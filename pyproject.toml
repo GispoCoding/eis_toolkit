@@ -6,6 +6,7 @@ authors = ["pavetsu14 <pauliina@gispo.fi>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+pandas = "1.4.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
