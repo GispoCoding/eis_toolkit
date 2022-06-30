@@ -1,0 +1,18 @@
+sources_dir: docs
+repo: https://github.com/GispoCoding/eis_toolkit
+version: master
+
+pages:
+  - page: "dummy.md"
+    source: "eis_toolkit/dependency_test/dummy.py"
+    functions:
+      - test_function
+      - test_function2
+  - page: "dummy_sklearn.md"
+    source: "eis_toolkit/dependency_test/dummy_sklearn.py"
+    functions:
+      - sk_mean
+  - page: "dummy_gdal.md"
+    source: "eis_toolkit/dependency_test/dummy_gdal.py"
+    functions:
+      - driver_cnt
