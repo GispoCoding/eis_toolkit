@@ -1,6 +1,14 @@
-a = 1
-b = 2
+def test_function(a: int, b: int) -> int:
+    """Tests whether simple function of summing two values together works.
 
-c = a+b
+    Args:
+        a: first input integer
+        b: second input integer
 
-print(c)
+    Returns:
+        int: sum of the input values
+    """
+    return(a + b)
+
+
+print(test_function(1, 2))
