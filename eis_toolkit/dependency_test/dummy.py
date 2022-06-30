@@ -11,4 +11,17 @@ def test_function(a: int, b: int) -> int:
     return(a + b)
 
 
+def test_function2(a: int) -> int:
+    """Tests whether simple function of subtracting 5 from input value works.
+
+    Args:
+        a: input integer
+
+    Returns:
+        int: result after the subtraction operation
+    """
+    return(a - 5)
+
+
 print(test_function(1, 2))
+print(test_function2(23))
