@@ -15,4 +15,4 @@ Tests whether it works to call one of gdal's functions.
 
 **Args**
 
-* **a**  : input determining the functionality of the function
+* **a** (int) : input determining the functionality of the function

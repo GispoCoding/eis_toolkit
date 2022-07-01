@@ -15,8 +15,8 @@ Tests whether simple function of summing two values together works.
 
 **Args**
 
-* **a**  : first input integer
-* **b**  : second input integer
+* **a** (int) : first input integer
+* **b** (int) : second input integer
 
 
 **Returns**
@@ -41,7 +41,7 @@ Tests whether simple function of subtracting 5 from input value works.
 
 **Args**
 
-* **a**  : input integer
+* **a** (int) : input integer
 
 
 **Returns**
