@@ -5,7 +5,7 @@ def driver_cnt(a: int) -> None:
     """Tests whether it works to call one of gdal's functions.
 
     Args:
-        a: input determining the functionality of the function
+        a (int): input determining the functionality of the function
     """
     if a == 1:
         gdal.AllRegister()
