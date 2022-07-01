@@ -18,13 +18,16 @@ keywords = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8 <3.11"
+python = ">=3.8,<3.11"
 pandas = "1.4.3"
 geopandas = "0.11.0"
 scikit-learn = "1.1.1"
 matplotlib = "3.5.2"
 statsmodels = "0.13.2"
 keras = "2.9.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
 pre-commit = "2.19.0"
 jinja2 = "3.0.3"
 flake8 = "4.0.1"
@@ -41,9 +44,6 @@ mkdocs-awesome-pages-plugin = "2.5.0"
 mkdocs-enumerate-headings-plugin = "0.4.4"
 mkdocs-print-site-plugin = "1.2.3"
 mkgendocs = "0.8.1"
-
-[tool.poetry.dev-dependencies]
-pytest = "^5.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
