@@ -16,3 +16,4 @@ Tests whether it works to call one of gdal's functions.
 **Args**
 
 * **a** (int) : input determining the functionality of the function
+
