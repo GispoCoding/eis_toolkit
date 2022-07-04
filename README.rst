@@ -33,7 +33,7 @@ or
 
  from eis_toolkit.dependency_test.dummy import test_function
 
- print(test_function(12,2))
+ test_function(12,2)
 
 or
 
