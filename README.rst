@@ -39,10 +39,6 @@ or
 
  from eis_toolkit.dependency_test.dummy_sklearn import sk_mean
 
- x = np.array([[1., -1., 2.], [1., 1., 1.]])
-
- print(sk_mean(x))
-
 In both cases, a result should appear into the QGIS's Python console's output window.
 
 
