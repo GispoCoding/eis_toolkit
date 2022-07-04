@@ -21,7 +21,3 @@ def test_function2(a: int) -> int:
         int: result after the subtraction operation
     """
     return(a - 5)
-
-
-print(test_function(1, 2))
-print(test_function2(23))
