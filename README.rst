@@ -18,9 +18,8 @@ For users
 ----
 
 1. Navigate to the Releases section and download tar.gz or .zip file
-
 2. Find out the path where python packages QGIS uses are installed e.g. by opening QGIS
-and navigating to Python console and executing
+   and navigating to Python console and executing
 
 .. code-block:: python
 
@@ -43,10 +42,10 @@ or
 4. Go back to QGIS's python console and run e.g.
 
 .. code-block:: python
+ 
+   from eis_toolkit.dependency_test.dummy import test_function
 
- from eis_toolkit.dependency_test.dummy import test_function
-
- test_function(12,2)
+   test_function(12,2)
 
 or
 
@@ -63,7 +62,6 @@ Prerequisites
 ^^^^
 
 1. Install `poetry <https://python-poetry.org/>`_ as per your platform's `instructions <https://python-poetry.org/docs/#installation>`_
-
 2. Get your local copy of the repository
 
 .. code-block:: shell
@@ -73,7 +71,7 @@ Prerequisites
 Setup local environment
 ^^^^
 
-Run all commands in the root of the repository unless otherwise directed
+*Run all commands in the root of the repository unless otherwise directed*
 
 1. Install dependencies and create a virtual environment 
 
@@ -116,7 +114,7 @@ With QGIS
 """"
 
 1. Find out the path where python packages QGIS uses are installed e.g. by opening QGIS
-and navigating to Python console and executing
+   and navigating to Python console and executing
 
 .. code-block:: python
 
@@ -165,7 +163,7 @@ In case you add a new class or function into the toolkit, please update the docu
 - Give list of the functions to be documented
 
 2. Navigate to the root directory level (the same level where mkgendocs.yml file is located)
-and run
+   and run
 
 .. code-block:: shell
 
