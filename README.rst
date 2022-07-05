@@ -4,21 +4,15 @@ EIS Toolkit
 
 Related to EIS Horizon EU project.
 
-Initializations for developers
-====
-
-Install poetry
-----
-
-<Eemil>
-
-Finally, clone this repository and start contributing!
-
 Testing
 ====
 
-This repository contains dummy files and functions for testing purposes. Instructions
-for testing of eis_toolkit's functionalities:
+This repository contains dummy files and functions for testing purposes. If you want to
+just test the installation of eis toolkit and use it, follow the **For users** section.
+If you want to set up a local development environment for contributing, read also the
+**For developers** section.
+
+Instructions for testing of eis_toolkit's functionalities:
 
 For users
 ----
@@ -30,21 +24,21 @@ and navigating to Python console and executing
 
 .. code-block:: python
 
- import imp
+   import imp
 
- str.replace(imp.find_module('numpy')[1], '/numpy', '')
+   str.replace(imp.find_module('numpy')[1], '/numpy', '')
 
 3. Open terminal and execute
 
 .. code-block:: shell
 
- pip install --target=<path_found_in_step_2> -U <path_to_eis_toolkit-dummy_test.tar.gz>
+   pip install --target=<path_found_in_step_2> -U <path_to_eis_toolkit-dummy_test.tar.gz>
 
 or
 
 .. code-block:: shell
 
- pip install --target=<path_found_in_step_2> -U <path_to_eis_toolkit-dummy_test.zip>
+   pip install --target=<path_found_in_step_2> -U <path_to_eis_toolkit-dummy_test.zip>
 
 4. Go back to QGIS's python console and run e.g.
 
@@ -58,55 +52,98 @@ or
 
 .. code-block:: python
 
- from eis_toolkit.dependency_test.dummy_sklearn import sk_mean
+   from eis_toolkit.dependency_test.dummy_sklearn import sk_mean
 
 In both cases, a result should appear into the QGIS's Python console's output window.
 
 For developers
 ----
 
-This repository contains dummy files and functions for testing purposes. Instructions
-for testing of eis_toolkit's functionalities:
+Prerequisites
+^^^^
 
-1. Check out Initializations for developers section!
+1. Install `poetry <https://python-poetry.org/>`_ as per your platform's `instructions <https://python-poetry.org/docs/#installation>`_
 
-2. Run
+2. Get your local copy of the repository
 
 .. code-block:: shell
 
- poetry install
+   git clone https://github.com/GispoCoding/eis_toolkit.git
 
- poetry shell
+Setup local environment
+^^^^
 
+Run all commands in the root of the repository unless otherwise directed
 
-3. Find out the path where python packages QGIS uses are installed e.g. by opening QGIS
+1. Install dependencies and create a virtual environment 
+
+.. code-block:: shell
+
+   poetry install
+
+2. To use the virtual environment you can either enter it:
+
+.. code-block:: shell
+
+   poetry shell
+
+Or prefix your normal shell commands with:
+
+.. code-block:: shell
+
+   poetry run
+
+Test your changes
+^^^^
+
+Without QGIS
+""""
+
+**From the command line**: You can run your code from the command-line with the virtual
+environment (as shown above)
+
+**With jupyter lab**: You can also use jupyterlab for more complicated testing (for
+example if you need results stored in active memory). Launch jupyterlab with:
+
+.. code-block:: shell
+
+   poetry run jupyter lab
+
+The notebooks are found in the `notebooks/` directory. You can import and use
+eis_toolkit's functions in these notebooks as you normally would.
+
+With QGIS
+""""
+
+1. Find out the path where python packages QGIS uses are installed e.g. by opening QGIS
 and navigating to Python console and executing
 
 .. code-block:: python
 
- import imp
+   import imp
 
- str.replace(imp.find_module('numpy')[1], '/numpy', '')
+   str.replace(imp.find_module('numpy')[1], '/numpy', '')
 
-3. Run
-
-.. code-block:: shell
-
- poetry build
-
-4. Open terminal and execute
+2. Build eis_toolkit
 
 .. code-block:: shell
 
- pip install --target=<path_found_in_step_2> -U <path_to_cloned_eis_toolkit_folder>
+   poetry build
 
-5. Go back to QGIS's python console and run e.g.
+3. Install eis_toolkit to the location found in step 1
+
+.. code-block:: shell
+
+   pip install --target=<path_found_in_step_1> -U <path_to_cloned_eis_toolkit_folder>
+
+4. Now eis_toolkit is available to QGIS's python. You can, for example, Go back to
+   QGIS's python console and run e.g.
 
 .. code-block:: python
 
- from eis_toolkit.dependency_test.dummy import test_function
+   from eis_toolkit.dependency_test.dummy import test_function
 
- test_function(12,2)
+   test_function(12,2)
 
 or
 
@@ -115,16 +152,6 @@ or
  from eis_toolkit.dependency_test.dummy_sklearn import sk_mean
 
 A result should appear into the QGIS's Python console's output window.
-
-For both
-----
-
-It is possible to test some functionalities of eis_toolkit also outside of the
-QGIS environment.
-
- Note that any of the GDAL functions won't work in the notebooks, but everything else should work!
-
-<Eemil: write here instructions for testing eis_toolkit with notebook file>
 
 Documentation
 ====
