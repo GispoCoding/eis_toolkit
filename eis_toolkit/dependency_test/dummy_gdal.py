@@ -13,6 +13,3 @@ def driver_cnt(a: int) -> None:
         print('GeoTiffien kasittelyyn soveltuvia drivereita: ', driver.Register())
     else:
         print('Muuten vaan!')
-
-
-driver_cnt(1)
