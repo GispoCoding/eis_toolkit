@@ -132,6 +132,13 @@ environment by
 The notebooks are found in the `notebooks/` directory. You can import and use
 eis_toolkit's functions in these notebooks in the same way as you normally would.
 
+*NOTE.* Any of the functionalities utilizing GDAL functions will not work when testing
+eis_toolkit outside of QGIS's Python console unless you have separately taken care of
+installing GDAL library. In order to install GDAL it is necessary to have libgdal and
+its development headers installed. This makes it impossible for us to handle GDAL dependency
+automatically. Note also that GDAL's installation procedure varies a lot between different
+operating systems.
+
 With QGIS
 """"
 
