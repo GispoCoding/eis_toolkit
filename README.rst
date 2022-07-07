@@ -198,7 +198,9 @@ In case you add a new class, module or function into the toolkit, please update 
 
     gendocs --config mkgendocs.yml
     
-**Note** that executing the command above automatically creates new (empty) version of the index.md file. However, this is not desired behaviuor since the index.md file already contains some general information about the eis_toolkit. Hence, please use Rollback or otherwise undo the modifications in index.md file before committing, or do not commit the index.md file at all.
+.. role:: red
+
+:red:`**Note**` that executing the command above automatically creates new (empty) version of the index.md file. However, this is not desired behaviuor since the index.md file already contains some general information about the eis_toolkit. Hence, please use Rollback or otherwise undo the modifications in index.md file before committing, or do not commit the index.md file at all.
 
 3. Run
 
