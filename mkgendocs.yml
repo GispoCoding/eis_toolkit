@@ -1,3 +1,4 @@
+site_name: EIS Toolkit
 sources_dir: docs
 repo: https://github.com/GispoCoding/eis_toolkit
 version: master
