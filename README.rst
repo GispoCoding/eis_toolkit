@@ -2,18 +2,16 @@
 EIS Toolkit
 ====
 
-Related to EIS Horizon EU project.
-
-Testing
-====
-
-This repository is in early development stage.
+Related to EIS Horizon EU project. This repository is in early development stage.
 
 Current contents
 
 - a bunch of different configuration files
 - one preprocessing tool
 - dummy files and functions for testing purposes.
+
+Testing
+====
 
 If you wish to just test the installation of eis_toolkit and use it, follow the **For users** section.
 If you want to set up a local development environment for contributing, read also the
