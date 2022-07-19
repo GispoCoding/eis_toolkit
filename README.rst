@@ -189,6 +189,7 @@ Any of the functionalities utilizing GDAL or rasterio (python library that depen
 work when testing eis_toolkit outside of QGIS's Python console unless you have separately taken care of
 installing GDAL library. In order to install GDAL it is necessary to have libgdal and
 its development headers installed. For Ubuntu 20.04 you can achieve this via
+
 .. code-block:: shell
 
     sudo apt-get install libgdal-dev
