@@ -47,4 +47,3 @@ Tests whether simple function of subtracting 5 from input value works.
 **Returns**
 
 * **int**  : result after the subtraction operation
-
