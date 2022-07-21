@@ -19,14 +19,15 @@ keywords = [
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-# UNCOMMENT THIS IF YOU ARE USING eis_toolkit OUTSIDE OF QGIS
-# gdal = "3.4.3"
+gdal = "3.4.3"
+rasterio = "1.3.0"
 pandas = "1.4.3"
 geopandas = "0.11.0"
 scikit-learn = "1.1.1"
 matplotlib = "3.5.2"
 statsmodels = "0.13.2"
 keras = "2.9.0"
+tensorflow = "2.9.1"
 
 [tool.poetry.dev-dependencies]
 jupyterlab = "^3.4.3"
