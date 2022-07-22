@@ -21,7 +21,7 @@ def clip_ras(rasin: Path, polin: Path, rasout: Path) -> None:
             raise (NotApplicableGeometryTypeException)
         if src.crs != pol_df.crs:
             raise (NonMatchingCrsException)
-        out_image, out_transform = mask(src, [pol_geom], crop=True)
+        out_image, out_transform = mask(src, [pol_geom], crop=True, all_touched=True)
         out_meta = src.meta
 
     out_meta.update({'driver': 'GTiff',

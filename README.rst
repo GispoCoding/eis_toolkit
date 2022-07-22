@@ -2,51 +2,82 @@
 EIS Toolkit
 ====
 
-Related to EIS Horizon EU project. This repository is in early development stage.
+Related to EIS Horizon EU project. This repository is in early
+development stage.
 
 Current contents
 
 - a bunch of different configuration files
-- one preprocessing tool
+- one preprocessing tool (clip raster with polygon)
 - dummy files and functions for testing purposes.
+
+.. important::
+This repository only contains source code related to eis_toolkit python package.
+The user interface will be implemented into separate repository.
+
 
 Testing
 ====
 
-If you wish to just test the installation of eis_toolkit and use it, follow the **For users** section.
-If you want to set up a local development environment for contributing, read also the
+If you wish to just test the installation of eis_toolkit and use it,
+follow the **For users** section. If you want to set up a local
+development environment for contributing, read also the
 **For developers** section.
+
 
 For users
 ----
 
-1. Navigate to the Releases section and download tar.gz or .zip file
-2. Find out the path where python packages (which QGIS uses) are installed e.g. by opening QGIS, navigating to its
-Python console and executing
+1. Navigate to the Releases section and download latest tar.gz or
+.zip file
 
-.. code-block:: python
-
-   import imp
-
-   str.replace(imp.find_module('numpy')[1], '/numpy', '')
-
-3. Open command line and execute
+2. Create a new virtual environment (VE) by navigating to the folder
+you wish to create the VE in, and by executing
 
 .. code-block:: shell
 
-   pip install --target=<path_found_in_step_2> -U <path_to_eis_toolkit-dummy_test.tar.gz>
+    python3 -m venv <name_of_your_virtualenv>
+
+3. Activate the VE:
+
+- UNIX / MacOS
+
+.. code-block:: shell
+
+    source <name_of_your_virtualenv>/bin/activate
+
+- Windows
+
+.. code-block:: shell
+
+    <name_of_your_virtualenv>\Scripts\activate.bat
+
+.. hint::
+You should see (*<name_of_your_virtualenv>*) appearing in front of the command prompt.
+
+4. Install eis_toolkit by running
+
+.. code-block:: shell
+
+   pip install <path_to_eis_toolkit-X.Y.Z.tar.gz>
 
 or
 
 .. code-block:: shell
 
-   pip install --target=<path_found_in_step_2> -U <path_to_eis_toolkit-dummy_test.zip>
+   pip install <path_to_eis_toolkit-X.Y.Z.zip>
 
-4. Go back to QGIS's Python console and run e.g.
+5. Open Python console with
+
+.. code-block:: shell
+
+    python
+
+and run e.g.
 
 .. code-block:: python
 
-   from eis_toolkit.dependency_test.dummy import test_function
+   from eis_toolkit.dummy_tests.dummy import test_function
 
    test_function(12,2)
 
@@ -54,11 +85,42 @@ or
 
 .. code-block:: python
 
-   from eis_toolkit.dependency_test.dummy_gdal import driver_cnt
+   from eis_toolkit.dummy_tests.dummy_gdal import driver_cnt
 
    driver_cnt(1)
 
-In both cases, a result should appear into the QGIS's Python console's output window.
+
+Performing more complex tests
+^^^^
+
+In case you do not want to insert your test commands one by one into the
+command line's python console, you can create a local test file and
+execute it with
+
+.. code-block:: shell
+
+    python <name_of_your_test_file>.py
+
+.. hint::
+Your .py test file can, for example, look like
+
+.. code-block:: python
+
+    import rasterio as rio
+    import numpy as np
+    from matplotlib import pyplot
+    from pathlib import Path
+
+    output_path = Path('/home/pauliina/Downloads/eis_outputs/clip_result.tif')
+    src = rio.open(output_path)
+    arr = src.read(1)
+    # Let's replace No data values with numpy NaN values in order to plot clipped raster
+    # so that the colour changes are visible for human eye
+    arr = np.where(arr<-100, np.nan, arr)
+
+    pyplot.imshow(arr, cmap='gray')
+    pyplot.show()
+
 
 For developers
 ----
@@ -66,13 +128,15 @@ For developers
 Prerequisites
 ^^^^
 
-1. Install `poetry <https://python-poetry.org/>`_ according to your platform's `instructions <https://python-poetry.org/docs/#installation>`_
+1. Install `poetry <https://python-poetry.org/>`_ according to your platform's
+`instructions <https://python-poetry.org/docs/#installation>`_
 
 2. Get your local copy of the repository
 
 .. code-block:: shell
 
    git clone https://github.com/GispoCoding/eis_toolkit.git
+
 
 Set up a local environment
 ^^^^
@@ -97,105 +161,57 @@ or prefix your normal shell commands with
 
    poetry run
 
+
 Test the effect of your changes
 ^^^^
 
-Without QGIS
+From command line
 """"
 
-**From the command line**: You can run your code from the command line with the virtual environment by
+You can run your code from the command line within the virtual environment created by poetry.
 
-1. Running (inside of the VE)
+1. Run
 
 .. code-block:: shell
 
    pip install eis_toolkit
 
 
-2. Opening VE's python console with
+2. Open python console with
 
 .. code-block:: shell
 
    python
 
-and running e.g.
+and run e.g.
 
 .. code-block:: python
 
-   from eis_toolkit.dependency_test.dummy import test_function
+   from eis_toolkit.dummy_tests.dummy import test_function
 
    test_function(12,2)
 
-**With JupyterLab**: You can also use `JupyterLab <https://jupyterlab.readthedocs.io/en/stable/>`_ for testing of more complicated functionalities
-(for example if you need to store intermediate results in active memory). Launch JupyterLab with
+
+With JupyterLab
+""""
+
+You can also use `JupyterLab <https://jupyterlab.readthedocs.io/en/stable/>`_ for testing purposes
+for example in cases when you want to store intermediate results in active memory.
+
+Launch JupyterLab with
 
 .. code-block:: shell
 
    poetry run jupyter lab
 
-The notebooks are found in the `notebooks/` directory. You can import and use
-eis_toolkit's functions in these notebooks in the same way as you normally would.
+The notebooks are found in this repository, under the `notebooks/` directory. You can import and use
+eis_toolkit's functions in these notebooks in the same way as you normally would use any other python package.
 
-With QGIS
-""""
+.. hint::
+There exists three example notebook files. The first one contains general usage instructions for running and
+modifying JupyterLab notebooks. The second one has been created for testing that dependencies to other
+python packages work and the third one has been created for testing the functionality of the clip tool.
 
-1. Find out the path where python packages (which QGIS uses) are installed e.g. by opening QGIS
-   and navigating to Python console and executing
-
-.. code-block:: python
-
-   import imp
-
-   str.replace(imp.find_module('numpy')[1], '/numpy', '')
-
-2. Go to command line, navigate inside of the cloned repository and build eis_toolkit with
-
-.. code-block:: shell
-
-   poetry build
-
-3. Install eis_toolkit to the location found in step 1
-
-.. code-block:: shell
-
-   pip install --target=<path_found_in_step_1> -U <path_to_cloned_eis_toolkit_folder>
-
-4. Now eis_toolkit is available in QGIS's python. You can, for example, go back to
-   QGIS's Python console and run
-
-.. code-block:: python
-
-   from eis_toolkit.dependency_test.dummy import test_function
-
-   test_function(12,2)
-
-or
-
-.. code-block:: python
-
- from eis_toolkit.dependency_test.dummy_sklearn import sk_mean
- import numpy as np
-
- x = np.array([[1.0, 2.0, 3.0], [2.0, 2.0, 2.0]])
-
- sk_mean(x)
-
-A result should appear into the QGIS's Python console's output window.
-
-Disclaimer
-====
-
-Any of the functionalities utilizing GDAL or rasterio (python library that depends on GDAL) functions will not
-work when testing eis_toolkit outside of QGIS's Python console unless you have separately taken care of
-installing GDAL library. In order to install GDAL it is necessary to have libgdal and
-its development headers installed. For Ubuntu 20.04 you can achieve this via
-
-.. code-block:: shell
-
-    sudo apt-get install libgdal-dev
-
-**Note** that GDAL's installation procedure varies a lot between different
-operating systems!
 
 Documentation
 ====
