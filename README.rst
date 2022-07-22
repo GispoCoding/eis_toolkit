@@ -12,8 +12,8 @@ Current contents
 - dummy files and functions for testing purposes.
 
 .. important::
-This repository only contains source code related to eis_toolkit python package.
-The user interface will be implemented into separate repository.
+    This repository only contains source code related to eis_toolkit python package.
+    The user interface will be implemented into separate repository.
 
 
 Testing
@@ -53,7 +53,7 @@ you wish to create the VE in, and by executing
     <name_of_your_virtualenv>\Scripts\activate.bat
 
 .. hint::
-You should see (*<name_of_your_virtualenv>*) appearing in front of the command prompt.
+    You should see (*<name_of_your_virtualenv>*) appearing in front of the command prompt.
 
 4. Install eis_toolkit by running
 
@@ -102,7 +102,7 @@ execute it with
     python <name_of_your_test_file>.py
 
 .. hint::
-Your .py test file can, for example, look like
+    Your .py test file can, for example, look like:
 
 .. code-block:: python
 
@@ -208,9 +208,9 @@ The notebooks are found in this repository, under the `notebooks/` directory. Yo
 eis_toolkit's functions in these notebooks in the same way as you normally would use any other python package.
 
 .. hint::
-There exists three example notebook files. The first one contains general usage instructions for running and
-modifying JupyterLab notebooks. The second one has been created for testing that dependencies to other
-python packages work and the third one has been created for testing the functionality of the clip tool.
+    There exists three example notebook files. The first one contains general usage instructions for running
+    and modifying JupyterLab notebooks. The second one has been created for testing that dependencies to other
+    python packages work and the third one has been created for testing the functionality of the clip tool.
 
 
 Documentation
@@ -231,10 +231,11 @@ In case you add a new class, module or function into the toolkit, please update 
 
     gendocs --config mkgendocs.yml
 
-**NOTE** that executing the command above automatically creates new (empty) version of the index.md file.
-However, this is not desired behaviuor since the index.md file already contains some general information about
-the eis_toolkit. Hence, please use Rollback or otherwise undo the modifications in index.md file before committing,
-or do not commit the index.md file at all.
+.. important::
+    Executing the command above automatically creates new (empty) version of the index.md file.
+    However, this is not desired behaviuor since the index.md file already contains some general
+    information about the eis_toolkit. Hence, please use Rollback or otherwise undo the modifications
+    in index.md file before committing, or do not commit the index.md file at all.
 
 3. Run
 
