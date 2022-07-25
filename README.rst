@@ -28,6 +28,13 @@ development environment for contributing, read also the
 For users
 ----
 
+0. Make sure that GDAL's dependencies
+
+- libgdal (3.5.1 or greater)
+- header files (gdal-devel)
+
+are satisfied. If not, install them.
+
 1. Navigate to the Releases section and download latest tar.gz or
 .zip file
 
@@ -89,6 +96,8 @@ or
 
    driver_cnt(1)
 
+**Note.** By using VEs we make sure that installing eis_toolkit does not break down anything (e.g. QGIS).
+
 
 Performing more complex tests
 ^^^^
@@ -127,6 +136,13 @@ For developers
 
 Prerequisites
 ^^^^
+
+0. Make sure that GDAL's dependencies
+
+- libgdal (3.5.1 or greater)
+- header files (gdal-devel)
+
+are satisfied. If not, install them.
 
 1. Install `poetry <https://python-poetry.org/>`_ according to your platform's
 `instructions <https://python-poetry.org/docs/#installation>`_
@@ -220,9 +236,9 @@ In case you add a new class, module or function into the toolkit, please update 
 
 1. Modify mkgendocs.yml by adding a new page to pages section:
 
-- Give name to a new page, e.g. new_module.md
-- Give path to the corresponding python file, e.g. eis_toolkit/new_module.py
-- Give list of the function names to be documented
+- Give name to a new page, e.g. geoprocess/clip.md
+- Give path to the corresponding python file, e.g. eis_toolkit/geoprocess/clipping.py
+- Give list of the function names to be documented, e.g. clip
 
 2. Navigate to the root directory level (the same level where mkgendocs.yml file is located)
    and run
