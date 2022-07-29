@@ -37,7 +37,7 @@ and running a container from it
 
 .. code-block:: shell
  
-    docker run -it -p 8888:8888 --rm eis
+    docker run -it -p 8888:8888 eis
 
 you now have a local development container. You can for eample run
 
@@ -51,7 +51,8 @@ to get into the venv and
  
     jupyter-lab --ip=0.0.0.0 --no-browser --allow-root
 
-to launch jupyter lab from the container
+to launch jupyter lab from the container. A jupyter session should be
+available at http://127.0.0.1:8888/
 
 For users
 ----
