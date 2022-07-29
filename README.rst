@@ -24,6 +24,34 @@ follow the **For users** section. If you want to set up a local
 development environment for contributing, read also the
 **For developers** section.
 
+Docker
+----
+An experimental dockerfile exists at project root. If you have docker,
+you can skip all dependency setup by building an image 
+
+.. code-block:: shell
+
+    docker build . --tag eis
+
+and running a container from it
+
+.. code-block:: shell
+ 
+    docker run -it -p 8888:8888 --rm eis
+
+you now have a local development container. You can for eample run
+
+.. code-block:: shell
+ 
+    poetry shell
+
+to get into the venv and
+
+.. code-block:: shell
+ 
+    jupyter-lab --ip=0.0.0.0 --no-browser --allow-root
+
+to launch jupyter lab from the container
 
 For users
 ----
