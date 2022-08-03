@@ -31,7 +31,7 @@ tensorflow = "2.9.1"
 
 [tool.poetry.dev-dependencies]
 jupyterlab = "^3.4.3"
-pytest = "^5.2"
+pytest = ">=6.2.5"
 pre-commit = "2.19.0"
 jinja2 = "3.0.3"
 flake8 = "4.0.1"
