@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 EXPOSE 8888
-WORKDIR /code
+WORKDIR /eis_toolkit
 
 RUN apt-get update && apt-get install -y \
     libgdal-dev \
@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip install poetry
 
-COPY poetry.lock pyproject.toml /code/
+COPY poetry.lock pyproject.toml /eis_toolkit/
 RUN poetry install
 
 COPY . .

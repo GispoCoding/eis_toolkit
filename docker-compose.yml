@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  eis_toolkit:
+    stdin_open: true      # run interactively
+    tty: true
+    build: .              # Build from the image here
+    ports:
+      - 8888:8888         # Ports for jupyter
+    volumes:
+      - ./:/eis_toolkit/  # Mount the repo
+    container_name: eis_toolkit

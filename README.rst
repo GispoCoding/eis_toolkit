@@ -26,20 +26,24 @@ development environment for contributing, read also the
 
 Docker
 ----
-An experimental dockerfile exists at project root. If you have docker,
-you can skip all dependency setup by building an image 
+A Dockerfile and a docker-compose.yml exist at project root. If you have docker,
+you can skip all dependency setup with the following:
+
+With docker compose
+^^^^
+Build and run the eis_toolkit container
 
 .. code-block:: shell
 
-    docker build . --tag eis
+    docker compose up -d
 
-and running a container from it
+Attach to the running container
 
 .. code-block:: shell
- 
-    docker run -it -p 8888:8888 eis
 
-you now have a local development container. You can for eample run
+    docker attach eis_toolkit
+
+You are now in your local development container. You can for eample run
 
 .. code-block:: shell
  
@@ -52,7 +56,22 @@ to get into the venv and
     jupyter-lab --ip=0.0.0.0 --no-browser --allow-root
 
 to launch jupyter lab from the container. A jupyter session should be
-available at http://127.0.0.1:8888/
+available at http://127.0.0.1:8888/ (the second link jupyter prints to command line)
+
+Without docker compose
+^^^^
+Everything is possible without docker compose too. You just have to manually
+build the eis_toolkit container
+
+.. code-block:: shell
+
+    docker build . --tag eis
+
+and then run it with the appropriate flags. For example:
+
+.. code-block:: shell
+ 
+    docker run -it -p 8888:8888 eis
 
 For users
 ----
