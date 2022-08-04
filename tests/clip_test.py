@@ -1,7 +1,7 @@
 import numpy as np
 from pathlib import Path
 import rasterio
-from eis_toolkit.preprocessing.clip import clip_ras
+from eis_toolkit.raster_processing.clip import clip_ras
 import pytest
 from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
