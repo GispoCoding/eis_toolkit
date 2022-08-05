@@ -9,11 +9,11 @@ Current contents
 *This repository only contains source code related to eis_toolkit python package. The user interface will be implemented into separate repository.*
 
 
-## Testing
-If you wish to just test the installation of eis_toolkit and use it, follow the **For users** section. If you want to set up a local development environment for contributing, read  the **For developers** section.
+## Contributing
+If you are contributing by writing code (implementing new funcionalities), read the **For developers** section. It will guide you to set up a local development environment. If you wish to just test the installation of eis_toolkit, follow the **For users** section (note that the currently documented installation process is by no means final). 
 
-### For developers
-#### Prerequisites
+## For developers
+### Prerequisites
 All contributing developers need git, and a copy of the repository.
 
 ```shell
@@ -26,14 +26,14 @@ After this you have two options for setting up your local development environmen
 
 Docker is recommended as it containerizes the whole development environment, making sure it stays identical across different developers and operating systems. It also keeps your own computer clean of all dependencies.
 
-#### Setting up a local development environment with docker (recommended)
+### Setting up a local development environment with docker (recommended)
 Build and run the eis_toolkit container. Run this and every other command in the repository root unless otherwise directed.
 
 ```shell
 docker compose up -d
 ```
 
-#### Working with the container
+### Working with the container
 Attach to the running container
 
 ```shell
@@ -50,8 +50,7 @@ For your workflow this means that:
 - You can edit all files like you normally would (on your own computer, inside your favourite text editor etc.)
 - You must do all testing and running the code inside the container
 
-Whether or not using docker we manage the dependencies with poetry. So, inside the
-container, you can get into the venv like you normally would
+Whether or not using docker we manage the python dependencies with poetry. This means that a python venv is found in the container too. Inside the container, you can get into the venv like you normally would
 
 ```shell
 poetry shell
@@ -69,12 +68,13 @@ or
 pytest .
 ```
 
+#### Using jupyterlab
 If you want to use jupyterlab from the container, it is entrirely possible. Follow the instructions [here](./instructions/using_jupyterlab.md)
 
-#### Setting up a local development environment without docker
+### Setting up a local development environment without docker
 See [setup without docker](./instructions/dev_setup_without_docker.md)
 
-### For users
+## For users
 0. Make sure that GDAL's dependencies
   - libgdal (3.5.1 or greater)
   - header files (gdal-devel)
@@ -92,7 +92,7 @@ python3 -m venv <name_of_your_virtualenv>
 
 3. Activate the VE:
 
-- UNIX / MacOS
+- Linux / MacOS
 
 ```shell
 source <name_of_your_virtualenv>/bin/activate
