@@ -5,7 +5,7 @@ from rasterio.mask import mask
 from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 
-def clip_ras(rasin: Path, polin: Path, rasout: Path) -> None:
+def clip(rasin: Path, polin: Path, rasout: Path) -> None:
     """Clips raster with polygon and saves resulting raster into given folder location.
 
     Args:
