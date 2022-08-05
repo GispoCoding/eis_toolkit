@@ -4,20 +4,20 @@ repo: https://github.com/GispoCoding/eis_toolkit
 version: master
 
 pages:
-  - page: "preprocessing/clip.md"
-    source: "eis_toolkit/preprocessing/clip.py"
+  - page: "raster_processing/clipping.md"
+    source: "eis_toolkit/raster_processing/clipping.py"
     functions:
-      - clip_ras
+      - clip
   - page: "dummy tests/simple dummy.md"
-    source: "eis_toolkit/dependency_test/dummy.py"
+    source: "eis_toolkit/dummy_tests/dummy.py"
     functions:
       - test_function
       - test_function2
   - page: "dummy tests/dummy sklearn.md"
-    source: "eis_toolkit/dependency_test/dummy_sklearn.py"
+    source: "eis_toolkit/dummy_tests/dummy_sklearn.py"
     functions:
       - sk_mean
   - page: "dummy tests/dummy gdal.md"
-    source: "eis_toolkit/dependency_test/dummy_gdal.py"
+    source: "eis_toolkit/dummy_tests/dummy_gdal.py"
     functions:
       - driver_cnt

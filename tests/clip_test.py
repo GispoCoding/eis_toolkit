@@ -1,7 +1,7 @@
 import numpy as np
 from pathlib import Path
 import rasterio
-from eis_toolkit.preprocessing.clip import clip_ras
+from eis_toolkit.raster_processing.clipping import clip
 import pytest
 from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
@@ -12,7 +12,7 @@ def test_clip():
     pol_path = Path('/home/pauliina/PycharmProjects/eis_toolkit/tests/data/small_area.shp')
     output_path = Path('/home/pauliina/Downloads/eis_outputs/clip_result.tif')
 
-    clip_ras(input_path, pol_path, output_path)
+    clip(input_path, pol_path, output_path)
 
     result = rasterio.open(output_path)
 
@@ -30,7 +30,7 @@ def test_clip_wrong_geometry_type():
     pol_path = Path('/home/pauliina/PycharmProjects/eis_toolkit/tests/data/point.gpkg')
     output_path = Path('/home/pauliina/Downloads/eis_outputs/clip_result.tif')
     with pytest.raises(NotApplicableGeometryTypeException):
-        clip_ras(input_path, pol_path, output_path)
+        clip(input_path, pol_path, output_path)
 
 
 def test_clip_different_crs():
@@ -39,4 +39,4 @@ def test_clip_different_crs():
     pol_df = Path('/home/pauliina/PycharmProjects/eis_toolkit/tests/data/small_area.geojson')
     output_path = Path('/home/pauliina/Downloads/eis_outputs/clip_result.tif')
     with pytest.raises(NonMatchingCrsException):
-        clip_ras(input_path, pol_df, output_path)
+        clip(input_path, pol_df, output_path)
