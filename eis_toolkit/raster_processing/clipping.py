@@ -3,9 +3,10 @@ import rasterio
 from rasterio.mask import mask
 
 from eis_toolkit.checks.crs import check_crs
-from eis_toolkit.exceptions import NotApplicableGeometryTypeException
+from eis_toolkit.checks.geometry import check_geometry_type
 
 
+# TODO
 def _extract_single_geometry(gdf: geopandas.GeoDataFrame):
 
     geometry = gdf['geometry'][0]
@@ -16,7 +17,7 @@ def clip(
     input_raster: rasterio.io.DatasetReader,
     input_polygon: geopandas.GeoDataFrame,
 ):
-    """Clips raster with polygon and saves resulting raster into given folder location.
+    """TODO Clips raster with polygon and saves resulting raster into given folder location.
 
     Args:
         rasin (Path): file path to input raster
@@ -26,8 +27,10 @@ def clip(
 
     check_crs([input_raster, input_polygon])
     polygon_geometry = _extract_single_geometry(input_polygon)
-    if polygon_geometry.geom_type not in ['Polygon', 'MultiPolygon']:
-        raise NotApplicableGeometryTypeException
+    check_geometry_type(
+        polygon_geometry,
+        allowed_types=['Polygon', 'MultiPolygon']
+    )
 
     out_image, out_transform = mask(
         input_raster,
@@ -45,5 +48,6 @@ def clip(
     })
 
     return out_image, out_transform, out_meta
+    # TODO what do we want to return?
     # with rasterio.open(output_raster, 'w', **out_meta) as dest:
     #     dest.write(out_image)
