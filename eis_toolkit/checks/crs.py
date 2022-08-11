@@ -1,7 +1,7 @@
 from eis_toolkit.exceptions import NonMatchingCrsException
 
 
-def check_crs(objects: list):
+def check_crs_matches(objects: list):
     """TODO Checks if every object in a list has the same crs."""
 
     epsg_list = []

@@ -2,52 +2,45 @@ import geopandas
 import rasterio
 from rasterio.mask import mask
 
-from eis_toolkit.checks.crs import check_crs
-from eis_toolkit.checks.geometry import check_geometry_type
-
-
-# TODO
-def _extract_single_geometry(gdf: geopandas.GeoDataFrame):
-
-    geometry = gdf['geometry'][0]
-    return geometry
+from eis_toolkit.checks.crs import check_crs_matches
+from eis_toolkit.checks.geometry import check_geometry_types
 
 
 def clip(
-    input_raster: rasterio.io.DatasetReader,
-    input_polygon: geopandas.GeoDataFrame,
+    raster: rasterio.io.DatasetReader,
+    polygon: geopandas.GeoDataFrame,
 ):
-    """TODO Clips raster with polygon and saves resulting raster into given folder location.
+    """Clips a raster with a polygon.
 
     Args:
-        rasin (Path): file path to input raster
-        polin (Path): file path to polygon to be used for clipping the input raster
-        rasout (Path): file path to output raster
+        raster (rasterio.io.DatasetReader): The raster to be clipped.
+        polygon (geopandas.GeoDataFrame): A polygon geodataframe to do the
+        clipping with.
+    Returns:
+        out_image ():
+        out_transform ():
+        out_meta ():
     """
 
-    check_crs([input_raster, input_polygon])
-    polygon_geometry = _extract_single_geometry(input_polygon)
-    check_geometry_type(
-        polygon_geometry,
+    check_crs_matches([raster, polygon])
+    shapes = polygon["geometry"].to_list()
+    check_geometry_types(
+        shapes,
         allowed_types=['Polygon', 'MultiPolygon']
     )
-
     out_image, out_transform = mask(
-        input_raster,
-        [polygon_geometry],
+        dataset=raster,
+        shapes=shapes,
         crop=True,
         all_touched=True
     )
-    out_meta = input_raster.meta.copy()
-
+    out_meta = raster.meta.copy()
     out_meta.update({
         'driver': 'GTiff',
         'height': out_image.shape[1],
         'width': out_image.shape[2],
         'transform': out_transform
     })
-
+    # TODO return these, or: Write to tempfile -> read it -> return opened
+    # raster?
     return out_image, out_transform, out_meta
-    # TODO what do we want to return?
-    # with rasterio.open(output_raster, 'w', **out_meta) as dest:
-    #     dest.write(out_image)

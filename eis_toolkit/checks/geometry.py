@@ -18,3 +18,7 @@ def check_geometry_type(geometry: shapely.geometry, allowed_types: list):
         raise NotApplicableGeometryTypeException(
             f"{type}, should be one of: {allowed_types}"
         )
+
+
+def check_geometry_types(geometries: list, allowed_types: list):
+    [check_geometry_type(geometry, allowed_types) for geometry in geometries]
