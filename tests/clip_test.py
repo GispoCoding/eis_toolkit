@@ -21,24 +21,23 @@ def test_clip():
 
     polygon = geopandas.read_file(polygon_path)
     with rasterio.open(raster_path) as raster:
-        clipped, out_transform, out_meta = clip(
+        out_image, out_meta = clip(
             raster=raster,
             polygon=polygon
         )
     with rasterio.open(output_raster_path, "w", **out_meta) as dest:
-        dest.write(clipped)
-    result = rasterio.open(output_raster_path)
-
-    assert np.amax(result.read()) != np.amin(result.read())
-    assert result.count == 1
-    # Corresponding operation executed with QGIS for reference solution
-    assert result.height == result.width == 26
-    assert result.bounds[0] == 384760.0
-    assert result.bounds[3] == 6671364.0
+        dest.write(out_image)
+    with rasterio.open(output_raster_path) as result:
+        assert np.amax(result.read()) != np.amin(result.read())
+        assert result.count == 1
+        # Corresponding operation executed with QGIS for a reference solution
+        assert result.height == result.width == 26
+        assert result.bounds[0] == 384760.0
+        assert result.bounds[3] == 6671364.0
 
 
 def test_clip_wrong_geometry_type():
-    """Checks that trying to clip a raster file with non-polygon shape returns custom exception error."""
+    """Tests that clipping with a non-polygon shape raises custom exception."""
 
     with pytest.raises(NotApplicableGeometryTypeException):
         point = geopandas.read_file(point_path)
@@ -50,12 +49,12 @@ def test_clip_wrong_geometry_type():
 
 
 def test_clip_different_crs():
-    """Checks that trying to clip a raster file with polygon without matching crs information returns custom exception error."""
+    """Tests that a crs mismatch raises custom exception."""
 
     with pytest.raises(NonMatchingCrsException):
-        polygon = geopandas.read_file(wrong_crs_polygon_path)
+        wrong_crs_polygon = geopandas.read_file(wrong_crs_polygon_path)
         with rasterio.open(raster_path) as raster:
             clip(
                 raster=raster,
-                polygon=polygon,
+                polygon=wrong_crs_polygon,
             )
