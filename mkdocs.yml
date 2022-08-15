@@ -3,68 +3,10 @@ repo_name: 'eis_toolkit'
 repo_url: 'https://github.com/GispoCoding/eis_toolkit'
 copyright: 'Made by <a href="info@gispo.fi">Gispo Ltd.</a>'
 
-# Navigation
-# There is no 'nav' in this config because we use mkdocs-awesome-pages-plugin
-# The ordering of pages in the docs folder are now in a `.pages` file instead
-
+# mkdocs.yml
 theme:
-    name: material
-    custom_dir: docs_assets/theme/
-    palette:
-        # scheme: preference uses dark or light mode based on user (OS) preference
-        scheme: preference
-        primary: deep-purple
-        accent: deep-blue
-    language: 'en'
+  name: "material"
 
 plugins:
-    - search
-    - minify:
-        minify_html: true
-    - git-revision-date-localized:
-        type: timeago
-    - git-authors:
-        show_contribution: True
-    - table-reader
-    - img2fig
-    - mknotebooks:
-        execute: false
-        # mkdocs-material theme has nicer cell styling
-        enable_default_jupyter_cell_styling: false
-        enable_default_pandas_dataframe_styling: true
-    - awesome-pages
-    - print-site
-
-markdown_extensions:
-    - codehilite
-    - markdown.extensions.admonition
-    - markdown.extensions.attr_list
-    - markdown.extensions.codehilite:
-        guess_lang: false
-    - markdown.extensions.def_list
-    - markdown.extensions.footnotes
-    - markdown.extensions.meta
-    - markdown.extensions.toc:
-        permalink: true
-    - pymdownx.arithmatex:
-        generic: true
-    - pymdownx.betterem:
-        smart_enable: all
-    - pymdownx.caret
-    - pymdownx.critic
-    - pymdownx.details
-    - pymdownx.inlinehilite
-    - pymdownx.keys
-    - pymdownx.mark
-    - pymdownx.smartsymbols
-    - pymdownx.snippets:
-        check_paths: true
-    - pymdownx.superfences
-    - pymdownx.tabbed
-    - pymdownx.tasklist:
-        custom_checkbox: true
-    - pymdownx.tilde
-
-# Lots of other settings
-edit_uri: edit/MkDocs/docs/
-use_directory_urls: false
+- search
+- mkdocstrings
