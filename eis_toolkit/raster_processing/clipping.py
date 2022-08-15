@@ -1,35 +1,54 @@
-import geopandas as gpd
-from pathlib import Path
+import geopandas
 import rasterio
 from rasterio.mask import mask
-from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
+
+from eis_toolkit.checks.crs import matching_crs
+from eis_toolkit.checks.geometry import correct_geometry_types
+from eis_toolkit.exceptions import NotApplicableGeometryTypeException
+from eis_toolkit.exceptions import NonMatchingCrsException
 
 
-def clip(rasin: Path, polin: Path, rasout: Path) -> None:
-    """Clips raster with polygon and saves resulting raster into given folder location.
+def clip(
+    raster: rasterio.io.DatasetReader,
+    polygon: geopandas.GeoDataFrame,
+):
+    """Clips a raster with vector geometry (polygon / polygons).
 
     Args:
-        rasin (Path): file path to input raster
-        polin (Path): file path to polygon to be used for clipping the input raster
-        rasout (Path): file path to output raster
+        raster (rasterio.io.DatasetReader): The raster to be clipped.
+        polygon (geopandas.GeoDataFrame): A geodataframe containing the
+        polygon(s) to do the clipping with.
+
+    Returns:
+        out_image (numpy.ndarray): The raster data
+        out_meta (dict): The updated metadata
+
+    Raises:
+        NonMatchingCrsException: The raster and polygons are not in the same
+        crs
+        NotApplicableGeometryTypeException: The input geometries contain
+        non-polygon features
     """
-    pol_df = gpd.read_file(polin)
 
-    with rasterio.open(rasin) as src:
-        pol_geom = pol_df['geometry'][0]
-        if pol_geom.geom_type not in ['Polygon', 'MultiPolygon']:
-            raise (NotApplicableGeometryTypeException)
-        if src.crs != pol_df.crs:
-            raise (NonMatchingCrsException)
-        out_image, out_transform = mask(src, [pol_geom], crop=True, all_touched=True)
-        out_meta = src.meta
+    shapes = polygon["geometry"]
 
-    out_meta.update({'driver': 'GTiff',
-                     'height': out_image.shape[1],
-                     'width': out_image.shape[2],
-                     'transform': out_transform})
+    if not matching_crs([raster, shapes]):
+        raise NonMatchingCrsException
+    if not correct_geometry_types(shapes, allowed=["Polygon", "MultiPolygon"]):
+        raise NotApplicableGeometryTypeException
 
-    with rasterio.open(rasout, 'w', **out_meta) as dest:
-        dest.write(out_image)
+    out_image, out_transform = mask(
+        dataset=raster,
+        shapes=shapes,
+        crop=True,
+        all_touched=True
+    )
+    out_meta = raster.meta.copy()
+    out_meta.update({
+        'driver': 'GTiff',
+        'height': out_image.shape[1],
+        'width': out_image.shape[2],
+        'transform': out_transform
+    })
 
-    return
+    return out_image, out_meta
