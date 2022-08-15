@@ -9,8 +9,8 @@ def correct_geometry_types(geometries: Iterable, allowed: list):
         or a geopandas.GeoSeries.
         allowed_types: a list of allowed geometry types.
 
-    Raises:
-        TODO
+    Returns:
+        Bool: True if all geometries match, False if not
     """
 
     for geometry in geometries:

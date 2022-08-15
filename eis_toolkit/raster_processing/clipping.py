@@ -12,7 +12,7 @@ def clip(
     raster: rasterio.io.DatasetReader,
     polygon: geopandas.GeoDataFrame,
 ):
-    """Clips a raster with a polygon / polygons.
+    """Clips a raster with vector geometry (polygon / polygons).
 
     Args:
         raster (rasterio.io.DatasetReader): The raster to be clipped.

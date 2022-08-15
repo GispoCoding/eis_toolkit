@@ -11,9 +11,10 @@ from eis_toolkit.exceptions import NotApplicableGeometryTypeException
 parent_dir = Path(__file__).parent
 raster_path = parent_dir.joinpath("data/small_raster.tif")
 polygon_path = parent_dir.joinpath("data/small_area.shp")
-output_raster_path = parent_dir.joinpath("data/test.tif")
 point_path = parent_dir.joinpath("data/point.gpkg")
 wrong_crs_polygon_path = parent_dir.joinpath("data/small_area.geojson")
+
+output_raster_path = parent_dir.joinpath("data/test.tif")
 
 
 def test_clip():
@@ -37,7 +38,7 @@ def test_clip():
 
 
 def test_clip_wrong_geometry_type():
-    """Tests that clipping with a non-polygon shape raises custom exception."""
+    """Tests that non-polygon geometry raises the correct exception."""
 
     with pytest.raises(NotApplicableGeometryTypeException):
         point = geopandas.read_file(point_path)
@@ -49,7 +50,7 @@ def test_clip_wrong_geometry_type():
 
 
 def test_clip_different_crs():
-    """Tests that a crs mismatch raises custom exception."""
+    """Tests that a crs mismatch raises the correct exception."""
 
     with pytest.raises(NonMatchingCrsException):
         wrong_crs_polygon = geopandas.read_file(wrong_crs_polygon_path)
