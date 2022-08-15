@@ -9,12 +9,13 @@ from eis_toolkit.exceptions import NotApplicableGeometryTypeException
 
 
 parent_dir = Path(__file__).parent
-raster_path = parent_dir.joinpath("data/small_raster.tif")
-polygon_path = parent_dir.joinpath("data/small_area.shp")
-point_path = parent_dir.joinpath("data/point.gpkg")
-wrong_crs_polygon_path = parent_dir.joinpath("data/small_area.geojson")
+raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
+polygon_path = parent_dir.joinpath("data/remote/small_area.shp")
+point_path = parent_dir.joinpath("data/remote/point.gpkg")
+wrong_crs_polygon_path = parent_dir.joinpath("data/remote/small_area.geojson")
 
-output_raster_path = parent_dir.joinpath("data/test.tif")
+# Save output to local to not push it
+output_raster_path = parent_dir.joinpath("data/local/test.tif")
 
 
 def test_clip():
