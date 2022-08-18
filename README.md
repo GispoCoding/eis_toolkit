@@ -12,6 +12,8 @@ Current contents
 ## Contributing
 If you are contributing by implementing new funcionalities, read the **For developers** section. It will guide you to set up a local development environment. If you wish to just test the installation of eis_toolkit, follow the **For users** section (note that the currently documented installation process is by no means final). 
 
+*For general contributing guidelines, see [CONTRIBUTING](./CONTRIBUTING.md).*
+
 ## For developers
 ### Prerequisites
 All contributing developers need git, and a copy of the repository.
