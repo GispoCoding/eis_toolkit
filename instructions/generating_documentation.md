@@ -1,25 +1,31 @@
-# Generating documentation
-In case you add a new class, module or function into the toolkit, please update the documentation site!
+# Adding and editing documentation
+When adding or editing a function, class or a module, please make sure the documentation stays current! 
 
-1. Modify mkgendocs.yml by adding a new page to pages section:
-  - Give name to a new page, e.g. geoprocess/clip.md
-  - Give path to the corresponding python file, e.g. eis_toolkit/geoprocess/clipping.py
-  - Give list of the function names to be documented, e.g. clip
+*If you wish to just take a look at the documentation, skip to step 2.*
 
-2. Navigate to the root directory level (the same level where mkgendocs.yml file is located) and run
+## 0. Make sure your functions have proper docstrings
+These are used for [autogenerating](https://mkdocstrings.github.io/) docs.
 
-```shell
-gendocs --config mkgendocs.yml
+## 1. Get the docs up to date
+If you added a module that is not yet referenced in the docs:
+- Add a markdown document for it: `docs/<package_name>/<your_new_module.md>`.
+- Refer to the new module in the markdown file. For example to refer to the clipping module, add this anywhere in the file: 
+```console
+::: eis_toolkit.<package_name>.<module_name>
 ```
+- You can otherwise edit the markdown files normally.
 
-*Executing the command above automatically creates new (empty) version of the index.md file. However, this is not desired behaviour since the index.md file already contains some general information about the eis_toolkit. Hence, please use Rollback or otherwise undo the modifications in index.md file before committing, or do not commit the index.md file at all.*
+If you edited something that is already referenced in the docs:
+- Unless you changed a module name (making the reference invalid) you do not need to do anything.
 
-3. Run
-
-```shell
-mkdocs serve
+## 2. Check out the updated docs
+- To serve the docs from the container run:
+```console
+mkdocs serve --dev-addr=0.0.0.0:8000
 ```
+- Check out the docs at [http://0.0.0.0:8000/](http://0.0.0.0:8000/)
+- If you are not developing inside a container, a simple ```mkdocs serve``` works.
 
-4. Go to http://127.0.0.1:8000/
+## 3. Build the docs
+- #TODO Update when topical
 
-If you **just** want to take a look at the documentation (not to modify it), just execute steps 3 and 4.

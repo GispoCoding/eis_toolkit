@@ -6,6 +6,7 @@ services:
     tty: true
     build: .              # Build from the image here
     ports:
+      - 8000:8000         # Ports for mkdocs
       - 8888:8888         # Ports for jupyter
     volumes:
       - ./:/eis_toolkit/  # Mount the repo

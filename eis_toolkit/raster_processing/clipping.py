@@ -17,17 +17,17 @@ def clip(
     Args:
         raster (rasterio.io.DatasetReader): The raster to be clipped.
         polygon (geopandas.GeoDataFrame): A geodataframe containing the
-        polygon(s) to do the clipping with.
+            polygon(s) to do the clipping with.
 
     Returns:
-        out_image (numpy.ndarray): The raster data
+        out_image (numpy.ndarray): The clipped raster data
         out_meta (dict): The updated metadata
 
     Raises:
         NonMatchingCrsException: The raster and polygons are not in the same
-        crs
+            crs
         NotApplicableGeometryTypeException: The input geometries contain
-        non-polygon features
+            non-polygon features
     """
 
     shapes = polygon["geometry"]
