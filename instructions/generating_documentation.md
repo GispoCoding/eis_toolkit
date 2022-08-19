@@ -9,11 +9,12 @@ These are used for [autogenerating](https://mkdocstrings.github.io/) docs.
 ## 1. Get the docs up to date
 If you added a module that is not yet referenced in the docs:
 - Add a markdown document for it: `docs/<package_name>/<your_new_module.md>`.
-- Refer to the new module in the markdown file. For example to refer to the clipping module, add this anywhere in the file: 
+- Refer to the new module in the markdown file by adding this somewhere in the file:
 ```console
 ::: eis_toolkit.<package_name>.<module_name>
 ```
 - You can otherwise edit the markdown files normally.
+- For reference, see the markdown sources of the docs in the [`docs/` folder](../docs/).
 
 If you edited something that is already referenced in the docs:
 - Unless you changed a module name (making the reference invalid) you do not need to do anything.
@@ -24,7 +25,7 @@ If you edited something that is already referenced in the docs:
 mkdocs serve --dev-addr=0.0.0.0:8000
 ```
 - Check out the docs at [http://0.0.0.0:8000/](http://0.0.0.0:8000/)
-- If you are not developing inside a container, a simple ```mkdocs serve``` works.
+- If you are not developing inside a container, a simple `mkdocs serve` works.
 
 ## 3. Build the docs
 - #TODO Update when topical
