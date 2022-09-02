@@ -1,7 +1,7 @@
 from typing import Iterable
 
 
-def check_geometry_types(geometries: Iterable, allowed: list):
+def check_geometry_types(geometries: Iterable, allowed_types: list):
     """Checks all geometries in an iterable against a list of allowed types.
 
     Args:
@@ -14,6 +14,6 @@ def check_geometry_types(geometries: Iterable, allowed: list):
     """
 
     for geometry in geometries:
-        if geometry.geom_type not in allowed:
+        if geometry.geom_type not in allowed_types:
             return False
     return True

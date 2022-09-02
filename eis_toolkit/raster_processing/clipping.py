@@ -1,7 +1,7 @@
 from typing import Iterable
-import geopandas
 import rasterio
 from rasterio.mask import mask
+import geopandas
 
 from eis_toolkit.checks.crs import check_matching_crs
 from eis_toolkit.checks.geometry import check_geometry_types
@@ -9,15 +9,14 @@ from eis_toolkit.exceptions import NotApplicableGeometryTypeException
 from eis_toolkit.exceptions import NonMatchingCrsException
 
 
-def __clip(
+def _clip(
     raster: rasterio.io.DatasetReader,
-    shapes: Iterable
+    geometries: Iterable
 ):
-    """The core clipping functionality to be used by clip"""
-
+    # The core clipping functionality. Used internally by clip.
     out_image, out_transform = mask(
         dataset=raster,
-        shapes=shapes,
+        shapes=geometries,
         crop=True,
         all_touched=True
     )
@@ -33,14 +32,14 @@ def __clip(
 
 def clip(
     raster: rasterio.io.DatasetReader,
-    polygon: geopandas.GeoDataFrame,
+    geodataframe: geopandas.GeoDataFrame
 ):
-    """Clips a raster with vector geometry (polygon / polygons).
+    """Clips a raster with a geodataframe.
 
     Args:
         raster (rasterio.io.DatasetReader): The raster to be clipped.
-        polygon (geopandas.GeoDataFrame): A geodataframe containing the
-            polygon(s) to do the clipping with.
+        geodataframe (geopandas.GeoDataFrame): A geodataframe containing the
+            geometries to do the clipping with.
 
     Returns:
         out_image (numpy.ndarray): The clipped raster data
@@ -53,9 +52,15 @@ def clip(
             non-polygon features
     """
 
-    shapes = polygon["geometry"]
-    if not check_matching_crs([raster, shapes]):
+    geometries = geodataframe["geometry"]
+
+    if not check_matching_crs(objects=[raster, geometries]):
         raise NonMatchingCrsException
-    if not check_geometry_types(shapes, allowed=["Polygon", "MultiPolygon"]):
+    if not check_geometry_types(
+        geometries=geometries,
+        allowed_types=["Polygon", "MultiPolygon"]
+    ):
         raise NotApplicableGeometryTypeException
-    return __clip(raster=raster, shapes=shapes)
+
+    out_image, out_meta = _clip(raster=raster, geometries=geometries)
+    return out_image, out_meta
