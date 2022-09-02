@@ -1,11 +1,34 @@
+from typing import Iterable
 import geopandas
 import rasterio
 from rasterio.mask import mask
 
-from eis_toolkit.checks.crs import matching_crs
-from eis_toolkit.checks.geometry import correct_geometry_types
+from eis_toolkit.checks.crs import check_matching_crs
+from eis_toolkit.checks.geometry import check_geometry_types
 from eis_toolkit.exceptions import NotApplicableGeometryTypeException
 from eis_toolkit.exceptions import NonMatchingCrsException
+
+
+def __clip(
+    raster: rasterio.io.DatasetReader,
+    shapes: Iterable
+):
+    """The core clipping functionality to be used by clip"""
+
+    out_image, out_transform = mask(
+        dataset=raster,
+        shapes=shapes,
+        crop=True,
+        all_touched=True
+    )
+    out_meta = raster.meta.copy()
+    out_meta.update({
+        'driver': 'GTiff',
+        'height': out_image.shape[1],
+        'width': out_image.shape[2],
+        'transform': out_transform
+    })
+    return out_image, out_meta
 
 
 def clip(
@@ -31,24 +54,8 @@ def clip(
     """
 
     shapes = polygon["geometry"]
-
-    if not matching_crs([raster, shapes]):
+    if not check_matching_crs([raster, shapes]):
         raise NonMatchingCrsException
-    if not correct_geometry_types(shapes, allowed=["Polygon", "MultiPolygon"]):
+    if not check_geometry_types(shapes, allowed=["Polygon", "MultiPolygon"]):
         raise NotApplicableGeometryTypeException
-
-    out_image, out_transform = mask(
-        dataset=raster,
-        shapes=shapes,
-        crop=True,
-        all_touched=True
-    )
-    out_meta = raster.meta.copy()
-    out_meta.update({
-        'driver': 'GTiff',
-        'height': out_image.shape[1],
-        'width': out_image.shape[2],
-        'transform': out_transform
-    })
-
-    return out_image, out_meta
+    return __clip(raster=raster, shapes=shapes)

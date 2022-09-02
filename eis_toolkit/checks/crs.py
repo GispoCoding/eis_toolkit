@@ -1,4 +1,4 @@
-def matching_crs(objects: list):
+def check_matching_crs(objects: list):
     """Checks if every object in a list has a crs, and that they match.
 
     Args:
