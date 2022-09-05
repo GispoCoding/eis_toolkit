@@ -3,7 +3,7 @@ import numpy as np
 
 
 def sk_mean(a: np.ndarray) -> np.ndarray:
-    """Tests whether it works to call one of scikit-learn's functions.
+    """Test whether it works to call one of scikit-learn's functions.
 
     Args:
         a (np.ndarray): input array
@@ -14,4 +14,4 @@ def sk_mean(a: np.ndarray) -> np.ndarray:
     """
     scaler = preprocessing.StandardScaler().fit(a)
     ka = scaler.mean_
-    return(ka)
+    return (ka)
