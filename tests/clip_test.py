@@ -15,7 +15,7 @@ point_path = parent_dir.joinpath("data/remote/point.gpkg")
 wrong_crs_polygon_path = parent_dir.joinpath("data/remote/small_area.geojson")
 
 # Save output to local to not push it
-output_raster_path = parent_dir.joinpath("data/local/test.tif")
+output_raster_path = parent_dir.joinpath("data/local/results/test.tif")
 
 
 def test_clip():
