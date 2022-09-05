@@ -21,11 +21,11 @@ output_raster_path = parent_dir.joinpath("data/local/test.tif")
 def test_clip():
     """Tests clip functionality with geotiff raster and shapefile polygon."""
 
-    polygon = geopandas.read_file(polygon_path)
+    geodataframe = geopandas.read_file(polygon_path)
     with rasterio.open(raster_path) as raster:
         out_image, out_meta = clip(
             raster=raster,
-            polygon=polygon
+            geodataframe=geodataframe
         )
     with rasterio.open(output_raster_path, "w", **out_meta) as dest:
         dest.write(out_image)
@@ -46,7 +46,7 @@ def test_clip_wrong_geometry_type():
         with rasterio.open(raster_path) as raster:
             clip(
                 raster=raster,
-                polygon=point,
+                geodataframe=point,
             )
 
 
@@ -58,5 +58,5 @@ def test_clip_different_crs():
         with rasterio.open(raster_path) as raster:
             clip(
                 raster=raster,
-                polygon=wrong_crs_polygon,
+                geodataframe=wrong_crs_polygon,
             )
