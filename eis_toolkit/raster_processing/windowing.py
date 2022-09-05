@@ -1,6 +1,7 @@
 import rasterio
 import numpy as np
 from rasterio import transform
+from rasterio.windows import Window
 from typing import Tuple
 
 from eis_toolkit.exceptions import CoordinatesOutOfBoundExeption, InvalidWindowSizeException
@@ -16,7 +17,7 @@ def extract_window(
         raster (rasterio.io.DatasetReader): Source raster.
         center_x (int): x coordinate for window center.
         center_y (int): y coordinate for window center.
-        window_size (int): Side length of the rectangular window, must be odd number
+        win_size (int): Side length of the rectangular window, must be odd number
             greater than 3.
     Returns:
         out_image (numpy.ndarray): Extracted raster window.
@@ -27,8 +28,6 @@ def extract_window(
         CoordinatesOutOfBoundException: Window center coordinates are out of raster
             bounds.
     """
-
-    # deal edge cases/padding
 
     if win_size % 2 == 0 or win_size < 3:
         raise InvalidWindowSizeException
@@ -41,23 +40,40 @@ def extract_window(
     ):
         raise CoordinatesOutOfBoundExeption
 
+     # Get the row and col location for center pixel
     row, col = transform.rowcol(
         raster.transform,
         center_x,
         center_y
     )
-
+    
+    # Get the offset for top left pixel
     px = int(np.floor(win_size / 2))
-    raster_arr = raster.read()
-    out_image = raster_arr[:,row-px:row+px+1, col-px:col+px+1]
+    tl_row = row - px
+    tl_col = col - px
 
+    # Read window
+    window = Window(
+        col_off=tl_col,
+        row_off=tl_row,
+        width=win_size,
+        height=win_size
+    )
+    out_image = raster.read(
+        boundless=True,
+        window=window,
+        fill_value=raster.nodata
+    )
+
+    # Get top left coordinates for the window
     tl = transform.xy(
         transform=raster.transform,
-        rows=row-px,
-        cols=col-px,
+        rows=tl_row,
+        cols=tl_col,
         offset='ul'
     )
 
+    # Updated transformation matrix
     out_transform = rasterio.Affine(
         raster.transform[0],
         raster.transform[1],
@@ -84,3 +100,20 @@ rast.bounds
 
 win = extract_window(rast, 384800, 6671280, 5)
 
+
+rast_arr = rast.read()
+plt.imshow(rast_arr[0])
+
+
+from rasterio.windows import Window
+window = Window(col_off=-10, row_off=-10, width=35, height=35)
+data = rast.read(boundless=True, window=window, fill_value=np.nan)
+plt.imshow(data[0])
+
+
+tl = transform.xy(
+        transform=rast.transform,
+        rows=-40,
+        cols=-50,
+        offset='ul'
+    )
