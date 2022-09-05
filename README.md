@@ -42,7 +42,6 @@ docker compose up -d --build
 ```
 
 ### Working with the container
-#### Container basics
 Attach to the running container
 
 ```console
@@ -59,7 +58,7 @@ For your workflow this means that:
 - You can edit all files like you normally would (on your own computer, with your favourite text editor etc.)
 - You must do all testing and running the code inside the container
 
-#### Python inside the container
+### Python inside the container
 Whether or not using docker we manage the python dependencies with poetry. This means that a python venv is found in the container too. Inside the container, you can get into the venv like you normally would
 
 ```console
@@ -84,14 +83,15 @@ You can also run commands from outside the venv, just prefix them with poetry ru
 poetry run pytest
 ```
 
-#### Testing your changes
-See the instructions [here](./instructions/testing.md)
+### Additonal instructions
+Here are some additional instructions related to the development of EIS toolkit:
+- [Adding data](./instructions/adding_data.md)
+- [Testing your changes](./instructions/testing.md)
+- [Generating documentation](./instructions/generating_documentation.md)
+- [Using jupyterlab](./instructions/using_jupyterlab.md)
 
-#### Using jupyterlab
-See the instructions [here](./instructions/using_jupyterlab.md)
-
-### Setting up a local development environment without docker
-See [setup without docker](./instructions/dev_setup_without_docker.md)
+If you want to set up the development environment without docker, see:
+- [Setup without docker](./instructions/dev_setup_without_docker.md)
 
 ## For users
 0. Make sure that GDAL's dependencies

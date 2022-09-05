@@ -160,5 +160,6 @@ cython_debug/
 #.idea/
 
 # Ignore local test data
-tests/data/local/*
-!tests/data/local/.gitkeep
+tests/data/local/**
+!tests/data/local/**/
+!tests/data/local/**/.gitkeep
