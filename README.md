@@ -10,7 +10,7 @@ Current contents
 
 
 ## Contributing
-If you are contributing by implementing new funcionalities, read the **For developers** section. It will guide you to set up a local development environment. If you wish to just test the installation of eis_toolkit, follow the **For users** section (note that the currently documented installation process is by no means final). 
+If you are contributing by implementing new funcionalities, read the **For developers** section. It will guide you to set up a local development environment. If you wish to just test the installation of eis_toolkit, follow the **For users** section (note that the currently documented installation process is by no means final).
 
 *For general contributing guidelines, see [CONTRIBUTING](./CONTRIBUTING.md).*
 
@@ -33,6 +33,12 @@ Build and run the eis_toolkit container. Run this and every other command in the
 
 ```console
 docker compose up -d
+```
+
+If you need to rebuild already existing container (e.g. dependencies have been updated), run
+
+```console
+docker compose up -d --build
 ```
 
 ### Working with the container
@@ -64,7 +70,7 @@ and run your code and tests from the command line. For example:
 
 ```console
 python <path/to/your/file.py>
-``` 
+```
 
 or
 
