@@ -12,7 +12,9 @@ def extract_window(
     center_y: int,
     win_size: int
 ) -> Tuple[np.ndarray, dict]:
-    """Extracts window from raster.
+    """Extracts window from raster. Center coordinate must be inside the raster but
+       window can extent outside the raster in which case padding with nodata value is
+       used.
     Args:
         raster (rasterio.io.DatasetReader): Source raster.
         center_x (int): x coordinate for window center.
@@ -26,7 +28,7 @@ def extract_window(
     Raises:
         InvalidWindowSizeException: Window size is too small or it is not odd number.
         CoordinatesOutOfBoundException: Window center coordinates are out of raster
-            bounds.
+        bounds.
     """
 
     if win_size % 2 == 0 or win_size < 3:
@@ -85,35 +87,9 @@ def extract_window(
 
     out_meta = raster.meta.copy()
     out_meta.update({
-        'driver': 'GTiff',
         'height': out_image.shape[1],
         'width': out_image.shape[2],
         'transform': out_transform
     })
 
     return out_image, out_meta
-
-
-
-rast = rasterio.open("tests/data/remote/small_raster.tif")
-rast.bounds
-
-win = extract_window(rast, 384800, 6671280, 5)
-
-
-rast_arr = rast.read()
-plt.imshow(rast_arr[0])
-
-
-from rasterio.windows import Window
-window = Window(col_off=-10, row_off=-10, width=35, height=35)
-data = rast.read(boundless=True, window=window, fill_value=np.nan)
-plt.imshow(data[0])
-
-
-tl = transform.xy(
-        transform=rast.transform,
-        rows=-40,
-        cols=-50,
-        offset='ul'
-    )
