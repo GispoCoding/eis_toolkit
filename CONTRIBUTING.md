@@ -89,7 +89,11 @@ have been combined into one task. The task can be executed from container's comm
 invoke lint
 ```
 
-Possible errors will be printed onto the command line. **Please** fix them before committing anything!
+Possible errors will be printed onto the command line.
+
+**Please** fix them before committing anything!
+
+> Note that sometimes the best way to "fix" an error is to ignore that particular error code for some spesific line of code. However, be conscious on when to use this approach!
 
 ## Testing
 
@@ -113,4 +117,4 @@ in the container's command line.
 
 ## Documentation
 
-When adding (or editing) a module, function or class, please make sure the documentation stays up-to-date! For more information, take a look at [documentation instructions](./instructions/generating_documentation.md)
+When adding (or editing) a module, function or class, please make sure the documentation stays up-to-date! For more information, take a look at [documentation instructions](./instructions/generating_documentation.md).
