@@ -16,8 +16,10 @@ and
 - testing
 
 on the issue-specific branch. Commit only to that branch, do not edit the master branch directly.
+
 4. Once you have something working, make sure it has the appropriate [documentation](./instructions/generating_documentation.md), and [tests](./instructions/testing.md)
-5. Create a pull request to merge your branch into the master. In it, summarize your changes.
+5. 
+6. Create a pull request to merge your branch into the master. In it, summarize your changes.
 Assign a reviewer / reviewers for the pull request.
 
 ### Formatting
