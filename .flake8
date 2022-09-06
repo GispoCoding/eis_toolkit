@@ -1,0 +1,5 @@
+[flake8]
+max-line-length = 120
+extend-ignore = ANN101,D100,D202,D104
+exclude = .git,__pycache__,{{eis_toolkit.project_directory}}
+docstring-style = google
