@@ -14,6 +14,7 @@ If an issue for the changes you intend to make does not exist, create one.
 git pull
 ```
 before checking out to a new branch.
+
 4. Do all
 - editing
 - formatting
