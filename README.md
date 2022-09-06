@@ -85,7 +85,6 @@ poetry run pytest
 
 ### Additonal instructions
 Here are some additional instructions related to the development of EIS toolkit:
-- [Adding data](./instructions/adding_data.md)
 - [Testing your changes](./instructions/testing.md)
 - [Generating documentation](./instructions/generating_documentation.md)
 - [Using jupyterlab](./instructions/using_jupyterlab.md)

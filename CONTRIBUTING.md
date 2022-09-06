@@ -41,13 +41,15 @@ current package division via creating an issue for it! Note that the packages ca
 
 Module names come from the names of the .py files containing function declarations. You will need to create a new python file for each functionality. The name of the file containing the function declaration(s) for providing the functionality will be essentially the same as the function’s name but instead of the basic form we will be using –ing form.
 
-> Try to create modules in a way that each module contains only one functionality. Split this functionality into two function declarations: one for external use and one (the core functionality) for internal use. See e.g. implementation of [clipping functionality](./eis_toolkit/raster_processing/clipping.py) for reference.
+- Try to create modules in a way that each module contains only one functionality. Split this functionality into two function declarations: one for external use and one (the core functionality) for internal use. See e.g. implementation of [clipping functionality](./eis_toolkit/raster_processing/clipping.py) for reference.
 
 3. Functions
  
 Name each function according to what it is supposed to do. Try to express the purpose as simplistic as possible. In principle, each function should be creted for executing one task. We prefer modular structure and low hierarchy by trying to avoid nested function declarations. It is highly recommended to call other functions for executing sub tasks.
 
-**Example (packages, modules & functions).** Create a function which clips a raster file with polygon -> name the function as clip. Write this function declaration into a new python file with name clipping.py inside of the eis_toolkit/eis_toolkit/raster_processing folder.
+**Example (packages, modules & functions):**
+
+Create a function which clips a raster file with polygon -> name the function as clip. Write this function declaration into a new python file with name clipping.py inside of the eis_toolkit/eis_toolkit/raster_processing folder.
 
 4. Classes
 
@@ -74,6 +76,9 @@ General guidelines about naming policy (applies to package, module, function, cl
 ## Code style
 
 In order to guarantee consistent coding style, a bunch of different linters and formatters have been brought into use.
+
+> **Please** note that running code style checks is not optional!
+
 For more convenient user experience, running
 - mypy (checks type annotations)
 - flake8 (checks the compliance to PEP8)
@@ -93,28 +98,26 @@ Possible errors will be printed onto the command line.
 
 **Please** fix them before committing anything!
 
-> Note that sometimes the best way to "fix" an error is to ignore that particular error code for some spesific line of code. However, be conscious on when to use this approach!
+- Note that sometimes the best way to "fix" an error is to ignore that particular error code for some spesific line of code. However, be conscious on when to use this approach!
 
 ## Testing
 
-**Please** add a new test file every time you wish to add new function to the toolkit! Begin by creating a new python file into eis_toolkit/tests folder. Name that file as <name_of_the_function_to_be_added>_test.py.
+Creating and executing tests improves code quality and helps to ensure that nothing gets broken
+after merging the pull request.
+
+> **Please** note that creating and running tests is not optional!
+
+Create a new python file into eis_toolkit/tests folder every time you wish to add a new functionality
+into eis_toolkit. Name that file as <name_of_the_function_to_be_added>_test.py.
 
 In this test file you can declare all test functions related to the new function. Add a function at least for testing that 
 - the new function works as expected (in this you can utilize other software for generating the reference solution) 
 - custom exception class errors get fired when expected
 
-You can utilize both local and remote test data in your tests. For more information, take a look at [test instructions](./instructions/testing.md).
-
-### Running tests
-
-Running tests defined in /eis_toolkit/tests folder can be done e.g. by executing
-
-```console
-pytest
-```
-
-in the container's command line.
+You can utilize both local and remote test data in your tests.
+For more information about creating and running tests, take a look at [test instructions](./instructions/testing.md).
 
 ## Documentation
 
-When adding (or editing) a module, function or class, please make sure the documentation stays up-to-date! For more information, take a look at [documentation instructions](./instructions/generating_documentation.md).
+When adding (or editing) a module, function or class, **please** make sure the documentation stays up-to-date!
+For more information, take a look at [documentation instructions](./instructions/generating_documentation.md).
