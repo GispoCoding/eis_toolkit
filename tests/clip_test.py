@@ -22,13 +22,16 @@ def test_clip():
     """Tests clip functionality with geotiff raster and shapefile polygon."""
 
     polygon = geopandas.read_file(polygon_path)
+
     with rasterio.open(raster_path) as raster:
         out_image, out_meta = clip(
             raster=raster,
-            polygon=polygon
+            polygon=polygon,
         )
+
     with rasterio.open(output_raster_path, "w", **out_meta) as dest:
         dest.write(out_image)
+
     with rasterio.open(output_raster_path) as result:
         assert np.amax(result.read()) != np.amin(result.read())
         assert result.count == 1
