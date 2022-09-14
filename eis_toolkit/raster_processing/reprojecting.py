@@ -3,8 +3,8 @@ import numpy as np
 from rasterio import warp
 from typing import Tuple
 
-def reproject(
-    raster: rasterio.io.DatasetReader,
+def reproject_raster(
+    src: rasterio.io.DatasetReader,
     target_EPSG: int,
     resampling_method: str = "nearest"
 ) -> Tuple[np.ndarray, dict]:
@@ -28,45 +28,38 @@ def reproject(
     }
 
     # Compare input and target crs and do nothing if they match
-    if target_EPSG == int(raster.crs.to_string()[5:]):
-        out_image = raster.read()
-        out_meta = raster.meta.copy()
+    if target_EPSG == int(src.crs.to_string()[5:]):
+        out_image = src.read()
+        out_meta = src.meta.copy()
     
     # Else reproject the input raster
     else:
-        raster_arr = raster.read()
-        br_crs = rasterio.CRS.from_epsg(target_EPSG)
+        src_arr = src.read()
+        dst_crs = rasterio.CRS.from_epsg(target_EPSG)
 
-        br_transform, br_width, br_height = warp.calculate_default_transform(
-        src_crs=raster.crs,
-        dst_crs=br_crs,
-        width=raster.width,
-        height=raster.height,
-        left=raster.bounds.left,
-        right=raster.bounds.right,
-        top=raster.bounds.top,
-        bottom=raster.bounds.bottom
+        dst_transform, dst_width, dst_height = warp.calculate_default_transform(
+           src.crs, dst_crs, src.width, src.height, *src.bounds
         )
 
         # Initialize base raster (target raster)
-        br = np.zeros((raster.count, br_height, br_width))
+        dst = np.zeros((src.count, dst_height, dst_width))
         
         out_image = warp.reproject(
-            source=raster_arr,
-            src_transform=raster.transform,
-            src_crs=raster.crs,
-            destination=br,
-            dst_transform=br_transform,
-            dst_crs=br_crs,
+            source=src_arr,
+            src_transform=src.transform,
+            src_crs=src.crs,
+            destination=dst,
+            dst_transform=dst_transform,
+            dst_crs=dst_crs,
             resampling=resamplers[resampling_method]
         )[0]
 
-        out_meta = raster.meta.copy()
+        out_meta = src.meta.copy()
         out_meta.update({
-            'crs': br_crs,
-            'transform': br_transform,
-            "width": br_width,
-            "height": br_height,
+            'crs': dst_crs,
+            'transform': dst_transform,
+            "width": dst_width,
+            "height": dst_height,
         })
 
     return out_image, out_meta
