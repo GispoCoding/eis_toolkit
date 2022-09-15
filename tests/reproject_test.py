@@ -4,15 +4,15 @@
 """
 import rasterio
 import numpy as np
-from eis_toolkit.raster_processing.reprojecting import reproject
+from eis_toolkit.raster_processing.reprojecting import reproject_raster
 from pathlib import Path
 
 parent_dir = Path(__file__).parent
 raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
 reprojected_raster_path = parent_dir.joinpath("data/remote/small_raster_qgis_kkj.tif")
 
-src_rast = rasterio.open(raster_path)
-reprojected_data, reprojected_meta = reproject(raster=src_rast, target_EPSG=2393)
+src_raster = rasterio.open(raster_path)
+reprojected_data, reprojected_meta = reproject_raster(src_raster, 2393)
 
 target_rast = rasterio.open(reprojected_raster_path)
 target_data = target_rast.read()
