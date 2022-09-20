@@ -94,6 +94,13 @@ have been combined into one task. The task can be executed from container's comm
 invoke lint
 ```
 
+- Assumption: you have already executed the following commands
+1. *docker compose up -d* or *docker compose up -d --build* (e.g. if dependencies have been updated)
+2. *docker attach eis_toolkit*
+3. *poetry shell*
+
+before you try to run *invoke lint* command.
+
 Possible errors will be printed onto the command line.
 
 **Please** fix them before committing anything!
