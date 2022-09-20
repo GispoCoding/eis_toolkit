@@ -4,8 +4,7 @@ from pathlib import Path
 import rasterio
 import geopandas
 from eis_toolkit.raster_processing.clipping import clip
-from eis_toolkit.exceptions import NonMatchingCrsException
-from eis_toolkit.exceptions import NotApplicableGeometryTypeException
+from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 
 parent_dir = Path(__file__).parent
@@ -19,16 +18,18 @@ output_raster_path = parent_dir.joinpath("data/local/test.tif")
 
 
 def test_clip():
-    """Tests clip functionality with geotiff raster and shapefile polygon."""
+    """Test clip functionality with geotiff raster and shapefile polygon."""
+    geodataframe = geopandas.read_file(polygon_path)
 
-    polygon = geopandas.read_file(polygon_path)
     with rasterio.open(raster_path) as raster:
         out_image, out_meta = clip(
             raster=raster,
-            polygon=polygon
+            geodataframe=geodataframe,
         )
+
     with rasterio.open(output_raster_path, "w", **out_meta) as dest:
         dest.write(out_image)
+
     with rasterio.open(output_raster_path) as result:
         assert np.amax(result.read()) != np.amin(result.read())
         assert result.count == 1
@@ -40,23 +41,21 @@ def test_clip():
 
 def test_clip_wrong_geometry_type():
     """Tests that non-polygon geometry raises the correct exception."""
-
     with pytest.raises(NotApplicableGeometryTypeException):
         point = geopandas.read_file(point_path)
         with rasterio.open(raster_path) as raster:
             clip(
                 raster=raster,
-                polygon=point,
+                geodataframe=point,
             )
 
 
 def test_clip_different_crs():
-    """Tests that a crs mismatch raises the correct exception."""
-
+    """Test that a crs mismatch raises the correct exception."""
     with pytest.raises(NonMatchingCrsException):
         wrong_crs_polygon = geopandas.read_file(wrong_crs_polygon_path)
         with rasterio.open(raster_path) as raster:
             clip(
                 raster=raster,
-                polygon=wrong_crs_polygon,
+                geodataframe=wrong_crs_polygon,
             )
