@@ -12,9 +12,11 @@ class NotApplicableGeometryTypeException(Exception):
 
 class InvalidWindowSizeException(Exception):
     """Exception error class for invalid window size values."""
+
     pass
 
 
-class CoordinatesOutOfBoundExeption(Exception):
+class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
+
     pass
