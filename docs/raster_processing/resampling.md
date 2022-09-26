@@ -1,2 +1,3 @@
-## Documentation for the resampling module
+# Rasample
+
 ::: eis_toolkit.raster_processing.resampling
