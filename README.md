@@ -1,21 +1,27 @@
 # EIS Toolkit
+
 Related to EIS Horizon EU project. This repository is in early development stage.
 
 Current contents
 - a bunch of different configuration files
-- one preprocessing tool (clip raster with polygon)
-- dummy files and functions for testing purposes.
+- instructions on how to contribute to the repository
+- implementation of one preprocessing tool (clip raster with polygon) to act as an example for further development
+- dummy files and functions for executing the most tentative tests between different environments
 
 *This repository only contains source code related to eis_toolkit python package. The user interface will be implemented into separate repository.*
 
+Licensed under the EUPL-1.2-or-later.
 
 ## Contributing
+
 If you are contributing by implementing new funcionalities, read the **For developers** section. It will guide you to set up a local development environment. If you wish to just test the installation of eis_toolkit, follow the **For users** section (note that the currently documented installation process is by no means final).
 
 *For general contributing guidelines, see [CONTRIBUTING](./CONTRIBUTING.md).*
 
 ## For developers
+
 ### Prerequisites
+
 All contributing developers need git, and a copy of the repository.
 
 ```console
@@ -42,6 +48,7 @@ docker compose up -d --build
 ```
 
 ### Working with the container
+
 Attach to the running container
 
 ```console
@@ -59,6 +66,7 @@ For your workflow this means that:
 - You must do all testing and running the code inside the container
 
 ### Python inside the container
+
 Whether or not using docker we manage the python dependencies with poetry. This means that a python venv is found in the container too. Inside the container, you can get into the venv like you normally would
 
 ```console
@@ -84,78 +92,11 @@ poetry run pytest
 ```
 
 ### Additonal instructions
+
 Here are some additional instructions related to the development of EIS toolkit:
-- [Adding data](./instructions/adding_data.md)
 - [Testing your changes](./instructions/testing.md)
 - [Generating documentation](./instructions/generating_documentation.md)
 - [Using jupyterlab](./instructions/using_jupyterlab.md)
 
 If you want to set up the development environment without docker, see:
 - [Setup without docker](./instructions/dev_setup_without_docker.md)
-
-## For users
-0. Make sure that GDAL's dependencies
-  - libgdal (3.5.1 or greater)
-  - header files (gdal-devel)
-
-are satisfied. If not, install them.
-
-1. Navigate to the Releases section and download latest tar.gz or
-.zip file
-
-2. Create a new virtual environment (VE) by navigating to the folder you wish to create the VE in, and by executing
-
-```console
-python3 -m venv <name_of_your_virtualenv>
-```
-
-3. Activate the VE:
-
-- Linux / MacOS
-
-```console
-source <name_of_your_virtualenv>/bin/activate
-```
-
-- Windows
-
-```console
-<name_of_your_virtualenv>\Scripts\activate.bat
-```
-
-You should now see (*<name_of_your_virtualenv>*) appearing in front of the command prompt.
-
-4. Install eis_toolkit by running
-
-```console
-pip install <path_to_eis_toolkit-X.Y.Z.tar.gz>
-```
-
-or
-
-```console
-pip install <path_to_eis_toolkit-X.Y.Z.zip>
-```
-
-5. Open Python console with
-
-```console
-python
-```
-
-and run e.g.
-
-```console
-from eis_toolkit.dummy_tests.dummy import test_function
-
-test_function(12,2)
-```
-
-or
-
-```console
-from eis_toolkit.dummy_tests.dummy_gdal import driver_cnt
-driver_cnt(1)
-```
-
-**Note** By using VEs we make sure that installing eis_toolkit does not break down anything (e.g. QGIS).
