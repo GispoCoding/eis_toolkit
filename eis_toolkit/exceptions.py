@@ -8,8 +8,8 @@ class NotApplicableGeometryTypeException(Exception):
     pass
 
 
-class NegativeResamplingFactorException(Exception):
-    """Exception error class for negative resampling factors."""
+class NumericValueSignException(Exception):
+    """Exception error class for numeric value sign exception."""
 
     pass
 

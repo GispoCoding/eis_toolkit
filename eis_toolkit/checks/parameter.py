@@ -15,17 +15,17 @@ def check_parameter_value(parameter_value: int, allowed_values: list):
         return False
 
 
-def check_resample_upscale_factor(upscale_factor: float):
-    """Checks if upscale factor used in resampling is positive.
+def check_numeric_value_sign(parameter_value):
+    """Checks if input numeric value is positive.
 
     Args:
-        upscale_factor (float): resample factor for raster resampling
+        parameter value: numeric input parameter
 
     Returns:
-        Bool: True if resample upscale factor is positive, False if not
+        Bool: True if parameter value is positive, False if not
     """
 
-    if upscale_factor > 0:
+    if parameter_value > 0:
         return True
     else:
         return False

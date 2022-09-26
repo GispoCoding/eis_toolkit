@@ -3,8 +3,8 @@ import numpy as np
 from rasterio.enums import Resampling
 from typing import Tuple
 
-from eis_toolkit.checks.parameter import check_parameter_value, check_resample_upscale_factor
-from eis_toolkit.exceptions import NegativeResamplingFactorException, InvalidParameterValueException
+from eis_toolkit.checks.parameter import check_numeric_value_sign
+from eis_toolkit.exceptions import NumericValueSignException
 
 
 def _resample(
@@ -36,9 +36,7 @@ def _resample(
     return out_image, out_meta
 
 
-def resample(raster: rasterio.io.DatasetReader,
-    upscale_factor: float,
-    resampling_method: int = 1
+def resample(raster: rasterio.io.DatasetReader, upscale_factor: float, resampling_method: Resampling
 ) -> Tuple[np.ndarray, dict]:
     """Resamples raster according to given upscale factor.
 
@@ -46,36 +44,21 @@ def resample(raster: rasterio.io.DatasetReader,
         raster (rasterio.io.DatasetReader): The raster to be resampled.
         upscale_factor (float): Resampling factor. Scale factors over 1 will yield
             higher resolution data. Value must be positive.
-        resampling_method (int): Parameterized resampling method. Options are
-            0: nearest,
-            1: bilinear,
-            2: cubic.
-            Defaults to bilinear.
+        resampling_method (rasterio.enums.Resampling): Resampling method. Most suitable
+            method depends on the dataset and context. Nearest, bilinear and cubic are some
+            common choices. This parameter defaults to bilinear.
 
     Returns:
         out_image (numpy.ndarray): Resampled raster data.
         out_meta (dict): The updated metadata.
 
     Raises:
-        NegativeResamplingFactorException: Upscale factor is negative (or not positive).
-        InvalidParameterValue: Resample method parameter did not correspond to any method.
+        NumericValueSignException: Upscale factor is not a positive value.
     """
-    if not check_parameter_value(
-        parameter_value = resampling_method,
-        allowed_values = [0, 1, 2]
-    ):
-        raise InvalidParameterValueException
-
-    if not check_resample_upscale_factor(
+    if not check_numeric_value_sign(
         upscale_factor
     ):
-        raise NegativeResamplingFactorException
+        raise NumericValueSignException
 
-    resamplers =  {
-        0: Resampling.nearest,
-        1: Resampling.bilinear,
-        2: Resampling.cubic
-    }
-
-    out_image, out_meta = _resample(raster, upscale_factor, resamplers[resampling_method])
+    out_image, out_meta = _resample(raster, upscale_factor, resampling_method)
     return out_image, out_meta
