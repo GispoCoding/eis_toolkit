@@ -7,7 +7,7 @@ from rasterio.enums import Resampling
 
 
 from eis_toolkit.raster_processing.resampling import resample
-from eis_toolkit.exceptions import InvalidParameterValueException, NumericValueSignException
+from eis_toolkit.exceptions import NumericValueSignException
 
 parent_dir = Path(__file__).parent
 raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
