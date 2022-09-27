@@ -63,24 +63,3 @@ def raster_to_pandas(  # type: ignore[no-any-unimported]
         add_img_coord=add_img_coord,
     )
     return data_frame
-
-
-rast = rasterio.open("tests/data/remote/small_raster.tif")
-rast_data_array = rast.read(1)
-
-multiband = "tests/data/local/data/multiband.tif"
-meta = rast.meta.copy()
-meta["count"] = 4
-with rasterio.open(multiband, "w", **meta) as dest:
-    for band in range(1, 5):
-        dest.write(rast_data_array - band, band)
-        dest.set_band_description(band, "band_" + str(band))
-
-multi = rasterio.open("tests/data/local/data/multiband.tif")
-
-df = raster_to_pandas(multi, add_img_coord=True)
-df["id"] = df.index
-long_df = pd.wide_to_long(df, ["band_"], i="id", j="band").reset_index()
-long_df.loc[:, ["col", "row"]] = long_df.loc[:, ["col", "row"]].astype(int)
-img = np.empty((multi.count, multi.height, multi.width))
-img[long_df.band - 1, long_df.row, long_df.col] = long_df.band_
