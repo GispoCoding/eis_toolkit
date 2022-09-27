@@ -21,7 +21,7 @@ jobs:
 
       - name: Install gdal prequites
         run: |
-          apt-get update && apt-get install -y libgdal-dev python3-pip
+          sudo apt-get update && apt-get install -y libgdal-dev python3-pip
 
       - name: Install poetry
         run: |
