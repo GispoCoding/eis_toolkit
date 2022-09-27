@@ -1,5 +1,5 @@
-def check_parameter_value(parameter_value: int, allowed_values: list):
-    """Checks if used parameter value is valid.
+def check_parameter_value(parameter_value: int, allowed_values: list) -> bool:
+    """Check if used parameter value is valid.
 
     Args:
         parameter_value (int): value given to a function.
@@ -15,8 +15,8 @@ def check_parameter_value(parameter_value: int, allowed_values: list):
         return False
 
 
-def check_numeric_value_sign(parameter_value):
-    """Checks if input numeric value is positive.
+def check_numeric_value_sign(parameter_value) -> bool:  # type: ignore[no-untyped-def]
+    """Check if input numeric value is positive.
 
     Args:
         parameter value: numeric input parameter
