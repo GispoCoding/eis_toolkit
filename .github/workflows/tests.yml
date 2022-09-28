@@ -9,28 +9,24 @@ on:
     branches: [master, main]
 
 jobs:
-  test:
+  build:
+
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
-      - name: Setup Python
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.10
         uses: actions/setup-python@v2
         with:
-          python-version: 3.10.0
-
-      - name: Install gdal prerequisites
-        run: |
-          sudo apt-get update && sudo apt-get install -y python3-dev gdal-bin libgdal-dev python3-pip
-
-      - name: Install poetry
-        run: |
-          python -m pip install poetry==1.2.1
-
+          python-version: 3.10
       - name: Install dependencies
         run: |
-          python -m poetry install
-
-      - name: Run tests
+          python -m pip install --upgrade pip
+          sudo apt-add-repository ppa:ubuntugis/ubuntugis-unstable
+          sudo apt-get update
+          sudo apt-get install gdal-bin libgdal-dev
+          pip install GDAL==3.4.3
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Test with pytest
         run: |
-          python -m poetry run python -m pytest -sxv
+          pytest
