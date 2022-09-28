@@ -8,6 +8,7 @@ from eis_toolkit.checks.parameter import check_numeric_value_sign
 from eis_toolkit.exceptions import NumericValueSignException
 
 
+# The core resampling functionality. Used internally by resample.
 def _resample(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader, upscale_factor: float, resampling_method: Resampling
 ) -> Tuple[np.ndarray, dict]:

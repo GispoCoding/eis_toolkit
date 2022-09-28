@@ -8,7 +8,6 @@ def check_parameter_value(parameter_value: int, allowed_values: list) -> bool:
     Returns:
         Bool: True if parameter value is allowed, False if not
     """
-
     if parameter_value in allowed_values:
         return True
     else:
@@ -24,7 +23,6 @@ def check_numeric_value_sign(parameter_value) -> bool:  # type: ignore[no-untype
     Returns:
         Bool: True if parameter value is positive, False if not
     """
-
     if parameter_value > 0:
         return True
     else:
