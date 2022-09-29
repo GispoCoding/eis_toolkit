@@ -44,7 +44,7 @@ def raster_to_pandas(  # type: ignore[no-any-unimported]
     dataframe by setting add_img_coord to True.
 
     Args:
-        raster (rasterio.io.DatasetReader):: Raster to be converted.
+        raster (rasterio.io.DatasetReader): Raster to be converted.
         bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
         add_img_coord (bool): Determines if pixel coordinates are written into dataframe. Defaults to false.
 
