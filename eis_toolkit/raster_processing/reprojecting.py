@@ -53,15 +53,16 @@ def _reproject_raster(  # type: ignore[no-any-unimported]
 
 
 def reproject_raster(  # type: ignore[no-any-unimported]
-    src: rasterio.io.DatasetReader, target_EPSG: int, resampling_method: int = 0
+    src: rasterio.io.DatasetReader, target_EPSG: int, resampling_method: warp.Resampling = warp.Resampling.nearest
 ) -> Tuple[np.ndarray, dict]:
     """Reprojects raster to match given coordinate system (EPSG).
 
     Args:
         raster (rasterio.io.DatasetReader): The raster to be clipped.
         target_EPSG (int): Target crs as EPSG code.
-        resampling_method (int): Resampling method. Can be either 0, 1 or 2 that correspond to 'nearest', 'bilinear' or
-        'cubic' respectively.
+        resampling_method (warp.Resampling): Resampling method. Most suitable
+            method depends on the dataset and context. Nearest, bilinear and cubic are some
+            common choices. This parameter defaults to nearest.
 
     Returns:
         out_image (numpy.ndarray): Reprojected raster data.
@@ -70,13 +71,6 @@ def reproject_raster(  # type: ignore[no-any-unimported]
     if target_EPSG == int(src.crs.to_string()[5:]):
         raise MatchingCrsException
 
-    resamplers = {
-        0: warp.Resampling.nearest,
-        1: warp.Resampling.bilinear,
-        2: warp.Resampling.cubic,
-    }
-    resampler = resamplers[resampling_method]
-
-    out_image, out_meta = _reproject_raster(src, target_EPSG, resampler)
+    out_image, out_meta = _reproject_raster(src, target_EPSG, resampling_method)
 
     return out_image, out_meta
