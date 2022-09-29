@@ -1,5 +1,11 @@
 # EIS Toolkit
 
+![tests](https://github.com/GispoCoding/eis_toolkit/workflows/Tests/badge.svg)
+[![codecov.io](https://codecov.io/github/GispoCoding/eis_toolkit/coverage.svg?branch=master)](https://codecov.io/github/GispoCoding/eis_toolkit?branch=master)
+[![EUPL1.2 license](https://img.shields.io/badge/License-EUPL1.2-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+
 Related to EIS Horizon EU project. This repository is in early development stage.
 
 Current contents
@@ -10,11 +16,11 @@ Current contents
 
 *This repository only contains source code related to eis_toolkit python package. The user interface will be implemented into separate repository.*
 
-Licensed under the EUPL-1.2-or-later.
+Licensed under the EUPL-1.2 or later.
 
 ## Contributing
 
-If you are contributing by implementing new funcionalities, read the **For developers** section. It will guide you to set up a local development environment. If you wish to just test the installation of eis_toolkit, follow the **For users** section (note that the currently documented installation process is by no means final).
+If you are contributing by implementing new functionalities, read the **For developers** section. It will guide you to set up a local development environment. If you wish to just test the installation of eis_toolkit, follow the **For users** section (note that the currently documented installation process is by no means final).
 
 *For general contributing guidelines, see [CONTRIBUTING](./CONTRIBUTING.md).*
 
