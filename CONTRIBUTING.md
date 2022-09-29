@@ -27,8 +27,8 @@ on the issue-specific branch. Commit only to that branch, do not edit the master
 
 5. Once you have something working, make sure your commits are according to the desired coding style and that your branch contains appropriate documentation and tests.
 
-6. Create a pull request to merge your branch into the master. In it, summarize your changes.
-Assign a reviewer / reviewers for the pull request.
+6. Create a pull request (PR) to merge your branch into the master. In it, summarize your changes.
+Assign a reviewer / reviewers for the PR.
 
 ## Terminology and general coding principles
 
@@ -94,6 +94,13 @@ have been combined into one task. The task can be executed from container's comm
 invoke lint
 ```
 
+**Assumption**: you have already executed the following commands
+1. *docker compose up -d* or *docker compose up -d --build* (e.g. if dependencies have been updated)
+2. *docker attach eis_toolkit*
+3. *poetry shell*
+
+before you try to run *invoke lint* command.
+
 Possible errors will be printed onto the command line.
 
 **Please** fix them before committing anything!
@@ -103,7 +110,7 @@ Possible errors will be printed onto the command line.
 ## Testing
 
 Creating and executing tests improves code quality and helps to ensure that nothing gets broken
-after merging the pull request.
+after merging the PR.
 
 > **Please** note that creating and running tests is not optional!
 
@@ -121,3 +128,30 @@ For more information about creating and running tests, take a look at [test inst
 
 When adding (or editing) a module, function or class, **please** make sure the documentation stays up-to-date!
 For more information, take a look at [documentation instructions](./instructions/generating_documentation.md).
+
+
+## Creating a PR
+
+Final step in your workflow is to create a PR from the feature
+branch you have been developing. Note that in this repository we have configured a workflow
+which executes pytest every time anyone creates a PR. Most often there is nothing you
+need to do, the check begins automatically and produces an output for you
+whether the tests got passed and the feature branch is ready to get merged or not. If errors
+do emerge, take a look into the Details section to get a more informative
+understanding of the problem.
+
+If you act according to the workflow stated in this document, these PR checks
+should always pass since you have already run pytest through before committing :)
+The purpose of this automatic workflow is to double check that nothing gets broken by merge.
+
+However, **IF** you make changes to the dependencies of the repository (i.e. edit
+pyproject.toml file), you need to update requirements.txt file in order to the
+workflow tests to stay up-to-date. You can do this by running the following command
+
+```console
+poetry export --without-hashes --format=requirements.txt > requirements.txt
+```
+
+and committing the new version of the particular file into your feature
+branch. Please note that this file is only used for GitHub workflows, otherwise
+we utilize poetry for dependency  handling.
