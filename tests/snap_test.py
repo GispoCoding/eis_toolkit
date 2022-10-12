@@ -15,12 +15,12 @@ from eis_toolkit.exceptions import (
 
 parent_dir = Path(__file__).parent
 
-snap_raster_path = parent_dir.joinpath("data/local/snap_raster.tif")
-case1_raster_path = parent_dir.joinpath("data/local/snap_test_raster_right_top.tif")
-case2_raster_path = parent_dir.joinpath("data/local/snap_test_raster_right_bottom.tif")
-case3_raster_path = parent_dir.joinpath("data/local/snap_test_raster_smaller_cells.tif")
-out_of_bounds_raster_path = parent_dir.joinpath("data/local/snap_test_raster_outofbounds.tif")
-nonsquare_raster_path = parent_dir.joinpath("data/local/snap_test_raster_nonsquare.tif")
+snap_raster_path = parent_dir.joinpath("data/remote/snap_raster.tif")
+case1_raster_path = parent_dir.joinpath("data/remote/snap_test_raster_right_top.tif")
+case2_raster_path = parent_dir.joinpath("data/remote/snap_test_raster_right_bottom.tif")
+case3_raster_path = parent_dir.joinpath("data/remote/snap_test_raster_smaller_cells.tif")
+out_of_bounds_raster_path = parent_dir.joinpath("data/remote/snap_test_raster_outofbounds.tif")
+nonsquare_raster_path = parent_dir.joinpath("data/remote/snap_test_raster_nonsquare.tif")
 
 # Save some test rasters to local
 wrong_crs_path = parent_dir.joinpath("data/local/snap_test_wrong_crs.tif")

@@ -52,11 +52,11 @@ def _snap(  # type: ignore[no-any-unimported]
     if x_distance < raster_pixel_size / 2 and y_distance < raster_pixel_size / 2:
         out_image[:, y0:y1, x0:x1] = raster.read(1)  # Snap left-bottom
     elif x_distance < raster_pixel_size / 2 and y_distance > raster_pixel_size / 2:
-        out_image[:, y0-1:y1-1, x0:x1] = raster.read(1)  # Snap left-top
+        out_image[:, y0 - 1 : y1 - 1, x0:x1] = raster.read(1)  # Snap left-top
     elif x_distance > raster_pixel_size / 2 and y_distance > raster_pixel_size / 2:
-        out_image[:, y0-1:y1-1, x0+1:x1+1] = raster.read(1)  # Snap right-top
+        out_image[:, y0 - 1 : y1 - 1, x0 + 1 : x1 + 1] = raster.read(1)  # Snap right-top
     else:
-        out_image[:, y0:y1, x0+1:x1+1] = raster.read(1)  # Snap right-bottom
+        out_image[:, y0:y1, x0 + 1 : x1 + 1] = raster.read(1)  # Snap right-bottom
 
     out_transform = Affine(
         raster.transform.a,
@@ -110,8 +110,10 @@ def snap_with_raster(  # type: ignore[no-any-unimported]
         raise OutOfBoundsException
 
     # Account for small rounding errors if raster has been resampled
-    if not abs(raster.transform.a + raster.transform.e) < 0.00001 or \
-       not abs(snap_raster.transform.a + snap_raster.transform.e) < 0.00001:
+    if (
+        not abs(raster.transform.a + raster.transform.e) < 0.00001
+        or not abs(snap_raster.transform.a + snap_raster.transform.e) < 0.00001
+    ):
         raise NonSquarePixelSizeException
 
     if snap_raster.transform.a < raster.transform.a:
