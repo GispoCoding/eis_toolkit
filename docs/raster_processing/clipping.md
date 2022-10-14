@@ -1,3 +1,3 @@
-# Clipping
-## Documentation for the clipping module
+# Clip raster
+
 ::: eis_toolkit.raster_processing.clipping

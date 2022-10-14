@@ -10,6 +10,22 @@ class NotApplicableGeometryTypeException(Exception):
     pass
 
 
+class MatchingCrsException(Exception):
+    """Exception error class for crs matches."""
+
+
+class NumericValueSignException(Exception):
+    """Exception error class for numeric value sign exception."""
+
+    pass
+
+
+class InvalidParameterValueException(Exception):
+    """Exception error class for invalid parameter values."""
+
+    pass
+
+
 class InvalidWindowSizeException(Exception):
     """Exception error class for invalid window size values."""
 
