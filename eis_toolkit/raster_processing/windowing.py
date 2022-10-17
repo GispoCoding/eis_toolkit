@@ -90,8 +90,8 @@ def extract_window(  # type: ignore[no-any-unimported]
         raster (rasterio.io.DatasetReader): Source raster.
         center_coords (Tuple[int, int]): center coordinates for window int the form (x, y).
         center_coord_crs (int): EPSG code that defines the coordinate reference system.
-        height (int): window height.
-        width (int): window width.
+        height (int): window height in pixels.
+        width (int): window width in pixels.
 
     Returns:
         out_image (numpy.ndarray): Extracted raster window.
