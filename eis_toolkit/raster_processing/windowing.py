@@ -9,33 +9,38 @@ from eis_toolkit.exceptions import CoordinatesOutOfBoundsException, InvalidWindo
 
 
 def _extract_window(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, center_x: float, center_y: float, window_size: int
+    raster: rasterio.io.DatasetReader,
+    center_coords: Tuple[float, float],
+    height: int,
+    width: int,
 ) -> Tuple[np.ndarray, dict]:
+
+    center_x = center_coords[0]
+    center_y = center_coords[1]
 
     center_row, center_col = transform.rowcol(raster.transform, center_x, center_y)
 
-    if window_size % 2 != 0:
-        length_px = int(np.floor(window_size / 2))
-        top_left_row = center_row - length_px
-        top_left_col = center_col - length_px
+    height_px = int(height / 2)
+    width_px = int(width / 2)
+    top_left_row = center_row - height_px
+    top_left_col = center_col - width_px
 
-    else:
-        px_x, px_y = raster.transform * (center_col, center_row)
-        length_px = int(window_size / 2)
-        top_left_row = center_row - length_px
-        top_left_col = center_col - length_px
-
-        if center_x > px_x:
-            top_left_col += 1
-        if center_y > px_y:
-            top_left_row += 1
+    if height % 2 == 0 or width % 2 == 0:
+        px_x, px_y = transform.xy(raster.transform, center_row, center_col)
+        if height % 2 == 0:
+            if center_y < px_y:
+                top_left_row += 1
+        if width % 2 == 0:
+            if center_x > px_x:
+                top_left_col += 1
 
     window = Window(
         col_off=top_left_col,
         row_off=top_left_row,
-        width=window_size,
-        height=window_size,
+        width=width,
+        height=height,
     )
+
     out_image = raster.read(
         boundless=True,
         window=window,
@@ -71,7 +76,11 @@ def _extract_window(  # type: ignore[no-any-unimported]
 
 
 def extract_window(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, center_coords: Tuple[float, float], center_coord_crs: int, window_size: int
+    raster: rasterio.io.DatasetReader,
+    center_coords: Tuple[float, float],
+    center_coord_crs: int,
+    height: int,
+    width: int,
 ) -> Tuple[np.ndarray, dict]:
     """Extract window from raster.
 
@@ -81,7 +90,9 @@ def extract_window(  # type: ignore[no-any-unimported]
         raster (rasterio.io.DatasetReader): Source raster.
         center_coords (Tuple[int, int]): center coordinates for window int the form (x, y).
         center_coord_crs (int): EPSG code that defines the coordinate reference system.
-        window_size (int): Side length of the rectangular window in pixels.
+        height (int): window height.
+        width (int): window width.
+
     Returns:
         out_image (numpy.ndarray): Extracted raster window.
         out_meta (dict): The updated metadata.
@@ -92,11 +103,14 @@ def extract_window(  # type: ignore[no-any-unimported]
         NonMatchingCrsException: Raster and center coordinates are not in same crs.
     """
 
+    if height < 1 or width < 1:
+        raise InvalidWindowSizeException
+
+    if center_coord_crs != int(raster.crs.to_string()[5:]):
+        raise NonMatchingCrsException
+
     center_x = center_coords[0]
     center_y = center_coords[1]
-
-    if window_size < 1:
-        raise InvalidWindowSizeException
 
     if (
         center_x < raster.bounds.left
@@ -106,9 +120,6 @@ def extract_window(  # type: ignore[no-any-unimported]
     ):
         raise CoordinatesOutOfBoundsException
 
-    if center_coord_crs != int(raster.crs.to_string()[5:]):
-        raise NonMatchingCrsException
-
-    out_image, out_meta = _extract_window(raster, center_x, center_y, window_size)
+    out_image, out_meta = _extract_window(raster, center_coords, height, width)
 
     return out_image, out_meta
