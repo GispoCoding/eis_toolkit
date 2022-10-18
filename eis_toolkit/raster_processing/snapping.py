@@ -7,10 +7,10 @@ from rasterio import Affine
 
 from eis_toolkit.checks.crs import check_matching_crs
 from eis_toolkit.exceptions import (
+    CoordinatesOutOfBoundsException,
     InvalidPixelSizeException,
     NonMatchingCrsException,
     NonSquarePixelSizeException,
-    CoordinatesOutOfBoundsException,
 )
 
 
