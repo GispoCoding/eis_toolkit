@@ -10,7 +10,7 @@ from eis_toolkit.exceptions import (
     InvalidPixelSizeException,
     NonMatchingCrsException,
     NonSquarePixelSizeException,
-    OutOfBoundsException,
+    CoordinatesOutOfBoundsException,
 )
 
 parent_dir = Path(__file__).parent
@@ -104,7 +104,7 @@ def test_snap_nonsquare_pixel():
 
 def test_snap_out_of_bounds():
     """Test that left-bottom corner of raster being outside snap raster raises the correct exception."""
-    with pytest.raises(OutOfBoundsException):
+    with pytest.raises(CoordinatesOutOfBoundsException):
         raster = rasterio.open(out_of_bounds_raster_path)
         snap_raster = rasterio.open(snap_raster_path)
         _, _ = snap_with_raster(raster, snap_raster)

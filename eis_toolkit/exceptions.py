@@ -32,11 +32,19 @@ class NonSquarePixelSizeException(Exception):
     pass
 
 
-class OutOfBoundsException(Exception):
-    """Exception error class for point being out of bounds."""
+class InvalidWindowSizeException(Exception):
+    """Exception error class for invalid window size values."""
 
     pass
 
 
 class InvalidPixelSizeException(Exception):
     """Exception error class for invalid pixel size."""
+
+    pass
+
+
+class CoordinatesOutOfBoundsException(Exception):
+    """Exception error class for out of bound coordinates."""
+
+    pass

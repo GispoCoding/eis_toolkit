@@ -10,7 +10,7 @@ from eis_toolkit.exceptions import (
     InvalidPixelSizeException,
     NonMatchingCrsException,
     NonSquarePixelSizeException,
-    OutOfBoundsException,
+    CoordinatesOutOfBoundsException,
 )
 
 
@@ -83,7 +83,7 @@ def snap_with_raster(  # type: ignore[no-any-unimported]
 
     Raises:
         NonMatchingCrsException: Raster and and snap raster are not in the same crs.
-        OutOfBoundsException: Left-bottom corner of raster is outside of snap raster.
+        CoordinatesOutOfBoundsException: Left-bottom corner of raster is outside of snap raster.
         NonSquarePixelSizeException: Raster or snap raster has nonsquare pixels.
         InvalidPixelSizeException: Snap raster has smaller pixel size than raster.
     """
@@ -103,7 +103,7 @@ def snap_with_raster(  # type: ignore[no-any-unimported]
         not snap_raster.bounds.bottom < raster.bounds.bottom < snap_raster.bounds.top
         or not snap_raster.bounds.left < raster.bounds.left < snap_raster.bounds.right
     ):
-        raise OutOfBoundsException
+        raise CoordinatesOutOfBoundsException
 
     # Account for small rounding errors if raster has been resampled
     if (
