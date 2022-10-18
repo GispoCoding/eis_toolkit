@@ -27,36 +27,32 @@ def _snap(  # type: ignore[no-any-unimported]
     out_image = np.full((1, raster.height + cells_added, raster.width + cells_added), raster.nodata)
     out_meta = raster.meta.copy()
 
-    # X direction
+    # Coordinates for the snap raster boundaries
     left_distance_in_pixels = (raster_bounds.left - snap_bounds.left) // snap_pixel_size
     left_snap_coordinate = snap_bounds.left + left_distance_in_pixels * snap_pixel_size
 
+    bottom_distance_in_pixels = (raster_bounds.bottom - snap_bounds.bottom) // snap_pixel_size
+    bottom_snap_coordinate = snap_bounds.bottom + bottom_distance_in_pixels * snap_pixel_size
+    top_snap_coordinate = bottom_snap_coordinate + (raster.height + cells_added) * raster_pixel_size
+
+    # Distance and array indices of close cell corner in snapped raster to slot values
     x_distance = (raster_bounds.left - left_snap_coordinate) % raster_pixel_size
     x0 = int((raster_bounds.left - left_snap_coordinate) // raster_pixel_size)
     x1 = x0 + raster.width
-
-    # Y direction
-    bottom_distance_in_pixels = (
-        raster_bounds.bottom - snap_bounds.bottom
-    ) // snap_pixel_size  # integer divison to floor
-    bottom_snap_coordinate = snap_bounds.bottom + bottom_distance_in_pixels * snap_pixel_size
-    top_snap_coordinate = (
-        bottom_snap_coordinate + (raster_bounds.top - raster_bounds.bottom) + cells_added * raster_pixel_size
-    )
 
     y_distance = (raster_bounds.bottom - bottom_snap_coordinate) % raster_pixel_size
     y0 = int(cells_added - ((raster_bounds.bottom - bottom_snap_coordinate) // raster_pixel_size))
     y1 = y0 + raster.height
 
-    # Find the closest corner of the snapped grid for shifting the original raster
+    # Find the closest corner of the snapped grid for shifting/slotting the original raster
     if x_distance < raster_pixel_size / 2 and y_distance < raster_pixel_size / 2:
-        out_image[:, y0:y1, x0:x1] = raster.read(1)  # Snap left-bottom
+        out_image[:, y0:y1, x0:x1] = raster.read(1)  # Snap values towards left-bottom
     elif x_distance < raster_pixel_size / 2 and y_distance > raster_pixel_size / 2:
-        out_image[:, y0 - 1 : y1 - 1, x0:x1] = raster.read(1)  # Snap left-top
+        out_image[:, y0 - 1 : y1 - 1, x0:x1] = raster.read(1)  # Snap values towards left-top # noqa: E203
     elif x_distance > raster_pixel_size / 2 and y_distance > raster_pixel_size / 2:
-        out_image[:, y0 - 1 : y1 - 1, x0 + 1 : x1 + 1] = raster.read(1)  # Snap right-top
+        out_image[:, y0 - 1 : y1 - 1, x0 + 1 : x1 + 1] = raster.read(1)  # Snap values towards right-top # noqa: E203
     else:
-        out_image[:, y0:y1, x0 + 1 : x1 + 1] = raster.read(1)  # Snap right-bottom
+        out_image[:, y0:y1, x0 + 1 : x1 + 1] = raster.read(1)  # Snap values towards right-bottom # noqa: E203
 
     out_transform = Affine(
         raster.transform.a,
