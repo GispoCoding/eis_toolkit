@@ -24,3 +24,15 @@ class InvalidParameterValueException(Exception):
     """Exception error class for invalid parameter values."""
 
     pass
+
+
+class InvalidWindowSizeException(Exception):
+    """Exception error class for invalid window size values."""
+
+    pass
+
+
+class CoordinatesOutOfBoundsException(Exception):
+    """Exception error class for out of bound coordinates."""
+
+    pass
