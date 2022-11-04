@@ -30,12 +30,10 @@ def plot_rate_curve(  # type: ignore[no-any-unimported]
     y_values: np.ndarray,
     plot_type: str = "success_rate",
 ) -> matplotlib.figure.Figure:
-    """Plot success or prediction rate curve.
+    """Plot success rate, prediction rate or ROC curve.
 
-    Type of plot depends on the given deposits. If deposits were used for model training, then the plot is known as
-    success rate curve. If deposits were not used for model training then the plot is known as prediction rate plot. In
-    both cases x-axis indicates the proportion of area that is considired to be prospective and y-axis indicates true
-    positive rate.
+    Plot type depends on plot_type argument. Y-axis is always true positive rate, while x-axis can be either false
+    positive rate (roc) or proportion of area (success and prediction rate) depending on plot type.
 
     Args:
         true_positive_rate_values (np.ndarray): True positive rate values, y-coordinates of the plot.
@@ -47,7 +45,7 @@ def plot_rate_curve(  # type: ignore[no-any-unimported]
 
     Raises:
         InvalidParameterValueException: Invalid plot type.
-        ValueError: x_values or y_values are out of bounds.
+        InvalidParameterValueException: x_values or y_values are out of bounds.
     """
     if plot_type == "success_rate":
         label = "Success rate"
@@ -62,10 +60,10 @@ def plot_rate_curve(  # type: ignore[no-any-unimported]
         raise InvalidParameterValueException("Invalid plot type")
 
     if x_values.max() > 1 or x_values.min() < 0:
-        raise ValueError("x_values should be within range 0-1")
+        raise InvalidParameterValueException("x_values should be within range 0-1")
 
     if y_values.max() > 1 or y_values.min() < 0:
-        raise ValueError("y_values should be within range 0-1")
+        raise InvalidParameterValueException("y_values should be within range 0-1")
 
     fig = _plot_rate_curve(x_values=x_values, y_values=y_values, label=label, xlab=xlab)
 

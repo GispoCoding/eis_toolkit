@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import geopandas
 import pytest
 import rasterio

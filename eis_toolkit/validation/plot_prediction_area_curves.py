@@ -2,6 +2,7 @@ import matplotlib
 import numpy as np
 from matplotlib import pyplot as plt
 
+from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.validation.get_pa_intersection import get_pa_intersection
 
 
@@ -53,17 +54,17 @@ def plot_prediction_area_curves(  # type: ignore[no-any-unimported]
         matplotlib.figure.Figure: P-A plot.
 
     Raises:
-        ValueError: true_positive_rate_values or proportion_of_area_values values are out of bounds.
+        InvalidParameterValueException: true_positive_rate_values or proportion_of_area_values values are out of bounds.
 
     References:
         Yousefi, Mahyar, and Emmanuel John M. Carranza. "Fuzzification of continuous-value spatial evidence for mineral
         prospectivity mapping." Computers & Geosciences 74 (2015): 97-109.
     """
     if true_positive_rate_values.max() > 1 or true_positive_rate_values.min() < 0:
-        raise ValueError("true_positive_rate values should be within range 0-1")
+        raise InvalidParameterValueException("true_positive_rate values should be within range 0-1")
 
     if proportion_of_area_values.max() > 1 or proportion_of_area_values.min() < 0:
-        raise ValueError("proportion_of_area values should be within range 0-1")
+        raise InvalidParameterValueException("proportion_of_area values should be within range 0-1")
 
     fig = _plot_prediction_area_curves(
         true_positive_rate_values=true_positive_rate_values,

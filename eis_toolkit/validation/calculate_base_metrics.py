@@ -81,8 +81,7 @@ def calculate_base_metrics(  # type: ignore[no-any-unimported]
 
     Returns:
         base_metrics: data frame containing true positive rate, proportion of area, threshold_values and false positive
-        rate.
-        (optional) values.
+            rate (optional) values.
 
     Raises:
         NonMatchingCrsException: The raster and point data are not in the same crs.

@@ -4,6 +4,8 @@ import numpy as np
 from shapely.geometry import LineString
 from shapely.geometry.point import Point
 
+from eis_toolkit.exceptions import InvalidParameterValueException
+
 
 def _get_pa_intersection(  # type: ignore[no-any-unimported]
     true_positive_rate_values: np.ndarray, proportion_of_area_values: np.ndarray, threshold_values: np.ndarray
@@ -33,13 +35,13 @@ def get_pa_intersection(
         Tuple[float, float]: x and y coordinates of the intersection point.
 
     Raises:
-        ValueError: true_positive_rate_values or proportion_of_area_values values are out of bounds.
+        InvalidParameterValueException: true_positive_rate_values or proportion_of_area_values values are out of bounds.
     """
     if true_positive_rate_values.max() > 1 or true_positive_rate_values.min() < 0:
-        raise ValueError("true_positive_rate_values values should be within range 0-1")
+        raise InvalidParameterValueException("true_positive_rate_values values should be within range 0-1")
 
     if proportion_of_area_values.max() > 1 or proportion_of_area_values.min() < 0:
-        raise ValueError("proportion_of_area_values values should be within range 0-1")
+        raise InvalidParameterValueException("proportion_of_area_values values should be within range 0-1")
 
     intersection = _get_pa_intersection(
         true_positive_rate_values=true_positive_rate_values,
