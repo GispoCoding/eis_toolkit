@@ -1,4 +1,5 @@
 import numpy
+from eis_toolkit.exceptions import InvalidParameterValueException
 
 def _fuzzy_prod( # type: ignore[no-any-unimported]
     indata: numpy.ndarray):

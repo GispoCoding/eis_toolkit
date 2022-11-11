@@ -1,4 +1,5 @@
 import numpy
+from eis_toolkit.exceptions import InvalidParameterValueException
 
 def _fuzzy_gamma( # type: ignore[no-any-unimported]
     indata: numpy.ndarray, gam: float):
@@ -29,7 +30,7 @@ def fuzzy_gamma( # type: ignore[no-any-unimported]
     if indata.min() < 0 or indata.max() > 1:
         raise InvalidParameterValueException("Input for fuzzy overlay must be in range [0,1]")
 
-    if  gam < 0 or gam > 1:
+    if  gam < 0 or gam > 1 or numpy.isnan(gam):
         raise InvalidParameterValueException("The gamma parameter must be in range [0,1]")
 
     fuzzygam = _fuzzy_gamma(indata,gam)
