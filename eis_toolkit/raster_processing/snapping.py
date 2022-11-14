@@ -3,7 +3,6 @@ from typing import Tuple
 
 import numpy as np
 import rasterio
-from rasterio import Affine
 
 from eis_toolkit.checks.crs import check_matching_crs
 from eis_toolkit.exceptions import (
@@ -16,7 +15,7 @@ from eis_toolkit.exceptions import (
 
 # The core snapping functionality. Used internally by snap.
 def _snap(  # type: ignore[no-any-unimported]
-    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
+    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader, bands: int = 1
 ) -> Tuple[np.ndarray, dict]:
     raster_bounds = raster.bounds
     snap_bounds = snap_raster.bounds
@@ -24,7 +23,7 @@ def _snap(  # type: ignore[no-any-unimported]
     snap_pixel_size = snap_raster.transform.a
 
     cells_added = ceil(snap_pixel_size / raster_pixel_size)
-    out_image = np.full((1, raster.height + cells_added, raster.width + cells_added), raster.nodata)
+    out_image = np.full((bands, raster.height + cells_added, raster.width + cells_added), raster.nodata)
     out_meta = raster.meta.copy()
 
     # Coordinates for the snap raster boundaries
@@ -46,15 +45,15 @@ def _snap(  # type: ignore[no-any-unimported]
 
     # Find the closest corner of the snapped grid for shifting/slotting the original raster
     if x_distance < raster_pixel_size / 2 and y_distance < raster_pixel_size / 2:
-        out_image[:, y0:y1, x0:x1] = raster.read(1)  # Snap values towards left-bottom
+        out_image[:, y0:y1, x0:x1] = raster.read(bands)  # Snap values towards left-bottom
     elif x_distance < raster_pixel_size / 2 and y_distance > raster_pixel_size / 2:
-        out_image[:, y0 - 1 : y1 - 1, x0:x1] = raster.read(1)  # Snap values towards left-top # noqa: E203
+        out_image[:, y0 - 1 : y1 - 1, x0:x1] = raster.read(bands)  # Snap values towards left-top # noqa: E203
     elif x_distance > raster_pixel_size / 2 and y_distance > raster_pixel_size / 2:
-        out_image[:, y0 - 1 : y1 - 1, x0 + 1 : x1 + 1] = raster.read(1)  # Snap values towards right-top # noqa: E203
+        out_image[:, y0 - 1 : y1 - 1, x0 + 1 : x1 + 1] = raster.read(bands)  # Snap values towards right-top # noqa: E203
     else:
-        out_image[:, y0:y1, x0 + 1 : x1 + 1] = raster.read(1)  # Snap values towards right-bottom # noqa: E203
+        out_image[:, y0:y1, x0 + 1 : x1 + 1] = raster.read(bands)  # Snap values towards right-bottom # noqa: E203
 
-    out_transform = Affine(
+    out_transform = rasterio.Affine(
         raster.transform.a,
         raster.transform.b,
         left_snap_coordinate,
@@ -67,7 +66,7 @@ def _snap(  # type: ignore[no-any-unimported]
 
 
 def snap_with_raster(  # type: ignore[no-any-unimported]
-    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
+    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader, bands: int = 1
 ) -> Tuple[np.ndarray, dict]:
     """Snaps/aligns raster to given snap raster.
 
@@ -76,6 +75,7 @@ def snap_with_raster(  # type: ignore[no-any-unimported]
     Args:
         raster (rasterio.io.DatasetReader): The raster to be clipped.
         snap_raster (rasterio.io.DatasetReader): The snap raster i.e. reference grid raster.
+        bands (int): Number of bands in raster. Defaults to 1.
 
     Returns:
         out_image (np.ndarray): The snapped raster data.
@@ -100,8 +100,8 @@ def snap_with_raster(  # type: ignore[no-any-unimported]
         raise NonMatchingCrsException
 
     if (
-        not snap_raster.bounds.bottom < raster.bounds.bottom < snap_raster.bounds.top
-        or not snap_raster.bounds.left < raster.bounds.left < snap_raster.bounds.right
+        not snap_raster.bounds.bottom <= raster.bounds.bottom <= snap_raster.bounds.top
+        or not snap_raster.bounds.left <= raster.bounds.left <= snap_raster.bounds.right
     ):
         raise CoordinatesOutOfBoundsException
 
@@ -115,8 +115,9 @@ def snap_with_raster(  # type: ignore[no-any-unimported]
     if snap_raster.transform.a < raster.transform.a:
         raise InvalidPixelSizeException
 
-    if snap_raster.bounds == raster.bounds:
-        out_image, out_meta = raster.read(), raster.meta
+    if (snap_raster.bounds.bottom == raster.bounds.bottom and
+        snap_raster.bounds.left == raster.bounds.left):
+        out_image, out_meta = raster.read(bands), raster.meta
         return out_image, out_meta
 
-    return _snap(raster, snap_raster)
+    return _snap(raster, snap_raster, bands)
