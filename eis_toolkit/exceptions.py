@@ -26,8 +26,20 @@ class InvalidParameterValueException(Exception):
     pass
 
 
+class NonSquarePixelSizeException(Exception):
+    """Exception error class for non-square pixel size."""
+
+    pass
+
+
 class InvalidWindowSizeException(Exception):
     """Exception error class for invalid window size values."""
+
+    pass
+
+
+class InvalidPixelSizeException(Exception):
+    """Exception error class for invalid pixel size."""
 
     pass
 
