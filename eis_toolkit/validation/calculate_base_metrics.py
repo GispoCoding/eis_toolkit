@@ -21,26 +21,26 @@ def _calculate_base_metrics(  # type: ignore[no-any-unimported]
 
     deposit_rows, deposit_cols = rasterio.transform.rowcol(raster.transform, deposits.geometry.x, deposits.geometry.y)
     deposit_scores = data_array[deposit_rows, deposit_cols]
-    threshold_valuess = np.flip(np.unique(deposit_scores))
+    threshold_values = np.flip(np.unique(deposit_scores))
 
-    if threshold_valuess.max() < data_array.max():
-        threshold_valuess = np.concatenate(([data_array.max()], threshold_valuess))
+    if threshold_values.max() < data_array.max():
+        threshold_values = np.concatenate(([data_array.max()], threshold_values))
 
-    if threshold_valuess.min() > data_array.min():
-        threshold_valuess = np.concatenate((threshold_valuess, [data_array.min()]))
+    if threshold_values.min() > data_array.min():
+        threshold_values = np.concatenate((threshold_values, [data_array.min()]))
 
     true_positive_rate_values = []
     proportion_of_area_values_values = []
 
-    for threshold_values in threshold_valuess:
-        true_positive_rate_values.append((deposit_scores >= threshold_values).sum() / deposit_scores.size)
-        proportion_of_area_values_values.append((data_array >= threshold_values).sum() / data_array.size)
+    for threshold_value in threshold_values:
+        true_positive_rate_values.append((deposit_scores >= threshold_value).sum() / deposit_scores.size)
+        proportion_of_area_values_values.append((data_array >= threshold_value).sum() / data_array.size)
 
     base_metrics = pd.DataFrame(
         {
             "true_positive_rate_values": true_positive_rate_values,
             "proportion_of_area_values": proportion_of_area_values_values,
-            "threshold_values": threshold_valuess,
+            "threshold_values": threshold_values,
         }
     )
 
@@ -53,7 +53,7 @@ def _calculate_base_metrics(  # type: ignore[no-any-unimported]
         negatives_scores = data_array[negatives_rows, negatives_cols]
 
         false_positive_rate_values = []
-        for threshold_values in threshold_valuess:
+        for threshold_values in threshold_values:
             false_positive_rate_values.append((negatives_scores >= threshold_values).sum() / negatives_scores.size)
 
         base_metrics["false_positive_rate_values"] = false_positive_rate_values
@@ -103,6 +103,6 @@ def calculate_base_metrics(  # type: ignore[no-any-unimported]
     ):
         raise NotApplicableGeometryTypeException
 
-    base_metrics = _calculate_base_metrics(raster=raster, deposits=deposits, negatives=negatives)
+    base_metrics = _calculate_base_metrics(raster=raster, deposits=deposits, band=band, negatives=negatives)
 
     return base_metrics
