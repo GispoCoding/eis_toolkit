@@ -15,7 +15,7 @@ def _winsorize_fixed_values(
   limit_max: Optional[float] = None,
   replace_lower: Optional[float] = None,
   replace_upper: Optional[float] = None,
-  nan_value: Optional[Union[str, int, float]] = None,
+  nan_value: Optional[Union[int, float]] = None,
 ) -> np.ndarray:
     
     out_array = np.where(data_array == nan_value, np.nan, data_array) if nan_value else data_array
@@ -31,26 +31,30 @@ def _winsorize_percentile_values(
     limit_min: Optional[float] = None,
     limit_max: Optional[float] = None,
     replace_value_location: bool = True,
-    nan_value: Optional[Union[str, int, float]] = None,
+    nan_value: Optional[Union[int, float]] = None,
 ) -> Tuple[np.ndarray, dict]:
     
-    out_array = np.where(data_array == nan_value, np.nan, data_array) if nan_value else data_array
+    data_array = np.where(data_array == nan_value, np.nan, data_array) if nan_value else data_array
     
-    method_lower_interval = "upper" if replace_value_location == True else "lower"
-    method_upper_interval = "lower" if replace_value_location == True else "upper"
+    method_lower_interval = "higher" if replace_value_location == True else "lower"
+    method_upper_interval = "lower" if replace_value_location == True else "higher"
+    array_list = []
+    out_dict = {}
     
-    lower_treshold = np.nanpercentile(out_array, limit_min, method = method_lower_interval) if limit_min else None
-    upper_treshold = np.nanpercentile(out_array, 100-limit_max, method = method_upper_interval) if limit_max else None
-    
-    out_array = np.where(out_array < lower_treshold, lower_treshold, out_array) if limit_min else out_array
-    out_array = np.where(out_array > upper_treshold, upper_treshold, out_array) if limit_max else out_array
+    for i in range(0, data_array.shape[0]):
+        lower_treshold = np.nanpercentile(data_array[i], limit_min, method = method_lower_interval) if limit_min else None
+        upper_treshold = np.nanpercentile(data_array[i], 100-limit_max, method = method_upper_interval) if limit_max else None
+        
+        data_array[i] = np.where(data_array[i] < lower_treshold, lower_treshold, data_array[i]) if limit_min else data_array[i]
+        data_array[i] = np.where(data_array[i] > upper_treshold, upper_treshold, data_array[i]) if limit_max else data_array[i]
+        
+        array_list.append(data_array[i]) if data_array.shape[0] > 1 else None
+        out_dict["band_" + str(i+1) + "_value_lower"] = lower_treshold
+        out_dict["band_" + str(i+1) + "_value_upper"] = upper_treshold
+        
+    out_array = np.stack(array_list) if data_array.shape[0] > 1 else data_array
     out_array = np.where(np.isnan(out_array), nan_value, out_array) if nan_value else out_array
-    
-    out_dict = {
-        "replacement_lower": lower_treshold,
-        "replacement_upper": upper_treshold,
-    }
-    
+
     return out_array, out_dict
 
 
@@ -83,17 +87,18 @@ def winsorize_fixed_values(  # type: ignore[no-any-unimported]
     
     Args:
         in_data (rasterio.io.DatasetReader, pandas.DataFrame, geopandas.GeoDataFrame): Single data set to be transformed.
-        bands (List[int], optional): Band numbers of raster data set to be processed. Defaults to None.
         limit_min (float, optional): Treshold below all values will be replaced. Defaults to None.
         limit_max (float, optional): Treshold above all values will be replaced. Defaults to None.
         replace_lower (float, optional): Replacement value for lower interval. Defaults to None.
         replace_upper (float, optional): Replacement value for upper interval. Defaults to None.
-        nan_value (int, float, optional): NoData value of a raster data set. Defaults to None.
+        nan_value (int, float, optional): NoData value of a data set. Defaults to None.
+        
+        bands (List[int], optional): Band numbers of raster data set to be processed. Defaults to None.
         nan_value_ignore (bool): Switch to ignore both input and raster NoData values. Defaults to false. 
 
     Returns:
-        out_image (np.ndarray): The transformed raster data.
-        out_meta (dict): The raster metadata.
+        out_image (np.ndarray): The transformed data.
+        out_meta (dict): The raster metadata. None if no metadata available.
 
     Raises:
         InvalidParameterValueException: The input contains invalid values.
