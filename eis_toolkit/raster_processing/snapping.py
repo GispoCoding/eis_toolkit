@@ -49,7 +49,7 @@ def _snap(  # type: ignore[no-any-unimported]
     elif x_distance < raster_pixel_size / 2 and y_distance > raster_pixel_size / 2:
         out_image[:, y0 - 1 : y1 - 1, x0:x1] = raster.read(bands)  # Snap values towards left-top # noqa: E203
     elif x_distance > raster_pixel_size / 2 and y_distance > raster_pixel_size / 2:
-        out_image[:, y0 - 1 : y1 - 1, x0 + 1 : x1 + 1] = raster.read(bands)  # Snap values towards right-top # noqa: E203
+        out_image[:, y0 - 1 : y1 - 1, x0 + 1 : x1 + 1] = raster.read(bands)  # Snap values toward right-top # noqa: E203
     else:
         out_image[:, y0:y1, x0 + 1 : x1 + 1] = raster.read(bands)  # Snap values towards right-bottom # noqa: E203
 
@@ -115,8 +115,7 @@ def snap_with_raster(  # type: ignore[no-any-unimported]
     if snap_raster.transform.a < raster.transform.a:
         raise InvalidPixelSizeException
 
-    if (snap_raster.bounds.bottom == raster.bounds.bottom and
-        snap_raster.bounds.left == raster.bounds.left):
+    if snap_raster.bounds.bottom == raster.bounds.bottom and snap_raster.bounds.left == raster.bounds.left:
         out_image, out_meta = raster.read(bands), raster.meta
         return out_image, out_meta
 
