@@ -17,7 +17,10 @@ def _calculate_base_metrics(  # type: ignore[no-any-unimported]
     data_array = raster.read(band)
 
     # Select only deposits that are within raster bounds
-    deposits = deposits.cx[raster.bounds.left : raster.bounds.right, raster.bounds.bottom : raster.bounds.top]
+    deposits = deposits.cx[
+        raster.bounds.left : raster.bounds.right,  # noqa: E203
+        raster.bounds.bottom : raster.bounds.top,  # noqa: E203
+    ]
 
     deposit_rows, deposit_cols = rasterio.transform.rowcol(raster.transform, deposits.geometry.x, deposits.geometry.y)
     deposit_scores = data_array[deposit_rows, deposit_cols]
@@ -46,7 +49,10 @@ def _calculate_base_metrics(  # type: ignore[no-any-unimported]
 
     if negatives is not None:
         # Select only negatives that are within raster bounds
-        negatives = negatives.cx[raster.bounds.left : raster.bounds.right, raster.bounds.bottom : raster.bounds.top]
+        negatives = negatives.cx[
+            raster.bounds.left : raster.bounds.right,  # noqa: E203
+            raster.bounds.bottom : raster.bounds.top,  # noqa: E203
+        ]
         negatives_rows, negatives_cols = rasterio.transform.rowcol(
             raster.transform, negatives.geometry.x, negatives.geometry.y
         )
