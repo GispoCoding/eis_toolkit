@@ -1,8 +1,17 @@
-import sys
+from typing import List
+
 import rasterio
 import numpy as np
-import pandas as pd
-sys.path.insert(0, "..")
 
+def raster_value_to_np_int(src: rasterio.io.DatasetReader, band_numbers: List[int]) -> rasterio.io.DatasetWriter:
 
-def raster_value_to_int(src: rasterio.io.DatasetReader, band_number: int) -> rasterio.io.DatasetReader:
+    # Read the raster data into a NumPy array
+    data = src.read()
+    
+    # Change the data type to int
+    data = data.astype(np.int)
+    
+    # Update the data type in the dataset object
+    src.meta['dtype'] = np.int
+    
+    src.write_transform(band_numbers)
