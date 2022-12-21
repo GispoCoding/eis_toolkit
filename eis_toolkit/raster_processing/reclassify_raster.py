@@ -1,5 +1,5 @@
 from typing import List, Optional
-
+import time
 import numpy as np
 import mapclassify as mc
 from jenkspy import JenksNaturalBreaks
@@ -79,16 +79,8 @@ def raster_with_equal_intervals(
     with rasterio.open(path_to_file, 'w', **raster.meta) as dst:
         for i in range(len(bands)):
             data_array = array_of_bands[i]
-            max_value = raster.statistics(i+1).max
-            min_value = raster.statistics(i+1).min
-            percentiles = np.linspace(0, 100, number_of_intervals+1)
-            bins = [min_value]
-            for j in range(number_of_intervals):
-                w = (max_value - np.min(bins)) / number_of_intervals
-                bins.append(min_value + w * (j + 1))
+            percentiles = np.linspace(0, 100, number_of_intervals)
             intervals = np.percentile(data_array, percentiles)
-            print("ints",intervals)
-            print("bins", bins)
             data = np.digitize(data_array, intervals)
             dst.write(data, bands[i])
 
@@ -115,9 +107,7 @@ def raster_with_quantiles(
     with rasterio.open(path_to_file, 'w', **raster.meta) as dst:
         for i in range(len(bands)):
             data_array = array_of_bands[i]
-            
             intervals = [np.percentile(data_array, i * 100 / number_of_quantiles) for i in range(number_of_quantiles)]
-
             data = np.digitize(data_array, intervals)
 
             dst.write(data, bands[i])
@@ -170,10 +160,10 @@ def raster_with_geometrical_intervals(
 
     with rasterio.open(path_to_file, 'w', **raster.meta) as dst:
         for i in range(len(bands)):
-            data_array = array_of_bands[i]
-            max_value = raster.statistics(i+1).max
+            data_array = mc.load_example() #array_of_bands[i]
+            max_value = max(data_array) #raster.statistics(i+1).max
 
-            min_value = raster.statistics(i+1).min
+            min_value = min(data_array)#raster.statistics(i+1).min
 
             x = (max_value/np.int(min_value))**(1/number_of_classes+1)
 
