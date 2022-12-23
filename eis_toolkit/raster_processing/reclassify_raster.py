@@ -1,251 +1,451 @@
 from typing import List, Optional
-import time
-import numpy as np
+
 import mapclassify as mc
-from jenkspy import JenksNaturalBreaks
-import math
+import numpy as np
 import rasterio
 
-def raster_with_manual_breaks(
+from eis_toolkit.exceptions import InvalidParameterValueException
+
+
+def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    path_to_file: str,
     breaks: List[int],
     bands: Optional[List[int]] = None
 ) -> rasterio.io.DatasetReader:
-   
+
+    custom_band_list = False if bands is None else True
     array_of_bands = []
     if bands is not None:
         for band in raster.read(bands):
             array_of_bands.append(band)
     else:
         array_of_bands = raster.read()
+        bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-    with rasterio.open(path_to_file, 'w', **raster.meta) as dst:
-        for i in range(len(bands)):
-            data_array = array_of_bands[i]
-            data = np.digitize(data_array, breaks)
-            dst.write(data, bands[i])
-        dst.close()
+    for i in range(len(bands)):
 
-    src = rasterio.open(path_to_file)
+        data_array = array_of_bands[i]
 
-    return src
+        data = np.digitize(data_array, breaks)
 
-def raster_with_defined_interval(
+        if custom_band_list:
+            raster.write(data, bands[i])
+        else:
+            raster.write(data, bands[i]+1)
+
+    return raster
+
+
+def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    path_to_file: str,
-    interval_size,
+    breaks: List[int],
     bands: Optional[List[int]] = None
 ) -> rasterio.io.DatasetReader:
-   
+    """Classify raster with manual breaks.
+
+    If bands are not given, all bands are used for classification.
+
+    Args:
+        raster (rasterio.io.DatasetReader): Raster to be classified.
+        breaks (List[int]): List of break values for the classification.
+        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+
+    Returns:
+        rasterio.io.DatasetReader: Raster classified with manual breaks.
+    """
+    if bands is not None:
+        if not isinstance(bands, list):
+            raise InvalidParameterValueException
+        elif not all(isinstance(band, int) for band in bands):
+            raise InvalidParameterValueException
+        elif len(bands) > raster.count:
+            raise InvalidParameterValueException
+    if breaks is None:
+        raise InvalidParameterValueException
+    else:
+        if not all(isinstance(_break, int) for _break in breaks):
+            raise InvalidParameterValueException
+
+    src = _raster_with_manual_breaks(raster, breaks, bands)
+
+    return src
+
+
+def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
+    raster: rasterio.io.DatasetReader,
+    interval_size: int,
+    bands: Optional[List[int]] = None
+) -> rasterio.io.DatasetWriter:
+
+    custom_band_list = False if bands is None else True
     array_of_bands = []
     if bands is not None:
         for band in raster.read(bands):
             array_of_bands.append(band)
     else:
         array_of_bands = raster.read()
+        bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-    with rasterio.open(path_to_file, 'w', **raster.meta) as dst:
-        for i in range(len(bands)):
-            data_array = array_of_bands[i]
-            print(interval_size)
-            hist, edges = np.histogram(data_array, bins=interval_size)
-            indices = np.digitize(data_array, edges)
-            #bins = np.linspace(raster.statistics(i+1).min, raster.statistics(i+1).max + interval_size, num=interval_size, dtype='float64')
-            #print(bins)
-            #data = np.digitize(data_array, indices)
-            dst.write(indices, bands[i])
-        dst.close()
+    for i in range(len(bands)):
+        data_array = array_of_bands[i]
 
-    src = rasterio.open(path_to_file)
+        hist, edges = np.histogram(data_array, bins=interval_size)
+
+        data = np.digitize(data_array, edges)
+
+        if custom_band_list:
+            raster.write(data, bands[i])
+        else:
+            raster.write(data, bands[i]+1)
+
+    return raster
+
+
+def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
+    raster: rasterio.io.DatasetReader,
+    interval_size: int,
+    bands: Optional[List[int]] = None
+) -> rasterio.io.DatasetReader:
+    """Classify raster with defined intervals.
+
+    If bands are not given, all bands are used for classification.
+
+    Args:
+        raster (rasterio.io.DatasetReader): Raster to be classified.
+        interval_size (int): The number of units in each interval.
+        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+
+    Returns:
+        rasterio.io.DatasetReader: Raster classified with defined intervals.
+    """
+    if bands is not None:
+        if not isinstance(bands, list):
+            raise InvalidParameterValueException
+        elif not all(isinstance(band, int) for band in bands):
+            raise InvalidParameterValueException
+        elif len(bands) > raster.count:
+            raise InvalidParameterValueException
+
+    src = _raster_with_defined_intervals(raster, interval_size, bands)
 
     return src
 
-def raster_with_equal_intervals(
+
+def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    path_to_file: str,
     number_of_intervals: int,
     bands: Optional[List[int]] = None
 ) -> rasterio.io.DatasetReader:
-   
+
+    custom_band_list = False if bands is None else True
     array_of_bands = []
-    min_and_max_values = []
     if bands is not None:
         for band in raster.read(bands):
             array_of_bands.append(band)
     else:
         array_of_bands = raster.read()
+        bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-    with rasterio.open(path_to_file, 'w', **raster.meta) as dst:
-        for i in range(len(bands)):
-            data_array = array_of_bands[i]
-            percentiles = np.linspace(0, 100, number_of_intervals)
-            intervals = np.percentile(data_array, percentiles)
-            data = np.digitize(data_array, intervals)
-            dst.write(data, bands[i])
+    for i in range(len(bands)):
+        data_array = array_of_bands[i]
+        percentiles = np.linspace(0, 100, number_of_intervals)
+        intervals = np.percentile(data_array, percentiles)
+        data = np.digitize(data_array, intervals)
+        if custom_band_list:
+            raster.write(data, bands[i])
+        else:
+            raster.write(data, bands[i]+1)
 
-        dst.close()
+    return raster
 
-    src = rasterio.open(path_to_file)
+
+def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
+    raster: rasterio.io.DatasetReader,
+    number_of_intervals: int,
+    bands: Optional[List[int]] = None
+) -> rasterio.io.DatasetReader:
+    """Classify raster with equal intervals.
+
+    If bands are not given, all bands are used for classification.
+
+    Args:
+        raster (rasterio.io.DatasetReader): Raster to be classified.
+        number_of_intervals (int): The number of intervals.
+        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+
+    Returns:
+        rasterio.io.DatasetReader: Raster classified with equal intervals.
+    """
+    if bands is not None:
+        if not isinstance(bands, list):
+            raise InvalidParameterValueException
+        elif not all(isinstance(band, int) for band in bands):
+            raise InvalidParameterValueException
+        elif len(bands) > raster.count:
+            raise InvalidParameterValueException
+
+    src = _raster_with_equal_intervals(raster, number_of_intervals, bands)
 
     return src
 
-def raster_with_quantiles(
+
+def _raster_with_quantiles(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    path_to_file: str,
     number_of_quantiles: int,
     bands: Optional[List[int]] = None
 ) -> rasterio.io.DatasetReader:
-   
+
+    custom_band_list = False if bands is None else True
     array_of_bands = []
     if bands is not None:
         for band in raster.read(bands):
             array_of_bands.append(band)
     else:
         array_of_bands = raster.read()
+        bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-    with rasterio.open(path_to_file, 'w', **raster.meta) as dst:
-        for i in range(len(bands)):
-            data_array = array_of_bands[i]
-            intervals = [np.percentile(data_array, i * 100 / number_of_quantiles) for i in range(number_of_quantiles)]
-            data = np.digitize(data_array, intervals)
+    for i in range(len(bands)):
+        data_array = array_of_bands[i]
+        intervals = [np.percentile(data_array, i * 100 / number_of_quantiles) for i in range(number_of_quantiles)]
+        data = np.digitize(data_array, intervals)
 
-            dst.write(data, bands[i])
-        dst.close()
+        if custom_band_list:
+            raster.write(data, bands[i])
+        else:
+            raster.write(data, bands[i]+1)
 
-    src = rasterio.open(path_to_file)
+    return raster
 
-    return src
 
-def raster_with_natural_breaks(
+def raster_with_quantiles(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    path_to_file: str,
-    number_of_breaks: int,
+    number_of_quantiles: int,
     bands: Optional[List[int]] = None
 ) -> rasterio.io.DatasetReader:
-   
-    array_of_bands = []
+    """Classify raster with quantiles.
+
+    If bands are not given, all bands are used for classification.
+
+    Args:
+        raster (rasterio.io.DatasetReader): Raster to be classified.
+        number_of_quantiles: (int): The number of quantiles.
+        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+
+    Returns:
+        rasterio.io.DatasetReader: Raster classified with quantiles.
+    """
     if bands is not None:
-        for band in raster.read(bands):
-            array_of_bands.append(band)
-    else:
-        array_of_bands = raster.read()
+        if not isinstance(bands, list):
+            raise InvalidParameterValueException
+        elif not all(isinstance(band, int) for band in bands):
+            raise InvalidParameterValueException
+        elif len(bands) > raster.count:
+            raise InvalidParameterValueException
 
-    with rasterio.open(path_to_file, 'w', **raster.meta) as dst:
-        for i in range(len(bands)):
-            data_array = array_of_bands[i]
-            breaks = mc.JenksCaspall(data_array, number_of_breaks)
-            data = np.digitize(data_array, np.sort(breaks.bins))
-
-            dst.write(data, bands[i])
-        dst.close()
-
-    src = rasterio.open(path_to_file)
+    src = _raster_with_quantiles(raster, number_of_quantiles, bands)
 
     return src
 
-def raster_with_geometrical_intervals(
+
+def _raster_with_natural_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    path_to_file: str,
     number_of_classes: int,
     bands: Optional[List[int]] = None
 ) -> rasterio.io.DatasetReader:
-   
+
+    custom_band_list = False if bands is None else True
     array_of_bands = []
     if bands is not None:
         for band in raster.read(bands):
             array_of_bands.append(band)
     else:
         array_of_bands = raster.read()
+        bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-    with rasterio.open(path_to_file, 'w', **raster.meta) as dst:
-        for i in range(len(bands)):
-            data_array = mc.load_example() #array_of_bands[i]
-            max_value = max(data_array) #raster.statistics(i+1).max
+    for i in range(len(bands)):
+        data_array = array_of_bands[i]
+        breaks = mc.JenksCaspall(data_array, number_of_classes)
+        data = np.digitize(data_array, np.sort(breaks.bins))
 
-            min_value = min(data_array)#raster.statistics(i+1).min
+        if custom_band_list:
+            raster.write(data, bands[i])
+        else:
+            raster.write(data, bands[i]+1)
 
-            x = (max_value/np.int(min_value))**(1/number_of_classes+1)
+    return raster
 
-            intervals = [min_value * x**i for i in range(1, number_of_classes+1)]
 
-            intervals = np.array(intervals, dtype=np.float32)
+def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
+    raster: rasterio.io.DatasetReader,
+    number_of_classes: int,
+    bands: Optional[List[int]] = None
+) -> rasterio.io.DatasetReader:
+    """Classify raster with natural breaks (Jenks Caspall).
 
-            data = np.digitize(data_array, np.sort(intervals))
-    
-            dst.write(data, bands[i])
-        dst.close()
+    If bands are not given, all bands are used for classification.
 
-    src = rasterio.open(path_to_file)
+    Args:
+        raster (rasterio.io.DatasetReader): Raster to be classified.
+        number_of_classes (int),: The number of classes.
+        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+
+    Returns:
+        rasterio.io.DatasetReader: Raster classified with natural breaks (Jenks Caspall).
+    """
+    if bands is not None:
+        if not isinstance(bands, list):
+            raise InvalidParameterValueException
+        elif not all(isinstance(band, int) for band in bands):
+            raise InvalidParameterValueException
+        elif len(bands) > raster.count:
+            raise InvalidParameterValueException
+
+    src = _raster_with_quantiles(raster, number_of_classes, bands)
 
     return src
 
-def raster_with_standard_deviation(
+
+def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    path_to_file: str,
+    number_of_classes: int,
+    bands: Optional[List[int]] = None
+) -> rasterio.io.DatasetReader:
+
+    custom_band_list = False if bands is None else True
+    array_of_bands = []
+    if bands is not None:
+        for band in raster.read(bands):
+            array_of_bands.append(band)
+    else:
+        array_of_bands = raster.read()
+        bands = np.arange(0, len(array_of_bands), 1).tolist()
+
+    for i in range(len(bands)):
+        # read one of the bands
+        data_array = array_of_bands[i]
+
+        max_value = raster.statistics(i+1).max
+
+        min_value = raster.statistics(i+1).min
+        # get X according to https://www.mdpi.com/2673-4931/10/1/1/htm (Formula 2)
+        x = (max_value/min_value)**(1/number_of_classes)
+        # calculate intervals according to https://www.mdpi.com/2673-4931/10/1/1/htm (Formula 1)
+        intervals = [min_value * x**j for j in range(1, number_of_classes)]
+
+        # transform intervals that have become complex numbers to float
+        intervals = [float(interval.real + interval.imag) for interval in intervals]
+
+        # Classify the raster values into the intervals
+        data = np.digitize(data_array, np.sort(intervals))
+
+        # Write the data to the correct band
+        if custom_band_list:
+            raster.write(data, bands[i])
+        else:
+            raster.write(data, bands[i]+1)
+
+    return raster
+
+
+def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
+    raster: rasterio.io.DatasetReader,
+    number_of_classes: int,
+    bands: Optional[List[int]] = None
+) -> rasterio.io.DatasetReader:
+    """Classify raster with geometrical intervals (Francisci D., 2021).
+
+    If bands are not given, all bands are used for classification.
+    This algorithm is based on Francisci (2021) found here: https://doi.org/10.3390/environsciproc2021010001.
+
+    Args:
+        raster (rasterio.io.DatasetReader): Raster to be classified.
+        number_of_classes (int),: The number of classes.
+        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+
+    Returns:
+        rasterio.io.DatasetReader: Raster classified with geometrical intervals (Francisci D., 2021).
+    """
+    if bands is not None:
+        if not isinstance(bands, list):
+            raise InvalidParameterValueException
+        elif not all(isinstance(band, int) for band in bands):
+            raise InvalidParameterValueException
+        elif len(bands) > raster.count:
+            raise InvalidParameterValueException
+
+    src = _raster_with_geometrical_intervals(raster, number_of_classes, bands)
+
+    return src
+
+
+def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
+    raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
     bands: Optional[List[int]] = None
 ) -> rasterio.io.DatasetReader:
-   
+
+    custom_band_list = False if bands is None else True
     array_of_bands = []
     if bands is not None:
         for band in raster.read(bands):
             array_of_bands.append(band)
     else:
         array_of_bands = raster.read()
+        bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-    with rasterio.open(path_to_file, 'w', **raster.meta) as dst:
-        for i in range(len(bands)):
+    for i in range(len(bands)):
 
-            data_array = array_of_bands[i]
-            mean = raster.statistics(i+1).mean
- 
-            stddev = raster.statistics(i+1).std
+        data_array = array_of_bands[i]
+        stddev = raster.statistics(i+1).std
+        mean = raster.statistics(i+1).mean
+        interval_size = 2 * stddev / number_of_intervals
 
-            interval_size = stddev / number_of_intervals
-            #intervals = []
-            print(interval_size)
-            print("raster.statistics(i+1).min", raster.statistics(i+1).min)
-            intervals = [raster.statistics(i+1).min]
-            for j in range(1, number_of_intervals+1):
-                intervals.append(intervals[-1] + interval_size)
+        classified = np.empty_like(data_array)
 
-            print(intervals)
-            print("raster.statistics(i+1).max", raster.statistics(i+1).max)
-            # Apply the mask to the data
-            #masked_data = np.ma.masked_array(data_array, intervals)
-            data = np.digitize(data_array, np.sort(intervals))
+        for j in range(data_array.shape[0]):
+            for k in range(data_array.shape[1]):
+                value = data_array[j, k]
+                if value < mean - stddev:
+                    classified[j, k] = -number_of_intervals
+                elif value > mean + stddev:
+                    classified[j, k] = number_of_intervals
+                else:
+                    interval = int((value - mean + stddev) / interval_size)
+                    classified[j, k] = interval - number_of_intervals // 2
 
-            dst.write(data, bands[i])
-        dst.close()
+        if custom_band_list:
+            raster.write(classified, bands[i])
+        else:
+            raster.write(classified, bands[i]+1)
 
-    src = rasterio.open(path_to_file)
+    return raster
+
+
+def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
+    raster: rasterio.io.DatasetReader,
+    number_of_intervals: int,
+    bands: Optional[List[int]] = None
+) -> rasterio.io.DatasetReader:
+    """Classify raster with standard deviation.
+
+    If bands are not given, all bands are used for classification.
+
+    Args:
+        raster (rasterio.io.DatasetReader): Raster to be classified.
+        number_of_intervals (int): The number of intervals.
+        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+
+    Returns:
+        rasterio.io.DatasetReader: Raster classified with standard deviation.
+    """
+    if bands is not None:
+        if not isinstance(bands, list):
+            raise InvalidParameterValueException
+        elif not all(isinstance(band, int) for band in bands):
+            raise InvalidParameterValueException
+        elif len(bands) > raster.count:
+            raise InvalidParameterValueException
+
+    src = _raster_with_standard_deviation(raster, number_of_intervals, bands)
 
     return src
-
-def testi():
-    # Get the number of intervals from the user
-    num_intervals = int(input("Enter the number of intervals: "))
-
-    # Set the NumPy array
-    data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-
-    # Calculate the standard deviation of the data
-    std = np.std(data)
-
-    # Calculate the interval size by dividing the standard deviation by the number of intervals
-    interval_size = std / num_intervals
-    print(interval_size)
-    # Create the intervals by iterating over the data and adding the interval size to the previous value
-    intervals = [data[0]]
-    for i in range(1, len(data)):
-        intervals.append(intervals[-1] + interval_size)
-
-    # Classify the data using the intervals
-    classified_data = np.zeros(data.shape)
-    for i, val in enumerate(data):
-        for j, interval in enumerate(intervals):
-            if val >= interval:
-                classified_data[i] = j
-
-    print(classified_data)
