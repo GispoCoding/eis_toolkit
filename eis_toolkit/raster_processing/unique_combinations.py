@@ -4,7 +4,7 @@ import itertools
 import numpy as np
 import rasterio
 
-#from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException
 
 def _unique_combinations(rasters: List[rasterio.io.DatasetReader], path_to_output_file) -> rasterio.io.DatasetReader:
     
@@ -39,10 +39,10 @@ def unique_combinations(rasters: List[rasterio.io.DatasetReader], path_to_output
     column_length = len(arrays[0][0][0])
 
     if not all(len(array[0]) == row_length for array in arrays):
-        raise ValueError('not all rasters have same length!')
+        raise InvalidParameterValueException
 
     if not all(len(array[0][0]) == column_length for array in arrays):
-        raise ValueError('not all rasters have same length!')
+        raise InvalidParameterValueException
 
     output_raster = _unique_combinations(rasters, path_to_output_file)
     return output_raster
