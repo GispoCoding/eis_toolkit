@@ -10,7 +10,7 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 
 parent_dir = Path(__file__).parent
 singleband_raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
-shapefile_path = parent_dir.joinpath("data/remote/extract_raster_values/extract_raster_values_point.shp")
+shapefile_path = parent_dir.joinpath("data/remote/extract_raster_values/extract_raster_values_points.shp")
 
 def test_extract_values_from_raster_returns_pandas_dataframe():
     '''Test extract raster values returns pandas DataFrame'''
