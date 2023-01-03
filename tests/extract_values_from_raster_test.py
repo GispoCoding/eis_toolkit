@@ -2,6 +2,7 @@ from pathlib import Path
 
 import geopandas as gpd
 import pandas as pd
+from pandas.testing import assert_series_equal
 import pytest
 import rasterio
 
@@ -11,6 +12,20 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 parent_dir = Path(__file__).parent
 singleband_raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
 shapefile_path = parent_dir.joinpath("data/remote/extract_raster_values/extract_raster_values_points.shp")
+
+def test_extract_values_from_raster_returns_correct_output():
+    '''Test extract raster values returns correct output'''
+    expected_output = pd.Series([5.683, 5.040, 2.958, 8.799, 5.234], name='small_raster')
+
+    single_band_raster = rasterio.open(singleband_raster_path)
+    shapefile = gpd.read_file(shapefile_path)
+
+    raster_list = [single_band_raster]
+
+    data_frame = extract_values_from_raster(raster_list = raster_list, shapefile = shapefile)
+    data_frame_column = data_frame['small_raster'].squeeze()
+
+    assert_series_equal(data_frame_column, expected_output)
 
 def test_extract_values_from_raster_returns_pandas_dataframe():
     '''Test extract raster values returns pandas DataFrame'''
