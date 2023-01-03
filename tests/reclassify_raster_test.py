@@ -36,12 +36,12 @@ def test_raster_with_defined_intervals():
 
 def raster_with_equal_intervals():
     """Test raster with equal intervals by comparing the output of the function to the original data."""
-    intervals = 75
+    number_of_intervals = 100
 
     raster = rasterio.open(raster_path, 'r+')
     band_1 = raster.read(1)
 
-    output = raster_with_manual_breaks(raster, intervals, band_numbers)
+    output = raster_with_equal_intervals(raster, number_of_intervals, band_numbers)
 
     assert not np.array_equal(output.read(1), band_1)
 
