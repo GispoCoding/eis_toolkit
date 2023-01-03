@@ -42,7 +42,8 @@ def _extract_values_from_raster(  # type: ignore[no-any-unimported]
                     band_column_name = os.path.splitext(raster.name)[0].rsplit('/', 1)[-1]
             data_frame[band_column_name] = [array[band_number] for array in raster_values]
 
-        data_frame[band_column_name] = data_frame[band_column_name].replace(-999999.0, np.NaN)
+        replaceable_values = {-999.999: np.NaN, -999999.0: np.NaN}
+        data_frame = data_frame.replace({band_column_name: replaceable_values})
 
     return data_frame
 
