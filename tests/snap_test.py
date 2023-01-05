@@ -7,10 +7,8 @@ from eis_toolkit.raster_processing.resampling import resample
 from eis_toolkit.raster_processing.reprojecting import reproject_raster
 from eis_toolkit.raster_processing.snapping import snap_with_raster
 from eis_toolkit.exceptions import (
-    InvalidPixelSizeException,
     NonMatchingCrsException,
     NonSquarePixelSizeException,
-    CoordinatesOutOfBoundsException,
 )
 
 parent_dir = Path(__file__).parent
@@ -93,6 +91,25 @@ def test_snap_case5_to_right_top_multiband():
     assert np.array_equal(out_image[:, :-1, 1:], raster.read())
 
 
+def test_snap_case6_small_snap_raster_pixel_size():
+    """Test snap functionality case 6. Snap raster has smaller pixel size than to-be-snapped raster. Should snap towards left bottom."""
+    # Resample snap raster to smaller pixel size than raster and write to local
+    snap_raster = rasterio.open(snap_raster_path)
+    out_image, out_meta = resample(snap_raster, 3)
+    with rasterio.open(small_snap_raster_path, "w", **out_meta) as dest:
+        dest.write(out_image)
+
+    raster = rasterio.open(case1_raster_path)
+    snap_raster = rasterio.open(small_snap_raster_path)
+    out_image, out_meta = snap_with_raster(raster, snap_raster)
+    
+    assert out_meta['height'] == raster.height + 1
+    assert out_meta['width'] == raster.width + 1
+    assert round(out_meta['transform'].c - raster.meta['transform'].c, 4) == -0.1667
+    assert round(out_meta['transform'].f - raster.meta['transform'].f, 4) == 1.8333
+    assert np.array_equal(out_image[:, 1:, :-1], raster.read())
+
+
 def test_snap_different_crs():
     """Test that a crs mismatch raises the correct exception."""
     with pytest.raises(NonMatchingCrsException):
@@ -107,23 +124,9 @@ def test_snap_different_crs():
         _, _ = snap_with_raster(raster, snap_raster)
 
 
-def test_snap_small_snap_pixel_size():
-    """Test that too small snap raster pixel size raises the correct exception."""
-    with pytest.raises(InvalidPixelSizeException):
-        # Resample snap raster to smaller pixel size than raster and write to local
+def test_snap_nonsquare_pixel():
+    """Test that nonsquare pixel raises the correct exception."""
+    with pytest.raises(NonSquarePixelSizeException):
+        raster = rasterio.open(nonsquare_raster_path)
         snap_raster = rasterio.open(snap_raster_path)
-        out_image, out_meta = resample(snap_raster, 3)
-        with rasterio.open(small_snap_raster_path, "w", **out_meta) as dest:
-            dest.write(out_image)
-    
-        raster = rasterio.open(case1_raster_path)
-        snap_raster = rasterio.open(small_snap_raster_path)
         _, _ = snap_with_raster(raster, snap_raster)
-
-
-# def test_snap_nonsquare_pixel():
-#     """Test that nonsquare pixel raises the correct exception."""
-#     with pytest.raises(NonSquarePixelSizeException):
-#         raster = rasterio.open(nonsquare_raster_path)
-#         snap_raster = rasterio.open(snap_raster_path)
-#         _, _ = snap_with_raster(raster, snap_raster)
