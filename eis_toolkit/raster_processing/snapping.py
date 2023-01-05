@@ -5,11 +5,7 @@ import numpy as np
 import rasterio
 
 from eis_toolkit.checks.crs import check_matching_crs
-from eis_toolkit.exceptions import (
-    InvalidPixelSizeException,
-    NonMatchingCrsException,
-    NonSquarePixelSizeException,
-)
+from eis_toolkit.exceptions import NonMatchingCrsException, NonSquarePixelSizeException
 
 
 # The core snapping functionality. Used internally by snap.
