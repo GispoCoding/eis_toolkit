@@ -30,7 +30,6 @@ keras = "^2.9.0"
 tensorflow = "^2.9.1"
 mkdocs-material = "^8.4.0"
 mapclassify = "^2.4.3"
-jenkspy = "^0.3.2"
 
 [tool.poetry.dev-dependencies]
 jupyterlab = "^3.4.5"

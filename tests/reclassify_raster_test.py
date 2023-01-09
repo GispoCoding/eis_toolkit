@@ -17,7 +17,7 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 parent_dir = Path(__file__).parent
 
 source = "data/remote/small_raster.tif"
-target = "data/remote/small_raster_copy.tif"
+target = "data/remote/small_raster - Copy.tif"
 shutil.copy(parent_dir.joinpath(source), parent_dir.joinpath(target))
 raster_path = parent_dir.joinpath(target)
 
