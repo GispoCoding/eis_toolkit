@@ -3,6 +3,8 @@ from pathlib import Path
 import pytest
 import rasterio
 
+from rasterio.enums import Resampling
+
 from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.raster_processing.unifying import unify_rasters
 
@@ -15,7 +17,7 @@ raster_to_unify = rasterio.open(raster_to_unify_path)
 
 def test_unify_rasters_case1():
     """Tests extract_window function in Case1."""
-    out_rasters = unify_rasters(base_raster, [raster_to_unify])
+    out_rasters = unify_rasters(base_raster, [raster_to_unify], Resampling.nearest)
     out_image, out_meta = out_rasters[0]
 
     # a = pixel size in x direction

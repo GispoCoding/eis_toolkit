@@ -36,24 +36,23 @@ def _unify_rasters(  # type: ignore[no-any-unimported]
 
         # Save to memory, then resample
         upscale_factor_x = base_raster.transform.a / out_meta["transform"].a 
-        # upscale_factor_y = base_raster.transform.e / out_meta.transform.e
-        # TODO: modify resample function to accept x and y scale factors differently
+        upscale_factor_y = base_raster.transform.e / out_meta["transform"].e
         if upscale_factor_x != 1:
             with MemoryFile() as memfile:
-                with memfile.open('w', driver='GTiff', **out_meta) as dataset:
+                with memfile.open(**out_meta) as dataset:
                     dataset.write(out_image)
                 with memfile.open() as reprojected_raster:
                     out_image, out_meta = resampling.resample(
-                        reprojected_raster, upscale_factor_x, resampling_method
+                        reprojected_raster, upscale_factor_x, upscale_factor_y, resampling_method
                     )
 
         # Save to memory, then snap
         with MemoryFile() as memfile:
-            with memfile.open('w', driver='GTiff', **out_meta) as dataset:
+            with memfile.open(**out_meta) as dataset:
                 dataset.write(out_image)
             with memfile.open() as resampled_raster:
                 out_image, out_meta = snapping.snap_with_raster(
-                    resampled_raster, base_raster
+                    resampled_raster, base_raster, resampled_raster.count
                 )
 
         out_rasters.append((out_image, out_meta))

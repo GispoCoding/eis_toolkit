@@ -17,7 +17,7 @@ def test_resample():
     """Test that resample function works as intended."""
     with rasterio.open(raster_path) as raster:
         upscale_factor = 2
-        _, resampled_meta = resample(raster, upscale_factor, Resampling.bilinear)
+        _, resampled_meta = resample(raster, upscale_factor, resampling_method = Resampling.bilinear)
 
         assert resampled_meta['crs'] == raster.meta['crs']
         assert np.array_equal(raster.width * upscale_factor, resampled_meta['width'])
