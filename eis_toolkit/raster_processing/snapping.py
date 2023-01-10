@@ -5,17 +5,12 @@ import numpy as np
 import rasterio
 
 from eis_toolkit.checks.crs import check_matching_crs
-from eis_toolkit.exceptions import (
-    CoordinatesOutOfBoundsException,
-    InvalidPixelSizeException,
-    NonMatchingCrsException,
-    NonSquarePixelSizeException,
-)
+from eis_toolkit.exceptions import NonMatchingCrsException, NonSquarePixelSizeException
 
 
 # The core snapping functionality. Used internally by snap.
 def _snap(  # type: ignore[no-any-unimported]
-    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader, bands: int = 1
+    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
 ) -> Tuple[np.ndarray, dict]:
     raster_bounds = raster.bounds
     snap_bounds = snap_raster.bounds
@@ -23,7 +18,8 @@ def _snap(  # type: ignore[no-any-unimported]
     snap_pixel_size = snap_raster.transform.a
 
     cells_added = ceil(snap_pixel_size / raster_pixel_size)
-    out_image = np.full((bands, raster.height + cells_added, raster.width + cells_added), raster.nodata)
+
+    out_image = np.full((raster.count, raster.height + cells_added, raster.width + cells_added), raster.nodata)
     out_meta = raster.meta.copy()
 
     # Coordinates for the snap raster boundaries
@@ -45,13 +41,13 @@ def _snap(  # type: ignore[no-any-unimported]
 
     # Find the closest corner of the snapped grid for shifting/slotting the original raster
     if x_distance < raster_pixel_size / 2 and y_distance < raster_pixel_size / 2:
-        out_image[:, y0:y1, x0:x1] = raster.read(bands)  # Snap values towards left-bottom
+        out_image[:, y0:y1, x0:x1] = raster.read()  # Snap values towards left-bottom
     elif x_distance < raster_pixel_size / 2 and y_distance > raster_pixel_size / 2:
-        out_image[:, y0 - 1 : y1 - 1, x0:x1] = raster.read(bands)  # Snap values towards left-top # noqa: E203
+        out_image[:, y0 - 1 : y1 - 1, x0:x1] = raster.read()  # Snap values towards left-top # noqa: E203
     elif x_distance > raster_pixel_size / 2 and y_distance > raster_pixel_size / 2:
-        out_image[:, y0 - 1 : y1 - 1, x0 + 1 : x1 + 1] = raster.read(bands)  # Snap values toward right-top # noqa: E203
+        out_image[:, y0 - 1 : y1 - 1, x0 + 1 : x1 + 1] = raster.read()  # Snap values toward right-top # noqa: E203
     else:
-        out_image[:, y0:y1, x0 + 1 : x1 + 1] = raster.read(bands)  # Snap values towards right-bottom # noqa: E203
+        out_image[:, y0:y1, x0 + 1 : x1 + 1] = raster.read()  # Snap values towards right-bottom # noqa: E203
 
     out_transform = rasterio.Affine(
         raster.transform.a,
@@ -66,16 +62,17 @@ def _snap(  # type: ignore[no-any-unimported]
 
 
 def snap_with_raster(  # type: ignore[no-any-unimported]
-    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader, bands: int = 1
+    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
 ) -> Tuple[np.ndarray, dict]:
     """Snaps/aligns raster to given snap raster.
 
-    Raster is snapped from its left-bottom corner to nearest snap raster corner in left-bottom direction.
+    Raster is snapped from its left-bottom corner to nearest snap raster grid corner in left-bottom direction.
+    Both raster and snap raster need to have square-shaped pixels.
+    If rasters are aligned, simply returns input raster data and metadata.
 
     Args:
         raster (rasterio.io.DatasetReader): The raster to be clipped.
         snap_raster (rasterio.io.DatasetReader): The snap raster i.e. reference grid raster.
-        bands (int): Number of bands in raster. Defaults to 1.
 
     Returns:
         out_image (np.ndarray): The snapped raster data.
@@ -83,27 +80,13 @@ def snap_with_raster(  # type: ignore[no-any-unimported]
 
     Raises:
         NonMatchingCrsException: Raster and and snap raster are not in the same crs.
-        CoordinatesOutOfBoundsException: Left-bottom corner of raster is outside of snap raster.
         NonSquarePixelSizeException: Raster or snap raster has nonsquare pixels.
-        InvalidPixelSizeException: Snap raster has smaller pixel size than raster.
     """
-
-    # Rules and assumptions:
-    # 1. The bottom-left corner of raster to be snapped must fall within the snap raster
-    # 2. Snap raster must have cell size => raster cell size
-    # 3. Cells are square-shaped
-    # 4. If raster and snap raster are already aligned, don't do anything
 
     if not check_matching_crs(
         objects=[raster, snap_raster],
     ):
         raise NonMatchingCrsException
-
-    if (
-        not snap_raster.bounds.bottom <= raster.bounds.bottom <= snap_raster.bounds.top
-        or not snap_raster.bounds.left <= raster.bounds.left <= snap_raster.bounds.right
-    ):
-        raise CoordinatesOutOfBoundsException
 
     # Account for small rounding errors if raster has been resampled
     if (
@@ -112,11 +95,9 @@ def snap_with_raster(  # type: ignore[no-any-unimported]
     ):
         raise NonSquarePixelSizeException
 
-    if snap_raster.transform.a < raster.transform.a:
-        raise InvalidPixelSizeException
-
     if snap_raster.bounds.bottom == raster.bounds.bottom and snap_raster.bounds.left == raster.bounds.left:
-        out_image, out_meta = raster.read(bands), raster.meta
+        out_image, out_meta = raster.read(), raster.meta
         return out_image, out_meta
 
-    return _snap(raster, snap_raster, bands)
+    out_image, out_meta = _snap(raster, snap_raster)
+    return out_image, out_meta
