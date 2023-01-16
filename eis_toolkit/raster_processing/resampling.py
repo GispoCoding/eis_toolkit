@@ -17,7 +17,7 @@ def _resample(  # type: ignore[no-any-unimported]
         upscale_factor_y = upscale_factor
 
     out_image = raster.read(
-        out_shape=(raster.count, int(raster.height * upscale_factor_y), int(raster.width * upscale_factor)),
+        out_shape=(raster.count, round(raster.height * upscale_factor), round(raster.width * upscale_factor_y)),
         resampling=resampling_method,
     )
 
