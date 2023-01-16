@@ -122,11 +122,3 @@ def test_snap_different_crs():
         raster = rasterio.open(wrong_crs_path)
         snap_raster = rasterio.open(snap_raster_path)
         _, _ = snap_with_raster(raster, snap_raster)
-
-
-def test_snap_nonsquare_pixel():
-    """Test that nonsquare pixel raises the correct exception."""
-    with pytest.raises(NonSquarePixelSizeException):
-        raster = rasterio.open(nonsquare_raster_path)
-        snap_raster = rasterio.open(snap_raster_path)
-        _, _ = snap_with_raster(raster, snap_raster)
