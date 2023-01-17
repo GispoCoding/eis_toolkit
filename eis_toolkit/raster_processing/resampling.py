@@ -31,7 +31,6 @@ def _resample(  # type: ignore[no-any-unimported]
             "transform": out_transform,
             "width": out_image.shape[-1],
             "height": out_image.shape[-2],
-            "nodata": 0,
         }
     )
 
