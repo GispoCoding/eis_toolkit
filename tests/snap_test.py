@@ -6,10 +6,7 @@ from pathlib import Path
 from eis_toolkit.raster_processing.resampling import resample
 from eis_toolkit.raster_processing.reprojecting import reproject_raster
 from eis_toolkit.raster_processing.snapping import snap_with_raster
-from eis_toolkit.exceptions import (
-    NonMatchingCrsException,
-    NonSquarePixelSizeException,
-)
+from eis_toolkit.exceptions import NonMatchingCrsException
 
 parent_dir = Path(__file__).parent
 
