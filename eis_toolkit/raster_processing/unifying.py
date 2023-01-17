@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import List, Tuple
 
 import numpy as np
 import rasterio
@@ -11,18 +11,11 @@ from eis_toolkit.raster_processing import reprojecting, resampling, snapping
 
 # The core unifying functionality. Used internally by unify_rasters.
 def _unify_rasters(  # type: ignore[no-any-unimported]
-    base_raster: rasterio.io.DatasetReader,
-    raster_list: List[rasterio.io.DatasetReader],
-    resampling_method: Resampling
+    base_raster: rasterio.io.DatasetReader, raster_list: List[rasterio.io.DatasetReader], resampling_method: Resampling
 ) -> List[Tuple[np.ndarray, dict]]:
 
     target_epsg = int(base_raster.crs.to_string()[5:])
-    # bbox = base_raster.bounds
-    # target_center_coords = ((bbox.left + bbox.right) / 2, (bbox.top + bbox.bottom) / 2)
-    # target_width = base_raster.width
-    # target_height = base_raster.height
 
-    # TODO: now it is expected all subfunctions go through without problems
     base_image = base_raster.read()
     base_meta = base_raster.meta.copy()
     out_rasters = [(base_image, base_meta)]
@@ -35,8 +28,9 @@ def _unify_rasters(  # type: ignore[no-any-unimported]
             out_image, out_meta = raster.read(), raster.meta.copy()
 
         # Save to memory, then resample
-        upscale_factor_x = base_raster.transform.a / out_meta["transform"].a 
-        upscale_factor_y = base_raster.transform.e / out_meta["transform"].e
+        upscale_factor_x = out_meta["transform"].a / base_raster.transform.a
+        upscale_factor_y = out_meta["transform"].e / base_raster.transform.e
+
         if upscale_factor_x != 1:
             with MemoryFile() as memfile:
                 with memfile.open(**out_meta) as dataset:
@@ -51,9 +45,7 @@ def _unify_rasters(  # type: ignore[no-any-unimported]
             with memfile.open(**out_meta) as dataset:
                 dataset.write(out_image)
             with memfile.open() as resampled_raster:
-                out_image, out_meta = snapping.snap_with_raster(
-                    resampled_raster, base_raster, resampled_raster.count
-                )
+                out_image, out_meta = snapping.snap_with_raster(resampled_raster, base_raster)
 
         out_rasters.append((out_image, out_meta))
 
@@ -63,7 +55,7 @@ def _unify_rasters(  # type: ignore[no-any-unimported]
 def unify_rasters(  # type: ignore[no-any-unimported]
     base_raster: rasterio.io.DatasetReader,
     raster_list: List[rasterio.io.DatasetReader],
-    resampling_method: Resampling = Resampling.bilinear
+    resampling_method: Resampling = Resampling.bilinear,
 ) -> List[Tuple[np.ndarray, dict]]:
     """Unifies (reprojects, resamples and aligns) given rasters relative to a base raster.
 
@@ -86,6 +78,8 @@ def unify_rasters(  # type: ignore[no-any-unimported]
     if not isinstance(raster_list, list):
         raise InvalidParameterValueException
     if not all(isinstance(raster, rasterio.io.DatasetReader) for raster in raster_list):
+        raise InvalidParameterValueException
+    if len(raster_list) == 0:
         raise InvalidParameterValueException
 
     out_rasters = _unify_rasters(base_raster, raster_list, resampling_method)
