@@ -1,22 +1,23 @@
 
-from typing import Optional
+from typing import Tuple, Optional
+
 import numpy as np
 import pandas as pd
-# from sklearn.preprocessing import OneHotEncoder
-# from eis_toolkit.exceptions import InvalidParameterValueException
+#import rasterio
+from sklearn.preprocessing import OneHotEncoder
+from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
 def _export_grid(
     metadata: dict,
     df: pd.DataFrame,
     nanmask: Optional[pd.DataFrame] = None
-    # wenn gtiff raus, dann wird noch ein Name gebraucht und eine Funktion pandas_to_raster
+    
 ) -> np.ndarray:
 
     if nanmask is None:   # reshape with metadata width and hiegt (nonaodata-samples ar removed)
         # width = metadata.width
         # height = metadata.height
-        ####??? noch prüfen, ob shape(df) = width * height ist
         out = df.to_numpy().reshape(metadata['height'],metadata['width'])
     else:
         # assemple a list out of the input dataframe ydf (one column) and the nodatamask-True-values: NaN
@@ -52,7 +53,7 @@ def export_grid(
         nanmask )pandas DataFrame): in case nodata-samples are removed during "nodata-replacement"
 
     Returns:
-        pd.DataFrame: Raster converted to new columns of pandas dataframe
+        np.array: 2-d-array (numpy) reddy to outpu as a tiff, grid,... 
     """
 
     out = _export_grid(
