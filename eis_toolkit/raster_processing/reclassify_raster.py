@@ -325,6 +325,7 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
 
     return src
 
+import numpy.ma as ma
 
 def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
@@ -343,19 +344,23 @@ def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
         for i in range(len(bands)):
             # read one of the bands
             data_array = array_of_bands[i]
-            max_value = raster.statistics(i+1).max
-            min_value = raster.statistics(i+1).min
-            median_value = np.nanmedian(data_array)
+            #missing = -1.e+32
+            data_array[data_array == -1.e+32] = np.nan
 
-            # In the following, assumed that data_array is a numpy array that contains the raster values
-            values_out = np.empty_like(data_array) # This should be the same shape as the original raster value array, so simply copy
+            median_value = np.nanmedian(data_array)
+            max_value = np.nanmax(data_array)
+            min_value = np.nanmin(data_array)
+            
+            data_array = np.ma.masked_where(np.isnan(data_array), data_array)
+            #ma.set_fill_value(data_array, -999999)
+            values_out = np.zeros_like(data_array) # This should be the same shape as the original raster value array, so simply copy
             if (median_value - min_value) < (max_value - median_value): # Large end tail longer
-                raster_half = data_array[np.where(data_array > median_value)]
+                raster_half = data_array[np.where((data_array > median_value) & (data_array != np.nan))]
                 range_half = max_value-median_value
                 raster_half = raster_half - median_value + (range_half)/1000.0
                 #raster_half = [value-median_value+(range_half)/1000.0 for value in raster_half] # raster_half-median_value+(range_half)/1000.0
             else:  # Small end tail longer
-                raster_half = data_array[np.where(data_array < median_value)]
+                raster_half = data_array[np.where(data_array < median_value) & (data_array != np.nan)]
                 range_half = median_value-min_value
                 raster_half = raster_half - min_value + (range_half)/1000.0
                 #raster_half = [value-min_value+(range_half)/1000.0 for value in raster_half] # raster_half-min_value+(range_half)/1000.0
@@ -379,57 +384,22 @@ def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
             k = 0
 
             for j in range(1, len(width)-2):
-                values_out[np.where(((median_value+width[j])<data_array) & (data_array<=(median_value+width[j+1])))] = j+1
-                values_out[np.where(((median_value-width[j])>data_array) & (data_array>=(median_value-width[j+1])))] = -j-1
+                values_out[np.where(((median_value+width[j])<data_array) & (data_array<=(median_value+width[j+1])) & (data_array != np.nan))] = j+1
+                values_out[np.where(((median_value-width[j])>data_array) & (data_array>=(median_value-width[j+1])) & (data_array != np.nan) )] = -j-1
                 k = j
 
-            values_out[np.where((median_value+width[k+1])<data_array)] = k+1
-            values_out[np.where((median_value-width[k+1])>data_array)] = -k-1
-            values_out[np.where(median_value==data_array)] = 0
+            values_out[np.where(((median_value+width[k+1])<data_array) & (data_array != np.nan))] = k+1
+            values_out[np.where(((median_value-width[k+1])>data_array) & (data_array != np.nan))] = -k-1
+            values_out[np.where(median_value = data_array)] = 0
             # Write data to the correct band
             if custom_band_list:
-                dst.write(data, bands[i])
+                dst.write(values_out, bands[i])
             else:
-                dst.write(data, bands[i]+1)
+                dst.write(values_out, bands[i]+1)
 
     src = rasterio.open(path_to_file)
     return src
-'''
-    custom_band_list = False if bands is None else True
-    array_of_bands = []
-    if bands is not None:
-        for band in raster.read(bands):
-            array_of_bands.append(band)
-    else:
-        array_of_bands = raster.read()
-        bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-    for i in range(len(bands)):
-        # read one of the bands
-        data_array = array_of_bands[i]
-
-        max_value = raster.statistics(i+1).max
-
-        min_value = raster.statistics(i+1).min
-        # get X according to https://www.mdpi.com/2673-4931/10/1/1/htm (Formula 2)
-        x = (max_value/min_value)**(1/number_of_classes)
-        # calculate intervals according to https://www.mdpi.com/2673-4931/10/1/1/htm (Formula 1)
-        intervals = [min_value * x**j for j in range(1, number_of_classes)]
-
-        # transform intervals that have become complex numbers to float
-        intervals = [float(interval.real + interval.imag) for interval in intervals]
-
-        # Classify the raster values into the intervals
-        data = np.digitize(data_array, np.sort(intervals))
-
-        # Write the data to the correct band
-        if custom_band_list:
-            raster.write(data, bands[i])
-        else:
-            raster.write(data, bands[i]+1)
-
-    return raster
-'''
 
 def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
@@ -487,7 +457,7 @@ def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
             interval_size = 2 * stddev / number_of_intervals
 
             classified = np.empty_like(data_array)
-    with rasterio.open(path_to_file, "w", **raster.meta) as dst:
+        with rasterio.open(path_to_file, "w", **raster.meta) as dst:
             for j in range(data_array.shape[0]):
                 for k in range(data_array.shape[1]):
                     value = data_array[j, k]
