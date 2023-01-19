@@ -23,15 +23,16 @@ def test_unique_combinations():
     raster_1 = rasterio.open(raster_path)
     raster_2 = rasterio.open(raster_path)
 
-    unique_combinations_raster = unique_combinations([raster_1, raster_2], output_raster_path)
-    
-    assert unique_combinations_raster.meta == raster_1.meta
-    assert unique_combinations_raster.read(1)[0].tolist() == expected_1st_row
-    assert unique_combinations_raster.read(1)[1].tolist() == expected_2nd_row
+    #unique_combinations_raster = unique_combinations([raster_1, raster_2])
+    out_image, out_meta = unique_combinations([raster_1, raster_2])
+    print(out_meta)
+    assert out_meta == raster_1.meta
+    assert out_image[0].tolist() == expected_1st_row
+    assert out_image[1].tolist() == expected_2nd_row
 
 
-def test_unique_combinations():
+def test_unique_combinations_invalid_parameter():
     """Test that invalid parameter values for rasters raises correct exception."""
     with pytest.raises(InvalidParameterValueException):
         with rasterio.open(raster_path) as raster:
-            unique_combinations([raster], output_raster_path)
+            unique_combinations([raster])
