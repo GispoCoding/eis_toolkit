@@ -10,7 +10,6 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 
 parent_dir = Path(__file__).parent
 raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
-output_raster_path = parent_dir.joinpath("data/remote/small_raster - Copy.tif")
 expected_1st_row = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0,
 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 46.0]
@@ -23,9 +22,15 @@ def test_unique_combinations():
     raster_1 = rasterio.open(raster_path)
     raster_2 = rasterio.open(raster_path)
 
-    #unique_combinations_raster = unique_combinations([raster_1, raster_2])
     out_image, out_meta = unique_combinations([raster_1, raster_2])
-    assert out_meta == raster_1.meta
+
+    assert out_meta["count"] == 1
+    assert out_meta["crs"] == raster_1.meta["crs"]
+    assert out_meta["driver"] == raster_1.meta["driver"]
+    assert out_meta["dtype"] == raster_1.meta["dtype"]
+    assert out_meta["height"] == raster_1.meta["height"]
+    assert out_meta["width"] == raster_1.meta["width"]
+
     assert out_image[0].tolist() == expected_1st_row
     assert out_image[1].tolist() == expected_2nd_row
 

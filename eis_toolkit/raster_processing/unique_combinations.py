@@ -1,6 +1,6 @@
-from typing import List, Dict, Tuple
-
 import itertools
+from typing import Dict, List, Tuple
+
 import numpy as np
 import rasterio
 
@@ -39,24 +39,35 @@ def unique_combinations(  # type: ignore[no-any-unimported]
         out_image (numpy.ndarray): Combinations of rasters.
         out_meta (dict): The metadata of the first raster in raster_list.
     """
-    rasters = []
+    bands = []
     out_meta = raster_list[0].meta
-    out_meta['count'] = 1
-    height = raster_list[0].meta['height']
-    width = raster_list[0].meta['width']
+    out_meta["count"] = 1
+    height = raster_list[0].meta["height"]
+    width = raster_list[0].meta["width"]
 
     for raster in raster_list:
-        for band in range(1, raster.count+1):
-            rasters.append(raster.read(band))
+        for band in range(1, raster.count + 1):
+            bands.append(raster.read(band))
 
-    if len(rasters) == 1:
+    if len(bands) == 1:
         raise InvalidParameterValueException
 
-    if not all(len(raster) == height for raster in rasters):
+    # Check if all rasters have the same pixel width.
+    if not all(raster.transform[0] == raster_list[0].transform[0] for raster in raster_list):
         raise InvalidParameterValueException
 
-    if not all(len(raster[0]) == width for raster in rasters):
+    # Check if all rasters have the same pixel height.
+    if not all(raster.transform[4] == raster_list[0].transform[4] for raster in raster_list):
         raise InvalidParameterValueException
 
-    out_image = _unique_combinations(rasters)
+    if not all(raster.meta["crs"] == out_meta["crs"] for raster in raster_list):
+        raise InvalidParameterValueException
+
+    if not all(len(band) == height for band in bands):
+        raise InvalidParameterValueException
+
+    if not all(len(band[0]) == width for band in bands):
+        raise InvalidParameterValueException
+
+    out_image = _unique_combinations(bands)
     return out_image, out_meta
