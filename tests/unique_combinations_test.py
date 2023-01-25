@@ -19,20 +19,19 @@ expected_2nd_row = [47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 
 
 def test_unique_combinations():
     """Test unique combinations creates expected output."""
-    raster_1 = rasterio.open(raster_path)
-    raster_2 = rasterio.open(raster_path)
+    with rasterio.open(raster_path) as raster_1, rasterio.open(raster_path) as raster_2:
 
-    out_image, out_meta = unique_combinations([raster_1, raster_2])
+        out_image, out_meta = unique_combinations([raster_1, raster_2])
 
-    assert out_meta["count"] == 1
-    assert out_meta["crs"] == raster_1.meta["crs"]
-    assert out_meta["driver"] == raster_1.meta["driver"]
-    assert out_meta["dtype"] == raster_1.meta["dtype"]
-    assert out_meta["height"] == raster_1.meta["height"]
-    assert out_meta["width"] == raster_1.meta["width"]
+        assert out_meta["count"] == 1
+        assert out_meta["crs"] == raster_1.meta["crs"]
+        assert out_meta["driver"] == raster_1.meta["driver"]
+        assert out_meta["dtype"] == raster_1.meta["dtype"]
+        assert out_meta["height"] == raster_1.meta["height"]
+        assert out_meta["width"] == raster_1.meta["width"]
 
-    assert out_image[0].tolist() == expected_1st_row
-    assert out_image[1].tolist() == expected_2nd_row
+        assert out_image[0].tolist() == expected_1st_row
+        assert out_image[1].tolist() == expected_2nd_row
 
 
 def test_unique_combinations_invalid_parameter():
