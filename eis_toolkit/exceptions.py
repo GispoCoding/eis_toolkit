@@ -36,3 +36,8 @@ class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
 
     pass
+
+class InvalidInputDataException(Exception):
+    """Exception error class for invalid input data."""
+
+    pass

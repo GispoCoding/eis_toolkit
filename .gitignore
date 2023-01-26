@@ -164,3 +164,4 @@ tests/data/local/**
 !tests/data/local/**/
 !tests/data/local/**/.gitkeep
 notebooks/transformations_methodology.ipynb
+eis_toolkit/transformations/winsorize_20230117.py
