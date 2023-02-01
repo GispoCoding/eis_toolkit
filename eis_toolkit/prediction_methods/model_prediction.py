@@ -6,15 +6,20 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
 def _model_prediction(
-    myML: Any,      
+    myML: Any,
     Xdf: pd.DataFrame      # dataframe of features for prediction
 ) -> pd.DataFrame:
 
+    if len(Xdf.columns) == 0:
+        raise InvalidParameterValueException ('***  DataFrame has no column')
+    if len(Xdf.index) == 0:
+        raise InvalidParameterValueException ('***  DataFrame has no rows')
+
     ydf = myML.predict(Xdf)
     if myML._estimator_type == 'classifier':
-        if 'int' not in ydf.dtype.__str__():      # in case of classification problem and the target is not int
+        if 'float' in ydf.dtype.__str__():      # in case of classification problem and the target is not int
             ydf = (ydf + 0.5).astype(np.uint16)
-        else:
+        elif 'int' in ydf.dtype.__str__():
             ydf = ydf.astype(np.uint16)
     cn = ['result']
 
@@ -22,7 +27,7 @@ def _model_prediction(
 
 # *******************************
 def model_prediction(
-    myML: Any,      
+    myML: Any,
     Xdf: pd.DataFrame      # dataframe of Features for prediction
 ) -> pd.DataFrame:
 
@@ -31,11 +36,9 @@ def model_prediction(
     Args:
         myML: existing model to use for the prediction (random rorest  classifier, random forest regressor,... )
         Xdf (Pandas dataframe or numpy array ("array-like")): features (columns) and samples (raws)
-
     Returns:
         pandas dataframe containing predicted values
     """
-    
     ydf = _model_prediction(myML, Xdf)  
 
     return ydf

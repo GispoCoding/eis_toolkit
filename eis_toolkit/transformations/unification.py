@@ -18,12 +18,10 @@ def unification(
 ) -> Tuple[pd.DataFrame]:
 
     """
-    unifies the to dataframes.
-
+       unifies the to dataframes.
     Args:
         Xvdf (pandas DataFrame): Dataframe (with all value und binary fields)
-        Xvdf (pandas DataFrame): Dataframe (with all categoriesed fields)
-
+        Xcdf (pandas DataFrame): Dataframe (with all categoriesed fields)
     Returns:
          pandas DataFrame (Xdf)
     """
