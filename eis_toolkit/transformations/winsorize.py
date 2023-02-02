@@ -20,11 +20,13 @@ def _winsorize_absolute_values(  # type: ignore[no-any-unimported]
     replace_min = replacements[0]
     replace_max = replacements[1]
     
-    out_array = np.where(data_array == nodata_value, np.nan, data_array) if not np.isnan(nodata_value) else data_array
-    out_array = np.where(out_array < limit_min, replace_min, out_array) if limit_min else out_array
-    out_array = np.where(out_array > limit_max, replace_max, out_array) if limit_max else out_array
     
-    if not np.isnan(nodata_value): out_array = np.where(np.isnan(out_array), nodata_value, out_array)
+    out_array = utils._replace_nan(data_array=data_array, nodata_value=nodata_value, set_nan=True)
+    
+    if limit_min: out_array[out_array < limit_min] = replace_min
+    if limit_max: out_array[out_array < limit_max] = replace_max
+    
+    out_array = utils._replace_nan(data_array=out_array, nodata_value=nodata_value, set_value=True)
     
     return out_array
 

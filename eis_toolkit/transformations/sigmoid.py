@@ -16,7 +16,7 @@ def _sigmoid_transform(  # type: ignore[no-any-unimported]
     nodata_value: Optional[int | float] = None,
 ) -> np.ndarray:
     
-    out_array = utils.replace_nan(data_array=data_array, nodata_value=nodata_value, set_nan=True)
+    out_array = utils._replace_nan(data_array=data_array, nodata_value=nodata_value, set_nan=True)
     out_array[np.isinf(out_array)] = np.nan
     
     lower = range[0]
@@ -26,6 +26,6 @@ def _sigmoid_transform(  # type: ignore[no-any-unimported]
     
     out_array = lower + (upper - lower) * (1 / (1 + np.exp(-slope*(out_array-shift_x)))) - shift_y
 
-    out_array = utils.replace_nan(data_array=out_array, nodata_value=nodata_value, set_value=True)
+    out_array = utils._replace_nan(data_array=out_array, nodata_value=nodata_value, set_value=True)
 
     return out_array

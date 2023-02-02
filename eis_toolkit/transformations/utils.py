@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
 import geopandas as gpd
+import rasterio
 from typing import Optional, Tuple, Union, List, Literal
 
 from eis_toolkit.exceptions import InvalidParameterValueException, InvalidInputDataException
 
-def replace_nan(
+def _replace_nan(
     data_array: np.ndarray,
     nodata_value: Optional[int | float] = None,
     set_nan: bool = False,
@@ -17,11 +18,32 @@ def replace_nan(
     
     if set_nan == True and not np.isnan(nodata_value): out_array[out_array == nodata_value] = np.nan
     elif set_value == True and not np.isnan(nodata_value): out_array[np.isnan(out_array)] = nodata_value
-
+                
     return out_array
 
 
-def select_columns(
+def _read_raster(
+    raster: rasterio.DatasetReader,
+    selection: List[int],
+    method: Literal["replace", "extract"],
+) -> Tuple[np.ndarray, dict, list, list, list]:
+    
+    out_meta = raster.meta.copy()
+    out_meta_nodata = raster.nodatavals
+    bands_idx = [band - 1 for band in selection]
+
+    if method == "replace":
+        out_array = raster.read()
+    elif method == "extract":
+        out_array = raster.read(selection)
+        out_meta.update({"count": len(selection)})
+        out_meta_nodata = [out_meta_nodata[band] for band in bands_idx]
+        bands_idx = list(range(0, len(bands_idx)))
+        
+    return out_array, out_meta, out_meta_nodata, bands_idx
+
+
+def _select_columns(
     in_data: Union[pd.DataFrame, gpd.GeoDataFrame],
     columns: Optional[List[str]] = None,
 ) -> dict:

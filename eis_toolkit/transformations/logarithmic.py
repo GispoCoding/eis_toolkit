@@ -14,12 +14,12 @@ def _log_transform(  # type: ignore[no-any-unimported]
     nodata_value: Optional[int | float] = None,
 ) -> np.ndarray:
     
-    out_array = utils.replace_nan(data_array=data_array, nodata_value=nodata_value, set_nan=True)
+    out_array = utils._replace_nan(data_array=data_array, nodata_value=nodata_value, set_nan=True)
     out_array[np.isinf(out_array)] = np.nan
     
     if base == 2: out_array = np.log2(out_array)
     if base == 10: out_array = np.log10(out_array)
 
-    out_array = utils.replace_nan(data_array=out_array, nodata_value=nodata_value, set_value=True)
+    out_array = utils._replace_nan(data_array=out_array, nodata_value=nodata_value, set_value=True)
 
     return out_array
