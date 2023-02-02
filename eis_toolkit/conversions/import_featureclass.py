@@ -1,162 +1,156 @@
 
-from typing import Tuple, Optional
+from typing import Optional
+import os
+import numpy as np
 import pandas as pd
-from pandas.api.types import is_numeric_dtype
 import geopandas as gpd
-#from os.path import exists
-from copy import deepcopy
-#from german_to_english_decimal import *
+import fiona
+from osgeo import ogr
 from eis_toolkit.exceptions import InvalidParameterValueException
-from eis_toolkit.conversions.raster_to_pandas import *
-
-#from pathlib import Path
-import geopandas as gpd
 
 # *******************************
-def _import_featureclass(
-    fields: dict,
-    df: Optional [gpd.GeoDataFrame | pd.DataFrame] = None,             # if None:   geofile is needed (geopandas or panda (csv))
-    file: Optional [str] = None,        # csv, shp, geojson or file geodatabase, geopackage
-    layer: Optional [str] = None,       # if geodatabase/geopackage: layer
-    #type: Optional [str] = None,        # if shape: None, if filegeodatabase: 'FileGDB'... 
-    decimalpoint_german: Optional[bool] = False
-    #csv:  Optional [bool] = False
-) -> Tuple[dict, pd.DataFrame, pd.DataFrame]:
+def _export_featureclass(
+    dfg: gpd.GeoDataFrame | pd.DataFrame,  # ydf has to add to XDF
+    ydf: pd.DataFrame,
+    outpath: Optional [str] = None,                 # path or geodatabase (.gdb)
+    outfile: Optional [str] = None,                 # file or layername if not given: pd.DataFrame will given back
+    outextension: Optional [str] = None,            # if file, e.g. shape-file. shp
+    nanmask: Optional[pd.DataFrame] = None,
+    decimalpoint_german: Optional[bool] = False   # german Comma (,) and seperator (;)
+    #csv: Optional[bool] = False                    # to csv-file, not fetureclass
+) -> pd.DataFrame:
 
-    # import fiona
-    # help(fiona.open)
+    def create_filename(
+        path: str,
+        name: str,
+        extension: str
+    ) -> str:
+        filenum = 1
+        filename = os.path.join(path,name)
+        if len(extension) > 0:
+            if extension[0] != '.':
+                extension = '.'+extension
+        if (os.path.exists(os.path.abspath(filename))) or (os.path.exists(os.path.abspath(filename+extension))):
+            while (os.path.exists(os.path.abspath(filename+str(filenum)))) or (os.path.exists(os.path.abspath(filename+str(filenum)+extension))):
+                filenum += 1
+            return path, name+str(filenum), extension   #open(filename+str(filenum)+extension,'w')
+        return path, name, extension
 
-    # parent_dir = Path(__file__).parent
-    # name_fc = parent_dir.joinpath(r'data/shps/IOCG_Deps_Prosp_Occs.shp') 
-    # print (name_fc)
-    # read file:
+    def create_layername(
+        path: str,
+        name: str
+    ) -> str:
+        filenum = 1
+        layers = fiona.listlayers(path)
+        if name in layers:
+            layer = name
+            while layer in fiona.listlayers(path):
+                layer = name+str(filenum)
+                filenum += 1
+            return path, layer
+        return path, name
+
     if decimalpoint_german:
         decimal = ','
         separator = ';'
     else:
         decimal = '.'
         separator = ','
-    
-    # Checks
-    if len(fields) == 0:
-        raise InvalidParameterValueException ('***  Fields is empty')
 
-    if df is None and file is not None:
-        # if not exists(file):
-        #     raise InvalidParameterValueException ('***  file does not exists: ' + str(file)) 
-        if file.__str__().endswith('.csv'):
-            df = pd.read_csv(file,delimiter=separator,encoding='unicode_escape',decimal=decimal) 
-        else:  # shp, FilGDB, 
-            df = gpd.read_file(file,layer=layer) #,driver=type)
-            #dfg = gpd.read_file(name_fc,layer = layer_name, driver = 'driver')
-    elif df is None and file is None:
-        raise InvalidParameterValueException ('***  import_featureclass: neither featureclass nor GeoDataaFrame (geopandas) is given ') 
-    urdf = deepcopy(df)
+    out = dfg
+    # next result field
+    nfield = 'result'
+    fieldnum = 1
+    if nfield in out.columns:
+        fieldnum = 1
+        while nfield in out.columns:
+            nfield + str(fieldnum)  
+            fieldnum += 1
 
-    #fc = german_to_english_decimal(fc,fields)
-    #crs = fc.crs
-    #dfnew = gpd.GeoDataFrame()
-    #gdf = geopandas.GeoDataFrame(df, geometry=gs, crs="EPSG:4326")
-
-    # v,b,c-fields at least 1, t no more then 1
-    if (list(fields.values()).count('v') + list(fields.values()).count('c') + list(fields.values()).count('d')) < 1:
-        raise InvalidParameterValueException ('***  there are no v-, c- or b-fields in fields') 
-    if (list(fields.values()).count('t')) > 1:
-        raise InvalidParameterValueException ('***  there are more then one t-fields in fields')  
-    # all fields in df?
-    tmpf = {}
-    for key,val in fields.items():                             # check if fields (v,b,c,t) is subset of df.columns 
-        if val in ('v','b','c','t'):
-            tmpf[key] = val
-    if not (set(tmpf.keys()).issubset(set(df.columns))):        # 2. list is the big one, 1. list is the subset
-        l = list(set(list(tmpf.keys())) - set(df.columns))
-        l = ','.join(l)
-        raise InvalidParameterValueException ('***  wrong columns in dataframe (compared with Fields): ' + l)
-
-    # at least one v,c or b-Field, no more then 1 t-field
-    # lv = list(fields.values()).count('v') #,'c','d')
-    # if :
-    #     raise InvalidParameterValueException ('***  no field type c, b or v')
-    # if: 
-    #     raise InvalidParameterValueException ('***  more then one fields with type t')
-    # choose all columns which are in fiels
-
-    #   alternative code: see separation
-    columns = {}
-    for col in df.columns:
-        tmp = df[col].to_frame(name=col)
-        if col in fields:
-            if fields[col] in ('v','b','c','t'):    # else: column is not a value or a category 
-                if 'dfnew' not in locals():                               # take the new columns
-                    #q = False
-                    dfnew = tmp                # fc[col].to_frame(name=col)
-                else:
-                    dfnew = dfnew.join(tmp)    # add an other column
-                if fields[col] in ('v','b'):
-                    if not is_numeric_dtype(tmp[col].dropna()):   #tmp[col].dtype != np.number:
-                        raise InvalidParameterValueException ('***  v- or b-field '+col+' is not number')
-                if fields[col] in ('b'):        # check b-column is 0,1
-                    if not tmp[col].dropna().isin([0,1]).all():
-                        raise InvalidParameterValueException ('***  b-field '+col+' is not only 0 or 1')
-                columns[col] = fields[col]      # add the column name and the column type type
-
-    return columns,dfnew,urdf
+    # if nodata-removement was made:
+    if nanmask is None:   # 
+        out[nfield] = ydf.to_numpy()
+    else:
+        # assemple a list out of the input dataframe ydf (one column) and the nodatamask-True-values: NaN
+        v = 0
+        lst = []
+        for cel in nanmask.iloc[:,0]:
+            if cel == True:
+                lst.append(np.NaN)
+            else:
+                lst.append(ydf.iloc[v,0])     # .values.tolist())
+                v += 1
+        out['result'] = lst
+        # append as result-column
+        
+    # save dataframe to file or layer in a geopacke
+    if outfile is not None:
+        if outextension is None:
+            outextension = ''
+        if outextension[0] == '.':
+            outextension = outextension[1:]
+        if outpath is None:
+            outpath = ''
+        path,file,extension = create_filename(outpath,outfile,outextension)
+        filename = os.path.join(path,file)
+        if outextension == "csv":
+            out.to_csv(filename+extension,header=True,sep=separator,decimal=decimal)
+        elif outextension == "shp":
+            out.to_file(filename+extension)
+        elif outextension == "geojson":
+            out.to_file(filename+extension,driver = 'GeoJSON')
+        elif outpath.endswith('.gpkg'):              # path is geopackage, file ist layer
+            path,file = create_layername(outpath,outfile)     
+            out.to_file(path,driver='GPKG',layer=file)
+        # elif outpath.endswith('.gdb'):              # path is file geodatabase, file s layer
+        #     out.to_file(path,driver='FileGDB',layer=file)
+        else: 
+            raise InvalidParameterValueException ('***  No data output. Wrong extension of the output-file')  
+    return out
 
 # *******************************
-def import_featureclass(
-    fields: dict,
-    df: Optional [gpd.GeoDataFrame] = None,
-    file: Optional [str] = None,
-    layer: Optional [str] = None,       # if geodatabase: layer
-    #type: Optional [str] = None,        # if shape: None, if filegeodatabase: 'FileGDB'... 
-    decimalpoint_german: Optional[bool] = False
-    #csv: Optional [bool] = False
+def export_featureclass(
+    dfg: gpd.GeoDataFrame | pd.DataFrame,  # ydf has to add to XDF
+    ydf: pd.DataFrame,
+    outpath: Optional [str] = None,
+    outfile: Optional [str] = None,            # if not given: pd.DataFrame will given back
+    outextension: Optional [str] = None,
+    nanmask: Optional[pd.DataFrame] = None,
+    decimalpoint_german: Optional[bool] = False   # german Comma (,) and seperator: ;
+    #csv: Optional[bool] = False                    # to csv-file, not fetureclass
+) -> pd.DataFrame:
 
-) -> Tuple[dict, pd.DataFrame, pd.DataFrame]:
-
-    """
-    reading a file to pandas DataFrame or csv or use a DataFrame:
-    erase all not used colmuns
-    creats a new fields-dictionary, e.g. {'field1': 'c'} 
-    tests whether all v-type are numeric abd b-fields contain just 0 and 1
+    """ 
+        Add the result column to the existing geopandas (or pandas) dataframe 
+        and saved the (geo)dataframe optionaly to a feature class file (like .shp) or to a csv (text) file.
+        If the file alredy exists, then new file will be named with (file-name)1, 2, ...
+        If outpath is a geopackage then outfile is the name of the new layer. 
+        If the layer alredy exists, the new layer will be named with (layer-name)1, 2, ...
+        If the column name is given, the new column will be named as result1, result2,... etc.
+        If outfile == None: No file will be stored
+        In case a nanmask is availabel (nan-cells for prediction input caused droped rows): 
+        "True"-cells in nanmask lead to nodata-cells in the output dataframe (y).
     Args:
-        fields (Dictionary): name and type of the fields {'feld1': 'c'} 
-            field-typs:  
-            v - values (float or int)
-            c - categery (int or str)
-            t - target (float or int)
-            b - binery (0 or 1)
-            g - geometry (not to use)
-            n - not to use
-            i - identificator (not to use)
-        df (DataFrame): DataFrame if exists. If not file should be not None
-        file (string): to imported feature class  (shp) ,geodatabase, geopackage,... or csv -file
-                        df should be None
-        layer (string): to imported feature class (layr) from a godatabase (filegeodatabase, geopackage,... )
-        type (string, default = shape ): type of the featureclass: 'FileGDB', 
-        decimalpoint_german (bool): if the csv is a german coded file with comma as decimal point and semikolon as delemiter (default: False)
-        csv (bool): if the file to be read is a text file (.csv), default: False
-
+        - dfg (pandas DataFrame or GeoDataFrame): is primary feature table - input for prediction process,
+        - ydf (pandas DataFrame): is result of prediction,
+        - outpath (string, optional): Path or geodatapacke of the output-file
+        - outfile (string, optional): Name of file or layer of the output
+        - outextension (string, optional): Name of the file extension (like .shp)
+        - nodata (pandas DataFrame, optional): marked rows witch are be droped because of nodata in the prediction input. 
+        - decimalpoint_german: (bool, optional): default False, german decimal comma (,) and separator (;)
     Returns:
-        dict (dictionary): in the order and the categories of the fields in the new dataframe (wihout 'n'-,'i'- or 'g'-Fields)
-        df (pandas DataFrame): ready for 
-           - training (with target value), 
-           - test (with target value) or 
-           - prediction (without target column)
-        df (pandas DataFrame): the original DataFrame from import the file 
-            optional: used in case of prediction to append new column as the resul of the prediction
-
+        gpd.GeoDataFrame or pd.DataFrame 
+        as stored file (csv, shp or geojson or feature class layer 
     """
-    # dfnew,columns = _import_featureclass(
-    #     fields = fields, fc = fc, geofile = geofile
-    #)
 
-    return _import_featureclass(
-        fields = fields,
-        df = df,
-        file = file,
-        layer = layer, 
-        #type = type,
+    out = _export_featureclass(
+        dfg = dfg,
+        ydf = ydf,
+        outpath = outpath,
+        outfile = outfile,
+        outextension = outextension,
+        nanmask  = nanmask,
         decimalpoint_german = decimalpoint_german
         #csv = csv
     )
+    return out

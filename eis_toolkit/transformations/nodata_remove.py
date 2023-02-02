@@ -23,7 +23,7 @@ def _nodata_remove(
     Xdf.replace([np.inf, -np.inf],np.nan,inplace=True)
     # for col in df.columns:
     #     if not is_numeric_dtype(df[col]):   # df[col].dtype != np.number:    # # empty strings cells will get numpy.nan
-    Xdf.replace(r'^\s*$',np.nan,regex=True,inplace=True)   # or: df.replace(r'\s+', np.nan, regex=True)
+    #Xdf.replace(r'^\s*$',np.nan,regex=True,inplace=True)   # or: df.replace(r'\s+', np.nan, regex=True)
 
     # Xvdf, Xcdf, ydf = separation(Xdf = Xdf, fields = columns)
     # Xdfv = Xdfv.astype('float32')
@@ -32,8 +32,9 @@ def _nodata_remove(
 
     dfmask = Xdf.isna()      # dfmsk will be needed in module "export_grid" after prediction to add nodata-values in y after prediction
     dfsum = pd.DataFrame(dfmask.sum(axis=1))
-    dfsum[dfsum>1] = 1    # if dataframe column: dfsum.loc[df['First Season'] > 1990, 'First Season'] = 1
-    dfsum.replace({1:True,0:False},inplace = True)
+    dfsum[dfsum>0] = True
+    dfsum[dfsum==0] = False
+    #dfsum.replace({1:True,0:False},inplace = True)
     Xdf.dropna(inplace = True)    # drops rows which contain missing values
     Xdf = copy.deepcopy(Xdf.reset_index(inplace=False))
 
@@ -45,10 +46,10 @@ def nodata_remove(
 ) -> Tuple[pd.DataFrame,pd.DataFrame]:
 
     """
-        removes nodata sample (by the way all inf values)
-        nodat_remove must be used befor separation 
-        Atention: QGIS Null for cells in a string-column will be not interpreted as None, 
-                  just string with length 0 (empty cell)
+        Removes nodata sample (by the way all inf values).
+        nodat_remove must be used befor separation.
+            Attention: QGIS Null for cells in a string-column will be not interpreted as None, 
+            just string with length 0 (empty cell)
     Args:
         Xdf (Pandas DataFrame)
     Returns:

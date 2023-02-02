@@ -1,4 +1,8 @@
 
+#### 
+# Dictionaries werden als json und csv-file so wie modelle und onehot-Encoderexportiert
+# abgucken in advangeo
+
 from typing import Optional, Any
 from pathlib import Path
 #import csv
@@ -17,12 +21,12 @@ def _export_files(
     validations: Optional[pandas.DataFrame] = None, 
     crossvalidation: Optional[dict] = None,
     confusion_matrix: Optional[pandas.DataFrame] = None,
+    comparison: Optional[pandas.DataFrame] = None,
     myML: Optional[Any] = None, 
     myOhe: Optional[Any] = None,
     myFields: Optional[dict] = None,
     myMetadata: Optional[dict] = None,
     # importance,
-    # comparison,
     #nanmask: Optional[pd.DataFrame] = None 
     decimalpoint_german: Optional[bool] = False
 ) -> dict: 
@@ -125,6 +129,16 @@ def _export_files(
         #     f.write(jsdata)
         #     f.close()
 
+    if comparison is not None:
+    # to csv
+        file = create_file(path,name+'_comparison','csv')
+        #tmp.to_csv(file, sep =';')
+        comparison.to_csv(file+'.csv',sep=separator,index=True,header=True,decimal=decimal)   # float_format='%00.5f',
+
+        # to json
+        file = create_file(path,name+'_comparison','json')
+        comparison.to_json(file+'.json',double_precision=5,orient='table',indent = 3)  # to string
+ 
     if myML is not None:   # Model
         file = create_file(path,name+'_myML','mdl')
         dict['myML'] = file+'.mdl'
@@ -176,7 +190,7 @@ def export_files(
     crossvalidation: Optional[dict] = None,
     confusion_matrix: Optional[pandas.DataFrame] = None,
     # importance,
-    # comparison
+    comparison: Optional[pandas.DataFrame] = None,
     myML: Optional[Any] = None, 
     myOhe: Optional[Any] = None,
     myFields: Optional[dict] = None,
@@ -185,16 +199,18 @@ def export_files(
     decimalpoint_german: Optional[bool] = False
 ) -> dict:
 
-    """ writes csv ubnd json files on disc 
+    """ 
+        writes csv and json files on disc 
     Args:
         - name (string, default 'ML'): Name of the ML-process
         - path (string, defalut './data'): Name of the output path
         at least one of the following arguments should be not None
         - testsplit (DatasFrame, default None): content of the output file: validation values from test_split
-        - crossvalidation (dictionary, default = None): content of the output file: validation values of each fold
-        - confusion_matrix (DataFrame,  default = None): content of the output file: validation values of each fold
+        - crossvalidation (dictionary, default = None): content of the output file are validation values of each fold
+        - confusion_matrix (DataFrame,  default = None): content of the output file is a table 
             exist only for classifier estimators,
-            will be writte in a file just wth testsplit is used 
+            (will be writte in a file just isf testsplit is used)
+        - comparison (DataFrame,  default = None): list of all compared values: given, predicted
         - myML (Model Object, default None): content of the output file, type of the file: Model
         - myOhe (OneHotEncoder Object, default None): content of the output file, type of the file: Ohe
         - myFields (dictionary, default = None):  content of the output file: columnslist with name and type of columns
@@ -209,6 +225,7 @@ def export_files(
         validations  = validations, 
         crossvalidation = crossvalidation,
         confusion_matrix = confusion_matrix,
+        comparison = comparison,
         myML = myML, 
         myOhe = myOhe,
         myFields = myFields,
@@ -217,3 +234,4 @@ def export_files(
     )
 
     return dict
+

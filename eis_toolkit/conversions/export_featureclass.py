@@ -62,9 +62,10 @@ def _export_featureclass(
     nfield = 'result'
     fieldnum = 1
     if nfield in out.columns:
+        fieldnum = 1
         while nfield in out.columns:
+            nfield + str(fieldnum)  
             fieldnum += 1
-        nfield + str(fieldnum)   
 
     # if nodata-removement was made:
     if nanmask is None:   # 
@@ -86,6 +87,8 @@ def _export_featureclass(
     if outfile is not None:
         if outextension is None:
             outextension = ''
+        if outextension[0] == '.':
+            outextension = outextension[1:]
         if outpath is None:
             outpath = ''
         path,file,extension = create_filename(outpath,outfile,outextension)
@@ -96,9 +99,8 @@ def _export_featureclass(
             out.to_file(filename+extension)
         elif outextension == "geojson":
             out.to_file(filename+extension,driver = 'GeoJSON')
-        elif outpath.endswith('.gpkg'):
-            path,file = create_layername(outpath,outfile)
-        #   if outpath.endswith('.gpkg'):             # path is geopackage, file ist layer
+        elif outpath.endswith('.gpkg'):              # path is geopackage, file ist layer
+            path,file = create_layername(outpath,outfile)     
             out.to_file(path,driver='GPKG',layer=file)
         # elif outpath.endswith('.gdb'):              # path is file geodatabase, file s layer
         #     out.to_file(path,driver='FileGDB',layer=file)
