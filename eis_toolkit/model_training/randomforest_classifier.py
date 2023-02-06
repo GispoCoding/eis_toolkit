@@ -77,7 +77,7 @@ def randomforest_classifier(  # type: ignore[no-any-unimported]
 ):
 
     """ 
-      training of a randmon forest model
+      creatig of a randmon forest classification model
     Args:
       - n_estimators (int, default=100):    The number of trees in the forest.
       - criterion ({“gini”, “entropy”, “log_loss”}, default=”gini”): 

@@ -65,7 +65,7 @@ def logistic_regression(  # type: ignore[no-any-unimported]
 ):
 
     """ 
-        training of a logistic regression model
+        creating of a logistic regression model
     Args:
         - penalty ({'l1', 'l2', 'elasticnet', 'none'}, default='l2'):
             Specify the norm of the penalty:

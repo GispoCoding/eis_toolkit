@@ -71,7 +71,7 @@ def randomforest_regressor(  # type: ignore[no-any-unimported]
 ):
 
     """ 
-      training of a randmon forest model
+      creatig of a randmon forest classification model
     Args:
       - n_estimators (int, default=100):    The number of trees in the forest.
       - criterion ({“squared_error”, “absolute_error”, “poisson”}, default=”squared_error”): 

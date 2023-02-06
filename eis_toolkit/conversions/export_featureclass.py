@@ -5,13 +5,14 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import fiona
+from copy import deepcopy
 from osgeo import ogr
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
 def _export_featureclass(
-    dfg: gpd.GeoDataFrame | pd.DataFrame,  # ydf has to add to XDF
-    ydf: pd.DataFrame,
+    ydf: pd.DataFrame,                                          # ydf has to add to xdf is given, else: ydf has to be exported
+    dfg: Optional [gpd.GeoDataFrame | pd.DataFrame] = None,    
     outpath: Optional [str] = None,                 # path or geodatabase (.gdb)
     outfile: Optional [str] = None,                 # file or layername if not given: pd.DataFrame will given back
     outextension: Optional [str] = None,            # if file, e.g. shape-file. shp
@@ -50,6 +51,7 @@ def _export_featureclass(
             return path, layer
         return path, name
 
+    # Main program
     if decimalpoint_german:
         decimal = ','
         separator = ';'
@@ -57,37 +59,54 @@ def _export_featureclass(
         decimal = '.'
         separator = ','
 
-    out = dfg
-    # next result field
-    nfield = 'result'
-    fieldnum = 1
-    if nfield in out.columns:
-        fieldnum = 1
-        while nfield in out.columns:
-            nfield + str(fieldnum)  
-            fieldnum += 1
-
-    # if nodata-removement was made:
-    if nanmask is None:   # 
-        out[nfield] = ydf.to_numpy()
+    if dfg is None or len(ydf.columns) > 1:     # ydf to export
+        if nanmask is None:   # 
+            out = ydf
+        else:
+            # assemple a list out of the input dataframe ydf (one column) and the nodatamask-True-values: NaN
+            v = 0
+            dfnew = deepcopy(ydf[0:0])
+            empty = deepcopy(ydf[:1])
+            empty.iloc[:] = np.nan
+            #lst = []
+            for cel in nanmask.iloc[:,0]:
+                if cel == True:
+                    dfnew = pd.concat([dfnew,pd.DataFrame(empty)],axis=0,ignore_index=True)
+                else:
+                    dfnew = pd.concat([dfnew,pd.DataFrame(ydf.iloc[v]).T],axis=0,ignore_index=True)
+                    v += 1
+            out = dfnew
     else:
-        # assemple a list out of the input dataframe ydf (one column) and the nodatamask-True-values: NaN
-        v = 0
-        lst = []
-        for cel in nanmask.iloc[:,0]:
-            if cel == True:
-                lst.append(np.NaN)
-            else:
-                lst.append(ydf.iloc[v,0])     # .values.tolist())
-                v += 1
-        out['result'] = lst
-        # append as result-column
+        out = dfg
+        # next result field
+        nfield = 'result'
+        fieldnum = 1
+        if nfield in dfg.columns:
+            fieldnum = 1
+            while nfield in out.columns:
+                nfield + str(fieldnum)  
+                fieldnum += 1
+
+        if nanmask is None:   # 
+                out[nfield] = ydf.to_numpy()
+        else: # if nodata-removement was made:
+            # assemple a list out of the input dataframe ydf (one column) and the nodatamask-True-values: NaN
+            v = 0
+            lst = []
+            for cel in nanmask.iloc[:,0]:
+                if cel == True:
+                    lst.append(np.NaN)
+                else:
+                    lst.append(ydf.iloc[v,0])     # .values.tolist())
+                    v += 1
+            out[nfield] = lst
+            # append as result-column
         
     # save dataframe to file or layer in a geopacke
     if outfile is not None:
         if outextension is None:
             outextension = ''
-        if outextension[0] == '.':
+        elif outextension[0] == '.':
             outextension = outextension[1:]
         if outpath is None:
             outpath = ''
@@ -110,8 +129,8 @@ def _export_featureclass(
 
 # *******************************
 def export_featureclass(
-    dfg: gpd.GeoDataFrame | pd.DataFrame,  # ydf has to add to XDF
-    ydf: pd.DataFrame,
+    ydf: pd.DataFrame,                                          # ydf has to add to XDF
+    dfg: Optional [gpd.GeoDataFrame | pd.DataFrame] = None,     # ydf has to be ecxported
     outpath: Optional [str] = None,
     outfile: Optional [str] = None,            # if not given: pd.DataFrame will given back
     outextension: Optional [str] = None,
@@ -144,8 +163,8 @@ def export_featureclass(
     """
 
     out = _export_featureclass(
-        dfg = dfg,
         ydf = ydf,
+        dfg = dfg,
         outpath = outpath,
         outfile = outfile,
         outextension = outextension,
