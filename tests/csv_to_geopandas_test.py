@@ -21,6 +21,7 @@ def test_csv_to_geopandas():
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert gdf.crs.to_epsg() == target_EPSG
 
+
 def test_csv_to_geopandas_using_wkt_invalid_parameter_value():
     """Test that index out of range raises correct exception."""
     with pytest.raises(InvalidColumnIndexException):
@@ -29,6 +30,7 @@ def test_csv_to_geopandas_using_wkt_invalid_parameter_value():
         gdf = csv_to_geopandas(csv_path, indexes, target_EPSG)
         assert isinstance(gdf, gpd.GeoDataFrame)
         assert gdf.crs.to_epsg() == target_EPSG
+
 
 def test_csv_to_geopandas_invalid_wkt():
     """Test that invalid WKT format raises correct exception."""
@@ -39,13 +41,15 @@ def test_csv_to_geopandas_invalid_wkt():
         assert isinstance(gdf, gpd.GeoDataFrame)
         assert gdf.crs.to_epsg() == target_EPSG
 
+
 def test_csv_to_geopandas_points():
-    """Test csv with point features to geopandas conversion using lattitude and longitude."""
+    """Test csv with point features to geopandas conversion using latitude and longitude."""
     indexes = [5,6]
     target_EPSG = 4326
     gdf = csv_to_geopandas(csv_path, indexes, target_EPSG)
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert gdf.crs.to_epsg() == target_EPSG
+
 
 def csv_to_geopandas_invalid_parameter_value():
     """Test that index(es) out of range raises correct exception."""
@@ -55,6 +59,7 @@ def csv_to_geopandas_invalid_parameter_value():
         gdf = csv_to_geopandas(csv_path, indexes, target_EPSG)
         assert isinstance(gdf, gpd.GeoDataFrame)
         assert gdf.crs.to_epsg() == target_EPSG
+
 
 def csv_to_geopandas_points_invalid_coordinate_values():
     """Test that index(es) with invalid coordinate value(s) raises correct exception."""
