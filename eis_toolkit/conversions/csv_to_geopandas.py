@@ -4,18 +4,19 @@ import csv as reader
 import pandas as pd
 import geopandas
 
+from pathlib import Path
 from eis_toolkit.exceptions import (InvalidParameterValueException,
                                     InvalidWktFormatException,
                                     InvalidColumnIndexException)
 
 
 def _csv_to_geopandas(  # type: ignore[no-any-unimported]
-    csv: str,
+    csv: Path,
     indexes: List[int],
     target_EPSG: int,
 ) -> geopandas.GeoDataFrame:
 
-    with open(csv, 'r') as f:
+    with csv.open(mode="r") as f:
         has_header = reader.Sniffer().has_header(f.read(1024))
 
     if has_header:
@@ -71,7 +72,7 @@ def _csv_to_geopandas(  # type: ignore[no-any-unimported]
 
 
 def csv_to_geopandas(  # type: ignore[no-any-unimported]
-    csv: str,
+    csv: Path,
     indexes: List[int],
     target_EPSG: int,
 ) -> geopandas.GeoDataFrame:
@@ -79,7 +80,7 @@ def csv_to_geopandas(  # type: ignore[no-any-unimported]
     Convert CSV file to geopandas DataFrame.
 
     Usage of single index expects valid WKT geometry.
-    Usage of two indexes expects the X and Y columns of POINT feature(s).
+    Usage of two indexes expects POINT feature(s) X-coordinate as the first index and Y-coordinate as the second index.
 
     Args:
         csv: path to the .csv file to be converted.
