@@ -1,3 +1,6 @@
+import rasterio
+from typing import Optional, Tuple, Union, List, Literal
+
 def check_parameter_value(parameter_value: int, allowed_values: list) -> bool:
     """Check if used parameter value is valid.
 
@@ -18,7 +21,7 @@ def check_numeric_value_sign(parameter_value) -> bool:  # type: ignore[no-untype
     """Check if input numeric value is positive.
 
     Args:
-        parameter value: numeric input parameter
+        parameter_value: numeric input parameter
 
     Returns:
         Bool: True if parameter value is positive, False if not
@@ -27,3 +30,106 @@ def check_numeric_value_sign(parameter_value) -> bool:  # type: ignore[no-untype
         return True
     else:
         return False
+
+
+def check_none_positions(parameter: Union[List, Tuple]) -> List:   # type: ignore[no-untyped-def]
+    """Check the position of NoneType values.
+
+    Args:
+        parameter_value: list or tuple containing parameter values
+
+    Returns:
+        List: List of position for NoneType values
+    """
+    out_positions = []
+    for i, inner_value in enumerate(parameter):
+        if inner_value is None:
+            out_positions.append(i)
+        elif isinstance(inner_value, Tuple):
+            for j, value in enumerate(inner_value):
+                if value is None: 
+                    out_positions.append((i, j))
+        
+    return out_positions
+
+
+def check_parameter_length(  # type: ignore[no-untyped-def]
+    selection: Optional[List] = None,
+    parameter: Optional[List] = None,
+    choice: Optional[int] = None,
+    nodata: bool = False,
+) -> bool:
+    """Check the length of a list against the length of selected bands.
+
+    Args:
+        selection: selected bands
+        parameter: list containing parameter values
+        choice: choice which use case should be validated
+        nodata: whether to check parameter or nodata input arguments 
+
+    Returns:
+        Bool: True if conditions are valid, else False
+    """
+    match choice:
+        case 1:
+            if selection is None or len(selection) == 1:
+                if nodata == False:
+                    return len(parameter) == 1
+                elif nodata == True:
+                    return parameter is None or parameter is not None and len(parameter) == 1
+            elif selection is not None and len(selection) > 1:
+                if nodata == False:
+                    return len(parameter) == 1 or len(parameter) == len(selection)
+                elif nodata == True:
+                    return parameter is None or parameter is not None and len(parameter) == 1 or len(parameter) == len(selection)
+        case 2:
+            return len(parameter) == 2
+        case _:
+            return False
+
+        
+def check_numeric_minmax_location(parameter: Tuple) -> bool:    # type: ignore[no-untyped-def]
+    """Check if parameter maximum value > parameter minimum value.
+
+    Args:
+        parameter: tuple containing parameter values for min and max
+
+    Returns:
+        Bool: True if minimum value < maxiumum value, else False
+    """
+    
+    if all(isinstance(item, Union[int, float]) for item in parameter):
+        return parameter[0] < parameter[1]
+    else:
+        return False
+
+
+def check_band_selection(   # type: ignore[no-untyped-def]
+    in_data: rasterio.DatasetReader,
+    selection: Optional[List[int]] = None,
+    validation_results: Optional[List[Tuple]] = None,
+) -> List[Tuple]:   
+    """Checks whether the selection of raster bands is valid or not.
+
+    Args:
+        in_data: raster object
+        selection: selected bands
+        validation_results: list containing a tuple for existing case and validation results
+
+    Returns:
+        List: list containing a tuple for case and validation results 
+    """
+    if validation_results is None:
+        validation_results = []
+    
+    if selection is not None:    
+        if isinstance(in_data, rasterio.DatasetReader):
+            validation = all([isinstance(item, int) for item in selection])
+            validation_results.append(("Band selection value data type", validation))
+            validation_results.append(("Band selection value zero", 0 not in selection))
+            validation_results.append(("Band selection values not unique", len(set(selection)) == len(selection)))
+            validation_results.append(("Band selection length", len(selection) <= in_data.count))
+            
+            if None not in selection and validation == True: validation_results.append(("Band selection maximum value", max(selection) <= in_data.count))
+    
+    return validation_results

@@ -6,12 +6,27 @@ from typing import Optional, Tuple, Union, List, Literal
 
 from eis_toolkit.exceptions import InvalidParameterValueException, InvalidInputDataException
 
-def _replace_nan(
+
+def expand_args(
+    selection: List[int],
+    **kwargs
+) -> dict:
+    
+  out_args = kwargs
+
+  for key, value in out_args.items():
+    if value is not None and len(value) == 1: 
+        out_args[key] = out_args[key] * len(selection)
+
+  return out_args
+
+
+def replace_nan(
     data_array: np.ndarray,
     nodata_value: Optional[int | float] = None,
     set_nan: bool = False,
     set_value: bool = False,
-    ) -> np.ndarray:
+) -> np.ndarray:
     
     out_array = data_array
     if not nodata_value: nodata_value = np.nan
@@ -22,11 +37,11 @@ def _replace_nan(
     return out_array
 
 
-def _read_raster(
+def read_raster(
     raster: rasterio.DatasetReader,
     selection: List[int],
     method: Literal["replace", "extract"],
-) -> Tuple[np.ndarray, dict, list, list, list]:
+) -> Tuple[np.ndarray, dict, list, list]:
     
     out_meta = raster.meta.copy()
     out_meta_nodata = raster.nodatavals
@@ -43,7 +58,7 @@ def _read_raster(
     return out_array, out_meta, out_meta_nodata, bands_idx
 
 
-def _select_columns(
+def select_columns(
     in_data: Union[pd.DataFrame, gpd.GeoDataFrame],
     columns: Optional[List[str]] = None,
 ) -> dict:
@@ -53,7 +68,6 @@ def _select_columns(
     1: Identifies column names of all, numerical, geometry column(s)
     2: Creates an intersection of selected and numerical columns for transformation.
     3: Identifies all unused columns (no transformation)
-    
     
     Args:
         in_data (pd.DataFrame, gpd.GeoDataFrame): Dataframe set to be transformed.

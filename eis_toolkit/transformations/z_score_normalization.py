@@ -21,12 +21,12 @@ def _z_score_normalization_core(  # type: ignore[no-any-unimported]
     out_array[np.isinf(out_array)] = np.nan
     
     mean = 0 if not with_mean else np.nanmean(out_array).astype(np.float32)
-    sd = 1 if not with_sd else np.nanstd(out_array).astype(np.float32)
-    out_array = (out_array - mean) / sd
+    std = 1 if not with_sd else np.nanstd(out_array).astype(np.float32)
+    out_array = (out_array - mean) / std
 
     out_array = utils.replace_nan(data_array=out_array, nodata_value=nodata_value, set_value=True)
 
-    return out_array, mean, sd
+    return out_array, mean, std
 
 
 def _minmax_scaling_core(  # type: ignore[no-any-unimported]
@@ -75,15 +75,15 @@ def _z_score_normalization_raster(  # type: ignore[no-any-unimported]
         for i, band_idx in enumerate(bands_idx):
             nodata_value = out_meta_nodata[i] if not nodata or nodata[i] is None else nodata[i]
             
-            out_array[band_idx], out_mean, out_sd = _z_score_normalization_core(data_array=out_array[band_idx],
-                                                                                with_mean=with_mean[i],
-                                                                                with_sd=with_sd[i],
-                                                                                nodata_value=nodata_value)
+            out_array[band_idx], out_mean, out_std = _z_score_normalization_core(data_array=out_array[band_idx],
+                                                                                 with_mean=with_mean[i],
+                                                                                 with_sd=with_sd[i],
+                                                                                 nodata_value=nodata_value)
             
             current_band = f"band {band_idx + 1}"
             current_settings = {"band_origin": bands[i],
                                 "mean": out_mean,
-                                "sd": out_sd,
+                                "std": out_std,
                                 "nodata_meta": out_meta_nodata[i],
                                 "nodata_used": nodata_value}
             out_settings[current_band] = current_settings
@@ -161,7 +161,7 @@ def z_score_norm(  # type: ignore[no-any-unimported]
         in_data (rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame): Data object to be transformed.
         selection (List[int], optional): Bands or columns to be processed. Defaults to None.
         with_mean (List[bool]): If True, data-based mean will be used, otherwise mean = 0. Defaults to True.
-        with_sd (List[bool]): If True, data-based standard deviatioin will be used, otherwise sd = 1. Defaults to True.
+        with_sd (List[bool]): If True, data-based standard deviatioin will be used, otherwise std = 1. Defaults to True.
         nodata (List[int | float], optional): NoData values to be considered. Defaults to None.
         method (Literal["replace", "extract"]): Switch for data output. Defaults to "replace".
 
@@ -175,10 +175,10 @@ def z_score_norm(  # type: ignore[no-any-unimported]
     """    
     valids = parameter.check_band_selection(in_data, selection)
     valids.append(("With mean length", parameter.check_parameter_length(selection, with_mean, choice=1)))
-    valids.append(("With sd length", parameter.check_parameter_length(selection, with_sd, choice=1)))
+    valids.append(("With std length", parameter.check_parameter_length(selection, with_sd, choice=1)))
     valids.append(("NoData length", parameter.check_parameter_length(selection, nodata, choice=1, nodata=True)))       
     valids.append(("With mean data type", all(isinstance(item, bool) for item in with_mean)))
-    valids.append(("With sd data type", all(isinstance(item, bool) for item in with_sd)))
+    valids.append(("With std data type", all(isinstance(item, bool) for item in with_sd)))
     
     if nodata is not None: 
         valids.append(("NoData data type", all(isinstance(item, Union[int, float, None]) for item in nodata)))
