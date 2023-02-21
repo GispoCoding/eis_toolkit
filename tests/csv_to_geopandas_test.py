@@ -27,9 +27,7 @@ def test_csv_to_geopandas_using_wkt_invalid_parameter_value():
     with pytest.raises(InvalidColumnIndexException):
         indexes = [8]
         target_EPSG = 4326
-        gdf = csv_to_geopandas(csv_path, indexes, target_EPSG)
-        assert isinstance(gdf, gpd.GeoDataFrame)
-        assert gdf.crs.to_epsg() == target_EPSG
+        csv_to_geopandas(csv_path, indexes, target_EPSG)
 
 
 def test_csv_to_geopandas_invalid_wkt():
@@ -37,9 +35,7 @@ def test_csv_to_geopandas_invalid_wkt():
     with pytest.raises(InvalidWktFormatException):
         indexes = [3]
         target_EPSG = 4326
-        gdf = csv_to_geopandas(csv_path, indexes, target_EPSG)
-        assert isinstance(gdf, gpd.GeoDataFrame)
-        assert gdf.crs.to_epsg() == target_EPSG
+        csv_to_geopandas(csv_path, indexes, target_EPSG)
 
 
 def test_csv_to_geopandas_points():
@@ -56,9 +52,7 @@ def csv_to_geopandas_invalid_parameter_value():
     with pytest.raises(InvalidColumnIndexException):
         indexes = [9,8]
         target_EPSG = 4326
-        gdf = csv_to_geopandas(csv_path, indexes, target_EPSG)
-        assert isinstance(gdf, gpd.GeoDataFrame)
-        assert gdf.crs.to_epsg() == target_EPSG
+        csv_to_geopandas(csv_path, indexes, target_EPSG)
 
 
 def csv_to_geopandas_points_invalid_coordinate_values():
@@ -66,6 +60,4 @@ def csv_to_geopandas_points_invalid_coordinate_values():
     with pytest.raises(InvalidParameterValueException):
         indexes = [3,4]
         target_EPSG = 4326
-        gdf = csv_to_geopandas(csv_path, indexes, target_EPSG)
-        assert isinstance(gdf, gpd.GeoDataFrame)
-        assert gdf.crs.to_epsg() == target_EPSG
+        csv_to_geopandas(csv_path, indexes, target_EPSG)
