@@ -32,7 +32,7 @@ def _csv_to_geopandas(  # type: ignore[no-any-unimported]
                 geoms = geopandas.GeoSeries.from_wkt(df[geom_column])
                 geodataframe = geopandas.GeoDataFrame(df, crs=target_EPSG, geometry=geoms)
                 return geodataframe
-            except:
+            except:  # noqa: E722
                 raise InvalidWktFormatException
 
         else:
@@ -47,7 +47,7 @@ def _csv_to_geopandas(  # type: ignore[no-any-unimported]
                 geodataframe = geopandas.GeoDataFrame(
                     df, crs=target_EPSG, geometry=geopandas.points_from_xy(df[geom_x], df[geom_y]))
                 return geodataframe
-            except:
+            except:  # noqa: E722
                 raise InvalidParameterValueException
     else:
         df = pd.read_csv(csv, header=None)
@@ -58,7 +58,7 @@ def _csv_to_geopandas(  # type: ignore[no-any-unimported]
                 geoms = geopandas.GeoSeries.from_wkt(df[indexes[0]])
                 geodataframe = geopandas.GeoDataFrame(df, crs=target_EPSG, geometry=geoms)
                 return geodataframe
-            except:
+            except:  # noqa: E722
                 raise InvalidWktFormatException
         else:
             if len(df.columns) < indexes[0] or len(df.columns) < indexes[1]:
@@ -67,7 +67,7 @@ def _csv_to_geopandas(  # type: ignore[no-any-unimported]
                 geodataframe = geopandas.GeoDataFrame(
                     df, crs=target_EPSG, geometry=geopandas.points_from_xy(df[indexes[0]], df[indexes[1]]))
                 return geodataframe
-            except:
+            except:  # noqa: E722
                 raise InvalidParameterValueException
 
 
