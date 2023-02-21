@@ -48,3 +48,15 @@ class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
 
     pass
+
+
+class InvalidWktFormatException(Exception):
+    """Exception error for invalid WKT format."""
+
+    pass
+
+
+class InvalidColumnIndexException(Exception):
+    """Exception error for index out of range."""
+
+    pass
