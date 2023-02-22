@@ -1,4 +1,6 @@
 import rasterio
+import pandas as pd
+import geopandas as gpd
 from typing import Optional, Tuple, Union, List, Literal
 
 def check_parameter_value(parameter_value: int, allowed_values: list) -> bool:
@@ -104,16 +106,16 @@ def check_numeric_minmax_location(parameter: Tuple) -> bool:    # type: ignore[n
         return False
 
 
-def check_band_selection(   # type: ignore[no-untyped-def]
+def check_selection(   # type: ignore[no-untyped-def]
     in_data: rasterio.DatasetReader,
-    selection: Optional[List[int]] = None,
+    selection: Optional[List[int | str]] = None,
     validation_results: Optional[List[Tuple]] = None,
 ) -> List[Tuple]:   
-    """Checks whether the selection of raster bands is valid or not.
+    """Checks whether the selection of raster bands or dataframe columns is valid or not.
 
     Args:
-        in_data: raster object
-        selection: selected bands
+        in_data: raster object or pandas dataframe/geopandas geodataframe
+        selection: selected bands/columns
         validation_results: list containing a tuple for existing case and validation results
 
     Returns:
@@ -121,15 +123,30 @@ def check_band_selection(   # type: ignore[no-untyped-def]
     """
     if validation_results is None:
         validation_results = []
-    
-    if selection is not None:    
-        if isinstance(in_data, rasterio.DatasetReader):
+
+    if isinstance(in_data, rasterio.DatasetReader):
+        if selection is not None: 
             validation = all([isinstance(item, int) for item in selection])
-            validation_results.append(("Band selection value data type", validation))
-            validation_results.append(("Band selection value zero", 0 not in selection))
-            validation_results.append(("Band selection values not unique", len(set(selection)) == len(selection)))
-            validation_results.append(("Band selection length", len(selection) <= in_data.count))
+            validation_results.append(('Band selection value data type', validation))
+            validation_results.append(('Band selection value zero', 0 not in selection))
+            validation_results.append(('Band selection values not unique', len(set(selection)) == len(selection)))
+            validation_results.append(('Band selection length', len(selection) <= in_data.count))
             
-            if None not in selection and validation == True: validation_results.append(("Band selection maximum value", max(selection) <= in_data.count))
-    
+            if None not in selection and validation == True: validation_results.append(('Band selection maximum value', max(selection) <= in_data.count))
+            
+    if isinstance(in_data, Union[pd.DataFrame, gpd.GeoDataFrame]):
+        columns_numeric = in_data.select_dtypes(include='number').columns.to_list()
+
+        if selection is None:
+            validation_results.append(('No numeric columns', len(columns_numeric) > 0))
+        else:
+            validation = all([isinstance(item, str) for item in selection])
+            validation_results.append(('Selection input data type', validation))
+            validation_results.append(('Column selection not unique', len(set(selection)) == len(selection)))
+            validation_results.append(('Column selection length', len(selection) <= len(in_data.columns.to_list())))
+            validation_results.append(('Column not found', all([column in in_data.columns for column in selection])))
+
+            validation = [column for column in columns_numeric if column in selection]
+            validation_results.append(('Non-numeric columns in selection', len(validation) == len(selection)))
+            
     return validation_results

@@ -58,13 +58,13 @@ def _minmax_scaling_raster(  # type: ignore[no-any-unimported]
                                                        new_range=new_range[i],
                                                        nodata_value=nodata_value)
             
-            current_band = f"band {band_idx + 1}"
+            current_transform = f"band {band_idx + 1}"
             current_settings = {"band_origin": bands[i],
                                 "scaled_min": new_range[i][0],
                                 "scaled_max": new_range[i][1],
                                 "nodata_meta": out_meta_nodata[i],
                                 "nodata_used": nodata_value}
-            out_settings[current_band] = current_settings
+            out_settings[current_transform] = current_settings
 
         return out_array, out_meta, out_settings
     
@@ -113,7 +113,7 @@ def minmax_scaling(  # type: ignore[no-any-unimported]
     Raises:
         InvalidParameterValueException: The input contains invalid values.
     """    
-    valids = parameter.check_band_selection(in_data, selection)
+    valids = parameter.check_selection(in_data, selection)
     valids.append(("New range length", parameter.check_parameter_length(selection, new_range, choice=1)))
     valids.append(("NoData length", parameter.check_parameter_length(selection, nodata, choice=1, nodata=True)))    
     valids.append(("New range values data type", min([all(isinstance(element, Union[int, float]) for element in item) for item in new_range])))
