@@ -6,6 +6,7 @@ from eis_toolkit.validation.calculate_auc import calculate_auc
 
 
 def test_calculate_auc():
+    """Test auc calculation."""
     assert calculate_auc(x_values=np.array([0, 1]), y_values=np.array([0, 1])) == 0.5
     assert calculate_auc(x_values=np.array([0, 1]), y_values=np.array([0, 0.5])) == 0.25
     angles = np.linspace(0, np.pi / 2, 100)
