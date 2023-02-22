@@ -17,6 +17,9 @@ keywords = [
     "Packages"
 ]
 
+[tool.poetry.scripts]
+eis-toolkit = "eis_toolkit.__main__:cli"
+
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 gdal = "3.4.3"
