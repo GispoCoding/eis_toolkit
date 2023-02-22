@@ -1,0 +1,5 @@
+{
+    "raster_file": "tests/data/remote/small_raster.tif",
+    "geodataframe_file": "tests/data/remote/small_area.shp",
+    "output_raster_file": "tests/data/local/test.tif"
+}
