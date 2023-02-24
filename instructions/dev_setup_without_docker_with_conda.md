@@ -1,7 +1,7 @@
-# Development without docker with `conda`
+# Development with `conda`
 
-If you do not have docker, you can setup your local development
-environment with `conda`.
+If you do not have docker, you can setup your local development environment
+with `conda`. However, the Python version will be 3.9.
 
 ## Prerequisites
 
@@ -19,6 +19,8 @@ A recent version of `conda` must be installed. See:
 
 ``` shell
 conda env create -f environment.yml
+# You can overwrite an existing environment named eis_toolkit with the --force flag
+conda env create -f environment.yml --force
 ```
 
 2.  Activate the environment.
@@ -28,10 +30,11 @@ conda activate eis_toolkit
 ```
 
 3.  With the environment active, the package and all its dependencies
-    should be available.
+    should be available for execution.
 
 4.  E.g. run `pytest` to verify that the test suite works with your
-    installation.
+    installation. If not, you should first verify your installation and
+    secondly make a GitHub issue if you cannot figure out the problem.
 
 ## Further info
 
@@ -39,5 +42,6 @@ You can add your own packages to the environment as needed. E.g.
 `jupyterlab`:
 
 ``` shell
+# -c conda-forge specifies the conda-forge channel, which is recommended
 conda install -n eis_toolkit -c conda-forge jupyterlab 
 ```
