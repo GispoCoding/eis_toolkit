@@ -1,7 +1,11 @@
 # Development with `conda`
 
 If you do not have docker, you can setup your local development environment
-with `conda`. However, the Python version will be 3.9.
+with `conda`. However, the Python version will be 3.9 and versions of some
+Python packages will differ from those defined for `Docker` and `poetry`
+installations. This can cause issues where code that runs on `Docker` does not
+run in the `conda` environment or produces different results. Any such issues
+should be posted on GitHub.
 
 ## Prerequisites
 
