@@ -1,13 +1,11 @@
 import pytest
 import rasterio
-import numpy as np
 import pandas as pd
 import random
 import string
 from pathlib import Path
 
 
-from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.transformations import binarize
 
 

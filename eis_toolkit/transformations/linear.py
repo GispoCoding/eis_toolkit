@@ -374,9 +374,9 @@ def minmax_scaling(  # type: ignore[no-any-unimported]
             if validation == False:
                 raise InvalidParameterValueException(error_msg)
         
-        out_array, out_column_info, out_settings = _minmax_scaling_raster(in_data=in_data,
-                                                                          columns=selection,
-                                                                          new_range=new_range,
-                                                                          nodata=nodata)
+        out_array, out_column_info, out_settings = _minmax_scaling_table(in_data=in_data,
+                                                                         columns=selection,
+                                                                         new_range=new_range,
+                                                                         nodata=nodata)
         
         return out_array, out_column_info, out_settings
