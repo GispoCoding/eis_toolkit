@@ -7,16 +7,16 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 MODE = Literal['gini','entropy','log_loss']
 maxf = Literal['sqrt','log2',None]
 classw = Literal['balanced','balanced_subsample']
-def _randomforest_classifier(  # type: ignore[no-any-unimported]
+def _sklearn_randomforest_classifier(  # type: ignore[no-any-unimported]
     n_estimators: Optional[int] = 100 ,
     criterion: Optional [MODE] = 'gini',
-    max_depth: Optional[int | float] = None,
+    max_depth: Optional[int] = None,
     min_samples_split: Optional[int | float] = 2,
     min_samples_leaf: Optional[int] = 1,        
-    min_weight_fraction_leaf: Optional[float] = 0.0,
+    min_weight_fraction_leaf: Optional[int |float] = 0.0,
     max_features: Optional[maxf | int | float]  = 'sqrt',
     max_leaf_nodes: Optional[int] = None,
-    min_impurity_decrease: Optional[float]  = 0.0,
+    min_impurity_decrease: Optional[int | float]  = 0.0,
     bootstrap: Optional[bool] = True,
     oob_score: Optional[bool] = False,  
     n_jobs: Optional[int] = None,
@@ -24,11 +24,58 @@ def _randomforest_classifier(  # type: ignore[no-any-unimported]
     verbose: Optional [int] = 0,
     warm_start: Optional [bool] = False,
     class_weight: Optional[classw | dict | List[dict]] = None,
-    ccp_alpha: Optional [float] = 0.0,
-    max_samples: Optional [int | float] = None
+    ccp_alpha: Optional [int | float] = 0.0,
+    max_samples: Optional [int | float] = None,
 ):
 
-   myML = RandomForestClassifier(
+   # Argument evaluation
+   fl = []
+   if criterion is not None:
+      if not (criterion in ['gini','entropy','log_loss']):
+         fl.append('argument criterion is not in (gini,entropy,log_loss)')
+   if not (isinstance(max_features,(int,float)) or (max_features is None)):
+      if not (max_features in ['sqrt','log2']):
+         fl.append('argument max_features is not in (gini,entropy,log_loss) not float and not None')
+   if not (isinstance(class_weight,(dict,list)) or (class_weight is None)):
+      if not (class_weight in ['balanced','balanced_subsample']):
+         fl.append('argument class_weight is not in (balanced,balanced_subsample), not dictionary, no list and not None')
+   if not (isinstance(random_state,int) or (random_state is None)):
+      fl.append('argument random_state is not integer and is not None')
+   if not (isinstance(n_estimators,int) or (n_estimators is None)):
+      fl.append('argument n_estimatorsis not integer and is not None')
+   if not (isinstance(n_jobs,int) or (n_jobs is None)):
+      fl.append('argument n_jobs is not integer and is not None')
+   if not (isinstance(verbose,int) or (verbose is None)):
+      fl.append('argument verbose is not integer and is not None')
+   if not (isinstance(min_samples_leaf,(int)) or (min_samples_leaf is None)):
+      fl.append('argument min_samples_leaf is not integer and is not None')
+   if not (isinstance(max_leaf_nodes,int) or (max_leaf_nodes is None)):
+      fl.append('argument max_leaf_nodes is not integer and is not None')
+   if not (isinstance(max_depth,int) or (max_depth is None)):
+      fl.append('argument max_depth is not integer and is not None')
+   if not (isinstance(min_samples_split,(int,float)) or (min_samples_split is None)):
+      fl.append('argument min_samples_split is not float and is not None')
+   if not (isinstance(min_impurity_decrease,(int,float)) or (min_impurity_decrease is None)):
+      fl.append('argument min_impurity_decrease is not float and is not None')
+   if not (isinstance(min_weight_fraction_leaf,(int,float)) or (min_weight_fraction_leaf is None)):
+      fl.append('argument min_weight_fraction_leaf is not float and is not None')
+   if not (isinstance(ccp_alpha,(int,float)) or (ccp_alpha is None)):
+      fl.append('argument ccp_alpha is not float and is not None')
+   if not (isinstance(max_samples,(int,float)) or (max_samples is None)):
+      fl.append('argument max_samples is not float and is not None')
+   if not (isinstance(bootstrap,bool) or (bootstrap is None)):
+      fl.append('argument bootstrap is not bool and is not None')
+   if not (isinstance(oob_score,bool) or (oob_score is None)):
+      fl.append('argument oob_score is not bool and is not None')
+   if not (isinstance(warm_start,bool) or (warm_start is None)):
+      fl.append('argument warm_start is not bool and is not None')
+   if len(fl) > 0:
+      raise InvalidParameterValueException ('***  function sklearn_randomforest_classifier: ' + fl[0])
+   if ccp_alpha is not None:
+      if ccp_alpha < 0:
+         fl.append('***  function sklearn_randomforest_classifier: argument ccp_alpha is negative')
+
+   sklearnMl = RandomForestClassifier(
         n_estimators = n_estimators,
         criterion = criterion,
         max_depth = max_depth,
@@ -49,13 +96,13 @@ def _randomforest_classifier(  # type: ignore[no-any-unimported]
         max_samples = max_samples
 )
 
-   return myML
+   return sklearnMl
 
 # *******************************
 MODE = Literal['gini','entropy','log_loss']
 maxf = Literal['sqrt','log2',None]
 classw = Literal['balanced','balanced_subsample']
-def randomforest_classifier(  # type: ignore[no-any-unimported]
+def sklearn_randomforest_classifier(  # type: ignore[no-any-unimported]
     n_estimators: Optional[int] = 100 ,
     criterion: Optional [MODE] = 'gini',
     max_depth: Optional[int | float] = None,
@@ -73,7 +120,7 @@ def randomforest_classifier(  # type: ignore[no-any-unimported]
     warm_start: Optional [bool] = False,
     class_weight: Optional[classw | dict | List[dict]] = None,
     ccp_alpha: Optional [float] = 0.0,
-    max_samples: Optional [int | float] = None
+    max_samples: Optional [int | float] = None,
 ):
 
     """ 
@@ -133,7 +180,7 @@ def randomforest_classifier(  # type: ignore[no-any-unimported]
         randomforrest model
     """
 
-    myML = _randomforest_classifier( 
+    sklearnMl = _sklearn_randomforest_classifier( 
         n_estimators = n_estimators,
         criterion = criterion,
         max_depth = max_depth,
@@ -154,5 +201,5 @@ def randomforest_classifier(  # type: ignore[no-any-unimported]
         max_samples = max_samples
     )
 
-    return myML
+    return sklearnMl
 

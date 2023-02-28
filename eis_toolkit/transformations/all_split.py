@@ -1,8 +1,3 @@
-"""
-Test split validation for a ML-model
-Created an Februar 10 2023
-@author: torchala 
-""" 
 
 from typing import Optional,Tuple
 import pandas as pd
@@ -11,7 +6,7 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
 
-def _split(  # type: ignore[no-any-unimported]
+def _all_split(  # type: ignore[no-any-unimported]
    Xdf: pd.DataFrame,    # dataframe of Features for traning (to split in training and test dataset) and or for Xdf abnd ydf
    ydf: Optional[pd.DataFrame] = None,    # dataframe of known values for training (to split) or known values to compare with test_y
    fields: Optional[dict] = None,        # 't'-field will be used if ydf is None 
@@ -22,9 +17,28 @@ def _split(  # type: ignore[no-any-unimported]
    #stratify: Optional [np.array] = None, 
 ) -> Tuple[pd.DataFrame,pd.DataFrame,pd.DataFrame,pd.DataFrame]:
 
+   # Argument evaluation
+   fl = []
+   if not (isinstance(Xdf,pd.DataFrame)):
+      fl.append('argument Xdf is not a DataFrame')
+   if not ((isinstance(ydf,pd.DataFrame)) or (ydf is None)):
+      fl.append('argument ydf is not a DataFrame and is not None')
+   if not ((isinstance(fields,dict)) or fields is None):
+      fl.append('argument fields is not a dictionary and is not None')
+   if not ((isinstance(test_size,(int,float))) or test_size is None):
+      fl.append('argument test_size is not numeric and is not None')
+   if not ((isinstance(train_size,(int,float))) or train_size is None):
+      fl.append('argument train_size is not numeric and is not None')
+   if not ((isinstance(random_state,(int))) or random_state is None):
+      fl.append('argument random_state is not integer and is not None')
+   if not ((isinstance(shuffle,(bool))) or shuffle is None):
+      fl.append('argument shuffle is not True or Flase and is not None')
+   if len(fl) > 0:
+      raise InvalidParameterValueException ('***  function all_split: ' + fl[0])
+        
    if Xdf is not None:
       if len(Xdf.columns) == 0 or len(Xdf.index) == 0:
-         raise InvalidParameterValueException ('***  DataFrame has no column or no rows')
+         raise InvalidParameterValueException ('***  funtion all_split: DataFrame has no column or no rows')
 
    # if ydf not as an separated datafram: separat "t"-column out of Xdf
    if ydf is None:
@@ -48,7 +62,7 @@ def _split(  # type: ignore[no-any-unimported]
          train_ydf = ydf
    else:
       # split in test and training datasets
-      if ydf is None:
+      if ydf is not None:
          train_Xdf,test_Xdf,train_ydf,test_ydf = train_test_split(
          Xdf,
          ydf,
@@ -57,7 +71,7 @@ def _split(  # type: ignore[no-any-unimported]
          random_state = random_state,
          shuffle = shuffle)
       else:
-         train_ydf,test_ydf = None
+         train_ydf = test_ydf = None
          train_Xdf,test_Xdf = train_test_split(
             Xdf,
             test_size = test_size,
@@ -71,7 +85,7 @@ def _split(  # type: ignore[no-any-unimported]
    return train_Xdf,test_Xdf,train_ydf,test_ydf
 
 # *******************************
-def split(  # type: ignore[no-any-unimported]
+def all_split(  # type: ignore[no-any-unimported]
    Xdf: pd.DataFrame,      # dataframe of Features for splitting in traning and test dataset
    ydf: Optional[pd.DataFrame] = None,      # dataframe of known values for splitting 
    fields: Optional[dict] = None,
@@ -86,12 +100,12 @@ def split(  # type: ignore[no-any-unimported]
       Split for Xdf and ydf in Training and Test-Set
       - random splited testset from size test_size/train_size. 
         Xdf and ydf will be randomly splitted in a test and a training dataset. 
-      or/and splits ydf from Xdf (usinf flieds-dictioary)
+      or/and splits ydf from Xdf (using field 't' from flieds-dictioary)
 
    Args:
       - Xdf Pandas dataframe or numpy array ("array-like"): features (columns) and samples (rows)
       - ydf Pandas dataframe or numpy array ("array-like"): target valus(columns) and samples (rows) (same number as Xdf)
-         If ydf is = None, target column is included in Xdf. In this case "fields" should not be None, is fild None, Xdf will be splitted
+         If ydf is = None, target column is included in Xdf. In this case "fields" should not be None. if fild is None, just Xdf will be splitted
       - fields (dictionary): shold be given if ydf ist a column inside ydf (fields-type = 't')
       - test_size (float or int, default=None): 
          If float, should be between 0.0 and 1.0 and represent the proportion of the dataset to include in the test split. 
@@ -112,14 +126,14 @@ def split(  # type: ignore[no-any-unimported]
       Pandas Dataframes: train_X, test_X, train_y, test_y
    """
 
-   train_Xdf,test_Xdf,train_ydf,test_ydf = _split(
+   train_Xdf,test_Xdf,train_ydf,test_ydf = _all_split(
       Xdf = Xdf,
       ydf = ydf,
       fields = fields,
       test_size = test_size,
       train_size = train_size,
       random_state = random_state,
-      shuffle = shuffle
+      shuffle = shuffle,
    )
 
    return train_Xdf,test_Xdf,train_ydf,test_ydf

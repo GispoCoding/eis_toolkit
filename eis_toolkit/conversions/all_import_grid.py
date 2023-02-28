@@ -6,13 +6,21 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.conversions.raster_to_pandas import *
 
 # *******************************
-def _import_grid(
+def _all_import_grid(
     grids: List[dict]
-) -> Tuple[pd.DataFrame,dict,dict]:
+) -> Tuple[dict,pd.DataFrame,dict]:
 
+    # Argument evaluation
+    fl = []
+    if not (isinstance(grids,list)):
+        fl.append('argument lists is not a list')   
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function all_import_grid: ' + fl[0])
     if len(grids) == 0:
-        raise InvalidParameterValueException ('***  grids is empty')
-        
+        raise InvalidParameterValueException ('***  function all_import_grid: grids is empty')
+    if not (grids[0].__class__.__name__ == 'dict'):         #(isinstance(grids[0],dict)):
+        raise InvalidParameterValueException ('***  function all_import_grid: the list contains no dictionaries')
+
     # for every raster-grid
     df = pd.DataFrame()
     fields = {}
@@ -34,7 +42,7 @@ def _import_grid(
             q = True
         else:
             if meta['height'] != grid.meta['height'] or meta['width'] != grid.meta['width']:
-                raise InvalidParameterValueException ('*** height and/or width differs in the imported grids ') 
+                raise InvalidParameterValueException ('*** function all_import_grid: height and/or width differs in the imported grids ') 
             meta = grid.meta
         fields[dict['name']]=dict['type']
     # remove the file-name out of the fields-dictionaries (not nessesary)
@@ -42,12 +50,12 @@ def _import_grid(
     # for gr in fields:
     #     del gr["file"]
 
-    return df,fields,meta
+    return fields,df,meta
 
 # *******************************
-def import_grid(  # type: ignore[no-any-unimported]
+def all_import_grid(  # type: ignore[no-any-unimported]
     grids: List[dict]
-) -> Tuple[pd.DataFrame,dict,dict]: 
+) -> Tuple[dict,pd.DataFrame,dict]: 
 
     """
         Add a list of rasters (grids) as columns to pandas DataFrame.
@@ -61,14 +69,15 @@ def import_grid(  # type: ignore[no-any-unimported]
             "file" the filename of each grid and
             "type" the type of each grid (v - value, c - categorised, b - boolean, t - target)
     Returns:
-        pandas DataFrame: one pandas dataframe of alle imported grids 
         dictionary:  name, type and nodatavalue of each column
+        pandas DataFrame: one pandas dataframe of alle imported grids 
         dictionary:  metadata of the first imported grid 
-                    containing the keys: driver, dtype, nodata, width, height, count (=1), crs, transform
+                     containing the keys: driver, dtype, nodata, width, height, count (=1), crs, transform
     """
 
-    data_frame,fields,meta = _import_grid( 
+    fields,data_frame,meta = _all_import_grid( 
         grids = grids
     )                       #, add_img_coord = add_img_coord, height = height, width = width)
 
-    return data_frame,fields,meta   #, columns, cats
+    return fields,data_frame,meta   #, columns, cats
+

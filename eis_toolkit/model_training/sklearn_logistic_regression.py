@@ -7,13 +7,13 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 penalty = Literal['l1','l2','elasticnet','none']
 solver = Literal['newton-cg','lbfgs','liblinear','sag','saga']
 balanced = Literal['balanced']
-def _logistic_regression(
+def _sklearn_logistic_regression(
     penalty: Optional [penalty] = 'l2',
     dual: Optional [bool] = False,
-    tol: Optional [float] = 1e-4,
-    C: Optional [float] = 1.0,
+    tol: Optional [float | int] = 1e-4,
+    C: Optional [float | int] = 1,
     fit_intercept: Optional [bool] = True,
-    intercept_scaling: Optional [float] = 1,
+    intercept_scaling: Optional [int | float] = 1,
     class_weight: Optional [dict | balanced] = None,
     random_state: Optional [int] = None,
     solver: Optional[solver] = 'lbfgs',
@@ -21,10 +21,60 @@ def _logistic_regression(
     verbose: Optional [int] = 0,
     warm_start: Optional [bool] = False,
     n_jobs: Optional [int] = None,
-    l1_ratio: Optional [float] = None
+    l1_ratio: Optional [float | int] = None,
 ):
 
-    myML = LogisticRegression( 
+    # Argument evaluation
+    fl = []
+    if penalty is not None:
+        if not (penalty in ['l1','l2','elasticnet','none']):
+            fl.append('argument penalty is not in (l1,l2,elasticnet,none)')
+    if solver is not None:
+        if not (solver in ['newton-cg','lbfgs','liblinear','sag','saga']):
+            fl.append('argument solver is not in (newton-cg,lbfgs,liblinear,sag,saga)')
+    if class_weight is not None:
+        if not ((class_weight in ['balanced']) or isinstance(class_weight,dict)):
+            fl.append('argument balanced is not in (balanced) not dictionary and not None')
+    if not (isinstance(random_state,int) or (random_state is None)):
+        fl.append('argument random_state is not integer and is not None')
+    if not (isinstance(max_iter,int) or (max_iter is None)):
+        fl.append('argument max_iter is not integer and is not None')
+    if not (isinstance(n_jobs,int) or (n_jobs is None)):
+        fl.append('argument n_jobs is not integer and is not None')
+    if not (isinstance(verbose,int) or (verbose is None)):
+        fl.append('argument verbose is not integer and is not None')
+    if not (isinstance(tol,(int,float)) or (tol is None)):
+        fl.append('argument tol is not float and is not None')
+    if not (isinstance(C,(int,float)) or (C is None)):
+        fl.append('argument C is not float and is not None')
+    if not (isinstance(intercept_scaling,(int,float)) or (intercept_scaling is None)):
+        fl.append('argument intercept_scaling is not float and is not None')
+    if not (isinstance(l1_ratio,(int,float)) or (l1_ratio is None)):
+        fl.append('argument l1_ratio is not float and is not None')
+    if not (isinstance(dual,bool) or (dual is None)):
+        fl.append('argument dual is not bool and is not None')
+    if not (isinstance(fit_intercept,bool) or (fit_intercept is None)):
+        fl.append('argument fit_intercept is not bool and is not None')
+    if not (isinstance(warm_start,bool) or (warm_start is None)):
+        fl.append('argument warm_start is not bool and is not None')    
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function sklearn_logistic_regression: ' + fl[0])
+    
+    if solver in ['lbfgs','newton_cg','newton_cholesky','sag']:
+        if not (penalty in ['l2','none']):
+            raise InvalidParameterValueException ('***  function sklearn_logistic_regression: for solver penalty should be l2 or none')
+    elif solver == 'liblinear':
+        if not (penalty in ['l2','l1']):
+            raise InvalidParameterValueException ('***  function sklearn_logistic_regression: for solver penalty should be l2 or l1')
+            # solver - penalty: 
+            # ‘lbfgs’ - [‘l2’, None]
+            # ‘liblinear’ - [‘l1’, ‘l2’]
+            # ‘newton-cg’ - [‘l2’, None]
+            # ‘newton-cholesky’ - [‘l2’, None]
+            # ‘sag’ - [‘l2’, None]
+            # ‘saga’ - [‘elasticnet’, ‘l1’, ‘l2’, None]
+
+    sklearnMl = LogisticRegression( 
         penalty = penalty,
         dual = dual,
         tol = tol,
@@ -38,20 +88,20 @@ def _logistic_regression(
         verbose = verbose,
         warm_start = warm_start,
         n_jobs = n_jobs,
-        l1_ratio = l1_ratio
+        l1_ratio = l1_ratio,
     )
 
-    return myML
+    return sklearnMl
 
 # *******************************
 penalty = Literal['l1','l2','elasticnet','none']
 solver = Literal ['newton-cg','lbfgs','liblinear','sag','saga']
 balanced = Literal ['balanced']
-def logistic_regression(  # type: ignore[no-any-unimported]
+def sklearn_logistic_regression(  # type: ignore[no-any-unimported]
     penalty: Optional [penalty] = 'l2',
     dual: Optional [bool] = False,
     tol: Optional [float] = 1e-4,
-    C: Optional [float] = 1.0,
+    C: Optional [float] = 1,
     fit_intercept: Optional [bool] = True,
     intercept_scaling: Optional [float] = 1,
     class_weight: Optional [dict | balanced] = None,
@@ -61,7 +111,7 @@ def logistic_regression(  # type: ignore[no-any-unimported]
     verbose: Optional [int] = 0,
     warm_start: Optional [bool] = False,
     n_jobs: Optional [int] = None,
-    l1_ratio: Optional [float] = None
+    l1_ratio: Optional [float] = None,
 ):
 
     """ 
@@ -124,7 +174,7 @@ def logistic_regression(  # type: ignore[no-any-unimported]
         logistic regression model
     """
 
-    myML = _logistic_regression( 
+    sklearnMl = _sklearn_logistic_regression( 
         penalty = penalty,
         dual = dual,
         tol = tol,
@@ -138,8 +188,8 @@ def logistic_regression(  # type: ignore[no-any-unimported]
         verbose = verbose,
         warm_start = warm_start,
         n_jobs = n_jobs,
-        l1_ratio = l1_ratio
+        l1_ratio = l1_ratio,
     )
 
-    return myML
+    return sklearnMl
     

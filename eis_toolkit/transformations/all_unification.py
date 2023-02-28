@@ -4,15 +4,26 @@ import pandas as pd
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
-def _unification(
+def _all_unification(
     Xvdf: pd.DataFrame,
     Xcdf: pd.DataFrame,
 ) -> Tuple[pd.DataFrame]:
 
+    # Argument evaluation
+    fl = []
+    if not (isinstance(Xcdf,pd.DataFrame)):
+        fl.append('argument Xvdf is not a DataFrame')
+    if not (isinstance(Xvdf,pd.DataFrame)):
+        fl.append('argument Xcdf is not a DataFrame')
+    if Xvdf.shape[0] != Xcdf.shape[0]:
+        fl.append('Xvdf and Xcdf have not the same number of rows')
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function all_unification: ' + fl[0])
+
     return Xvdf.join(Xcdf)
 
 # *******************************
-def unification(
+def all_unification(
     Xvdf: pd.DataFrame,
     Xcdf: pd.DataFrame,
 ) -> Tuple[pd.DataFrame]:
@@ -26,6 +37,5 @@ def unification(
          pandas DataFrame (Xdf)
     """
 
-    return _unification(Xvdf,Xcdf)
-
+    return _all_unification(Xvdf,Xcdf)
 

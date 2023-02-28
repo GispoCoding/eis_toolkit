@@ -7,55 +7,78 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
 
-def _model_crossvalidation(  # type: ignore[no-any-unimported]
-    myML: Any,
+def _sklearn_model_crossvalidation(  # type: ignore[no-any-unimported]
+    sklearnMl: Any,
     Xdf: pd.DataFrame,                  # dataframe of Features for traning
-    ydf: Optional[pd.DataFrame] = None, # dataframe of known values for training
-    fields: Optional[dict] = None,
+    ydf: pd.DataFrame,                  # dataframe of known values for training
     scoring: Optional[list] = None,
     cv: Optional[int] = None,           # int: number of the folds (default 5)
     n_jobs: Optional[int] = None,       # if None: complement size of the test_size
     verbose: Optional [int] = 0,
-    pre_dispatch: Optional [int | str] = '2*n_jobs',
-    return_train_score: Optional [list] = True       # a list for Classification estimators: ['accuracy','recall_macro','precision_macro','f1_macro']
+    pre_dispatch: Optional [int] = None,
+    return_train_score: Optional [bool] = False,       # a list for Classification estimators: ['accuracy','recall_macro','precision_macro','f1_macro']
                                                     # a list of Regression estimators:  ['r2','explained_variance','neg_mean_absolute_error','neg_mean_squared_error']
 ) -> dict:
 
+    # Argument evaluation
+    fl = []
+    t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
+    if not t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression'):
+        fl.append('argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
+    if not (isinstance(Xdf,pd.DataFrame)):
+        fl.append('argument Xdf is not a DataFrame')
+    if not (isinstance(ydf,pd.DataFrame)):
+        fl.append('argument ydf is not a DataFrame')
+    if not (isinstance(cv,int) or (cv is None)):
+        fl.append('argument cv is not integer and is not None')
+    if not (isinstance(n_jobs,int) or (n_jobs is None)):
+        fl.append('argument n_jobs is not integer and is not None')
+    if not (isinstance(verbose,int) or (verbose is None)):
+        fl.append('argument verbose is not integer and is not None')
+    if not (isinstance(pre_dispatch,int) or (pre_dispatch is None)):
+        fl.append('argument pre_dispatch is not integer and is not None')
+    if not (isinstance(return_train_score,bool) or (return_train_score is None)):
+        fl.append('argument return_train_score is not bool and is not None')
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function sklearn_model_crossvalidation: ' + fl[0])
+    
+    fl = []
+    if len(Xdf.columns) == 0:
+        fl.append('DataFrame Xdf has no column')
+    if len(Xdf.index) == 0:
+        fl.append('DataFrame Xdf has no rows')
+    if len(ydf.columns) == 0:
+        fl.append('DataFrame ydf has no column')
+    if len(ydf.index) == 0:
+        fl.append('DataFrame ydf has no rows')
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function sklearn_model_crossvalidation: ' + fl[0])
+
     # Check
     if len(Xdf.columns) == 0:
-        raise InvalidParameterValueException ('***  DataFrame has no column')
+        raise InvalidParameterValueException ('***  sklearn_model_crossvalidation:  DataFrame has no column')
     if len(Xdf.index) == 0:
-        raise InvalidParameterValueException ('***  DataFrame has no rows')
+        raise InvalidParameterValueException ('***  sklearn_model_crossvalidation:  DataFrame has no rows')
     # check cv:
     if cv == None: 
         tmp = 5
     else:
         tmp = cv
     if Xdf.shape[0] / tmp < 4:
-         raise InvalidParameterValueException ('***  cross validation splitting: X to smal / cv to hight ') 
+         raise InvalidParameterValueException ('***  sklearn_model_crossvalidation: cross validation splitting: X to smal / cv to hight ') 
 
-    # if ydf not as an separated datafram: separat "t"-column out of Xdf
-    if ydf is None:
-        if fields is None:
-            raise InvalidParameterValueException ('***  target and target-field are None: ') 
-        else:
-            name = {i for i in fields if fields[i]=="t"}
-            ydf = Xdf[list(name)]
-            Xdf.drop(name,axis=1,inplace=True)
-
-    # ty = ydf
-    # if len(ydf.shape) > 1:
-    #     if ydf.shape[1] == 1:
-    #         ty = np.ravel(ydf)
-
+    ty = ydf
+    if len(ydf.shape) > 1:
+        if ydf.shape[1] == 1:
+            ty = np.ravel(ydf)
     #  Crossvalidation
-    myML.fit(Xdf, ydf)
+    sklearnMl.fit(Xdf, ty)
     if scoring is None:
-        if myML._estimator_type == 'regressor':
+        if sklearnMl._estimator_type == 'regressor':
             scoring = ['r2','explained_variance','neg_mean_absolute_error','neg_mean_squared_error']
         else: 
             scoring = ['accuracy','recall_macro','precision_macro','f1_macro']
-    crsv = cross_validate(estimator = myML,
+    crsv = cross_validate(estimator = sklearnMl,
                         X = Xdf,
                         y = ydf,
                         scoring = scoring,
@@ -69,17 +92,16 @@ def _model_crossvalidation(  # type: ignore[no-any-unimported]
     return crsv
 
 # *******************************
-def model_crossvalidation(  # type: ignore[no-any-unimported]
-    myML: Any,
+def sklearn_model_crossvalidation(  # type: ignore[no-any-unimported]
+    sklearnMl: Any,
     Xdf: pd.DataFrame,                      # dataframe of Features for traning
-    ydf: Optional[pd.DataFrame] = None,      # dataframe of known values for training
-    fields: Optional[dict] = None,
+    ydf: pd.DataFrame,                      # dataframe of known values for training
     scoring: Optional[str | list | tuple | dict] = None,
     cv: Optional[int] = None,               # int: number of the folds (None -> 5)
     n_jobs: Optional[int] = None,           # if None: complement size of the test_size
     verbose: Optional [int] = 0,
-    pre_dispatch: Optional [int | str] = '2*n_jobs',
-    return_train_score: Optional [list] = True       # a list for Classification estimators: ['accuracy','recall_macro','precision_macro','f1_macro']
+    pre_dispatch: Optional [int] = None,
+    return_train_score: Optional [bool] = None,       # a list for Classification estimators: ['accuracy','recall_macro','precision_macro','f1_macro']
                                                     # a list of Regression estimators:  ['r2','explained_variance','neg_mean_absolute_error','neg_mean_squared_error'] 
 ) -> dict:
 
@@ -88,9 +110,7 @@ def model_crossvalidation(  # type: ignore[no-any-unimported]
     Args:
         - Xdf Pandas dataframe or numpy array ("array-like"): features (columns) and samples (rows)
         - ydf Pandas dataframe or numpy array ("array-like"): target valus(columns) and samples (rows) (same number as Xdf)
-            If ydf is = None, target column is included in Xdf. In this case fields should not be None
-        - fields (listdictionary default = None): the fieldnames and type of fields. A field type 't' is needed, fields is not needed if ydf is not None.
-        - scoringstr (str, list, tuple, dict default=None), 
+        - scoring (str, list, tuple, dict default=None), 
             If scoring represents a single score, one can use: str
             If scoring represents multiple scores, one can use:
                 - a list or tuple of unique strings:
@@ -118,7 +138,7 @@ def model_crossvalidation(  # type: ignore[no-any-unimported]
             A str, giving an expression as a function of n_jobs, as in ‘2*n_jobs’
    Returns:
         Dictionary of the reached scores    
-            scoresdict of float arrays of shape (n_splits,)
+            scores dict of float arrays of shape (n_splits,)
             Array of scores of the estimator for each run of the cross validation.
             A dict of arrays containing the score/time arrays for each scorer is returned. The possible keys for this dict are:
             test_score
@@ -131,17 +151,16 @@ def model_crossvalidation(  # type: ignore[no-any-unimported]
                 The time for scoring the estimator on the test set for each cv split. (Note time for scoring on the train set is not included even if return_train_score is set to True
     """
 
-    return _model_crossvalidation(
-        myML = myML,
+    return _sklearn_model_crossvalidation(
+        sklearnMl = sklearnMl,
         Xdf = Xdf, 
-        ydf = ydf, 
-        fields = fields,
+        ydf = ydf,
         scoring = scoring,     
         cv = cv,
         n_jobs = n_jobs,
         verbose = verbose,
         pre_dispatch = pre_dispatch,
-        return_train_score = return_train_score
+        return_train_score = return_train_score,
     )
 
 

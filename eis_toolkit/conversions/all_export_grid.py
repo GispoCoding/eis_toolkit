@@ -8,9 +8,9 @@ from sklearn.preprocessing import OneHotEncoder
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
-def _export_grid(
-    metadata: dict,                         # liust of metadata-Dictionaries
+def _all_export_grid(
     df: pd.DataFrame,
+    metadata: dict,            # metadata-Dictionary
     outpath: Optional [str] = None,  
     outfile: Optional [str] = None,            # if not given: pd.DataFrame will given back
     outextension: Optional [str] = 'tif',
@@ -34,6 +34,23 @@ def _export_grid(
             return filename+str(filenum)+outextension   #open(filename+str(filenum)+'.'+extension,'w')
         return filename+outextension
 
+    # Argument evaluation
+    fl = []
+    if not isinstance(metadata,dict):
+        fl.append('argument metadata is not a Dictionary')
+    if not isinstance(df,pd.DataFrame):
+        fl.append('argument df is not a DataFrame') 
+    if not ((isinstance(outpath,str) or (outpath is None)) and 
+        (isinstance(outfile,str) or (outfile is None)) and 
+        (isinstance(outextension,str) or (outextension is None))):
+        #raise InvalidParameterValueException ('***  outpath, outfile or outextension is not str (or None)')
+        fl.append('arguments outpath, outfile or outextension are not str or are not None')
+    if not ((isinstance(nanmask,pd.DataFrame)) or (nanmask is None)):
+        fl.append('argument nanmask is not a DataFrame and is not None')
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function all_export_grid: ' + fl[0])
+
+    # main
     if nanmask is None:   # reshape with metadata width and hiegt (nonaodata-samples ar removed)
         # width = metadata.width
         # height = metadata.height
@@ -74,9 +91,9 @@ def _export_grid(
     return out
 
 # *******************************
-def export_grid(
-    metadata: dict,
+def all_export_grid(
     df: pd.DataFrame,
+    metadata: dict,
     outpath: Optional [str] = None,  
     outfile: Optional [str] = None,            # if not given: pd.DataFrame will given back
     outextension: Optional [str] = None,
@@ -91,8 +108,8 @@ def export_grid(
    In case outfile is not None, the dataframe will be saved to a geoTiff-file 
 
     Args:
+        df (pandas DataFrame): is the input df comming from prediction-method
         metadata (dictionary): contains with and height values
-        df (pandas DataFrame): is the input df comming from prediction-method 
         outpath (string, optional): Path of the output-file
         outfile (string, optional): Name of file of the output
         outextension (string, optional): Name of the file extension (like .tif)       
@@ -102,9 +119,9 @@ def export_grid(
         np.array: 2-d-array (numpy) reddy to outpu as a tiff, grid,... 
     """
 
-    out = _export_grid(
-    metadata = metadata,
+    out = _all_export_grid(
     df = df,
+    metadata = metadata,
     outpath = outpath,  
     outfile = outfile,            # if not given: pd.DataFrame will given back
     outextension = outextension,
