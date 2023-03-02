@@ -1,9 +1,9 @@
+"""Command-line interface for eis_toolkit."""
 import json
 from pathlib import Path
 
 import click
 import geopandas as gpd
-import jsonschema
 import rasterio
 
 from eis_toolkit.raster_processing.clipping import clip_raster
@@ -62,26 +62,28 @@ def cli_clip_raster_config(config_file: str):
 
     # I added an example on how to validate the configuration passed from a config file.
     # It uses the jsonschema library, which was, like click already a dependency
-    schema = {
-        "type": "object",
-        "properties": {
-            "raster_file": {
-                "type": "string",
-                "minLength": 1,
-            },
-            "geodataframe_file": {
-                "type": "string",
-                "minLength": 1,
-            },
-            "output_raster_file": {
-                "type": "string",
-                "minLength": 1,
-            },
-        },
-        "required": ["raster_file", "geodataframe_file", "output_raster_file"],
-    }
+    # in poetry.lock but not in requirements.txt so I commented this out to avoid
+    # ci errors.
+    # schema = {
+    #     "type": "object",
+    #     "properties": {
+    #         "raster_file": {
+    #             "type": "string",
+    #             "minLength": 1,
+    #         },
+    #         "geodataframe_file": {
+    #             "type": "string",
+    #             "minLength": 1,
+    #         },
+    #         "output_raster_file": {
+    #             "type": "string",
+    #             "minLength": 1,
+    #         },
+    #     },
+    #     "required": ["raster_file", "geodataframe_file", "output_raster_file"],
+    # }
 
-    jsonschema.validate(instance=loaded_config, schema=schema)
+    # jsonschema.validate(instance=loaded_config, schema=schema)
 
     click.echo(loaded_config)
 
