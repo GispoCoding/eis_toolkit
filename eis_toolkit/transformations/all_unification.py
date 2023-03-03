@@ -9,17 +9,6 @@ def _all_unification(
     Xcdf: pd.DataFrame,
 ) -> Tuple[pd.DataFrame]:
 
-    # Argument evaluation
-    fl = []
-    if not (isinstance(Xcdf,pd.DataFrame)):
-        fl.append('argument Xvdf is not a DataFrame')
-    if not (isinstance(Xvdf,pd.DataFrame)):
-        fl.append('argument Xcdf is not a DataFrame')
-    if Xvdf.shape[0] != Xcdf.shape[0]:
-        fl.append('Xvdf and Xcdf have not the same number of rows')
-    if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function all_unification: ' + fl[0])
-
     return Xvdf.join(Xcdf)
 
 # *******************************
@@ -36,6 +25,16 @@ def all_unification(
     Returns:
          pandas DataFrame (Xdf)
     """
-
+    # Argument evaluation
+    fl = []
+    if not (isinstance(Xcdf,pd.DataFrame)):
+        fl.append('argument Xvdf is not a DataFrame')
+    if not (isinstance(Xvdf,pd.DataFrame)):
+        fl.append('argument Xcdf is not a DataFrame')
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function all_unification: ' + fl[0])
+    if Xvdf.shape[0] != Xcdf.shape[0]:
+        raise InvalidParameterValueException ('***  function all_unification: Xvdf and Xcdf have not the same number of rows')
+    
     return _all_unification(Xvdf,Xcdf)
 

@@ -23,20 +23,6 @@ def _all_import_featureclass(
     #csv:  Optional [bool] = False
 ):
 
-    # Argument evaluation
-    fl = []
-    if not (isinstance(df,(gpd.GeoDataFrame,pd.DataFrame)) or df is None):
-        fl.append('argument df is not a DataFrame and is not None')
-    if not ((isinstance(file.__str__(),str) or file is None) and 
-        (isinstance(layer,str) or layer is None)):
-        fl.append('arguments file or layer are not str or are not None')
-    if not ((isinstance(fields,dict)) or fields is None):
-        fl.append('argument fields is not a dictionary and is not None')
-    if not (isinstance(decimalpoint_german,(bool)) or decimalpoint_german is None):
-        fl.append('argument decimalpoint_german are not boolen or are not None')      
-    if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function all_import_featureclass: ' + fl[0])
-
     # main
     if decimalpoint_german:
         decimal = ','
@@ -44,11 +30,9 @@ def _all_import_featureclass(
     else:
         decimal = '.'
         separator = ','
-    
-    # Checks
-    if len(fields) == 0:
-        raise InvalidParameterValueException ('***  function all_import_featureclass: Fields is empty')
 
+    metadata = None  
+    # check
     if df is None and file is not None:
         if not exists(file):
              raise InvalidParameterValueException ('***  function all_import_featureclass: file does not exists: ' + str(file)) 
@@ -56,7 +40,7 @@ def _all_import_featureclass(
             df = pd.read_csv(file,delimiter=separator,encoding='unicode_escape',decimal=decimal) 
         else:  # shp, FilGDB, 
             df = gpd.read_file(file,layer=layer) #,driver=type)
-            metadata = None             # save the coordinata reference system (crs) to metadata
+            # save the coordinata reference system (crs) to metadata
             if df.crs is not None:
                 metadata = df.crs          #.to_epsg()
             #dfg = gpd.read_file(name_fc,layer = layer_name, driver = 'driver')
@@ -122,7 +106,6 @@ def all_import_featureclass(
     #type: Optional [str] = None,        # if shape: None, if filegeodatabase: 'FileGDB'... 
     decimalpoint_german: Optional[bool] = False,
     #csv: Optional [bool] = False
-
 ):
 
     """
@@ -157,11 +140,26 @@ def all_import_featureclass(
         df (pandas DataFrame): the original DataFrame from import the file 
             optional: used in case of prediction to append new column as the resul of the prediction
             optional: metadata dictionary if an geodatandas dataframe is imported. crs is in metadata['crs']
-
+        metadata (crs-object): contains the coordinate reference system if exists
     """
-    # dfnew,columns = _import_featureclass(
-    #     fields = fields, fc = fc, geofile = geofile
-    #)
+
+    # Argument evaluation
+    fl = []
+    if not (isinstance(df,(gpd.GeoDataFrame,pd.DataFrame)) or df is None):
+        fl.append('argument df is not a DataFrame and is not None')
+    if not ((isinstance(file.__str__(),str) or file is None) and 
+        (isinstance(layer,str) or layer is None)):
+        fl.append('arguments file or layer are not str or are not None')
+    if not ((isinstance(fields,dict)) or fields is None):
+        fl.append('argument fields is not a dictionary and is not None')
+    if not (isinstance(decimalpoint_german,(bool)) or decimalpoint_german is None):
+        fl.append('argument decimalpoint_german are not boolen or are not None')      
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function all_import_featureclass: ' + fl[0])
+
+    # Checks
+    if len(fields) == 0:
+        raise InvalidParameterValueException ('***  function all_import_featureclass: Fields is empty')
 
     return _all_import_featureclass(
         fields = fields,

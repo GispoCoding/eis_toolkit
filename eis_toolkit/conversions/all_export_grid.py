@@ -34,22 +34,6 @@ def _all_export_grid(
             return filename+str(filenum)+outextension   #open(filename+str(filenum)+'.'+extension,'w')
         return filename+outextension
 
-    # Argument evaluation
-    fl = []
-    if not isinstance(metadata,dict):
-        fl.append('argument metadata is not a Dictionary')
-    if not isinstance(df,pd.DataFrame):
-        fl.append('argument df is not a DataFrame') 
-    if not ((isinstance(outpath,str) or (outpath is None)) and 
-        (isinstance(outfile,str) or (outfile is None)) and 
-        (isinstance(outextension,str) or (outextension is None))):
-        #raise InvalidParameterValueException ('***  outpath, outfile or outextension is not str (or None)')
-        fl.append('arguments outpath, outfile or outextension are not str or are not None')
-    if not ((isinstance(nanmask,pd.DataFrame)) or (nanmask is None)):
-        fl.append('argument nanmask is not a DataFrame and is not None')
-    if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function all_export_grid: ' + fl[0])
-
     # main
     if nanmask is None:   # reshape with metadata width and hiegt (nonaodata-samples ar removed)
         # width = metadata.width
@@ -118,6 +102,22 @@ def all_export_grid(
     Returns:
         np.array: 2-d-array (numpy) reddy to outpu as a tiff, grid,... 
     """
+
+    # Argument evaluation
+    fl = []
+    if not isinstance(metadata,dict):
+        fl.append('argument metadata is not a Dictionary')
+    if not isinstance(df,pd.DataFrame):
+        fl.append('argument df is not a DataFrame') 
+    if not ((isinstance(outpath,str) or (outpath is None)) and 
+        (isinstance(outfile,str) or (outfile is None)) and 
+        (isinstance(outextension,str) or (outextension is None))):
+        #raise InvalidParameterValueException ('***  outpath, outfile or outextension is not str (or None)')
+        fl.append('arguments outpath, outfile or outextension are not str or are not None')
+    if not ((isinstance(nanmask,pd.DataFrame)) or (nanmask is None)):
+        fl.append('argument nanmask is not a DataFrame and is not None')
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function all_export_grid: ' + fl[0])
 
     out = _all_export_grid(
     df = df,

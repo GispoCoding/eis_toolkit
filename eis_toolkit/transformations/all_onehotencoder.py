@@ -12,21 +12,6 @@ def _all_onehotencoder(
     #fields: Optional[Any] = None
 ) -> pd.DataFrame:
 
-    # Argument evaluation
-    fl = []
-    if not (isinstance(df,pd.DataFrame)):
-        fl.append('argument df is not a DataFrame')
-    t = ohe.__class__.__name__
-    if not (t in ('OneHotEncoder') or ohe is None):
-        fl.append('argument ohe ist not an instance of one of OneHotEncoder')
-    if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function all_onhotencoder: ' + fl[0])
-
-    # if len(Xdf.columns) == 0:
-    #     raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no column')
-    # if len(Xdf.index) == 0:
-    #     raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no rows')
-
     encnew = None
     if len(df.columns) == 0 and len(df.index) == 0:
         tmpb = None
@@ -65,6 +50,21 @@ def all_onehotencoder(  # type: ignore[no-any-unimported]
         ohe - Objet (OnHotEncoing): in case of training 
                                     in case of prediction: None
     """
+    # Argument evaluation
+    fl = []
+    if not (isinstance(df,pd.DataFrame)):
+        fl.append('argument df is not a DataFrame')
+    t = ohe.__class__.__name__
+    if not (t in ('OneHotEncoder') or ohe is None):
+        fl.append('argument ohe ist not an instance of one of OneHotEncoder')
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function all_onhotencoder: ' + fl[0])
+
+    # if len(Xdf.columns) == 0:
+    #     raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no column')
+    # if len(Xdf.index) == 0:
+    #     raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no rows')
+
 
     dfnew,encnew = _all_onehotencoder(
         df = df, ohe = ohe        #, fields = fields

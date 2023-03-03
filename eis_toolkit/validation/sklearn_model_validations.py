@@ -3,8 +3,8 @@ from typing import Optional, Any, Tuple
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from eis_toolkit.prediction_methods.sklearn_model_prediction import *
 from sklearn import metrics
-from sklearn_model_prediction import *
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
@@ -24,44 +24,8 @@ def _sklearn_model_validations(  # type: ignore[no-any-unimported]
    #stratify: Optional [np.array] = None, 
 ) -> Tuple[pd.DataFrame,pd.DataFrame,pd.DataFrame,Any]:  #dict
 
-   # Argument evaluation
-   fl = []
-   t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
-   if not t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression'):
-      fl.append('argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
-   if not (isinstance(Xdf,pd.DataFrame) or (Xdf is None)):
-      fl.append('argument Xdf is not a DataFrame and is not None')
-   if not (isinstance(ydf,pd.DataFrame)  or (ydf is None)):
-      fl.append('argument ydf is not a DataFrame and is not None')
-   if not (isinstance(predict_ydf,pd.DataFrame) or (predict_ydf is None)):
-      fl.append('argument predict_ydf is not a DataFrame and is not None')
-   if predict_ydf is not None:
-      if len(predict_ydf.columns) != 1:
-        fl.append('predict_ydf has 0 or more than 1 columns') 
-   if not (isinstance(test_size,(float,int)) or (test_size is None)):
-      fl.append('argument test_size is not integer and is not None')
-   if not (isinstance(train_size,(float,int)) or (train_size is None)):
-      fl.append('argument train_size is not integer and is not None')
-   if not (isinstance(random_state,int) or (random_state is None)):
-      fl.append('argument random_state is not integer and is not None')
-   if not (isinstance(shuffle,bool) or (shuffle is None)):
-      fl.append('argument shuffle is not bool and is not None')
-   if not (isinstance(confusion_matrix,bool) or (confusion_matrix is None)):
-      fl.append('argument confusion_matrix is not bool and is not None')
-   if not (isinstance(comparison,bool) or (comparison is None)):
-      fl.append('argument comparison is not bool and is not None')
-
-   if len(fl) > 0:
-      raise InvalidParameterValueException ('***  function sklearn_model_validation: ' + fl[0])
-    
    # configuration:
    maxlines = 1000000     # max. number of y ->rows for comparison
-
-   if Xdf is not None:
-      if len(Xdf.columns) == 0:
-         raise InvalidParameterValueException ('***  function sklearn_model_validation:  DataFrame has no column')
-      if len(Xdf.index) == 0:
-         raise InvalidParameterValueException ('***  function sklearn_model_validation:  DataFrame has no rows')
 
    # if ydf not as an separated datafram: separat "t"-column out of Xdf
    # if ydf is None:
@@ -227,14 +191,50 @@ def sklearn_model_validations(  # type: ignore[no-any-unimported]
          No effect with selftest
    
    Returns:
-      validation: Dictionary of the validation
+      validation: DataFrame with all values of the validation
       confusion_matrix: DataFrame of confusion matrix, if calculated 
            confusion schold be read paire wise: 
            number of pair test(0),predict(0), 
            up to n classes which apeers in y_test and y_predict
-      comparison_list, if calculated
+      comparison_list,: pd.DataFrame if calculated
       Model, if calculated
    """
+
+   # Argument evaluation
+   fl = []
+   t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
+   if not t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression'):
+      fl.append('argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
+   if not (isinstance(Xdf,pd.DataFrame) or (Xdf is None)):
+      fl.append('argument Xdf is not a DataFrame and is not None')
+   if not (isinstance(ydf,pd.DataFrame)  or (ydf is None)):
+      fl.append('argument ydf is not a DataFrame and is not None')
+   if not (isinstance(predict_ydf,pd.DataFrame) or (predict_ydf is None)):
+      fl.append('argument predict_ydf is not a DataFrame and is not None')
+   if predict_ydf is not None:
+      if len(predict_ydf.columns) != 1:
+        fl.append('predict_ydf has 0 or more than 1 columns') 
+   if not (isinstance(test_size,(float,int)) or (test_size is None)):
+      fl.append('argument test_size is not integer and is not None')
+   if not (isinstance(train_size,(float,int)) or (train_size is None)):
+      fl.append('argument train_size is not integer and is not None')
+   if not (isinstance(random_state,int) or (random_state is None)):
+      fl.append('argument random_state is not integer and is not None')
+   if not (isinstance(shuffle,bool) or (shuffle is None)):
+      fl.append('argument shuffle is not bool and is not None')
+   if not (isinstance(confusion_matrix,bool) or (confusion_matrix is None)):
+      fl.append('argument confusion_matrix is not bool and is not None')
+   if not (isinstance(comparison,bool) or (comparison is None)):
+      fl.append('argument comparison is not bool and is not None')
+
+   if len(fl) > 0:
+      raise InvalidParameterValueException ('***  function sklearn_model_validation: ' + fl[0])
+
+   if Xdf is not None:
+      if len(Xdf.columns) == 0:
+         raise InvalidParameterValueException ('***  function sklearn_model_validation:  DataFrame has no column')
+      if len(Xdf.index) == 0:
+         raise InvalidParameterValueException ('***  function sklearn_model_validation:  DataFrame has no rows')
 
    validation,confusion,comparison,sklearnMl = _sklearn_model_validations(
       sklearnMl = sklearnMl,

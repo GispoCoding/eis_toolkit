@@ -12,18 +12,6 @@ def _all_nodata_remove(
     df: pd.DataFrame
 ) -> Tuple[pd.DataFrame,pd.DataFrame]:     # das 2. df ist die neue nodata-mask (nur eine Spalte, ebenso viele reihen, wie die erste df)
 
-    # Argument evaluation
-    fl = []
-    if not (isinstance(df,pd.DataFrame)):
-        fl.append('argument df is not a DataFrame')
-    if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function all_nodata_remove: ' + fl[0])
-
-    if len(df.columns) == 0:
-        raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no column')
-    if len(df.index) == 0:
-        raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no rows')
-        
     # datatype to float32 (on this way float64 come to np.inf)
     df.loc[:,df.dtypes=='float64'] = df.loc[:,df.dtypes=='float64'].astype('float32')
     df.loc[:,df.dtypes=='int64'] = df.loc[:,df.dtypes=='int64'].astype('int32')
@@ -64,6 +52,19 @@ def all_nodata_remove(
         - pandas DataFrame: nodatamask containing True for rows which are droped 
                             because of some nodata cells
     """
+    
+    # Argument evaluation
+    fl = []
+    if not (isinstance(df,pd.DataFrame)):
+        fl.append('argument df is not a DataFrame')
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function all_nodata_remove: ' + fl[0])
+
+    if len(df.columns) == 0:
+        raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no column')
+    if len(df.index) == 0:
+        raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no rows')
+        
 
     df,dfsum =  _all_nodata_remove(                # np2: nodatamask
         df = df

@@ -17,29 +17,7 @@ def _all_split(  # type: ignore[no-any-unimported]
    #stratify: Optional [np.array] = None, 
 ) -> Tuple[pd.DataFrame,pd.DataFrame,pd.DataFrame,pd.DataFrame]:
 
-   # Argument evaluation
-   fl = []
-   if not (isinstance(Xdf,pd.DataFrame)):
-      fl.append('argument Xdf is not a DataFrame')
-   if not ((isinstance(ydf,pd.DataFrame)) or (ydf is None)):
-      fl.append('argument ydf is not a DataFrame and is not None')
-   if not ((isinstance(fields,dict)) or fields is None):
-      fl.append('argument fields is not a dictionary and is not None')
-   if not ((isinstance(test_size,(int,float))) or test_size is None):
-      fl.append('argument test_size is not numeric and is not None')
-   if not ((isinstance(train_size,(int,float))) or train_size is None):
-      fl.append('argument train_size is not numeric and is not None')
-   if not ((isinstance(random_state,(int))) or random_state is None):
-      fl.append('argument random_state is not integer and is not None')
-   if not ((isinstance(shuffle,(bool))) or shuffle is None):
-      fl.append('argument shuffle is not True or Flase and is not None')
-   if len(fl) > 0:
-      raise InvalidParameterValueException ('***  function all_split: ' + fl[0])
-        
-   if Xdf is not None:
-      if len(Xdf.columns) == 0 or len(Xdf.index) == 0:
-         raise InvalidParameterValueException ('***  funtion all_split: DataFrame has no column or no rows')
-
+   #
    # if ydf not as an separated datafram: separat "t"-column out of Xdf
    if ydf is None:
       if fields is not None:
@@ -125,6 +103,29 @@ def all_split(  # type: ignore[no-any-unimported]
    Returns:
       Pandas Dataframes: train_X, test_X, train_y, test_y
    """
+  # Argument evaluation
+   fl = []
+   if not (isinstance(Xdf,pd.DataFrame)):
+      fl.append('argument Xdf is not a DataFrame')
+   if not ((isinstance(ydf,pd.DataFrame)) or (ydf is None)):
+      fl.append('argument ydf is not a DataFrame and is not None')
+   if not ((isinstance(fields,dict)) or fields is None):
+      fl.append('argument fields is not a dictionary and is not None')
+   if not ((isinstance(test_size,(int,float))) or test_size is None):
+      fl.append('argument test_size is not numeric and is not None')
+   if not ((isinstance(train_size,(int,float))) or train_size is None):
+      fl.append('argument train_size is not numeric and is not None')
+   if not ((isinstance(random_state,(int))) or random_state is None):
+      fl.append('argument random_state is not integer and is not None')
+   if not ((isinstance(shuffle,(bool))) or shuffle is None):
+      fl.append('argument shuffle is not True or Flase and is not None')
+   if len(fl) > 0:
+      raise InvalidParameterValueException ('***  function all_split: ' + fl[0])
+        
+   if Xdf is not None:
+      if len(Xdf.columns) == 0 or len(Xdf.index) == 0:
+         raise InvalidParameterValueException ('***  funtion all_split: DataFrame has no column or no rows')
+
 
    train_Xdf,test_Xdf,train_ydf,test_ydf = _all_split(
       Xdf = Xdf,

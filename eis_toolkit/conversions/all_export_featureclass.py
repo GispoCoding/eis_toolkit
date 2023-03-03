@@ -58,38 +58,6 @@ def _all_export_featureclass(
             return path, layer
         return path, name
 
-    # Argument evaluation
-    fl = []
-    if not (isinstance(ydf,pd.DataFrame)):
-        fl.append('ydf is not a DataFrame')
-        #raise InvalidParameterValueException ('***  all_export_featureclass: ydf is not a DataFrame')
-    if not (isinstance(dfg,(pd.DataFrame,gpd.GeoDataFrame)) or (dfg is None)):
-        fl.append('dfg is not in instance of one of (pd.DataFrame,gpd.GeoDataFrame( or is not None)')
-        #raise InvalidParameterValueException ('***  dfg is not in instance of one of (pd.DataFrame,gpd.GeoDataFrame,None)')
-    # if not (isinstance(metadata,dict)  or (metadata is None)):
-    #     fl.append('metadata is not dict or None')
-    if not (isinstance(decimalpoint_german,(bool)) and isinstance(new_version,(bool))):
-        fl.append('decimalpoint_german or new_version is not boolen or None')
-        #raise InvalidParameterValueException ('***  decimalpoint_german or new_version is not boolen')        
-    if not (isinstance(nanmask,pd.DataFrame)):
-        if nanmask is not None:
-            #raise InvalidParameterValueException ('*** nanmask is not an pd.DataFrame')
-            fl.append('nanmask is not an pd.DataFrame or None')
-    if not ((isinstance(outpath,str) or (outpath is None)) and 
-        (isinstance(outfile,str) or (outfile is None)) and 
-        (isinstance(outextension,str) or (outextension is None))):
-        #raise InvalidParameterValueException ('***  outpath, outfile or outextension is not str (or None)')
-        fl.append('outpath, outfile or outextension is not str or None')
-    if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function all_export_featureclass: ' + fl[0])
-    if dfg is not None and nanmask is None:
-        if ydf.shape[0] != dfg.shape[0]:          # rows (.index)
-            raise InvalidParameterValueException ('*** function all_export_featureclass:  ydf and dfg have not the same number of rows')
-    if dfg is not None and nanmask is not None:
-        if dfg.shape[0] != nanmask.shape[0]:          # rows (.index)
-            raise InvalidParameterValueException ('*** function all_export_featureclass:  dfg and nanamask have not the same number of rows') 
-    if dfg is None and nanmask is not None:
-        raise InvalidParameterValueException ('*** function all_export_featureclass:  nanmask is not needed, because dfg ist None')
     # Main program
     if decimalpoint_german:
         decimal = ','
@@ -218,6 +186,40 @@ def all_export_featureclass(
         gpd.GeoDataFrame or pd.DataFrame 
         optionaly stored as a file (csv, shp or geojson or feature class layer for a geopackage)
     """
+
+    # Argument evaluation
+    fl = []
+    if not (isinstance(ydf,pd.DataFrame)):
+        fl.append('ydf is not a DataFrame')
+        #raise InvalidParameterValueException ('***  all_export_featureclass: ydf is not a DataFrame')
+    if not (isinstance(dfg,(pd.DataFrame,gpd.GeoDataFrame)) or (dfg is None)):
+        fl.append('dfg is not in instance of one of (pd.DataFrame,gpd.GeoDataFrame( or is not None)')
+        #raise InvalidParameterValueException ('***  dfg is not in instance of one of (pd.DataFrame,gpd.GeoDataFrame,None)')
+    # if not (isinstance(metadata,dict)  or (metadata is None)):
+    #     fl.append('metadata is not dict or None')
+    if not (isinstance(decimalpoint_german,(bool)) and isinstance(new_version,(bool))):
+        fl.append('decimalpoint_german or new_version is not boolen or None')
+        #raise InvalidParameterValueException ('***  decimalpoint_german or new_version is not boolen')        
+    if not (isinstance(nanmask,pd.DataFrame)):
+        if nanmask is not None:
+            #raise InvalidParameterValueException ('*** nanmask is not an pd.DataFrame')
+            fl.append('nanmask is not an pd.DataFrame or None')
+    if not ((isinstance(outpath,str) or (outpath is None)) and 
+        (isinstance(outfile,str) or (outfile is None)) and 
+        (isinstance(outextension,str) or (outextension is None))):
+        #raise InvalidParameterValueException ('***  outpath, outfile or outextension is not str (or None)')
+        fl.append('outpath, outfile or outextension is not str or None')
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function all_export_featureclass: ' + fl[0])
+    if dfg is not None and nanmask is None:
+        if ydf.shape[0] != dfg.shape[0]:          # rows (.index)
+            raise InvalidParameterValueException ('*** function all_export_featureclass:  ydf and dfg have not the same number of rows')
+    if dfg is not None and nanmask is not None:
+        if dfg.shape[0] != nanmask.shape[0]:          # rows (.index)
+            raise InvalidParameterValueException ('*** function all_export_featureclass:  dfg and nanamask have not the same number of rows') 
+    if dfg is None and nanmask is not None:
+        raise InvalidParameterValueException ('*** function all_export_featureclass:  nanmask is not needed, because dfg ist None')
+
 
     out = _all_export_featureclass(
         ydf = ydf,

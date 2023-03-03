@@ -1,8 +1,3 @@
-"""
-prediction for a keras-model
-Created an Feb 04 2023
-@author: torchala 
-""" 
 
 from typing import Any, Optional, Tuple
 import pandas as pd
