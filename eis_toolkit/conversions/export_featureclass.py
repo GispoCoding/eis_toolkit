@@ -10,7 +10,7 @@ from copy import deepcopy
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
-def _all_export_featureclass(
+def _export_featureclass(
     ydf: pd.DataFrame | gpd.GeoDataFrame,                                          # ydf has to add to dfg is given, else: ydf has to be exported
     dfg: Optional [gpd.GeoDataFrame | pd.DataFrame] = None,
     metadata: Optional [Any] = None,
@@ -141,11 +141,11 @@ def _all_export_featureclass(
             elif outextension == "geojson":
                 out.to_file(filename+extension,driver = 'GeoJSON')
             else:
-                raise InvalidParameterValueException ('***  function all_xport_featureclass: No data output. Wrong extension of the output-file')  
+                raise InvalidParameterValueException ('***  function export_featureclass: No data output. Wrong extension of the output-file')  
     return out
 
 # *******************************
-def all_export_featureclass(
+def export_featureclass(
     ydf: pd.DataFrame | gpd.GeoDataFrame,                       # ydf has to add to XDF
     dfg: Optional [gpd.GeoDataFrame | pd.DataFrame] = None,     # ydf has to be ecxported
     metadata: Optional [Any] = None,
@@ -159,39 +159,39 @@ def all_export_featureclass(
 ):
 
     """ 
-        Add the result column to the existing geopandas (or pandas) dataframe (if exists)
-        and saved the (geo)dataframe optionaly to a feature class file (like .shp) or to a csv (text) file.
-        If the file alredy exists, then the old file will be optionaly delteted or the new file will be named with (file-name)1, 2, ... 
+        Add the prediction result column to the existing geopandas (or pandas) dataframe (if exists)
+        and saved the (geo)dataframe optionaly to a feature class file (like .shp, layer of a geopackage ...) or to a csv (text) file.
+        If the file alredy exists, then the old file will be optionaly deleteted or the new file will be named numberd with (file-name)1, 2, ... 
         If outpath is a geopackage then outfile is the name of the new layer. 
         If the layer alredy exists, the new layer will be named with (layer-name)1, 2, ... 
         If the column name already exists, the new column will be named as result1, result2,... etc.
-        If outfile == None: No file will be stored.
+        If outfile == None: No file will be stored (the only result is a dataframe)
         In case a nanmask is availabel (nan-cells for prediction input caused droped rows): 
-        "True"-cells in nanmask lead to nodata-cells in ydf. So ydf may be added to dfg.
+             "True"-cells in nanmask lead to nodata-cells in ydf before added to dfg.
         If no dfg is given: 
-            no nadatamask is needed.
-            if ydf has a geometry columns, it may be stored as a GIS-Layer if tge extension of the file name is .shp, geojson or gpkg
+            No nadatamask is needed.
+            If ydf has a geometry columns, it may be stored as a GIS-Layer if the extension of the file name is .shp, geojson or gpkg (no csv)
     Args:
-        - ydf (pandas DataFrame): is result of prediction,
-        - dfg (pandas DataFrame or GeoDataFrame): is the primary feature table - input for prediction process (to add with ydf)
-        - metadata:   in case of a geodataframe: crs
-        - outpath (string, optional): Path or geodatapacke of the output-file
+        - ydf (pandas DataFrame): Result of prediction,
+        - dfg (pandas DataFrame or GeoDataFrame): Is the primary feature table - input for prediction process (is to add with ydf)
+        - metadata: In case of a geodataframe: crs (coordinate reference system)
+        - outpath (string, optional): Path or name of a geodatapacke for the output-file or -layer
         - outfile (string, optional): Name of file or layer of the output
-        - outextension (string, optional): Name of the file extension (like .shp, geojson or gpkg)
-        - nodata (pandas DataFrame, optional): marked rows witch are be droped because of nodata in the prediction input. 
-        - decimalpoint_german: (bool, optional): default False, german decimal comma (,) and separator (;)
-        - new_version: = True: is the output file exists, then a new filename will be generated with the next number. 
-                       = False:  the existing file will be deleted 
+        - outextension (string, optional): Name of the file extension (like shp, .shop, geojson, .geojson, .gpg or gpkg as well as csvor .csv).
+        - nanmask (pandas DataFrame, optional): Marked rows witch are be droped because of nodata in the prediction input. 
+        - decimalpoint_german: (bool, optional,default False): If True german decimal comma (,) and separator (;) will be used (else decimal . and separator ,)
+        - new_version: = True: If the output file exists, then a new filename will be generated with the next number. 
+                       = False:  The existing file will be deleted.
     Returns:
-        gpd.GeoDataFrame or pd.DataFrame 
-        optionaly stored as a file (csv, shp or geojson or feature class layer for a geopackage)
+        - gpd.GeoDataFrame or pd.DataFrame  (csv)
+        - optionaly: stored file (csv, shp or geojson or feature class layer for a geopackage)
     """
 
     # Argument evaluation
     fl = []
     if not (isinstance(ydf,pd.DataFrame)):
         fl.append('ydf is not a DataFrame')
-        #raise InvalidParameterValueException ('***  all_export_featureclass: ydf is not a DataFrame')
+        #raise InvalidParameterValueException ('***  export_featureclass: ydf is not a DataFrame')
     if not (isinstance(dfg,(pd.DataFrame,gpd.GeoDataFrame)) or (dfg is None)):
         fl.append('dfg is not in instance of one of (pd.DataFrame,gpd.GeoDataFrame( or is not None)')
         #raise InvalidParameterValueException ('***  dfg is not in instance of one of (pd.DataFrame,gpd.GeoDataFrame,None)')
@@ -210,18 +210,18 @@ def all_export_featureclass(
         #raise InvalidParameterValueException ('***  outpath, outfile or outextension is not str (or None)')
         fl.append('outpath, outfile or outextension is not str or None')
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function all_export_featureclass: ' + fl[0])
+        raise InvalidParameterValueException ('***  function export_featureclass: ' + fl[0])
     if dfg is not None and nanmask is None:
         if ydf.shape[0] != dfg.shape[0]:          # rows (.index)
-            raise InvalidParameterValueException ('*** function all_export_featureclass:  ydf and dfg have not the same number of rows')
+            raise InvalidParameterValueException ('*** function export_featureclass:  ydf and dfg have not the same number of rows')
     if dfg is not None and nanmask is not None:
         if dfg.shape[0] != nanmask.shape[0]:          # rows (.index)
-            raise InvalidParameterValueException ('*** function all_export_featureclass:  dfg and nanamask have not the same number of rows') 
+            raise InvalidParameterValueException ('*** function export_featureclass:  dfg and nanamask have not the same number of rows') 
     if dfg is None and nanmask is not None:
-        raise InvalidParameterValueException ('*** function all_export_featureclass:  nanmask is not needed, because dfg ist None')
+        raise InvalidParameterValueException ('*** function export_featureclass:  nanmask is not needed, because dfg ist None')
 
 
-    out = _all_export_featureclass(
+    out = _export_featureclass(
         ydf = ydf,
         dfg = dfg,
         metadata = metadata,

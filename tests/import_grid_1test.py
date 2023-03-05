@@ -1,5 +1,5 @@
 
-# all_import_grid_test.py
+# import_grid_test.py
 ####################################
 import pytest
 import sys
@@ -11,7 +11,7 @@ sys.path.append (scripts)
 # import rasterio
 import geopandas as gpd
 import pandas as pd
-from eis_toolkit.conversions.all_import_grid import *
+from eis_toolkit.conversions.import_grid import *
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 # input from GUI:
@@ -33,9 +33,9 @@ gridwrong = [{'name':'Total','type':'t','file':name_target},
  {'name':'Thorium', 'file':name_Th, 'type':'v'},
  {'name':'Uran', 'file':name_wrong, 'type':'v'}]
 
-def test_all_import_grid_ok():
+def test_import_grid_ok():
     """Test functionality: import of tif files and creating of X as DataFrame"""
-    columns, df, metadata= all_import_grid(grids = grids) 
+    columns, df, metadata= import_grid(grids = grids) 
 
     assert isinstance(columns,dict)
     assert isinstance(df,pd.DataFrame)
@@ -45,12 +45,12 @@ def test_all_import_grid_ok():
     assert isinstance(metadata,dict)
     assert metadata['height'] > 0
 
-def test_all_import_grid_wrong():
+def test_import_grid_wrong():
     """Test functionality with wrong filenames."""
     with pytest.raises(InvalidParameterValueException):
-        columns , df , metadata = all_import_grid(grids = gridwrong) 
+        columns , df , metadata = import_grid(grids = gridwrong) 
 
-test_all_import_grid_ok()
-test_all_import_grid_wrong()
+test_import_grid_ok()
+test_import_grid_wrong()
 
 

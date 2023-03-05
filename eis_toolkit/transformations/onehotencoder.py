@@ -1,12 +1,11 @@
 
 from typing import Optional, Any
 import pandas as pd
-#from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder #, LabelEncoder  
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
-def _all_onehotencoder(
+def _onehotencoder(
     df: pd.DataFrame,             # oder: Dateiname (dann hier erst einesen)
     ohe: Optional[Any] = None
     #fields: Optional[Any] = None
@@ -30,19 +29,18 @@ def _all_onehotencoder(
 
 
 # *******************************
-def all_onehotencoder(  # type: ignore[no-any-unimported]
+def onehotencoder(  # type: ignore[no-any-unimported]
     df: pd.DataFrame,
     ohe: Optional [Any] = None
-    #fields: Optional[Any] = None
 ) -> pd.DataFrame:
 
     """
-        encode all categorical columns in pandas dataframe
-        in case of model training: enhotencoder object is one of the outputs
-        in case of prediction: enhotencoder object created in traing is needed 
+        Encodes all categorical columns in a pandas dataframe.
+        In case of model training: onehotencoder object is one of the outputs.
+        In case of prediction: onehotencoder object created in traing is needed (input argument).
     Args:
-        df (DataFrame): 
-        ohe: in case of predition mandantory
+        - df (DataFrame): 
+        - ohe: in case of predition mandantory
              in case of training = None
 
     Returns:
@@ -50,6 +48,7 @@ def all_onehotencoder(  # type: ignore[no-any-unimported]
         ohe - Objet (OnHotEncoing): in case of training 
                                     in case of prediction: None
     """
+    
     # Argument evaluation
     fl = []
     if not (isinstance(df,pd.DataFrame)):
@@ -58,7 +57,7 @@ def all_onehotencoder(  # type: ignore[no-any-unimported]
     if not (t in ('OneHotEncoder') or ohe is None):
         fl.append('argument ohe ist not an instance of one of OneHotEncoder')
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function all_onhotencoder: ' + fl[0])
+        raise InvalidParameterValueException ('***  function onhotencoder: ' + fl[0])
 
     # if len(Xdf.columns) == 0:
     #     raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no column')
@@ -66,7 +65,7 @@ def all_onehotencoder(  # type: ignore[no-any-unimported]
     #     raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no rows')
 
 
-    dfnew,encnew = _all_onehotencoder(
+    dfnew,encnew = _onehotencoder(
         df = df, ohe = ohe        #, fields = fields
     )
 

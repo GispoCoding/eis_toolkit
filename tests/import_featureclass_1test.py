@@ -1,43 +1,28 @@
 
-# all_nodata_remove_test.py
-#####################################
+# import_featureclass_test.py
+##################################
 import pytest
-# import numpy as np
 import sys
 from pathlib import Path
-from copy import deepcopy
+
 scripts = r'/eis_toolkit'  #/eis_toolkit/conversions'
 sys.path.append (scripts)
 
+# import rasterio
 import geopandas as gpd
 import pandas as pd
-from eis_toolkit.conversions.all_import_featureclass import *
-from eis_toolkit.conversions.all_import_grid import *
-from eis_toolkit.transformations.all_nodata_remove import *
+from eis_toolkit.conversions.import_featureclass import *
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
-#################################################################
-# import of data from all_import_featureclass or all_import_grid
-# fc or csv:
+# input from GUI:
 parent_dir = Path(__file__).parent
-name_fc = parent_dir.joinpath(r'data/shps/EIS_gp.gpkg')
+name_fc = str(parent_dir.joinpath(r'data/shps/EIS_gp.gpkg'))
 layer_name = r'Occ_2'
-name_csv = parent_dir.joinpath(r'data/csv/Trainings_Test.csv') 
-
-# grid:
-parent_dir = Path(__file__).parent
-name_K = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_K_.tif'))
-name_Th = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_Th_eq_.tif'))
-name_U = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif'))
-name_target = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif'))
-
-#grids and grid-types for X (training based on tif-files)
-grids =  [{'name':'Total','type':'t','file':name_target},
- {'name':'Kalium', 'file':name_K, 'type':'v'},
- {'name':'Thorium', 'file':name_Th, 'type':'v'},
- {'name':'Uran', 'file':name_U, 'type':'v'}]
-
+name_csv = str(parent_dir.joinpath(r'data/csv/Trainings_Test.csv')) 
+name_wrong = str(parent_dir.joinpath(r'data/csv/Trainings_no.csv'))
+#dfg = gpd.read_file(name_fc,layer = layer_name, driver = 'driver')
 #columns and column-types for X (training based on a geopackage-layer)
+
 fields_fc=  {'OBJECTID':'i', 'ID':'n', 'Name':'n', 'Alternativ':'n', 'Easting_EU':'n', 'Northing_E':'n',
        'Easting_YK':'n', 'Northing_Y':'n', 'Commodity':'c', 'Size_by_co':'c', 'All_main_c':'n',
        'Other_comm':'n', 'Ocurrence_':'n', 'Mine_statu':'n', 'Discovery_':'n', 'Commodity_':'n',
@@ -56,27 +41,35 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'K_Al':'v','Si_K':'v','K_Fe':'v','K_Ti':'v','Ca_Mg':'v','Ca_Al':'v',
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
-# Import:
-# #columns , df , urdf , metadata = all_import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns , df , urdf , metadata = all_import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
-#columns , df , metadata = all_import_grid(grids = grids) 
 
+def test_import_featureclass_fc():
+    """Test functionality import of fc layer."""
+    columns, df, urdf,metadata= import_featureclass(fields = fields_fc, file = name_fc , layer = layer_name) 
 
-#################################################################
+    assert isinstance(columns,dict)
+    assert isinstance(df,(gpd.GeoDataFrame,pd.DataFrame))
+    assert isinstance(urdf,(gpd.GeoDataFrame,pd.DataFrame))
+    assert len(columns) > 0
+    assert len(df.index) > 0 
+    assert len(df.columns) > 0
 
-def test_all_nodata_remove():
-    """Test functionality of nodata_remove of imported X (Dataframe)."""
-    df1 = deepcopy(df)
-    df_new, nodatmask = all_nodata_remove(df = df1)
+def test_import_featureclass_csv():
+    """Test functionality import of fc layer."""
+    columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
 
-    assert ((isinstance(df_new,pd.DataFrame)))
-    assert ((isinstance(nodatmask,pd.DataFrame)))
-    assert len(nodatmask.index) == len(df.index) 
+    assert isinstance(columns,dict)
+    assert isinstance(df,(gpd.GeoDataFrame,pd.DataFrame))
+    assert isinstance(urdf,(gpd.GeoDataFrame,pd.DataFrame))
+    assert len(columns) > 0
+    assert len(df.index) > 0 
+    assert len(df.columns) > 0
 
-def test_all_nodata_remove_error():
-    """Test wrong arguments."""
+def test_import_featureclass_wrong():
+    """Test functionality import with wrong file name."""
     with pytest.raises(InvalidParameterValueException):
-        df_new, nodatmask = all_nodata_remove(df = [1,2])
+        columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_wrong , decimalpoint_german = True) 
 
-test_all_nodata_remove()
-test_all_nodata_remove_error()
+test_import_featureclass_fc()
+test_import_featureclass_csv()
+test_import_featureclass_wrong()
+

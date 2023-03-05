@@ -1,5 +1,5 @@
 
-from typing import Optional, Any, Tuple
+from typing import Optional, Tuple
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -9,34 +9,23 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
 
-def _sklearn_model_validations(  # type: ignore[no-any-unimported]
-   sklearnMl: Any,                             # Optional[Any] = None,   # None: just compare ydf and predict_ydf
+def _sklearn_model_validations(
+   sklearnMl,                            # Optional[Any] = None,   # None: just compare ydf and predict_ydf
    Xdf: Optional[pd.DataFrame] = None,    # dataframe of Features for traning (to split in training and test dataset)
    ydf: Optional[pd.DataFrame] = None,    # dataframe of known values for training (to split) or known values to compare with test_y
    predict_ydf: Optional[pd.DataFrame] = None,   # predicted values to compare with ydf (known values), if given Xdf is not nessesarry
-   #fields: Optional[dict] = None,        # 't'-field will be used if ydf is None
    test_size: Optional[int | float] = None,  # int: number of test-samples, if float: 0<ts<1
    train_size: Optional[int | float] = None, # if None: complement size of the test_size
    random_state: Optional [int] = None,
    shuffle: Optional [bool] = None,
    confusion_matrix: Optional[bool] = True,
    comparison: Optional[bool] = False,
-   #stratify: Optional [np.array] = None, 
-) -> Tuple[pd.DataFrame,pd.DataFrame,pd.DataFrame,Any]:  #dict
+) -> Tuple[pd.DataFrame,pd.DataFrame,pd.DataFrame,Any]:
 
    # configuration:
-   maxlines = 1000000     # max. number of y ->rows for comparison
+   maxlines = 1.000    # max. number of y ->rows for comparison
 
-   # if ydf not as an separated datafram: separat "t"-column out of Xdf
-   # if ydf is None:
-   #    if fields is None:
-   #       raise InvalidParameterValueException ('***  function sklearn_model_validation: target and target-field are None ') 
-   #    else:
-   #       name = {i for i in fields if fields[i]=="t"}
-   #       ydf = Xdf[list(name)]
-   #       Xdf.drop(name,axis=1,inplace=True)
-
-   # xternal tet_set for y will b used
+   # external tet_set for y will be used
    if predict_ydf is not None:
       if ydf.shape[0] != predict_ydf.shape[0]:
          raise InvalidParameterValueException ('***  function sklearn_model_validation: Known testset (y) and predicted y have not the same number of samples')
@@ -111,12 +100,6 @@ def _sklearn_model_validations(  # type: ignore[no-any-unimported]
          lists = list(set(ltest+lpredict))
          lists.sort()
          confusion = pd.DataFrame(metrics.confusion_matrix(ltest,lpredict))#,labels=lists))      #,predict_y, labels=list1))
-         # Beschriften der Tabelle: 
-         #sort_y =  test_y.sort_values(test_y.columns[0])
-         # Name of the y-columns
-         # l1 = test_y.loc[:,test_y.columns[0]].tolist()
-         # list1 = list(set(ltest))
-         # list1.sort() 
          list2 = list(confusion.index.values)
          df1 = confusion.rename(index=dict(zip(list2,lists)))
          confusion1 = df1.rename(columns=dict(zip(list2,lists)))
@@ -124,7 +107,7 @@ def _sklearn_model_validations(  # type: ignore[no-any-unimported]
 
    #comparison
    comparison_lst = None
-   if comparison and test_y.shape[0] < maxlines:
+   if comparison and test_y.shape[0] <= maxlines:
       # if test_Id is not None:   #(with ID-Column??)
       #       tmpl = pandas.DataFrame(test_Id, columns = ['Id']).join(test_y).join(test_pred)
       #   else:
@@ -136,39 +119,35 @@ def _sklearn_model_validations(  # type: ignore[no-any-unimported]
    return validation,confusion1,comparison_lst,sklearnMl
 
 # *******************************
-def sklearn_model_validations(  # type: ignore[no-any-unimported]
-   sklearnMl: Any, 
+def sklearn_model_validations(
+   sklearnMl,
    Xdf: Optional[pd.DataFrame] = None,      # dataframe of Features for splitting in traning and test dataset
    ydf: Optional[pd.DataFrame] = None,      # dataframe of known values for splitting 
-   #test_Xdf: Optional[pd.DataFrame] = None,    # wether this or testsize/train_size should be given
    predict_ydf: Optional[pd.DataFrame] = None,   # if No random subset will be used for validation (test_size...)
-   #fields: Optional[dict] = None,
    test_size: Optional[int | float] = None,  # int: namuber of test-samples, if float: 0<ts<1
    train_size: Optional[int | float] = None,  # if None: complement size of the test_size
    random_state: Optional [int] = None,
    shuffle: Optional [bool] = None,
    confusion_matrix: Optional[bool] = True,   # calculate confusion matrix
    comparison: Optional[bool] = False,
-   #stratify: Optional [np.array] = None
 ) -> Tuple[pd.DataFrame,pd.DataFrame,pd.DataFrame,Any]:  #dict, dict]:
 
    """ 
       Validation for a ML model based on:
-      - random splited testset from size test_size/train_size. 
+      - Randomly splited testset from size test_size/train_size. 
         Xdf and ydf will be randomly splitted in a test and a training dataset. 
         The training-dataset will be used for model-training. 
         The test-dataset will be used for prediction. 
         The result of prediction will be compared with ydf from test-dataset
-      - if predict_ydf ist given:  test_ydf is the known set of data to compare with predict_ydf
-
+      - If predict_ydf ist given:  
+        test_ydf is the known set of data to compare with predict_ydf.
+        sklearnMl will be used to determine the estimator type: regression or classification.
    Args:
-      - sklearnMl (model). even for comparison with a testset the model is used to get the model-typ (regression or classification). 
+      - sklearnMl (model): Even for comparison with a testset the model is used to get the model-typ (regression or classification). 
         If ydf and predict_ydf will be compared. sklearnMl has te information whether ist a classification or a regression-model
-      - Xdf Pandas dataframe or numpy array ("array-like"): features (columns) and samples (rows)
-      - ydf Pandas dataframe or numpy array ("array-like"): target valus(columns) and samples (rows) (same number as Xdf)
-         If ydf is = None, target column is included in Xdf. In this case "fields" should not be None
-      - predict_ydf:  Pandas dataframe or numpy array ("array-like"): predicted values of a test_dataset
-      #- fields (dictionary): the fieldnames and type of fields. A field type 't' is needed, fields is not needed if ydf is not None.
+      - Xdf Pandas dataframe or numpy array ("array-like"): Features (columns) and samples (rows)
+      - ydf Pandas dataframe or numpy array ("array-like"): Target valus(columns) and samples (rows) (same number as Xdf).
+      - predict_ydf:  Pandas dataframe or numpy array ("array-like"): Predicted values of a test_dataset
       - test_size (float or int, default=None): 
          If float, should be between 0.0 and 1.0 and represent the proportion of the dataset to include in the test split. 
          If int, represents the absolute number of test samples. 
@@ -182,22 +161,21 @@ def sklearn_model_validations(  # type: ignore[no-any-unimported]
       - random_state (int, RandomState instance or None, default=None):
          Controls the shuffling applied to the data before applying the split. 
          Pass an int for reproducible output across multiple function calls.
-         No effect with selftest
+         No effect with selftest.
       - shuffle (bool, default=True):
          Whether or not to shuffle the data before splitting. If shuffle=False then stratify must be None.
          No effect with selftest
-      - stratify (array-like, default=None):
-         If not None, data is split in a stratified fashion, using this as the class labels.
-         No effect with selftest
+      - confusion_matrix (bool, default = True): If True a confusion matrix will be generated if the model is a classifiing estimator.
+      _ comparison (bool, default = False): If True and there are less then 1.000 rows in X.
    
    Returns:
-      validation: DataFrame with all values of the validation
-      confusion_matrix: DataFrame of confusion matrix, if calculated 
-           confusion schold be read paire wise: 
+      - validation: DataFrame with all values of the validation
+      - confusion_matrix: DataFrame of confusion matrix, if calculated.
+           confusion should be read paire wise: 
            number of pair test(0),predict(0), 
-           up to n classes which apeers in y_test and y_predict
-      comparison_list,: pd.DataFrame if calculated
-      Model, if calculated
+           up to n classes which apeers in y_test and y_predict.
+      - comparison_list: pd.DataFrame if calculated.
+      - model, if calculated
    """
 
    # Argument evaluation
@@ -241,7 +219,6 @@ def sklearn_model_validations(  # type: ignore[no-any-unimported]
       Xdf = Xdf,
       ydf = ydf,
       predict_ydf = predict_ydf,
-      #fields = fields,
       test_size = test_size,
       train_size = train_size,
       random_state = random_state,

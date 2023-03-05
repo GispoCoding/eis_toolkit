@@ -1,18 +1,14 @@
 
 from typing import Optional, Any
 from pathlib import Path
-#import csv
 import pandas as pd
 import os
-#import json
-#import locale
-#import pickle
 import joblib          # from joblib import dump, load
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
-def _all_export_files(
-    name: Optional[str] = 'ML',            # Vorgangsname
+def _export_files(
+    name: Optional[str] = 'ML',            # Name of Subject
     path: Optional[str] = None,
     validations: Optional[pd.DataFrame] = None, 
     crossvalidation: Optional[dict] = None,
@@ -21,7 +17,7 @@ def _all_export_files(
     importance: Optional[pd.DataFrame] = None,
     kerasHistory: Optional[Any] = None,
     sklearnMl: Optional[Any] = None, 
-    myOhe: Optional[Any] = None,
+    sklearnOhe: Optional[Any] = None,
     myFields: Optional[dict] = None,
     #myMetadata: Optional[dict] = None,
     kerasMl: Optional[Any] = None,
@@ -50,51 +46,13 @@ def _all_export_files(
                 os.remove(os.path.abspath(filename+extension))
         return filename
 
-    # Argument evaluation
-    fl = []
-    if not ((isinstance(name,str)) or (name is None)):
-        fl.append('argument name is not a string and is not None')
-    if not ((isinstance(path, str)) or (path is None)):
-        fl.append('argument path is not a string and is not None')
-    if not ((isinstance(validations,pd.DataFrame)) or (validations is None)):
-        fl.append('argument validations is not a DataFrame and is not None')
-    if not ((isinstance(comparison,pd.DataFrame)) or (comparison is None)):
-        fl.append('argument comparison is not a DataFrame and is not None')
-    if not ((isinstance(confusion_matrix,pd.DataFrame)) or (confusion_matrix is None)):
-        fl.append('argument confusion_matrix is not a DataFrame and is not None')
-    if not ((isinstance(importance,pd.DataFrame)) or (importance is  None)):
-        fl.append('argument importance is not a DataFrame and is not None')
-    #(isinstance(crossvalidation,dict)
-    if not (isinstance(crossvalidation,dict) or (crossvalidation is None)):
-        fl.append('argument crossvalidation is not a dictionary and is not None')
-    if not ((isinstance(myFields,dict)) or (myFields is None)):
-        fl.append('argument myFields is not a dictionary and is not None')
-    # if not ((isinstance(myMetadata,dict)) or (myMetadata is None)):
-    #     fl.append('argument myMetadata is not a dictionary and is not None')
-    t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
-    if not (t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression') or sklearnMl is None):
-        fl.append('argument sklearnMl ist not in instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
-        #raise InvalidParameterValueException ('***  sklearnMl ist not in instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
-    t = myOhe.__class__.__name__ 
-    if not (t in ('OneHotEncoder') or myOhe is None):
-        fl.append('argument myOhe ist not in instance of one of OneHotEncoder')
-    if not (kerasHistory.__class__.__name__ in ('History') or kerasHistory is None):
-        fl.append('argument kerasHistory ist not in instance of one of History')
-    t = kerasOhe.__class__.__name__ 
-    if not (t in ('OneHotEncoder') or kerasOhe is None):
-        fl.append('argument kerasOhe ist not in instance of one of OneHotEncoder')
-    if not (kerasMl.__class__.__name__ in ('Model') or kerasMl is None):
-        fl.append('argument kerasMl ist not an instance of one of Model')
-    if not ((isinstance(decimalpoint_german,bool) or (decimalpoint_german is None)) and (isinstance(new_version,bool) or (decimalpoint_german is None))):
-        fl.append('argument decimalpoint_german or new_version are not boolean or are not None')
-    if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function all_export_files: ' + fl[0])
-
     # Main
-    dt = {}
+    dt = {}             # dictionary of output files to use in input_files function
     if path is None:
         parent_dir = Path(__file__).parent
         path = parent_dir.joinpath(r'data')
+    if not os.path.exists(path):
+        raise InvalidParameterValueException ('***  function export_files: path does not exists:' + str(path))
     dt['path'] = path
 
     if decimalpoint_german:
@@ -216,10 +174,10 @@ def _all_export_files(
         # with open("encoder", "wb") as f: 
         # pickle.dump(one_hot, f)
 
-    if myOhe is not None:   # OneHotEncoder
+    if sklearnOhe is not None:   # OneHotEncoder
         file = create_file(path,name+'_myOhe','ohe',new_version=new_version)
         dt['myOhe'] = file+'.ohe'
-        joblib.dump(myOhe,file+'.ohe')
+        joblib.dump(sklearnOhe,file+'.ohe')
    
     # fields
     if myFields is not None:    # Validation
@@ -265,7 +223,7 @@ def _all_export_files(
     return dt
 
 # *******************************
-def all_export_files(
+def export_files(
     name: Optional[str] = 'ML',            # Vorgangsname
     path: Optional[str] = None,
     validations: Optional[pd.DataFrame] = None, 
@@ -275,7 +233,7 @@ def all_export_files(
     importance: Optional[pd.DataFrame] = None,
     kerasHistory: Optional[Any] = None,
     sklearnMl: Optional[Any] = None,
-    myOhe: Optional[Any] = None,
+    sklearnOhe: Optional[Any] = None,
     myFields: Optional[dict] = None,
     #myMetadata: Optional[dict] = None,
     kerasMl: Optional[Any] = None,
@@ -286,31 +244,71 @@ def all_export_files(
 ) -> dict:
 
     """ 
-        writes csv and json files on disc 
+        Writes files on disc, like the results of validation, fitted model or OneHotEncoder object.
     Args:
-        - name (string, default 'ML'): Name of the ML-process
-        - path (string, defalut './data'): Name of the output path
-        at least one of the following arguments should be not None
-        - testsplit (DatasFrame, default None): content of the output file: validation values from test_split
-        - crossvalidation (dictionary, default = None): content of the output file are validation values of each fold
-        - confusion_matrix (DataFrame,  default = None): content of the output file is a table 
-            exist only for classifier estimators,
-            (will be writte in a file just isf testsplit is used)
-        - importance (DataFrame,  default = None): content of the output file is a table with values of importance for each feature
-        - kerasHistory (Dictionary, default = None): the Dictionary of history.history from keras fit
-        - comparison (DataFrame,  default = None): list of all compared values: given, predicted
-        - sklearnMl (Model Object, default None): content of the output file, type of the file: Model
-        - myOhe (OneHotEncoder Object, default None): content of the output file, type of the file: Ohe
-        - myFields (dictionary, default = None):  content of the output file: columnslist with name and type of columns
-        - kerasMl (Model Object, default None):  Tensorflor model zu save as an file
+        - name (string, default 'ML'): Name of the ML-process (subject) will be used to build the filenames.
+        - path (string, defalut './data'): Name of the output path. If the path does not exists, the function will raise an exception.
+        At least one of the following arguments should be not None:
+        - validation (DataFrame, default = None): Values of metrics according to the type of the model (classification or regression)
+        - crossvalidation (dictionary, default = None): Content of the output file are validation values of each fold.
+        - confusion_matrix (DataFrame,  default = None): Content of the output file is a table .
+            Exist only for classifier estimators,
+            (will be writte in a file just if validation is used).
+        - importance (DataFrame,  default = None): Content of the output file is a table with values of importance for each feature.
+        - kerasHistory (Dictionary, default = None): The Dictionary of history.history from keras fit
+        - comparison (DataFrame,  default = None): List of all compared value pares: given, predicted 
+        - sklearnMl (Model Object, default None): Content of the output file, type of the file: SKLAERN Model
+        - sklearnOhe (OneHotEncoder Object, default None): Content of the output file, type of the file: SKLEARN OneHotEncoder
+        - myFields (dictionary, default = None):  Content of the output file: columnslist with name and type of columns
+        - kerasMl (Model Object, default None):  Tensorflor model to save as an file.
         - kerasOhe (OneHotEncoder Object, default None): content of the output file, type of the file: Ohe. In Case of Keras multiclass estimator 
-        - decimalpoint_german (boolen default False): True if the files above should get "," as decimal point and ";" in csv- files
-        - new_version (boolen, default = False): if the file exists it schould be deletet (new_version = False) or a new version shold be created
+        - decimalpoint_german (boolen, default False): True if the files above should get "," as decimal point and ";" in csv- files
+        - new_version (boolen, default = False): If the file exists it schould be deletet (new_version = False) or a new version shold be created (new_version = True)
     Returns: 
-        dictionary of the files names für sklearnMl, myOhe, myFields and myMetadata
+        dictionary of the file names of sklearnMl, myOhe, myFields and myMetadata
     """
 
-    dict = _all_export_files(
+    # Argument evaluation
+    fl = []
+    if not ((isinstance(name,str)) or (name is None)):
+        fl.append('argument name is not a string and is not None')
+    if not ((isinstance(path, str)) or (path is None)):
+        fl.append('argument path is not a string and is not None')
+    if not ((isinstance(validations,pd.DataFrame)) or (validations is None)):
+        fl.append('argument validations is not a DataFrame and is not None')
+    if not ((isinstance(comparison,pd.DataFrame)) or (comparison is None)):
+        fl.append('argument comparison is not a DataFrame and is not None')
+    if not ((isinstance(confusion_matrix,pd.DataFrame)) or (confusion_matrix is None)):
+        fl.append('argument confusion_matrix is not a DataFrame and is not None')
+    if not ((isinstance(importance,pd.DataFrame)) or (importance is  None)):
+        fl.append('argument importance is not a DataFrame and is not None')
+    #(isinstance(crossvalidation,dict)
+    if not (isinstance(crossvalidation,dict) or (crossvalidation is None)):
+        fl.append('argument crossvalidation is not a dictionary and is not None')
+    if not ((isinstance(myFields,dict)) or (myFields is None)):
+        fl.append('argument myFields is not a dictionary and is not None')
+    # if not ((isinstance(myMetadata,dict)) or (myMetadata is None)):
+    #     fl.append('argument myMetadata is not a dictionary and is not None')
+    t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
+    if not (t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression') or sklearnMl is None):
+        fl.append('argument sklearnMl ist not in instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
+        #raise InvalidParameterValueException ('***  sklearnMl ist not in instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
+    t = sklearnOhe.__class__.__name__ 
+    if not (t in ('OneHotEncoder') or sklearnOhe is None):
+        fl.append('argument myOhe ist not in instance of one of OneHotEncoder')
+    if not (kerasHistory.__class__.__name__ in ('History') or kerasHistory is None):
+        fl.append('argument kerasHistory ist not in instance of one of History')
+    t = kerasOhe.__class__.__name__ 
+    if not (t in ('OneHotEncoder') or kerasOhe is None):
+        fl.append('argument kerasOhe ist not in instance of one of OneHotEncoder')
+    if not (kerasMl.__class__.__name__ in ('Model') or kerasMl is None):
+        fl.append('argument kerasMl ist not an instance of one of Model')
+    if not ((isinstance(decimalpoint_german,bool) or (decimalpoint_german is None)) and (isinstance(new_version,bool) or (decimalpoint_german is None))):
+        fl.append('argument decimalpoint_german or new_version are not boolean or are not None')
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function export_files: ' + fl[0])
+
+    dict = _export_files(
         name = name,
         path = path,
         validations  = validations, 
@@ -320,7 +318,7 @@ def all_export_files(
         importance = importance,
         kerasHistory = kerasHistory,
         sklearnMl = sklearnMl, 
-        myOhe = myOhe,
+        sklearnOhe = sklearnOhe,
         myFields = myFields,
         #myMetadata = myMetadata,
         kerasMl = kerasMl,

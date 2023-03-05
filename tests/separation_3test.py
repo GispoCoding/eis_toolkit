@@ -1,5 +1,5 @@
 
-# all_onehotencoder_test.py
+# separation_test.py
 ##############################
 import pytest
 # import numpy as np
@@ -11,15 +11,13 @@ sys.path.append (scripts)
 
 import geopandas as gpd
 import pandas as pd
-from eis_toolkit.conversions.all_import_featureclass import *
-from eis_toolkit.conversions.all_import_grid import *
-from eis_toolkit.transformations.all_separation import *
-from eis_toolkit.transformations.all_nodata_replace import *
-from eis_toolkit.transformations.all_onehotencoder import *
+from eis_toolkit.conversions.import_featureclass import *
+from eis_toolkit.conversions.import_grid import *
+from eis_toolkit.transformations.separation import *
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 #################################################################
-# import of data from all_import_featureclass or all_import_grid
+# import of data from import_featureclass or import_grid
 # fc or csv:
 parent_dir = Path(__file__).parent
 name_fc = str(parent_dir.joinpath(r'data/shps/EIS_gp.gpkg'))
@@ -59,28 +57,27 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
-# columns , df , urdf , metadata = all_import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns , df , urdf , metadata = all_import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
-#columns , df , metadata = all_import_grid(grids = grids) 
-# Separation
-Xvdf , Xcdf , ydf , igdf = all_separation(df = df, fields = columns) 
-# nodata_replacement of 
-Xcdf = all_nodata_replace(df = Xcdf, rtype = 'most_frequent') 
+# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
+columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
+#columns , df , metadata = import_grid(grids = grids) 
 
 #################################################################
 
-def test_all_onehotencoder():
-    """Test functionality of onehotencoder of categorized columns of  imported X (Dataframe)."""
-    Xdf_enh, eho = all_onehotencoder(df = Xcdf)
+def test_separation():
+    """Test functionality of separation of imported X (Dataframe)."""
+    Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = columns) 
 
-    assert ((isinstance(Xdf_enh,pd.DataFrame)) or (Xcdf is None))
-    if (Xdf_enh is not None) and (Xcdf is not None):
-        assert len(Xcdf.index) == len(Xdf_enh.index) 
+    assert ((isinstance(Xcdf,pd.DataFrame)) or (Xcdf is None))
+    assert ((isinstance(Xvdf,pd.DataFrame)) or (Xvdf is None))
+    assert ((isinstance(ydf,pd.DataFrame)) or (ydf is None))
+    assert ((isinstance(igdf,pd.DataFrame)) or (igdf is None))
+    if (Xvdf is not None) and (ydf is not None):
+        assert len(Xcdf.index) == len(ydf.index) 
 
-def test_all_onehotencoder_error():
-    """Test wrong arguments of onehotencoder with wron arguments."""
+def test_separation_error():
+    """Test wrong arguments of separation of imported X (Dataframe) with wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        Xdf_enh, eho = all_onehotencoder(df = {'a':'A'})
+        Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = 'eins:3') 
 
-test_all_onehotencoder()
-test_all_onehotencoder_error()
+test_separation()
+test_separation_error()

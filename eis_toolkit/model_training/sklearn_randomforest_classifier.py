@@ -28,53 +28,6 @@ def _sklearn_randomforest_classifier(  # type: ignore[no-any-unimported]
     max_samples: Optional [int | float] = None,
 ):
 
-   # Argument evaluation
-   fl = []
-   if criterion is not None:
-      if not (criterion in ['gini','entropy','log_loss']):
-         fl.append('argument criterion is not in (gini,entropy,log_loss)')
-   if not (isinstance(max_features,(int,float)) or (max_features is None)):
-      if not (max_features in ['sqrt','log2']):
-         fl.append('argument max_features is not in (gini,entropy,log_loss) not float and not None')
-   if not (isinstance(class_weight,(dict,list)) or (class_weight is None)):
-      if not (class_weight in ['balanced','balanced_subsample']):
-         fl.append('argument class_weight is not in (balanced,balanced_subsample), not dictionary, no list and not None')
-   if not (isinstance(random_state,int) or (random_state is None)):
-      fl.append('argument random_state is not integer and is not None')
-   if not (isinstance(n_estimators,int) or (n_estimators is None)):
-      fl.append('argument n_estimatorsis not integer and is not None')
-   if not (isinstance(n_jobs,int) or (n_jobs is None)):
-      fl.append('argument n_jobs is not integer and is not None')
-   if not (isinstance(verbose,int) or (verbose is None)):
-      fl.append('argument verbose is not integer and is not None')
-   if not (isinstance(min_samples_leaf,(int)) or (min_samples_leaf is None)):
-      fl.append('argument min_samples_leaf is not integer and is not None')
-   if not (isinstance(max_leaf_nodes,int) or (max_leaf_nodes is None)):
-      fl.append('argument max_leaf_nodes is not integer and is not None')
-   if not (isinstance(max_depth,int) or (max_depth is None)):
-      fl.append('argument max_depth is not integer and is not None')
-   if not (isinstance(min_samples_split,(int,float)) or (min_samples_split is None)):
-      fl.append('argument min_samples_split is not float and is not None')
-   if not (isinstance(min_impurity_decrease,(int,float)) or (min_impurity_decrease is None)):
-      fl.append('argument min_impurity_decrease is not float and is not None')
-   if not (isinstance(min_weight_fraction_leaf,(int,float)) or (min_weight_fraction_leaf is None)):
-      fl.append('argument min_weight_fraction_leaf is not float and is not None')
-   if not (isinstance(ccp_alpha,(int,float)) or (ccp_alpha is None)):
-      fl.append('argument ccp_alpha is not float and is not None')
-   if not (isinstance(max_samples,(int,float)) or (max_samples is None)):
-      fl.append('argument max_samples is not float and is not None')
-   if not (isinstance(bootstrap,bool) or (bootstrap is None)):
-      fl.append('argument bootstrap is not bool and is not None')
-   if not (isinstance(oob_score,bool) or (oob_score is None)):
-      fl.append('argument oob_score is not bool and is not None')
-   if not (isinstance(warm_start,bool) or (warm_start is None)):
-      fl.append('argument warm_start is not bool and is not None')
-   if len(fl) > 0:
-      raise InvalidParameterValueException ('***  function sklearn_randomforest_classifier: ' + fl[0])
-   if ccp_alpha is not None:
-      if ccp_alpha < 0:
-         fl.append('***  function sklearn_randomforest_classifier: argument ccp_alpha is negative')
-
    sklearnMl = RandomForestClassifier(
         n_estimators = n_estimators,
         criterion = criterion,
@@ -103,30 +56,30 @@ MODE = Literal['gini','entropy','log_loss']
 maxf = Literal['sqrt','log2',None]
 classw = Literal['balanced','balanced_subsample']
 def sklearn_randomforest_classifier(  # type: ignore[no-any-unimported]
-    n_estimators: Optional[int] = 100 ,
-    criterion: Optional [MODE] = 'gini',
-    max_depth: Optional[int | float] = None,
-    min_samples_split: Optional[int | float] = 2,
-    min_samples_leaf: Optional[int] = 1,        
-    min_weight_fraction_leaf: Optional[float] = 0.0,
-    max_features: Optional[maxf | int | float]  = 'sqrt',
-    max_leaf_nodes: Optional[int] = None,
-    min_impurity_decrease: Optional[float]  = 0.0,
-    bootstrap: Optional[bool] = True,
-    oob_score: Optional[bool] = False,
-    n_jobs: Optional[int] = None,
-    random_state: Optional [int] = None,
-    verbose: Optional [int] = 0,
-    warm_start: Optional [bool] = False,
-    class_weight: Optional[classw | dict | List[dict]] = None,
-    ccp_alpha: Optional [float] = 0.0,
-    max_samples: Optional [int | float] = None,
+   n_estimators: Optional[int] = 100 ,
+   criterion: Optional [MODE] = 'gini',
+   max_depth: Optional[int | float] = None,
+   min_samples_split: Optional[int | float] = 2,
+   min_samples_leaf: Optional[int] = 1,        
+   min_weight_fraction_leaf: Optional[float] = 0.0,
+   max_features: Optional[maxf | int | float]  = 'sqrt',
+   max_leaf_nodes: Optional[int] = None,
+   min_impurity_decrease: Optional[float]  = 0.0,
+   bootstrap: Optional[bool] = True,
+   oob_score: Optional[bool] = False,
+   n_jobs: Optional[int] = None,
+   random_state: Optional [int] = None,
+   verbose: Optional [int] = 0,
+   warm_start: Optional [bool] = False,
+   class_weight: Optional[classw | dict | List[dict]] = None,
+   ccp_alpha: Optional [float] = 0.0,
+   max_samples: Optional [int | float] = None,
 ):
 
-    """ 
-      creatig of a randmon forest classification model
-    Args:
-      - n_estimators (int, default=100):    The number of trees in the forest.
+   """ 
+      Creatig of a randmon forest classification model
+   Args:
+      - n_estimators (int, default=100):  The number of trees in the forest.
       - criterion ({“gini”, “entropy”, “log_loss”}, default=”gini”): 
          the function to measure the quality of a split. 
          Supported criteria are “gini” for the Gini impurity and “log_loss” and “entropy” both for the Shannon information gain, see Mathematical formulation. 
@@ -176,11 +129,58 @@ def sklearn_randomforest_classifier(  # type: ignore[no-any-unimported]
          If None (default) then draw X.shape[0] samples.
          If int, then draw max_samples samples.
          If float, then draw max_samples * X.shape[0] samples. Thus, max_samples should be in the interval (0.0, 1.0].
-    Returns:
-        randomforrest model
-    """
+   Returns:
+      SKLEARN model (random forest classifier)
+   """
 
-    sklearnMl = _sklearn_randomforest_classifier( 
+   # Argument evaluation
+   fl = []
+   if criterion is not None:
+      if not (criterion in ['gini','entropy','log_loss']):
+         fl.append('argument criterion is not in (gini,entropy,log_loss)')
+   if not (isinstance(max_features,(int,float)) or (max_features is None)):
+      if not (max_features in ['sqrt','log2']):
+         fl.append('argument max_features is not in (gini,entropy,log_loss) not float and not None')
+   if not (isinstance(class_weight,(dict,list)) or (class_weight is None)):
+      if not (class_weight in ['balanced','balanced_subsample']):
+         fl.append('argument class_weight is not in (balanced,balanced_subsample), not dictionary, no list and not None')
+   if not (isinstance(random_state,int) or (random_state is None)):
+      fl.append('argument random_state is not integer and is not None')
+   if not (isinstance(n_estimators,int) or (n_estimators is None)):
+      fl.append('argument n_estimatorsis not integer and is not None')
+   if not (isinstance(n_jobs,int) or (n_jobs is None)):
+      fl.append('argument n_jobs is not integer and is not None')
+   if not (isinstance(verbose,int) or (verbose is None)):
+      fl.append('argument verbose is not integer and is not None')
+   if not (isinstance(min_samples_leaf,(int)) or (min_samples_leaf is None)):
+      fl.append('argument min_samples_leaf is not integer and is not None')
+   if not (isinstance(max_leaf_nodes,int) or (max_leaf_nodes is None)):
+      fl.append('argument max_leaf_nodes is not integer and is not None')
+   if not (isinstance(max_depth,int) or (max_depth is None)):
+      fl.append('argument max_depth is not integer and is not None')
+   if not (isinstance(min_samples_split,(int,float)) or (min_samples_split is None)):
+      fl.append('argument min_samples_split is not float and is not None')
+   if not (isinstance(min_impurity_decrease,(int,float)) or (min_impurity_decrease is None)):
+      fl.append('argument min_impurity_decrease is not float and is not None')
+   if not (isinstance(min_weight_fraction_leaf,(int,float)) or (min_weight_fraction_leaf is None)):
+      fl.append('argument min_weight_fraction_leaf is not float and is not None')
+   if not (isinstance(ccp_alpha,(int,float)) or (ccp_alpha is None)):
+      fl.append('argument ccp_alpha is not float and is not None')
+   if not (isinstance(max_samples,(int,float)) or (max_samples is None)):
+      fl.append('argument max_samples is not float and is not None')
+   if not (isinstance(bootstrap,bool) or (bootstrap is None)):
+      fl.append('argument bootstrap is not bool and is not None')
+   if not (isinstance(oob_score,bool) or (oob_score is None)):
+      fl.append('argument oob_score is not bool and is not None')
+   if not (isinstance(warm_start,bool) or (warm_start is None)):
+      fl.append('argument warm_start is not bool and is not None')
+   if len(fl) > 0:
+      raise InvalidParameterValueException ('***  function sklearn_randomforest_classifier: ' + fl[0])
+   if ccp_alpha is not None:
+      if ccp_alpha < 0:
+         fl.append('***  function sklearn_randomforest_classifier: argument ccp_alpha is negative')
+
+   sklearnMl = _sklearn_randomforest_classifier( 
         n_estimators = n_estimators,
         criterion = criterion,
         max_depth = max_depth,
@@ -201,5 +201,5 @@ def sklearn_randomforest_classifier(  # type: ignore[no-any-unimported]
         max_samples = max_samples
     )
 
-    return sklearnMl
+   return sklearnMl
 

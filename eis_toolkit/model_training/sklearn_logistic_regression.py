@@ -24,56 +24,6 @@ def _sklearn_logistic_regression(
     l1_ratio: Optional [float | int] = None,
 ):
 
-    # Argument evaluation
-    fl = []
-    if penalty is not None:
-        if not (penalty in ['l1','l2','elasticnet','none']):
-            fl.append('argument penalty is not in (l1,l2,elasticnet,none)')
-    if solver is not None:
-        if not (solver in ['newton-cg','lbfgs','liblinear','sag','saga']):
-            fl.append('argument solver is not in (newton-cg,lbfgs,liblinear,sag,saga)')
-    if class_weight is not None:
-        if not ((class_weight in ['balanced']) or isinstance(class_weight,dict)):
-            fl.append('argument balanced is not in (balanced) not dictionary and not None')
-    if not (isinstance(random_state,int) or (random_state is None)):
-        fl.append('argument random_state is not integer and is not None')
-    if not (isinstance(max_iter,int) or (max_iter is None)):
-        fl.append('argument max_iter is not integer and is not None')
-    if not (isinstance(n_jobs,int) or (n_jobs is None)):
-        fl.append('argument n_jobs is not integer and is not None')
-    if not (isinstance(verbose,int) or (verbose is None)):
-        fl.append('argument verbose is not integer and is not None')
-    if not (isinstance(tol,(int,float)) or (tol is None)):
-        fl.append('argument tol is not float and is not None')
-    if not (isinstance(C,(int,float)) or (C is None)):
-        fl.append('argument C is not float and is not None')
-    if not (isinstance(intercept_scaling,(int,float)) or (intercept_scaling is None)):
-        fl.append('argument intercept_scaling is not float and is not None')
-    if not (isinstance(l1_ratio,(int,float)) or (l1_ratio is None)):
-        fl.append('argument l1_ratio is not float and is not None')
-    if not (isinstance(dual,bool) or (dual is None)):
-        fl.append('argument dual is not bool and is not None')
-    if not (isinstance(fit_intercept,bool) or (fit_intercept is None)):
-        fl.append('argument fit_intercept is not bool and is not None')
-    if not (isinstance(warm_start,bool) or (warm_start is None)):
-        fl.append('argument warm_start is not bool and is not None')    
-    if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function sklearn_logistic_regression: ' + fl[0])
-    
-    if solver in ['lbfgs','newton_cg','newton_cholesky','sag']:
-        if not (penalty in ['l2','none']):
-            raise InvalidParameterValueException ('***  function sklearn_logistic_regression: for solver penalty should be l2 or none')
-    elif solver == 'liblinear':
-        if not (penalty in ['l2','l1']):
-            raise InvalidParameterValueException ('***  function sklearn_logistic_regression: for solver penalty should be l2 or l1')
-            # solver - penalty: 
-            # ‘lbfgs’ - [‘l2’, None]
-            # ‘liblinear’ - [‘l1’, ‘l2’]
-            # ‘newton-cg’ - [‘l2’, None]
-            # ‘newton-cholesky’ - [‘l2’, None]
-            # ‘sag’ - [‘l2’, None]
-            # ‘saga’ - [‘elasticnet’, ‘l1’, ‘l2’, None]
-
     sklearnMl = LogisticRegression( 
         penalty = penalty,
         dual = dual,
@@ -171,8 +121,58 @@ def sklearn_logistic_regression(  # type: ignore[no-any-unimported]
         - l1_ratio (float, default=None):
             The Elastic-Net mixing parameter, with 0 <= l1_ratio <= 1. Only used if penalty='elasticnet'. Setting l1_ratio=0 is equivalent to using penalty='l2', while setting l1_ratio=1 is equivalent to using penalty='l1'. For 0 < l1_ratio <1, the penalty is a combination of L1 and L2.
     Returns:
-        logistic regression model
+        SKLEARN model (logistic regression)
     """
+
+    # Argument evaluation
+    fl = []
+    if penalty is not None:
+        if not (penalty in ['l1','l2','elasticnet','none']):
+            fl.append('argument penalty is not in (l1,l2,elasticnet,none)')
+    if solver is not None:
+        if not (solver in ['newton-cg','lbfgs','liblinear','sag','saga']):
+            fl.append('argument solver is not in (newton-cg,lbfgs,liblinear,sag,saga)')
+    if class_weight is not None:
+        if not ((class_weight in ['balanced']) or isinstance(class_weight,dict)):
+            fl.append('argument balanced is not in (balanced) not dictionary and not None')
+    if not (isinstance(random_state,int) or (random_state is None)):
+        fl.append('argument random_state is not integer and is not None')
+    if not (isinstance(max_iter,int) or (max_iter is None)):
+        fl.append('argument max_iter is not integer and is not None')
+    if not (isinstance(n_jobs,int) or (n_jobs is None)):
+        fl.append('argument n_jobs is not integer and is not None')
+    if not (isinstance(verbose,int) or (verbose is None)):
+        fl.append('argument verbose is not integer and is not None')
+    if not (isinstance(tol,(int,float)) or (tol is None)):
+        fl.append('argument tol is not float and is not None')
+    if not (isinstance(C,(int,float)) or (C is None)):
+        fl.append('argument C is not float and is not None')
+    if not (isinstance(intercept_scaling,(int,float)) or (intercept_scaling is None)):
+        fl.append('argument intercept_scaling is not float and is not None')
+    if not (isinstance(l1_ratio,(int,float)) or (l1_ratio is None)):
+        fl.append('argument l1_ratio is not float and is not None')
+    if not (isinstance(dual,bool) or (dual is None)):
+        fl.append('argument dual is not bool and is not None')
+    if not (isinstance(fit_intercept,bool) or (fit_intercept is None)):
+        fl.append('argument fit_intercept is not bool and is not None')
+    if not (isinstance(warm_start,bool) or (warm_start is None)):
+        fl.append('argument warm_start is not bool and is not None')    
+    if len(fl) > 0:
+        raise InvalidParameterValueException ('***  function sklearn_logistic_regression: ' + fl[0])
+    
+    if solver in ['lbfgs','newton_cg','newton_cholesky','sag']:
+        if not (penalty in ['l2','none']):
+            raise InvalidParameterValueException ('***  function sklearn_logistic_regression: for solver penalty should be l2 or none')
+    elif solver == 'liblinear':
+        if not (penalty in ['l2','l1']):
+            raise InvalidParameterValueException ('***  function sklearn_logistic_regression: for solver penalty should be l2 or l1')
+            # solver - penalty: 
+            # ‘lbfgs’ - [‘l2’, None]
+            # ‘liblinear’ - [‘l1’, ‘l2’]
+            # ‘newton-cg’ - [‘l2’, None]
+            # ‘newton-cholesky’ - [‘l2’, None]
+            # ‘sag’ - [‘l2’, None]
+            # ‘saga’ - [‘elasticnet’, ‘l1’, ‘l2’, None]
 
     sklearnMl = _sklearn_logistic_regression( 
         penalty = penalty,

@@ -25,47 +25,6 @@ def _sklearn_randomforest_regressor(  # type: ignore[no-any-unimported]
    ccp_alpha: Optional [int | float] = 0.0,
    max_samples: Optional [int | float] = None,
 ):
-
-   # Argument evaluation
-   fl = []
-   if criterion is not None:
-      if not (criterion in ['squared_error','absolute_error','poisson']):
-         fl.append('argument criterion is not in (squared_error,absolute_error,poisson)')
-   if not (isinstance(max_features,(int,float)) or (max_features is None)):
-      if not (max_features in ['sqrt','log2']):
-         fl.append('argument max_features is not in (gini,entropy,log_loss) not float and not None')
-   if not (isinstance(random_state,int) or (random_state is None)):
-      fl.append('argument random_state is not integer and is not None')
-   if not (isinstance(n_estimators,int) or (n_estimators is None)):
-      fl.append('argument n_estimatorsis not integer and is not None')
-   if not (isinstance(n_jobs,int) or (n_jobs is None)):
-      fl.append('argument n_jobs is not integer and is not None')
-   if not (isinstance(verbose,int) or (verbose is None)):
-      fl.append('argument verbose is not integer and is not None')
-   if not (isinstance(min_samples_leaf,(float,int)) or (min_samples_leaf is None)):
-      fl.append('argument min_samples_leaf is not integer and is not None')
-   if not (isinstance(max_leaf_nodes,int) or (max_leaf_nodes is None)):
-      fl.append('argument max_leaf_nodes is not integer and is not None')
-   if not (isinstance(max_depth,(float,int)) or (max_depth is None)):
-      fl.append('argument max_depth is not integer or float and is not None')
-   if not (isinstance(min_samples_split,(int,float)) or (min_samples_split is None)):
-      fl.append('argument min_samples_split is not float and is not None')
-   if not (isinstance(min_impurity_decrease,(int,float)) or (min_impurity_decrease is None)):
-      fl.append('argument min_impurity_decrease is not float and is not None')
-   if not (isinstance(min_weight_fraction_leaf,(int,float)) or (min_weight_fraction_leaf is None)):
-      fl.append('argument min_weight_fraction_leaf is not float and is not None')
-   if not (isinstance(ccp_alpha,(int,float)) or (ccp_alpha is None)):
-      fl.append('argument ccp_alpha is not float and is not None')
-   if not (isinstance(max_samples,(int,float)) or (max_samples is None)):
-      fl.append('argument max_samples is not float and is not None')
-   if not (isinstance(bootstrap,bool) or (bootstrap is None)):
-      fl.append('argument bootstrap is not bool and is not None')
-   if not (isinstance(oob_score,bool) or (oob_score is None)):
-      fl.append('argument oob_score is not bool and is not None')
-   if not (isinstance(warm_start,bool) or (warm_start is None)):
-      fl.append('argument warm_start is not bool and is not None')
-   if len(fl) > 0:
-      raise InvalidParameterValueException ('***  function sklearn_randomforest_rehgressor: ' + fl[0])
     
    sklearnMl = RandomForestRegressor(
       n_estimators = n_estimators,
@@ -111,9 +70,9 @@ def sklearn_randomforest_regressor(  # type: ignore[no-any-unimported]
    max_samples: Optional [int | float] = None,
 ):
 
-    """ 
+   """ 
       creatig of a randmon forest classification model
-    Args:
+   Args:
       - n_estimators (int, default=100):    The number of trees in the forest.
       - criterion ({“squared_error”, “absolute_error”, “poisson”}, default=”squared_error”): 
          the function to measure the quality of a split. 
@@ -160,11 +119,52 @@ def sklearn_randomforest_regressor(  # type: ignore[no-any-unimported]
          If None (default), then draw X.shape[0] samples.
          If int, then draw max_samples samples.
          If float, then draw max_samples * X.shape[0] samples. Thus, max_samples should be in the interval (0.0, 1.0].
-    Returns:
-        randomforrest model
-    """
+   Returns:
+      SKLEARN model (random forest regressor)
+   """
 
-    sklearnMl = _sklearn_randomforest_regressor( 
+   # Argument evaluation
+   fl = []
+   if criterion is not None:
+      if not (criterion in ['squared_error','absolute_error','poisson']):
+         fl.append('argument criterion is not in (squared_error,absolute_error,poisson)')
+   if not (isinstance(max_features,(int,float)) or (max_features is None)):
+      if not (max_features in ['sqrt','log2']):
+         fl.append('argument max_features is not in (gini,entropy,log_loss) not float and not None')
+   if not (isinstance(random_state,int) or (random_state is None)):
+      fl.append('argument random_state is not integer and is not None')
+   if not (isinstance(n_estimators,int) or (n_estimators is None)):
+      fl.append('argument n_estimatorsis not integer and is not None')
+   if not (isinstance(n_jobs,int) or (n_jobs is None)):
+      fl.append('argument n_jobs is not integer and is not None')
+   if not (isinstance(verbose,int) or (verbose is None)):
+      fl.append('argument verbose is not integer and is not None')
+   if not (isinstance(min_samples_leaf,(float,int)) or (min_samples_leaf is None)):
+      fl.append('argument min_samples_leaf is not integer and is not None')
+   if not (isinstance(max_leaf_nodes,int) or (max_leaf_nodes is None)):
+      fl.append('argument max_leaf_nodes is not integer and is not None')
+   if not (isinstance(max_depth,(float,int)) or (max_depth is None)):
+      fl.append('argument max_depth is not integer or float and is not None')
+   if not (isinstance(min_samples_split,(int,float)) or (min_samples_split is None)):
+      fl.append('argument min_samples_split is not float and is not None')
+   if not (isinstance(min_impurity_decrease,(int,float)) or (min_impurity_decrease is None)):
+      fl.append('argument min_impurity_decrease is not float and is not None')
+   if not (isinstance(min_weight_fraction_leaf,(int,float)) or (min_weight_fraction_leaf is None)):
+      fl.append('argument min_weight_fraction_leaf is not float and is not None')
+   if not (isinstance(ccp_alpha,(int,float)) or (ccp_alpha is None)):
+      fl.append('argument ccp_alpha is not float and is not None')
+   if not (isinstance(max_samples,(int,float)) or (max_samples is None)):
+      fl.append('argument max_samples is not float and is not None')
+   if not (isinstance(bootstrap,bool) or (bootstrap is None)):
+      fl.append('argument bootstrap is not bool and is not None')
+   if not (isinstance(oob_score,bool) or (oob_score is None)):
+      fl.append('argument oob_score is not bool and is not None')
+   if not (isinstance(warm_start,bool) or (warm_start is None)):
+      fl.append('argument warm_start is not bool and is not None')
+   if len(fl) > 0:
+      raise InvalidParameterValueException ('***  function sklearn_randomforest_rehgressor: ' + fl[0])
+
+   sklearnMl = _sklearn_randomforest_regressor( 
       n_estimators = n_estimators,
       criterion = criterion,
       max_depth = max_depth,
@@ -182,8 +182,8 @@ def sklearn_randomforest_regressor(  # type: ignore[no-any-unimported]
       warm_start = warm_start,
       ccp_alpha = ccp_alpha,
       max_samples = max_samples,
-    )
+   )
 
-    return sklearnMl
+   return sklearnMl
 
 

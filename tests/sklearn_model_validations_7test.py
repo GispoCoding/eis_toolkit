@@ -11,19 +11,19 @@ sys.path.append (scripts)
 
 import geopandas as gpd
 import pandas as pd
-from eis_toolkit.conversions.all_import_featureclass import *
-from eis_toolkit.conversions.all_import_grid import *
-from eis_toolkit.transformations.all_separation import *
-from eis_toolkit.transformations.all_nodata_replace import *
-from eis_toolkit.transformations.all_onehotencoder import *
-from eis_toolkit.transformations.all_unification import *
+from eis_toolkit.conversions.import_featureclass import *
+from eis_toolkit.conversions.import_grid import *
+from eis_toolkit.transformations.separation import *
+from eis_toolkit.transformations.nodata_replace import *
+from eis_toolkit.transformations.onehotencoder import *
+from eis_toolkit.transformations.unification import *
 from eis_toolkit.model_training.sklearn_randomforest_classifier import *
 from eis_toolkit.validation.sklearn_model_validations import *
 
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 #################################################################
-# import of data from all_import_featureclass or all_import_grid
+# import of data from import_featureclass or import_grid
 # fc or csv:
 parent_dir = Path(__file__).parent
 name_fc = str(parent_dir.joinpath(r'data/shps/EIS_gp.gpkg'))
@@ -63,17 +63,17 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
-# columns , df , urdf , metadata = all_import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns , df , urdf , metadata = all_import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
-#columns , df , metadata = all_import_grid(grids = grids) 
+# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
+columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
+#columns , df , metadata = import_grid(grids = grids) 
 # Separation
-Xvdf , Xcdf , ydf , igdf = all_separation(df = df, fields = columns) 
+Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = columns) 
 # nodata_replacement of 
-Xcdf = all_nodata_replace(df = Xcdf, rtype = 'most_frequent') 
+Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent') 
 # onehotencoder
-Xdf_enh, eho = all_onehotencoder(df = Xcdf)
+Xdf_enh, eho = onehotencoder(df = Xcdf)
 # unification
-Xdf = all_unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
+Xdf = unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
 # model
 sklearnMl = sklearn_randomforest_classifier(oob_score = True)
 

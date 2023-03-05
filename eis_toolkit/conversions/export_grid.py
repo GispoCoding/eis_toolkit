@@ -8,7 +8,7 @@ from sklearn.preprocessing import OneHotEncoder
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
-def _all_export_grid(
+def _export_grid(
     df: pd.DataFrame,
     metadata: dict,            # metadata-Dictionary
     outpath: Optional [str] = None,  
@@ -75,7 +75,7 @@ def _all_export_grid(
     return out
 
 # *******************************
-def all_export_grid(
+def export_grid(
     df: pd.DataFrame,
     metadata: dict,
     outpath: Optional [str] = None,  
@@ -84,20 +84,20 @@ def all_export_grid(
     nanmask: Optional[pd.DataFrame] = 'tif'
 ) -> np.ndarray:
 
-    """ reshape one column of the pandas DataFrame to a new dataframe with width and height. 
-    In case a nanmask is availabel (nan-cells for prediction input caused droped rows): 
-        "True"-cells in nanmask lead to nodata-cells in the output dataframe (y)
-   metadata contains width and height values out of input grids for prediction, as well as the crs (coordinate refrnce system)
-   nodata marks rows witch are droped because of nodata in the prediction input.
-   In case outfile is not None, the dataframe will be saved to a geoTiff-file 
+    """ 
+        Reshape one column of the pandas df to a new dataframe with width and height. 
+        In case a nanmask is availabel (nan-cells for prediction input caused droped rows): 
+            "True"-cells in nanmask lead to nodata-rows in the output dataframe (y).
+        Metadata contains width and height values out of input grids for prediction, as well as the crs (coordinate reference system).
+        In case outfile is not None, the dataframe will be saved to a geoTiff-file 
 
     Args:
-        df (pandas DataFrame): is the input df comming from prediction-method
-        metadata (dictionary): contains with and height values
-        outpath (string, optional): Path of the output-file
-        outfile (string, optional): Name of file of the output
-        outextension (string, optional): Name of the file extension (like .tif)       
-        nanmask (pandas DataFrame): in case nodata-samples are removed during "nodata-replacement"
+        - df (pandas DataFrame): Is the input df, result from prediction-method.
+        - metadata (dictionary): Contains with and height values.
+        - outpath (string, optional): Path of the output-file
+        - outfile (string, optional): Name of file of the output
+        - outextension (string, optional): Name of the file extension (like .tif)       
+        - nanmask (pandas DataFrame): In case nodata-samples are removed during "nodata-replacement"
 
     Returns:
         np.array: 2-d-array (numpy) reddy to outpu as a tiff, grid,... 
@@ -117,9 +117,9 @@ def all_export_grid(
     if not ((isinstance(nanmask,pd.DataFrame)) or (nanmask is None)):
         fl.append('argument nanmask is not a DataFrame and is not None')
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function all_export_grid: ' + fl[0])
+        raise InvalidParameterValueException ('***  function export_grid: ' + fl[0])
 
-    out = _all_export_grid(
+    out = _export_grid(
     df = df,
     metadata = metadata,
     outpath = outpath,  

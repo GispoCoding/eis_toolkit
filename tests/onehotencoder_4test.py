@@ -1,5 +1,5 @@
 
-# sklearn_model_fit_test.py
+# onehotencoder_test.py
 ##############################
 import pytest
 # import numpy as np
@@ -16,10 +16,6 @@ from eis_toolkit.conversions.import_grid import *
 from eis_toolkit.transformations.separation import *
 from eis_toolkit.transformations.nodata_replace import *
 from eis_toolkit.transformations.onehotencoder import *
-from eis_toolkit.transformations.unification import *
-from eis_toolkit.model_training.sklearn_randomforest_classifier import *
-from eis_toolkit.model_training.sklearn_model_fit import *
-
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 #################################################################
@@ -70,26 +66,21 @@ columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file 
 Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = columns) 
 # nodata_replacement of 
 Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent') 
-# onehotencoder
-Xdf_enh, eho = onehotencoder(df = Xcdf)
-# unification
-Xdf = unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
-# model
-sklearnMl = sklearn_randomforest_classifier(oob_score = True)
 
 #################################################################
 
-def test_sklearn_model_fit():
-    """Test functionality of fitting of a model."""
+def test_onehotencoder():
+    """Test functionality of onehotencoder of categorized columns of  imported X (Dataframe)."""
+    Xdf_enh, eho = onehotencoder(df = Xcdf)
 
-    myMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
+    assert ((isinstance(Xdf_enh,pd.DataFrame)) or (Xcdf is None))
+    if (Xdf_enh is not None) and (Xcdf is not None):
+        assert len(Xcdf.index) == len(Xdf_enh.index) 
 
-def test_sklearn_model_fit_error():
-    """Test wrong arguments."""
+def test_onehotencoder_error():
+    """Test wrong arguments of onehotencoder with wron arguments."""
     with pytest.raises(InvalidParameterValueException):
-        myMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = sklearnMl, ydf = ydf)
-    with pytest.raises(InvalidParameterValueException):
-        myMl = sklearn_model_fit (sklearnMl = ydf , Xdf = Xdf , ydf = ydf)
+        Xdf_enh, eho = onehotencoder(df = {'a':'A'})
 
-test_sklearn_model_fit()
-test_sklearn_model_fit_error()
+test_onehotencoder()
+test_onehotencoder_error()

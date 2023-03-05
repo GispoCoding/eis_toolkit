@@ -12,6 +12,31 @@ def _sklearn_model_fit(  # type: ignore[no-any-unimported]
    ydf: pd.DataFrame,      # dataframe of known values for training
 ):
 
+   ty = ydf
+   if len(ydf.shape) > 1: 
+        if ydf.shape[1] == 1:
+              ty = np.ravel(ydf)
+   sklearnMl.fit(Xdf,ty)
+   
+   return sklearnMl
+
+# *******************************
+def sklearn_model_fit(  # type: ignore[no-any-unimported]
+   sklearnMl: Any,
+   Xdf: pd.DataFrame,                       # dataframe of Features for training
+   ydf: pd.DataFrame,                     # dataframe of known values for training
+):
+
+   """ 
+      Training of a ML model
+   Args:
+      - sklearnMl: before defined model (random rorest  classifier, random forest regressor, logistic regressor)
+      - Xdf (Pandas dataframe or numpy array ("array-like")): features (columns) and samples (rows)
+      - ydf (Pandas dataframe or numpy array ("array-like")): target valus(columns) and samples (rows) (same number as Xdf)
+   Returns:
+        Fited ML model
+   """
+
    # Argument evaluation
    fl = []
    t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
@@ -37,35 +62,10 @@ def _sklearn_model_fit(  # type: ignore[no-any-unimported]
       raise InvalidParameterValueException ('***  function sklearn_model_fit: ' + fl[0])
 
 
-   ty = ydf
-   if len(ydf.shape) > 1: 
-        if ydf.shape[1] == 1:
-              ty = np.ravel(ydf)
-   sklearnMl.fit(Xdf,ty)
-   
-   return sklearnMl
-
-# *******************************
-def sklearn_model_fit(  # type: ignore[no-any-unimported]
-   sklearnMl: Any,
-   Xdf: pd.DataFrame,                       # dataframe of Features for training
-   ydf: pd.DataFrame,                     # dataframe of known values for training
-):
-
-    """ 
-      training of a ML model
-    Args:
-      - sklearnMl: before trained Model (random rorest  classifier, random forest regressor,... )
-      - Xdf (Pandas dataframe or numpy array ("array-like")): features (columns) and samples (rows)
-      - ydf (Pandas dataframe or numpy array ("array-like")): target valus(columns) and samples (rows) (same number as Xdf)
-    Returns:
-        fited ML model
-    """
-
-    sklearnMl = _sklearn_model_fit(
+   sklearnMl = _sklearn_model_fit(
       sklearnMl = sklearnMl,
       Xdf = Xdf,
-      ydf = ydf,
-    )
+      ydf = ydf
+   )
 
-    return sklearnMl
+   return sklearnMl

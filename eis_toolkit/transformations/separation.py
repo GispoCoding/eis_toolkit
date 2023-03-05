@@ -1,10 +1,10 @@
 
-from typing import Optional, Tuple
+from typing import Tuple
 import pandas as pd
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
-def _all_separation(
+def _separation(
     df: pd.DataFrame,
     fields: dict,
 ) -> Tuple[pd.DataFrame,pd.DataFrame,pd.DataFrame,pd.DataFrame]:            # Xvdf, Xcdf, ydf, ,
@@ -32,17 +32,18 @@ def _all_separation(
     return Xvdf,Xcdf,ydf,igdf
 
 # *******************************
-def all_separation(  # type: ignore[no-any-unimported]
+def separation(  # type: ignore[no-any-unimported]
     df: pd.DataFrame,
     fields: dict
 ) -> Tuple[pd.DataFrame,pd.DataFrame, pd.DataFrame,pd.DataFrame]:
 
     """
-        Separates the target column to a separate dataframe.
-        All categorical columns (fields) will be separated from all other features.
+        Separates the target column (id exists) to a separate dataframe ydf
+        All categorical columns (fields) will be separated from all other features (columns) in a separate dataframe Xcdf.
+        Separates the id and geometry column to a separate dataframe igdf
     Args:
-        df (pandas DataFrame): including target column ('t')
-        fields (dictionary): column type for each column
+        df (pandas DataFrame): Including target column ('t').
+        fields (dictionary): Column type for each column
 
     Returns:
         pandas DataFrame: value-sample  (Xvdf)
@@ -58,7 +59,7 @@ def all_separation(  # type: ignore[no-any-unimported]
     if not (isinstance(fields,dict)):
         fl.append('argument fields is not a dictionary') 
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function all_separation: ' + fl[0])
+        raise InvalidParameterValueException ('***  function separation: ' + fl[0])
         
     if len(df.columns) == 0:
         raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no column')
@@ -68,6 +69,6 @@ def all_separation(  # type: ignore[no-any-unimported]
         raise InvalidParameterValueException ('***  function all_nodata_remove: Fields is empty')
 
     # call
-    Xvdf,Xcdf,ydf,igdf = _all_separation(df,fields)
+    Xvdf,Xcdf,ydf,igdf = _separation(df,fields)
 
     return Xvdf,Xcdf,ydf,igdf

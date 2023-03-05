@@ -1,5 +1,5 @@
 
-# all_unification_test.py
+# unification_test.py
 ##############################
 import pytest
 # import numpy as np
@@ -11,16 +11,16 @@ sys.path.append (scripts)
 
 import geopandas as gpd
 import pandas as pd
-from eis_toolkit.conversions.all_import_featureclass import *
-from eis_toolkit.conversions.all_import_grid import *
-from eis_toolkit.transformations.all_separation import *
-from eis_toolkit.transformations.all_nodata_replace import *
-from eis_toolkit.transformations.all_onehotencoder import *
-from eis_toolkit.transformations.all_unification import *
+from eis_toolkit.conversions.import_featureclass import *
+from eis_toolkit.conversions.import_grid import *
+from eis_toolkit.transformations.separation import *
+from eis_toolkit.transformations.nodata_replace import *
+from eis_toolkit.transformations.onehotencoder import *
+from eis_toolkit.transformations.unification import *
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 #################################################################
-# import of data from all_import_featureclass or all_import_grid
+# import of data from import_featureclass or import_grid
 # fc or csv:
 parent_dir = Path(__file__).parent
 name_fc = str(parent_dir.joinpath(r'data/shps/EIS_gp.gpkg'))
@@ -60,21 +60,21 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
-# columns , df , urdf , metadata = all_import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns , df , urdf , metadata = all_import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
-#columns , df , metadata = all_import_grid(grids = grids) 
+# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
+columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
+#columns , df , metadata = import_grid(grids = grids) 
 # Separation
-Xvdf , Xcdf , ydf , igdf = all_separation(df = df, fields = columns) 
+Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = columns) 
 # nodata_replacement of 
-Xcdf = all_nodata_replace(df = Xcdf, rtype = 'most_frequent') 
+Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent') 
 # onehotencoder
-Xdf_enh, eho = all_onehotencoder(df = Xcdf)
+Xdf_enh, eho = onehotencoder(df = Xcdf)
 
 #################################################################
 
-def test_all_unification():
+def test_unification():
     """Test functionality of unification of separated dataframes."""
-    Xdf = all_unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
+    Xdf = unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
 
     assert ((isinstance(Xdf,pd.DataFrame)))
     if (Xdf_enh is not None) and (Xdf is not None):
@@ -82,12 +82,12 @@ def test_all_unification():
     if (Xvdf is not None) and (Xdf is not None):
         assert len(Xdf.index) == len(Xvdf.index) 
 
-def test_all_unification_error():
+def test_unification_error():
     """Test wrong arguments of unification of separated dataframes (wrong arguments)."""
     with pytest.raises(InvalidParameterValueException):
-        Xdf = all_unification(Xvdf = {'a':'A'}, Xcdf = Xdf_enh)
+        Xdf = unification(Xvdf = {'a':'A'}, Xcdf = Xdf_enh)
     with pytest.raises(InvalidParameterValueException):
-        Xdf = all_unification(Xvdf = Xvdf, Xcdf = {'a':'A'})
+        Xdf = unification(Xvdf = Xvdf, Xcdf = {'a':'A'})
 
-test_all_unification()
-test_all_unification_error()
+test_unification()
+test_unification_error()
