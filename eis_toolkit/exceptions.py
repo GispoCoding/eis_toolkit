@@ -48,3 +48,11 @@ class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
 
     pass
+
+class InvalidDataFrameException(Exception):
+    """Exception error class for invalid dataframes."""
+    pass
+
+class InvalidNumberOfPrincipalComponent(Exception):
+    """Exception error class for invalid dataframes."""
+    pass
