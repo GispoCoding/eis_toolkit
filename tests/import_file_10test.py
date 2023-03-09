@@ -1,12 +1,14 @@
 
-import pytest
 
+import pytest
+# import numpy as np
 import sys
 from pathlib import Path
 
 scripts = r'/eis_toolkit'  #/eis_toolkit/conversions'
 sys.path.append (scripts)
 
+import geopandas as gpd
 import pandas as pd
 from eis_toolkit.conversions.import_featureclass import *
 from eis_toolkit.conversions.import_grid import *
@@ -14,7 +16,16 @@ from eis_toolkit.transformations.separation import *
 from eis_toolkit.transformations.nodata_replace import *
 from eis_toolkit.transformations.onehotencoder import *
 from eis_toolkit.transformations.unification import *
-#from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
+from eis_toolkit.model_training.sklearn_randomforest_classifier import *
+from eis_toolkit.model_training.sklearn_model_fit import *
+from eis_toolkit.prediction_methods.sklearn_model_prediction import *
+from eis_toolkit.validation.sklearn_model_validations import *
+from eis_toolkit.validation.sklearn_model_crossvalidation import *
+from eis_toolkit.validation.sklearn_model_importance import *
+from eis_toolkit.file.export_files import *
+from eis_toolkit.file.import_files import *
+
+#from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException, MissingFileOrPath
 
 #################################################################
 # import of data from import_featureclass or import_grid
@@ -22,7 +33,7 @@ from eis_toolkit.transformations.unification import *
 parent_dir = Path(__file__).parent
 name_fc = str(parent_dir.joinpath(r'data/shps/EIS_gp.gpkg'))
 layer_name = r'Occ_2'
-name_csv = str(parent_dir.joinpath(r'data/csv/Trainings_Test.csv'))
+name_csv = str(parent_dir.joinpath(r'data/csv/Test_Test.csv'))
 
 # grid:
 parent_dir = Path(__file__).parent
@@ -57,7 +68,7 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
-# columns, df, urdf, metadata = import_featureclass(fields = fields_fc, file = name_fc, layer = layer_name)
+# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
 columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
 #columns , df , metadata = import_grid(grids = grids) 
 # Separation
@@ -66,25 +77,74 @@ Xvdf, Xcdf, ydf, igdf = separation(df = df, fields = columns)
 Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent') 
 # onehotencoder
 Xdf_enh, eho = onehotencoder(df = Xcdf)
-
+# unification
+Xdf = unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
+# model
+sklearnMl = sklearn_randomforest_classifier(oob_score = True)
+# fit
+sklearnMl = sklearn_model_fit (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf)
+# validation
+#validation , confusion , comparison , myMl = sklearn_model_validations (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf , comparison = True , confusion_matrix = True , test_size = 0.2)
+# crossvalidation
+#cv = sklearn_model_crossvalidation (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
+# importance
+#importance = sklearn_model_importance (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
+# export_files
+parent_dir = Path(__file__).parent
+path = str(parent_dir.joinpath(r'data'))
+filesdict = export_files(
+    name = 'test_csv',
+    path = path,
+    sklearnMl = sklearnMl,
+    sklearnOhe = eho,
+    myFields = columns,
+    decimalpoint_german = True,
+    new_version = False,
+)
 #################################################################
 
-def test_unification():
-    """Test functionality of unification of separated dataframes."""
-    Xdf = unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
+parent_dir = Path(__file__).parent
+file_wrong = str(parent_dir.joinpath(r'data/falsch.csv'))
 
-    assert ((isinstance(Xdf,pd.DataFrame)))
-    if (Xdf_enh is not None) and (Xdf is not None):
-        assert len(Xdf.index) == len(Xdf_enh.index) 
-    if (Xvdf is not None) and (Xdf is not None):
-        assert len(Xdf.index) == len(Xvdf.index) 
+def test_import_files():
+    """Test functionality of save import files."""
 
-def test_unification_error():
-    """Test wrong arguments of unification of separated dataframes (wrong arguments)."""
+    sklearnMlp, sklearnOhep, myFieldsp, kerasMlp, kerasOhep = import_files(
+        sklearnMl_file = filesdict['sklearnMl'],
+        sklearnOhe_file = filesdict['sklearnOhe'],
+        myFields_file = filesdict['myFields'], 
+        )
+    assert (isinstance(myFieldsp,dict) or (myFieldsp is None))
+    t = sklearnMlp.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
+    assert (t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression') or sklearnMlp is None)
+    t = sklearnOhep.__class__.__name__
+    assert (t in ('OneHotEncoder') or sklearnOhep is None)
+    assert (kerasMlp.__class__.__name__ in ('Model') or kerasMlp is None)
+    assert (kerasOhep.__class__.__name__ in ('Model') or kerasOhep is None)
+
+def test_import_files_error():
+    """Test wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        Xdf = unification(Xvdf = {'a':'A'}, Xcdf = Xdf_enh)
-    with pytest.raises(InvalidParameterValueException):
-        Xdf = unification(Xvdf = Xvdf, Xcdf = {'a':'A'})
+        mlp, ohep, fldp, kmlp, kohep = import_files(
+        sklearnMl_file = 999,
+        sklearnOhe_file = filesdict['sklearnOhe'],
+        myFields_file = filesdict['myFields'], 
+        )
 
-test_unification()
-test_unification_error()
+    filesdict['sklearnMl'] = file_wrong
+    with pytest.raises(MissingFileOrPath):
+        mlp, ohep, fldp, kmlp, kohep = import_files(
+        sklearnMl_file = filesdict['sklearnMl'],
+        sklearnOhe_file = filesdict['sklearnOhe'],
+        myFields_file = filesdict['myFields'], 
+        )
+
+    # with pytest.raises(InvalidParameterValueException):
+    #     mlp, ohep, fldp, kmlp, kohep = import_files(
+    #     sklearnMl_file = filesdict['myFields'],
+    #     sklearnOhe_file = filesdict['sklearnOhe'],
+    #     myFields_file = filesdict['myFields'], 
+    #     )
+
+test_import_files()
+test_import_files_error()

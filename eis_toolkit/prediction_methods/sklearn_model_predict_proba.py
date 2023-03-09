@@ -3,7 +3,7 @@ from typing import Any, Optional
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, InvalideContentOfInputDataFrame, ModelIsNotFitted
 
 # *******************************
 def _sklearn_model_predict_proba(
@@ -14,15 +14,15 @@ def _sklearn_model_predict_proba(
 ):
 
     if sklearnMl._estimator_type == 'classifier':
-        ydf = pd.DataFrame(sklearnMl.predict_proba(Xdf),columns=sklearnMl.classes_)
+        ydf = pd.DataFrame(sklearnMl.predict_proba(Xdf), columns=sklearnMl.classes_)
     else:
-        raise InvalidParameterValueException ('***  function sklearn_model_predict_proba:  Model is not a classifier')
+        raise InvalidParameterValueException ('Model is not a classifier')
 
     if igdf is not None:
         if len(ydf.index) != len(igdf.index):
-            raise InvalidParameterValueException ('***  function sklearn_model_predict_proba:  Xdf and igdf have different number of rows')
+            raise InvalideContentOfInputDataFrame('Xdf and igdf have different number of rows')
         elif len(igdf.columns) > 0:              # zipping og id and geo columns
-            ydf =  pd.DataFrame(np.column_stack((igdf,ydf)),columns=igdf.columns.to_list()+ydf.columns.to_list())
+            ydf =  pd.DataFrame(np.column_stack((igdf,ydf)), columns=igdf.columns.to_list()+ydf.columns.to_list())
             gm =  list({i for i in fields if fields[i] in ('g')})
             if len(gm) == 1:
                 if gm == ['geometry']:           # if geometry exists DataFrame will be changed to geoDataFrame
@@ -51,29 +51,30 @@ def sklearn_model_predict_proba(
 
     # Argument evaluation
     fl = []
-    if not (isinstance(Xdf,pd.DataFrame)):
-        fl.append('argument Xdf is not a DataFrame')
+    if not (isinstance(Xdf, pd.DataFrame)):
+        fl.append('Argument Xdf is not a DataFrame')
     t = sklearnMl.__class__.__name__
     if not t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression'):
-        fl.append('argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
-    if not (isinstance(igdf,pd.DataFrame) or (igdf is None)):
-        fl.append('argument igdf is not a DataFrame and is not None')
-    if not (isinstance(fields,dict) or (fields is None)):
-        fl.append('argument fields is not a dictionary and is not None')            
+        fl.append('Argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
+    if not (isinstance(igdf, pd.DataFrame) or (igdf is None)):
+        fl.append('Argument igdf is not a DataFrame and is not None')
+    if not (isinstance(fields, dict) or (fields is None)):
+        fl.append('Argument fields is not a dictionary and is not None')            
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function sklearn_model_predict_proba:  ' + fl[0])
+        raise InvalidParameterValueException (fl[0])
     
     if len(Xdf.columns) == 0:
-        raise InvalidParameterValueException ('***  function sklearn_model_predict_proba: DataFrame has no column')
+        raise InvalideContentOfInputDataFrame('DataFrame has no column')
     if len(Xdf.index) == 0:
-        raise InvalidParameterValueException ('***  function sklearn_model_predict_proba:  DataFrame has no rows')
+        raise InvalideContentOfInputDataFrame('DataFrame has no rows')
 
+    if not hasattr(sklearnMl,'feature_names_in_'):
+        raise ModelIsNotFitted('Model is not fitted')
 
-    ydf = _sklearn_model_predict_proba(
+    return _sklearn_model_predict_proba(
         sklearnMl=sklearnMl,
         Xdf=Xdf,
         igdf=igdf,
         fields = fields,
     )
 
-    return ydf

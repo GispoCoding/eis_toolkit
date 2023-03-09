@@ -3,13 +3,13 @@ from typing import List, Tuple
 import pandas as pd
 import rasterio
 from os.path import exists
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, NonMatchingImagesExtend, FileReadWriteError
 from eis_toolkit.conversions.raster_to_pandas import *
 
 # *******************************
 def _import_grid(
     grids: List[dict]
-) -> Tuple[dict,pd.DataFrame,dict]:
+) -> Tuple[dict, pd.DataFrame, dict]:
 
     # for every raster-grid
     df = pd.DataFrame()
@@ -21,8 +21,11 @@ def _import_grid(
         if not exists(dict['file']):
             fl.append('file does not extsis: '+dict['file'])
         else:
-            grid = rasterio.open(dict['file'])
-            dt = grid.read()[0]   #.T              # add a new columns to the feature-table (dataFrame)
+            try:
+                grid = rasterio.open(dict['file'])
+                dt = grid.read()[0]   #.T              # add a new columns to the feature-table (dataFrame)
+            except:
+                raise  FileReadWriteError('file is not readable')
             #nanv = grid.meta['nodata']
             #da = grid.read()
             dtrans = np.ravel(dt)
@@ -36,22 +39,22 @@ def _import_grid(
                 q = True
             else:
                 if meta['height'] != grid.meta['height'] or meta['width'] != grid.meta['width']:
-                    raise InvalidParameterValueException ('*** function import_grid: height and/or width differs in the imported grids ') 
+                    raise NonMatchingImagesExtend('height and/or width differs in the imported grids ') 
                 meta = grid.meta
             fields[dict['name']]=dict['type']
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function import_grid: ' + fl[0])
+        raise InvalidParameterValueException (fl[0])
     # remove the file-name out of the fields-dictionaries (not nessesary)
     # fields = grids
     # for gr in fields:
     #     del gr["file"]
 
-    return fields,df,meta
+    return fields, df, meta
 
 # *******************************
 def import_grid(  # type: ignore[no-any-unimported]
     grids: List[dict]
-) -> Tuple[dict,pd.DataFrame,dict]: 
+) -> Tuple[dict, pd.DataFrame, dict]: 
 
     """
         Add a list of rasters (grids) as columns to new pandas DataFrame.
@@ -74,18 +77,18 @@ def import_grid(  # type: ignore[no-any-unimported]
 
     # Argument evaluation
     fl = []
-    if not (isinstance(grids,list)):
+    if not (isinstance(grids, list)):
         fl.append('argument lists is not a list')   
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function import_grid: ' + fl[0])
+        raise InvalidParameterValueException (fl[0])
     if len(grids) == 0:
-        raise InvalidParameterValueException ('***  function import_grid: grids is empty')
+        raise InvalidParameterValueException ('Argunment grids is empty')
     if not (grids[0].__class__.__name__ == 'dict'):         #(isinstance(grids[0],dict)):
-        raise InvalidParameterValueException ('***  function import_grid: the list contains no dictionaries')
+        raise InvalidParameterValueException ('The grids list contains no dictionaries')
 
-    fields,data_frame,meta = _import_grid( 
+    fields, data_frame, meta = _import_grid( 
         grids = grids
     )                       #, add_img_coord = add_img_coord, height = height, width = width)
 
-    return fields,data_frame,meta   #, columns, cats
+    return fields, data_frame, meta   #, columns, cats
 

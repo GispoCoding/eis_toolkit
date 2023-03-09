@@ -3,7 +3,7 @@ from typing import Tuple
 import copy
 import numpy as np 
 import pandas as pd
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, InvalideContentOfInputDataFrame
 
 # *******************************
 def _nodata_remove(
@@ -23,7 +23,7 @@ def _nodata_remove(
     df.dropna(inplace = True)    # drops rows which contain missing values
     df = copy.deepcopy(df.reset_index(inplace=False))
 
-    return df,dfsum          # if no ydf (target, for prediction) exists: thease output DataFrames are set to None
+    return df, dfsum          # if no ydf (target, for prediction) exists: thease output DataFrames are set to None
 
 # *******************************
 def nodata_remove(
@@ -44,18 +44,17 @@ def nodata_remove(
     
     # Argument evaluation
     fl = []
-    if not (isinstance(df,pd.DataFrame)):
-        fl.append('argument df is not a DataFrame')
+    if not (isinstance(df, pd.DataFrame)):
+        fl.append('Argument df is not a DataFrame')
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function nodata_remove: ' + fl[0])
+        raise InvalidParameterValueException (fl[0])
 
     if len(df.columns) == 0:
-        raise InvalidParameterValueException ('***  function nodata_remove: DataFrame has no column')
+        raise InvalideContentOfInputDataFrame('DataFrame has no column')
     if len(df.index) == 0:
-        raise InvalidParameterValueException ('***  function nodata_remove: DataFrame has no rows')
+        raise InvalideContentOfInputDataFrame('DataFrame has no rows')
         
-    df,dfsum =  _nodata_remove(                # np2: nodatamask
+    return _nodata_remove(                # np2: nodatamask
         df = df
     )
-    return df,dfsum
 

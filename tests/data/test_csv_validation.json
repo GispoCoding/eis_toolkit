@@ -1,0 +1,33 @@
+{
+   "columns":[
+      "test_split"
+   ],
+   "index":[
+      "accuracy",
+      "recall",
+      "precision",
+      "F1 score",
+      "oob score",
+      "testsplit size"
+   ],
+   "data":[
+      [
+         1.0
+      ],
+      [
+         1.0
+      ],
+      [
+         1.0
+      ],
+      [
+         1.0
+      ],
+      [
+         0.9473684211
+      ],
+      [
+         24.0
+      ]
+   ]
+}

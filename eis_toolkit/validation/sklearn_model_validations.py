@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from eis_toolkit.prediction_methods.sklearn_model_prediction import *
 from sklearn import metrics
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, InvalideContentOfInputDataFrame
 
 # *******************************
 
@@ -17,10 +17,10 @@ def _sklearn_model_validations(
    test_size: Optional[int | float] = None,  # int: number of test-samples, if float: 0<ts<1
    train_size: Optional[int | float] = None, # if None: complement size of the test_size
    random_state: Optional [int] = None,
-   shuffle: Optional [bool] = None,
+   shuffle: Optional [bool] = True,
    confusion_matrix: Optional[bool] = True,
    comparison: Optional[bool] = False,
-) -> Tuple[pd.DataFrame,pd.DataFrame,pd.DataFrame,Any]:
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, Any]:
 
    # configuration:
    maxlines = 1.000    # max. number of y ->rows for comparison
@@ -37,7 +37,7 @@ def _sklearn_model_validations(
       testtype = "test_split"
       if test_size is not None:
          if test_size != 0:           # if testsize == 0 :   selftest will be performed
-            train_X,test_X,train_y,test_y = train_test_split(
+            train_X, test_X, train_y, test_y = train_test_split(
                Xdf,
                ydf,
                test_size = test_size,
@@ -50,7 +50,7 @@ def _sklearn_model_validations(
             testtype = 'self_test'
       elif train_size is not None:
          if train_size != 0:   # if trainsize == 0:   selftest will be performed
-            train_X,test_X,train_y,test_y = train_test_split(
+            train_X, test_X, train_y, test_y = train_test_split(
                Xdf,
                ydf,
                test_size = test_size,
@@ -75,21 +75,21 @@ def _sklearn_model_validations(
    # Validation 
    validation ={}
    if sklearnMl._estimator_type == 'regressor':
-      validation["R2 score"] = metrics.r2_score(test_y,predict_y)
-      validation["explained variance"] = metrics.explained_variance_score(test_y,predict_y)
-      validation["mean absolut error"] = metrics.mean_absolute_error(test_y,predict_y)
-      validation["mean square arror"] = metrics.mean_squared_error(test_y,predict_y)
+      validation["R2 score"] = metrics.r2_score(test_y, predict_y)
+      validation["explained variance"] = metrics.explained_variance_score(test_y, predict_y)
+      validation["mean absolut error"] = metrics.mean_absolute_error(test_y, predict_y)
+      validation["mean square arror"] = metrics.mean_squared_error(test_y, predict_y)
    else:
-      validation["accuracy"] = metrics.accuracy_score(test_y,predict_y)
-      validation["recall"] = metrics.recall_score(test_y,predict_y,average = 'weighted') #'macro')
-      validation["precision"] = metrics.precision_score(test_y,predict_y,average = 'weighted') #'macro')
-      validation["F1 score"] = metrics.f1_score(test_y,predict_y,average = 'weighted') #'macro')
+      validation["accuracy"] = metrics.accuracy_score(test_y, predict_y)
+      validation["recall"] = metrics.recall_score(test_y, predict_y, average = 'weighted') #'macro')
+      validation["precision"] = metrics.precision_score(test_y, predict_y,average = 'weighted') #'macro')
+      validation["F1 score"] = metrics.f1_score(test_y, predict_y, average = 'weighted') #'macro')
    #if sklearnMl.estimator_ in ['RandomForestClassifier','RandomForesteRegressor']:
    if hasattr(sklearnMl,'oob_score'):
       if sklearnMl.oob_score:
          validation['oob score'] = sklearnMl.oob_score_
    validation['testsplit size'] = test_y.shape[0]
-   validation =  pd.DataFrame.from_dict(validation,orient='index', columns=[testtype]) 
+   validation =  pd.DataFrame.from_dict(validation, orient='index', columns=[testtype]) 
 
    # confusion matrix
    confusion1 = None
@@ -99,7 +99,7 @@ def _sklearn_model_validations(
          lpredict = predict_y.loc[:,predict_y.columns[0]].tolist()
          lists = list(set(ltest+lpredict))
          lists.sort()
-         confusion = pd.DataFrame(metrics.confusion_matrix(ltest,lpredict))#,labels=lists))      #,predict_y, labels=list1))
+         confusion = pd.DataFrame(metrics.confusion_matrix(ltest, lpredict))  #,labels=lists))      #,predict_y, labels=list1))
          list2 = list(confusion.index.values)
          df1 = confusion.rename(index=dict(zip(list2,lists)))
          confusion1 = df1.rename(columns=dict(zip(list2,lists)))
@@ -112,11 +112,11 @@ def _sklearn_model_validations(
       #       tmpl = pandas.DataFrame(test_Id, columns = ['Id']).join(test_y).join(test_pred)
       #   else:
       #tmpl = test_y.column[0].join(predict_y.columns[0])
-      predict_y.reset_index(drop=True,inplace = True)
-      test_y.reset_index(drop=True,inplace = True)
+      predict_y.reset_index(drop=True, inplace = True)
+      test_y.reset_index(drop=True, inplace = True)
       comparison_lst = test_y.join(predict_y)
 
-   return validation,confusion1,comparison_lst,sklearnMl
+   return validation, confusion1, comparison_lst, sklearnMl
 
 # *******************************
 def sklearn_model_validations(
@@ -127,10 +127,10 @@ def sklearn_model_validations(
    test_size: Optional[int | float] = None,  # int: namuber of test-samples, if float: 0<ts<1
    train_size: Optional[int | float] = None,  # if None: complement size of the test_size
    random_state: Optional [int] = None,
-   shuffle: Optional [bool] = None,
+   shuffle: Optional [bool] = True,
    confusion_matrix: Optional[bool] = True,   # calculate confusion matrix
    comparison: Optional[bool] = False,
-) -> Tuple[pd.DataFrame,pd.DataFrame,pd.DataFrame,Any]:  #dict, dict]:
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, Any]:  #dict, dict]:
 
    """ 
       Validation for a ML model based on:
@@ -140,7 +140,7 @@ def sklearn_model_validations(
         The test-dataset will be used for prediction. 
         The result of prediction will be compared with ydf from test-dataset
       - If predict_ydf ist given:  
-        test_ydf is the known set of data to compare with predict_ydf.
+        test_ydf is the known set of data to compare with the predicted set predict_ydf.
         sklearnMl will be used to determine the estimator type: regression or classification.
    Args:
       - sklearnMl (model): Even for comparison with a testset the model is used to get the model-typ (regression or classification). 
@@ -182,39 +182,43 @@ def sklearn_model_validations(
    fl = []
    t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
    if not t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression'):
-      fl.append('argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
-   if not (isinstance(Xdf,pd.DataFrame) or (Xdf is None)):
-      fl.append('argument Xdf is not a DataFrame and is not None')
-   if not (isinstance(ydf,pd.DataFrame)  or (ydf is None)):
-      fl.append('argument ydf is not a DataFrame and is not None')
-   if not (isinstance(predict_ydf,pd.DataFrame) or (predict_ydf is None)):
-      fl.append('argument predict_ydf is not a DataFrame and is not None')
-   if predict_ydf is not None:
-      if len(predict_ydf.columns) != 1:
-        fl.append('predict_ydf has 0 or more than 1 columns') 
-   if not (isinstance(test_size,(float,int)) or (test_size is None)):
-      fl.append('argument test_size is not integer and is not None')
-   if not (isinstance(train_size,(float,int)) or (train_size is None)):
-      fl.append('argument train_size is not integer and is not None')
-   if not (isinstance(random_state,int) or (random_state is None)):
-      fl.append('argument random_state is not integer and is not None')
-   if not (isinstance(shuffle,bool) or (shuffle is None)):
-      fl.append('argument shuffle is not bool and is not None')
-   if not (isinstance(confusion_matrix,bool) or (confusion_matrix is None)):
-      fl.append('argument confusion_matrix is not bool and is not None')
-   if not (isinstance(comparison,bool) or (comparison is None)):
-      fl.append('argument comparison is not bool and is not None')
+      fl.append('Argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
+   if not (isinstance(Xdf, pd.DataFrame) or (Xdf is None)):
+      fl.append('Argument Xdf is not a DataFrame and is not None')
+   if not (isinstance(ydf, pd.DataFrame)  or (ydf is None)):
+      fl.append('Argument ydf is not a DataFrame and is not None')
+   if not (isinstance(predict_ydf, pd.DataFrame) or (predict_ydf is None)):
+      fl.append('Argument predict_ydf is not a DataFrame and is not None')
+
+   if not (isinstance(test_size, (float,int)) or (test_size is None)):
+      fl.append('Argument test_size is not integer and is not None')
+   if not (isinstance(train_size, (float,int)) or (train_size is None)):
+      fl.append('Argument train_size is not integer and is not None')
+   if not (isinstance(random_state, int) or (random_state is None)):
+      fl.append('Argument random_state is not integer and is not None')
+   if not (isinstance(shuffle, bool) or (shuffle is None)):
+      fl.append('Argument shuffle is not bool and is not None')
+   if not (isinstance(confusion_matrix, bool) or (confusion_matrix is None)):
+      fl.append('Argument confusion_matrix is not bool and is not None')
+   if not (isinstance(comparison, bool) or (comparison is None)):
+      fl.append('Argument comparison is not bool and is not None')
 
    if len(fl) > 0:
-      raise InvalidParameterValueException ('***  function sklearn_model_validation: ' + fl[0])
+      raise InvalidParameterValueException(fl[0])
 
    if Xdf is not None:
       if len(Xdf.columns) == 0:
-         raise InvalidParameterValueException ('***  function sklearn_model_validation:  DataFrame has no column')
+         raise InvalidParameterValueException('DataFrame has no column')
       if len(Xdf.index) == 0:
-         raise InvalidParameterValueException ('***  function sklearn_model_validation:  DataFrame has no rows')
+         raise InvalidParameterValueException('DataFrame has no rows')
+   if predict_ydf is not None:
+      if len(predict_ydf.columns) != 1:
+        fl.append('predict_ydf has 0 or more than 1 columns')
+   if predict_ydf is not None:
+      if predict_ydf.shape[0] != ydf.shape[0]:
+         raise InvalideContentOfInputDataFrame('predict_ydf and ydf have not the same number of rows')
 
-   validation,confusion,comparison,sklearnMl = _sklearn_model_validations(
+   validation, confusion, comparison, sklearnMl = _sklearn_model_validations(
       sklearnMl = sklearnMl,
       Xdf = Xdf,
       ydf = ydf,
@@ -227,4 +231,4 @@ def sklearn_model_validations(
       comparison = comparison,
    )
 
-   return validation,confusion,comparison,sklearnMl
+   return validation, confusion, comparison, sklearnMl

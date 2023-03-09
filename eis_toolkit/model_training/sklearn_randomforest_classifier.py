@@ -137,48 +137,48 @@ def sklearn_randomforest_classifier(  # type: ignore[no-any-unimported]
    fl = []
    if criterion is not None:
       if not (criterion in ['gini','entropy','log_loss']):
-         fl.append('argument criterion is not in (gini,entropy,log_loss)')
-   if not (isinstance(max_features,(int,float)) or (max_features is None)):
+         fl.append('Argument criterion is not in (gini,entropy,log_loss)')
+   if not (isinstance(max_features, (int,float)) or (max_features is None)):
       if not (max_features in ['sqrt','log2']):
-         fl.append('argument max_features is not in (gini,entropy,log_loss) not float and not None')
-   if not (isinstance(class_weight,(dict,list)) or (class_weight is None)):
+         fl.append('Argument max_features is not in (gini,entropy,log_loss) not float and not None')
+   if not (isinstance(class_weight, (dict,list)) or (class_weight is None)):
       if not (class_weight in ['balanced','balanced_subsample']):
-         fl.append('argument class_weight is not in (balanced,balanced_subsample), not dictionary, no list and not None')
-   if not (isinstance(random_state,int) or (random_state is None)):
-      fl.append('argument random_state is not integer and is not None')
-   if not (isinstance(n_estimators,int) or (n_estimators is None)):
-      fl.append('argument n_estimatorsis not integer and is not None')
-   if not (isinstance(n_jobs,int) or (n_jobs is None)):
-      fl.append('argument n_jobs is not integer and is not None')
-   if not (isinstance(verbose,int) or (verbose is None)):
-      fl.append('argument verbose is not integer and is not None')
-   if not (isinstance(min_samples_leaf,(int)) or (min_samples_leaf is None)):
-      fl.append('argument min_samples_leaf is not integer and is not None')
-   if not (isinstance(max_leaf_nodes,int) or (max_leaf_nodes is None)):
-      fl.append('argument max_leaf_nodes is not integer and is not None')
-   if not (isinstance(max_depth,int) or (max_depth is None)):
-      fl.append('argument max_depth is not integer and is not None')
-   if not (isinstance(min_samples_split,(int,float)) or (min_samples_split is None)):
-      fl.append('argument min_samples_split is not float and is not None')
-   if not (isinstance(min_impurity_decrease,(int,float)) or (min_impurity_decrease is None)):
-      fl.append('argument min_impurity_decrease is not float and is not None')
-   if not (isinstance(min_weight_fraction_leaf,(int,float)) or (min_weight_fraction_leaf is None)):
-      fl.append('argument min_weight_fraction_leaf is not float and is not None')
-   if not (isinstance(ccp_alpha,(int,float)) or (ccp_alpha is None)):
-      fl.append('argument ccp_alpha is not float and is not None')
-   if not (isinstance(max_samples,(int,float)) or (max_samples is None)):
-      fl.append('argument max_samples is not float and is not None')
-   if not (isinstance(bootstrap,bool) or (bootstrap is None)):
-      fl.append('argument bootstrap is not bool and is not None')
-   if not (isinstance(oob_score,bool) or (oob_score is None)):
-      fl.append('argument oob_score is not bool and is not None')
-   if not (isinstance(warm_start,bool) or (warm_start is None)):
-      fl.append('argument warm_start is not bool and is not None')
+         fl.append('Argument class_weight is not in (balanced,balanced_subsample), not dictionary, no list and not None')
+   if not (isinstance(random_state, int) or (random_state is None)):
+      fl.append('Argument random_state is not integer and is not None')
+   if not (isinstance(n_estimators, int) or (n_estimators is None)):
+      fl.append('Argument n_estimatorsis not integer and is not None')
+   if not (isinstance(n_jobs, int) or (n_jobs is None)):
+      fl.append('Argument n_jobs is not integer and is not None')
+   if not (isinstance(verbose, int) or (verbose is None)):
+      fl.append('Argument verbose is not integer and is not None')
+   if not (isinstance(min_samples_leaf, (int)) or (min_samples_leaf is None)):
+      fl.append('Argument min_samples_leaf is not integer and is not None')
+   if not (isinstance(max_leaf_nodes, int) or (max_leaf_nodes is None)):
+      fl.append('Argument max_leaf_nodes is not integer and is not None')
+   if not (isinstance(max_depth, int) or (max_depth is None)):
+      fl.append('Argument max_depth is not integer and is not None')
+   if not (isinstance(min_samples_split, (int,float)) or (min_samples_split is None)):
+      fl.append('Argument min_samples_split is not float and is not None')
+   if not (isinstance(min_impurity_decrease, (int,float)) or (min_impurity_decrease is None)):
+      fl.append('Argument min_impurity_decrease is not float and is not None')
+   if not (isinstance(min_weight_fraction_leaf, (int,float)) or (min_weight_fraction_leaf is None)):
+      fl.append('Argument min_weight_fraction_leaf is not float and is not None')
+   if not (isinstance(ccp_alpha, (int,float)) or (ccp_alpha is None)):
+      fl.append('Argument ccp_alpha is not float and is not None')
+   if not (isinstance(max_samples, (int,float)) or (max_samples is None)):
+      fl.append('Argument max_samples is not float and is not None')
+   if not (isinstance(bootstrap, bool) or (bootstrap is None)):
+      fl.append('Argument bootstrap is not bool and is not None')
+   if not (isinstance(oob_score, bool) or (oob_score is None)):
+      fl.append('Argument oob_score is not bool and is not None')
+   if not (isinstance(warm_start, bool) or (warm_start is None)):
+      fl.append('Argument warm_start is not bool and is not None')
    if len(fl) > 0:
-      raise InvalidParameterValueException ('***  function sklearn_randomforest_classifier: ' + fl[0])
+      raise InvalidParameterValueException (fl[0])
    if ccp_alpha is not None:
       if ccp_alpha < 0:
-         fl.append('***  function sklearn_randomforest_classifier: argument ccp_alpha is negative')
+         fl.append('Argument ccp_alpha is negative')
 
    sklearnMl = _sklearn_randomforest_classifier( 
         n_estimators = n_estimators,

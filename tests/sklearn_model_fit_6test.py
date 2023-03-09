@@ -1,16 +1,11 @@
 
-# sklearn_model_fit_test.py
-##############################
 import pytest
-# import numpy as np
 import sys
 from pathlib import Path
 
 scripts = r'/eis_toolkit'  #/eis_toolkit/conversions'
 sys.path.append (scripts)
 
-import geopandas as gpd
-import pandas as pd
 from eis_toolkit.conversions.import_featureclass import *
 from eis_toolkit.conversions.import_grid import *
 from eis_toolkit.transformations.separation import *
@@ -64,10 +59,10 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
 # columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
+columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
 #columns , df , metadata = import_grid(grids = grids) 
 # Separation
-Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = columns) 
+Xvdf, Xcdf, ydf, igdf = separation(df = df, fields = columns) 
 # nodata_replacement of 
 Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent') 
 # onehotencoder
@@ -82,14 +77,14 @@ sklearnMl = sklearn_randomforest_classifier(oob_score = True)
 def test_sklearn_model_fit():
     """Test functionality of fitting of a model."""
 
-    myMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
+    myMl = sklearn_model_fit (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf)
 
 def test_sklearn_model_fit_error():
     """Test wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        myMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = sklearnMl, ydf = ydf)
+        myMl = sklearn_model_fit (sklearnMl = sklearnMl, Xdf = sklearnMl, ydf = ydf)
     with pytest.raises(InvalidParameterValueException):
-        myMl = sklearn_model_fit (sklearnMl = ydf , Xdf = Xdf , ydf = ydf)
+        myMl = sklearn_model_fit (sklearnMl = ydf, Xdf = Xdf, ydf = ydf)
 
 test_sklearn_model_fit()
 test_sklearn_model_fit_error()

@@ -1,8 +1,5 @@
 
-# sklearn_model_validations_test.py
-##############################
 import pytest
-# import numpy as np
 import sys
 from pathlib import Path
 
@@ -20,6 +17,10 @@ from eis_toolkit.transformations.unification import *
 from eis_toolkit.model_training.sklearn_randomforest_classifier import *
 from eis_toolkit.model_training.sklearn_model_fit import *
 from eis_toolkit.prediction_methods.sklearn_model_prediction import *
+from eis_toolkit.file.export_files import *
+from eis_toolkit.file.import_files import *
+from eis_toolkit.checks.sklearn_check_prediction import *
+from eis_toolkit.transformations.split import *
 
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
@@ -67,10 +68,13 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
 # columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
 columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
 #columns , df , metadata = import_grid(grids = grids) 
+# nodata_remove
+
 # Separation
 Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = columns) 
 # nodata_replacement of 
-Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent') 
+Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent')
+Xvdf = nodata_replace(df = Xvdf, rtype = 'mean') 
 # onehotencoder
 Xdf_enh, eho = onehotencoder(df = Xcdf)
 # unification
@@ -78,24 +82,58 @@ Xdf = unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
 # model
 sklearnMl = sklearn_randomforest_classifier(oob_score = True)
 # fit
-sklearnMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
+sklearnMl = sklearn_model_fit (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf)
+# export files
+parent_dir = Path(__file__).parent
+path = str(parent_dir.joinpath(r'data'))
+filesdict = export_files(
+    name = 'test_csv',
+    path = path,
+    sklearnMl = sklearnMl,
+    sklearnOhe = eho,
+    myFields = columns,
+    decimalpoint_german = True,
+    new_version = False,
+)
+
+# import files
+sklearnMlp, sklearnOhep, myFieldsp, kerasMlp, kerasOhep = import_files(
+    sklearnMl_file = filesdict['sklearnMl'],
+    sklearnOhe_file = filesdict['sklearnOhe'],
+    myFields_file = filesdict['myFields'], 
+    )
+
+# split
+Xdf_train, Xdf_test, ydf_train, ydf_test = split(Xdf = df, test_size = 10)
+
+Xvdf_test, Xcdf_test, ydf_dmp, igdf_test = separation(df = Xdf_test, fields = myFieldsp) 
+# nodata_replacement of 
+Xcdf_test = nodata_replace(df = Xcdf_test, rtype = 'most_frequent') 
+# nodata_replacement of 
+Xvdf_test = nodata_replace(df = Xvdf_test, rtype = 'mean') 
+# onehotencoder
+Xdf_enht, eho = onehotencoder(df = Xcdf_test, ohe = sklearnOhep)
+# unification
+Xdf_tst = unification(Xvdf = Xvdf_test, Xcdf = Xdf_enht)
+# check prediction
+Xdf_pr = sklearn_check_prediction(sklearnMl= sklearnMlp, Xdf = Xdf_tst)
 
 #################################################################
 
 def test_sklearn_model_prediction():
     """Test functionality of prediction based on a model."""
 
-    ydf = sklearn_model_prediction(sklearnMl = sklearnMl ,Xdf = Xdf) 
+    ydf = sklearn_model_prediction(sklearnMl = sklearnMlp, Xdf = Xdf_pr) 
 
     assert (isinstance(ydf,pd.DataFrame))
-    assert len(Xdf.index) == len(ydf.index) 
+    assert len(Xdf_pr.index) == len(ydf.index) 
 
 def test_sklearn_model_prediction_error():
     """Test wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        ydf = sklearn_model_prediction(sklearnMl = Xdf_enh ,Xdf = Xdf)
+        ydf = sklearn_model_prediction(sklearnMl = Xdf_enht, Xdf = Xdf_pr)
     with pytest.raises(InvalidParameterValueException):
-        ydf = sklearn_model_prediction(sklearnMl = sklearnMl ,Xdf = '_') 
+        ydf = sklearn_model_prediction(sklearnMl = sklearnMl, Xdf = '_') 
 
 test_sklearn_model_prediction()
 test_sklearn_model_prediction_error()

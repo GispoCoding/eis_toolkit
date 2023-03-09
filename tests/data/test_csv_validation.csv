@@ -1,0 +1,7 @@
+,test_split
+accuracy,1.00000
+recall,1.00000
+precision,1.00000
+F1 score,1.00000
+oob score,0.94737
+testsplit size,24.00000

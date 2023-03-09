@@ -1,27 +1,32 @@
 
-
 import pytest
-# import numpy as np
 import sys
 from pathlib import Path
-from copy import deepcopy
+
 scripts = r'/eis_toolkit'  #/eis_toolkit/conversions'
 sys.path.append (scripts)
 
-import geopandas as gpd
 import pandas as pd
 from eis_toolkit.conversions.import_featureclass import *
 from eis_toolkit.conversions.import_grid import *
-from eis_toolkit.transformations.nodata_remove import *
-#from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
+from eis_toolkit.transformations.separation import *
+from eis_toolkit.transformations.nodata_replace import *
+from eis_toolkit.transformations.onehotencoder import *
+from eis_toolkit.transformations.unification import *
+from eis_toolkit.model_training.sklearn_randomforest_classifier import *
+from eis_toolkit.model_training.sklearn_model_fit import *
+from eis_toolkit.transformations.split import *
+from eis_toolkit.prediction_methods.sklearn_model_predict_proba import *
+
+#from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException, InvalideContentOfInputDataFrame
 
 #################################################################
 # import of data from import_featureclass or import_grid
 # fc or csv:
 parent_dir = Path(__file__).parent
-name_fc = parent_dir.joinpath(r'data/shps/EIS_gp.gpkg')
+name_fc = str(parent_dir.joinpath(r'data/shps/EIS_gp.gpkg'))
 layer_name = r'Occ_2'
-name_csv = parent_dir.joinpath(r'data/csv/Trainings_Test.csv') 
+name_csv = str(parent_dir.joinpath(r'data/csv/Test_Test.csv'))
 
 # grid:
 parent_dir = Path(__file__).parent
@@ -55,27 +60,43 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'K_Al':'v','Si_K':'v','K_Fe':'v','K_Ti':'v','Ca_Mg':'v','Ca_Al':'v',
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
-# Import:
-columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-#columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
-#columns , df , metadata = import_grid(grids = grids) 
 
+# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
+columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
+#columns , df , metadata = import_grid(grids = grids) 
+# Separation
+Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = columns) 
+# nodata_replacement of 
+Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent') 
+# onehotencoder
+Xdf_enh, eho = onehotencoder(df = Xcdf)
+# unification
+Xdf = unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
+# model
+sklearnMl = sklearn_randomforest_classifier(oob_score = True)
+# fit
+sklearnMl = sklearn_model_fit (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf)
+# split
+Xdf_train, Xdf_test, ydf_train, ydf_test = split(Xdf = Xdf, ydf = ydf, test_size = 0.2)
 
 #################################################################
 
-def test_nodata_remove():
-    """Test functionality of nodata_remove of imported X (Dataframe)."""
-    df1 = deepcopy(df)
-    df_new, nodatmask = nodata_remove(df = df1)
+def test_sklearn_model_predict_proba():
+    """Test functionality of prediction based on a model."""
 
-    assert ((isinstance(df_new,pd.DataFrame)))
-    assert ((isinstance(nodatmask,pd.DataFrame)))
-    assert len(nodatmask.index) == len(df.index) 
+    ydf = sklearn_model_predict_proba(sklearnMl = sklearnMl, Xdf = Xdf, igdf = igdf, fields = columns) 
 
-def test_nodata_remove_error():
+    assert (isinstance(ydf,pd.DataFrame))
+    assert len(Xdf.index) == len(ydf.index) 
+
+def test_sklearn_model_predict_proba_error():
     """Test wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        df_new, nodatmask = nodata_remove(df = [1,2])
+        ydf = sklearn_model_predict_proba(sklearnMl = Xdf_enh, Xdf = Xdf)
+    with pytest.raises(InvalidParameterValueException):
+        ydf = sklearn_model_predict_proba(sklearnMl = sklearnMl, Xdf = '_') 
+    with pytest.raises(InvalideContentOfInputDataFrame):
+        ydf = sklearn_model_predict_proba(sklearnMl = sklearnMl, Xdf = Xdf_test, igdf = igdf) 
 
-test_nodata_remove()
-test_nodata_remove_error()
+test_sklearn_model_predict_proba()
+test_sklearn_model_predict_proba_error()

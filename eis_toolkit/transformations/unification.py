@@ -1,7 +1,7 @@
 
 from typing import Tuple
 import pandas as pd
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, InvalideContentOfInputDataFrame
 
 # *******************************
 def _unification(
@@ -28,14 +28,13 @@ def unification(
     
     # Argument evaluation
     fl = []
-    if not (isinstance(Xcdf,pd.DataFrame)):
-        fl.append('argument Xvdf is not a DataFrame')
-    if not (isinstance(Xvdf,pd.DataFrame)):
-        fl.append('argument Xcdf is not a DataFrame')
+    if not (isinstance(Xcdf, pd.DataFrame)):
+        fl.append('Argument Xvdf is not a DataFrame')
+    if not (isinstance(Xvdf, pd.DataFrame)):
+        fl.append('Argument Xcdf is not a DataFrame')
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function unification: ' + fl[0])
+        raise InvalidParameterValueException(fl[0])
     if Xvdf.shape[0] != Xcdf.shape[0]:
-        raise InvalidParameterValueException ('***  function unification: Xvdf and Xcdf have not the same number of rows')
+        raise InvalideContentOfInputDataFrame('Xvdf and Xcdf have not the same number of rows')
     
-    return _unification(Xvdf,Xcdf)
-
+    return _unification(Xvdf, Xcdf)

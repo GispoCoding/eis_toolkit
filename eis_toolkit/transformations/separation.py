@@ -1,13 +1,13 @@
 
 from typing import Tuple
 import pandas as pd
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, InvalideContentOfInputDataFrame
 
 # *******************************
 def _separation(
     df: pd.DataFrame,
     fields: dict,
-) -> Tuple[pd.DataFrame,pd.DataFrame,pd.DataFrame,pd.DataFrame]:            # Xvdf, Xcdf, ydf, ,
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:            # Xvdf, Xcdf, ydf, ,
 
     ### Target dataframe
     name = {i for i in fields if fields[i]=='t'}
@@ -29,7 +29,7 @@ def _separation(
     igdf = df[list(name)]       #ydf = Xdf.loc[:,name]
     #Xdf.drop(name, axis=1, inplace=True)   
 
-    return Xvdf,Xcdf,ydf,igdf
+    return Xvdf, Xcdf, ydf, igdf
 
 # *******************************
 def separation(  # type: ignore[no-any-unimported]
@@ -54,21 +54,20 @@ def separation(  # type: ignore[no-any-unimported]
 
     # Argument evaluation
     fl = []
-    if not (isinstance(df,pd.DataFrame)):
-        fl.append('argument df is not a DataFrame')
-    if not (isinstance(fields,dict)):
-        fl.append('argument fields is not a dictionary') 
+    if not (isinstance(df, pd.DataFrame)):
+        fl.append('Argument df is not a DataFrame')
+    if not (isinstance(fields, dict)):
+        fl.append('Argument fields is not a dictionary') 
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function separation: ' + fl[0])
+        raise InvalidParameterValueException (fl[0])
         
     if len(df.columns) == 0:
-        raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no column')
+        raise InvalideContentOfInputDataFrame('DataFrame has no column')
     if len(df.index) == 0:
-        raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no rows')
+        raise InvalideContentOfInputDataFrame('DataFrame has no rows')
     if len(fields) == 0:
-        raise InvalidParameterValueException ('***  function all_nodata_remove: Fields is empty')
+        raise InvalideContentOfInputDataFrame('Fields is empty')
 
     # call
-    Xvdf,Xcdf,ydf,igdf = _separation(df,fields)
+    return _separation(df, fields)
 
-    return Xvdf,Xcdf,ydf,igdf

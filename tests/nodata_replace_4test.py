@@ -1,6 +1,4 @@
 
-# nodata_replace_test.py
-###################################
 import pytest
 # import numpy as np
 import sys
@@ -60,10 +58,10 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
 
 # Import
 # columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
+columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
 #columns , df , metadata = import_grid(grids = grids) 
 # Separation
-Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = columns) 
+Xvdf, Xcdf, ydf, igdf = separation(df = df, fields = columns) 
 
 
 #################################################################

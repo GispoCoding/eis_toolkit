@@ -1,5 +1,5 @@
 
-from typing import Optional, Any
+from typing import Any
 import numpy as np
 import pandas as pd
 from eis_toolkit.exceptions import InvalidParameterValueException
@@ -16,7 +16,7 @@ def _sklearn_model_fit(  # type: ignore[no-any-unimported]
    if len(ydf.shape) > 1: 
         if ydf.shape[1] == 1:
               ty = np.ravel(ydf)
-   sklearnMl.fit(Xdf,ty)
+   sklearnMl.fit(Xdf, ty)
    
    return sklearnMl
 
@@ -42,12 +42,12 @@ def sklearn_model_fit(  # type: ignore[no-any-unimported]
    t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
    if not t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression'):
       fl.append('argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
-   if not (isinstance(Xdf,pd.DataFrame)):
+   if not (isinstance(Xdf, pd.DataFrame)):
       fl.append('argument Xdf is not a DataFrame')
-   if not (isinstance(ydf,pd.DataFrame)):
+   if not (isinstance(ydf, pd.DataFrame)):
       fl.append('argument ydf is not a DataFrame')
    if len(fl) > 0:
-      raise InvalidParameterValueException ('***  function sklearn_model_fit: ' + fl[0])
+      raise InvalidParameterValueException (fl[0])
 
    fl = []
    if len(Xdf.columns) == 0:
@@ -59,7 +59,7 @@ def sklearn_model_fit(  # type: ignore[no-any-unimported]
    if len(ydf.index) == 0:
       fl.append('DataFrame ydf has no rows')
    if len(fl) > 0:
-      raise InvalidParameterValueException ('***  function sklearn_model_fit: ' + fl[0])
+      raise InvalidParameterValueException (fl[0])
 
 
    sklearnMl = _sklearn_model_fit(

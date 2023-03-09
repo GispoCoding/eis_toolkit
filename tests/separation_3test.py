@@ -1,6 +1,4 @@
 
-# separation_test.py
-##############################
 import pytest
 # import numpy as np
 import sys
@@ -57,9 +55,9 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
-# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
-#columns , df , metadata = import_grid(grids = grids) 
+# columns, df, urdf, metadata = import_featureclass(fields = fields_fc, file = name_fc, layer = layer_name)
+columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
+#columns, df ,metadata = import_grid(grids = grids) 
 
 #################################################################
 
@@ -77,7 +75,7 @@ def test_separation():
 def test_separation_error():
     """Test wrong arguments of separation of imported X (Dataframe) with wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = 'eins:3') 
+        Xvdf, Xcdf, ydf, igdf = separation(df = df, fields = 'eins:3') 
 
 test_separation()
 test_separation_error()

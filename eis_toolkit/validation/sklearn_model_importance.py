@@ -2,7 +2,7 @@
 from typing import Optional, Tuple
 import pandas as pd
 from sklearn.inspection import permutation_importance
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, ModelIsNotFitted, InvalideContentOfInputDataFrame
 
 # *******************************
 
@@ -11,25 +11,25 @@ def _sklearn_model_importance(  # type: ignore[no-any-unimported]
    Xdf: Optional[pd.DataFrame] = None,    # dataframe for permutation importance 
    ydf: Optional[pd.DataFrame] = None,
    scoring: Optional[str | list | tuple | dict] = None,
-   n_repeats: Optional[int] = None,   # number of permutation, default = 5
+   n_repeats: Optional[int] = 5,   # number of permutation, default = 5
    random_state:  Optional[int] = None,
-   n_jobs: Optional[int] = None, 
-   max_samples: Optional[float|int] = None,   # default = 1
-) -> Tuple[pd.DataFrame]:
+   n_jobs: Optional[int] = None,
+   max_samples: Optional[float|int] = 1.0,   # default = 1.0
+) -> pd.DataFrame:
 
-   temp = None 
+   importance = None 
    fields = sklearnMl.feature_names_in_
    if sklearnMl.__str__().find('RandomForestClassifier') >= 0 or sklearnMl.__str__().find('RandomForestRegressor') >= 0:
       trf = sklearnMl.feature_importances_
-      temp = pd.DataFrame(zip(fields,trf))   # for pd.DataFrame  dict is possible as well
+      importance = pd.DataFrame(zip(fields, trf))   # for pd.DataFrame  dict is possible as well
    else:
       if Xdf is None or ydf is None:
-          raise InvalidParameterValueException ('***  function sklearn_model_importance: Estimator is not RandomForest, Xdf and ydf must be given')                                                                        # feature importance from Randmom forres
+          raise InvalidParameterValueException('estimator is not RandomForest, Xdf and ydf must be given')                                                                        # feature importance from Randmom forres
    if Xdf is not None and ydf is not None:      # Permutation feature importance
       if len(Xdf.columns) == 0:
-         raise InvalidParameterValueException ('***  function sklearn_model_importance: DataFrame Xdf has no column')
+         raise InvalideContentOfInputDataFrame('DataFrame Xdf has no column')
       if len(Xdf.index) == 0:
-         raise InvalidParameterValueException ('***  function sklearn_model_importance: DataFrame Xdf has no rows')
+         raise InvalideContentOfInputDataFrame('DataFrame Xdf has no rows')
 
       # if scoring is None:
       #    if sklearnMl._estimator_type == 'regressor':
@@ -37,11 +37,27 @@ def _sklearn_model_importance(  # type: ignore[no-any-unimported]
       #    else: 
       #          scoring = ['accuracy','recall_macro','precision_macro','f1_macro']
       
-      t = permutation_importance(sklearnMl,Xdf,ydf,n_repeats=n_repeats,random_state=random_state,n_jobs=n_jobs,max_samples=max_samples,scoring=scoring)
-      if temp is None:
-         importance = pd.DataFrame(zip(fields,t.importances_mean,t.importances_std),columns=['feature','permutation mean','permutation std'])
+      t = permutation_importance(
+         sklearnMl, 
+         Xdf, 
+         ydf, 
+         n_repeats=n_repeats, 
+         random_state=random_state, 
+         n_jobs=n_jobs, 
+         max_samples=max_samples, 
+         scoring=scoring
+         )
+      if importance is None:
+         importance = pd.DataFrame(zip(fields, 
+                                       t.importances_mean, 
+                                       t.importances_std), 
+                                       columns=['feature','permutation mean','permutation std'])
       else:
-         importance = pd.DataFrame(zip(fields,trf,t.importances_mean,t.importances_std),columns=['feature','RandomForest','permutation mean','permutation std'])
+         importance = pd.DataFrame(zip(fields, 
+                                       trf, 
+                                       t.importances_mean, 
+                                       t.importances_std), 
+                                       columns=['feature','RandomForest','permutation mean','permutation std'])
    return importance
 
 # *******************************
@@ -50,11 +66,11 @@ def sklearn_model_importance(  # type: ignore[no-any-unimported]
    Xdf: Optional[pd.DataFrame] = None,
    ydf: Optional[pd.DataFrame] = None,
    scoring: Optional[str | list | tuple | dict] = None,
-   n_repeats: Optional[int] = None,   # number of permutation, default = 5
+   n_repeats: Optional[int] = 5,   # number of permutation, default = 5
    random_state:  Optional[int] = None,
    n_jobs: Optional[int] = None, 
-   max_samples: Optional[float|int] = None,   # default = 1
-) -> Tuple[pd.DataFrame,pd.DataFrame]: 
+   max_samples: Optional[float|int] = 1.0,   # default = 1.0
+) -> pd.DataFrame: 
 
    """ 
       Calcultaes feature importance
@@ -92,33 +108,42 @@ def sklearn_model_importance(  # type: ignore[no-any-unimported]
    fl = []
    t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
    if not t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression'):
-      fl.append('argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
-   if not (isinstance(Xdf,pd.DataFrame) or (Xdf is None)):
-      fl.append('argument Xdf is not a DataFrame and is not None')
-   if not (isinstance(ydf,pd.DataFrame)  or (ydf is None)):
-      fl.append('argument ydf is not a DataFrame and is not None')
-   # if not (isinstance(scoring,list) or (scoring is None)):
-   #    fl.append('argument scoring is not integer and is not None')
-   if not (isinstance(n_jobs,int) or (n_jobs is None)):
-      fl.append('argument n_jobs is not integer and is not None')
-   if not (isinstance(random_state,int) or (random_state is None)):
-      fl.append('argument random_state is not integer and is not None')
-   if not (isinstance(n_repeats,int) or (n_repeats is None)):
-      fl.append('argument n_repeats is not bool and is not None')
-   if not (isinstance(max_samples,(float,int)) or (max_samples is None)):
-      fl.append('argument max_samples is not integer or float and is not None')   
+      fl.append('Argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
+   if not (isinstance(Xdf, pd.DataFrame) or (Xdf is None)):
+      fl.append('Argument Xdf is not a DataFrame and is not None')
+   if not (isinstance(ydf, pd.DataFrame)  or (ydf is None)):
+      fl.append('Argument ydf is not a DataFrame and is not None')
+   if not (isinstance(scoring, list) or isinstance(scoring,tuple) or isinstance(scoring,dict) or isinstance(scoring,str) or (scoring is None)):   
+      fl.append('Argument scoring is not integer and is not None')
+   if not (isinstance(n_jobs, int) or (n_jobs is None)):
+      fl.append('Argument n_jobs is not integer and is not None')
+   if not (isinstance(random_state, int) or (random_state is None)):
+      fl.append('Argument random_state is not integer and is not None')
+   if not (isinstance(n_repeats, int) or (n_repeats is None)):
+      fl.append('Argument n_repeats is not bool and is not None')
+   if not (isinstance(max_samples, (float,int)) or (max_samples is None)):
+      fl.append('Argument max_samples is not integer or float and is not None')   
    if len(fl) > 0:
-      raise InvalidParameterValueException ('***  function sklearn_model_importance: ' + fl[0])
+      raise InvalidParameterValueException (fl[0])
    
-   importance = _sklearn_model_importance(
+   if Xdf is not None:
+      if ydf is None:
+         raise InvalidParameterValueException('Xdf is not Non but ydf is None')
+      else: 
+         if Xdf.shape[0] != ydf.shape[0]:
+            raise InvalideContentOfInputDataFrame('Xdf and ydf have not the same number of rows')
+
+   if not hasattr(sklearnMl,'feature_names_in_'):
+      raise ModelIsNotFitted('Model is not fitted')
+
+   return  _sklearn_model_importance(
       sklearnMl = sklearnMl,
       Xdf = Xdf,
       ydf = ydf,
-      #scoring = scoring,
+      scoring = scoring,
       n_repeats = n_repeats,
       random_state = random_state,
       n_jobs = n_jobs,
       max_samples = max_samples,
    )
 
-   return importance

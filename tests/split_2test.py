@@ -1,18 +1,16 @@
 
 
 import pytest
-# import numpy as np
 import sys
 from pathlib import Path
 from copy import deepcopy
 scripts = r'/eis_toolkit'  #/eis_toolkit/conversions'
 sys.path.append (scripts)
 
-import geopandas as gpd
 import pandas as pd
 from eis_toolkit.conversions.import_featureclass import *
 from eis_toolkit.conversions.import_grid import *
-from eis_toolkit.transformations.nodata_remove import *
+from eis_toolkit.transformations.split import *
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 #################################################################
@@ -31,7 +29,7 @@ name_U = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif'))
 name_target = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif'))
 
 #grids and grid-types for X (training based on tif-files)
-grids =  [{'name':'Total','type':'t','file':name_target},
+grids =  [{'name':'Total', 'type':'t', 'file':name_target},
  {'name':'Kalium', 'file':name_K, 'type':'v'},
  {'name':'Thorium', 'file':name_Th, 'type':'v'},
  {'name':'Uran', 'file':name_U, 'type':'v'}]
@@ -56,26 +54,47 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 # Import:
-columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-#columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
-#columns , df , metadata = import_grid(grids = grids) 
-
+# #columns, df, urdf, metadata = import_featureclass(fields = fields_fc, file = name_fc, layer = layer_name)
+columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
+#columns, df, metadata = import_grid(grids = grids) 
 
 #################################################################
 
-def test_nodata_remove():
-    """Test functionality of nodata_remove of imported X (Dataframe)."""
-    df1 = deepcopy(df)
-    df_new, nodatmask = nodata_remove(df = df1)
+def test_split():
+    """Test functionality of split."""
 
-    assert ((isinstance(df_new,pd.DataFrame)))
-    assert ((isinstance(nodatmask,pd.DataFrame)))
-    assert len(nodatmask.index) == len(df.index) 
 
-def test_nodata_remove_error():
+    Xdf_train, Xdf_test, ydf_train, ydf_test = split(Xdf = df, test_size = 10)
+
+    assert (isinstance(Xdf_train, pd.DataFrame))
+    assert (isinstance(Xdf_test, pd.DataFrame))
+    assert (ydf_train is None)
+    assert (ydf_test is None)
+
+    Xdf_train, Xdf_test, ydf_train, ydf_test = split(Xdf = df, fields = columns, test_size = 10)
+
+    assert ((isinstance(Xdf_train, pd.DataFrame)))
+    assert ((isinstance(Xdf_test, pd.DataFrame)))
+    assert ((isinstance(ydf_train, pd.DataFrame)))
+    assert ((isinstance(ydf_test, pd.DataFrame)))
+
+    Xdf_train, Xdf_test, ydf_train, ydf_test = split(Xdf = Xdf_train, ydf = ydf_train, train_size = 0.8)
+
+    assert ((isinstance(Xdf_train, pd.DataFrame)))
+    assert ((isinstance(Xdf_test, pd.DataFrame)))
+    assert ((isinstance(ydf_train, pd.DataFrame)))
+    assert ((isinstance(ydf_test, pd.DataFrame)))
+
+def test_split_error():
     """Test wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        df_new, nodatmask = nodata_remove(df = [1,2])
+        Xdf_train, Xdf_test, ydf_train, ydf_test = split(Xdf = df, fields = columns, test_size = '9')
+    with pytest.raises(InvalidParameterValueException):
+        Xdf_train, Xdf_test, ydf_train, ydf_test = split(Xdf = df, fields = 0.2)
+    with pytest.raises(InvalidParameterValueException):
+        Xdf_train, Xdf_test, ydf_train, ydf_test = split(Xdf = df, ydf = {'a':1}, train_size = 0.8)
+    with pytest.raises(InvalidParameterValueException):
+        Xdf_train, Xdf_test, ydf_train, ydf_test = split(Xdf = ['df'], fields = 0.2)
 
-test_nodata_remove()
-test_nodata_remove_error()
+test_split()
+test_split_error()

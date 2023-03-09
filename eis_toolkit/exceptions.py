@@ -48,3 +48,33 @@ class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
 
     pass
+
+
+class InvalideContentOfInputDataFrame(Exception):
+    """Exception error class for missing or wrong values in DataFrame."""
+
+    pass
+
+
+class FileReadWriteError(Exception):
+    """Exception error class for an error ocurs during read, write or delete a file."""
+
+    pass
+
+
+class MissingFileOrPath(Exception):
+    """Exception error class for an error ocurs during read, write or delete a file."""
+
+    pass
+
+
+class NonMatchingImagesExtend(Exception):
+    """Exception error class for extend mismatches."""
+
+    pass
+
+
+class ModelIsNotFitted(Exception):
+    """Exception error class for not fitted model."""
+
+    pass

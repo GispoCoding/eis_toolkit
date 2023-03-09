@@ -1,10 +1,10 @@
 
-from typing import Optional, Any
+from typing import Optional, Any, Tuple
 from pathlib import Path
 import pandas as pd
 import os
 import joblib          # from joblib import dump, load
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, FileReadWriteError, MissingFileOrPath
 
 # *******************************
 def _export_files(
@@ -25,7 +25,7 @@ def _export_files(
     #nanmask: Optional[pd.DataFrame] = None, 
     decimalpoint_german: Optional[bool] = False,
     new_version: Optional[bool] = False,
-) -> dict:
+) -> Tuple[dict]:
 
     def create_file(
         path: str, 
@@ -43,7 +43,10 @@ def _export_files(
                     filenum+=1
                 return filename+str(filenum)   #open(filename+str(filenum)+extension,'w')
             else:               # file will be deletet
-                os.remove(os.path.abspath(filename+extension))
+                try:
+                    os.remove(os.path.abspath(filename+extension))
+                except:
+                    raise FileReadWriteError('Problem deleting file '+str(filename+extension))
         return filename
 
     # Main
@@ -52,7 +55,7 @@ def _export_files(
         parent_dir = Path(__file__).parent
         path = parent_dir.joinpath(r'data')
     if not os.path.exists(path):
-        raise InvalidParameterValueException ('***  function export_files: path does not exists:' + str(path))
+        raise MissingFileOrPath('path does not exists:' + str(path))
     dt['path'] = path
 
     if decimalpoint_german:
@@ -64,7 +67,7 @@ def _export_files(
 
     if validations is not None:    # Validation
         # to csv
-        file = create_file(path,name+'_validation','csv',new_version=new_version)
+        file = create_file(path, name+'_validation', 'csv', new_version=new_version)
         #tmp =  pandas.DataFrame.from_dict(validations,orient='index')   # with dataframe
         # if decimalpoint_german:
         #     decimal = ','
@@ -72,15 +75,21 @@ def _export_files(
         #     decimal = '.'
         #tmp.to_csv(file+'.csv', sep=';', index = True, header= True, float_format='%00.4f', decimal = decimal)   # formatstring
         # tmp = tmp.astype('float',errors= 'ignore')     # str)
-        validations.to_csv(file+'.csv',sep=separator,header=True,decimal=decimal,float_format='%00.5f')
+        try:
+            validations.to_csv(file+'.csv', sep=separator, header=True, decimal=decimal, float_format='%00.5f')
+        except:
+           raise FileReadWriteError('Problem saving file ' +file+ '.csv')
         # with open(file+'.csv','w') as f:
         #     w = csv.writer(f)
         #     w.writerows(validations.items())
 
         # to json
         #import json
-        file = create_file(path,name+'_validation','json',new_version=new_version)
-        validations.to_json(file+'.json',orient='split',indent = 3) 
+        file = create_file(path, name+'_validation','json', new_version=new_version)
+        try:
+            validations.to_json(file+'.json', orient='split', indent = 3)
+        except:
+           raise  FileReadWriteError('Problem saving file ' +file+'.json')
         # with open(file+'.json','w') as f:
         #     jsdata = json.dumps(validations, indent = 2)
         #     f.write(jsdata)
@@ -90,11 +99,16 @@ def _export_files(
     # to csv
         file = create_file(path,name+'_confusion_matrix','csv',new_version=new_version)
         #tmp.to_csv(file, sep =';')
-        confusion_matrix.to_csv(file+'.csv',sep=separator,index=True,header=True,decimal=decimal)   # float_format='%00.5f',
-
+        try:
+            confusion_matrix.to_csv(file+'.csv', sep=separator, index=True, header=True, decimal=decimal)   # float_format='%00.5f',
+        except:
+           raise  FileReadWriteError('Problem saving file ' +file+'.csv')
         # to json
-        file = create_file(path,name+'_confusion_matrix','json',new_version=new_version)
-        confusion_matrix.to_json(file+'.json',double_precision=5,orient='table',indent = 3)  # to string
+        file = create_file(path, name+'_confusion_matrix', 'json', new_version=new_version)
+        try:
+            confusion_matrix.to_json(file+'.json', double_precision=5, orient='table', indent = 3)  # to string
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.json')   
                                 # orient = 'split', 'records', 'index', 'columns', 'values'
         # with open(file+'.json','w') as f:
         #     jsdata = json.dumps(ndict, indent = 2)
@@ -113,10 +127,14 @@ def _export_files(
             ndict[i] = nfolds
 
         # to csv
-        file = create_file(path,name+'_cross_validation','csv',new_version=new_version)
-        tmp = pd.DataFrame.from_dict(ndict,orient='index')   # über dataframe
+        file = create_file(path, name+'_cross_validation', 'csv', new_version=new_version)
+        tmp = pd.DataFrame.from_dict(ndict, orient='index')   # über dataframe
+
         #tmp.to_csv(file, sep =';')
-        tmp.to_csv(file+'.csv', sep=';',index=True,header=True,float_format='%00.5f',decimal=decimal)   # formatstring
+        try:
+            tmp.to_csv(file+'.csv', sep=';', index=True, header=True, float_format='%00.5f', decimal=decimal)   # formatstring
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.csv')
         # with open(file+'.csv','w') as f:
         #     for r in ndict:
         #                            # rows
@@ -125,9 +143,12 @@ def _export_files(
 
         # to json
         #import json
-        file = create_file(path,name+'_cross_validation','json',new_version=new_version)
+        file = create_file(path, name+'_cross_validation', 'json', new_version=new_version)
         df = pd.DataFrame.from_dict(ndict)
-        df.to_json(file+'.json',double_precision=5,orient='table',indent=3)  # to string
+        try:
+            df.to_json(file+'.json', double_precision=5, orient='table', indent=3)  # to string
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.json')
         # with open(file+'.json','w') as f:               # von Dictionary: geht auch mit (zeilenumbruch)
         #     jsdata = json.dumps(ndict, indent = 2)
         #     f.write(jsdata)
@@ -135,39 +156,54 @@ def _export_files(
 
     if comparison is not None:
     # to csv
-        file = create_file(path,name+'_comparison','csv',new_version=new_version)
+        file = create_file(path, name+'_comparison', 'csv', new_version=new_version)
         #tmp.to_csv(file, sep =';')
-        comparison.to_csv(file+'.csv',sep=separator,index=True,header=True,decimal=decimal)   # float_format='%00.5f',
-
+        try:
+            comparison.to_csv(file+'.csv', sep=separator, index=True, header=True, decimal=decimal)   # float_format='%00.5f',
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.csv')
         # to json
-        file = create_file(path,name+'_comparison','json',new_version=new_version)
-        comparison.to_json(file+'.json',double_precision=5,orient='table',indent = 3)  # to string
- 
+        file = create_file(path, name+'_comparison', 'json', new_version=new_version)
+        try:
+            comparison.to_json(file+'.json', double_precision=5, orient='table', indent = 3)  # to string
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.json')
     if importance is not None:
     # to csv
-        file = create_file(path,name+'_importance','csv',new_version=new_version)
+        file = create_file(path, name+'_importance', 'csv', new_version=new_version)
         #tmp.to_csv(file, sep =';')
-        importance.to_csv(file+'.csv',sep=separator,index=True,header=True,decimal=decimal)   # float_format='%00.5f',
-
+        try:
+            importance.to_csv(file+'.csv', sep=separator, index=True, header=True, decimal=decimal)   # float_format='%00.5f',
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.csv')
         # to json
-        file = create_file(path,name+'_importance','json',new_version=new_version)
-        importance.to_json(file+'.json',double_precision=5,orient='table',indent = 3)  # to string
-
+        file = create_file(path, name+'_importance', 'json', new_version=new_version)
+        try:
+            importance.to_json(file+'.json', double_precision=5, orient='table', indent = 3)  # to string
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.json')
     if kerasHistory is not None:
         hist_df = pd.DataFrame(kerasHistory)
         # to csv
-        file = create_file(path,name+'_kerashistory','csv',new_version=new_version)
+        file = create_file(path, name+'_kerashistory', 'csv', new_version=new_version)
         #tmp.to_csv(file, sep =';')
-        hist_df.to_csv(file+'.csv',sep=separator,index=True,header=True,decimal=decimal)   # float_format='%00.5f',
-
+        try:
+            hist_df.to_csv(file+'.csv', sep=separator, index=True, header=True, decimal=decimal)   # float_format='%00.5f',
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.csv')
         # to json
-        file = create_file(path,name+'_kerashistory','json',new_version=new_version)
-        hist_df.to_json(file+'.json',double_precision=5,orient='table',indent = 3)  # to string
- 
+        file = create_file(path, name+'_kerashistory', 'json', new_version=new_version)
+        try:
+            hist_df.to_json(file+'.json', double_precision=5, orient='table', indent = 3)  # to string
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.json')
     if sklearnMl is not None:   # Model
-        file = create_file(path,name+'_sklearnMl','mdl',new_version=new_version)
-        dt['sklearnMl'] = file+'.mdl'
-        joblib.dump(sklearnMl,file+'.mdl') # save the model
+        file = create_file(path,name+'_sklearnMl', 'mdl', new_version=new_version)
+        dt['sklearnMl'] = file + '.mdl'
+        try:
+            joblib.dump(sklearnMl, file+'.mdl') # save the model
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.mdl')
         # clf = load('filename.joblib') # load and reuse the model
 
         # file = create_file(path, name+'sklearnMl','json')
@@ -175,19 +211,24 @@ def _export_files(
         # pickle.dump(one_hot, f)
 
     if sklearnOhe is not None:   # OneHotEncoder
-        file = create_file(path,name+'_myOhe','ohe',new_version=new_version)
-        dt['myOhe'] = file+'.ohe'
-        joblib.dump(sklearnOhe,file+'.ohe')
-   
+        file = create_file(path, name+'_sklearnOhe', 'ohe', new_version=new_version)
+        dt['sklearnOhe'] = file + '.ohe'
+        try:
+            joblib.dump(sklearnOhe, file+'.ohe')
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.ohe')
     # fields
     if myFields is not None:    # Validation
-        file = create_file(path,name+'_myFields','fld',new_version=new_version)
-        dt['myFields'] = file+'.fld'
+        file = create_file(path,name+'_myFields', 'fld', new_version=new_version)
+        dt['myFields'] = file + '.fld'
         import json
-        with open(file+'.fld','w') as f:
-            jsdata = json.dumps(myFields,indent=2)
-            f.write(jsdata)
-            f.close()
+        try:
+            with open(file+'.fld', 'w') as f:
+                jsdata = json.dumps(myFields, indent=2)
+                f.write(jsdata)
+                f.close()
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.fld')
         # Read data from file:
         # data = json.load( open( "file_name.json" ) )
 
@@ -206,9 +247,12 @@ def _export_files(
     #     # data = json.load( open( "file_name.json" ) )
 
     if kerasMl is not None:   # Model
-        file = create_file(path,name+'_kerasMl','h5',new_version=new_version)
-        dt['kerasMl'] = file+'.h5'
-        kerasMl.save(file+'.h5') # save the model
+        file = create_file(path, name+'_kerasMl', 'h5', new_version=new_version)
+        dt['kerasMl'] = file + '.h5'
+        try:
+            kerasMl.save(file+'.h5') # save the model
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.h5')
         # clf = load('filename.joblib') # load and reuse the model
 
         # file = create_file(path, name+'sklearnMl','json')
@@ -216,9 +260,12 @@ def _export_files(
         # pickle.dump(one_hot, f)
 
     if kerasOhe is not None:   # OneHotEncoder
-        file = create_file(path,name+'_kerasOhe','ohe',new_version=new_version)
+        file = create_file(path,name+'_kerasOhe', 'ohe', new_version=new_version)
         dict['kerasOhe'] = file+'.ohe'
-        joblib.dump(kerasOhe,file+'.ohe')
+        try:
+            joblib.dump(kerasOhe, file+'.ohe')
+        except:
+            raise  FileReadWriteError('Problem saving file ' +file+'.ohe')
    
     return dt
 
@@ -241,7 +288,7 @@ def export_files(
     #nanmask: Optional[pd.DataFrame] = None,
     decimalpoint_german: Optional[bool] = False,
     new_version: Optional[bool] = False
-) -> dict:
+) -> Tuple[dict]:
 
     """ 
         Writes files on disc, like the results of validation, fitted model or OneHotEncoder object.
@@ -267,48 +314,48 @@ def export_files(
     Returns: 
         dictionary of the file names of sklearnMl, myOhe, myFields and myMetadata
     """
-
     # Argument evaluation
     fl = []
-    if not ((isinstance(name,str)) or (name is None)):
-        fl.append('argument name is not a string and is not None')
+    if not ((isinstance(name, str)) or (name is None)):
+        fl.append('Argument name is not a string and is not None')
     if not ((isinstance(path, str)) or (path is None)):
-        fl.append('argument path is not a string and is not None')
-    if not ((isinstance(validations,pd.DataFrame)) or (validations is None)):
-        fl.append('argument validations is not a DataFrame and is not None')
-    if not ((isinstance(comparison,pd.DataFrame)) or (comparison is None)):
-        fl.append('argument comparison is not a DataFrame and is not None')
-    if not ((isinstance(confusion_matrix,pd.DataFrame)) or (confusion_matrix is None)):
-        fl.append('argument confusion_matrix is not a DataFrame and is not None')
-    if not ((isinstance(importance,pd.DataFrame)) or (importance is  None)):
-        fl.append('argument importance is not a DataFrame and is not None')
-    #(isinstance(crossvalidation,dict)
-    if not (isinstance(crossvalidation,dict) or (crossvalidation is None)):
-        fl.append('argument crossvalidation is not a dictionary and is not None')
-    if not ((isinstance(myFields,dict)) or (myFields is None)):
-        fl.append('argument myFields is not a dictionary and is not None')
+        fl.append('Argument path is not a string and is not None')
+    if not ((isinstance(validations, pd.DataFrame)) or (validations is None)):
+        fl.append('Argument validations is not a DataFrame and is not None')
+    if not ((isinstance(comparison, pd.DataFrame)) or (comparison is None)):
+        fl.append('Argument comparison is not a DataFrame and is not None')
+    if not ((isinstance(confusion_matrix, pd.DataFrame)) or (confusion_matrix is None)):
+        fl.append('Argument confusion_matrix is not a DataFrame and is not None')
+    if not ((isinstance(importance, pd.DataFrame)) or (importance is  None)):
+        fl.append('Argument importance is not a DataFrame and is not None')
+    if not ((str(type(crossvalidation)) == "<class 'dict'>")  or (crossvalidation is None)):
+    #if not ((isinstance(crossvalidation,dict)) or (crossvalidation is None)):
+        fl.append('Argument crossvalidation is not a dictionary and is not None')
+    if not ((str(type(myFields)) == "<class 'dict'>") or (myFields is None)):
+    #if not ((isinstance(myFields,dict)) or (myFields is None)):
+        fl.append('Argument myFields is not a dictionary and is not None')
     # if not ((isinstance(myMetadata,dict)) or (myMetadata is None)):
     #     fl.append('argument myMetadata is not a dictionary and is not None')
     t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
     if not (t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression') or sklearnMl is None):
-        fl.append('argument sklearnMl ist not in instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
+        fl.append('Argument sklearnMl ist not in instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
         #raise InvalidParameterValueException ('***  sklearnMl ist not in instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
     t = sklearnOhe.__class__.__name__ 
     if not (t in ('OneHotEncoder') or sklearnOhe is None):
-        fl.append('argument myOhe ist not in instance of one of OneHotEncoder')
+        fl.append('Argument myOhe ist not in instance of one of OneHotEncoder')
     if not (kerasHistory.__class__.__name__ in ('History') or kerasHistory is None):
         fl.append('argument kerasHistory ist not in instance of one of History')
     t = kerasOhe.__class__.__name__ 
     if not (t in ('OneHotEncoder') or kerasOhe is None):
-        fl.append('argument kerasOhe ist not in instance of one of OneHotEncoder')
+        fl.append('Argument kerasOhe ist not in instance of one of OneHotEncoder')
     if not (kerasMl.__class__.__name__ in ('Model') or kerasMl is None):
-        fl.append('argument kerasMl ist not an instance of one of Model')
-    if not ((isinstance(decimalpoint_german,bool) or (decimalpoint_german is None)) and (isinstance(new_version,bool) or (decimalpoint_german is None))):
-        fl.append('argument decimalpoint_german or new_version are not boolean or are not None')
+        fl.append('Argument kerasMl ist not an instance of one of Model')
+    if not ((isinstance(decimalpoint_german, bool) or (decimalpoint_german is None)) and (isinstance(new_version,bool) or (decimalpoint_german is None))):
+        fl.append('Argument decimalpoint_german or new_version are not boolean or are not None')
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function export_files: ' + fl[0])
+        raise InvalidParameterValueException (fl[0])
 
-    dict = _export_files(
+    return _export_files(
         name = name,
         path = path,
         validations  = validations, 
@@ -320,11 +367,9 @@ def export_files(
         sklearnMl = sklearnMl, 
         sklearnOhe = sklearnOhe,
         myFields = myFields,
-        #myMetadata = myMetadata,
         kerasMl = kerasMl,
         kerasOhe = kerasOhe,
         decimalpoint_german = decimalpoint_german,
         new_version = new_version,
     )
 
-    return dict

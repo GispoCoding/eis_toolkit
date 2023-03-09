@@ -1,6 +1,4 @@
 
-# sklearn_model_validations_test.py
-##############################
 import pytest
 # import numpy as np
 import sys
@@ -18,9 +16,15 @@ from eis_toolkit.transformations.nodata_replace import *
 from eis_toolkit.transformations.onehotencoder import *
 from eis_toolkit.transformations.unification import *
 from eis_toolkit.model_training.sklearn_randomforest_classifier import *
+from eis_toolkit.model_training.sklearn_model_fit import *
+from eis_toolkit.prediction_methods.sklearn_model_prediction import *
 from eis_toolkit.validation.sklearn_model_validations import *
+from eis_toolkit.validation.sklearn_model_crossvalidation import *
+from eis_toolkit.validation.sklearn_model_importance import *
+from eis_toolkit.file.export_files import *
+# from eis_toolkit.file.import_file import *
 
-#from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
+from eis_toolkit.exceptions import InvalidParameterValueException, MissingFileOrPath, FileReadWriteError
 
 #################################################################
 # import of data from import_featureclass or import_grid
@@ -28,7 +32,7 @@ from eis_toolkit.validation.sklearn_model_validations import *
 parent_dir = Path(__file__).parent
 name_fc = str(parent_dir.joinpath(r'data/shps/EIS_gp.gpkg'))
 layer_name = r'Occ_2'
-name_csv = str(parent_dir.joinpath(r'data/csv/Trainings_Test.csv'))
+name_csv = str(parent_dir.joinpath(r'data/csv/Test_Test.csv'))
 
 # grid:
 parent_dir = Path(__file__).parent
@@ -64,7 +68,7 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
 # columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
+columns , df , urdf , metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
 #columns , df , metadata = import_grid(grids = grids) 
 # Separation
 Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = columns) 
@@ -76,24 +80,112 @@ Xdf_enh, eho = onehotencoder(df = Xcdf)
 Xdf = unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
 # model
 sklearnMl = sklearn_randomforest_classifier(oob_score = True)
+# fit
+sklearnMl = sklearn_model_fit (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf)
+# validation
+validation , confusion , comparison , myMl = sklearn_model_validations (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf, comparison = True, confusion_matrix = True, test_size = 0.2)
+# crossvalidation
+cv = sklearn_model_crossvalidation (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf)
+# importance
+importance = sklearn_model_importance (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf)
 
 #################################################################
+parent_dir = Path(__file__).parent
+path = str(parent_dir.joinpath(r'data'))
+path_wrong = str(parent_dir.joinpath(r'falsch'))
 
-def test_sklearn_model_validations():
-    """Test functionality of validation of a model."""
+def test_export_files():
+    """Test functionality of save validation files and model files."""
 
-    validation , confusion , comparison , myMl = sklearn_model_validations (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf , comparison = True , confusion_matrix = True , test_size = 0.2)
+    filesdict = export_files(
+        name = 'test_csv',
+        path = path,
+        validations = validation,
+        confusion_matrix = confusion,
+        comparison = comparison,
+        crossvalidation = cv,
+        importance = importance,
+        sklearnMl = sklearnMl,
+        sklearnOhe = eho,
+        myFields = columns,
+        decimalpoint_german = True,
+        new_version = False,
+    )
+    assert (isinstance(filesdict,dict))
 
-    assert isinstance(validation,pd.DataFrame)
-    assert ((isinstance(confusion,pd.DataFrame)) or (confusion is None))
-    assert ((isinstance(comparison,pd.DataFrame)) or (comparison is None))
+    filesdict = export_files(
+        name = 'test_csv',
+        path = path,
+        validations = validation,
+        confusion_matrix = confusion,
+        comparison = comparison,
+        crossvalidation = cv,
+        importance = importance,
+    )
+    assert (isinstance(filesdict,dict))
 
-def test_sklearn_model_validations_error():
+    filesdict = export_files(
+        name = 'test_csv',
+        path = path,
+        sklearnMl = sklearnMl,
+        sklearnOhe = eho,
+        myFields = columns,
+        decimalpoint_german = True,
+        new_version = False,
+    )
+
+def test_export_files_error():
+
+
     """Test wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        validation , confusion , comparison , myMl = sklearn_model_validations (sklearnMl = Xdf , Xdf = Xdf , ydf = ydf , comparison = True , confusion_matrix = True , test_size = 0.2)
-    with pytest.raises(InvalidParameterValueException):
-        validation , confusion , comparison , myMl = sklearn_model_validations (sklearnMl = sklearnMl , Xdf = ' ' , ydf = ydf , comparison = True , confusion_matrix = True , test_size = 0.2)
+        fd = export_files(
+        name = 'test_csv',
+        path = path,
+        validations = ['t','s'],
+        confusion_matrix = confusion,
+        comparison = comparison,
+        crossvalidation = cv,
+        importance = importance,
+        sklearnMl = sklearnMl,
+        sklearnOhe = eho,
+        myFields = columns,
+        decimalpoint_german = True,
+        new_version = False,
+    )
 
-test_sklearn_model_validations()
-test_sklearn_model_validations_error()
+    with pytest.raises(MissingFileOrPath):
+        fd = export_files(
+        name = 'test_csv',
+        path = path_wrong,
+        validations = validation,
+        confusion_matrix = confusion,
+        comparison = comparison,
+        crossvalidation = cv,
+        importance = importance,
+        sklearnMl = sklearnMl,
+        sklearnOhe = eho,
+        myFields = columns,
+        decimalpoint_german = True,
+        new_version = False,
+    )
+
+    with pytest.raises(InvalidParameterValueException):
+        fd = export_files(
+        name = 'test_csv',
+        path = path,
+        validations = validation,
+        confusion_matrix = confusion,
+        comparison = comparison,
+        crossvalidation = cv,
+        importance = importance,
+        sklearnMl = sklearnMl,
+        sklearnOhe = sklearnMl,
+        myFields = columns,
+        decimalpoint_german = True,
+        new_version = False,
+    )
+
+
+test_export_files()
+test_export_files_error()

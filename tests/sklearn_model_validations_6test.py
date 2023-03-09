@@ -1,6 +1,5 @@
 
 import pytest
-
 import sys
 from pathlib import Path
 
@@ -14,6 +13,10 @@ from eis_toolkit.transformations.separation import *
 from eis_toolkit.transformations.nodata_replace import *
 from eis_toolkit.transformations.onehotencoder import *
 from eis_toolkit.transformations.unification import *
+from eis_toolkit.transformations.split import *
+from eis_toolkit.model_training.sklearn_randomforest_classifier import *
+from eis_toolkit.validation.sklearn_model_validations import *
+
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 #################################################################
@@ -57,7 +60,7 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
-# columns, df, urdf, metadata = import_featureclass(fields = fields_fc, file = name_fc, layer = layer_name)
+# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
 columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
 #columns , df , metadata = import_grid(grids = grids) 
 # Separation
@@ -66,25 +69,39 @@ Xvdf, Xcdf, ydf, igdf = separation(df = df, fields = columns)
 Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent') 
 # onehotencoder
 Xdf_enh, eho = onehotencoder(df = Xcdf)
-
+# unification
+Xdf = unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
+# model
+sklearnMl = sklearn_randomforest_classifier(oob_score = True)
+# split 
+y1, ydf_split, y01, y02= split(ydf, test_size = 0.5)
 #################################################################
 
-def test_unification():
-    """Test functionality of unification of separated dataframes."""
-    Xdf = unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
+def test_sklearn_model_validations():
+    """Test functionality of validation of a model."""
 
-    assert ((isinstance(Xdf,pd.DataFrame)))
-    if (Xdf_enh is not None) and (Xdf is not None):
-        assert len(Xdf.index) == len(Xdf_enh.index) 
-    if (Xvdf is not None) and (Xdf is not None):
-        assert len(Xdf.index) == len(Xvdf.index) 
+    validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf, comparison = True, confusion_matrix = True, test_size = 0.2)
 
-def test_unification_error():
-    """Test wrong arguments of unification of separated dataframes (wrong arguments)."""
+    assert isinstance(validation,pd.DataFrame)
+    assert ((isinstance(confusion,pd.DataFrame)) or (confusion is None))
+    assert ((isinstance(comparison,pd.DataFrame)) or (comparison is None))
+
+def test_sklearn_model_validations_error():
+    """Test wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        Xdf = unification(Xvdf = {'a':'A'}, Xcdf = Xdf_enh)
+        validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl = Xdf, Xdf = Xdf , ydf = ydf, comparison = True, confusion_matrix = True, test_size = 0.2)
     with pytest.raises(InvalidParameterValueException):
-        Xdf = unification(Xvdf = Xvdf, Xcdf = {'a':'A'})
+        validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl = sklearnMl, Xdf = ' ', ydf = ydf, comparison = True, confusion_matrix = True, test_size = 0.2)
+    with pytest.raises(InvalidParameterValueException):
+        validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl = sklearnMl, Xdf = Xdf, ydf = True, comparison = True, confusion_matrix = True, test_size = 0.2)
+    with pytest.raises(InvalidParameterValueException):
+        validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf, comparison = ydf, confusion_matrix = True, test_size = 0.2)
+    with pytest.raises(InvalidParameterValueException):
+        validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl = sklearnMl, Xdf = Xdf,  predict_ydf = 99, comparison = True, confusion_matrix = True, test_size = 0.2)
+    with pytest.raises(InvalidParameterValueException):
+        validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf, comparison = True, confusion_matrix = True, test_size = 0.2)
+    with pytest.raises(InvalideContentOfInputDataFrame):
+        validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl = sklearnMl, ydf = ydf, predict_y = ydf_split, comparison = True, confusion_matrix = True, test_size = 'X')
 
-test_unification()
-test_unification_error()
+test_sklearn_model_validations()
+test_sklearn_model_validations_error()

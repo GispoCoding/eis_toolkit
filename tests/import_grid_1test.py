@@ -1,6 +1,4 @@
 
-# import_grid_test.py
-####################################
 import pytest
 import sys
 from pathlib import Path
@@ -21,6 +19,7 @@ name_Th = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_Th_eq_.tif'
 name_U = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif'))
 name_target = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif'))
 name_wrong = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_wrong.tif')) 
+size_wrong  = str(parent_dir.joinpath(r'data/local/data/multiband.tif')) 
 
 #grids and grid-types for X (training based on tif-files)
 grids =  [{'name':'Total','type':'t','file':name_target},
@@ -32,6 +31,11 @@ gridwrong = [{'name':'Total','type':'t','file':name_target},
  {'name':'Kalium', 'file':name_K, 'type':'v'},
  {'name':'Thorium', 'file':name_Th, 'type':'v'},
  {'name':'Uran', 'file':name_wrong, 'type':'v'}]
+
+gridsize = [{'name':'Total','type':'t','file':name_target},
+ {'name':'Kalium', 'file':name_K, 'type':'v'},
+ {'name':'Thorium', 'file':name_Th, 'type':'v'},
+ {'name':'Uran', 'file':size_wrong, 'type':'v'}]
 
 def test_import_grid_ok():
     """Test functionality: import of tif files and creating of X as DataFrame"""
@@ -48,7 +52,14 @@ def test_import_grid_ok():
 def test_import_grid_wrong():
     """Test functionality with wrong filenames."""
     with pytest.raises(InvalidParameterValueException):
-        columns , df , metadata = import_grid(grids = gridwrong) 
+        columns, df , metadata = import_grid(grids = 6) 
+    """Test functionality with wrong filenames."""
+    with pytest.raises(InvalidParameterValueException):
+        columns, df , metadata = import_grid(grids = gridwrong)
+    """Test functionality with wrong imagesize/crs."""
+    with pytest.raises(NonMatchingImagesExtend):
+        columns, df , metadata = import_grid(grids = gridsize) 
+
 
 test_import_grid_ok()
 test_import_grid_wrong()

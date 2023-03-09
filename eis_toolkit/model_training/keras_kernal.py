@@ -1,14 +1,3 @@
-"""
-create ann regression based on tensorflow and sklearn
-Created an Feb 04 2023
-@author: torchala 
-""" 
-
-
-### Experementeller Kern von ANN: Alles instellbar
-# ist Kern für ANN-classifcation, -regression und -binaer
-# Vorraussetzug;  (1-dimensionales tebnsorflow (aus DataFrame))
-
 
 from typing import Optional
 import pandas as pd

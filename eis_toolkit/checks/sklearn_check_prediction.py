@@ -2,8 +2,7 @@
 from typing import Any
 import numpy as np
 import pandas as pd
-
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, InvalideContentOfInputDataFrame
 
 # *******************************
 def _sklearn_check_prediction(
@@ -12,28 +11,8 @@ def _sklearn_check_prediction(
 #    myOhe: Optional[Any]  
 ) -> pd.DataFrame:
 
-    # evaluation arguments
-    # Argument evaluation
-    fl = []        
-    if not (isinstance(Xdf,pd.DataFrame)):
-        fl.append('argument Xdf is not a DataFrame')
-        #raise InvalidParameterValueException ('***  Xdf is not a DataFrame')
-    t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
-    if not t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression'):
-        fl.append('argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
-        #raise InvalidParameterValueException ('***  sklearnMl ist not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
-    if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function sklearn_check_prediction: ' + fl[0])
-    
-    # Fields in sklearnMl are in Xdf as well? 
-    t0 = set(sklearnMl.feature_names_in_) - set(Xdf.columns)
-    if t0.__len__() > 0:
-        raise InvalidParameterValueException ('***  function sklearn_check_prediction: missing columns in dataframe (compared with Model): ' + str(t0))
-    t0 = set(Xdf.columns) - set(sklearnMl.feature_names_in_)
-    if t0.__len__() > 0:
-        raise InvalidParameterValueException ('***  function sklearn_check_prediction: wrong columns in dataframe  (compared with Model): ' + str(t0))
     if not (Xdf.shape[1] == Xdf.select_dtypes(include=np.number).shape[1]):
-        raise InvalidParameterValueException ('***  function sklearn_check_prediction: non numeric data in the Dataframe') 
+        raise InvalideContentOfInputDataFrame('Non numeric data in the Dataframe') 
     else:
         #Xdf = Xdf[[sklearnMl.feature_names_in_]]
         Xdf = Xdf.reindex(columns=sklearnMl.feature_names_in_) # alternative
@@ -66,4 +45,27 @@ def sklearn_check_prediction(
         Dataframe with columns in the order of the Model sklearnMl
     """
 
-    return _sklearn_check_prediction(sklearnMl,Xdf)
+    # Argument evaluation
+    fl = []        
+    if not (isinstance(Xdf,pd.DataFrame)):
+        fl.append('Argument Xdf is not a DataFrame')
+        #raise InvalidParameterValueException ('***  Xdf is not a DataFrame')
+    t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
+    if not t in ('RandomForestClassifier', 'RandomForestRegressor', 'LogisticRegression'):
+        fl.append('Argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
+        #raise InvalidParameterValueException ('***  sklearnMl ist not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
+    if len(fl) > 0:
+        raise InvalidParameterValueException (fl[0])
+    
+    # Fields in sklearnMl are in Xdf as well? 
+    fl = []
+    t0 = set(sklearnMl.feature_names_in_) - set(Xdf.columns)
+    if t0.__len__() > 0:
+        fl.append('Missing columns in dataframe (compared with Model): ' + str(t0))
+    t0 = set(Xdf.columns) - set(sklearnMl.feature_names_in_)
+    if t0.__len__() > 0:
+        fl.append('Wrong columns in dataframe  (compared with Model): ' + str(t0))
+    if len(fl) > 0: 
+        raise InvalideContentOfInputDataFrame(fl[0])
+    
+    return _sklearn_check_prediction(sklearnMl, Xdf)

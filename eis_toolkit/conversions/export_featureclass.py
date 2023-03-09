@@ -7,7 +7,7 @@ import geopandas as gpd
 import fiona
 from copy import deepcopy
 #from osgeo import ogr
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, FileReadWriteError, MissingFileOrPath
 
 # *******************************
 def _export_featureclass(
@@ -20,7 +20,6 @@ def _export_featureclass(
     nanmask: Optional[pd.DataFrame] = None,
     decimalpoint_german: Optional[bool] = False,   # german Comma (,) and seperator (;)
     new_version: Optional[bool]  = False,
-    #csv: Optional[bool] = False,                    # to csv-file, not fetureclass
 ):
 
     def create_filename(
@@ -29,6 +28,8 @@ def _export_featureclass(
         extension: str,
         new_version: bool,
     ) -> str:
+        if not os.path.exists(path):
+            raise MissingFileOrPath('Path does not exists:' + str(path))
         filenum = 1
         filename = os.path.join(path,name)
         if len(extension) > 0:
@@ -40,7 +41,10 @@ def _export_featureclass(
                     filenum += 1
                 return path, name+str(filenum), extension   #open(filename+str(filenum)+extension,'w')
             else:               # file will be deletet
-                os.remove(os.path.abspath(filename+extension))
+                try:
+                    os.remove(os.path.abspath(filename+extension))
+                except:
+                    raise FileReadWriteError('Problems with ' + str(filename+extension))
         return path, name, extension
 
     def create_layername(
@@ -49,7 +53,10 @@ def _export_featureclass(
         #new_version: bool,
     ) -> str:
         filenum = 1
-        layers = fiona.listlayers(path)
+        try:
+            layers = fiona.listlayers(path)
+        except:
+            raise FileReadWriteError('Problems with ' + str(path))
         if name in layers:
             layer = name
             while layer in fiona.listlayers(path):
@@ -84,9 +91,9 @@ def _export_featureclass(
             #lst = []
             for cel in nanmask.iloc[:,0]:
                 if cel == True:
-                    dfnew = pd.concat([dfnew,pd.DataFrame(empty)],axis=0,ignore_index=True)
+                    dfnew = pd.concat([dfnew, pd.DataFrame(empty)], axis=0, ignore_index=True)
                 else:
-                    dfnew = pd.concat([dfnew,pd.DataFrame(ydf.iloc[v]).T],axis=0,ignore_index=True)
+                    dfnew = pd.concat([dfnew, pd.DataFrame(ydf.iloc[v]).T], axis=0, ignore_index=True)
                     v += 1
             #out = gpd.GeoDataFrame(dfnew)  # crs = ??dfnew 
             out = dfnew
@@ -98,7 +105,7 @@ def _export_featureclass(
         if nfield in dfg.columns:
             fieldnum = 1
             while nfield in out.columns:
-                nfield + str(fieldnum)  
+                nfield = nfield + str(fieldnum)  
                 fieldnum += 1
 
         if nanmask is None:   # 
@@ -126,22 +133,34 @@ def _export_featureclass(
             outpath = ''
         # geopackeges or geodatabases
         if outpath.endswith('.gpkg'):              # path is geopackage, file ist layer
-            path,file = create_layername(outpath,outfile)
+            path, file = create_layername(outpath, outfile)
             out.columns = out.columns.astype(str)
-            out.to_file(path,driver='GPKG',layer=file)
+            try:
+                out.to_file(path, driver='GPKG', layer=file)
+            except:
+                raise FileReadWriteError('Problem with writing geopackage '+str(path)+'; and layer '+str(file))
             # elif outpath.endswith('.gdb'):              # path is file geodatabase, file s layer
             #     out.to_file(path,driver='FileGDB',layer=file)
         else:
-            path,file,extension = create_filename(outpath,outfile,outextension,new_version)
+            path, file, extension = create_filename(outpath, outfile, outextension, new_version)
             filename = os.path.join(path,file)
             if outextension == "csv":
-                out.to_csv(filename+extension,header=True,sep=separator,decimal=decimal)
+                try:
+                    out.to_csv(filename+extension, header=True, sep=separator, decimal=decimal)
+                except:
+                    raise FileReadWriteError('Problem with writing csv-file')
             elif outextension == "shp":
-                out.to_file(filename+extension)
+                try:
+                    out.to_file(filename+extension)
+                except:
+                    raise FileReadWriteError('Problem with writing shp-file')
             elif outextension == "geojson":
-                out.to_file(filename+extension,driver = 'GeoJSON')
+                try:
+                    out.to_file(filename+extension, driver = 'GeoJSON')
+                except:
+                    raise FileReadWriteError('Problem with writing geojson')
             else:
-                raise InvalidParameterValueException ('***  function export_featureclass: No data output. Wrong extension of the output-file')  
+                raise MissingFileOrPath('No data output. Wrong extension of the output-file') 
     return out
 
 # *******************************
@@ -155,73 +174,71 @@ def export_featureclass(
     nanmask: Optional[pd.DataFrame] = None,
     decimalpoint_german: Optional[bool] = False,   # german Comma (,) and seperator: ;
     new_version = False,
-    #csv: Optional[bool] = False                    # to csv-file, not fetureclass
 ):
 
     """ 
         Add the prediction result column to the existing geopandas (or pandas) dataframe (if exists)
         and saved the (geo)dataframe optionaly to a feature class file (like .shp, layer of a geopackage ...) or to a csv (text) file.
-        If the file alredy exists, then the old file will be optionaly deleteted or the new file will be named numberd with (file-name)1, 2, ... 
+        If the file alredy exists, then the old file will be optionaly deleteted or a new file will be named numbered with (file-name)1, 2, ... 
         If outpath is a geopackage then outfile is the name of the new layer. 
         If the layer alredy exists, the new layer will be named with (layer-name)1, 2, ... 
         If the column name already exists, the new column will be named as result1, result2,... etc.
-        If outfile == None: No file will be stored (the only result is a dataframe)
+        If outfile == None: No file will be stored (the only result is a new dataframe)
         In case a nanmask is availabel (nan-cells for prediction input caused droped rows): 
              "True"-cells in nanmask lead to nodata-cells in ydf before added to dfg.
         If no dfg is given: 
             No nadatamask is needed.
-            If ydf has a geometry columns, it may be stored as a GIS-Layer if the extension of the file name is .shp, geojson or gpkg (no csv)
+            If ydf has a geometry column, ydf may be stored as a GIS-Layer if the extension of the file name is .shp, geojson or gpkg (no csv)
     Args:
         - ydf (pandas DataFrame): Result of prediction,
         - dfg (pandas DataFrame or GeoDataFrame): Is the primary feature table - input for prediction process (is to add with ydf)
         - metadata: In case of a geodataframe: crs (coordinate reference system)
-        - outpath (string, optional): Path or name of a geodatapacke for the output-file or -layer
+        - outpath (string, optional): Path or name of a geopackage for the output-file or -layer
         - outfile (string, optional): Name of file or layer of the output
-        - outextension (string, optional): Name of the file extension (like shp, .shop, geojson, .geojson, .gpg or gpkg as well as csvor .csv).
+        - outextension (string, optional): Name of the file extension (like shp, .shp, geojson, .geojson, .gpkg or gpkg as well as csv or .csv).
         - nanmask (pandas DataFrame, optional): Marked rows witch are be droped because of nodata in the prediction input. 
-        - decimalpoint_german: (bool, optional,default False): If True german decimal comma (,) and separator (;) will be used (else decimal . and separator ,)
+        - decimalpoint_german: (bool, optional,default False): If True german decimal comma (,) and separator (;) will be used for output csv (else decimal . and separator ,)
         - new_version: = True: If the output file exists, then a new filename will be generated with the next number. 
                        = False:  The existing file will be deleted.
     Returns:
-        - gpd.GeoDataFrame or pd.DataFrame  (csv)
+        - gpd.GeoDataFrame or pd.DataFrame (csv)
         - optionaly: stored file (csv, shp or geojson or feature class layer for a geopackage)
     """
 
     # Argument evaluation
     fl = []
-    if not (isinstance(ydf,pd.DataFrame)):
+    if not (isinstance(ydf, pd.DataFrame)):
         fl.append('ydf is not a DataFrame')
         #raise InvalidParameterValueException ('***  export_featureclass: ydf is not a DataFrame')
-    if not (isinstance(dfg,(pd.DataFrame,gpd.GeoDataFrame)) or (dfg is None)):
+    if not (isinstance(dfg, (pd.DataFrame,gpd.GeoDataFrame)) or (dfg is None)):
         fl.append('dfg is not in instance of one of (pd.DataFrame,gpd.GeoDataFrame( or is not None)')
         #raise InvalidParameterValueException ('***  dfg is not in instance of one of (pd.DataFrame,gpd.GeoDataFrame,None)')
     # if not (isinstance(metadata,dict)  or (metadata is None)):
     #     fl.append('metadata is not dict or None')
-    if not (isinstance(decimalpoint_german,(bool)) and isinstance(new_version,(bool))):
+    if not (isinstance(decimalpoint_german, (bool)) and isinstance(new_version,(bool))):
         fl.append('decimalpoint_german or new_version is not boolen or None')
         #raise InvalidParameterValueException ('***  decimalpoint_german or new_version is not boolen')        
-    if not (isinstance(nanmask,pd.DataFrame)):
+    if not (isinstance(nanmask, pd.DataFrame)):
         if nanmask is not None:
             #raise InvalidParameterValueException ('*** nanmask is not an pd.DataFrame')
             fl.append('nanmask is not an pd.DataFrame or None')
-    if not ((isinstance(outpath,str) or (outpath is None)) and 
-        (isinstance(outfile,str) or (outfile is None)) and 
-        (isinstance(outextension,str) or (outextension is None))):
+    if not ((isinstance(outpath, str) or (outpath is None)) and 
+        (isinstance(outfile, str) or (outfile is None)) and 
+        (isinstance(outextension, str) or (outextension is None))):
         #raise InvalidParameterValueException ('***  outpath, outfile or outextension is not str (or None)')
         fl.append('outpath, outfile or outextension is not str or None')
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function export_featureclass: ' + fl[0])
+        raise InvalidParameterValueException (fl[0])
     if dfg is not None and nanmask is None:
         if ydf.shape[0] != dfg.shape[0]:          # rows (.index)
-            raise InvalidParameterValueException ('*** function export_featureclass:  ydf and dfg have not the same number of rows')
+            raise InvalidParameterValueException ('ydf and dfg have not the same number of rows')
     if dfg is not None and nanmask is not None:
         if dfg.shape[0] != nanmask.shape[0]:          # rows (.index)
-            raise InvalidParameterValueException ('*** function export_featureclass:  dfg and nanamask have not the same number of rows') 
+            raise InvalidParameterValueException ('dfg and nanamask have not the same number of rows') 
     if dfg is None and nanmask is not None:
-        raise InvalidParameterValueException ('*** function export_featureclass:  nanmask is not needed, because dfg ist None')
+        raise InvalidParameterValueException ('nanmask is not needed, because dfg ist None')
 
-
-    out = _export_featureclass(
+    return _export_featureclass(
         ydf = ydf,
         dfg = dfg,
         metadata = metadata,
@@ -231,6 +248,5 @@ def export_featureclass(
         nanmask  = nanmask,
         decimalpoint_german = decimalpoint_german,
         new_version = new_version,
-        #csv = csv
     )
-    return out
+

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 from sklearn.preprocessing import OneHotEncoder
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, FileReadWriteError
 
 # *******************************
 def _export_grid(
@@ -38,7 +38,7 @@ def _export_grid(
     if nanmask is None:   # reshape with metadata width and hiegt (nonaodata-samples ar removed)
         # width = metadata.width
         # height = metadata.height
-        out = df.to_numpy().reshape(metadata['height'],metadata['width'])
+        out = df.to_numpy().reshape(metadata['height'], metadata['width'])
     else:
         # assemple a list out of the input dataframe ydf (one column) and the nodatamask-True-values: NaN
         v = 0
@@ -50,7 +50,7 @@ def _export_grid(
                 lst.append(df.iloc[v,0])     # .values.tolist())
                 v += 1
 
-        out = np.array(lst).reshape(metadata['height'],metadata['width'])
+        out = np.array(lst).reshape(metadata['height'], metadata['width'])
 
     # save dataframe to file 
     if outfile is not None:
@@ -58,7 +58,7 @@ def _export_grid(
             outextension = ''
         if outpath is None:
             outpath = '' 
-        file = create_filename(outpath,outfile,outextension)
+        file = create_filename(outpath, outfile, outextension)
 
         profile = metadata
         profile.update(
@@ -69,9 +69,12 @@ def _export_grid(
          #   'tiled': False,
         #     #compress='lzw'
         # )
-        with rasterio.open(file,'w',**profile) as dst:         #os.path.join(outpath, 'test1k.tif'), 'w', **profile) as dst:
-            dst.write_band(1, out.astype(rasterio.float32))
-
+        try:
+            with rasterio.open(file, 'w',**profile) as dst:         #os.path.join(outpath, 'test1k.tif'), 'w', **profile) as dst:
+                dst.write_band(1, out.astype(rasterio.float32))
+        except:
+            raise FileReadWriteError('Problems with ' + str(dst))
+    
     return out
 
 # *******************************
@@ -85,12 +88,11 @@ def export_grid(
 ) -> np.ndarray:
 
     """ 
-        Reshape one column of the pandas df to a new dataframe with width and height. 
+        Reshape one column of the pandas df to a new dataframe with width and height.
         In case a nanmask is availabel (nan-cells for prediction input caused droped rows): 
             "True"-cells in nanmask lead to nodata-rows in the output dataframe (y).
         Metadata contains width and height values out of input grids for prediction, as well as the crs (coordinate reference system).
         In case outfile is not None, the dataframe will be saved to a geoTiff-file 
-
     Args:
         - df (pandas DataFrame): Is the input df, result from prediction-method.
         - metadata (dictionary): Contains with and height values.
@@ -98,26 +100,26 @@ def export_grid(
         - outfile (string, optional): Name of file of the output
         - outextension (string, optional): Name of the file extension (like .tif)       
         - nanmask (pandas DataFrame): In case nodata-samples are removed during "nodata-replacement"
-
     Returns:
-        np.array: 2-d-array (numpy) reddy to outpu as a tiff, grid,... 
+        np.array: 2-d-array (numpy) 
+        optionaly: output as a geotiff file
     """
 
     # Argument evaluation
     fl = []
-    if not isinstance(metadata,dict):
-        fl.append('argument metadata is not a Dictionary')
-    if not isinstance(df,pd.DataFrame):
-        fl.append('argument df is not a DataFrame') 
-    if not ((isinstance(outpath,str) or (outpath is None)) and 
-        (isinstance(outfile,str) or (outfile is None)) and 
-        (isinstance(outextension,str) or (outextension is None))):
+    if not isinstance(metadata, dict):
+        fl.append('Argument metadata is not a Dictionary')
+    if not isinstance(df, pd.DataFrame):
+        fl.append('Argument df is not a DataFrame') 
+    if not ((isinstance(outpath, str) or (outpath is None)) and 
+        (isinstance(outfile, str) or (outfile is None)) and 
+        (isinstance(outextension, str) or (outextension is None))):
         #raise InvalidParameterValueException ('***  outpath, outfile or outextension is not str (or None)')
-        fl.append('arguments outpath, outfile or outextension are not str or are not None')
-    if not ((isinstance(nanmask,pd.DataFrame)) or (nanmask is None)):
-        fl.append('argument nanmask is not a DataFrame and is not None')
+        fl.append('Arguments outpath, outfile or outextension are not str or are not None')
+    if not ((isinstance(nanmask, pd.DataFrame)) or (nanmask is None)):
+        fl.append('Argument nanmask is not a DataFrame and is not None')
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function export_grid: ' + fl[0])
+        raise InvalidParameterValueException (fl[0])
 
     out = _export_grid(
     df = df,

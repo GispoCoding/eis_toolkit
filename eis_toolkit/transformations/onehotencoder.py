@@ -17,16 +17,15 @@ def _onehotencoder(
     else:
         if ohe is not None:
             tmpb = ohe.transform(df)
-            tmpb = pd.DataFrame(tmpb,columns=ohe.get_feature_names_out())  #([].append(col)))
+            tmpb = pd.DataFrame(tmpb, columns=ohe.get_feature_names_out())  #([].append(col)))
         else:
-            encnew = OneHotEncoder(categories='auto',handle_unknown='ignore',sparse = False,dtype = int)
+            encnew = OneHotEncoder(categories='auto', handle_unknown='ignore', sparse = False, dtype = int)
             #encnew = OneHotEncoder(categories=col_c,handle_unknown='ignore',sparse=False,dtype = int)
             encnew.fit(df)
             tmpb = encnew.transform(df)
-            tmpb = pd.DataFrame(tmpb,columns=encnew.get_feature_names_out())  #([].append(col)))
+            tmpb = pd.DataFrame(tmpb, columns=encnew.get_feature_names_out())  #([].append(col)))
 
-    return tmpb,encnew
-
+    return tmpb, encnew
 
 # *******************************
 def onehotencoder(  # type: ignore[no-any-unimported]
@@ -37,12 +36,11 @@ def onehotencoder(  # type: ignore[no-any-unimported]
     """
         Encodes all categorical columns in a pandas dataframe.
         In case of model training: onehotencoder object is one of the outputs.
-        In case of prediction: onehotencoder object created in traing is needed (input argument).
+        In case of prediction: onehotencoder object created in traing is needed (input Argument).
     Args:
         - df (DataFrame): 
         - ohe: in case of predition mandantory
              in case of training = None
-
     Returns:
         pandas DataFrame: binarized
         ohe - Objet (OnHotEncoing): in case of training 
@@ -51,23 +49,19 @@ def onehotencoder(  # type: ignore[no-any-unimported]
     
     # Argument evaluation
     fl = []
-    if not (isinstance(df,pd.DataFrame)):
-        fl.append('argument df is not a DataFrame')
+    if not (isinstance(df, pd.DataFrame)):
+        fl.append('Argument df is not a DataFrame')
     t = ohe.__class__.__name__
     if not (t in ('OneHotEncoder') or ohe is None):
-        fl.append('argument ohe ist not an instance of one of OneHotEncoder')
+        fl.append('Argument ohe ist not an instance of one of OneHotEncoder')
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function onhotencoder: ' + fl[0])
+        raise InvalidParameterValueException (fl[0])
 
     # if len(Xdf.columns) == 0:
-    #     raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no column')
+    #     raise InvalidParameterValueException ('DataFrame has no column')
     # if len(Xdf.index) == 0:
-    #     raise InvalidParameterValueException ('***  function all_nodata_remove: DataFrame has no rows')
+    #     raise InvalidParameterValueException (' DataFrame has no rows')
 
-
-    dfnew,encnew = _onehotencoder(
+    return _onehotencoder(
         df = df, ohe = ohe        #, fields = fields
     )
-
-    return dfnew,encnew
-

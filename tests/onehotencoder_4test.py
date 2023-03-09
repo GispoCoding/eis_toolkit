@@ -1,6 +1,5 @@
 
-# onehotencoder_test.py
-##############################
+
 import pytest
 # import numpy as np
 import sys
@@ -9,7 +8,6 @@ from pathlib import Path
 scripts = r'/eis_toolkit'  #/eis_toolkit/conversions'
 sys.path.append (scripts)
 
-import geopandas as gpd
 import pandas as pd
 from eis_toolkit.conversions.import_featureclass import *
 from eis_toolkit.conversions.import_grid import *
@@ -60,10 +58,10 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
 # columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
+columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
 #columns , df , metadata = import_grid(grids = grids) 
 # Separation
-Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = columns) 
+Xvdf, Xcdf, ydf, igdf = separation(df = df, fields = columns) 
 # nodata_replacement of 
 Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent') 
 

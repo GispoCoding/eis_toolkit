@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import cross_validate
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, InvalideContentOfInputDataFrame
 
 # *******************************
 
@@ -11,7 +11,7 @@ def _sklearn_model_crossvalidation(  # type: ignore[no-any-unimported]
     sklearnMl,
     Xdf: pd.DataFrame,                  # dataframe of Features for traning
     ydf: pd.DataFrame,                  # dataframe of known values for training
-    coring: Optional[str | list | tuple | dict] = None,
+    scoring: Optional[str | list | tuple | dict] = None,
     cv: Optional[int] = None,           # int: number of the folds (default 5)
     n_jobs: Optional[int] = None,       # if None: complement size of the test_size
     verbose: Optional [int] = 0,
@@ -34,7 +34,7 @@ def _sklearn_model_crossvalidation(  # type: ignore[no-any-unimported]
             scoring = ['accuracy','recall_macro','precision_macro','f1_macro']
     crsv = cross_validate(estimator = sklearnMl,
                         X = Xdf,
-                        y = ydf,
+                        y = ty,
                         scoring = scoring,
                         cv = cv,
                         n_jobs = n_jobs,
@@ -71,7 +71,7 @@ def sklearn_model_crossvalidation(  # type: ignore[no-any-unimported]
                     for classification: ['accuracy','recall_macro','precision_macro','f1_macro']
                     for regression: ['r2','explained_variance','neg_mean_absolute_error','neg_mean_squared_error']
                 - a dictionary with metric names as keys and callables a values.
-        - cv (int, optional). cross-validation generator or an iterable,    
+        - cv (int, default = 4). cross-validation generator or an iterable,    
             Determines the cross-validation splitting strategy. Possible inputs for cv are:
                 None, to use the default 5-fold cross validation,
                 int, to specify the number of folds in a (Stratified)KFold,
@@ -109,23 +109,23 @@ def sklearn_model_crossvalidation(  # type: ignore[no-any-unimported]
     fl = []
     t = sklearnMl.__class__.__name__           #t = isinstance(sklearnMl,(RandomForestClassifier,RandomForestRegressor,LogisticRegression))
     if not t in ('RandomForestClassifier','RandomForestRegressor','LogisticRegression'):
-        fl.append('argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
-    if not (isinstance(Xdf,pd.DataFrame)):
-        fl.append('argument Xdf is not a DataFrame')
-    if not (isinstance(ydf,pd.DataFrame)):
-        fl.append('argument ydf is not a DataFrame')
-    if not (isinstance(cv,int) or (cv is None)):
-        fl.append('argument cv is not integer and is not None')
-    if not (isinstance(n_jobs,int) or (n_jobs is None)):
-        fl.append('argument n_jobs is not integer and is not None')
-    if not (isinstance(verbose,int) or (verbose is None)):
-        fl.append('argument verbose is not integer and is not None')
-    if not (isinstance(pre_dispatch,int) or (pre_dispatch is None)):
-        fl.append('argument pre_dispatch is not integer and is not None')
-    if not (isinstance(return_train_score,bool) or (return_train_score is None)):
-        fl.append('argument return_train_score is not bool and is not None')
+        fl.append('Argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)')
+    if not (isinstance(Xdf, pd.DataFrame)):
+        fl.append('Argument Xdf is not a DataFrame')
+    if not (isinstance(ydf, pd.DataFrame)):
+        fl.append('Argument ydf is not a DataFrame')
+    if not (isinstance(cv, int) or (cv is None)):
+        fl.append('Argument cv is not integer and is not None')
+    if not (isinstance(n_jobs, int) or (n_jobs is None)):
+        fl.append('Argument n_jobs is not integer and is not None')
+    if not (isinstance(verbose, int) or (verbose is None)):
+        fl.append('Argument verbose is not integer and is not None')
+    if not (isinstance(pre_dispatch, int) or (pre_dispatch is None)):
+        fl.append('Argument pre_dispatch is not integer and is not None')
+    if not (isinstance(return_train_score ,bool) or (return_train_score is None)):
+        fl.append('Argument return_train_score is not bool and is not None')
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function sklearn_model_crossvalidation: ' + fl[0])
+        raise InvalidParameterValueException(fl[0])
     
     fl = []
     if len(Xdf.columns) == 0:
@@ -137,26 +137,21 @@ def sklearn_model_crossvalidation(  # type: ignore[no-any-unimported]
     if len(ydf.index) == 0:
         fl.append('DataFrame ydf has no rows')
     if len(fl) > 0:
-        raise InvalidParameterValueException ('***  function sklearn_model_crossvalidation: ' + fl[0])
+        raise InvalideContentOfInputDataFrame(fl[0])
 
-    # Check
-    if len(Xdf.columns) == 0:
-        raise InvalidParameterValueException ('***  sklearn_model_crossvalidation:  DataFrame has no column')
-    if len(Xdf.index) == 0:
-        raise InvalidParameterValueException ('***  sklearn_model_crossvalidation:  DataFrame has no rows')
     # check cv:
     if cv == None: 
         tmp = 5
     else:
         tmp = cv
     if Xdf.shape[0] / tmp < 4:
-         raise InvalidParameterValueException ('***  sklearn_model_crossvalidation: cross validation splitting: X to smal / cv to hight ') 
+         raise InvalideContentOfInputDataFrame('cross validation splitting: X to smal / cv to hight ') 
 
     return _sklearn_model_crossvalidation(
         sklearnMl = sklearnMl,
         Xdf = Xdf, 
         ydf = ydf,
-        scoring = scoring,     
+        scoring = scoring,
         cv = cv,
         n_jobs = n_jobs,
         verbose = verbose,
