@@ -28,7 +28,7 @@ def _sklearn_model_validations(
    # external tet_set for y will be used
    if predict_ydf is not None:
       if ydf.shape[0] != predict_ydf.shape[0]:
-         raise InvalidParameterValueException ('***  function sklearn_model_validation: Known testset (y) and predicted y have not the same number of samples')
+         raise InvalidParameterValueException ('Known testset (y) and predicted y have not the same number of samples')
       test_y = ydf
       predict_y = predict_ydf
       testtype = "test_dataset"

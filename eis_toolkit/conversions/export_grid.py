@@ -4,8 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 import rasterio
-from sklearn.preprocessing import OneHotEncoder
-from eis_toolkit.exceptions import InvalidParameterValueException, FileReadWriteError
+from eis_toolkit.exceptions import InvalidParameterValueException, FileReadWriteError, InvalideContentOfInputDataFrame
 
 # *******************************
 def _export_grid(
@@ -119,7 +118,15 @@ def export_grid(
     if not ((isinstance(nanmask, pd.DataFrame)) or (nanmask is None)):
         fl.append('Argument nanmask is not a DataFrame and is not None')
     if len(fl) > 0:
-        raise InvalidParameterValueException (fl[0])
+        raise InvalidParameterValueException(fl[0])
+    if not('height' in metadata) and ('width' in metadata):
+        raise InvalidParameterValueException ('Metadata has no keys height and width')
+    if nanmask is not None:
+        if nanmask.shape[0] != (metadata['height'] * metadata['width']):
+            raise  InvalideContentOfInputDataFrame('nanmask (' +str(nanmask.shape[0])+ ') is different from '+ str(metadata['height'])+'*'+str(metadata['width']))
+    else:
+        if df.shape[0] != (metadata['height'] * metadata['width']):
+            raise  InvalideContentOfInputDataFrame('dataframe (' +str(df.shape[0])+ ') can not be copied in a array '+ str(metadata['height'])+'*'+str(metadata['width']))
 
     out = _export_grid(
     df = df,

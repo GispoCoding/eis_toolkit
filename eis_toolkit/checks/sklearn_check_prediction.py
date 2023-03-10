@@ -35,14 +35,14 @@ def sklearn_check_prediction(
 ) -> pd.DataFrame:
 
     """ 
-        Check whether the fields of the dataframe Xdf are the same (number and names) as the fields in the model sklearnMl.
+        Check whether the fields of the dataframe Xdf are the same (amount and names) as the fields in the model sklearnMl.
         The Columns will be ordered in the same way as in sklearnMl used.
         Check_Prediction should be used just befor model_prediction and after onehotencoding.
     Args:
         sklearnMl: Existing model to use for the prediction (random forest classifier, random forest regressor, logistic regression )
         Xdf (Pandas dataframe or numpy array ("array-like")): features (columns) and samples (raws)
     Returns:
-        Dataframe with columns in the order of the Model sklearnMl
+        Dataframe with columns in the same order of the model sklearnMl
     """
 
     # Argument evaluation
