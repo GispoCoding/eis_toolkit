@@ -60,3 +60,13 @@ class InvalidColumnIndexException(Exception):
     """Exception error for index out of range."""
 
     pass
+
+class UnFavorableClassDoesntExistException(Exception):
+    """Exception error class for failure to generalize classes using the given studentised contrast threshold value. Class 1 (unfavorable class)  doesn't exist"""
+  
+    pass
+
+class FavorableClassDoesntExistException(Exception):
+    """Exception error class for failure to generalize classes using the given studentised contrast threshold value. Class 2 (favorable class)  doesn't exist"""
+  
+    pass
