@@ -2,7 +2,7 @@
 from typing import Optional, Any
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder #, LabelEncoder  
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, InvalideContentOfInputDataFrame
 
 # *******************************
 def _onehotencoder(
@@ -19,6 +19,8 @@ def _onehotencoder(
             tmpb = ohe.transform(df)
             tmpb = pd.DataFrame(tmpb, columns=ohe.get_feature_names_out())  #([].append(col)))
         else:
+            if len((df.select_dtypes(include=[float])).columns) > 0:
+                raise InvalideContentOfInputDataFrame('One of the c-type fields is float') 
             encnew = OneHotEncoder(categories='auto', handle_unknown='ignore', sparse = False, dtype = int)
             #encnew = OneHotEncoder(categories=col_c,handle_unknown='ignore',sparse=False,dtype = int)
             encnew.fit(df)
@@ -38,7 +40,7 @@ def onehotencoder(  # type: ignore[no-any-unimported]
         In case of model training: onehotencoder object is one of the outputs.
         In case of prediction: onehotencoder object created in traing is needed (input Argument).
     Args:
-        - df (DataFrame): 
+        - df (DataFrame): cantains all c-typed columns witch should not be float
         - ohe: in case of predition mandantory
              in case of training = None
     Returns:

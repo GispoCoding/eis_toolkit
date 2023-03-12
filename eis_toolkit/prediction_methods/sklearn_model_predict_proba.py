@@ -14,6 +14,8 @@ def _sklearn_model_predict_proba(
 ):
 
     if sklearnMl._estimator_type == 'classifier':
+        if Xdf.isna().sum().sum() > 0:
+            raise InvalideContentOfInputDataFrame('DataFrame Xdf contains Nodata-values')
         ydf = pd.DataFrame(sklearnMl.predict_proba(Xdf), columns=sklearnMl.classes_)
     else:
         raise InvalidParameterValueException ('Model is not a classifier')

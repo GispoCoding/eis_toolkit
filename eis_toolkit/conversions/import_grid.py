@@ -3,7 +3,7 @@ from typing import List, Tuple
 import pandas as pd
 import rasterio
 from os.path import exists
-from eis_toolkit.exceptions import InvalidParameterValueException, NonMatchingImagesExtend, FileReadWriteError
+from eis_toolkit.exceptions import InvalidParameterValueException, NonMatchingImagesExtend, FileReadWriteError, MissingFileOrPath
 from eis_toolkit.conversions.raster_to_pandas import *
 
 # *******************************
@@ -19,7 +19,7 @@ def _import_grid(
     fl = []
     for dict in grids:                     # !!! prüfen, ob crs, transform height, width gleich
         if not exists(dict['file']):
-            fl.append('file does not extsis: '+dict['file'])
+            raise MissingFileOrPath('file does not extsis: '+dict['file'])
         else:
             try:
                 grid = rasterio.open(dict['file'])
@@ -39,11 +39,15 @@ def _import_grid(
                 q = True
             else:
                 if meta['height'] != grid.meta['height'] or meta['width'] != grid.meta['width']:
-                    raise NonMatchingImagesExtend('height and/or width differs in the imported grids ') 
+                    fl.append('height and/or width differs in the imported grids ') 
+                if meta['crs'] != grid.meta['crs']:
+                    fl.append('crs differs in the imported grids ')
+                if meta['transform'] != grid.meta['transform']:
+                    fl.append('extend/cellsize differs in the imported grids ')  
                 meta = grid.meta
             fields[dict['name']]=dict['type']
     if len(fl) > 0:
-        raise InvalidParameterValueException (fl[0])
+        raise NonMatchingImagesExtend(fl[0])
     # remove the file-name out of the fields-dictionaries (not nessesary)
     # fields = grids
     # for gr in fields:
@@ -85,6 +89,13 @@ def import_grid(  # type: ignore[no-any-unimported]
         raise InvalidParameterValueException ('Argunment grids is empty')
     if not (grids[0].__class__.__name__ == 'dict'):         #(isinstance(grids[0],dict)):
         raise InvalidParameterValueException ('The grids list contains no dictionaries')
+
+    # v,b,c-fields at least 1, t no more then 1
+
+    if len(list(counter for counter, fld in enumerate(grids) if fld['type'] in ['v','c','b'])) < 1:
+        raise InvalidParameterValueException ('There are no v-, c- or b-fields in fields argument') 
+    if len(list(counter for counter, fld in enumerate(grids) if fld['type'] in ['t'])) > 1:
+        raise InvalidParameterValueException ('There are more then one t-fields in fields argument')  
 
     fields, data_frame, meta = _import_grid( 
         grids = grids

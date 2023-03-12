@@ -1,18 +1,11 @@
-"""
-Created an November 24 2022
-@author: torchala 
-""" 
+
 ########################
 # Test frame for single modules
 # 
 
 from pathlib import Path
-import copy
 import sys
-from typing import Tuple
-import numpy as np
-import rasterio
-import os
+
 import matplotlib.pyplot as plt
 from rasterio.plot import show
 
@@ -24,6 +17,8 @@ sys.path.append (scripts)
 
 from eis_toolkit.conversions.export_featureclass import *
 from eis_toolkit.conversions.import_featureclass import *
+from eis_toolkit.conversions.export_grid import *
+from eis_toolkit.conversions.import_grid import *
 from eis_toolkit.transformations.nodata_replace import *
 from eis_toolkit.transformations.nodata_remove import *
 from eis_toolkit.transformations.separation import *
@@ -45,10 +40,7 @@ from eis_toolkit.validation.sklearn_model_importance import *
 
 rname = 'test_images'   # name of the project
 parent_dir = Path(__file__).parent
-dt = datetime.datetime.now()
 print ('*****************************************************')
-print ('\nProjectname: '+rname)
-print('\nStart of test_sklearn_frame_image: ' + dt.strftime('%d.%h.%y; %H:%M:%S'))
 # Aktuell Testrahmen des Einlesens eines GRID 
 # Dateiname eines GRID: 
 
@@ -77,7 +69,6 @@ print('\nStart of test_sklearn_frame_image: ' + dt.strftime('%d.%h.%y; %H:%M:%S'
 #  {'name':'Thorium', 'file':name_Th, 'type':'v'},
 #  #{'name':'Uran', 'file':name_U, 'type':'v'}]
 # ]
-
 
 # Ghana
 #name_tif1 = parent_dir.joinpath(r'data/Ghana/Deposits/gold_dep100/dblbnd.adf')  # nodata = -1 wird nicht genommen
@@ -143,6 +134,16 @@ grids=  [{'name':'Deposit','type':'t','file':name_tif1},
  {'name':'gy_scaled', 'file':name_tif3, 'type':'v'},
 ]
 
+
+# name_tif1 = str(parent_dir.joinpath(r'data/test1.tif'))
+# name_tif2 = str(parent_dir.joinpath(r'data/test2.tif'))
+name_tif3 = parent_dir.joinpath(r'data/test1.tif')
+
+grids=  [{'name':'targe','type':'t','file':name_tif1},
+ {'name':'test1', 'file':name_tif2, 'type':'v'},
+ {'name':'test2', 'file':name_tif3, 'type':'v'},
+]
+
 print('+++++++++++++++++++++++++++++++++++++++++   Part 1 Import')
 
 #########################################
@@ -179,7 +180,6 @@ Xdfneu, ohe = onehotencoder(df = Xcdf,)
 
 # 3.5: putting binariesed Xcdf and Xvdf together again
 Xdf = unification(Xvdf = Xvdf, Xcdf = Xdfneu,)
-
 
 #########################################
 # 4. Creating of the sklearn model (random forest or logistic regression)
@@ -346,8 +346,6 @@ Ergebnis = export_grid( df = ydf1,
                             )
 
 # 
-dt = datetime.datetime.now()
-print ('*****************************************************')
-print('\nEnd: ' + dt.strftime('%d.%h.%y; %H:%M:%S'))
+
 print ('*****************************************************')
 

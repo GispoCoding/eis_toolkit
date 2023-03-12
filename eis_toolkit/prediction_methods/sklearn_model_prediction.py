@@ -16,12 +16,6 @@ def _sklearn_model_prediction(
     cn = ['result']
     ydf = sklearnMl.predict(Xdf)
 
-    if sklearnMl._estimator_type == 'classifier':
-        if 'float' in ydf.dtype.__str__():      # in case of classification problem and the target is not int
-            ydf = (ydf + 0.5).astype(np.uint16)
-        elif 'int' in ydf.dtype.__str__():
-            ydf = ydf.astype(np.uint16)
-
     ydf= pd.DataFrame(ydf,columns=cn)
     if igdf is not None:
         if len(ydf.index) != len(igdf.index):
@@ -74,7 +68,8 @@ def sklearn_model_prediction(
         raise InvalideContentOfInputDataFrame('DataFrame has no column')
     if len(Xdf.index) == 0:
         raise InvalideContentOfInputDataFrame('DataFrame has no rows')
- 
+    if Xdf.isna().sum().sum() > 0:             
+         raise InvalideContentOfInputDataFrame('DataFrame Xdf contains Nodata-values')
     if not hasattr(sklearnMl,'feature_names_in_'):
         raise ModelIsNotFitted('Model is not fitted')
 

@@ -26,6 +26,18 @@ def _sklearn_model_crossvalidation(  # type: ignore[no-any-unimported]
             ty = np.ravel(ydf)
     
     #  Crossvalidation
+    # if not sklearnMl._estimator_type == 'regressor':
+    #      if np.issubdtype(ty.dtype, np.floating):
+    #         raise InvalideContentOfInputDataFrame('A classifier model cannot us a float y (target)')
+
+    if sklearnMl._estimator_type == 'classifier':
+        if np.issubdtype(ty.dtype, np.floating):
+            raise InvalideContentOfInputDataFrame('A classifier model cannot us a float y (target)')
+            #ty = (ty + 0.5).astype(np.uint16)
+    else:
+        if not np.issubdtype(ty.dtype, np.number):
+            raise InvalideContentOfInputDataFrame('A regressor model can only use number y (target)')
+
     sklearnMl.fit(Xdf, ty)
     if scoring is None:
         if sklearnMl._estimator_type == 'regressor':
@@ -64,6 +76,7 @@ def sklearn_model_crossvalidation(  # type: ignore[no-any-unimported]
     Args:
         - Xdf Pandas dataframe or numpy array ("array-like"): features (columns) and samples (rows)
         - ydf Pandas dataframe or numpy array ("array-like"): target valus(columns) and samples (rows) (same number as Xdf)
+            If ydf is float and the estimator is a classifier: ydf will be rounded to int.
         - scoring (str, list, tuple, dict; optional), 
             If scoring represents a single score, one can use: str
             If scoring represents multiple scores, one can use:
@@ -132,10 +145,12 @@ def sklearn_model_crossvalidation(  # type: ignore[no-any-unimported]
         fl.append('DataFrame Xdf has no column')
     if len(Xdf.index) == 0:
         fl.append('DataFrame Xdf has no rows')
-    if len(ydf.columns) == 0:
-        fl.append('DataFrame ydf has no column')
+    if len(ydf.columns) != 1:
+        fl.append('DataFrame ydf has 0 or more then 1 columns')
     if len(ydf.index) == 0:
         fl.append('DataFrame ydf has no rows')
+    if Xdf.isna().sum().sum() > 0 or ydf.isna().sum().sum() > 0:
+        fl.append('DataFrame train_ydf or train_Xdf contains Nodata-values')    
     if len(fl) > 0:
         raise InvalideContentOfInputDataFrame(fl[0])
 

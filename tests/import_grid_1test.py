@@ -10,7 +10,7 @@ sys.path.append (scripts)
 import geopandas as gpd
 import pandas as pd
 from eis_toolkit.conversions.import_grid import *
-#from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
+#from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException, MissingFileOrPath
 
 # input from GUI:
 parent_dir = Path(__file__).parent
@@ -37,6 +37,16 @@ gridsize = [{'name':'Total','type':'t','file':name_target},
  {'name':'Thorium', 'file':name_Th, 'type':'v'},
  {'name':'Uran', 'file':size_wrong, 'type':'v'}]
 
+gridtype1 = [{'name':'Total','type':'t','file':name_target},
+ {'name':'Kalium', 'file':name_K, 'type':'t'},
+ {'name':'Thorium', 'file':name_Th, 'type':'v'},
+ {'name':'Uran', 'file':name_wrong, 'type':'v'}]
+
+gridtype2 = [{'name':'Total','type':'t','file':name_target},
+ {'name':'Kalium', 'file':name_K, 'type':'n'},
+ {'name':'Thorium', 'file':name_Th, 'type':'n'},
+ {'name':'Uran', 'file':name_wrong, 'type':'d'}]
+
 def test_import_grid_ok():
     """Test functionality: import of tif files and creating of X as DataFrame"""
     columns, df, metadata= import_grid(grids = grids) 
@@ -54,12 +64,15 @@ def test_import_grid_wrong():
     with pytest.raises(InvalidParameterValueException):
         columns, df , metadata = import_grid(grids = 6) 
     """Test functionality with wrong filenames."""
-    with pytest.raises(InvalidParameterValueException):
+    with pytest.raises(MissingFileOrPath):
         columns, df , metadata = import_grid(grids = gridwrong)
     """Test functionality with wrong imagesize/crs."""
     with pytest.raises(NonMatchingImagesExtend):
         columns, df , metadata = import_grid(grids = gridsize) 
-
+    with pytest.raises(InvalidParameterValueException):
+        columns, df , metadata = import_grid(grids = gridtype2)
+    with pytest.raises(InvalidParameterValueException):
+        columns, df , metadata = import_grid(grids = gridtype1)
 
 test_import_grid_ok()
 test_import_grid_wrong()

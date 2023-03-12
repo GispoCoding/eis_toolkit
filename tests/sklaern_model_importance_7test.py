@@ -13,10 +13,12 @@ from eis_toolkit.conversions.import_featureclass import *
 from eis_toolkit.conversions.import_grid import *
 from eis_toolkit.transformations.separation import *
 from eis_toolkit.transformations.nodata_replace import *
+from eis_toolkit.transformations.nodata_remove import *
 from eis_toolkit.transformations.onehotencoder import *
 from eis_toolkit.transformations.unification import *
 from eis_toolkit.transformations.split import *
 from eis_toolkit.model_training.sklearn_randomforest_classifier import *
+from eis_toolkit.model_training.sklearn_randomforest_regressor import *
 from eis_toolkit.model_training.sklearn_model_fit import *
 from eis_toolkit.prediction_methods.sklearn_model_prediction import *
 from eis_toolkit.validation.sklearn_model_importance import *
@@ -44,6 +46,15 @@ grids =  [{'name':'Total','type':'t','file':name_target},
  {'name':'Thorium', 'file':name_Th, 'type':'v'},
  {'name':'Uran', 'file':name_U, 'type':'v'}]
 
+name_tif1 = str(parent_dir.joinpath(r'data/test1.tif'))
+name_tif2 = str(parent_dir.joinpath(r'data/test2.tif'))
+name_tif3 = parent_dir.joinpath(r'data/test1.tif')
+
+grids=  [{'name':'targe','type':'t','file':name_tif1},
+ {'name':'test1', 'file':name_tif2, 'type':'v'},
+ {'name':'test2', 'file':name_tif3, 'type':'v'},
+]
+
 #columns and column-types for X (training based on a geopackage-layer)
 fields_fc=  {'OBJECTID':'i', 'ID':'n', 'Name':'n', 'Alternativ':'n', 'Easting_EU':'n', 'Northing_E':'n',
        'Easting_YK':'n', 'Northing_Y':'n', 'Commodity':'c', 'Size_by_co':'c', 'All_main_c':'n',
@@ -64,19 +75,23 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
-# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
-#columns , df , metadata = import_grid(grids = grids) 
+columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
+#columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
+#columns , df , metadata = import_grid(grids = grids) # 
+# nodata_:remove 
+#df, nodatmask = nodata_remove(df = df,)            # for images only
 # Separation
 Xvdf, Xcdf, ydf, igdf = separation(df = df, fields = columns) 
 # nodata_replacement of 
-Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent') 
+Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent')
+Xvdf = nodata_replace(df = Xvdf, rtype = 'mean') 
+ydf = nodata_replace(df = ydf, rtype = 'most_frequent') 
 # onehotencoder
 Xdf_enh, eho = onehotencoder(df = Xcdf)
 # unification
 Xdf = unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
 # model
-sklearnMl = sklearn_randomforest_classifier(oob_score = True)
+sklearnMl = sklearn_randomforest_regressor(oob_score = True)
 # fit
 sklearnMl = sklearn_model_fit (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf)
 # split 

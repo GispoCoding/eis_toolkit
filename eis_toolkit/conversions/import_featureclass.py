@@ -50,7 +50,7 @@ def _import_featureclass(
     urdf = deepcopy(df)
 
     # v,b,c-fields at least 1, t no more then 1
-    if (list(fields.values()).count('v') + list(fields.values()).count('c') + list(fields.values()).count('d')) < 1:
+    if (list(fields.values()).count('v') + list(fields.values()).count('c') + list(fields.values()).count('b')) < 1:
         raise InvalidParameterValueException ('There are no v-, c- or b-fields in fields argument') 
     if (list(fields.values()).count('t')) > 1:
         raise InvalidParameterValueException ('There are more then one t-fields in fields argument')  

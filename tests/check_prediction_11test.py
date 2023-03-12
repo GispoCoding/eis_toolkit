@@ -70,14 +70,15 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
-# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
+columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
+#columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
 #columns , df , metadata = import_grid(grids = grids) 
 # Separation
 Xvdf, Xcdf, ydf, igdf = separation(df = df, fields = columns) 
 # nodata_replacement of 
 Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent')
 Xvdf = nodata_replace(df = Xvdf, rtype = 'mean')
+ydf = nodata_replace(df = ydf, rtype = 'most_frequent')
 # onehotencoder
 Xdf_enh, eho = onehotencoder(df = Xcdf)
 # unification
@@ -141,7 +142,7 @@ def test_sklearn_check_prediction():
 def test_sklearn_check_prediction_error():
     """Test wrong arguments."""
 
-    Xdf_wrong = Xdf_test.drop(columns=['K_H'])
+    Xdf_wrong = Xdf_test.drop(columns=['Plunge_dip'])
     with pytest.raises(InvalideContentOfInputDataFrame):
         X = sklearn_check_prediction(sklearnMl= sklearnMlp, Xdf = Xdf_wrong)
     

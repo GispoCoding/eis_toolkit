@@ -15,6 +15,7 @@ from eis_toolkit.transformations.nodata_replace import *
 from eis_toolkit.transformations.onehotencoder import *
 from eis_toolkit.transformations.unification import *
 from eis_toolkit.model_training.sklearn_randomforest_classifier import *
+from eis_toolkit.model_training.sklearn_randomforest_regressor import *
 from eis_toolkit.model_training.sklearn_model_fit import *
 from eis_toolkit.prediction_methods.sklearn_model_prediction import *
 from eis_toolkit.file.export_files import *
@@ -55,7 +56,6 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
 
 # columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
 columns, df, urdf, metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True) 
-#columns , df , metadata = import_grid(grids = grids) 
 # nodata_remove
 
 # split

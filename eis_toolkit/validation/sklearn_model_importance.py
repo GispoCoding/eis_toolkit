@@ -1,6 +1,7 @@
 
 from typing import Optional, Tuple
 import pandas as pd
+import numpy as np
 from sklearn.inspection import permutation_importance
 from eis_toolkit.exceptions import InvalidParameterValueException, ModelIsNotFitted, InvalideContentOfInputDataFrame
 
@@ -26,16 +27,34 @@ def _sklearn_model_importance(  # type: ignore[no-any-unimported]
       if Xdf is None or ydf is None:
           raise InvalidParameterValueException('estimator is not RandomForest, Xdf and ydf must be given')                                                                        # feature importance from Randmom forres
    if Xdf is not None and ydf is not None:      # Permutation feature importance
+      fl = []
       if len(Xdf.columns) == 0:
-         raise InvalideContentOfInputDataFrame('DataFrame Xdf has no column')
+         fl.append('DataFrame Xdf has no column')
       if len(Xdf.index) == 0:
-         raise InvalideContentOfInputDataFrame('DataFrame Xdf has no rows')
+         fl.append('DataFrame Xdf has no rows')
+      if len(ydf.columns) != 1:
+         fl.append('DataFrame ydf has 0 or more then 1 columns')
+      if len(ydf.index) == 0:
+         fl.append('DataFrame ydf has no rows')
+      if len(fl) > 0:
+         raise InvalideContentOfInputDataFrame(fl[0])
 
       # if scoring is None:
       #    if sklearnMl._estimator_type == 'regressor':
       #          scoring = ['r2','explained_variance','neg_mean_absolute_error','neg_mean_squared_error']
       #    else: 
       #          scoring = ['accuracy','recall_macro','precision_macro','f1_macro']
+         
+      if sklearnMl._estimator_type == 'classifier':
+         if np.issubdtype(ydf.dtypes[0], np.floating):
+            raise InvalideContentOfInputDataFrame('A classifier model cannot us a float y (target)')
+            #ydf = (ydf + 0.5).astype(np.uint16)
+      else:
+         if not np.issubdtype(ydf.dtypes[0], np.number):
+            raise InvalideContentOfInputDataFrame('A regressor model can only use number y (target)')
+      
+      if Xdf.isna().sum().sum() > 0 or ydf.isna().sum().sum() > 0:
+         raise InvalideContentOfInputDataFrame('DataFrame ydf or Xdf contains Nodata-values')
       
       t = permutation_importance(
          sklearnMl, 

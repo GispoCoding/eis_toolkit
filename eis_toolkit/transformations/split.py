@@ -21,6 +21,8 @@ def _split(  # type: ignore[no-any-unimported]
    if ydf is None:
       if fields is not None:
          name = {i for i in fields if fields[i]=="t"}
+         if not set(list(name)).issubset(set(Xdf.columns)):
+            raise InvalideContentOfInputDataFrame('fields and column names of DataFrame Xdf does not match')
          ydf = Xdf[list(name)]
          Xdf.drop(name,axis=1,inplace=True)
 

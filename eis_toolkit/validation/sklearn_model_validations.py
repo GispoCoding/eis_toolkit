@@ -35,13 +35,14 @@ def _sklearn_model_validations(
    
    else:    # split in test and training datasets
       testtype = "test_split"
+      if (test_size is None) and (train_size is None):
+         test_size = 0.25
       if test_size is not None:
          if test_size != 0:           # if testsize == 0 :   selftest will be performed
             train_X, test_X, train_y, test_y = train_test_split(
                Xdf,
                ydf,
                test_size = test_size,
-               train_size = train_size,
                random_state = random_state,
                shuffle = shuffle)
          else:
@@ -53,7 +54,6 @@ def _sklearn_model_validations(
             train_X, test_X, train_y, test_y = train_test_split(
                Xdf,
                ydf,
-               test_size = test_size,
                train_size = train_size,
                random_state = random_state,
                shuffle = shuffle)
@@ -67,9 +67,24 @@ def _sklearn_model_validations(
       if len(train_y.shape) > 1: 
          if train_y.shape[1] == 1:
                ty = np.ravel(train_y)
+
+      if sklearnMl._estimator_type == 'classifier':
+         if np.issubdtype(ty.dtype, np.floating):
+            raise InvalideContentOfInputDataFrame('A classifier model cannot us a float y (target)')
+            #ty = (ty + 0.5).astype(np.uint16)
+      else:
+         if not np.issubdtype(ty.dtype, np.number):
+            raise InvalideContentOfInputDataFrame('A regressor model can only use number y (target)')
+   
+      if train_X.isna().sum().sum() > 0 or train_y.isna().sum().sum() > 0:
+         raise InvalideContentOfInputDataFrame('DataFrame ydf or Xdf contains Nodata-values')
+      
       sklearnMl.fit(train_X,ty)
 
       #Prediction based on the test-data
+      if test_X.isna().sum().sum() > 0:
+         raise InvalideContentOfInputDataFrame('DataFrame Xdf contains Nodata-values')
+      
       predict_y = sklearn_model_prediction(sklearnMl,test_X)
 
    # Validation 
@@ -140,14 +155,15 @@ def sklearn_model_validations(
         The test-dataset will be used for prediction. 
         The result of prediction will be compared with ydf from test-dataset
       - If predict_ydf ist given:  
-        test_ydf is the known set of data to compare with the predicted set predict_ydf.
+        ydf is the known set of data to compare with the predicted set predict_ydf.
         sklearnMl will be used to determine the estimator type: regression or classification.
    Args:
       - sklearnMl (model): Even for comparison with a testset the model is used to get the model-typ (regression or classification). 
         If ydf and predict_ydf will be compared. sklearnMl has te information whether ist a classification or a regression-model
       - Xdf Pandas dataframe or numpy array ("array-like"): Features (columns) and samples (rows)
-      - ydf Pandas dataframe or numpy array ("array-like"): Target valus(columns) and samples (rows) (same number as Xdf).
-      - predict_ydf:  Pandas dataframe or numpy array ("array-like"): Predicted values of a test_dataset
+      - ydf Pandas dataframe or numpy array ("array-like"): Target valus(column) and samples (rows) (same number as Xdf).
+        If ydf is float and the estimator is a classifier: ydf will be rounded to int.
+      - predict_ydf:  Pandas dataframe or numpy array ("array-like"): Predicted values of a test_dataset, to compare with ydf
       - test_size (float or int, default=None): 
          If float, should be between 0.0 and 1.0 and represent the proportion of the dataset to include in the test split. 
          If int, represents the absolute number of test samples. 
@@ -202,21 +218,27 @@ def sklearn_model_validations(
       fl.append('Argument confusion_matrix is not bool and is not None')
    if not (isinstance(comparison, bool) or (comparison is None)):
       fl.append('Argument comparison is not bool and is not None')
-
    if len(fl) > 0:
       raise InvalidParameterValueException(fl[0])
 
    if Xdf is not None:
       if len(Xdf.columns) == 0:
-         raise InvalidParameterValueException('DataFrame has no column')
+         raise InvalidParameterValueException('DataFrame Xdf has no column')
       if len(Xdf.index) == 0:
-         raise InvalidParameterValueException('DataFrame has no rows')
+         raise InvalidParameterValueException('DataFrame Xdf has no rows')
    if predict_ydf is not None:
       if len(predict_ydf.columns) != 1:
-        fl.append('predict_ydf has 0 or more than 1 columns')
+        raise InvalidParameterValueException('predict_ydf has 0 or more than 1 columns')
    if predict_ydf is not None:
-      if predict_ydf.shape[0] != ydf.shape[0]:
+      if ydf is None:
+         raise InvalidParameterValueException('DataFrame ydf is None')
+      elif predict_ydf.shape[0] != ydf.shape[0]:
          raise InvalideContentOfInputDataFrame('predict_ydf and ydf have not the same number of rows')
+   if ydf is not None: 
+      if len(ydf.columns) != 1:
+         raise InvalidParameterValueException('DataFrame ydf has 0 or more than 1 columns')
+      if len(ydf.index) == 0:
+         raise InvalidParameterValueException('DataFrame ydf has no rows')     
 
    validation, confusion, comparison, sklearnMl = _sklearn_model_validations(
       sklearnMl = sklearnMl,

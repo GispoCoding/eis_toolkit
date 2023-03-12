@@ -18,8 +18,10 @@ from eis_toolkit.transformations.nodata_remove import *
 from eis_toolkit.transformations.onehotencoder import *
 from eis_toolkit.transformations.unification import *
 from eis_toolkit.model_training.sklearn_randomforest_classifier import *
+from eis_toolkit.model_training.sklearn_randomforest_regressor import *
 from eis_toolkit.model_training.sklearn_model_fit import *
 from eis_toolkit.prediction_methods.sklearn_model_prediction import *
+from eis_toolkit.prediction_methods.sklearn_model_predict_proba import *
 from eis_toolkit.file.export_files import *
 from eis_toolkit.file.import_files import *
 from eis_toolkit.checks.sklearn_check_prediction import *
@@ -43,9 +45,18 @@ grids =  [{'name':'Total','type':'t','file':name_target},
  {'name':'Thorium', 'file':name_Th, 'type':'v'},
  {'name':'Uran', 'file':name_U, 'type':'v'}]
 
-# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
+
+name_tif1 = str(parent_dir.joinpath(r'data/test1.tif'))
+name_tif2 = str(parent_dir.joinpath(r'data/test2.tif'))
+name_tif3 = parent_dir.joinpath(r'data/test1.tif')
+
+grids=  [{'name':'targe','type':'t','file':name_tif1},
+ {'name':'test1', 'file':name_tif2, 'type':'v'},
+ {'name':'test2', 'file':name_tif3, 'type':'v'},
+]
+# import grids
 columns, df, metadata = import_grid(grids) 
-#columns , df , metadata = import_grid(grids = grids) 
+
 # nodata_remove
 df,nanmask = nodata_remove(df = df)
 # split
@@ -54,12 +65,16 @@ Xdf_train, Xdf_test, ydf_train, ydf_test = split(Xdf = df, test_size = 10)
 # Separation
 Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = columns) 
 # nodata_replacement
+#Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent')
+#Xvdf = nodata_replace(df = Xvdf, rtype = 'mean')
+#ydf = nodata_replace(df = ydf, rtype = 'most_frequent')
 # onehotencoder
 Xdf_enh, eho = onehotencoder(df = Xcdf)
 # unification
 Xdf = unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
 # model
-sklearnMl = sklearn_randomforest_classifier(oob_score = True)
+# sklearnMl = sklearn_randomforest_classifier(oob_score = True)
+sklearnMl = sklearn_randomforest_regressor(oob_score = True)
 # fit
 sklearnMl = sklearn_model_fit (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf)
 # export files
@@ -82,17 +97,17 @@ sklearnMlp, sklearnOhep, myFieldsp, kerasMlp, kerasOhep = import_files(
     myFields_file = filesdict['myFields'], 
     )
 
-# nodata_remove
-df_test,nanmask = nodata_remove(df = Xdf_test)
-# separation
-Xvdf_test, Xcdf_test, ydf_dmp, igdf_test = separation(df = df_test, fields = myFieldsp) 
+# # nodata_remove
+# df_test,nanmask = nodata_remove(df = Xdf)
+# # separation
+# Xvdf_test, Xcdf_test, ydf_dmp, igdf_test = separation(df = Xdf, fields = myFieldsp) 
 
-# onehotencoder
-Xdf_enht, eho = onehotencoder(df = Xcdf_test, ohe = sklearnOhep)
-# unification
-Xdf_tst = unification(Xvdf = Xvdf_test, Xcdf = Xdf_enht)
+# # onehotencoder
+# Xdf_enht, eho = onehotencoder(df = Xcdf_test, ohe = sklearnOhep)
+# # unification
+# Xdf_tst = unification(Xvdf = Xvdf_test, Xcdf = Xdf_enht)
 # check prediction
-Xdf_pr = sklearn_check_prediction(sklearnMl= sklearnMlp, Xdf = Xdf_tst)
+Xdf_pr = sklearn_check_prediction(sklearnMl= sklearnMlp, Xdf = Xdf)
 # prediction
 ydfpr = sklearn_model_prediction(sklearnMl = sklearnMlp, Xdf = Xdf_pr) 
 # predict_proba
@@ -102,26 +117,27 @@ ydfpr = sklearn_model_prediction(sklearnMl = sklearnMlp, Xdf = Xdf_pr)
 def test_export_grid():
     """Test functionality of export grid."""
 
-    ydf_prd = export_grid(ydf = ydfpr, metadata = metadata, outpath = path, outfile = 'pr_image', outextension = 'tif',nanmask = nanmask)
+    ydf_prd = export_grid(df = ydfpr, metadata = metadata, outpath = path, outfile = 'pr_image', outextension = 'tif',nanmask = nanmask)
+    assert (isinstance(ydfpr,pd.DataFrame))
 
-    assert (isinstance(ydf_prd,pd.DataFrame))
+    ydf = export_grid(df = ydfpr, metadata = metadata, outpath = path, outfile = 'pr_image', outextension = 'xls', nanmask = nanmask)
+    assert (isinstance(ydfpr,pd.DataFrame))
 
 def test_export_grid_error():
     """Test wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        ydf = export_grid(ydf = path)
+        ydf = export_grid(df = path, metadata = path, )
     with pytest.raises(InvalidParameterValueException):
-        ydf = export_grid(ydf = ydfpr, metadata = path, outpath = path, outfile = 'pr_image', outextension = 'tif',nanmask = nanmask) 
+        ydf = export_grid(df = ydfpr, metadata = path, outpath = path, outfile = 'pr_image', outextension = 'tif',nanmask = nanmask) 
 
     path_wrong = str(parent_dir.joinpath(r'falsch'))
+    with pytest.raises(FileReadWriteError):
+        ydf = export_grid(df = ydfpr,  metadata = metadata, outpath = path_wrong, outfile = 'pr_image', outextension = 'tif',nanmask = nanmask) 
     with pytest.raises(InvalidParameterValueException):
-        ydf = export_grid(ydf = ydfpr,  metadata = metadata, outpath = path_wrong, outfile = 'pr_image', outextension = 'tif',nanmask = nanmask) 
+        ydf = export_grid(df = ydfpr, metadata = metadata, outpath = path, outfile = 9.9, outextension = 'tif',nanmask = nanmask) 
+
     with pytest.raises(InvalidParameterValueException):
-        ydf = export_grid(ydf = ydfpr, metadata = metadata, outpath = path, outfile = 9.9, outextension = 'tif',nanmask = nanmask) 
-    with pytest.raises(InvalidParameterValueException):
-        ydf = export_grid(ydf = ydfpr, metadata = metadata, outpath = path, outfile = 'pr_image', outextension = 'xls', nanmask = nanmask)
-    with pytest.raises(InvalidParameterValueException):
-        ydf = export_grid(ydf = ydfpr, metadata = metadata, outpath = path, outfile = 'pr_image', outextension = 'tif',nanmask = ',')
+        ydf = export_grid(df = ydfpr, metadata = metadata, outpath = path, outfile = 'pr_image', outextension = 'tif',nanmask = ',')
 
 test_export_grid()
 test_export_grid_error()

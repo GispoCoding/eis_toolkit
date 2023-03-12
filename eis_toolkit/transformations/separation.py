@@ -2,32 +2,41 @@
 from typing import Tuple
 import pandas as pd
 from eis_toolkit.exceptions import InvalidParameterValueException, InvalideContentOfInputDataFrame
-
 # *******************************
 def _separation(
     df: pd.DataFrame,
     fields: dict,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:            # Xvdf, Xcdf, ydf, ,
 
+    cn = df.columns
     ### Target dataframe
     name = {i for i in fields if fields[i]=='t'}
+    if not set(list(name)).issubset(set(cn)):
+        raise InvalideContentOfInputDataFrame('fields and column names of DataFrame df does not match')
     ydf = df[list(name)]       #ydf = Xdf.loc[:,name]
     #Xdf.drop(name, axis=1, inplace=True)
 
     ### Values dataframe
     name ={i for i in fields if fields[i] in ('v','b')}
+    if not set(list(name)).issubset(set(cn)):
+        raise InvalideContentOfInputDataFrame('fields and column names of DataFrame df does not match')
     Xvdf = df[list(name)]       #ydf = Xdf.loc[:,name]
     #Xdf.drop(name, axis=1, inplace=True)
 
     ### classes dataframe
     name = {i for i in fields if fields[i] == 'c'}
+    if not set(list(name)).issubset(set(cn)):
+        raise InvalideContentOfInputDataFrame('fields and column names of DataFrame df does not match')
     Xcdf = df[list(name)]       #ydf = Xdf.loc[:,name]
     #Xdf.drop(name, axis=1, inplace=True)    
 
     ### identity-geometry dataframe
     name = {i for i in fields if fields[i] in ('i','g')}
+    if not set(list(name)).issubset(set(cn)):
+        raise InvalideContentOfInputDataFrame('fields and column names of DataFrame df does not match')
     igdf = df[list(name)]       #ydf = Xdf.loc[:,name]
     #Xdf.drop(name, axis=1, inplace=True)   
+
 
     return Xvdf, Xcdf, ydf, igdf
 

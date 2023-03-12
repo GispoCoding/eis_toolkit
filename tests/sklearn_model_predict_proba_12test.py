@@ -11,9 +11,11 @@ from eis_toolkit.conversions.import_featureclass import *
 from eis_toolkit.conversions.import_grid import *
 from eis_toolkit.transformations.separation import *
 from eis_toolkit.transformations.nodata_replace import *
+from eis_toolkit.transformations.nodata_remove import *
 from eis_toolkit.transformations.onehotencoder import *
 from eis_toolkit.transformations.unification import *
 from eis_toolkit.model_training.sklearn_randomforest_classifier import *
+from eis_toolkit.model_training.sklearn_randomforest_regressor import *
 from eis_toolkit.model_training.sklearn_model_fit import *
 from eis_toolkit.transformations.split import *
 from eis_toolkit.prediction_methods.sklearn_model_predict_proba import *
@@ -61,13 +63,18 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
-# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
-#columns , df , metadata = import_grid(grids = grids) 
+columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
+#columns , df , urdf , metadata = import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
+#columns , df , metadata = import_grid(grids = grids)
+
+# nodata_:remove 
+#df, nodatmask = nodata_remove(df = df,)            # for images only
 # Separation
 Xvdf , Xcdf , ydf , igdf = separation(df = df, fields = columns) 
 # nodata_replacement of 
 Xcdf = nodata_replace(df = Xcdf, rtype = 'most_frequent') 
+Xvdf = nodata_replace(df = Xvdf, rtype = 'mean') 
+
 # onehotencoder
 Xdf_enh, eho = onehotencoder(df = Xcdf)
 # unification

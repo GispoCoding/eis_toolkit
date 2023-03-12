@@ -72,7 +72,7 @@ def _export_grid(
             with rasterio.open(file, 'w',**profile) as dst:         #os.path.join(outpath, 'test1k.tif'), 'w', **profile) as dst:
                 dst.write_band(1, out.astype(rasterio.float32))
         except:
-            raise FileReadWriteError('Problems with ' + str(dst))
+            raise FileReadWriteError('Problems with ' + file)
     
     return out
 
