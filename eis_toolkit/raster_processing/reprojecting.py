@@ -13,7 +13,7 @@ def _reproject_raster(  # type: ignore[no-any-unimported]
 ) -> Tuple[np.ndarray, dict]:
 
     src_arr = src.read()
-    dst_crs = rasterio.CRS.from_epsg(target_EPSG)
+    dst_crs = rasterio.crs.CRS.from_epsg(target_EPSG)
 
     dst_transform, dst_width, dst_height = warp.calculate_default_transform(
         src.crs,
