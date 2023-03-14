@@ -1,17 +1,18 @@
-import pytest
-import rasterio
-import numpy as np
 from pathlib import Path
 
-from eis_toolkit.raster_processing.resampling import resample
-from eis_toolkit.raster_processing.reprojecting import reproject_raster
-from eis_toolkit.raster_processing.snapping import snap_with_raster
+import numpy as np
+import pytest
+import rasterio
+
 from eis_toolkit.exceptions import (
+    CoordinatesOutOfBoundsException,
     InvalidPixelSizeException,
     NonMatchingCrsException,
     NonSquarePixelSizeException,
-    CoordinatesOutOfBoundsException,
 )
+from eis_toolkit.raster_processing.reprojecting import reproject_raster
+from eis_toolkit.raster_processing.resampling import resample
+from eis_toolkit.raster_processing.snapping import snap_with_raster
 
 parent_dir = Path(__file__).parent
 
@@ -32,11 +33,11 @@ def test_snap_case1():
     raster = rasterio.open(case1_raster_path)
     snap_raster = rasterio.open(snap_raster_path)
     out_image, out_meta = snap_with_raster(raster, snap_raster)
-    
-    assert out_meta['height'] == raster.height + 1
-    assert out_meta['width'] == raster.width + 1
-    assert out_meta['transform'].c == snap_raster.meta['transform'].c + 2
-    assert out_meta['transform'].f == snap_raster.meta['transform'].f
+
+    assert out_meta["height"] == raster.height + 1
+    assert out_meta["width"] == raster.width + 1
+    assert out_meta["transform"].c == snap_raster.meta["transform"].c + 2
+    assert out_meta["transform"].f == snap_raster.meta["transform"].f
     assert np.array_equal(out_image[:, :-1, 1:], raster.read())
 
 
@@ -46,10 +47,10 @@ def test_snap_case2():
     snap_raster = rasterio.open(snap_raster_path)
     out_image, out_meta = snap_with_raster(raster, snap_raster)
 
-    assert out_meta['height'] == raster.height + 1
-    assert out_meta['width'] == raster.width + 1
-    assert out_meta['transform'].c == snap_raster.meta['transform'].c + 2
-    assert out_meta['transform'].f == snap_raster.meta['transform'].f
+    assert out_meta["height"] == raster.height + 1
+    assert out_meta["width"] == raster.width + 1
+    assert out_meta["transform"].c == snap_raster.meta["transform"].c + 2
+    assert out_meta["transform"].f == snap_raster.meta["transform"].f
     assert np.array_equal(out_image[:, 1:, 1:], raster.read())
 
 
@@ -59,10 +60,10 @@ def test_snap_case3():
     snap_raster = rasterio.open(snap_raster_path)
     out_image, out_meta = snap_with_raster(raster, snap_raster)
 
-    assert out_meta['height'] == raster.height + 2
-    assert out_meta['width'] == raster.width + 2
-    assert out_meta['transform'].c == snap_raster.meta['transform'].c + 2
-    assert out_meta['transform'].f == snap_raster.meta['transform'].f + 1.2
+    assert out_meta["height"] == raster.height + 2
+    assert out_meta["width"] == raster.width + 2
+    assert out_meta["transform"].c == snap_raster.meta["transform"].c + 2
+    assert out_meta["transform"].f == snap_raster.meta["transform"].f + 1.2
     assert np.array_equal(out_image[:, 1:-1, 1:-1], raster.read())
 
 
@@ -88,7 +89,7 @@ def test_snap_small_snap_pixel_size():
         out_image, out_meta = resample(snap_raster, 3)
         with rasterio.open(small_snap_raster_path, "w", **out_meta) as dest:
             dest.write(out_image)
-    
+
         raster = rasterio.open(case1_raster_path)
         snap_raster = rasterio.open(small_snap_raster_path)
         _, _ = snap_with_raster(raster, snap_raster)
