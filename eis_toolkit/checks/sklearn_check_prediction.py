@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from eis_toolkit.exceptions import InvalidParameterValueException, InvalideContentOfInputDataFrame
 
-# *******************************
+# ********************************_*
 def _sklearn_check_prediction(
     sklearnMl: Any,
     Xdf: pd.DataFrame,      # dataframe of features for prediction
