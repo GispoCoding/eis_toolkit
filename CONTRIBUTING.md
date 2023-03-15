@@ -75,6 +75,63 @@ General guidelines about naming policy (applies to package, module, function, cl
 
 ## Code style
 
+### pre-commit
+
+The repository contains a `.pre-commit-config.yaml` file that has configuration
+to run a set of [`pre-commit`](https://pre-commit.com) hooks. As the name
+implies, they run before committing code and reject commits that would include
+code that is not formatted or contains linting errors. `pre-commit` must be
+installed on your system **and** the hooks must be enabled within your local
+copy of the repository to run.
+
+To install `pre-commit` on Debian or Ubuntu -based systems with `apt` as
+the package manager you should be able to run: 
+
+``` console
+apt update
+apt install pre-commit
+```
+
+Alternatively, it can be installed with the system installation of `Python`:
+
+``` console
+pip install pre-commit
+```
+
+Visit the `pre-commit` website for more guidance on various system installation
+methods (<https://pre-commit.com>).
+
+To enable the hooks locally, enter the directory with your local
+version of `eis_toolkit`, and run:
+
+``` console
+pre-commit install
+```
+
+Within this local repository, before any commits, the hooks should now run.
+Note that the `black` formatting hook will modify files and consequently, the
+edits by `pre-commit` will be unstaged. Stage the changes to add them back to
+the commit. 
+
+To disable the hooks and allow commits even with errors pointed out by
+`pre-commit`, you can add the `--no-verify` option to the `git` command-line:
+
+``` console
+git commit -m "<message>" --no-verify
+```
+
+However, this is not recommended and you should instead fix any issues pointed
+out by `pre-commit`.
+
+You can also run the hooks without committing on all files. Make sure you save
+any text changes as `pre-commit` can modify unformatted files:
+
+``` console
+pre-commit run --all-files
+```
+
+### invoke
+
 In order to guarantee consistent coding style, a bunch of different linters and formatters have been brought into use.
 
 > **Please** note that running code style checks is not optional!
