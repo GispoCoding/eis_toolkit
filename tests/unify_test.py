@@ -6,7 +6,8 @@ import rasterio
 from rasterio.enums import Resampling
 
 from eis_toolkit.exceptions import InvalidParameterValueException
-from eis_toolkit.raster_processing.unifying import unify_rasters
+# from eis_toolkit.raster_processing.unifying import unify_rasters
+from eis_toolkit.raster_processing.coregister_rasters import coregister_rasters
 
 parent_dir = Path(__file__).parent
 base_raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
@@ -18,13 +19,13 @@ raster_to_unify_save_path_2 = parent_dir.joinpath("data/local/unified_res_2.tif"
 
 
 def test_unify_rasters_case1():
-    """Tests extract_window function in Case 1.
+    """Tests unify function function in Case 1.
     
     The raster-to-unfiy here needs all 3 of reprojecting, resampling and snapping.
     The result pixel size is not exactly the same as the base rasters and the unified
     result does not look the best as it is nonsquare pixels projected from WGS 84"""
     raster_to_unify = rasterio.open(raster_to_unify_path_1)
-    out_rasters = unify_rasters(base_raster, [raster_to_unify], Resampling.nearest)
+    out_rasters = coregister_rasters(base_raster, [raster_to_unify], Resampling.bilinear, False)
     out_image, out_meta = out_rasters[1]
 
     assert len(out_rasters) == 2
@@ -37,12 +38,12 @@ def test_unify_rasters_case1():
 
 
 def test_unify_rasters_case2():
-    """Tests extract_window function in Case 2.
+    """Tests unify function in Case 2.
     
     The raster-to-unify here needs resampling and snapping."""
     
     raster_to_unify = rasterio.open(raster_to_unify_path_2)
-    out_rasters = unify_rasters(base_raster, [raster_to_unify], Resampling.bilinear)
+    out_rasters = unify_rasters(base_raster, [raster_to_unify], Resampling.bilinear, False)
     out_image, out_meta = out_rasters[1]
 
     assert len(out_rasters) == 2
