@@ -23,26 +23,28 @@ clipped_snap_raster = rasterio.open(clipped_snap_raster_path)
 
 def test_rasters_with_matching_gridding() -> None:
     """Check that gridding_check returns True when pixel alignment,
-    crs and cell size matches, with same_extent set to false"""
+    crs and cell size matches, with same_extent set to False.
+    """
     test = gridding_check([snap_raster, snap_raster, clipped_snap_raster])
     assert test is True
 
 
 def test_rasters_with_matching_gridding_same_extent() -> None:
-    """Check that gridding_check returns False when same_extent is set to true, while
-    crs, cell size and pixel alignment matches, but bounds do not."""
+    """Check that gridding_check returns False when same_extent is set to True, while
+    crs, cell size and pixel alignment matches, but bounds do not.
+    """
     test = gridding_check([snap_raster, snap_raster, snap_raster, clipped_snap_raster], True)
     assert test is False
 
 
 def test_crs_false() -> None:
-    """Test that nonmatching crs returns false"""
+    """Test that nonmatching crs returns False."""
     test = gridding_check([small_raster, small_raster_epsg4326])
     assert test is False
 
 
 def test_crs_false_same_extent() -> None:
-    """Test that nonmatching crs returns false with same_extent set to True."""
+    """Test that nonmatching crs returns False with same_extent set to True."""
     test = gridding_check([small_raster, small_raster_epsg4326], True)
     assert test is False
 
@@ -60,12 +62,12 @@ def test_cell_size_false_same_extent() -> None:
 
 
 def test_alignment_false_same_extent() -> None:
-    """Test that nonmatching pixelalignment returns False with same_extent set to True."""
-    test = gridding_check([snap_raster, snap_raster_bottom_right, clipped_snap_raster], True)
+    """Test that nonmatching pixel alignment returns False with same_extent set to True."""
+    test = gridding_check([snap_raster, snap_raster, clipped_snap_raster], True)
     assert test is False
 
 
 def test_alignment_false() -> None:
-    """Test that matching pixelalignment returns True, with same_extent set to False."""
-    test = gridding_check([snap_raster, snap_raster_bottom_right, clipped_snap_raster])
+    """Test that matching pixel alignment returns True, with same_extent set to False."""
+    test = gridding_check([snap_raster, snap_raster, clipped_snap_raster])
     assert test is True

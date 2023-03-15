@@ -20,10 +20,6 @@ def check_matching_pixel_alignment(
         pixel_size_x, pixel_size_y = rasters[0].transform.a, abs(rasters[0].transform.e)
         left_pixel, top_pixel = rasters[0].bounds.left, rasters[0].bounds.top
         for raster in rasters:
-            if (left_pixel - raster.bounds.left == 0 and top_pixel - raster.bounds.top == 0 or
-                left_pixel - raster.bounds.left == 0 and (top_pixel - raster.bounds.top) % pixel_size_y == 0 or
-                    (left_pixel - raster.bounds.left) % pixel_size_x == 0 and top_pixel - raster.bounds.top == 0):
-                return True
             if abs(left_pixel - raster.bounds.left) % pixel_size_x != 0 or abs(
                     top_pixel - raster.bounds.top) % pixel_size_y != 0:
                 return False
