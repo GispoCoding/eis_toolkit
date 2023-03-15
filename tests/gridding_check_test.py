@@ -1,6 +1,7 @@
+from pathlib import Path
+
 import rasterio
 
-from pathlib import Path
 from eis_toolkit.raster_processing.gridding_check import gridding_check
 
 parent_dir = Path(__file__).parent
@@ -22,17 +23,13 @@ clipped_snap_raster = rasterio.open(clipped_snap_raster_path)
 
 
 def test_rasters_with_matching_gridding() -> None:
-    """Check that gridding_check returns True when pixel alignment,
-    crs and cell size matches, with same_extent set to False.
-    """
+    """Check that gridding_check case 1 returns True."""
     test = gridding_check([snap_raster, snap_raster, clipped_snap_raster])
     assert test is True
 
 
 def test_rasters_with_matching_gridding_same_extent() -> None:
-    """Check that gridding_check returns False when same_extent is set to True, while
-    crs, cell size and pixel alignment matches, but bounds do not.
-    """
+    """Check that gridding_check case 2 returns False."""
     test = gridding_check([snap_raster, snap_raster, snap_raster, clipped_snap_raster], True)
     assert test is False
 

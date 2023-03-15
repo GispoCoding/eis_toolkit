@@ -2,9 +2,9 @@ from typing import List
 
 import rasterio
 
+from eis_toolkit.checks.bounds import check_matching_bounds
 from eis_toolkit.checks.crs import check_matching_crs
 from eis_toolkit.checks.pixel_alignment import check_matching_pixel_alignment
-from eis_toolkit.checks.bounds import check_matching_bounds
 
 
 def _gridding_check(
@@ -22,8 +22,7 @@ def _gridding_check(
 
 
 def gridding_check(
-        rasters: List[rasterio.io.DatasetReader],
-        same_extent: bool = False
+    rasters: List[rasterio.io.DatasetReader], same_extent: bool = False
 ) -> bool:  # type: ignore[no-any-unimported]
     """
     Check the set of input rasters for matching gridding and optionally matching bounds.
