@@ -3,9 +3,8 @@ from pathlib import Path
 import geopandas
 import pytest
 
-from eis_toolkit.vector_processing.reproject_vector import reproject_vector
 from eis_toolkit.exceptions import MatchingCrsException
-
+from eis_toolkit.vector_processing.reproject_vector import reproject_vector
 
 parent_dir = Path(__file__).parent
 vector_path = parent_dir.joinpath("data/remote/small_area.shp")
