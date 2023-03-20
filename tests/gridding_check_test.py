@@ -16,7 +16,7 @@ clipped_snap_raster = rasterio.open(parent_dir.joinpath("data/remote/clipped_sna
 
 
 def test_identical_rasters_same_extent() -> None:
-    """Check that identical rasters return true."""
+    """Check that identical rasters return True."""
     test = gridding_check([snap_raster, snap_raster, snap_raster], True)
     assert test is True
 
