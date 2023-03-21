@@ -8,9 +8,9 @@ from rasterio.enums import Resampling
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
-def _coregister_rasters(  # type: ignore[no-any-unimported]
+def _unify_raster_grids(
     base_raster: rasterio.io.DatasetReader,
-    rasters_to_coregister: List[rasterio.io.DatasetReader],
+    rasters_to_unify: List[rasterio.io.DatasetReader],
     resampling_method: Resampling,
     same_extent: bool,
 ) -> List[Tuple[np.ndarray, dict]]:
@@ -24,9 +24,9 @@ def _coregister_rasters(  # type: ignore[no-any-unimported]
     out_rasters = [(base_raster.read(), base_raster.meta.copy())]
     out_meta = base_raster.meta.copy()
 
-    for raster in rasters_to_coregister:
+    for raster in rasters_to_unify:
 
-        # If we coregister without clipping, things are more complicated and we need to
+        # If we unify without clipping, things are more complicated and we need to
         # calculate corner coordinates, width and height, and snap the grid to nearest corner
         if not same_extent:
             dst_transform, dst_width, dst_height = warp.calculate_default_transform(
@@ -84,25 +84,25 @@ def _coregister_rasters(  # type: ignore[no-any-unimported]
     return out_rasters
 
 
-def coregister_rasters(  # type: ignore[no-any-unimported]
+def unify_raster_grids(  # type: ignore[no-any-unimported]
     base_raster: rasterio.io.DatasetReader,
     raster_list: List[rasterio.io.DatasetReader],
     resampling_method: Resampling = Resampling.nearest,
     same_extent: bool = True,
 ) -> List[Tuple[np.ndarray, dict]]:
-    """Coregisters/unifies (reprojects, resamples, aligns and optionally clips) given rasters relative to base raster.
+    """Unifies (reprojects, resamples, aligns and optionally clips) given rasters relative to base raster.
 
     Args:
         base_raster (rasterio.io.DatasetReader): The base raster to determine target raster grid properties.
-        raster_list (list(rasterio.io.DatasetReader)): List of rasters to be corigestered with the base raster.
+        raster_list (list(rasterio.io.DatasetReader)): List of rasters to be unified with the base raster.
         resampling_method (rasterio.enums.Resampling): Resampling method. Most suitable
             method depends on the dataset and context. Nearest, bilinear and cubic are some
             common choices. This parameter defaults to nearest.
-        same_extent (bool): If the corigestered rasters will be forced to have the same extent/bounds
+        same_extent (bool): If the unified rasters will be forced to have the same extent/bounds
             as the base raster. Expands smaller rasters with nodata cells. Defaults to True.
 
     Returns:
-        out_rasters (list(tuple(numpy.ndarray, dict))): List of coregistered rasters' data and metadata.
+        out_rasters (list(tuple(numpy.ndarray, dict))): List of unifyed rasters' data and metadata.
             First element is the base raster.
 
     Raises:
@@ -117,5 +117,5 @@ def coregister_rasters(  # type: ignore[no-any-unimported]
     if len(raster_list) == 0:
         raise InvalidParameterValueException
 
-    out_rasters = _coregister_rasters(base_raster, raster_list, resampling_method, same_extent)
+    out_rasters = _unify_raster_grids(base_raster, raster_list, resampling_method, same_extent)
     return out_rasters

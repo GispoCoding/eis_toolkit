@@ -3,7 +3,7 @@ from typing import List
 import rasterio
 
 
-def check_matching_cell_size(
+def check_matching_cell_size(  # type: ignore[no-any-unimported]
     rasters: List[rasterio.io.DatasetReader],
 ) -> bool:
     """Check if every raster in a list has matching cell size.
@@ -22,7 +22,7 @@ def check_matching_cell_size(
     return True
 
 
-def check_matching_pixel_alignment(
+def check_matching_pixel_alignment(  # type: ignore[no-any-unimported]
     rasters: List[rasterio.io.DatasetReader],
 ) -> bool:
     """Check if every raster in a list has matching cell size and matching pixel alignment.
@@ -48,7 +48,7 @@ def check_matching_pixel_alignment(
         return False
 
 
-def check_matching_bounds(
+def check_matching_bounds(  # type: ignore[no-any-unimported]
     rasters: List[rasterio.io.DatasetReader],
 ) -> bool:
     """Check if every raster in a list has matching bounds.
