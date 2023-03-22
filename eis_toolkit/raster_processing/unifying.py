@@ -8,7 +8,7 @@ from rasterio.enums import Resampling
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
-def _unify_raster_grids(
+def _unify_raster_grids(  # type: ignore[no-any-unimported]
     base_raster: rasterio.io.DatasetReader,
     rasters_to_unify: List[rasterio.io.DatasetReader],
     resampling_method: Resampling,
