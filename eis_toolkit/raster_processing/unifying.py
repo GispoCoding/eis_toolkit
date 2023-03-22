@@ -102,7 +102,7 @@ def unify_raster_grids(  # type: ignore[no-any-unimported]
             as the base raster. Expands smaller rasters with nodata cells. Defaults to True.
 
     Returns:
-        out_rasters (list(tuple(numpy.ndarray, dict))): List of unifyed rasters' data and metadata.
+        out_rasters (list(tuple(numpy.ndarray, dict))): List of unified rasters' data and metadata.
             First element is the base raster.
 
     Raises:
