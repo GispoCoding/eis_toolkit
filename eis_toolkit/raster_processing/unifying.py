@@ -88,7 +88,7 @@ def unify_raster_grids(  # type: ignore[no-any-unimported]
     base_raster: rasterio.io.DatasetReader,
     raster_list: List[rasterio.io.DatasetReader],
     resampling_method: Resampling = Resampling.nearest,
-    same_extent: bool = True,
+    same_extent: bool = False,
 ) -> List[Tuple[np.ndarray, dict]]:
     """Unifies (reprojects, resamples, aligns and optionally clips) given rasters relative to base raster.
 
@@ -99,7 +99,7 @@ def unify_raster_grids(  # type: ignore[no-any-unimported]
             method depends on the dataset and context. Nearest, bilinear and cubic are some
             common choices. This parameter defaults to nearest.
         same_extent (bool): If the unified rasters will be forced to have the same extent/bounds
-            as the base raster. Expands smaller rasters with nodata cells. Defaults to True.
+            as the base raster. Expands smaller rasters with nodata cells. Defaults to False.
 
     Returns:
         out_rasters (list(tuple(numpy.ndarray, dict))): List of unified rasters' data and metadata.
