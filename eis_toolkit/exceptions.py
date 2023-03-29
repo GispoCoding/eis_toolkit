@@ -49,10 +49,14 @@ class CoordinatesOutOfBoundsException(Exception):
 
     pass
 
+
 class InvalidDataFrameException(Exception):
-    """Exception error class for invalid dataframes."""
+    """Exception error class thrown if the dtatafram has no rows to analyse."""
+
     pass
 
+
 class InvalidNumberOfPrincipalComponent(Exception):
-    """Exception error class for invalid dataframes."""
+    """Exception error class thrown if the number of principal components should be >= 2."""
+
     pass
