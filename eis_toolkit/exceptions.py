@@ -60,3 +60,27 @@ class InvalidNumberOfPrincipalComponent(Exception):
     """Exception error class thrown if the number of principal components should be >= 2."""
 
     pass
+
+
+class InvalidInputShapeException(Exception):
+    """X train array need to have row and cols."""
+
+    pass
+
+
+class CanNotMakeCategoricalLabelException(Exception):
+    """Exception error class thrown if the labels are not converted to categorical."""
+
+    pass
+
+
+class InvalidCrossValidationSelected:
+    """The selected cv is not implemented."""
+
+    pass
+
+
+class NumberOfSplitException:
+    """Number of cv split should be always > 1."""
+
+    pass

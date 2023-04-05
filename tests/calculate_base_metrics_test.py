@@ -15,6 +15,7 @@ wrong_crs_polygon_path = parent_dir.joinpath("data/remote/small_area.geojson")
 
 
 def test_calculate_base_metrics():
+    """Tests that the base metrics are calculated correctly."""
     raster = rasterio.open(raster_path)
     deposits = pd.DataFrame({"x": [384829.33, 384829.33], "y": [6671310.87, 6671308.70]})
     deposits = gpd.GeoDataFrame(deposits, geometry=gpd.points_from_xy(deposits.x, deposits.y, crs="EPSG:3067"))
