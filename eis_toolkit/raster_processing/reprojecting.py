@@ -13,7 +13,7 @@ def _reproject_raster(  # type: ignore[no-any-unimported]
 ) -> Tuple[np.ndarray, dict]:
 
     src_arr = src.read()
-    dst_crs = rasterio.CRS.from_epsg(target_EPSG)
+    dst_crs = rasterio.crs.CRS.from_epsg(target_EPSG)
 
     dst_transform, dst_width, dst_height = warp.calculate_default_transform(
         src.crs,
@@ -25,7 +25,7 @@ def _reproject_raster(  # type: ignore[no-any-unimported]
 
     # Initialize base raster (target raster)
     dst = np.empty((src.count, dst_height, dst_width))
-    dst.fill(-9999)
+    dst.fill(src.meta["nodata"])
 
     out_image = warp.reproject(
         source=src_arr,
@@ -34,7 +34,7 @@ def _reproject_raster(  # type: ignore[no-any-unimported]
         destination=dst,
         dst_transform=dst_transform,
         dst_crs=dst_crs,
-        src_nodata=-9999,
+        src_nodata=src.meta["nodata"],
         dst_nodata=src.meta["nodata"],
         resampling=resampling_method,
     )[0]

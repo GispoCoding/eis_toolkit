@@ -32,12 +32,12 @@ def test_reproject_meta():
     assert reprojected_meta["dtype"] == reference_meta["dtype"]
     assert reprojected_meta["height"] == reference_meta["height"]
     assert reprojected_meta["width"] == reference_meta["width"]
-    assert abs(reprojected_meta['transform'][0] - reference_meta['transform'][0]) < 0.00000001
-    assert abs(reprojected_meta['transform'][1] - reference_meta['transform'][1]) < 0.00000001
-    assert abs(reprojected_meta['transform'][2] - reference_meta['transform'][2]) < 0.00000001
-    assert abs(reprojected_meta['transform'][3] - reference_meta['transform'][3]) < 0.00000001
-    assert abs(reprojected_meta['transform'][4] - reference_meta['transform'][4]) < 0.00000001
-    assert abs(reprojected_meta['transform'][5] - reference_meta['transform'][5]) < 0.00000001
+    assert abs(reprojected_meta["transform"][0] - reference_meta["transform"][0]) < 0.00000001
+    assert abs(reprojected_meta["transform"][1] - reference_meta["transform"][1]) < 0.00000001
+    assert abs(reprojected_meta["transform"][2] - reference_meta["transform"][2]) < 0.00000001
+    assert abs(reprojected_meta["transform"][3] - reference_meta["transform"][3]) < 0.00000001
+    assert abs(reprojected_meta["transform"][4] - reference_meta["transform"][4]) < 0.00000001
+    assert abs(reprojected_meta["transform"][5] - reference_meta["transform"][5]) < 0.00000001
 
 
 def test_same_crs():

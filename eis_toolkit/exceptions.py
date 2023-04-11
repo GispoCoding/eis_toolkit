@@ -56,7 +56,19 @@ class EmptyDataFrameException(Exception):
     pass
 
 
+class InvalidWktFormatException(Exception):
+    """Exception error for invalid WKT format."""
+
+    pass
+
+
 class InvalidNumberOfPrincipalComponents(Exception):
     """Exception error class thrown if the number of principal components is less than 2."""
+
+    pass
+
+
+class InvalidColumnIndexException(Exception):
+    """Exception error for index out of range."""
 
     pass
