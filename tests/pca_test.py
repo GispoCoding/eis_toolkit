@@ -1,40 +1,41 @@
-import matplotlib
-import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import pytest
 
-from eis_toolkit.exploratory_analyses.pca import _compute_pca
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidNumberOfPrincipalComponents
+from eis_toolkit.exploratory_analyses.pca import compute_pca
 
-
-def plot_pca(X1: pd.Dataframe, X2: pd.Dataframe) -> None:
-    """Do the pricipal components.
-
-    Args:
-        X1: (dataframe).
-        X2: (dataframe).
-
-    Returns:
-        return None.
-    """
-
-    # plotting the graph
-    plt.scatter(X2.principal_component_1, X2.principal_component_2, marker=".", color="blue", s=200, alpha=0.2)
-    plt.scatter(X1.principal_component_1, X1.principal_component_2, marker="*", color="red", s=500)
-    matplotlib.rcParams.update({"font.size": 22})
-    plt.title("Principal components of all points")
-    plt.xlabel("Principal component 1")
-    plt.ylabel("Principal component 2")
-
-    plt.savefig("test_pca.png")
+data = pd.DataFrame({"A": [1, 2, 3], "B": [1, 2, 3]})
 
 
-num_components = 2
+def test_pca_output():
+    """Test that PCA function gives output in intended format."""
+    pca_df, explained_variances = compute_pca(data, 2)
+    expected_columns = ["principal_component_1", "principal_component_2"]
 
-# do the first PCA
-data_to_analyse_1 = pd.read_csv("data/local/data/17x9.csv")
-returned_principal_components_a = _compute_pca(data_to_analyse_1, num_components)
+    assert explained_variances.size == 2
+    assert list(pca_df.columns) == expected_columns
+    assert pca_df.shape == data.shape
 
-# DO THE SECOND PCA
-data_to_analyse_2 = pd.read_csv("data/local/data/1112x9.csv")
-returned_principal_components_b = _compute_pca(data_to_analyse_2, num_components)
 
-plot_pca(returned_principal_components_a, returned_principal_components_b)
+def test_pca_values():
+    """Test that PCA function returns correct output values."""
+    pca_df, explained_variances = compute_pca(data, 2)
+    expected_pca_values = np.array([[-1.73205081, 1.11022302e-16], [0.0, 0.0], [1.73205081, 1.11022302e-16]])
+    expected_explained_variances_values = [1.0, 4.10865055e-33]
+
+    np.testing.assert_array_almost_equal(pca_df.values, expected_pca_values, decimal=8)
+    np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=8)
+
+
+def test_empty_dataframe():
+    """Test that empty dataframe raises the correct exception."""
+    empty_df = pd.DataFrame()
+    with pytest.raises(EmptyDataFrameException):
+        compute_pca(empty_df, 2)
+
+
+def test_invalid_number_of_components():
+    """Test that invalid number of PCA components raises the correct exception."""
+    with pytest.raises(InvalidNumberOfPrincipalComponents):
+        compute_pca(data, 1)

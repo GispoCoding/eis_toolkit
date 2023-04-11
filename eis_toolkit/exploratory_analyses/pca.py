@@ -1,41 +1,56 @@
+from typing import Tuple
+
+import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-from eis_toolkit.exceptions import InvalidDataFrameException, InvalidNumberOfPrincipalComponent
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidNumberOfPrincipalComponents
 
 
-def _compute_pca(data_to_compute: pd.DataFrame, num_components: int) -> pd.DataFrame:
-    """Do the pricipal components.
+def _compute_pca(  # type: ignore[no-any-unimported]
+    data: pd.DataFrame, n_components: int
+) -> Tuple[pd.DataFrame, np.ndarray]:
+
+    if data.empty:
+        raise EmptyDataFrameException("The input DataFrame is empty.")
+
+    if n_components < 2 or n_components > len(data.columns):
+        raise InvalidNumberOfPrincipalComponents(
+            "The number of principal components should be >= 2 and at most the number of columns in the DataFrame."
+        )
+
+    feature_matrix = data.loc[:, data.columns].values
+    standardized_data = StandardScaler().fit_transform(feature_matrix)
+
+    pca = PCA(n_components=n_components)
+    principal_components = pca.fit_transform(standardized_data)
+    explained_variances = pca.explained_variance_ratio_
+
+    component_names = [f"principal_component_{i+1}" for i in range(n_components)]
+
+    principal_component_df = pd.DataFrame(data=principal_components, columns=component_names)
+    return principal_component_df, explained_variances
+
+
+def compute_pca(  # type: ignore[no-any-unimported]
+    data: pd.DataFrame, n_components: int
+) -> Tuple[pd.DataFrame, np.ndarray]:
+    """
+    Compute the principal components for the input data.
 
     Args:
-        data_to_compute: (dataframe).
-        num_components (integer).
+        data (pandas.DataFrame): A DataFrame containing the input data.
+        n_components (int): The number of principal components to compute.
 
     Returns:
-        return a dataframe with the principal components values.
+        principal_component_df (pandas.DataFrame): A DataFrame containing the computed principal components.
+        explained_variances (numpy.ndarray): The explained variance ratios for each component.
 
     Raises:
-        InvalidDataFrameException: The dataframe is null.
-        InvalidNumberOfPrincipalComponent: The number of principal components should be >= 2.
+        EmptyDataFrameException: Raised when the input DataFrame is empty.
+        InvalidNumberOfPrincipalComponents: Raised when the number of principal components is less than 2.
     """
 
-    if not data_to_compute.shape[1]:
-        raise InvalidDataFrameException
-
-    if num_components <= 1:
-        raise InvalidNumberOfPrincipalComponent
-
-    data = data_to_compute.loc[:, data_to_compute.columns].values
-
-    data = StandardScaler().fit_transform(data)
-
-    pca = PCA(n_components=num_components)
-    principalComponent = pca.fit_transform(data)
-
-    columns_name_holder = []
-    for i in range(num_components):
-        columns_name_holder.append(f"principal_component_{i+1}")
-
-    dataframe = pd.DataFrame(data=principalComponent, columns=columns_name_holder)
-    return dataframe
+    principal_component_df, explained_variances = _compute_pca(data, n_components)
+    return principal_component_df, explained_variances

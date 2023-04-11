@@ -50,13 +50,13 @@ class CoordinatesOutOfBoundsException(Exception):
     pass
 
 
-class InvalidDataFrameException(Exception):
-    """Exception error class thrown if the dtatafram has no rows to analyse."""
+class EmptyDataFrameException(Exception):
+    """Exception error class thrown if the dataframe is empty."""
 
     pass
 
 
-class InvalidNumberOfPrincipalComponent(Exception):
-    """Exception error class thrown if the number of principal components should be >= 2."""
+class InvalidNumberOfPrincipalComponents(Exception):
+    """Exception error class thrown if the number of principal components is less than 2."""
 
     pass
