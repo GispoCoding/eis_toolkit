@@ -3,7 +3,7 @@ name: Conda
 on:
   pull_request:
   push:
-    branches: [master, main]
+    # branches: [master, main]
 jobs:
   conda-test:
     name: Conda Install & Test
@@ -22,10 +22,11 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: ${{ matrix.python-version }}
-          channel-priority: true
           environment-file: environment.yml
           activate-environment: eis_toolkit
           auto-activate-base: false
+          mamba-version: "*"
+          channel-priority: true
       - name: Print conda environment
         run: |
           # Print environment
