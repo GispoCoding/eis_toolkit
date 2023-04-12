@@ -34,7 +34,7 @@ def test_raster_to_pandas():
     long_df = pd.wide_to_long(df, ["band_"], i="id", j="band").reset_index()
     long_df.loc[:, ["col", "row"]] = long_df.loc[:, ["col", "row"]].astype(int)
     raster_img = np.empty((multiband_raster.count, multiband_raster.height, multiband_raster.width))
-    raster_img[long_df.band - 1, long_df.row, long_df.col] = long_df.band_
+    raster_img[(long_df.band - 1).to_numpy(), long_df.row.to_numpy(), long_df.col.to_numpy()] = long_df.band_
 
     assert np.array_equal(multiband_raster.read(), raster_img)
 
