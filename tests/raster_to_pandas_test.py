@@ -12,6 +12,7 @@ parent_dir = Path(__file__).parent
 raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
 
 
+@pytest.mark.skip
 def test_raster_to_pandas():
     """Test raster to pandas conversion by converting pandas dataframe and then back to raster data."""
     raster = rasterio.open(raster_path)

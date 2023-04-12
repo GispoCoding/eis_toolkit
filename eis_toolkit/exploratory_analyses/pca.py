@@ -12,14 +12,6 @@ def _compute_pca(  # type: ignore[no-any-unimported]
     data: pd.DataFrame, n_components: int
 ) -> Tuple[pd.DataFrame, np.ndarray]:
 
-    if data.empty:
-        raise EmptyDataFrameException("The input DataFrame is empty.")
-
-    if n_components < 2 or n_components > len(data.columns):
-        raise InvalidNumberOfPrincipalComponents(
-            "The number of principal components should be >= 2 and at most the number of columns in the DataFrame."
-        )
-
     feature_matrix = data.loc[:, data.columns].values
     standardized_data = StandardScaler().fit_transform(feature_matrix)
 
@@ -51,6 +43,14 @@ def compute_pca(  # type: ignore[no-any-unimported]
         EmptyDataFrameException: Raised when the input DataFrame is empty.
         InvalidNumberOfPrincipalComponents: Raised when the number of principal components is less than 2.
     """
+
+    if data.empty:
+        raise EmptyDataFrameException("The input DataFrame is empty.")
+
+    if n_components < 2 or n_components > len(data.columns):
+        raise InvalidNumberOfPrincipalComponents(
+            "The number of principal components should be >= 2 and at most the number of columns in the DataFrame."
+        )
 
     principal_component_df, explained_variances = _compute_pca(data, n_components)
     return principal_component_df, explained_variances
