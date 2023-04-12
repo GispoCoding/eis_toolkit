@@ -50,8 +50,20 @@ class CoordinatesOutOfBoundsException(Exception):
     pass
 
 
+class EmptyDataFrameException(Exception):
+    """Exception error class thrown if the dataframe is empty."""
+
+    pass
+
+
 class InvalidWktFormatException(Exception):
     """Exception error for invalid WKT format."""
+
+    pass
+
+
+class InvalidNumberOfPrincipalComponents(Exception):
+    """Exception error class thrown if the number of principal components is less than 2."""
 
     pass
 
