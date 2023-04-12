@@ -2,4 +2,5 @@
 
 
 def test_func(a, b):
+    """Docstring."""
     return a + b
