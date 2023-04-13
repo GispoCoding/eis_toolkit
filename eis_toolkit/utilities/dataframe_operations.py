@@ -1,7 +1,8 @@
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
+
 import pandas as pd
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
 
 from eis_toolkit.checks.argument_types import check_argument_types
 
@@ -29,14 +30,14 @@ def separation(df: pd.DataFrame, fields: dict) -> Tuple[pd.DataFrame, pd.DataFra
     """
 
     column_names = df.columns
-    ydf_columns = get_columns_by_type(fields, ('t',))
-    Xvdf_columns = get_columns_by_type(fields, ('v', 'b'))
-    Xcdf_columns = get_columns_by_type(fields, ('c',))
-    igdf_columns = get_columns_by_type(fields, ('i', 'g'))
+    ydf_columns = get_columns_by_type(fields, ("t",))
+    Xvdf_columns = get_columns_by_type(fields, ("v", "b"))
+    Xcdf_columns = get_columns_by_type(fields, ("c",))
+    igdf_columns = get_columns_by_type(fields, ("i", "g"))
 
     for col_set in (ydf_columns, Xvdf_columns, Xcdf_columns, igdf_columns):
         if not col_set.issubset(column_names):
-            raise Exception('fields and column names of DataFrame df do not match')
+            raise Exception("fields and column names of DataFrame df do not match")
 
     ydf = df[list(ydf_columns)]
     Xvdf = df[list(Xvdf_columns)]
@@ -49,7 +50,7 @@ def separation(df: pd.DataFrame, fields: dict) -> Tuple[pd.DataFrame, pd.DataFra
 def extract_target_from_features(features_df: pd.DataFrame, fields: dict) -> Tuple[pd.DataFrame, pd.DataFrame]:
     target_field = {i for i in fields if fields[i] == "t"}
     if not set(target_field).issubset(set(features_df.columns)):
-        raise Exception('fields and column names of DataFrame features_df do not match')
+        raise Exception("fields and column names of DataFrame features_df do not match")
     target_df = features_df[target_field]
     features_df.drop(target_field, axis=1, inplace=True)
     return features_df, target_df
@@ -79,14 +80,12 @@ def split(
             test_size=test_size,
             train_size=train_size,
             random_state=random_state,
-            shuffle=shuffle)
+            shuffle=shuffle,
+        )
     else:
         train_features, test_features = train_test_split(
-            features_df,
-            test_size=test_size,
-            train_size=train_size,
-            random_state=random_state,
-            shuffle=shuffle)
+            features_df, test_size=test_size, train_size=train_size, random_state=random_state, shuffle=shuffle
+        )
         train_target = None
         test_target = None
 
@@ -95,14 +94,13 @@ def split(
 
 @check_argument_types
 def one_hot_encoder(
-    df: pd.DataFrame,
-    ohe: Optional[OneHotEncoder] = None
+    df: pd.DataFrame, ohe: Optional[OneHotEncoder] = None
 ) -> Tuple[pd.DataFrame, Optional[OneHotEncoder]]:
     """
     Encodes all categorical columns in a pandas dataframe.
     In case of model training: onehotencoder object is one of the outputs.
     In case of prediction: onehotencoder object created in traing is needed (input Argument).
-    
+
     Args:
         - df (DataFrame): contains all c-typed columns which should not be float
         - ohe: in case of prediction mandatory
@@ -110,11 +108,11 @@ def one_hot_encoder(
 
     Returns:
         pandas DataFrame: binarized
-        ohe - Object (OneHotEncoding): in case of training 
+        ohe - Object (OneHotEncoding): in case of training
                                        in case of prediction: None
     """
     if ohe is None:
-        ohe = OneHotEncoder(categories='auto', handle_unknown='ignore', sparse=False, dtype=int)
+        ohe = OneHotEncoder(categories="auto", handle_unknown="ignore", sparse=False, dtype=int)
         ohe.fit(df)
 
     transformed = ohe.transform(df)
@@ -124,7 +122,7 @@ def one_hot_encoder(
 
 
 def transform_fit_dataframe(df):
-    ohe = OneHotEncoder(categories='auto', handle_unknown='ignore', sparse=False, dtype=int)
+    ohe = OneHotEncoder(categories="auto", handle_unknown="ignore", sparse=False, dtype=int)
     ohe.fit(df)
     return transform_dataframe(df, ohe)
 
@@ -137,9 +135,6 @@ def transform_dataframe(df: pd.DataFrame, ohe: OneHotEncoder):
 @check_argument_types
 def one_hot_encoder_pandas(input_df: pd.DataFrame, encoded_columns: List[str]) -> pd.DataFrame:
 
-    encoded_df = pd.get_dummies(
-        data=input_df,
-        columns=encoded_columns,
-        dummy_na=True)
+    encoded_df = pd.get_dummies(data=input_df, columns=encoded_columns, dummy_na=True)
 
     return encoded_df
