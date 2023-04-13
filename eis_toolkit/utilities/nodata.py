@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-def set_nodata_raster(raster_meta: Dict, nodata_value: float) -> Dict:
+def set_nodata_raster_meta(raster_meta: Dict, nodata_value: float) -> Dict:
     """
     Set new NoData value for raster metadata.
 
@@ -19,26 +19,30 @@ def set_nodata_raster(raster_meta: Dict, nodata_value: float) -> Dict:
     return raster_meta
 
 
-def replace_values_with_nodata_raster(in_data: np.ndarray, values_to_replace: List[float], new_nodata: float):
+def replace_values_with_nodata_multiple(data: np.ndarray, values_to_replace: List[float]):
+    pass
+
+
+def replace_values_with_nodata(data: np.ndarray, values_to_replace: List[float], new_nodata: float = np.nan):
     """
     Replace multiple NoData values in a raster numpy array with a new NoData value.
 
     Args:
         in_data (np.ndarray): Input raster data as a numpy array.
         values_to_replace (List[float]): List of values to be replaced with new_nodata.
-        new_nodata (float): New NoData value to be set.
+        new_nodata (float): New NoData value to be set. Defaults to np.nan.
 
     Returns:
         np.ndarray: Raster data with updated NoData values.
     """
-    out_data = in_data.copy()
-    mask = np.isin(in_data, values_to_replace)
+    out_data = data.copy()
+    mask = np.isin(data, values_to_replace)
     out_data[mask] = new_nodata
     return out_data
 
 
 def replace_nodata_dataframe(
-    in_data: pd.DataFrame, new_nodata: float, old_nodata: float = np.nan, columns: Optional[List[str]] = None
+    data: pd.DataFrame, new_nodata: float, old_nodata: float = np.nan, columns: Optional[List[str]] = None
 ) -> pd.DataFrame:
     """
     Replace the NoData value in specified columns of a DataFrame.
@@ -52,7 +56,7 @@ def replace_nodata_dataframe(
     Returns:
         pd.DataFrame: DataFrame with updated NoData values.
     """
-    out_data = in_data.copy()
+    out_data = data.copy()
     if columns is None:
         columns = out_data.columns
 

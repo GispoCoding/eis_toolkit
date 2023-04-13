@@ -4,11 +4,11 @@ from typing import Any, Callable
 from eis_toolkit.exceptions import InvalidArgumentTypeException
 
 
-def argument_type_check(func: Callable) -> Callable:
+def check_argument_types(func: Callable) -> Callable:
     """
-    Check that all arguments are according to the type hints when a function is called.
+    Check that all arguments correspond to the type hints when a function is invoked.
 
-    This decorator should be used for all public functions of EIS Toolkit.
+    This decorator should be used for all public functions of EIS Toolkit for input validation.
     """
 
     @functools.wraps(func)
