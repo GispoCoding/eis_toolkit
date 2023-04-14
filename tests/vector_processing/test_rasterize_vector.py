@@ -9,7 +9,7 @@ from rasterio import profiles, transform
 from shapely.geometry import LineString, Point, box
 
 from eis_toolkit import exceptions
-from eis_toolkit.vector_processing.rasterize import rasterize_vector
+from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
 SAMPLE_LINE_GEODATAFRAME = gpd.GeoDataFrame(
     {
@@ -27,9 +27,11 @@ SAMPLE_POINT_GEODATAFRAME = gpd.GeoDataFrame(
         "geometry": [
             Point(0, 0),
             Point(2, 2),
-            Point(10, 10),
+            Point(3, 3),
+            Point(4, 2),
+            Point(5, 5),
         ],
-        "values": [1, 2, 3],
+        "values": [1, 2, 3, 4, 5],
     },
 )
 
@@ -208,3 +210,93 @@ def test_rasterize_vector(
     # _{resolution}_{value_column}_{base_raster_profile is None}_{buffer_value is not None}"
     # fig.suptitle(name)
     # fig.savefig(f"/mnt/c/tmp/new_{name}.png")
+
+
+@pytest.mark.parametrize(
+    "geodataframe,resolution,value_column,default_value,fill_value,base_raster_profile,buffer_value,expected_result",
+    [
+        pytest.param(
+            SAMPLE_LINE_GEODATAFRAME,
+            0.25,
+            None,
+            1,
+            0,
+            None,
+            None,
+            np.array(
+                [
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 1],
+                    [0, 0, 1, 0],
+                    [0, 1, 0, 0],
+                    [1, 0, 0, 0],
+                    [0, 0, 0, 1],
+                    [0, 0, 1, 0],
+                    [0, 1, 0, 0],
+                    [1, 0, 0, 0],
+                    [0, 0, 0, 1],
+                    [0, 0, 1, 0],
+                    [0, 1, 0, 0],
+                ],
+                dtype=np.uint8,
+            ),
+            id="LineStrings",
+        ),
+        pytest.param(
+            SAMPLE_POINT_GEODATAFRAME,
+            0.5,
+            None,
+            1,
+            0,
+            None,
+            0.5,
+            np.array(
+                [
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ],
+                dtype=np.uint8,
+            ),
+            id="Points_with_small_buffer",
+        ),
+    ],
+)
+def test_rasterize_vector_with_known_result(
+    geodataframe: gpd.GeoDataFrame,
+    resolution,
+    value_column,
+    default_value,
+    fill_value,
+    base_raster_profile,
+    buffer_value,
+    expected_result,
+):
+    """Test rasterize_vector."""
+    out_raster_array, out_metadata = rasterize_vector(
+        geodataframe=geodataframe,
+        resolution=resolution,
+        value_column=value_column,
+        default_value=default_value,
+        fill_value=fill_value,
+        base_raster_profile=base_raster_profile,
+        buffer_value=buffer_value,
+    )
+
+    assert isinstance(out_raster_array, np.ndarray)
+    assert isinstance(out_metadata, dict)
+
+    if base_raster_profile is not None:
+        for key in ("transform", "width", "height"):
+            assert out_metadata[key] == base_raster_profile[key]
+
+    np.testing.assert_array_equal(out_raster_array, expected_result)
