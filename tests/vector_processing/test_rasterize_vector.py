@@ -1,8 +1,7 @@
 from contextlib import nullcontext
+from typing import ContextManager, NamedTuple, Optional, Union
 
 import geopandas as gpd
-
-# import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from rasterio import profiles, transform
@@ -65,87 +64,72 @@ SAMPLE_TRACES_WITH_EMPTY_GEODATAFRAME = gpd.GeoDataFrame(
 )
 
 
+class RasterizeVectorTestArgs(NamedTuple):
+    """Tuple for holding arguments, with defaults, for testing rasterize_vector."""
+
+    geodataframe: gpd.GeoDataFrame
+    resolution: float = 1.0
+    value_column: Optional[str] = None
+    default_value: float = 1.0
+    fill_value: float = 0.0
+    base_raster_profile: Optional[Union[profiles.Profile, dict]] = None
+    buffer_value: Optional[float] = None
+    raises: ContextManager = nullcontext()
+
+
 @pytest.mark.parametrize(
     "geodataframe,resolution,value_column,default_value,fill_value,base_raster_profile,buffer_value,raises",
     [
         pytest.param(
-            SAMPLE_LINE_GEODATAFRAME,
-            0.05,
-            None,
-            1,
-            0,
-            None,
-            None,
-            nullcontext(),
+            *RasterizeVectorTestArgs(geodataframe=SAMPLE_LINE_GEODATAFRAME, resolution=0.05),
             id="LineStrings",
         ),
         pytest.param(
-            SAMPLE_POINT_GEODATAFRAME,
-            0.5,
-            None,
-            1,
-            0,
-            None,
-            None,
-            nullcontext(),
+            *RasterizeVectorTestArgs(geodataframe=SAMPLE_POINT_GEODATAFRAME, resolution=0.5),
             id="Points",
         ),
         pytest.param(
-            SAMPLE_POLYGON_GEODATAFRAME,
-            0.5,
-            None,
-            1,
-            0,
-            None,
-            None,
-            nullcontext(),
+            *RasterizeVectorTestArgs(
+                geodataframe=SAMPLE_POINT_GEODATAFRAME,
+                resolution=-0.5,
+                raises=pytest.raises(exceptions.NumericValueSignException),
+            ),
+            id="Points_with_negative_resolution",
+        ),
+        pytest.param(
+            *RasterizeVectorTestArgs(geodataframe=SAMPLE_POLYGON_GEODATAFRAME),
             id="Polygons",
         ),
         pytest.param(
-            SAMPLE_EMPTY_GEODATAFRAME,
-            0.5,
-            None,
-            1,
-            0,
-            None,
-            None,
-            pytest.raises(exceptions.EmptyDataFrameException),
+            *RasterizeVectorTestArgs(
+                geodataframe=SAMPLE_EMPTY_GEODATAFRAME, raises=pytest.raises(exceptions.EmptyDataFrameException)
+            ),
             id="Empty_GeoDataFrame_that_should_raise_exception",
         ),
         pytest.param(
-            SAMPLE_TRACES_WITH_EMPTY_GEODATAFRAME,
-            0.5,
-            None,
-            1,
-            0,
-            None,
-            None,
-            nullcontext(),
+            *RasterizeVectorTestArgs(geodataframe=SAMPLE_TRACES_WITH_EMPTY_GEODATAFRAME),
             id="LineStrings_with_some_empty",
         ),
         pytest.param(
-            SAMPLE_LINE_GEODATAFRAME,
-            0.15,
-            None,
-            1,
-            0,
-            profiles.Profile(
-                dict(height=20, width=20, transform=transform.from_bounds(-10, -10, 10, 10, width=20, height=20))
+            *RasterizeVectorTestArgs(
+                geodataframe=SAMPLE_LINE_GEODATAFRAME,
+                base_raster_profile=profiles.Profile(
+                    dict(height=20, width=20, transform=transform.from_bounds(-10, -10, 10, 10, width=20, height=20))
+                ),
             ),
-            None,
-            nullcontext(),
             id="LineStrings_with_base_raster",
         ),
         pytest.param(
-            SAMPLE_LINE_GEODATAFRAME,
-            0.15,
-            None,
-            1,
-            0,
-            None,
-            1.0,
-            nullcontext(),
+            *RasterizeVectorTestArgs(geodataframe=SAMPLE_LINE_GEODATAFRAME, buffer_value=1.0, resolution=0.15),
             id="LineStrings_with_buffer",
+        ),
+        pytest.param(
+            *RasterizeVectorTestArgs(
+                geodataframe=SAMPLE_LINE_GEODATAFRAME,
+                value_column="not-in-columns",
+                raises=pytest.raises(exceptions.InvalidParameterValueException),
+            ),
+            id="Invalid_value_column",
         ),
     ],
 )
@@ -182,34 +166,6 @@ def test_rasterize_vector(
     if base_raster_profile is not None:
         for key in ("transform", "width", "height"):
             assert out_metadata[key] == base_raster_profile[key]
-
-    # # with rasterio.open(
-    # #         "/mnt/c/tmp/new.tiff",
-    # #         mode="w",
-    # #         driver="GTiff",
-    # #         height=out_raster_array.shape[0],
-    # #         width=out_raster_array.shape[1],
-    # #         count=1,
-    # #         dtype=out_raster_array.dtype,
-    # #         crs=geodataframe.crs,
-    # #         transform=out_metadata["transform"]
-    # #         ) as new_dataset:
-
-    # #     new_dataset.write(out_raster_array, 1)
-    # # geodataframe.to_file("/mnt/c/tmp/new.gpkg", driver="GPKG")
-
-    # fig, ax = plt.subplots()
-    # rasterio_ax = plot.show(out_raster_array, transform=out_metadata["transform"], ax=ax)
-    # fig.colorbar(rasterio_ax.get_images()[0])
-    # geodataframe.plot(ax=ax, alpha=0.5)
-
-    # # min_x, min_y, max_x, max_y = geodataframe.total_bounds
-    # # ax.set_xlim(min_x - (0.1 * max_x), max_x * 1.1)
-    # # ax.set_ylim(min_y - (0.1 * max_y), max_y * 1.1)
-    # name = f"{geodataframe.geometry.values[0].geom_type}
-    # _{resolution}_{value_column}_{base_raster_profile is None}_{buffer_value is not None}"
-    # fig.suptitle(name)
-    # fig.savefig(f"/mnt/c/tmp/new_{name}.png")
 
 
 @pytest.mark.parametrize(
