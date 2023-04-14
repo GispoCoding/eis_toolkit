@@ -43,6 +43,7 @@ def rasterize_vector(
         raise ValueError(f"Expected a positive buffer_value ({dict(buffer_value=buffer_value)})")
 
     if buffer_value is not None:
+        geodataframe = geodataframe.copy()
         geodataframe["geometry"] = geodataframe["geometry"].apply(lambda geom: geom.buffer(buffer_value))
 
     return _rasterize_vector(
