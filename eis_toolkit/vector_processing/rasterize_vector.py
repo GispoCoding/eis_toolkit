@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -13,7 +13,7 @@ def rasterize_vector(
     value_column: Optional[str] = None,
     default_value: float = 1.0,
     fill_value: float = 0.0,
-    base_raster_profile: Optional[profiles.Profile] = None,
+    base_raster_profile: Optional[Union[profiles.Profile, dict]] = None,
     buffer_value: Optional[float] = None,
 ) -> Tuple[np.ndarray, dict]:
     """Transform vector data into raster data.
@@ -23,12 +23,15 @@ def rasterize_vector(
         resolution (float): The resolution i.e. cell size of the output raster
         value_column (Optional[str]): The column name with values for each geometry.
             If None, then default_value is used for all geometries.
-        default_value (int): Default value burned into raster cells based on geometries.
-        fill_value (int): VAlue used outside the burned geometry cells.
-        buffer_value (float): Add buffer around passed geometries before rasterization.
+        default_value (float): Default value burned into raster cells based on geometries.
+        base_raster_profile (Optional[Union[rasterio.profiles.Profile, dict]]): Base raster profile
+            to be used for determining the grid on which vectors are burned in.
+        fill_value (float): VAlue used outside the burned/rasterized geometry cells.
+        buffer_value (Optional[float]): For adding a buffer around passed
+            geometries before rasterization.
 
     Returns:
-        out_raster (tuple(numpy.ndarray, dict)): Raster data and metadata.
+        out_raster (tuple(numpy.ndarray, dict)): Rasterized vector data and metadata.
     """
 
     if geodataframe.shape[0] == 0:
@@ -36,11 +39,22 @@ def rasterize_vector(
         raise exceptions.EmptyDataFrameException("Expected geodataframe to contain geometries.")
 
     if not resolution > 0:
-        raise ValueError(f"Expected a positive value resolution ({dict(resolution=resolution)})")
+        raise exceptions.NumericValueSignException(
+            f"Expected a positive value resolution ({dict(resolution=resolution)})"
+        )
     if value_column is not None and value_column not in geodataframe.columns:
-        raise ValueError(f"Expected value_column ({value_column}) to be contained in geodataframe columns.")
+        raise exceptions.InvalidParameterValueException(
+            f"Expected value_column ({value_column}) to be contained in geodataframe columns."
+        )
     if buffer_value is not None and buffer_value < 0:
-        raise ValueError(f"Expected a positive buffer_value ({dict(buffer_value=buffer_value)})")
+        raise exceptions.NumericValueSignException(
+            f"Expected a positive buffer_value ({dict(buffer_value=buffer_value)})"
+        )
+
+    if base_raster_profile is not None and not isinstance(base_raster_profile, (profiles.Profile, dict)):
+        raise exceptions.InvalidParameterValueException(
+            f"Expected base_raster_profile ({type(base_raster_profile)}) to be dict or rasterio.profiles.Profile."
+        )
 
     if buffer_value is not None:
         geodataframe = geodataframe.copy()
