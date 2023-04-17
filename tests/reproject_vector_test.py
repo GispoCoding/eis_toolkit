@@ -1,7 +1,9 @@
+import sys
 from pathlib import Path
 
 import geopandas
 import pytest
+from pyproj.exceptions import ProjError
 
 from eis_toolkit.exceptions import MatchingCrsException
 from eis_toolkit.vector_processing.reproject_vector import reproject_vector
@@ -14,6 +16,9 @@ geodataframe = geopandas.read_file(vector_path)
 reference_geodataframe = geopandas.read_file(reference_solution_path)
 
 
+@pytest.mark.xfail(
+    sys.platform == "win32", reason="Fails due to internal pyproj transformation error on Windows.", raises=ProjError
+)
 def test_reproject_vector():
     """Test reproject vector functionality."""
     reprojected_geodataframe = reproject_vector(geodataframe, 4326)
