@@ -14,6 +14,7 @@
 | libclang                     | 14.0.6    | Apache Software License                            |
 | requests                     | 2.28.1    | Apache Software License                            |
 | rsa                          | 4.9       | Apache Software License                            |
+| tenacity                     | 8.2.2     | Apache Software License                            |
 | tensorboard                  | 2.9.1     | Apache Software License                            |
 | tensorboard-data-server      | 0.6.1     | Apache Software License                            |
 | tensorflow                   | 2.9.2     | Apache Software License                            |
@@ -70,6 +71,7 @@
 | mkdocs-material              | 8.4.2     | MIT License                                        |
 | mkdocs-material-extensions   | 1.0.3     | MIT License                                        |
 | munch                        | 2.5.0     | MIT License                                        |
+| plotly                       | 5.14.0    | MIT License                                        |
 | pymdown-extensions           | 9.5       | MIT License                                        |
 | pyparsing                    | 3.0.9     | MIT License                                        |
 | pyproj                       | 3.3.1     | MIT License                                        |
