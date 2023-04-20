@@ -74,6 +74,12 @@ class InvalidColumnException(Exception):
     pass
 
 
+class InvalidColumnIndexException(Exception):
+    """Exception error for invalid column index."""
+
+    pass
+
+
 class InvalidArgumentTypeException(Exception):
     """Exception error for invalid argument type."""
 
