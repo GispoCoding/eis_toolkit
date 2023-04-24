@@ -1,5 +1,3 @@
-from functools import partial
-
 import geopandas as gpd
 import numpy as np
 from rasterio import profiles, transform
@@ -73,10 +71,11 @@ def _distance_computation(
     cols = np.arange(raster_width)
     rows = np.arange(raster_height)
 
-    # Use partial to create a function with added static arguments
-    _calculate_row_distances_for_geometries = partial(
-        _calculate_row_distances, cols=cols, raster_transform=raster_transform, geometries=geometries
+    distance_matrix = np.array(
+        [
+            _calculate_row_distances(row=row, cols=cols, raster_transform=raster_transform, geometries=geometries)
+            for row in rows
+        ]
     )
-    distance_matrix = np.array([_calculate_row_distances_for_geometries(row=row) for row in rows])
 
     return distance_matrix
