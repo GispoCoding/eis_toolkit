@@ -33,9 +33,10 @@ All contributing developers need git, and a copy of the repository.
 git clone https://github.com/GispoCoding/eis_toolkit.git
 ```
 
-After this you have two options for setting up your local development environment.
+After this you have three options for setting up your local development environment.
 1. Docker
 2. Python venv
+3. Conda
 
 Docker is recommended as it containerizes the whole development environment, making sure it stays identical across different developers and operating systems. Using a container also keeps your own computer clean of all dependencies.
 
@@ -104,4 +105,5 @@ Here are some additional instructions related to the development of EIS toolkit:
 - [Using jupyterlab](./instructions/using_jupyterlab.md)
 
 If you want to set up the development environment without docker, see:
-- [Setup without docker](./instructions/dev_setup_without_docker.md)
+- [Setup without docker with poetry](./instructions/dev_setup_without_docker.md)
+- [Setup without docker with conda](./instructions/dev_setup_without_docker_with_conda.md)

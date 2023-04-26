@@ -29,6 +29,7 @@ statsmodels = "^0.13.2"
 keras = "^2.9.0"
 tensorflow = "^2.9.1"
 mkdocs-material = "^8.4.0"
+plotly = "^5.14.0"
 
 [tool.poetry.dev-dependencies]
 jupyterlab = "^3.4.5"

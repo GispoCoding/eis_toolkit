@@ -1,0 +1,10 @@
+id,name,wkt,random_number,random_string,lat,lng
+1,Helsinki,POINT (24.945831 60.192059),124,testing,24.945831,60.192059
+2,Espoo,POINT (24.6559 60.2055),248,if this,24.6559,60.2055
+3,Vantaa,POINT (25.0378 60.2934),496,works,25.0378,60.2934
+4,Kauniainen,POINT (24.7284 60.2124),992,with points,24.7284,60.2124
+5,Paakaupunkiseutu,"MULTIPOINT ((24.945831 60.192059), (25.0378 60.2934), (24.6559 60.2055),(24.7284 60.2124))",1984,with multipoint,null,null
+6,Polygon,"POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))",3968,with polygon,null,null
+7,Multipolygon,"MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)),((15 5, 40 10, 10 20, 5 10, 15 5)))",7936,with multipolygon,null,null
+8,Hki_espoo_line,"LINESTRING (24.945831 60.192059, 24.6559 60.2055)",15872,with linestring,null,null
+9,Multilinestring_test,"MULTILINESTRING ((24.945831 60.192059, 24.6559 60.2055),(25.0378 60.2934, 24.7284 60.2124))",31744,with multilinestring,null,null
