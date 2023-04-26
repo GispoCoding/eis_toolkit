@@ -3,6 +3,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
+from numpy.typing import ArrayLike
 
 from eis_toolkit.checks.dataframe import check_columns_valid
 from eis_toolkit.exceptions import InvalidColumnException, InvalidRasterBandException
@@ -21,7 +22,8 @@ def set_nodata_raster_meta(raster_meta: Dict, nodata_value: float) -> Dict:
     Returns:
         raster_meta: Raster metadata with updated nodata value.
     """
-    raster_meta.update({"nodata": nodata_value})
+    out_meta = raster_meta.copy()
+    out_meta.update({"nodata": nodata_value})
     return raster_meta
 
 
@@ -57,7 +59,7 @@ def replace_raster_nodata_each_band(
 
 
 def replace_values_with_nodata(
-    data: np.ndarray, values_to_replace: List[float], new_nodata: float = np.nan
+    data: np.ndarray, values_to_replace: ArrayLike[float], new_nodata: float = np.nan
 ) -> np.ndarray:
     """
     Replace multiple nodata values in a raster numpy array with a new nodata value.
@@ -70,11 +72,7 @@ def replace_values_with_nodata(
     Returns:
         out_data: Raster data with updated nodata values.
     """
-    out_data = data.copy()
-    out_data[np.isinf(out_data)] = new_nodata  # Is this line needed?
-    mask = np.isin(data, values_to_replace)
-    out_data[mask] = new_nodata
-    return out_data
+    return np.where(np.isin(data, values_to_replace) | np.isinf(data), new_nodata, data)
 
 
 def replace_nodata_dataframe(
