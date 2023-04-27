@@ -90,3 +90,15 @@ def check_raster_grids(  # type: ignore[no-any-unimported]
     if same_extent and not check_matching_bounds(rasters):
         return False
     return True
+
+
+def check_raster_bands(raster: rasterio.io.DatasetReader, bands: List[int]) -> bool:  # type: ignore[no-any-unimported]
+    """Check if selection of bands is contained in the raster.
+
+    Args:
+        raster: Raster to be checked.
+
+    Returns:
+        bool: True if all bands exist, False if not.
+    """
+    return all(band in range(1, raster.count + 1) for band in bands)

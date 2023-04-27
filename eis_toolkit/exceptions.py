@@ -92,7 +92,7 @@ class InvalidRasterBandException(Exception):
     pass
 
 
-class UnsupportedFileExtensionException(Exception):
+class FileReadError(Exception):
     """Exception error class for unsupported file exceptions."""
 
     pass

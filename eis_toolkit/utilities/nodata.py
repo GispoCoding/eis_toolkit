@@ -1,15 +1,18 @@
 import functools
-from typing import Any, Callable, Dict, List, Optional
+from numbers import Number
+from typing import Any, Callable, Iterable, List, Optional
 
 import numpy as np
 import pandas as pd
-from numpy.typing import ArrayLike
+from beartype import beartype
+from beartype.typing import Dict
 
 from eis_toolkit.checks.dataframe import check_columns_valid
 from eis_toolkit.exceptions import InvalidColumnException, InvalidRasterBandException
 
 
-def set_nodata_raster_meta(raster_meta: Dict, nodata_value: float) -> Dict:
+@beartype
+def set_nodata_raster_meta(raster_meta: Dict, nodata_value: Number) -> Dict:
     """
     Set new nodata value for raster metadata.
 
@@ -20,15 +23,16 @@ def set_nodata_raster_meta(raster_meta: Dict, nodata_value: float) -> Dict:
         nodata_value: Nodata value to be set.
 
     Returns:
-        raster_meta: Raster metadata with updated nodata value.
+        Raster metadata with updated nodata value.
     """
     out_meta = raster_meta.copy()
     out_meta.update({"nodata": nodata_value})
-    return raster_meta
+    return out_meta
 
 
+@beartype
 def replace_raster_nodata_each_band(
-    raster_data: np.ndarray, nodata_per_band: Dict[int, List[float]], new_nodata: float = -9999
+    raster_data: np.ndarray, nodata_per_band: Dict[int, Number | Iterable[Number]], new_nodata: Number = -9999
 ) -> np.ndarray:
     """
     Replace old nodata values with a new nodata value in a raster for each band separately.
@@ -39,7 +43,7 @@ def replace_raster_nodata_each_band(
         new_nodata: A new nodata value that will be used for all old nodata values and all bands. Defaults to -9999.
 
     Returns:
-        out_raster_data: The original raster data with replaced nodata values.
+        The original raster data with replaced nodata values.
 
     Raises:
         InvalidRasterBandException: Invalid band index in nodata mapping.
@@ -58,25 +62,30 @@ def replace_raster_nodata_each_band(
     return out_raster_data
 
 
+@beartype
 def replace_values_with_nodata(
-    data: np.ndarray, values_to_replace: ArrayLike[float], new_nodata: float = np.nan
+    data: np.ndarray, values_to_replace: Number | Iterable[Number], new_nodata: Number = np.nan
 ) -> np.ndarray:
     """
     Replace multiple nodata values in a raster numpy array with a new nodata value.
 
     Args:
         in_data: Input raster data as a numpy array.
-        values_to_replace: List of values to be replaced with new_nodata.
+        values_to_replace: Values to be replaced with new_nodata.
         new_nodata: New nodata value to be set. Defaults to np.nan.
 
     Returns:
-        out_data: Raster data with updated nodata values.
+        Raster data with updated nodata values.
     """
     return np.where(np.isin(data, values_to_replace) | np.isinf(data), new_nodata, data)
 
 
+@beartype
 def replace_nodata_dataframe(
-    df: pd.DataFrame, old_nodata: float | List[float], new_nodata: float = np.nan, columns: Optional[List[str]] = None
+    df: pd.DataFrame,
+    old_nodata: Number | Iterable[Number],
+    new_nodata: Number = np.nan,
+    columns: Optional[List[str]] = None,
 ) -> pd.DataFrame:
     """
     Replace the nodata value in specified columns of a DataFrame.
@@ -88,7 +97,7 @@ def replace_nodata_dataframe(
         columns: List of column names to replace nodata values. Defaults to None (all columns).
 
     Returns:
-        out_df: DataFrame with updated nodata values.
+        DataFrame with updated nodata values.
     """
     if columns is None:
         columns = df.columns
