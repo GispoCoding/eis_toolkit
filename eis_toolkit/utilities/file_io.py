@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Union
 
 import geopandas as gpd
 import pandas as pd
@@ -7,7 +8,7 @@ import rasterio
 from eis_toolkit.exceptions import FileReadError
 
 
-def read_file(file_path: Path) -> rasterio.io.DatasetReader | gpd.GeoDataFrame | pd.DataFrame:
+def read_file(file_path: Path) -> Union[rasterio.io.DatasetReader, gpd.GeoDataFrame, pd.DataFrame]:
     """Read an input file trying different readers.
 
     First tries to read to a rasterio DatasetReader, then to a GeoDataFrame, then to a DataFrame.

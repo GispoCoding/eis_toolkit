@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 from numbers import Number
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -14,7 +12,7 @@ from eis_toolkit.exceptions import InvalidColumnException
 
 @beartype
 def replace_values(
-    data: np.ndarray, values_to_replace: Number | Iterable[Number], replace_value: Number, copy: bool = False
+    data: np.ndarray, values_to_replace: Union[Number, Iterable[Number]], replace_value: Number, copy: bool = False
 ) -> np.ndarray:
     """
     Replace one or many values in a Numpy array with a new value.
@@ -38,7 +36,7 @@ def replace_values(
 @beartype
 def replace_values_df(
     df: pd.DataFrame,
-    values_to_replace: Number | Iterable[Number],
+    values_to_replace: Union[Number, Iterable[Number]],
     replace_value: Number,
     columns: Optional[Iterable[str]] = None,
     copy: bool = False,
