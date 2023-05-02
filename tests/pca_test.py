@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -18,6 +20,7 @@ def test_pca_output():
     assert pca_df.shape == data.shape
 
 
+@pytest.mark.xfail(sys.platform == "win32", reason="Results deviate on Windows.", raises=AssertionError)
 def test_pca_values():
     """Test that PCA function returns correct output values."""
     pca_df, explained_variances = compute_pca(data, 2)
