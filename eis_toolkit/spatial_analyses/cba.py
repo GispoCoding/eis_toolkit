@@ -163,7 +163,6 @@ class CBA:
 
         # No buffer
         if buffer is False:
-
             # Recovery of the grid calculated at the initialization of the CBA
             grid = gp.GeoDataFrame(self.cba)
 
@@ -174,7 +173,6 @@ class CBA:
 
         # Buffer of specified value
         else:
-
             # Calculation of the buffer disks
             added_buf = CBA._get_disc(self.cba, self.grid, buffer)
 
