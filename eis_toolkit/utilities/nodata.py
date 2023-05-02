@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 from numbers import Number
 from typing import Any
