@@ -1,14 +1,13 @@
 import functools
 from numbers import Number
-from typing import Any, Callable, Iterable, List, Optional
+from typing import Any
 
 import numpy as np
-import pandas as pd
 from beartype import beartype
-from beartype.typing import Dict
+from beartype.typing import Callable, Dict, Iterable
 
-from eis_toolkit.checks.dataframe import check_columns_valid
-from eis_toolkit.exceptions import InvalidColumnException, InvalidRasterBandException
+from eis_toolkit.exceptions import InvalidRasterBandException
+from eis_toolkit.utilities.miscellaneous import replace_values
 
 
 @beartype
@@ -56,71 +55,49 @@ def replace_raster_nodata_each_band(
     for band, nodata_values in nodata_per_band.items():
         index = band - 1
         band_data = raster_data[index]
-        out_data = replace_values_with_nodata(band_data, nodata_values, new_nodata)
+        out_data = replace_values(band_data, nodata_values, new_nodata)
         out_raster_data[index] = out_data
 
     return out_raster_data
 
 
 @beartype
-def replace_values_with_nodata(
-    data: np.ndarray, values_to_replace: Number | Iterable[Number], new_nodata: Number = np.nan
-) -> np.ndarray:
-    """
-    Replace multiple nodata values in a raster numpy array with a new nodata value.
+def nodata_to_nan(data: np.ndarray, nodata_value: Number) -> np.ndarray:
+    """Convert specified nodata_value to np.nan.
 
     Args:
-        in_data: Input raster data as a numpy array.
-        values_to_replace: Values to be replaced with new_nodata.
-        new_nodata: New nodata value to be set. Defaults to np.nan.
+        data: Input data as a numpy array.
+        nodata_value: Value that is converted to np.nan.
 
     Returns:
-        Raster data with updated nodata values.
+        Input array where specified nodata has been converted to np.nan.
     """
-    return np.where(np.isin(data, values_to_replace) | np.isinf(data), new_nodata, data)
+    return np.where(np.isin(data, nodata_value), np.nan, data)
 
 
 @beartype
-def replace_nodata_dataframe(
-    df: pd.DataFrame,
-    old_nodata: Number | Iterable[Number],
-    new_nodata: Number = np.nan,
-    columns: Optional[List[str]] = None,
-) -> pd.DataFrame:
-    """
-    Replace the nodata value in specified columns of a DataFrame.
+def nan_to_nodata(data: np.ndarray, nodata_value: Number) -> np.ndarray:
+    """Convert np.nan values to specified nodata_value.
 
     Args:
-        df: Input DataFrame data.
-        old_nodata: Current nodata value(s) to be replaced.
-        new_nodata: New nodata value to be set. Defaults to np.nan.
-        columns: List of column names to replace nodata values. Defaults to None (all columns).
+        data: Input data as a numpy array.
+        nodata_value: Value that np.nan is converted to.
 
     Returns:
-        DataFrame with updated nodata values.
+        Input array where np.nan has been converted to specified nodata.
     """
-    if columns is None:
-        columns = df.columns
-    else:
-        if not check_columns_valid(df, columns):
-            raise InvalidColumnException("All columns were not found in input dataframe.")
-
-    out_df = df.copy()
-
-    for col in columns:
-        out_df[col] = out_df[col].replace(old_nodata, new_nodata)
-
-    return out_df
+    return np.where(np.isnan(data), nodata_value, data)
 
 
-def handle_nodata_as_nan(func: Callable):
+@beartype
+def handle_nodata_as_nan(func: Callable) -> Callable:
     """Replace nodata_values with np.nan for function execution and reverses the replacement afterwards."""
 
     @functools.wraps(func)
-    def wrapper(in_data: np.ndarray, *args: Any, nodata_values: List[np.number], **kwargs: Any) -> np.ndarray:
-        replaced_data = replace_values_with_nodata(in_data, nodata_values, np.nan)
+    def wrapper(in_data: np.ndarray, *args: Any, nodata_value: Number, **kwargs: Any) -> np.ndarray:
+        replaced_data = nodata_to_nan(in_data, nodata_value)
         result = func(replaced_data, *args, **kwargs)
-        out_data = replace_values_with_nodata(result, np.nan, nodata_values)
+        out_data = nan_to_nodata(result, nodata_value)
         return out_data
 
     return wrapper
