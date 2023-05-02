@@ -15,5 +15,6 @@ dependencies:
   - statsmodels >=0.13.5,<1.0.0
   - keras >=2.10.0,<3.0.0
   - tensorflow >=2.10.0,<3.0.0
+  - beartype >=0.13.1,<2.0.0
   # Dependencies for testing
   - pytest >=7.2.1
