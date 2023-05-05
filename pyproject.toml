@@ -31,6 +31,7 @@ tensorflow = "^2.9.1"
 mkdocs-material = "^8.4.0"
 plotly = "^5.14.0"
 rtree= "^1.0.1"
+beartype = "^0.13.1"
 
 [tool.poetry.dev-dependencies]
 jupyterlab = "^3.4.5"

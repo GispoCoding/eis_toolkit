@@ -2,6 +2,8 @@ from typing import List
 
 import rasterio
 
+from eis_toolkit.checks.crs import check_matching_crs
+
 
 def check_matching_cell_size(  # type: ignore[no-any-unimported]
     rasters: List[rasterio.io.DatasetReader],
@@ -65,3 +67,38 @@ def check_matching_bounds(  # type: ignore[no-any-unimported]
         if raster.bounds != bounds:
             return False
     return True
+
+
+def check_raster_grids(  # type: ignore[no-any-unimported]
+    rasters: List[rasterio.io.DatasetReader], same_extent: bool = False
+) -> bool:
+    """
+    Check the set of input rasters for matching gridding and optionally matching bounds.
+
+    Args:
+        rasters: List of rasters to test for matching gridding.
+        same_extent: optional boolean argument that determines if rasters are tested for matching bounds.
+            Default set to False.
+
+    Returns:
+        True if gridding and optionally bounds matches, False if not.
+    """
+    if not check_matching_crs(rasters):
+        return False
+    if not check_matching_pixel_alignment(rasters):
+        return False
+    if same_extent and not check_matching_bounds(rasters):
+        return False
+    return True
+
+
+def check_raster_bands(raster: rasterio.io.DatasetReader, bands: List[int]) -> bool:  # type: ignore[no-any-unimported]
+    """Check if selection of bands is contained in the raster.
+
+    Args:
+        raster: Raster to be checked.
+
+    Returns:
+        bool: True if all bands exist, False if not.
+    """
+    return all(band in range(1, raster.count + 1) for band in bands)
