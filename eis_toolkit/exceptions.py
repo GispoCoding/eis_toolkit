@@ -68,7 +68,31 @@ class InvalidNumberOfPrincipalComponents(Exception):
     pass
 
 
+class InvalidColumnException(Exception):
+    """Exception error for invalid column."""
+
+    pass
+
+
 class InvalidColumnIndexException(Exception):
-    """Exception error for index out of range."""
+    """Exception error for invalid column index."""
+
+    pass
+
+
+class InvalidArgumentTypeException(Exception):
+    """Exception error for invalid argument type."""
+
+    pass
+
+
+class InvalidRasterBandException(Exception):
+    """Expection error class for invalid raster band selection."""
+
+    pass
+
+
+class FileReadError(Exception):
+    """Exception error class for unsupported file exceptions."""
 
     pass
