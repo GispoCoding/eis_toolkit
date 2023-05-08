@@ -1,5 +1,6 @@
 import matplotlib
 import numpy as np
+from beartype import beartype
 from matplotlib import pyplot as plt
 
 from eis_toolkit.exceptions import InvalidParameterValueException
@@ -25,6 +26,7 @@ def _plot_rate_curve(  # type: ignore[no-any-unimported]
     return fig
 
 
+@beartype
 def plot_rate_curve(  # type: ignore[no-any-unimported]
     x_values: np.ndarray,
     y_values: np.ndarray,

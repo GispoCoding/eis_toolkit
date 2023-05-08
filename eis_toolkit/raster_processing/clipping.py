@@ -1,8 +1,8 @@
-from typing import Iterable, Tuple
-
 import geopandas
 import numpy as np
 import rasterio
+from beartype import beartype
+from beartype.typing import Iterable, Tuple
 from rasterio.mask import mask
 
 from eis_toolkit.checks.crs import check_matching_crs
@@ -23,6 +23,7 @@ def _clip_raster(  # type: ignore[no-any-unimported] # noqa: E261
     return out_image, out_meta
 
 
+@beartype
 def clip_raster(  # type: ignore[no-any-unimported] # noqa: E261,E262
     raster: rasterio.io.DatasetReader, geodataframe: geopandas.GeoDataFrame
 ) -> Tuple[np.ndarray, dict]:

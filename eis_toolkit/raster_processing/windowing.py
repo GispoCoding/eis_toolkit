@@ -1,7 +1,9 @@
-from typing import Tuple
+from numbers import Number
 
 import numpy as np
 import rasterio
+from beartype import beartype
+from beartype.typing import Tuple
 from rasterio import transform
 from rasterio.windows import Window
 
@@ -10,7 +12,7 @@ from eis_toolkit.exceptions import CoordinatesOutOfBoundsException, InvalidWindo
 
 def _extract_window(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    center_coords: Tuple[float, float],
+    center_coords: Tuple[Number, Number],
     height: int,
     width: int,
 ) -> Tuple[np.ndarray, dict]:
@@ -75,9 +77,10 @@ def _extract_window(  # type: ignore[no-any-unimported]
     return out_image, out_meta
 
 
+@beartype
 def extract_window(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    center_coords: Tuple[float, float],
+    center_coords: Tuple[Number, Number],
     height: int,
     width: int,
 ) -> Tuple[np.ndarray, dict]:

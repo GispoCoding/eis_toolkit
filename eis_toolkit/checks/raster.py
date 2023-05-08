@@ -1,10 +1,11 @@
-from typing import Iterable
-
 import rasterio
+from beartype import beartype
+from beartype.typing import Iterable
 
 from eis_toolkit.checks.crs import check_matching_crs
 
 
+@beartype
 def check_matching_cell_size(  # type: ignore[no-any-unimported]
     rasters: Iterable[rasterio.io.DatasetReader],
 ) -> bool:
@@ -24,6 +25,7 @@ def check_matching_cell_size(  # type: ignore[no-any-unimported]
     return True
 
 
+@beartype
 def check_matching_pixel_alignment(  # type: ignore[no-any-unimported]
     rasters: Iterable[rasterio.io.DatasetReader],
 ) -> bool:
@@ -50,6 +52,7 @@ def check_matching_pixel_alignment(  # type: ignore[no-any-unimported]
         return False
 
 
+@beartype
 def check_matching_bounds(  # type: ignore[no-any-unimported]
     rasters: Iterable[rasterio.io.DatasetReader],
 ) -> bool:
@@ -69,6 +72,7 @@ def check_matching_bounds(  # type: ignore[no-any-unimported]
     return True
 
 
+@beartype
 def check_raster_grids(  # type: ignore[no-any-unimported]
     rasters: Iterable[rasterio.io.DatasetReader], same_extent: bool = False
 ) -> bool:
@@ -92,6 +96,7 @@ def check_raster_grids(  # type: ignore[no-any-unimported]
     return True
 
 
+@beartype
 def check_raster_bands(raster: rasterio.io.DatasetReader, bands: Iterable[int]) -> bool:
     """Check if selection of bands is contained in the raster.
 

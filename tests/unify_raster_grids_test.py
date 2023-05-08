@@ -86,10 +86,3 @@ def test_unify_raster_grids_empty_raster_list():
     with pytest.raises(InvalidParameterValueException):
         with rasterio.open(base_raster_path_1) as base_raster:
             _ = unify_raster_grids(base_raster, [])
-
-
-def test_unify_raster_grids_wrong_type_in_raster_list():
-    """Test that wrong type of items in raster list raises correct exception."""
-    with pytest.raises(InvalidParameterValueException):
-        with rasterio.open(base_raster_path_1) as base_raster:
-            _ = unify_raster_grids(base_raster, [1, 3, 5])

@@ -1,6 +1,6 @@
-from typing import Tuple
-
 import numpy as np
+from beartype import beartype
+from beartype.typing import Tuple
 from shapely.geometry import LineString
 from shapely.geometry.point import Point
 
@@ -17,6 +17,7 @@ def _get_pa_intersection(  # type: ignore[no-any-unimported]
     return intersection
 
 
+@beartype
 def get_pa_intersection(
     true_positive_rate_values: np.ndarray, proportion_of_area_values: np.ndarray, threshold_values: np.ndarray
 ) -> Tuple[float, float]:

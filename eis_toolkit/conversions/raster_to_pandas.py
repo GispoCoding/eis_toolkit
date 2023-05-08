@@ -1,15 +1,15 @@
-from typing import List, Optional
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 import rasterio
-
-from eis_toolkit.exceptions import InvalidParameterValueException
+from beartype import beartype
+from beartype.typing import Iterable
 
 
 def _raster_to_pandas(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    bands: Optional[List[int]],
+    bands: Optional[Iterable[int]],
     add_coordinates: bool,
 ) -> pd.DataFrame:
 
@@ -30,9 +30,10 @@ def _raster_to_pandas(  # type: ignore[no-any-unimported]
     return pd.DataFrame(pixel_data, columns=band_names)
 
 
+@beartype
 def raster_to_pandas(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    bands: Optional[List[int]] = None,
+    bands: Optional[Iterable[int]] = None,
     add_coordinates: bool = False,
 ) -> pd.DataFrame:
     """Convert raster to pandas DataFrame.
@@ -49,11 +50,6 @@ def raster_to_pandas(  # type: ignore[no-any-unimported]
     Returns:
         Raster converted to pandas dataframe
     """
-    if bands is not None:
-        if not isinstance(bands, list):
-            raise InvalidParameterValueException
-        elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException
 
     data_frame = _raster_to_pandas(
         raster=raster,

@@ -1,8 +1,12 @@
 from numbers import Number
 from typing import Any
 
+from beartype import beartype
+from beartype.typing import Iterable
 
-def check_parameter_value(parameter_value: Any, allowed_values: list) -> bool:
+
+@beartype
+def check_parameter_value(parameter_value: Any, allowed_values: Iterable) -> bool:
     """Check if used parameter value is valid.
 
     Args:
@@ -18,6 +22,7 @@ def check_parameter_value(parameter_value: Any, allowed_values: list) -> bool:
         return False
 
 
+@beartype
 def check_numeric_value_sign(parameter_value: Number) -> bool:  # type: ignore[no-untyped-def]
     """Check if input numeric value is positive.
 

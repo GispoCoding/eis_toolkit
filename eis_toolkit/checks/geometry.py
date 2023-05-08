@@ -1,7 +1,9 @@
-from typing import Iterable
+from beartype import beartype
+from beartype.typing import Iterable
 
 
-def check_geometry_types(geometries: Iterable, allowed_types: list) -> bool:
+@beartype
+def check_geometry_types(geometries: Iterable, allowed_types: Iterable) -> bool:
     """Check all geometries in an iterable against a list of allowed types.
 
     Args:

@@ -6,7 +6,6 @@ import pytest
 import rasterio
 
 from eis_toolkit.conversions.raster_to_pandas import raster_to_pandas
-from eis_toolkit.exceptions import InvalidParameterValueException
 
 parent_dir = Path(__file__).parent
 raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
@@ -38,10 +37,3 @@ def test_raster_to_pandas():
     raster_img[(long_df.band - 1).to_list(), long_df.row.to_list(), long_df.col.to_list()] = long_df.band_
 
     assert np.array_equal(multiband_raster.read(), raster_img)
-
-
-def test_raster_to_pandas_invalid_parameter_value():
-    """Test that invalid parameter value for bands raises correct exception."""
-    with pytest.raises(InvalidParameterValueException):
-        with rasterio.open(raster_path) as raster:
-            raster_to_pandas(raster, bands=["1", "2"])

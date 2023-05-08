@@ -1,4 +1,9 @@
-def check_matching_crs(objects: list) -> bool:
+from beartype import beartype
+from beartype.typing import List
+
+
+@beartype
+def check_matching_crs(objects: List) -> bool:
     """Check if every object in a list has a crs, and that they match.
 
     Args:

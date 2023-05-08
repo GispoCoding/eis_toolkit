@@ -1,8 +1,9 @@
 from math import ceil
-from typing import Tuple
 
 import numpy as np
 import rasterio
+from beartype import beartype
+from beartype.typing import Tuple
 
 from eis_toolkit.checks.crs import check_matching_crs
 from eis_toolkit.exceptions import NonMatchingCrsException
@@ -64,6 +65,7 @@ def _snap(  # type: ignore[no-any-unimported]
     return out_image, out_meta
 
 
+@beartype
 def snap_with_raster(  # type: ignore[no-any-unimported]
     raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
 ) -> Tuple[np.ndarray, dict]:

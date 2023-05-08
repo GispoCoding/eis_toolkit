@@ -1,4 +1,5 @@
 import numpy as np
+from beartype import beartype
 from sklearn import metrics
 
 from eis_toolkit.exceptions import InvalidParameterValueException
@@ -10,6 +11,7 @@ def _calculate_auc(x_values: np.ndarray, y_values: np.ndarray) -> float:
     return float(auc_value)
 
 
+@beartype
 def calculate_auc(x_values: np.ndarray, y_values: np.ndarray) -> float:
     """Calculate area under curve (AUC).
 

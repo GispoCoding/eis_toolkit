@@ -1,5 +1,6 @@
 import matplotlib
 import numpy as np
+from beartype import beartype
 from matplotlib import pyplot as plt
 
 from eis_toolkit.exceptions import InvalidParameterValueException
@@ -37,6 +38,7 @@ def _plot_prediction_area_curves(  # type: ignore[no-any-unimported]
     return fig
 
 
+@beartype
 def plot_prediction_area_curves(  # type: ignore[no-any-unimported]
     true_positive_rate_values: np.ndarray, proportion_of_area_values: np.ndarray, threshold_values: np.ndarray
 ) -> matplotlib.figure.Figure:

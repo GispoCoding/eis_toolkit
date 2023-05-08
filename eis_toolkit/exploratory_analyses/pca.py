@@ -1,7 +1,7 @@
-from typing import Tuple
-
 import numpy as np
 import pandas as pd
+from beartype import beartype
+from beartype.typing import Tuple
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
@@ -25,6 +25,7 @@ def _compute_pca(  # type: ignore[no-any-unimported]
     return principal_component_df, explained_variances
 
 
+@beartype
 def compute_pca(  # type: ignore[no-any-unimported]
     data: pd.DataFrame, number_of_components: int
 ) -> Tuple[pd.DataFrame, np.ndarray]:

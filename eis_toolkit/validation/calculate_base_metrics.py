@@ -4,6 +4,7 @@ import geopandas
 import numpy as np
 import pandas as pd
 import rasterio
+from beartype import beartype
 
 from eis_toolkit.checks.crs import check_matching_crs
 from eis_toolkit.checks.geometry import check_geometry_types
@@ -69,6 +70,7 @@ def _calculate_base_metrics(  # type: ignore[no-any-unimported]
     return base_metrics
 
 
+@beartype
 def calculate_base_metrics(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     deposits: geopandas.GeoDataFrame,

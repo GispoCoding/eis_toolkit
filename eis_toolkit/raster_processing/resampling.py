@@ -1,7 +1,10 @@
-from typing import Optional, Tuple
+from numbers import Number
+from typing import Optional
 
 import numpy as np
 import rasterio
+from beartype import beartype
+from beartype.typing import Tuple
 from rasterio.enums import Resampling
 
 from eis_toolkit.checks.parameter import check_numeric_value_sign
@@ -12,8 +15,8 @@ from eis_toolkit.exceptions import NumericValueSignException
 def _resample(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     resampling_method: Resampling,
-    upscale_factor: float,
-    upscale_factor_y: Optional[float],
+    upscale_factor: Number,
+    upscale_factor_y: Optional[Number],
 ) -> Tuple[np.ndarray, dict]:
 
     if upscale_factor_y is None:
@@ -40,10 +43,11 @@ def _resample(  # type: ignore[no-any-unimported]
     return out_image, out_meta
 
 
+@beartype
 def resample(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    upscale_factor: float,
-    upscale_factor_y: Optional[float] = None,
+    upscale_factor: Number,
+    upscale_factor_y: Optional[Number] = None,
     resampling_method: Resampling = Resampling.bilinear,
 ) -> Tuple[np.ndarray, dict]:
     """Resamples raster according to given upscale factor.

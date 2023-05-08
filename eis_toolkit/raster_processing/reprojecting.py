@@ -1,7 +1,7 @@
-from typing import Tuple
-
 import numpy as np
 import rasterio
+from beartype import beartype
+from beartype.typing import Tuple
 from rasterio import warp
 
 from eis_toolkit.exceptions import MatchingCrsException
@@ -52,6 +52,7 @@ def _reproject_raster(  # type: ignore[no-any-unimported]
     return out_image, out_meta
 
 
+@beartype
 def reproject_raster(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader, target_crs: int, resampling_method: warp.Resampling = warp.Resampling.nearest
 ) -> Tuple[np.ndarray, dict]:

@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
 import plotly.express as px
+from beartype import beartype
 from plotly.graph_objects import Figure
 
 
+@beartype
 def plot_pca(  # type: ignore[no-any-unimported]
     pca_df: pd.DataFrame, explained_variances: np.ndarray, color_feat: pd.Series = None, save_path: str = ""
 ) -> Figure:

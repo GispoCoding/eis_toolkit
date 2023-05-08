@@ -1,18 +1,18 @@
 import os
-from typing import List, Optional
+from typing import Optional
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio
-
-from eis_toolkit.exceptions import InvalidParameterValueException
+from beartype import beartype
+from beartype.typing import Iterable
 
 
 def _extract_values_from_raster(  # type: ignore[no-any-unimported]
-    raster_list: List[rasterio.io.DatasetReader],
+    raster_list: Iterable[rasterio.io.DatasetReader],
     geodataframe: gpd.GeoDataFrame,
-    raster_column_names: Optional[List[str]] = None,
+    raster_column_names: Optional[Iterable[str]] = None,
 ) -> pd.DataFrame:
 
     data_frame = pd.DataFrame()
@@ -48,10 +48,11 @@ def _extract_values_from_raster(  # type: ignore[no-any-unimported]
     return data_frame
 
 
+@beartype
 def extract_values_from_raster(  # type: ignore[no-any-unimported]
-    raster_list: List[rasterio.io.DatasetReader],
+    raster_list: Iterable[rasterio.io.DatasetReader],
     geodataframe: gpd.GeoDataFrame,
-    raster_column_names: Optional[List[str]] = None,
+    raster_column_names: Optional[Iterable[str]] = None,
 ) -> pd.DataFrame:
     """Extract raster values using point data to a dataframe.
 
@@ -66,18 +67,8 @@ def extract_values_from_raster(  # type: ignore[no-any-unimported]
     Returns:
         Dataframe with x & y coordinates and the values from the raster file(s) as columns.
     """
-    if raster_column_names is not None:
-        if not isinstance(raster_column_names, list):
-            raise InvalidParameterValueException
-        if not raster_column_names:
-            raise InvalidParameterValueException
-        elif not all(isinstance(raster_column_name, str) for raster_column_name in raster_column_names):
-            raise InvalidParameterValueException
-
-    if not isinstance(raster_list, list):
-        raise InvalidParameterValueException
-    elif not all(isinstance(raster, rasterio.io.DatasetReader) for raster in raster_list):
-        raise InvalidParameterValueException
+    if raster_column_names == []:
+        raster_column_names = None
 
     data_frame = _extract_values_from_raster(
         raster_list=raster_list, geodataframe=geodataframe, raster_column_names=raster_column_names
