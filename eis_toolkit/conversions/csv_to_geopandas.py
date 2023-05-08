@@ -92,7 +92,7 @@ def csv_to_geopandas(  # type: ignore[no-any-unimported]
         target_EPSG: Target crs as EPSG code.
 
     Returns:
-        geodataframe: csv converted to geopandas geodataframe.
+        csv converted to geopandas geodataframe.
     """
 
     data_frame = _csv_to_geopandas(

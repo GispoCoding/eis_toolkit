@@ -73,12 +73,12 @@ def snap_with_raster(  # type: ignore[no-any-unimported]
     If rasters are aligned, simply returns input raster data and metadata.
 
     Args:
-        raster (rasterio.io.DatasetReader): The raster to be clipped.
-        snap_raster (rasterio.io.DatasetReader): The snap raster i.e. reference grid raster.
+        raster: The raster to be clipped.
+        snap_raster: The snap raster i.e. reference grid raster.
 
     Returns:
-        out_image (np.ndarray): The snapped raster data.
-        out_meta (dict): The updated metadata.
+        The snapped raster data.
+        The updated metadata.
 
     Raises:
         NonMatchingCrsException: Raster and and snap raster are not in the same crs.

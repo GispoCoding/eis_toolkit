@@ -9,11 +9,11 @@ def reproject_vector(  # type: ignore[no-any-unimported]
     """Reprojects vector data to match given coordinate system (EPSG).
 
     Args:
-        geodataframe (geopandas.GeoDataFrame): The vector dataframe to be reprojected.
-        target_EPSG (int): Target crs as EPSG code.
+        geodataframe: The vector dataframe to be reprojected.
+        target_EPSG: Target crs as EPSG code.
 
     Returns:
-        reprojected_gdf (geopandas.GeoDataFrame): Reprojected vector data.
+        Reprojected vector data.
     """
 
     if geodataframe.crs.to_epsg() == target_EPSG:

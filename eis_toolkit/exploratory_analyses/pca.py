@@ -32,12 +32,12 @@ def compute_pca(  # type: ignore[no-any-unimported]
     Compute the principal components for the input data.
 
     Args:
-        data (pandas.DataFrame): A DataFrame containing the input data.
-        n_components (int): The number of principal components to compute.
+        data: A DataFrame containing the input data.
+        n_components: The number of principal components to compute.
 
     Returns:
-        principal_component_df (pandas.DataFrame): A DataFrame containing the computed principal components.
-        explained_variances (numpy.ndarray): The explained variance ratios for each component.
+        DataFrame containing the computed principal components.
+        The explained variance ratios for each component.
 
     Raises:
         EmptyDataFrameException: Raised when the input DataFrame is empty.

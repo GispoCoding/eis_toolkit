@@ -36,12 +36,12 @@ def plot_rate_curve(  # type: ignore[no-any-unimported]
     positive rate (roc) or proportion of area (success and prediction rate) depending on plot type.
 
     Args:
-        true_positive_rate_values (np.ndarray): True positive rate values, y-coordinates of the plot.
-        proportion_of_area_values (np.ndarray): Proportion of area values, x-coordinates of the plot.
-        plot_type (str): Plot type. Can be either: "success_rate", "prediction_rate" or "roc".
+        true_positive_rate_values: True positive rate values, y-coordinates of the plot.
+        proportion_of_area_values: Proportion of area values, x-coordinates of the plot.
+        plot_type: Plot type. Can be either: "success_rate", "prediction_rate" or "roc".
 
     Returns:
-        matplotlib.figure.Figure: Success rate, prediction rate or ROC plot.
+        Success rate, prediction rate or ROC plot figure object.
 
     Raises:
         InvalidParameterValueException: Invalid plot type.

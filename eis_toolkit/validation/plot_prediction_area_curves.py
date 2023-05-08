@@ -46,12 +46,12 @@ def plot_prediction_area_curves(  # type: ignore[no-any-unimported]
     Yousefi and Carranza (2015).
 
     Args:
-        true_positive_rate_values (np.ndarray): True positive rate values.
-        proportion_of_area_values (np.ndarray): Proportion of area values.
-        threshold_values (np.ndarray): Threshold values.
+        true_positive_rate_values: True positive rate values.
+        proportion_of_area_values: Proportion of area values.
+        threshold_values: Threshold values.
 
     Returns:
-        matplotlib.figure.Figure: P-A plot.
+        P-A plot figure object.
 
     Raises:
         InvalidParameterValueException: true_positive_rate_values or proportion_of_area_values values are out of bounds.

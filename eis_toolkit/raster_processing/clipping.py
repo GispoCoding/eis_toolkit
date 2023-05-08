@@ -29,12 +29,12 @@ def clip_raster(  # type: ignore[no-any-unimported] # noqa: E261,E262
     """Clips a raster with a geodataframe.
 
     Args:
-        raster (rasterio.io.DatasetReader): The raster to be clipped.
-        geodataframe (geopandas.GeoDataFrame): A geodataframe containing the geometries to do the clipping with.
+        raster: The raster to be clipped.
+        geodataframe: A geodataframe containing the geometries to do the clipping with.
 
     Returns:
-        out_image (np.ndarray): The clipped raster data.
-        out_meta (dict): The updated metadata.
+        The clipped raster data.
+        The updated metadata.
 
     Raises:
         NonMatchingCrsException: The raster and polygons are not in the same crs.

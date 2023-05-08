@@ -59,12 +59,12 @@ def extract_values_from_raster(  # type: ignore[no-any-unimported]
        and file_name_bandnumber for multiband files.
 
     Args:
-        raster_list (List[rasterio.io.DatasetReader]): list to extract values from.
-        shapefile (geopandas.GeoDataFrame): object to extract values with.
-        raster_column_names (List[str]): list of optional column names for bands.
+        raster_list: list to extract values from.
+        shapefile: object to extract values with.
+        raster_column_names: list of optional column names for bands.
 
     Returns:
-        pandas.DataFrame: Dataframe with x & y coordinates and the values from the raster file(s) as columns.
+        Dataframe with x & y coordinates and the values from the raster file(s) as columns.
     """
     if raster_column_names is not None:
         if not isinstance(raster_column_names, list):

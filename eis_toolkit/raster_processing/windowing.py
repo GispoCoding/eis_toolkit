@@ -87,15 +87,15 @@ def extract_window(  # type: ignore[no-any-unimported]
        Center coordinate must be inside the raster but window can extent outside the raster in which case padding with
        -9999 is used.
     Args:
-        raster (rasterio.io.DatasetReader): Source raster.
-        center_coords (Tuple[int, int]): center coordinates for window int the form (x, y).
-        center_coord_crs (int): EPSG code that defines the coordinate reference system.
-        height (int): window height in pixels.
-        width (int): window width in pixels.
+        raster: Source raster.
+        center_coords: center coordinates for window int the form (x, y).
+        center_coord_crs: EPSG code that defines the coordinate reference system.
+        height: window height in pixels.
+        width: window width in pixels.
 
     Returns:
-        out_image (numpy.ndarray): Extracted raster window.
-        out_meta (dict): The updated metadata.
+        Extracted raster window.
+        The updated metadata.
 
     Raises:
         CoordinatesOutOfBoundException: Window center coordinates are out of raster bounds.

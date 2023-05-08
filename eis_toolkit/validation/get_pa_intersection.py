@@ -26,13 +26,13 @@ def get_pa_intersection(
     Area curve uses inverted proportion of area as y-axis.
 
     Args:
-        true_positive_rate_values (np.ndarray): True positive rate values, values should be within range 0-1.
-        proportion_of_area_values (np.ndarray): Proportion of area values, values should be within range 0-1.
-        threshold_values (np.ndarray): Threshold values that were used to calculate true positive rate and proportion of
+        true_positive_rate_values: True positive rate values, values should be within range 0-1.
+        proportion_of_area_values: Proportion of area values, values should be within range 0-1.
+        threshold_values: Threshold values that were used to calculate true positive rate and proportion of
         area.
 
     Returns:
-        Tuple[float, float]: x and y coordinates of the intersection point.
+        X and y coordinates of the intersection point.
 
     Raises:
         InvalidParameterValueException: true_positive_rate_values or proportion_of_area_values values are out of bounds.

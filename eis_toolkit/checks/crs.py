@@ -1,13 +1,11 @@
-def check_matching_crs(
-    objects: list,
-) -> bool:
+def check_matching_crs(objects: list) -> bool:
     """Check if every object in a list has a crs, and that they match.
 
     Args:
-        objects (list): A list of objects to check.
+        objects: A list of objects to check.
 
     Returns:
-        bool: True if everything matches, false if not.
+        True if everything matches, false if not.
     """
     epsg_list = []
 

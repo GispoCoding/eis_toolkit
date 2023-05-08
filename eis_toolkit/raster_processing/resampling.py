@@ -49,19 +49,19 @@ def resample(  # type: ignore[no-any-unimported]
     """Resamples raster according to given upscale factor.
 
     Args:
-        raster (rasterio.io.DatasetReader): The raster to be resampled.
-        upscale_factor (float): Resampling factor for raster width (and height by default).
+        raster: The raster to be resampled.
+        upscale_factor: Resampling factor for raster width (and height by default).
             Scale factors over 1 will yield higher resolution data. Value must be positive.
-        upscale_factor_y (float): Resampling factor for raster height, if different scaling is needed
+        upscale_factor_y: Resampling factor for raster height, if different scaling is needed
             for x and y directions. Defaults to None, in which case upscale_factor is used
             for both width and height.
-        resampling_method (rasterio.enums.Resampling): Resampling method. Most suitable
+        resampling_method: Resampling method. Most suitable
             method depends on the dataset and context. Nearest, bilinear and cubic are some
             common choices. This parameter defaults to bilinear.
 
     Returns:
-        out_image (numpy.ndarray): Resampled raster data.
-        out_meta (dict): The updated metadata.
+        Resampled raster data.
+        The updated metadata.
 
     Raises:
         NumericValueSignException: Upscale factor is not a positive value.

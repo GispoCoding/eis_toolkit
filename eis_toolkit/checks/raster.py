@@ -14,7 +14,7 @@ def check_matching_cell_size(  # type: ignore[no-any-unimported]
         rasters: List of rasters to check.
 
     Returns:
-        bool: True if cell size of each raster matches, False if not.
+        True if cell size of each raster matches, False if not.
     """
 
     pixel_size = [rasters[0].transform.a, rasters[0].transform.e]
@@ -33,7 +33,7 @@ def check_matching_pixel_alignment(  # type: ignore[no-any-unimported]
         rasters: List of rasters to check.
 
     Returns:
-        bool: True if cell size and pixel alignment matches, False if not.
+        True if cell size and pixel alignment matches, False if not.
     """
 
     if check_matching_cell_size(rasters):
@@ -59,7 +59,7 @@ def check_matching_bounds(  # type: ignore[no-any-unimported]
         rasters: List of rasters to check.
 
     Returns:
-        bool: True if bounds of each raster matches, False if not.
+        True if bounds of each raster matches, False if not.
     """
 
     bounds = rasters[0].bounds
@@ -77,7 +77,7 @@ def check_raster_grids(  # type: ignore[no-any-unimported]
 
     Args:
         rasters: List of rasters to test for matching gridding.
-        same_extent: optional boolean argument that determines if rasters are tested for matching bounds.
+        same_extent: Optional boolean argument that determines if rasters are tested for matching bounds.
             Default set to False.
 
     Returns:
@@ -99,6 +99,6 @@ def check_raster_bands(raster: rasterio.io.DatasetReader, bands: List[int]) -> b
         raster: Raster to be checked.
 
     Returns:
-        bool: True if all bands exist, False if not.
+        True if all bands exist, False if not.
     """
     return all(band in range(1, raster.count + 1) for band in bands)

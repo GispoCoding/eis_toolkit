@@ -80,13 +80,13 @@ def calculate_base_metrics(  # type: ignore[no-any-unimported]
     positive rate is optional and is only done if negative point locations are provided.
 
     Args:
-        raster (rasterio.io.DatasetReader): Mineral prospectivity map or evidence layer.
-        deposits (geopandas.GeoDataFrame): Mineral deposit locations as points.
-        band (int): band index of the mineral prospectivity map, defaults to 1.
-        negatives (gepandas.GeoDataFrame): Negative locations as points.
+        raster: Mineral prospectivity map or evidence layer.
+        deposits: Mineral deposit locations as points.
+        band: band index of the mineral prospectivity map, defaults to 1.
+        negatives: Negative locations as points.
 
     Returns:
-        base_metrics: data frame containing true positive rate, proportion of area, threshold_values and false positive
+        DataFrame containing true positive rate, proportion of area, threshold values and false positive
             rate (optional) values.
 
     Raises:
