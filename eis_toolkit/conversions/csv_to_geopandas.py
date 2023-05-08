@@ -15,7 +15,7 @@ from eis_toolkit.exceptions import (
 def _csv_to_geopandas(  # type: ignore[no-any-unimported]
     csv: Path,
     indexes: List[int],
-    target_EPSG: int,
+    target_crs: int,
 ) -> geopandas.GeoDataFrame:
 
     with csv.open(mode="r") as f:
@@ -32,7 +32,7 @@ def _csv_to_geopandas(  # type: ignore[no-any-unimported]
             geom_column = column_names[indexes[0]]
             try:
                 geoms = geopandas.GeoSeries.from_wkt(df[geom_column])
-                geodataframe = geopandas.GeoDataFrame(df, crs=target_EPSG, geometry=geoms)
+                geodataframe = geopandas.GeoDataFrame(df, crs=target_crs, geometry=geoms)
                 return geodataframe
             except:  # noqa: E722
                 raise InvalidWktFormatException
@@ -47,7 +47,7 @@ def _csv_to_geopandas(  # type: ignore[no-any-unimported]
                 geom_x = column_names[indexes[0]]
                 geom_y = column_names[indexes[1]]
                 geodataframe = geopandas.GeoDataFrame(
-                    df, crs=target_EPSG, geometry=geopandas.points_from_xy(df[geom_x], df[geom_y])
+                    df, crs=target_crs, geometry=geopandas.points_from_xy(df[geom_x], df[geom_y])
                 )
                 return geodataframe
             except:  # noqa: E722
@@ -59,7 +59,7 @@ def _csv_to_geopandas(  # type: ignore[no-any-unimported]
                 raise InvalidColumnIndexException
             try:
                 geoms = geopandas.GeoSeries.from_wkt(df[indexes[0]])
-                geodataframe = geopandas.GeoDataFrame(df, crs=target_EPSG, geometry=geoms)
+                geodataframe = geopandas.GeoDataFrame(df, crs=target_crs, geometry=geoms)
                 return geodataframe
             except:  # noqa: E722
                 raise InvalidWktFormatException
@@ -68,7 +68,7 @@ def _csv_to_geopandas(  # type: ignore[no-any-unimported]
                 raise InvalidColumnIndexException
             try:
                 geodataframe = geopandas.GeoDataFrame(
-                    df, crs=target_EPSG, geometry=geopandas.points_from_xy(df[indexes[0]], df[indexes[1]])
+                    df, crs=target_crs, geometry=geopandas.points_from_xy(df[indexes[0]], df[indexes[1]])
                 )
                 return geodataframe
             except:  # noqa: E722
@@ -78,7 +78,7 @@ def _csv_to_geopandas(  # type: ignore[no-any-unimported]
 def csv_to_geopandas(  # type: ignore[no-any-unimported]
     csv: Path,
     indexes: List[int],
-    target_EPSG: int,
+    target_crs: int,
 ) -> geopandas.GeoDataFrame:
     """
     Convert CSV file to geopandas DataFrame.
@@ -87,17 +87,17 @@ def csv_to_geopandas(  # type: ignore[no-any-unimported]
     Usage of two indexes expects POINT feature(s) X-coordinate as the first index and Y-coordinate as the second index.
 
     Args:
-        csv: path to the .csv file to be converted.
-        indexes: index(es) of the geometry column(s).
-        target_EPSG: Target crs as EPSG code.
+        csv: Path to the .csv file to be converted.
+        indexes: Index(es) of the geometry column(s).
+        target_crs: Target crs as an EPSG code.
 
     Returns:
-        csv converted to geopandas geodataframe.
+        Csv converted to geopandas geodataframe.
     """
 
     data_frame = _csv_to_geopandas(
         csv=csv,
         indexes=indexes,
-        target_EPSG=target_EPSG,
+        target_crs=target_crs,
     )
     return data_frame

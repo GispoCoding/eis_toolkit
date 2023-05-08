@@ -11,13 +11,13 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 
 def _extract_values_from_raster(  # type: ignore[no-any-unimported]
     raster_list: List[rasterio.io.DatasetReader],
-    shapefile: gpd.GeoDataFrame,
+    geodataframe: gpd.GeoDataFrame,
     raster_column_names: Optional[List[str]] = None,
 ) -> pd.DataFrame:
 
     data_frame = pd.DataFrame()
 
-    points = shapefile["geometry"].apply(lambda point: (point.xy[0][0], point.xy[1][0]))
+    points = geodataframe["geometry"].apply(lambda point: (point.xy[0][0], point.xy[1][0]))
 
     data_frame["x"] = points.apply(lambda point: (point[0]))
     data_frame["y"] = points.apply(lambda point: (point[1]))
@@ -50,7 +50,7 @@ def _extract_values_from_raster(  # type: ignore[no-any-unimported]
 
 def extract_values_from_raster(  # type: ignore[no-any-unimported]
     raster_list: List[rasterio.io.DatasetReader],
-    shapefile: gpd.GeoDataFrame,
+    geodataframe: gpd.GeoDataFrame,
     raster_column_names: Optional[List[str]] = None,
 ) -> pd.DataFrame:
     """Extract raster values using point data to a dataframe.
@@ -60,7 +60,7 @@ def extract_values_from_raster(  # type: ignore[no-any-unimported]
 
     Args:
         raster_list: list to extract values from.
-        shapefile: object to extract values with.
+        geodataframe: object to extract values with.
         raster_column_names: list of optional column names for bands.
 
     Returns:
@@ -80,7 +80,7 @@ def extract_values_from_raster(  # type: ignore[no-any-unimported]
         raise InvalidParameterValueException
 
     data_frame = _extract_values_from_raster(
-        raster_list=raster_list, shapefile=shapefile, raster_column_names=raster_column_names
+        raster_list=raster_list, geodataframe=geodataframe, raster_column_names=raster_column_names
     )
 
     return data_frame

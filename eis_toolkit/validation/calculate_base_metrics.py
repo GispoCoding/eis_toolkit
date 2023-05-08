@@ -1,3 +1,5 @@
+from typing import Optional
+
 import geopandas
 import numpy as np
 import pandas as pd
@@ -11,8 +13,8 @@ from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometr
 def _calculate_base_metrics(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     deposits: geopandas.GeoDataFrame,
-    band: int = 1,
-    negatives: geopandas.GeoDataFrame = None,
+    band: int,
+    negatives: geopandas.GeoDataFrame,
 ) -> pd.DataFrame:
     data_array = raster.read(band)
 
@@ -71,7 +73,7 @@ def calculate_base_metrics(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     deposits: geopandas.GeoDataFrame,
     band: int = 1,
-    negatives: geopandas.GeoDataFrame = None,
+    negatives: Optional[geopandas.GeoDataFrame] = None,
 ) -> pd.DataFrame:
     """Calculate true positive rate, proportion of area and false positive rate values for different thresholds.
 
@@ -82,7 +84,7 @@ def calculate_base_metrics(  # type: ignore[no-any-unimported]
     Args:
         raster: Mineral prospectivity map or evidence layer.
         deposits: Mineral deposit locations as points.
-        band: band index of the mineral prospectivity map, defaults to 1.
+        band: Band index of the mineral prospectivity map. Defaults to 1.
         negatives: Negative locations as points.
 
     Returns:

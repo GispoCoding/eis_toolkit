@@ -36,8 +36,8 @@ def plot_rate_curve(  # type: ignore[no-any-unimported]
     positive rate (roc) or proportion of area (success and prediction rate) depending on plot type.
 
     Args:
-        true_positive_rate_values: True positive rate values, y-coordinates of the plot.
-        proportion_of_area_values: Proportion of area values, x-coordinates of the plot.
+        x_values: False positive rate values or proportion of area values.
+        y_values: True positive rate values.
         plot_type: Plot type. Can be either: "success_rate", "prediction_rate" or "roc".
 
     Returns:

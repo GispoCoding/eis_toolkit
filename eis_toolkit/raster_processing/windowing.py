@@ -5,7 +5,7 @@ import rasterio
 from rasterio import transform
 from rasterio.windows import Window
 
-from eis_toolkit.exceptions import CoordinatesOutOfBoundsException, InvalidWindowSizeException, NonMatchingCrsException
+from eis_toolkit.exceptions import CoordinatesOutOfBoundsException, InvalidWindowSizeException
 
 
 def _extract_window(  # type: ignore[no-any-unimported]
@@ -78,7 +78,6 @@ def _extract_window(  # type: ignore[no-any-unimported]
 def extract_window(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     center_coords: Tuple[float, float],
-    center_coord_crs: int,
     height: int,
     width: int,
 ) -> Tuple[np.ndarray, dict]:
@@ -88,13 +87,12 @@ def extract_window(  # type: ignore[no-any-unimported]
        -9999 is used.
     Args:
         raster: Source raster.
-        center_coords: center coordinates for window int the form (x, y).
-        center_coord_crs: EPSG code that defines the coordinate reference system.
-        height: window height in pixels.
-        width: window width in pixels.
+        center_coords: Center coordinates for window in form (x, y). The coordinates should be in the raster's CRS.
+        height: Window height in pixels.
+        width: Window width in pixels.
 
     Returns:
-        Extracted raster window.
+        The extracted raster window.
         The updated metadata.
 
     Raises:
@@ -105,9 +103,6 @@ def extract_window(  # type: ignore[no-any-unimported]
 
     if height < 1 or width < 1:
         raise InvalidWindowSizeException
-
-    if center_coord_crs != int(raster.crs.to_string()[5:]):
-        raise NonMatchingCrsException
 
     center_x = center_coords[0]
     center_y = center_coords[1]

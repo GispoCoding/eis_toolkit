@@ -60,7 +60,7 @@ def resample(  # type: ignore[no-any-unimported]
             common choices. This parameter defaults to bilinear.
 
     Returns:
-        Resampled raster data.
+        The resampled raster data.
         The updated metadata.
 
     Raises:
