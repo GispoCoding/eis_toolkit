@@ -99,13 +99,12 @@ def extract_window(  # type: ignore[no-any-unimported]
         The updated metadata.
 
     Raises:
-        CoordinatesOutOfBoundException: Window center coordinates are out of raster bounds.
         InvalidWindowSizeException: Window size is too small.
-        NonMatchingCrsException: Raster and center coordinates are not in same crs.
+        CoordinatesOutOfBoundException: Window center coordinates are out of raster bounds.
     """
 
     if height < 1 or width < 1:
-        raise InvalidWindowSizeException
+        raise InvalidWindowSizeException("Window size is too small.")
 
     center_x = center_coords[0]
     center_y = center_coords[1]
@@ -116,7 +115,7 @@ def extract_window(  # type: ignore[no-any-unimported]
         or center_y < raster.bounds.bottom
         or center_y > raster.bounds.top
     ):
-        raise CoordinatesOutOfBoundsException
+        raise CoordinatesOutOfBoundsException("Window center coordinates are out of raster bounds.")
 
     out_image, out_meta = _extract_window(raster, center_coords, height, width)
 

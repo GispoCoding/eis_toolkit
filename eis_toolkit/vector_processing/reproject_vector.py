@@ -19,7 +19,7 @@ def reproject_vector(  # type: ignore[no-any-unimported]
     """
 
     if geodataframe.crs.to_epsg() == target_crs:
-        raise MatchingCrsException
+        raise MatchingCrsException("Vector data is already in the target CRS.")
 
     reprojected_gdf = geodataframe.to_crs("epsg:" + str(target_crs))
     return reprojected_gdf

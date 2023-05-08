@@ -67,9 +67,12 @@ def reproject_raster(  # type: ignore[no-any-unimported]
     Returns:
         The reprojected raster data.
         The updated metadata.
+
+    Raises:
+        NonMatchinCrsException: Raster is already in the target CRS.
     """
     if target_crs == int(raster.crs.to_string()[5:]):
-        raise MatchingCrsException
+        raise MatchingCrsException("Raster is already in the target CRS.")
 
     out_image, out_meta = _reproject_raster(raster, target_crs, resampling_method)
 

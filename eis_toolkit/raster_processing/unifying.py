@@ -109,7 +109,7 @@ def unify_raster_grids(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Rasters to unify is empty.
     """
     if len(rasters_to_unify) == 0:
-        raise InvalidParameterValueException
+        raise InvalidParameterValueException("Rasters to unify is empty.")
 
     out_rasters = _unify_raster_grids(base_raster, rasters_to_unify, resampling_method, same_extent)
     return out_rasters

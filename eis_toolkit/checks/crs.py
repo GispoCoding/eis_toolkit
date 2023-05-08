@@ -4,13 +4,13 @@ from beartype.typing import List
 
 @beartype
 def check_matching_crs(objects: List) -> bool:
-    """Check if every object in a list has a crs, and that they match.
+    """Check if every object in a list has a CRS, and that they match.
 
     Args:
         objects: A list of objects to check.
 
     Returns:
-        True if everything matches, false if not.
+        True if everything matches, False if not.
     """
     epsg_list = []
 

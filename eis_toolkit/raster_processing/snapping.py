@@ -89,7 +89,7 @@ def snap_with_raster(  # type: ignore[no-any-unimported]
     if not check_matching_crs(
         objects=[raster, snap_raster],
     ):
-        raise NonMatchingCrsException
+        raise NonMatchingCrsException("Raster and and snap raster have different CRS.")
 
     if snap_raster.bounds.bottom == raster.bounds.bottom and snap_raster.bounds.left == raster.bounds.left:
         out_image, out_meta = raster.read(), raster.meta

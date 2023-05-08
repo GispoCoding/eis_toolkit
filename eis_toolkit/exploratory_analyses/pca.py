@@ -41,8 +41,9 @@ def compute_pca(  # type: ignore[no-any-unimported]
         The explained variance ratios for each component.
 
     Raises:
-        EmptyDataFrameException: Raised when the input DataFrame is empty.
-        InvalidNumberOfPrincipalComponents: Raised when the number of principal components is less than 2.
+        EmptyDataFrameException: The input DataFrame is empty.
+        InvalidNumberOfPrincipalComponents: The number of principal components is less than 2 or more than
+            number of columns in the DataFrame.
     """
 
     if data.empty:

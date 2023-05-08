@@ -105,13 +105,13 @@ def calculate_base_metrics(  # type: ignore[no-any-unimported]
     if not check_matching_crs(
         objects=[raster, geometries],
     ):
-        raise NonMatchingCrsException
+        raise NonMatchingCrsException("The raster and deposits are not in the same CRS.")
 
     if not check_geometry_types(
         geometries=geometries,
         allowed_types=["Point"],
     ):
-        raise NotApplicableGeometryTypeException
+        raise NotApplicableGeometryTypeException("The input geometries contain non-point features.")
 
     base_metrics = _calculate_base_metrics(raster=raster, deposits=deposits, band=band, negatives=negatives)
 
