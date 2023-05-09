@@ -1,10 +1,10 @@
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Iterable
+from beartype.typing import Sequence
 
 
 @beartype
-def check_columns_valid(df: pd.DataFrame, columns: Iterable[str]) -> bool:  # type: ignore[no-any-unimported]
+def check_columns_valid(df: pd.DataFrame, columns: Sequence[str]) -> bool:  # type: ignore[no-any-unimported]
     """
     Check that all specified columns are in the dataframe.
 
@@ -19,7 +19,7 @@ def check_columns_valid(df: pd.DataFrame, columns: Iterable[str]) -> bool:  # ty
 
 
 @beartype
-def check_columns_numeric(df: pd.DataFrame, columns: Iterable[str]) -> bool:  # type: ignore[no-any-unimported]
+def check_columns_numeric(df: pd.DataFrame, columns: Sequence[str]) -> bool:  # type: ignore[no-any-unimported]
     """
     Check that all specified columns are numeric.
 

@@ -2,7 +2,7 @@ import geopandas
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import Iterable, Tuple
+from beartype.typing import Sequence, Tuple
 from rasterio.mask import mask
 
 from eis_toolkit.checks.crs import check_matching_crs
@@ -12,7 +12,7 @@ from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometr
 
 # The core clipping functionality. Used internally by clip.
 def _clip_raster(  # type: ignore[no-any-unimported] # noqa: E261
-    raster: rasterio.io.DatasetReader, geometries: Iterable
+    raster: rasterio.io.DatasetReader, geometries: Sequence
 ) -> Tuple[np.ndarray, dict]:
     out_image, out_transform = mask(dataset=raster, shapes=geometries, crop=True, all_touched=True)
     out_meta = raster.meta.copy()

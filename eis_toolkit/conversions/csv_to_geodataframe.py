@@ -4,7 +4,7 @@ from pathlib import Path
 import geopandas
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Iterable
+from beartype.typing import Sequence
 
 from eis_toolkit.exceptions import (
     InvalidColumnIndexException,
@@ -15,7 +15,7 @@ from eis_toolkit.exceptions import (
 
 def _csv_to_geodataframe(  # type: ignore[no-any-unimported]
     csv: Path,
-    indexes: Iterable[int],
+    indexes: Sequence[int],
     target_crs: int,
 ) -> geopandas.GeoDataFrame:
 
@@ -79,7 +79,7 @@ def _csv_to_geodataframe(  # type: ignore[no-any-unimported]
 @beartype
 def csv_to_geodataframe(  # type: ignore[no-any-unimported]
     csv: Path,
-    indexes: Iterable[int],
+    indexes: Sequence[int],
     target_crs: int,
 ) -> geopandas.GeoDataFrame:
     """

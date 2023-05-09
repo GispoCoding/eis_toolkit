@@ -4,7 +4,7 @@ from typing import Optional, Union
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Iterable
+from beartype.typing import Sequence
 
 from eis_toolkit.checks.dataframe import check_columns_valid
 from eis_toolkit.exceptions import InvalidColumnException
@@ -12,7 +12,7 @@ from eis_toolkit.exceptions import InvalidColumnException
 
 @beartype
 def replace_values(
-    data: np.ndarray, values_to_replace: Union[Number, Iterable[Number]], replace_value: Number
+    data: np.ndarray, values_to_replace: Union[Number, Sequence[Number]], replace_value: Number
 ) -> np.ndarray:
     """
     Replace one or many values in a Numpy array with a new value. Returns a copy of the input array.
@@ -32,9 +32,9 @@ def replace_values(
 @beartype
 def replace_values_df(
     df: pd.DataFrame,
-    values_to_replace: Union[Number, Iterable[Number]],
+    values_to_replace: Union[Number, Sequence[Number]],
     replace_value: Number,
-    columns: Optional[Iterable[str]] = None,
+    columns: Optional[Sequence[str]] = None,
 ) -> pd.DataFrame:
     """
     Replace one or many values in a DataFrame with a new value. Returns a copy of the input array.

@@ -23,7 +23,7 @@ def check_parameter_value(parameter_value: Any, allowed_values: Iterable) -> boo
 
 
 @beartype
-def check_numeric_value_sign(parameter_value: Number) -> bool:  # type: ignore[no-untyped-def]
+def check_numeric_value_sign(parameter_value: Number) -> bool:
     """Check if input numeric value is positive.
 
     Args:

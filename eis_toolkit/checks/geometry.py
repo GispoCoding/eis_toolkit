@@ -7,8 +7,8 @@ def check_geometry_types(geometries: Iterable, allowed_types: Iterable) -> bool:
     """Check all geometries in an iterable against a list of allowed types.
 
     Args:
-        geometries: for example a list of shapely.geometry objects or a geopandas.GeoSeries.
-        allowed_types: a list of allowed geometry types.
+        geometries: Geometries to check (for example shapely.geometry objects or a geopandas.GeoSeries).
+        allowed_types: Allowed geometry types.
 
     Returns:
         True if all geometries match, False if not.

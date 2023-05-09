@@ -4,12 +4,12 @@ import numpy as np
 import pandas as pd
 import rasterio
 from beartype import beartype
-from beartype.typing import Iterable
+from beartype.typing import Sequence
 
 
 def _raster_to_dataframe(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    bands: Optional[Iterable[int]],
+    bands: Optional[Sequence[int]],
     add_coordinates: bool,
 ) -> pd.DataFrame:
 
@@ -33,7 +33,7 @@ def _raster_to_dataframe(  # type: ignore[no-any-unimported]
 @beartype
 def raster_to_dataframe(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    bands: Optional[Iterable[int]] = None,
+    bands: Optional[Sequence[int]] = None,
     add_coordinates: bool = False,
 ) -> pd.DataFrame:
     """Convert raster to Pandas DataFrame.

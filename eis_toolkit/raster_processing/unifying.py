@@ -1,7 +1,7 @@
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import Iterable, List, Tuple
+from beartype.typing import List, Sequence, Tuple
 from rasterio import warp
 from rasterio.enums import Resampling
 
@@ -10,7 +10,7 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 
 def _unify_raster_grids(  # type: ignore[no-any-unimported]
     base_raster: rasterio.io.DatasetReader,
-    rasters_to_unify: Iterable[rasterio.io.DatasetReader],
+    rasters_to_unify: Sequence[rasterio.io.DatasetReader],
     resampling_method: Resampling,
     same_extent: bool,
 ) -> List[Tuple[np.ndarray, dict]]:
@@ -87,7 +87,7 @@ def _unify_raster_grids(  # type: ignore[no-any-unimported]
 @beartype
 def unify_raster_grids(  # type: ignore[no-any-unimported]
     base_raster: rasterio.io.DatasetReader,
-    rasters_to_unify: Iterable[rasterio.io.DatasetReader],
+    rasters_to_unify: Sequence[rasterio.io.DatasetReader],
     resampling_method: Resampling = Resampling.nearest,
     same_extent: bool = False,
 ) -> List[Tuple[np.ndarray, dict]]:

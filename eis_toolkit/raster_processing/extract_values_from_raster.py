@@ -5,15 +5,15 @@ import geopandas as gpd
 import pandas as pd
 import rasterio
 from beartype import beartype
-from beartype.typing import Iterable
+from beartype.typing import Sequence
 
 from eis_toolkit.exceptions import NonMatchinParameterLengthsException
 
 
 def _extract_values_from_raster(  # type: ignore[no-any-unimported]
-    raster_list: Iterable[rasterio.io.DatasetReader],
+    raster_list: Sequence[rasterio.io.DatasetReader],
     geodataframe: gpd.GeoDataFrame,
-    raster_column_names: Optional[Iterable[str]],
+    raster_column_names: Optional[Sequence[str]],
 ) -> pd.DataFrame:
 
     data_frame = pd.DataFrame()
@@ -44,9 +44,9 @@ def _extract_values_from_raster(  # type: ignore[no-any-unimported]
 
 @beartype
 def extract_values_from_raster(  # type: ignore[no-any-unimported]
-    raster_list: Iterable[rasterio.io.DatasetReader],
+    raster_list: Sequence[rasterio.io.DatasetReader],
     geodataframe: gpd.GeoDataFrame,
-    raster_column_names: Optional[Iterable[str]] = None,
+    raster_column_names: Optional[Sequence[str]] = None,
 ) -> pd.DataFrame:
     """Extract raster values using point data to a DataFrame.
 

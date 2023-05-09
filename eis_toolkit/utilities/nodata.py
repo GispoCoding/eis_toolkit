@@ -4,7 +4,7 @@ from typing import Any, Union
 
 import numpy as np
 from beartype import beartype
-from beartype.typing import Callable, Dict, Iterable
+from beartype.typing import Callable, Dict, Sequence
 
 from eis_toolkit.exceptions import InvalidRasterBandException
 from eis_toolkit.utilities.miscellaneous import replace_values
@@ -31,7 +31,7 @@ def set_nodata_raster_meta(raster_meta: Dict, nodata_value: Number) -> Dict:
 
 @beartype
 def replace_raster_nodata_each_band(
-    raster_data: np.ndarray, nodata_per_band: Dict[int, Union[Number, Iterable[Number]]], new_nodata: Number = -9999
+    raster_data: np.ndarray, nodata_per_band: Dict[int, Union[Number, Sequence[Number]]], new_nodata: Number = -9999
 ) -> np.ndarray:
     """
     Replace old nodata values with a new nodata value in a raster for each band separately.

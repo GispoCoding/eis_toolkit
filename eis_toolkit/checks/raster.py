@@ -1,13 +1,13 @@
 import rasterio
 from beartype import beartype
-from beartype.typing import Iterable
+from beartype.typing import Sequence
 
 from eis_toolkit.checks.crs import check_matching_crs
 
 
 @beartype
 def check_matching_cell_size(  # type: ignore[no-any-unimported]
-    rasters: Iterable[rasterio.io.DatasetReader],
+    rasters: Sequence[rasterio.io.DatasetReader],
 ) -> bool:
     """Check if all input rasters have matching cell size.
 
@@ -27,7 +27,7 @@ def check_matching_cell_size(  # type: ignore[no-any-unimported]
 
 @beartype
 def check_matching_pixel_alignment(  # type: ignore[no-any-unimported]
-    rasters: Iterable[rasterio.io.DatasetReader],
+    rasters: Sequence[rasterio.io.DatasetReader],
 ) -> bool:
     """Check if all input rasters have matching cell size and matching pixel alignment.
 
@@ -54,7 +54,7 @@ def check_matching_pixel_alignment(  # type: ignore[no-any-unimported]
 
 @beartype
 def check_matching_bounds(  # type: ignore[no-any-unimported]
-    rasters: Iterable[rasterio.io.DatasetReader],
+    rasters: Sequence[rasterio.io.DatasetReader],
 ) -> bool:
     """Check if all input rasters have matching bounds.
 
@@ -74,7 +74,7 @@ def check_matching_bounds(  # type: ignore[no-any-unimported]
 
 @beartype
 def check_raster_grids(  # type: ignore[no-any-unimported]
-    rasters: Iterable[rasterio.io.DatasetReader], same_extent: bool = False
+    rasters: Sequence[rasterio.io.DatasetReader], same_extent: bool = False
 ) -> bool:
     """
     Check all input rasters for matching gridding and optionally matching bounds.
@@ -97,7 +97,7 @@ def check_raster_grids(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def check_raster_bands(raster: rasterio.io.DatasetReader, bands: Iterable[int]) -> bool:
+def check_raster_bands(raster: rasterio.io.DatasetReader, bands: Sequence[int]) -> bool:
     """Check if selection of bands is contained in the raster.
 
     Args:

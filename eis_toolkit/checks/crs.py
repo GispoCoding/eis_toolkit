@@ -1,9 +1,9 @@
 from beartype import beartype
-from beartype.typing import List
+from beartype.typing import Iterable
 
 
 @beartype
-def check_matching_crs(objects: List) -> bool:
+def check_matching_crs(objects: Iterable) -> bool:
     """Check if every object in a list has a CRS, and that they match.
 
     Args:
