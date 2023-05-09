@@ -7,7 +7,7 @@ from beartype import beartype
 from beartype.typing import Iterable
 
 
-def _raster_to_pandas(  # type: ignore[no-any-unimported]
+def _raster_to_dataframe(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     bands: Optional[Iterable[int]],
     add_coordinates: bool,
@@ -31,12 +31,12 @@ def _raster_to_pandas(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def raster_to_pandas(  # type: ignore[no-any-unimported]
+def raster_to_dataframe(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     bands: Optional[Iterable[int]] = None,
     add_coordinates: bool = False,
 ) -> pd.DataFrame:
-    """Convert raster to pandas DataFrame.
+    """Convert raster to Pandas DataFrame.
 
     If bands are not given, all bands are used for conversion. Selected bands are named based on their index e.g.,
     band_1, band_2,...,band_n. If wanted, image coordinates (row, col) for each pixel can be written to
@@ -48,10 +48,10 @@ def raster_to_pandas(  # type: ignore[no-any-unimported]
         add_coordinates: Determines if pixel coordinates are written into dataframe. Defaults to False.
 
     Returns:
-        Raster converted to pandas dataframe
+        Raster converted to a DataFrame.
     """
 
-    data_frame = _raster_to_pandas(
+    data_frame = _raster_to_dataframe(
         raster=raster,
         bands=bands,
         add_coordinates=add_coordinates,

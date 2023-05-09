@@ -6,9 +6,8 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 
 
 def _calculate_auc(x_values: np.ndarray, y_values: np.ndarray) -> float:
-    auc_value = metrics.auc(x_values, y_values)
-
-    return float(auc_value)
+    auc_value = float(metrics.auc(x_values, y_values))
+    return auc_value
 
 
 @beartype

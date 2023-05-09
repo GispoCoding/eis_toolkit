@@ -60,7 +60,7 @@ def reproject_raster(  # type: ignore[no-any-unimported]
 
     Args:
         raster: The raster to be reprojected.
-        target_crs: Target crs as EPSG code.
+        target_crs: Target CRS as EPSG code.
         resampling_method: Resampling method. Most suitable method depends on the dataset and context.
             Nearest, bilinear and cubic are some common choices. This parameter defaults to nearest.
 

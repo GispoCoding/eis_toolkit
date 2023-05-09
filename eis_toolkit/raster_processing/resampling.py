@@ -68,10 +68,12 @@ def resample(  # type: ignore[no-any-unimported]
         The updated metadata.
 
     Raises:
-        NumericValueSignException: Upscale factor is not a positive value.
+        NumericValueSignException: Upscale factor (y) is not a positive value.
     """
     if not check_numeric_value_sign(upscale_factor):
         raise NumericValueSignException(f"Upscale factor is not a positive value: {upscale_factor}")
+    if upscale_factor_y is not None and not check_numeric_value_sign(upscale_factor_y):
+        raise NumericValueSignException(f"Upscale factor y is not a positive value: {upscale_factor_y}")
 
     out_image, out_meta = _resample(raster, resampling_method, upscale_factor, upscale_factor_y)
     return out_image, out_meta

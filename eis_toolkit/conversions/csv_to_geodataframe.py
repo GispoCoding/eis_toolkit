@@ -13,7 +13,7 @@ from eis_toolkit.exceptions import (
 )
 
 
-def _csv_to_geopandas(  # type: ignore[no-any-unimported]
+def _csv_to_geodataframe(  # type: ignore[no-any-unimported]
     csv: Path,
     indexes: Iterable[int],
     target_crs: int,
@@ -77,27 +77,27 @@ def _csv_to_geopandas(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def csv_to_geopandas(  # type: ignore[no-any-unimported]
+def csv_to_geodataframe(  # type: ignore[no-any-unimported]
     csv: Path,
     indexes: Iterable[int],
     target_crs: int,
 ) -> geopandas.GeoDataFrame:
     """
-    Convert CSV file to geopandas DataFrame.
+    Read CSV file to a GeoDataFrame.
 
     Usage of single index expects valid WKT geometry.
     Usage of two indexes expects POINT feature(s) X-coordinate as the first index and Y-coordinate as the second index.
 
     Args:
-        csv: Path to the .csv file to be converted.
+        csv: Path to the .csv file to be read.
         indexes: Index(es) of the geometry column(s).
-        target_crs: Target crs as an EPSG code.
+        target_crs: Target CRS as an EPSG code.
 
     Returns:
-        Csv converted to geopandas geodataframe.
+        CSV file read to a GeoDataFrame.
     """
 
-    data_frame = _csv_to_geopandas(
+    data_frame = _csv_to_geodataframe(
         csv=csv,
         indexes=indexes,
         target_crs=target_crs,

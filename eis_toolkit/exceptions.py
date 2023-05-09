@@ -35,11 +35,19 @@ class InvalidWktFormatException(Exception):
 
 
 class MatchingCrsException(Exception):
-    """Exception error class for crs matches."""
+    """Exception error class for CRS matches."""
+
+
+class MatchingRasterGridException(Exception):
+    """Exception error class for raster grid matches."""
 
 
 class NonMatchingCrsException(Exception):
-    """Exception error class for crs mismatches."""
+    """Exception error class for CRS mismatches."""
+
+
+class NonMatchinParameterLengthsException(Exception):
+    """Exception error class for parameters with different lenghts."""
 
 
 class NotApplicableGeometryTypeException(Exception):

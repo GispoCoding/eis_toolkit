@@ -2,9 +2,11 @@ from pathlib import Path
 
 import geopandas as gpd
 import pandas as pd
+import pytest
 import rasterio
 from pandas.testing import assert_series_equal
 
+from eis_toolkit.exceptions import NonMatchinParameterLengthsException
 from eis_toolkit.raster_processing.extract_values_from_raster import extract_values_from_raster
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
@@ -66,3 +68,15 @@ def test_extract_values_from_raster_uses_custom_column_names():
     )
 
     assert column_name in data_frame.columns
+
+
+def test_extract_values_from_raster_nonmatching_parameter_lengths():
+    """Tests that invalid parameter value for resampling method raises the correct exception."""
+    single_band_raster = rasterio.open(SMALL_RASTER_PATH)
+    gdf = gpd.read_file(gdf_path)
+
+    raster_list = [single_band_raster]
+    raster_column_names = ["singleband_raster", "singleband_raster_2"]
+
+    with pytest.raises(NonMatchinParameterLengthsException):
+        extract_values_from_raster(raster_list=raster_list, geodataframe=gdf, raster_column_names=raster_column_names)

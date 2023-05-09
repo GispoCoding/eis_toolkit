@@ -2,17 +2,16 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import pytest
 import rasterio
 
-from eis_toolkit.conversions.raster_to_pandas import raster_to_pandas
+from eis_toolkit.conversions.raster_to_dataframe import raster_to_dataframe
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
 test_dir = Path(__file__).parent.parent
 
 
-@pytest.mark.skip
-def test_raster_to_pandas():
+# @pytest.mark.skip
+def test_raster_to_dataframe():
     """Test raster to pandas conversion by converting pandas dataframe and then back to raster data."""
     raster = rasterio.open(SMALL_RASTER_PATH)
     raster_data_array = raster.read(1)
@@ -27,7 +26,7 @@ def test_raster_to_pandas():
 
     """Convert to dataframe."""
     multiband_raster = rasterio.open(test_dir.joinpath("data/local/data/multiband.tif"))
-    df = raster_to_pandas(multiband_raster, add_img_coord=True)
+    df = raster_to_dataframe(multiband_raster, add_coordinates=True)
 
     """Convert back to raster image."""
     df["id"] = df.index

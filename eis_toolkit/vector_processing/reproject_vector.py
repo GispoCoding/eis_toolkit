@@ -12,7 +12,7 @@ def reproject_vector(  # type: ignore[no-any-unimported]
 
     Args:
         geodataframe: The vector dataframe to be reprojected.
-        target_crs: Target crs as an EPSG code.
+        target_crs: Target CRS as an EPSG code.
 
     Returns:
         Reprojected vector data.

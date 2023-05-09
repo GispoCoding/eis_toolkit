@@ -94,7 +94,7 @@ def calculate_base_metrics(  # type: ignore[no-any-unimported]
             rate (optional) values.
 
     Raises:
-        NonMatchingCrsException: The raster and point data are not in the same crs.
+        NonMatchingCrsException: The raster and point data are not in the same CRS.
         NotApplicableGeometryTypeException: The input geometries contain non-point features.
     """
     if negatives is not None:

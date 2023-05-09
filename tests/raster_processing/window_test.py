@@ -12,7 +12,7 @@ raster = rasterio.open(SMALL_RASTER_PATH)
 # Case1 3x3 window where part of the window is out of bounds
 case1_easting = 384745
 case1_northing = 6671273
-case1_reference_data = np.array([[[-9999, 3.105, 3.152], [-9999, 3.004, 3.037], [-9999, -9999, -9999]]])
+case1_reference_data = np.array([[[-999.999, 3.105, 3.152], [-999.999, 3.004, 3.037], [-999.999, -999.999, -999.999]]])
 case1_reference_transform = rasterio.Affine(2.0, 0.0, 384742.0, 0.0, -2.0, 6671276.0)
 case1_reference_meta = raster.meta.copy()
 case1_reference_meta.update({"height": 3, "width": 3, "transform": case1_reference_transform})
@@ -28,7 +28,7 @@ case2_reference_meta.update({"height": 2, "width": 2, "transform": case2_referen
 # Case3 3x2 window where part of the window is out of bounds
 case3_easting = 384804.19
 case3_northing = 6671272.15
-case3_reference_data = np.array([[[7.502, 8.459], [6.788, 7.831], [-9999, -9999]]])
+case3_reference_data = np.array([[[7.502, 8.459], [6.788, 7.831], [-999.999, -999.999]]])
 case3_reference_transform = rasterio.Affine(2.0, 0.0, 384802.0, 0.0, -2.0, 6671276.0)
 case3_reference_meta = raster.meta.copy()
 case3_reference_meta.update({"height": 3, "width": 2, "transform": case3_reference_transform})
@@ -36,6 +36,7 @@ case3_reference_meta.update({"height": 3, "width": 2, "transform": case3_referen
 
 def test_extract_window_case1():
     """Tests extract_window function in Case1."""
+    print(raster.meta["nodata"])
     case1_window_data, case1_window_meta = extract_window(
         raster=raster, center_coords=(case1_easting, case1_northing), height=3, width=3
     )

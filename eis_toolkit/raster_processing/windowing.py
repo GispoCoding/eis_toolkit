@@ -17,6 +17,8 @@ def _extract_window(  # type: ignore[no-any-unimported]
     width: int,
 ) -> Tuple[np.ndarray, dict]:
 
+    out_meta = raster.meta.copy()
+
     center_x = center_coords[0]
     center_y = center_coords[1]
 
@@ -46,7 +48,7 @@ def _extract_window(  # type: ignore[no-any-unimported]
     out_image = raster.read(
         boundless=True,
         window=window,
-        fill_value=-9999,
+        fill_value=out_meta["nodata"],
     )
 
     top_left_coordinates = transform.xy(
@@ -65,7 +67,6 @@ def _extract_window(  # type: ignore[no-any-unimported]
         top_left_coordinates[1],
     )
 
-    out_meta = raster.meta.copy()
     out_meta.update(
         {
             "height": out_image.shape[1],
@@ -87,7 +88,7 @@ def extract_window(  # type: ignore[no-any-unimported]
     """Extract window from raster.
 
        Center coordinate must be inside the raster but window can extent outside the raster in which case padding with
-       -9999 is used.
+       raster nodata value is used.
     Args:
         raster: Source raster.
         center_coords: Center coordinates for window in form (x, y). The coordinates should be in the raster's CRS.
@@ -104,7 +105,7 @@ def extract_window(  # type: ignore[no-any-unimported]
     """
 
     if height < 1 or width < 1:
-        raise InvalidParameterValueException("Window size is too small.")
+        raise InvalidParameterValueException(f"Window size is too small: {height}, {width}.")
 
     center_x = center_coords[0]
     center_y = center_coords[1]
