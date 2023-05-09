@@ -5,7 +5,7 @@ from beartype.typing import Tuple
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-from eis_toolkit.exceptions import EmptyDataFrameException, InvalidNumberOfPrincipalComponents
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 
 
 def _compute_pca(  # type: ignore[no-any-unimported]
@@ -50,7 +50,7 @@ def compute_pca(  # type: ignore[no-any-unimported]
         raise EmptyDataFrameException("The input DataFrame is empty.")
 
     if number_of_components < 2 or number_of_components > len(data.columns):
-        raise InvalidNumberOfPrincipalComponents(
+        raise InvalidParameterValueException(
             "The number of principal components should be >= 2 and at most the number of columns in the DataFrame."
         )
 

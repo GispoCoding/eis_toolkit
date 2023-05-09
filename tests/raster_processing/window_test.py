@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import rasterio
 
-from eis_toolkit.exceptions import CoordinatesOutOfBoundsException, InvalidWindowSizeException
+from eis_toolkit.exceptions import CoordinatesOutOfBoundsException, InvalidParameterValueException
 from eis_toolkit.raster_processing.windowing import extract_window
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
@@ -69,7 +69,7 @@ def test_extract_window_case3():
 
 def test_extract_window_invalid_window():
     """Test that invalid window size raises correct exception."""
-    with pytest.raises(InvalidWindowSizeException):
+    with pytest.raises(InvalidParameterValueException):
         extract_window(raster=raster, center_coords=(case1_easting, case1_northing), height=0, width=0)
 
 

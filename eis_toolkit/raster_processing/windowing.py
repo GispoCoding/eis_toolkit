@@ -7,7 +7,7 @@ from beartype.typing import Tuple
 from rasterio import transform
 from rasterio.windows import Window
 
-from eis_toolkit.exceptions import CoordinatesOutOfBoundsException, InvalidWindowSizeException
+from eis_toolkit.exceptions import CoordinatesOutOfBoundsException, InvalidParameterValueException
 
 
 def _extract_window(  # type: ignore[no-any-unimported]
@@ -99,12 +99,12 @@ def extract_window(  # type: ignore[no-any-unimported]
         The updated metadata.
 
     Raises:
-        InvalidWindowSizeException: Window size is too small.
+        InvalidParameterValueException: Window size is too small.
         CoordinatesOutOfBoundException: Window center coordinates are out of raster bounds.
     """
 
     if height < 1 or width < 1:
-        raise InvalidWindowSizeException("Window size is too small.")
+        raise InvalidParameterValueException("Window size is too small.")
 
     center_x = center_coords[0]
     center_y = center_coords[1]
