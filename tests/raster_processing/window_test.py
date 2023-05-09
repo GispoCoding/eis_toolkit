@@ -1,15 +1,12 @@
-from pathlib import Path
-
 import numpy as np
 import pytest
 import rasterio
 
 from eis_toolkit.exceptions import CoordinatesOutOfBoundsException, InvalidWindowSizeException
 from eis_toolkit.raster_processing.windowing import extract_window
+from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
-parent_dir = Path(__file__).parent
-raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
-raster = rasterio.open(raster_path)
+raster = rasterio.open(SMALL_RASTER_PATH)
 
 # Reference values acuired from QGIS from small_raster.tif
 # Case1 3x3 window where part of the window is out of bounds

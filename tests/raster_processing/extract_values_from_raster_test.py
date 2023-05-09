@@ -6,17 +6,17 @@ import rasterio
 from pandas.testing import assert_series_equal
 
 from eis_toolkit.raster_processing.extract_values_from_raster import extract_values_from_raster
+from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
-parent_dir = Path(__file__).parent
-singleband_raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
-gdf_path = parent_dir.joinpath("data/remote/extract_raster_values/extract_raster_values_points.shp")
+test_dir = Path(__file__).parent.parent
+gdf_path = test_dir.joinpath("data/remote/extract_raster_values/extract_raster_values_points.shp")
 
 
 def test_extract_values_from_raster_returns_correct_output():
     """Test extract raster values returns correct output."""
     expected_output = pd.Series([5.683, 5.040, 2.958, 8.799, 5.234], name="small_raster")
 
-    single_band_raster = rasterio.open(singleband_raster_path)
+    single_band_raster = rasterio.open(SMALL_RASTER_PATH)
     gdf = gpd.read_file(gdf_path)
 
     raster_list = [single_band_raster]
@@ -29,7 +29,7 @@ def test_extract_values_from_raster_returns_correct_output():
 
 def test_extract_values_from_raster_returns_pandas_dataframe():
     """Test extract raster values returns pandas DataFrame."""
-    single_band_raster = rasterio.open(singleband_raster_path)
+    single_band_raster = rasterio.open(SMALL_RASTER_PATH)
     gdf = gpd.read_file(gdf_path)
 
     raster_list = [single_band_raster]
@@ -41,7 +41,7 @@ def test_extract_values_from_raster_returns_pandas_dataframe():
 
 def test_extract_values_from_raster_returns_non_empty_dataframe():
     """Test extract raster values returns a filled pandas DataFrame."""
-    single_band_raster = rasterio.open(singleband_raster_path)
+    single_band_raster = rasterio.open(SMALL_RASTER_PATH)
     gdf = gpd.read_file(gdf_path)
 
     raster_list = [single_band_raster]
@@ -53,7 +53,7 @@ def test_extract_values_from_raster_returns_non_empty_dataframe():
 
 def test_extract_values_from_raster_uses_custom_column_names():
     """Test extract raster values full pandas DataFrame."""
-    single_band_raster = rasterio.open(singleband_raster_path)
+    single_band_raster = rasterio.open(SMALL_RASTER_PATH)
     gdf = gpd.read_file(gdf_path)
 
     raster_list = [single_band_raster]

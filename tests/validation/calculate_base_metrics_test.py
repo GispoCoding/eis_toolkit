@@ -8,10 +8,10 @@ import rasterio
 from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 from eis_toolkit.validation.calculate_base_metrics import calculate_base_metrics
 
-parent_dir = Path(__file__).parent
-raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
-polygon_path = parent_dir.joinpath("data/remote/small_area.shp")
-wrong_crs_polygon_path = parent_dir.joinpath("data/remote/small_area.geojson")
+test_dir = Path(__file__).parent.parent
+raster_path = test_dir.joinpath("data/remote/small_raster.tif")
+polygon_path = test_dir.joinpath("data/remote/small_area.shp")
+wrong_crs_polygon_path = test_dir.joinpath("data/remote/small_area.geojson")
 
 
 def test_calculate_base_metrics():

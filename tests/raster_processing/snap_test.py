@@ -9,19 +9,19 @@ from eis_toolkit.raster_processing.reprojecting import reproject_raster
 from eis_toolkit.raster_processing.resampling import resample
 from eis_toolkit.raster_processing.snapping import snap_with_raster
 
-parent_dir = Path(__file__).parent
+test_dir = Path(__file__).parent.parent
 
-snap_raster_path = parent_dir.joinpath("data/remote/snapping/snap_raster.tif")
-case1_raster_path = parent_dir.joinpath("data/remote/snapping/snap_test_raster_right_top.tif")
-case2_raster_path = parent_dir.joinpath("data/remote/snapping/snap_test_raster_right_bottom.tif")
-case3_raster_path = parent_dir.joinpath("data/remote/snapping/snap_test_raster_smaller_cells.tif")
-case4_raster_path = parent_dir.joinpath("data/remote/snapping/snap_test_raster_outofbounds.tif")
-case5_raster_path = parent_dir.joinpath("data/remote/small_raster_multiband.tif")
-nonsquare_raster_path = parent_dir.joinpath("data/remote/snapping/snap_test_raster_nonsquare.tif")
+snap_raster_path = test_dir.joinpath("data/remote/snapping/snap_raster.tif")
+case1_raster_path = test_dir.joinpath("data/remote/snapping/snap_test_raster_right_top.tif")
+case2_raster_path = test_dir.joinpath("data/remote/snapping/snap_test_raster_right_bottom.tif")
+case3_raster_path = test_dir.joinpath("data/remote/snapping/snap_test_raster_smaller_cells.tif")
+case4_raster_path = test_dir.joinpath("data/remote/snapping/snap_test_raster_outofbounds.tif")
+case5_raster_path = test_dir.joinpath("data/remote/small_raster_multiband.tif")
+nonsquare_raster_path = test_dir.joinpath("data/remote/snapping/snap_test_raster_nonsquare.tif")
 
 # Save some test rasters to local
-wrong_crs_path = parent_dir.joinpath("data/local/snap_test_wrong_crs.tif")
-small_snap_raster_path = parent_dir.joinpath("data/local/snap_test_small_snap_raster.tif")
+wrong_crs_path = test_dir.joinpath("data/local/results/snap_test_wrong_crs.tif")
+small_snap_raster_path = test_dir.joinpath("data/local/results/snap_test_small_snap_raster.tif")
 
 
 def test_snap_case1_to_right_top():

@@ -11,9 +11,9 @@ from eis_toolkit.utilities.nodata import (
     set_nodata_raster_meta,
 )
 
-parent_dir = Path(__file__).parent.parent
-raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
-multi_raster_path = parent_dir.joinpath("data/remote/small_raster_multiband.tif")
+test_dir = Path(__file__).parent.parent
+raster_path = test_dir.joinpath("data/remote/small_raster.tif")
+multi_raster_path = test_dir.joinpath("data/remote/small_raster_multiband.tif")
 
 
 def test_set_nodata_raster_meta():

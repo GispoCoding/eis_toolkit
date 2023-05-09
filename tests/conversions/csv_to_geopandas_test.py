@@ -10,8 +10,8 @@ from eis_toolkit.exceptions import (
     InvalidWktFormatException,
 )
 
-parent_dir = Path(__file__).parent
-csv_path = parent_dir.joinpath("data/remote/test.csv")
+test_dir = Path(__file__).parent.parent
+csv_path = test_dir.joinpath("data/remote/test.csv")
 
 
 def test_csv_to_geopandas():
