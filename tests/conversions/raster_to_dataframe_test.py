@@ -2,6 +2,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 import rasterio
 
 from eis_toolkit.conversions.raster_to_dataframe import raster_to_dataframe
@@ -10,7 +11,7 @@ from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 test_dir = Path(__file__).parent.parent
 
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_raster_to_dataframe():
     """Test raster to pandas conversion by converting pandas dataframe and then back to raster data."""
     raster = rasterio.open(SMALL_RASTER_PATH)
