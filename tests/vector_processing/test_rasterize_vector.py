@@ -1,5 +1,5 @@
 from contextlib import nullcontext
-from typing import ContextManager, NamedTuple, Optional, Union
+from typing import NamedTuple, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -74,7 +74,6 @@ class RasterizeVectorTestArgs(NamedTuple):
     fill_value: float = 0.0
     base_raster_profile: Optional[Union[profiles.Profile, dict]] = None
     buffer_value: Optional[float] = None
-    raises: ContextManager = nullcontext()
 
 
 @pytest.mark.parametrize(
@@ -82,32 +81,35 @@ class RasterizeVectorTestArgs(NamedTuple):
     [
         pytest.param(
             *RasterizeVectorTestArgs(geodataframe=SAMPLE_LINE_GEODATAFRAME, resolution=0.05),
+            nullcontext(),
             id="LineStrings",
         ),
         pytest.param(
             *RasterizeVectorTestArgs(geodataframe=SAMPLE_POINT_GEODATAFRAME, resolution=0.5),
+            nullcontext(),
             id="Points",
         ),
         pytest.param(
             *RasterizeVectorTestArgs(
                 geodataframe=SAMPLE_POINT_GEODATAFRAME,
                 resolution=-0.5,
-                raises=pytest.raises(exceptions.NumericValueSignException),
             ),
+            pytest.raises(exceptions.NumericValueSignException),
             id="Points_with_negative_resolution",
         ),
         pytest.param(
             *RasterizeVectorTestArgs(geodataframe=SAMPLE_POLYGON_GEODATAFRAME),
+            nullcontext(),
             id="Polygons",
         ),
         pytest.param(
-            *RasterizeVectorTestArgs(
-                geodataframe=SAMPLE_EMPTY_GEODATAFRAME, raises=pytest.raises(exceptions.EmptyDataFrameException)
-            ),
+            *RasterizeVectorTestArgs(geodataframe=SAMPLE_EMPTY_GEODATAFRAME),
+            pytest.raises(exceptions.EmptyDataFrameException),
             id="Empty_GeoDataFrame_that_should_raise_exception",
         ),
         pytest.param(
             *RasterizeVectorTestArgs(geodataframe=SAMPLE_TRACES_WITH_EMPTY_GEODATAFRAME),
+            nullcontext(),
             id="LineStrings_with_some_empty",
         ),
         pytest.param(
@@ -117,18 +119,20 @@ class RasterizeVectorTestArgs(NamedTuple):
                     dict(height=20, width=20, transform=transform.from_bounds(-10, -10, 10, 10, width=20, height=20))
                 ),
             ),
+            nullcontext(),
             id="LineStrings_with_base_raster",
         ),
         pytest.param(
             *RasterizeVectorTestArgs(geodataframe=SAMPLE_LINE_GEODATAFRAME, buffer_value=1.0, resolution=0.15),
+            nullcontext(),
             id="LineStrings_with_buffer",
         ),
         pytest.param(
             *RasterizeVectorTestArgs(
                 geodataframe=SAMPLE_LINE_GEODATAFRAME,
                 value_column="not-in-columns",
-                raises=pytest.raises(exceptions.InvalidParameterValueException),
             ),
+            pytest.raises(exceptions.InvalidParameterValueException),
             id="Invalid_value_column",
         ),
     ],
@@ -172,13 +176,15 @@ def test_rasterize_vector(
     "geodataframe,resolution,value_column,default_value,fill_value,base_raster_profile,buffer_value,expected_result",
     [
         pytest.param(
-            SAMPLE_LINE_GEODATAFRAME,
-            0.25,
-            None,
-            1,
-            0,
-            None,
-            None,
+            *RasterizeVectorTestArgs(
+                geodataframe=SAMPLE_LINE_GEODATAFRAME,
+                resolution=0.25,
+                value_column=None,
+                default_value=1.0,
+                fill_value=0.0,
+                base_raster_profile=None,
+                buffer_value=None,
+            ),
             np.array(
                 [
                     [0, 0, 0, 0],
@@ -199,13 +205,15 @@ def test_rasterize_vector(
             id="LineStrings",
         ),
         pytest.param(
-            SAMPLE_POINT_GEODATAFRAME,
-            0.5,
-            None,
-            1,
-            0,
-            None,
-            0.5,
+            *RasterizeVectorTestArgs(
+                geodataframe=SAMPLE_POINT_GEODATAFRAME,
+                resolution=0.5,
+                value_column=None,
+                default_value=1.0,
+                fill_value=0.0,
+                base_raster_profile=None,
+                buffer_value=0.5,
+            ),
             np.array(
                 [
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],

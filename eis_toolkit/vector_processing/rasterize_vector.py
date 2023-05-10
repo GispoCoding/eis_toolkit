@@ -1,12 +1,13 @@
-from typing import Optional, Tuple, Union
-
 import geopandas as gpd
 import numpy as np
+from beartype import beartype
+from beartype.typing import Optional, Tuple, Union
 from rasterio import features, profiles, transform
 
 from eis_toolkit import exceptions
 
 
+@beartype
 def rasterize_vector(
     geodataframe: gpd.GeoDataFrame,
     resolution: float,
@@ -19,19 +20,19 @@ def rasterize_vector(
     """Transform vector data into raster data.
 
     Args:
-        geodataframe (geopandas.GeoDataFrame): The vector dataframe to be rasterized.
-        resolution (float): The resolution i.e. cell size of the output raster
-        value_column (Optional[str]): The column name with values for each geometry.
+        geodataframe: The vector dataframe to be rasterized.
+        resolution: The resolution i.e. cell size of the output raster
+        value_column: The column name with values for each geometry.
             If None, then default_value is used for all geometries.
-        default_value (float): Default value burned into raster cells based on geometries.
-        base_raster_profile (Optional[Union[rasterio.profiles.Profile, dict]]): Base raster profile
+        default_value: Default value burned into raster cells based on geometries.
+        base_raster_profile: Base raster profile
             to be used for determining the grid on which vectors are burned in.
-        fill_value (float): VAlue used outside the burned/rasterized geometry cells.
-        buffer_value (Optional[float]): For adding a buffer around passed
+        fill_value: Value used outside the burned/rasterized geometry cells.
+        buffer_value: For adding a buffer around passed
             geometries before rasterization.
 
     Returns:
-        out_raster (tuple(numpy.ndarray, dict)): Rasterized vector data and metadata.
+        Rasterized vector data and metadata.
     """
 
     if geodataframe.shape[0] == 0:
@@ -76,9 +77,7 @@ def _transform_from_geometries(
     """Determine transform from the input geometries.
 
     Returns:
-        width (float): Width of the raster
-        height (float): Height of the raster
-        out_transform (rasterio.transform.Affine): Affine transform of the output
+        Width, height and transform of the raster in a tuple.
     """
     min_x, min_y, max_x, max_y = geodataframe.total_bounds
     width = (max_x - min_x) / resolution
@@ -93,7 +92,7 @@ def _rasterize_vector(
     value_column: Optional[str],
     default_value: float,
     fill_value: float,
-    base_raster_profile: Optional[profiles.Profile],
+    base_raster_profile: Optional[Union[profiles.Profile, dict]],
     resolution: float,
 ) -> Tuple[np.ndarray, dict]:
     # rasterio.features.rasterize expects a shapes parameter which is
