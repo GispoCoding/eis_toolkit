@@ -10,7 +10,7 @@ from beartype.typing import Sequence
 from eis_toolkit.exceptions import NonMatchinParameterLengthsException
 
 
-def _extract_values_from_raster(  # type: ignore[no-any-unimported]
+def _extract_values_from_raster(
     raster_list: Sequence[rasterio.io.DatasetReader],
     geodataframe: gpd.GeoDataFrame,
     raster_column_names: Optional[Sequence[str]],
@@ -43,7 +43,7 @@ def _extract_values_from_raster(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def extract_values_from_raster(  # type: ignore[no-any-unimported]
+def extract_values_from_raster(
     raster_list: Sequence[rasterio.io.DatasetReader],
     geodataframe: gpd.GeoDataFrame,
     raster_column_names: Optional[Sequence[str]] = None,

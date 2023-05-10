@@ -12,7 +12,7 @@ from eis_toolkit.exceptions import NumericValueSignException
 
 
 # The core resampling functionality. Used internally by resample.
-def _resample(  # type: ignore[no-any-unimported]
+def _resample(
     raster: rasterio.io.DatasetReader,
     resampling_method: Resampling,
     upscale_factor: Number,
@@ -44,7 +44,7 @@ def _resample(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def resample(  # type: ignore[no-any-unimported]
+def resample(
     raster: rasterio.io.DatasetReader,
     upscale_factor: Number,
     upscale_factor_y: Optional[Number] = None,

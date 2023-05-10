@@ -10,9 +10,7 @@ from eis_toolkit.exceptions import MatchingRasterGridException, NonMatchingCrsEx
 
 
 # The core snapping functionality. Used internally by snap.
-def _snap(  # type: ignore[no-any-unimported]
-    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
-) -> Tuple[np.ndarray, dict]:
+def _snap(raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader) -> Tuple[np.ndarray, dict]:
     raster_bounds = raster.bounds
     snap_bounds = snap_raster.bounds
     raster_pixel_size_x = raster.transform.a
@@ -66,9 +64,7 @@ def _snap(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def snap_with_raster(  # type: ignore[no-any-unimported]
-    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
-) -> Tuple[np.ndarray, dict]:
+def snap_with_raster(raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader) -> Tuple[np.ndarray, dict]:
     """Snaps/aligns raster to given snap raster.
 
     Raster is snapped from its left-bottom corner to nearest snap raster grid corner in left-bottom direction.

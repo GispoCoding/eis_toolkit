@@ -8,7 +8,7 @@ from eis_toolkit.exceptions import MatchingCrsException
 
 
 # Core reprojecting functionality used internally by reproject_raster and reproject_and_write_raster
-def _reproject_raster(  # type: ignore[no-any-unimported]
+def _reproject_raster(
     raster: rasterio.io.DatasetReader, target_crs: int, resampling_method: warp.Resampling
 ) -> Tuple[np.ndarray, dict]:
 
@@ -53,7 +53,7 @@ def _reproject_raster(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def reproject_raster(  # type: ignore[no-any-unimported]
+def reproject_raster(
     raster: rasterio.io.DatasetReader, target_crs: int, resampling_method: warp.Resampling = warp.Resampling.nearest
 ) -> Tuple[np.ndarray, dict]:
     """Reprojects raster to match given coordinate reference system (EPSG).

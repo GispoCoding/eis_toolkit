@@ -7,7 +7,7 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.validation.get_pa_intersection import get_pa_intersection
 
 
-def _plot_prediction_area_curves(  # type: ignore[no-any-unimported]
+def _plot_prediction_area_curves(
     true_positive_rate_values: np.ndarray, proportion_of_area_values: np.ndarray, threshold_values: np.ndarray
 ) -> matplotlib.figure.Figure:
     intersection = get_pa_intersection(true_positive_rate_values, proportion_of_area_values, threshold_values)
@@ -39,7 +39,7 @@ def _plot_prediction_area_curves(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def plot_prediction_area_curves(  # type: ignore[no-any-unimported]
+def plot_prediction_area_curves(
     true_positive_rate_values: np.ndarray, proportion_of_area_values: np.ndarray, threshold_values: np.ndarray
 ) -> matplotlib.figure.Figure:
     """Plot prediction-area (P-A) plot.

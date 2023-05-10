@@ -7,7 +7,7 @@ from plotly.graph_objects import Figure
 
 
 @beartype
-def plot_pca(  # type: ignore[no-any-unimported]
+def plot_pca(
     pca_df: pd.DataFrame, explained_variances: np.ndarray, color_feat: Optional[pd.Series] = None, save_path: str = ""
 ) -> Figure:
     """Plot a scatter matrix of different principal component combinations.

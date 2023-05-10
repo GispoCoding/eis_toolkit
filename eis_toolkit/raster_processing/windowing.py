@@ -10,7 +10,7 @@ from rasterio.windows import Window
 from eis_toolkit.exceptions import CoordinatesOutOfBoundsException, InvalidParameterValueException
 
 
-def _extract_window(  # type: ignore[no-any-unimported]
+def _extract_window(
     raster: rasterio.io.DatasetReader,
     center_coords: Tuple[Number, Number],
     height: int,
@@ -79,7 +79,7 @@ def _extract_window(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def extract_window(  # type: ignore[no-any-unimported]
+def extract_window(
     raster: rasterio.io.DatasetReader,
     center_coords: Tuple[Number, Number],
     height: int,

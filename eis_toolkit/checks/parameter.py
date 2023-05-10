@@ -32,7 +32,7 @@ def check_numeric_value_sign(parameter_value: Number) -> bool:
     Returns:
         True if parameter value is positive, False if not
     """
-    if parameter_value > 0:
+    if parameter_value > 0:  # type: ignore
         return True
     else:
         return False

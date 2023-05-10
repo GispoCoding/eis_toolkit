@@ -7,7 +7,7 @@ from shapely.geometry.point import Point
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
-def _get_pa_intersection(  # type: ignore[no-any-unimported]
+def _get_pa_intersection(
     true_positive_rate_values: np.ndarray, proportion_of_area_values: np.ndarray, threshold_values: np.ndarray
 ) -> Point:
     true_positive_area_curve = LineString(np.column_stack((threshold_values, true_positive_rate_values)))

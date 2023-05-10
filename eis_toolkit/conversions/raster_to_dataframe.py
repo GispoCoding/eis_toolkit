@@ -7,7 +7,7 @@ from beartype import beartype
 from beartype.typing import Sequence
 
 
-def _raster_to_dataframe(  # type: ignore[no-any-unimported]
+def _raster_to_dataframe(
     raster: rasterio.io.DatasetReader,
     bands: Optional[Sequence[int]],
     add_coordinates: bool,
@@ -31,7 +31,7 @@ def _raster_to_dataframe(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def raster_to_dataframe(  # type: ignore[no-any-unimported]
+def raster_to_dataframe(
     raster: rasterio.io.DatasetReader,
     bands: Optional[Sequence[int]] = None,
     add_coordinates: bool = False,

@@ -5,9 +5,7 @@ from eis_toolkit.exceptions import MatchingCrsException
 
 
 @beartype
-def reproject_vector(  # type: ignore[no-any-unimported]
-    geodataframe: geopandas.GeoDataFrame, target_crs: int
-) -> geopandas.GeoDataFrame:
+def reproject_vector(geodataframe: geopandas.GeoDataFrame, target_crs: int) -> geopandas.GeoDataFrame:
     """Reprojects vector data to match given coordinate reference system (EPSG).
 
     Args:

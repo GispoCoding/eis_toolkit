@@ -13,7 +13,7 @@ from eis_toolkit.exceptions import (
 )
 
 
-def _csv_to_geodataframe(  # type: ignore[no-any-unimported]
+def _csv_to_geodataframe(
     csv: Path,
     indexes: Sequence[int],
     target_crs: int,
@@ -77,7 +77,7 @@ def _csv_to_geodataframe(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def csv_to_geodataframe(  # type: ignore[no-any-unimported]
+def csv_to_geodataframe(
     csv: Path,
     indexes: Sequence[int],
     target_crs: int,

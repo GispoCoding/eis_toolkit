@@ -26,7 +26,7 @@ def replace_values(
         Raster data with replaced values.
     """
     out_data = data.copy()
-    return np.where(np.isin(out_data, values_to_replace), replace_value, out_data)
+    return np.where(np.isin(out_data, values_to_replace), replace_value, out_data)  # type: ignore
 
 
 @beartype

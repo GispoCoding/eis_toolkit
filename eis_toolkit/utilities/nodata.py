@@ -31,7 +31,9 @@ def set_nodata_raster_meta(raster_meta: Dict, nodata_value: Number) -> Dict:
 
 @beartype
 def replace_raster_nodata_each_band(
-    raster_data: np.ndarray, nodata_per_band: Dict[int, Union[Number, Sequence[Number]]], new_nodata: Number = -9999
+    raster_data: np.ndarray,
+    nodata_per_band: Dict[int, Union[Number, Sequence[Number]]],
+    new_nodata: Number = -9999,  # type: ignore
 ) -> np.ndarray:
     """
     Replace old nodata values with a new nodata value in a raster for each band separately.
@@ -72,7 +74,7 @@ def nodata_to_nan(data: np.ndarray, nodata_value: Number) -> np.ndarray:
     Returns:
         Input array where specified nodata has been converted to np.nan.
     """
-    return np.where(np.isin(data, nodata_value), np.nan, data)
+    return np.where(np.isin(data, nodata_value), np.nan, data)  # type: ignore
 
 
 @beartype
@@ -86,7 +88,7 @@ def nan_to_nodata(data: np.ndarray, nodata_value: Number) -> np.ndarray:
     Returns:
         Input array where np.nan has been converted to specified nodata.
     """
-    return np.where(np.isnan(data), nodata_value, data)
+    return np.where(np.isnan(data), nodata_value, data)  # type: ignore
 
 
 @beartype

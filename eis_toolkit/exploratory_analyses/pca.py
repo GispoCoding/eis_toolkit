@@ -8,9 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 
 
-def _compute_pca(  # type: ignore[no-any-unimported]
-    data: pd.DataFrame, number_of_components: int
-) -> Tuple[pd.DataFrame, np.ndarray]:
+def _compute_pca(data: pd.DataFrame, number_of_components: int) -> Tuple[pd.DataFrame, np.ndarray]:
 
     feature_matrix = data.loc[:, data.columns].values
     standardized_data = StandardScaler().fit_transform(feature_matrix)
@@ -26,9 +24,7 @@ def _compute_pca(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def compute_pca(  # type: ignore[no-any-unimported]
-    data: pd.DataFrame, number_of_components: int
-) -> Tuple[pd.DataFrame, np.ndarray]:
+def compute_pca(data: pd.DataFrame, number_of_components: int) -> Tuple[pd.DataFrame, np.ndarray]:
     """
     Compute the principal components for the input data.
 

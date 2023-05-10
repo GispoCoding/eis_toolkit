@@ -11,7 +11,7 @@ from eis_toolkit.checks.geometry import check_geometry_types
 from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 
-def _calculate_base_metrics(  # type: ignore[no-any-unimported]
+def _calculate_base_metrics(
     raster: rasterio.io.DatasetReader,
     deposits: geopandas.GeoDataFrame,
     band: int,
@@ -71,7 +71,7 @@ def _calculate_base_metrics(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def calculate_base_metrics(  # type: ignore[no-any-unimported]
+def calculate_base_metrics(
     raster: rasterio.io.DatasetReader,
     deposits: geopandas.GeoDataFrame,
     band: int = 1,

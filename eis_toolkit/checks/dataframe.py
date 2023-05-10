@@ -4,7 +4,7 @@ from beartype.typing import Sequence
 
 
 @beartype
-def check_columns_valid(df: pd.DataFrame, columns: Sequence[str]) -> bool:  # type: ignore[no-any-unimported]
+def check_columns_valid(df: pd.DataFrame, columns: Sequence[str]) -> bool:
     """
     Check that all specified columns are in the dataframe.
 
@@ -19,7 +19,7 @@ def check_columns_valid(df: pd.DataFrame, columns: Sequence[str]) -> bool:  # ty
 
 
 @beartype
-def check_columns_numeric(df: pd.DataFrame, columns: Sequence[str]) -> bool:  # type: ignore[no-any-unimported]
+def check_columns_numeric(df: pd.DataFrame, columns: Sequence[str]) -> bool:
     """
     Check that all specified columns are numeric.
 

@@ -11,9 +11,7 @@ from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometr
 
 
 # The core clipping functionality. Used internally by clip.
-def _clip_raster(  # type: ignore[no-any-unimported] # noqa: E261
-    raster: rasterio.io.DatasetReader, geometries: Sequence
-) -> Tuple[np.ndarray, dict]:
+def _clip_raster(raster: rasterio.io.DatasetReader, geometries: Sequence) -> Tuple[np.ndarray, dict]:
     out_image, out_transform = mask(dataset=raster, shapes=geometries, crop=True, all_touched=True)
     out_meta = raster.meta.copy()
     out_meta.update(
@@ -24,9 +22,7 @@ def _clip_raster(  # type: ignore[no-any-unimported] # noqa: E261
 
 
 @beartype
-def clip_raster(  # type: ignore[no-any-unimported] # noqa: E261,E262
-    raster: rasterio.io.DatasetReader, geodataframe: geopandas.GeoDataFrame
-) -> Tuple[np.ndarray, dict]:
+def clip_raster(raster: rasterio.io.DatasetReader, geodataframe: geopandas.GeoDataFrame) -> Tuple[np.ndarray, dict]:
     """Clips a raster with polygon geometries.
 
     Args:

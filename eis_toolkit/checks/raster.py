@@ -6,7 +6,7 @@ from eis_toolkit.checks.crs import check_matching_crs
 
 
 @beartype
-def check_matching_cell_size(  # type: ignore[no-any-unimported]
+def check_matching_cell_size(
     rasters: Sequence[rasterio.io.DatasetReader],
 ) -> bool:
     """Check if all input rasters have matching cell size.
@@ -26,7 +26,7 @@ def check_matching_cell_size(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def check_matching_pixel_alignment(  # type: ignore[no-any-unimported]
+def check_matching_pixel_alignment(
     rasters: Sequence[rasterio.io.DatasetReader],
 ) -> bool:
     """Check if all input rasters have matching cell size and matching pixel alignment.
@@ -53,7 +53,7 @@ def check_matching_pixel_alignment(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def check_matching_bounds(  # type: ignore[no-any-unimported]
+def check_matching_bounds(
     rasters: Sequence[rasterio.io.DatasetReader],
 ) -> bool:
     """Check if all input rasters have matching bounds.
@@ -73,9 +73,7 @@ def check_matching_bounds(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def check_raster_grids(  # type: ignore[no-any-unimported]
-    rasters: Sequence[rasterio.io.DatasetReader], same_extent: bool = False
-) -> bool:
+def check_raster_grids(rasters: Sequence[rasterio.io.DatasetReader], same_extent: bool = False) -> bool:
     """
     Check all input rasters for matching gridding and optionally matching bounds.
 
