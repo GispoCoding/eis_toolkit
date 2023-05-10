@@ -1,21 +1,25 @@
+from typing import Union
+
 import geopandas as gpd
 import numpy as np
+from beartype import beartype
 from rasterio import profiles, transform
 from shapely.geometry import Point
 
 from eis_toolkit import exceptions
 
 
-def _smallest_distance_to_point(point: Point, geometries: gpd.GeoDataFrame) -> float:
-    """Calculate smalled distance from geometries to point."""
+def _shortest_distance_to_point(point: Point, geometries: gpd.GeoDataFrame) -> float:
+    """Calculate shortest distance from geometries to point."""
     # This could be sped up by using a spatial index to first choose only
     # geometries that are close to the point
     distances_to_point = geometries.distance(point)
-    smallest_distance = distances_to_point.min()
-    return smallest_distance
+    shortest_distance: float = distances_to_point.min()
+    return shortest_distance
 
 
-def distance_computation(raster_profile: profiles.Profile, geometries: gpd.GeoDataFrame) -> np.ndarray:
+@beartype
+def distance_computation(raster_profile: Union[profiles.Profile, dict], geometries: gpd.GeoDataFrame) -> np.ndarray:
     """Calculate distance from raster cell to nearest geometry.
 
     Args:
@@ -60,7 +64,7 @@ def _calculate_row_distances(
     # in a 1D array
     point_xs, point_ys = transform.xy(transform=raster_transform, cols=cols, rows=row)
     row_points = [Point(x, y) for x, y in zip(point_xs, point_ys)]
-    row_distances = np.array([_smallest_distance_to_point(point=point, geometries=geometries) for point in row_points])
+    row_distances = np.array([_shortest_distance_to_point(point=point, geometries=geometries) for point in row_points])
     return row_distances
 
 
