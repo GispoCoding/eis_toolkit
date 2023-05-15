@@ -73,7 +73,7 @@ For creating docstrings, we rely on google convention (see section 3.8 in [link]
 General guidelines about naming policy (applies to package, module, function, class and variable names):
 - all names should be given in English
 - avoid too cryptic names by using complete words
-- if the name consists of multiple words, use snake_case so replace space with underscore character (_) (CamelCase is sused for classes as an exception to this rule)
+- if the name consists of multiple words, use snake_case so replace space with underscore character (_) (CamelCase is used for classes as an exception to this rule)
 - do not include special characters, capital letters or numbers into the names unless in case of using numbers in variable names and there is an unavoidable need for it / using numbers significantly increases clarity
 
 ## Code style
@@ -221,17 +221,23 @@ we utilize poetry for dependency  handling.
 
 ## Recent changes
 Some changes have been made to the style guide:
+- Use `numbers.Number` as the type when both floats and integers are accepted by functions:
+```python
+from numbers import Number
+
+def func(int_or_float: Number):
+    ...
 - Write comments to exceptions:
 ```python
 raise InvalidParameterValueException(f"Window size is too small: {height}, {width}.")
 ```
-- Use beartype's decorator for automatic function argument type checking:
+- Use beartype's decorator for automatic function argument type checking and import types from `beartype.typing` if a warning is raised by beartype on imports from `typing`:
 ```python
 from beartype import beartype
+from beartype.typing import Sequence
 
 @beartype
-def my_function(parameter_1: float, parameter_2: bool):
-```
+def my_function(parameter_1: float, parameter_2: bool, parameter_seq: Sequence):
 - Don't put parameter types and return variable name into function docstring:
 ```python
 # OLD

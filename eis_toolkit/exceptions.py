@@ -3,7 +3,7 @@ class CoordinatesOutOfBoundsException(Exception):
 
 
 class EmptyDataFrameException(Exception):
-    """Exception error class thrown if the dataframe is empty."""
+    """Exception error class raised if the dataframe is empty."""
 
 
 class FileReadError(Exception):
