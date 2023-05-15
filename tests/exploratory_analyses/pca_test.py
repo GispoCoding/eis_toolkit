@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eis_toolkit.exceptions import EmptyDataFrameException, InvalidNumberOfPrincipalComponents
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 from eis_toolkit.exploratory_analyses.pca import compute_pca
 
 data = pd.DataFrame({"A": [1, 2, 3], "B": [1, 2, 3]})
@@ -40,5 +40,5 @@ def test_empty_dataframe():
 
 def test_invalid_number_of_components():
     """Test that invalid number of PCA components raises the correct exception."""
-    with pytest.raises(InvalidNumberOfPrincipalComponents):
+    with pytest.raises(InvalidParameterValueException):
         compute_pca(data, 1)

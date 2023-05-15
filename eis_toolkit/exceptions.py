@@ -1,98 +1,58 @@
-class NonMatchingCrsException(Exception):
-    """Exception error class for crs mismatches."""
-
-    pass
-
-
-class NotApplicableGeometryTypeException(Exception):
-    """Exception error class for not suitable geometry types."""
-
-    pass
-
-
-class MatchingCrsException(Exception):
-    """Exception error class for crs matches."""
-
-
-class NumericValueSignException(Exception):
-    """Exception error class for numeric value sign exception."""
-
-    pass
-
-
-class InvalidParameterValueException(Exception):
-    """Exception error class for invalid parameter values."""
-
-    pass
-
-
-class NonSquarePixelSizeException(Exception):
-    """Exception error class for non-square pixel size."""
-
-    pass
-
-
-class InvalidWindowSizeException(Exception):
-    """Exception error class for invalid window size values."""
-
-    pass
-
-
-class InvalidPixelSizeException(Exception):
-    """Exception error class for invalid pixel size."""
-
-    pass
-
-
 class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
 
-    pass
-
 
 class EmptyDataFrameException(Exception):
-    """Exception error class thrown if the dataframe is empty."""
-
-    pass
-
-
-class InvalidWktFormatException(Exception):
-    """Exception error for invalid WKT format."""
-
-    pass
-
-
-class InvalidNumberOfPrincipalComponents(Exception):
-    """Exception error class thrown if the number of principal components is less than 2."""
-
-    pass
-
-
-class InvalidColumnException(Exception):
-    """Exception error for invalid column."""
-
-    pass
-
-
-class InvalidColumnIndexException(Exception):
-    """Exception error for invalid column index."""
-
-    pass
-
-
-class InvalidArgumentTypeException(Exception):
-    """Exception error for invalid argument type."""
-
-    pass
-
-
-class InvalidRasterBandException(Exception):
-    """Expection error class for invalid raster band selection."""
-
-    pass
+    """Exception error class raised if the dataframe is empty."""
 
 
 class FileReadError(Exception):
     """Exception error class for unsupported file exceptions."""
 
-    pass
+
+class InvalidColumnException(Exception):
+    """Exception error for invalid column."""
+
+
+class InvalidColumnIndexException(Exception):
+    """Exception error for invalid column index."""
+
+
+class InvalidParameterValueException(Exception):
+    """Exception error class for invalid parameter values."""
+
+
+class InvalidPixelSizeException(Exception):
+    """Exception error class for invalid pixel size."""
+
+
+class InvalidRasterBandException(Exception):
+    """Expection error class for invalid raster band selection."""
+
+
+class InvalidWktFormatException(Exception):
+    """Exception error for invalid WKT format."""
+
+
+class MatchingCrsException(Exception):
+    """Exception error class for CRS matches."""
+
+
+class MatchingRasterGridException(Exception):
+    """Exception error class for raster grid matches."""
+
+
+class NonMatchingCrsException(Exception):
+    """Exception error class for CRS mismatches."""
+
+
+class NonMatchinParameterLengthsException(Exception):
+    """Exception error class for parameters with different lenghts."""
+
+
+class NotApplicableGeometryTypeException(Exception):
+    """Exception error class for not suitable geometry types."""
+
+
+class NumericValueSignException(Exception):
+    """Exception error class for numeric value sign exception."""

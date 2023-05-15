@@ -4,10 +4,12 @@ from typing import Union
 import geopandas as gpd
 import pandas as pd
 import rasterio
+from beartype import beartype
 
 from eis_toolkit.exceptions import FileReadError
 
 
+@beartype
 def read_file(file_path: Path) -> Union[rasterio.io.DatasetReader, gpd.GeoDataFrame, pd.DataFrame]:
     """Read an input file trying different readers.
 
@@ -44,6 +46,7 @@ def read_file(file_path: Path) -> Union[rasterio.io.DatasetReader, gpd.GeoDataFr
     return data
 
 
+@beartype
 def read_raster(file_path: Path) -> rasterio.io.DatasetReader:
     """Read a raster file to a rasterio DatasetReader.
 
@@ -63,6 +66,7 @@ def read_raster(file_path: Path) -> rasterio.io.DatasetReader:
     return data
 
 
+@beartype
 def read_vector(file_path: Path) -> gpd.GeoDataFrame:
     """Read a vector file to a GeoDataFrame.
 
@@ -82,6 +86,7 @@ def read_vector(file_path: Path) -> gpd.GeoDataFrame:
     return data
 
 
+@beartype
 def read_tabular(file_path: Path) -> pd.DataFrame:
     """Read tabular data to a DataFrame.
 
