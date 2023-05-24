@@ -17,7 +17,7 @@ lines_file = gpd.GeoDataFrame.from_file(lines_path)
 def test_crs():
     """Test that Coordinate Systems for input dataset and output grids are equivalent."""
     cba_grid = CBA()
-    cba_grid.init_from_vector_file(
+    cba_grid.init_from_vector_data(
         cell_size=4000, geodataframe=vector_file, column="Litho", subset_of_target_attribut_values="all"
     )
     shp_cba_grid = CBA()
@@ -29,7 +29,7 @@ def test_crs():
 def test_gridding():
     """Test that cells indexing is coherent."""
     cba_grid = CBA()
-    cba_grid.init_from_vector_file(
+    cba_grid.init_from_vector_data(
         cell_size=4000, geodataframe=vector_file, column="Litho", subset_of_target_attribut_values="all"
     )
     shp_cba_grid = CBA()
@@ -41,7 +41,7 @@ def test_code_envs():
     """Test that binary code produced are coherent."""
     names = list(vector_file.Litho.unique())
     cba_grid = CBA()
-    cba_grid.init_from_vector_file(
+    cba_grid.init_from_vector_data(
         cell_size=4000, geodataframe=vector_file, column="Litho", subset_of_target_attribut_values="all"
     )
     shp_cba_grid = CBA()
@@ -52,7 +52,7 @@ def test_code_envs():
 def test_add_points():
     """Test the add_layer() function for points vector file."""
     cba_grid = CBA()
-    cba_grid.init_from_vector_file(
+    cba_grid.init_from_vector_data(
         cell_size=4000, geodataframe=vector_file, column="Litho", subset_of_target_attribut_values="all"
     )
     cba_grid.add_layer(
@@ -70,7 +70,7 @@ def test_add_points():
 def test_add_points_buffered():
     """Test the add_layer() function for points vector file with buffer option."""
     cba_grid = CBA()
-    cba_grid.init_from_vector_file(
+    cba_grid.init_from_vector_data(
         cell_size=4000, geodataframe=vector_file, column="Litho", subset_of_target_attribut_values="all"
     )
     cba_grid.add_layer(
@@ -84,7 +84,7 @@ def test_add_points_buffered():
 def test_add_lines():
     """Test the add_layer() function for mutltilines vector file."""
     cba_grid = CBA()
-    cba_grid.init_from_vector_file(
+    cba_grid.init_from_vector_data(
         cell_size=4000, geodataframe=vector_file, column="Litho", subset_of_target_attribut_values="all"
     )
     cba_grid.add_layer(
