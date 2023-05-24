@@ -44,12 +44,12 @@ class CBA:
         # grid is a GeoDataFrame object containing only the cell grid.
         self.grid = gp.GeoDataFrame()
 
-    def init_from_vector_file(
+    def init_from_vector_data(
         self,
         cell_size: int,
-        vector_file_path: str,
-        target_attribut: str = "",
-        subset_of_target_attribut_values: Union[list, None] = None,
+        geodataframe: gpd.GeoDataFrame,
+        column: str = "",
+        subset_of_target_attribute_values: Optional[list] = None,
     ) -> None:
         """Creation of CBA object.
 
