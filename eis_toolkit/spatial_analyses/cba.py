@@ -6,11 +6,9 @@ Created on Thu Jan 19 09:17:33 2023.
 @author: A.Vella, V. Labbe
 """
 
-import time
-from typing import Tuple, Union
-
-# Importing necessary librarie
-import geopandas as gp
+from typing import Tuple, Union, Optional
+from numbers import Number
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 from shapely import wkt
@@ -36,13 +34,13 @@ class CBA:
         """Build an empty CBA matrix."""
 
         # cba is a GeoDataFrame object with the cell grid and the matrix.
-        self.cba = gp.GeoDataFrame()
+        self.cba = gpd.GeoDataFrame()
 
         # crs is a string object (Coordinate system of the cba object)
         self.crs = str()
 
         # grid is a GeoDataFrame object containing only the cell grid.
-        self.grid = gp.GeoDataFrame()
+        self.grid = gpd.GeoDataFrame()
 
     def init_from_vector_data(
         self,
@@ -75,8 +73,6 @@ class CBA:
         Returns:
             CBA object is initialized.
         """
-        # Utility to give computation time
-        initial_time = time.perf_counter()
 
         # Allows a non-mutable default value
         if subset_of_target_attribut_values is None:
@@ -86,7 +82,7 @@ class CBA:
         self.cba = None
 
         # Reading the vector file
-        geodata = gp.GeoDataFrame.from_file(vector_file_path)
+        geodata = gpd.GeoDataFrame.from_file(vector_file_path)
         self.crs = geodata.crs
 
         # Initialization of the grid
@@ -102,23 +98,16 @@ class CBA:
         tmp.rename({"geom": "geometry"}, axis=1, inplace=True)
 
         # Saving results in attributes
-        self.cba = gp.GeoDataFrame(pd.concat([tmp.groupby(tmp.index).first(), indicators], axis=1))
+        self.cba = gpd.GeoDataFrame(pd.concat([tmp.groupby(tmp.index).first(), indicators], axis=1))
         self.cba = self.cba.set_crs(self.crs, allow_override=True)
-        # self.cba["cell_id"] = "C-" + self.cba.index.map(str)
-        # cols = self.cba.columns.tolist()
-        # cols = cols[-1:] + cols[:-1]
-        # self.cba = self.cba[cols]
-        # self.cba.set_index("cell_id", inplace=True)
-        final_time = time.perf_counter()
-        print(f"CBA matrix computed in {final_time - initial_time:0.4f} seconds")
 
     def add_layer(
         self,
-        vector_file_path: str,
-        target_attribut: str = "",
-        subset_of_target_attribut_values: Union[list, None] = None,
-        Name: Union[str, None] = None,
-        buffer: Union[int, float, bool] = False,
+        grid: gpd.GeoDataFrame,
+        column: str = "",
+        subset_of_target_attribut_values: Optional[list] = None,
+        name: Optional[str] = None,
+        buffer: Union[Number, bool] = False,
     ) -> None:
         """Add new data to CBA matrix.
 
@@ -149,8 +138,6 @@ class CBA:
             CBA object is completed.
         """
 
-        initial_time = time.perf_counter()
-
         # Allows a non-mutable default value
         if subset_of_target_attribut_values is None:
             subset_of_target_attribut_values = []
@@ -159,12 +146,12 @@ class CBA:
         assert self.cba is not None
 
         # Reading the vector file
-        geodata = gp.GeoDataFrame.from_file(vector_file_path)
+        geodata = gpd.GeoDataFrame.from_file(vector_file_path)
 
         # No buffer
         if buffer is False:
             # Recovery of the grid calculated at the initialization of the CBA
-            grid = gp.GeoDataFrame(self.cba)
+            grid = gpd.GeoDataFrame(self.cba)
 
             # Adding a column to the CBA
             dummies, join_grid = CBA._prepare_grid(
@@ -185,7 +172,7 @@ class CBA:
             self.join_disc = join_disc
 
         # Application of the indicated name (otherwise filename is used)
-        if Name is not None:
+        if name is not None:
             dummies.name = Name
 
         # Completion of the CBA object (values and names)
@@ -193,17 +180,14 @@ class CBA:
         if target_attribut == "":
             self.cba[dummies.name] = self.cba[dummies.name].map(int)
 
-        final_time = time.perf_counter()
-        print(f"Layer added in {final_time - initial_time:0.4f} seconds")
-
     @staticmethod
     def _prepare_grid(  # type: ignore[no-any-unimported]
         file_path: str,
-        geodata: gp.geodataframe.GeoDataFrame,
-        grid: gp.geodataframe.GeoDataFrame,
+        geodata: gpd.GeoDataFrame,
+        grid: gpd.GeoDataFrame,
         target_attribut: str,
         subset_of_target_attribut_values: list,
-    ) -> Union[list, gp.geodataframe.GeoDataFrame]:
+    ) -> Union[list, gpd.GeoDataFrame]:
         """Intermediate utility.
 
         Preparation of the dummification of selected variables and intersection
@@ -229,7 +213,7 @@ class CBA:
         )
 
         # Spatial join of the intersection between the grid and the current map
-        join_grid = gp.sjoin(grid, geodata, how="inner", op="intersects")
+        join_grid = gpd.sjoin(grid, geodata, how="inner", predicate="intersects")
         if dummification:
             tmp = pd.get_dummies(
                 join_grid[join_grid[target].isin(identified_values)][[target]], prefix="", prefix_sep=""
@@ -242,7 +226,7 @@ class CBA:
 
     @staticmethod
     def _check_and_prepare_param(  # type: ignore[no-any-unimported]
-        filepath: str, geodata: gp.geodataframe.GeoDataFrame, target: str, attribut_values: list
+        filepath: str, geodata: gpd.GeoDataFrame, target: str, attribut_values: list
     ) -> Tuple[bool, str, list]:
         """Intermediate utility.
 
@@ -304,8 +288,8 @@ class CBA:
 
     @staticmethod
     def _get_disc(  # type: ignore[no-any-unimported]
-        geodata: gp.geodataframe.GeoDataFrame, grid: gp.geodataframe.GeoDataFrame, buff_radius: Union[int, float]
-    ) -> gp.geodataframe.GeoDataFrame:
+        geodata: gpd.GeoDataFrame, grid: gpd.GeoDataFrame, buff_radius: Union[int, float]
+    ) -> gpd.GeoDataFrame:
         """Intermediate utility.
 
         Defines disks with radii defined from the centroids of the cells of a grid.
@@ -321,7 +305,7 @@ class CBA:
         """
 
         # Deletion of cells that do not intersect shapefile geometries
-        cells_w_bound = gp.sjoin(grid, geodata, how="inner", op="intersects")
+        cells_w_bound = gpd.sjoin(grid, geodata, how="inner", predicate="intersects")
         cells_w_bound["index"] = cells_w_bound.index
         cells_w_bound = cells_w_bound.dissolve(by="index")
         drop_list = geodata.columns
@@ -329,25 +313,25 @@ class CBA:
         cells_w_bound = cells_w_bound.drop(drop_list, axis="columns")
 
         # Creation of the centroids of the mesh
-        CentX = cells_w_bound.centroid.x
-        CentY = cells_w_bound.centroid.y
-        df = pd.DataFrame({"CentX": CentX, "CentY": CentY})
-        Points = gp.GeoDataFrame(df, geometry=gp.points_from_xy(df.CentX, df.CentY), crs=geodata.crs)
+        centX = cells_w_bound.centroid.x
+        centY = cells_w_bound.centroid.y
+        df = pd.DataFrame({"CentX": centX, "CentY": centY})
+        points = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.CentX, df.CentY), crs=geodata.crs)
 
         # Transformation into a disc with a given radius
-        Disc = gp.GeoDataFrame.copy(Points)
-        Disc["geom"] = Disc.geometry.buffer(buff_radius, resolution=16)
+        disc = gpd.GeoDataFrame.copy(points)
+        disc["geom"] = disc.geometry.buffer(buff_radius, resolution=16)
 
-        return gp.GeoDataFrame(Disc, geometry="geom", crs=geodata.crs)
+        return gpd.GeoDataFrame(disc, geometry="geom", crs=geodata.crs)
 
     @staticmethod
     def _prepare_disc(  # type: ignore[no-any-unimported]
         file_path: str,
-        geodata: gp.geodataframe.GeoDataFrame,
-        disc: gp.geodataframe.GeoDataFrame,
+        geodata: gpd.GeoDataFrame,
+        disc: gpd.GeoDataFrame,
         target_attribut: str,
         subset_of_target_attribut_values: list,
-    ) -> Tuple[list, gp.geodataframe.GeoDataFrame]:
+    ) -> Tuple[list, gpd.GeoDataFrame]:
         """Intermediate utility.
 
         Compute spatial joint and generate the table of presence of the different
@@ -371,7 +355,7 @@ class CBA:
         )
 
         # Spatial join of the intersection between the grid and the current map
-        join_grid = gp.sjoin(disc, geodata, how="inner", op="intersects")
+        join_grid = gpd.sjoin(disc, geodata, how="inner", predicate="intersects")
 
         if dummification:
             tmp = pd.get_dummies(
@@ -385,8 +369,8 @@ class CBA:
 
     @staticmethod
     def _get_grid(  # type: ignore[no-any-unimported]
-        working_map: gp.geodataframe.GeoDataFrame, cell_width: int, cell_height: int
-    ) -> gp.geodataframe.GeoDataFrame:
+        working_map: gpd.GeoDataFrame, cell_width: int, cell_height: int
+    ) -> gpd.GeoDataFrame:
         """Intermediate utility.
 
         Produces a regular grid based on geodata surface.
@@ -430,13 +414,12 @@ class CBA:
             x_left_origin = x_left_origin + cell_width
             x_right_origin = x_right_origin + cell_width
         result = pd.DataFrame(data, columns=["cell_id", "x", "y", "geom"])
-        # result["cell_id"] = "C-" + result.index.map(str)
         result.set_index("cell_id", inplace=True)
 
-        return gp.GeoDataFrame(result, geometry="geom", crs=working_map.crs)
+        return gpd.GeoDataFrame(result, geometry="geom", crs=working_map.crs)
 
     @staticmethod
-    def from_csv(input_csv_file_path: str) -> gp.geodataframe.GeoDataFrame:  # type: ignore[no-any-unimported]
+    def from_csv(input_csv_file_path: str) -> gpd.GeoDataFrame:  # type: ignore[no-any-unimported]
         """Intermediate utility.
 
         Read a CBA grid from CSV file. CSV file must contain "geometry"
@@ -456,16 +439,15 @@ class CBA:
         crs = {"init": tmp[1].split(".")[0].replace("_", ":")}
         df = pd.read_csv(input_csv_file_path)
         df["geometry"] = df["geometry"].apply(wkt.loads)
-        cba_grid.cba = gp.GeoDataFrame(df, geometry="geometry")
+        cba_grid.cba = gpd.GeoDataFrame(df, geometry="geometry")
         cba_grid.cba = cba_grid.cba.set_crs(crs)
-        # cba_grid.cba.set_index("cell_id", inplace=True)
         cba_grid.crs = cba_grid.cba.crs
         cba_grid.grid = cba_grid.cba[["geometry"]]
         cba_grid.grid.index = cba_grid.cba.index
         return cba_grid
 
     @staticmethod
-    def from_vector_file(cba_vector_file_path: str) -> gp.geodataframe.GeoDataFrame:  # type: ignore[no-any-unimported]
+    def from_vector_file(cba_vector_file_path: str) -> gpd.GeoDataFrame:  # type: ignore[no-any-unimported]
         """Intermediate utility.
 
         Read a CBA grid from a vector file (ESRI shapefile, geojson...).
@@ -480,8 +462,8 @@ class CBA:
             Corresponding CBA object.
         """
         cba_grid = CBA()
-        geodata = gp.GeoDataFrame.from_file(cba_vector_file_path)
-        cba_grid.cba = gp.GeoDataFrame(geodata, geometry="geometry")
+        geodata = gpd.GeoDataFrame.from_file(cba_vector_file_path)
+        cba_grid.cba = gpd.GeoDataFrame(geodata, geometry="geometry")
         cba_grid.cba.set_index("cell_id", inplace=True)
         cba_grid.crs = geodata.crs
         cba_grid.grid = geodata[["geometry"]]
@@ -504,18 +486,9 @@ class CBA:
             None
         """
 
-        initial_time = time.perf_counter()
-
         crs_txt = f"epsg:{self.cba.crs.to_epsg()}"
-        tmp = gp.GeoDataFrame(self.cba)
-        # tmp["cell_id"] = "C-" + tmp.index.map(str)
-        # cols = tmp.columns.tolist()
-        # cols = cols[-1:] + cols[:-1]
-        # tmp = tmp[cols]
+        tmp = gpd.GeoDataFrame(self.cba)
         tmp.to_csv(output_csv_file_path + "__" + str(crs_txt).replace(":", "_") + ".csv", index=False)
-
-        final_time = time.perf_counter()
-        print(f"CSV saved in {final_time - initial_time:0.4f} seconds")
 
     def to_shapefile(self, output_shapefile_path: str) -> None:
         """Intermediate utility.
@@ -529,20 +502,9 @@ class CBA:
             None
         """
 
-        initial_time = time.perf_counter()
-
-        tmp = gp.GeoDataFrame(self.cba)
+        tmp = gpd.GeoDataFrame(self.cba)
         tmp.crs = self.crs
-        # tmp["cell_id"] = "C-" + tmp.index.map(str)
-        # # on replace la colonne 'cell_id' en premiere place
-        # cols = tmp.columns.tolist()
-        # cols = cols[-1:] + cols[:-1]
-        # tmp = tmp[cols]
-        # tmp.set_index("cell_id", inplace=True)
         tmp.to_file(output_shapefile_path + ".shp")
-
-        final_time = time.perf_counter()
-        print(f"Shapefile saved in {final_time - initial_time:0.4f} seconds")
 
     def to_geojson(self, output_geojson_file_path: str) -> None:
         """Intermediate utility.
@@ -555,14 +517,7 @@ class CBA:
         Returns:
             None
         """
-        initial_time = time.perf_counter()
-        tmp = gp.GeoDataFrame(self.cba)
-        # tmp["cell_id"] = "C-" + tmp.index.map(str)
-        # on replace la colonne 'cell_id' en premiere place
-        # cols = tmp.columns.tolist()
-        # cols = cols[-1:] + cols[:-1]
-        # tmp = tmp[cols]
+
+        tmp = gpd.GeoDataFrame(self.cba)
         tmp.crs = self.crs
         tmp.to_file(output_geojson_file_path + ".geojson", driver="GeoJSON")
-        final_time = time.perf_counter()
-        print(f"geoJSON saved in {final_time - initial_time:0.4f} seconds")
