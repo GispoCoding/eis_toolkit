@@ -9,7 +9,7 @@ points_path = str(parent_dir.joinpath("data/remote/Test_Occ.shp"))
 lines_path = str(parent_dir.joinpath("data/remote/Test_Faults.shp"))
 matrix_path = str(parent_dir.joinpath("data/remote/Test_CBA_matrix.shp"))
 
-vector_file = gpd.GeoDataFrame.from_file(vector_file_path)
+vector_file = gpd.GeoDataFrame.from_file(vector_path)
 points_file = gpd.GeoDataFrame.from_file(points_path)
 lines_file = gpd.GeoDataFrame.from_file(lines_path)
 
