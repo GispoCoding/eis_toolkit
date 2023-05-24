@@ -103,7 +103,7 @@ class CBA:
 
     def add_layer(
         self,
-        grid: gpd.GeoDataFrame,
+        geodataframe: gpd.GeoDataFrame,
         column: str = "",
         subset_of_target_attribut_values: Optional[list] = None,
         name: Optional[str] = None,
