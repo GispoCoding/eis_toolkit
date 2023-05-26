@@ -6,12 +6,12 @@ import rasterio
 
 from eis_toolkit.exceptions import MatchingCrsException
 from eis_toolkit.raster_processing.reprojecting import reproject_raster
+from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
-parent_dir = Path(__file__).parent
-raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
-reference_solution_path = parent_dir.joinpath("data/remote/small_raster_EPSG4326.tif")
+test_dir = Path(__file__).parent.parent
+reference_solution_path = test_dir.joinpath("data/remote/small_raster_EPSG4326.tif")
 
-src_raster = rasterio.open(raster_path)
+src_raster = rasterio.open(SMALL_RASTER_PATH)
 reprojected_data, reprojected_meta = reproject_raster(src_raster, 4326)
 
 reference_raster = rasterio.open(reference_solution_path)
@@ -43,5 +43,5 @@ def test_reproject_meta():
 def test_same_crs():
     """Test that a crs match raises the correct exception."""
     with pytest.raises(MatchingCrsException):
-        with rasterio.open(raster_path) as raster:
+        with rasterio.open(SMALL_RASTER_PATH) as raster:
             reproject_raster(raster, int(raster.crs.to_string()[5:]))

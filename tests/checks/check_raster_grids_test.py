@@ -5,16 +5,12 @@ import rasterio
 from eis_toolkit.checks.raster import check_raster_grids
 
 # Test rasters.
-parent_dir = Path(__file__).parent
-snap_raster = rasterio.open(parent_dir.joinpath("data/remote/snapping/snap_raster.tif"))
-small_raster = rasterio.open(parent_dir.joinpath("data/remote/small_raster.tif"))
-small_raster_epsg4326 = rasterio.open(parent_dir.joinpath("data/remote/small_raster_EPSG4326.tif"))
-snap_raster_smaller_cells = rasterio.open(
-    parent_dir.joinpath("data/remote/snapping/snap_test_raster_smaller_cells.tif")
-)
-snap_raster_top_right = rasterio.open(parent_dir.joinpath("data/remote/snapping/snap_test_raster_right_top.tif"))
-snap_raster_bottom_right = rasterio.open(parent_dir.joinpath("data/remote/snapping/snap_test_raster_right_bottom.tif"))
-clipped_snap_raster = rasterio.open(parent_dir.joinpath("data/remote/snapping/clipped_snap_raster.tif"))
+test_dir = Path(__file__).parent.parent
+snap_raster = rasterio.open(test_dir.joinpath("data/remote/snapping/snap_raster.tif"))
+small_raster = rasterio.open(test_dir.joinpath("data/remote/small_raster.tif"))
+small_raster_epsg4326 = rasterio.open(test_dir.joinpath("data/remote/small_raster_EPSG4326.tif"))
+snap_raster_smaller_cells = rasterio.open(test_dir.joinpath("data/remote/snapping/snap_test_raster_smaller_cells.tif"))
+clipped_snap_raster = rasterio.open(test_dir.joinpath("data/remote/snapping/clipped_snap_raster.tif"))
 
 
 def test_identical_rasters_same_extent() -> None:

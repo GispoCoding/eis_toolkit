@@ -1,14 +1,13 @@
 import matplotlib
 import numpy as np
+from beartype import beartype
 from matplotlib import pyplot as plt
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.validation.calculate_auc import calculate_auc
 
 
-def _plot_rate_curve(  # type: ignore[no-any-unimported]
-    x_values: np.ndarray, y_values: np.ndarray, label: str, xlab: str
-) -> matplotlib.figure.Figure:
+def _plot_rate_curve(x_values: np.ndarray, y_values: np.ndarray, label: str, xlab: str) -> matplotlib.figure.Figure:
     fig = plt.figure(figsize=(10, 7))
     plt.plot(x_values, y_values, label=label)
     plt.xlim(-0.01, 1)
@@ -25,7 +24,8 @@ def _plot_rate_curve(  # type: ignore[no-any-unimported]
     return fig
 
 
-def plot_rate_curve(  # type: ignore[no-any-unimported]
+@beartype
+def plot_rate_curve(
     x_values: np.ndarray,
     y_values: np.ndarray,
     plot_type: str = "success_rate",
@@ -36,12 +36,12 @@ def plot_rate_curve(  # type: ignore[no-any-unimported]
     positive rate (roc) or proportion of area (success and prediction rate) depending on plot type.
 
     Args:
-        true_positive_rate_values (np.ndarray): True positive rate values, y-coordinates of the plot.
-        proportion_of_area_values (np.ndarray): Proportion of area values, x-coordinates of the plot.
-        plot_type (str): Plot type. Can be either: "success_rate", "prediction_rate" or "roc".
+        x_values: False positive rate values or proportion of area values.
+        y_values: True positive rate values.
+        plot_type: Plot type. Can be either: "success_rate", "prediction_rate" or "roc".
 
     Returns:
-        matplotlib.figure.Figure: Success rate, prediction rate or ROC plot.
+        Success rate, prediction rate or ROC plot figure object.
 
     Raises:
         InvalidParameterValueException: Invalid plot type.

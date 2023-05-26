@@ -7,16 +7,16 @@ from rasterio.enums import Resampling
 from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.raster_processing.unifying import unify_raster_grids
 
-parent_dir = Path(__file__).parent
+test_dir = Path(__file__).parent.parent
 
-base_raster_path_1 = parent_dir.joinpath("data/remote/small_raster.tif")
-base_raster_path_2 = parent_dir.joinpath("data/remote/smaller_raster.tif")
+base_raster_path_1 = test_dir.joinpath("data/remote/small_raster.tif")
+base_raster_path_2 = test_dir.joinpath("data/remote/smaller_raster.tif")
 
-raster_to_unify_path_1 = parent_dir.joinpath("data/remote/unifying/raster_to_unify_1.tif")
-raster_to_unify_path_2 = parent_dir.joinpath("data/remote/unifying/raster_to_unify_2.tif")
+raster_to_unify_path_1 = test_dir.joinpath("data/remote/unifying/raster_to_unify_1.tif")
+raster_to_unify_path_2 = test_dir.joinpath("data/remote/unifying/raster_to_unify_2.tif")
 
-raster_to_unify_save_path_1 = parent_dir.joinpath("data/local/unify_test_result_1.tif")
-raster_to_unify_save_path_2 = parent_dir.joinpath("data/local/unify_test_result_2.tif")
+raster_to_unify_save_path_1 = test_dir.joinpath("data/local/results/unify_test_result_1.tif")
+raster_to_unify_save_path_2 = test_dir.joinpath("data/local/results/unify_test_result_2.tif")
 
 
 def test_unify_raster_grids_case1():
@@ -86,10 +86,3 @@ def test_unify_raster_grids_empty_raster_list():
     with pytest.raises(InvalidParameterValueException):
         with rasterio.open(base_raster_path_1) as base_raster:
             _ = unify_raster_grids(base_raster, [])
-
-
-def test_unify_raster_grids_wrong_type_in_raster_list():
-    """Test that wrong type of items in raster list raises correct exception."""
-    with pytest.raises(InvalidParameterValueException):
-        with rasterio.open(base_raster_path_1) as base_raster:
-            _ = unify_raster_grids(base_raster, [1, 3, 5])

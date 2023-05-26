@@ -8,9 +8,9 @@ from pyproj.exceptions import ProjError
 from eis_toolkit.exceptions import MatchingCrsException
 from eis_toolkit.vector_processing.reproject_vector import reproject_vector
 
-parent_dir = Path(__file__).parent
-vector_path = parent_dir.joinpath("data/remote/small_area.shp")
-reference_solution_path = parent_dir.joinpath("data/remote/small_area_reprojected.shp")
+test_dir = Path(__file__).parent.parent
+vector_path = test_dir.joinpath("data/remote/small_area.shp")
+reference_solution_path = test_dir.joinpath("data/remote/small_area_reprojected.shp")
 
 geodataframe = geopandas.read_file(vector_path)
 reference_geodataframe = geopandas.read_file(reference_solution_path)

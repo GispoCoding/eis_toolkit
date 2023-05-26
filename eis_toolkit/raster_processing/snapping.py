@@ -1,17 +1,16 @@
 from math import ceil
-from typing import Tuple
 
 import numpy as np
 import rasterio
+from beartype import beartype
+from beartype.typing import Tuple
 
 from eis_toolkit.checks.crs import check_matching_crs
-from eis_toolkit.exceptions import NonMatchingCrsException
+from eis_toolkit.exceptions import MatchingRasterGridException, NonMatchingCrsException
 
 
 # The core snapping functionality. Used internally by snap.
-def _snap(  # type: ignore[no-any-unimported]
-    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
-) -> Tuple[np.ndarray, dict]:
+def _snap(raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader) -> Tuple[np.ndarray, dict]:
     raster_bounds = raster.bounds
     snap_bounds = snap_raster.bounds
     raster_pixel_size_x = raster.transform.a
@@ -64,34 +63,33 @@ def _snap(  # type: ignore[no-any-unimported]
     return out_image, out_meta
 
 
-def snap_with_raster(  # type: ignore[no-any-unimported]
-    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
-) -> Tuple[np.ndarray, dict]:
+@beartype
+def snap_with_raster(raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader) -> Tuple[np.ndarray, dict]:
     """Snaps/aligns raster to given snap raster.
 
     Raster is snapped from its left-bottom corner to nearest snap raster grid corner in left-bottom direction.
     If rasters are aligned, simply returns input raster data and metadata.
 
     Args:
-        raster (rasterio.io.DatasetReader): The raster to be clipped.
-        snap_raster (rasterio.io.DatasetReader): The snap raster i.e. reference grid raster.
+        raster: The raster to be clipped.
+        snap_raster: The snap raster i.e. reference grid raster.
 
     Returns:
-        out_image (np.ndarray): The snapped raster data.
-        out_meta (dict): The updated metadata.
+        The snapped raster data.
+        The updated metadata.
 
     Raises:
-        NonMatchingCrsException: Raster and and snap raster are not in the same crs.
+        NonMatchingCrsException: Raster and and snap raster are not in the same CRS.
+        MatchingRasterGridException: Raster grids are already aligned.
     """
 
     if not check_matching_crs(
         objects=[raster, snap_raster],
     ):
-        raise NonMatchingCrsException
+        raise NonMatchingCrsException("Raster and and snap raster have different CRS.")
 
     if snap_raster.bounds.bottom == raster.bounds.bottom and snap_raster.bounds.left == raster.bounds.left:
-        out_image, out_meta = raster.read(), raster.meta
-        return out_image, out_meta
+        raise MatchingRasterGridException("Raster grids are already aligned.")
 
     out_image, out_meta = _snap(raster, snap_raster)
     return out_image, out_meta

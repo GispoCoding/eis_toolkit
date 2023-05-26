@@ -5,7 +5,8 @@ Created on Thu Jan 19 09:17:33 2023.
 
 @author: A.Vella, V. Labbe
 """
-
+import os
+os.environ['USE_PYGEOS'] = '0'
 from typing import Tuple, Union, Optional
 from numbers import Number
 import geopandas as gpd
@@ -57,7 +58,7 @@ class CBA:
 
         Args:
             cell_size: size of the cells (ex : 3000).
-            vector_file_path: path to vector file.
+            geodataframe: path to vector file.
             target_attribut: <optionnel> name of the attribute of interest.
                 If no attribute is specified, then an artificial attribute is created
                 representing the presence or absence of the geometries of this file for
@@ -75,14 +76,14 @@ class CBA:
         """
 
         # Allows a non-mutable default value
-        if subset_of_target_attribut_values is None:
-            subset_of_target_attribut_values = []
+        if subset_of_target_attribute_values is None:
+            subset_of_target_attribute_values = []
 
         # Reset of the CBA grid (in case it has been previously initialized)
         self.cba = None
 
         # Reading the vector file
-        geodata = gpd.GeoDataFrame.from_file(vector_file_path)
+        geodata = geodataframe.copy(deep = True)
         self.crs = geodata.crs
 
         # Initialization of the grid
@@ -92,7 +93,7 @@ class CBA:
 
         # Filling the grid with overlapped geometries
         indicators, join_grid = CBA._prepare_grid(
-            vector_file_path, geodata, grid, target_attribut, subset_of_target_attribut_values
+            geodataframe, grid, column, subset_of_target_attribute_values
         )
         tmp = join_grid[["geom"]].copy(deep=True)
         tmp.rename({"geom": "geometry"}, axis=1, inplace=True)
@@ -100,12 +101,13 @@ class CBA:
         # Saving results in attributes
         self.cba = gpd.GeoDataFrame(pd.concat([tmp.groupby(tmp.index).first(), indicators], axis=1))
         self.cba = self.cba.set_crs(self.crs, allow_override=True)
+        self.cba = self.cba.astype('int', errors='ignore')
 
     def add_layer(
         self,
         geodataframe: gpd.GeoDataFrame,
         column: str = "",
-        subset_of_target_attribut_values: Optional[list] = None,
+        subset_of_target_attribute_values: Optional[list] = None,
         name: Optional[str] = None,
         buffer: Union[Number, bool] = False,
     ) -> None:
@@ -116,7 +118,7 @@ class CBA:
         targeted shapes and/or attributes.
 
         Args:
-            vector_file_path: path to vector file.
+            geodataframe: path to vector file.
             target_attribut: <optional> Name of the targeted attribute. If
                 no attribute are specified, added data fo each cell are based on the
                 absence/presence intersection between cells and the shapes within the
@@ -139,14 +141,14 @@ class CBA:
         """
 
         # Allows a non-mutable default value
-        if subset_of_target_attribut_values is None:
-            subset_of_target_attribut_values = []
+        if subset_of_target_attribute_values is None:
+            subset_of_target_attribute_values = []
 
         # Prerequisite: the CBA grid must already have been initialized
         assert self.cba is not None
 
         # Reading the vector file
-        geodata = gpd.GeoDataFrame.from_file(vector_file_path)
+        geodata = geodataframe.copy(deep = True)
 
         # No buffer
         if buffer is False:
@@ -155,7 +157,7 @@ class CBA:
 
             # Adding a column to the CBA
             dummies, join_grid = CBA._prepare_grid(
-                vector_file_path, geodata, grid, target_attribut, subset_of_target_attribut_values
+                geodata, grid, column, subset_of_target_attribute_values
             )
 
         # Buffer of specified value
@@ -165,7 +167,7 @@ class CBA:
 
             # Adding a column to the CBA
             dummies, join_disc = CBA._prepare_disc(
-                vector_file_path, geodata, added_buf, target_attribut, subset_of_target_attribut_values
+                geodata, added_buf, column, subset_of_target_attribute_values
             )
 
             self.dummies = dummies
@@ -173,16 +175,17 @@ class CBA:
 
         # Application of the indicated name (otherwise filename is used)
         if name is not None:
-            dummies.name = Name
+            dummies.name = name
 
         # Completion of the CBA object (values and names)
         self.cba = self.cba.join(dummies).replace(np.nan, 0)
-        if target_attribut == "":
+        if column == "":
             self.cba[dummies.name] = self.cba[dummies.name].map(int)
+            
+        self.cba = self.cba.astype('int', errors='ignore')
 
     @staticmethod
     def _prepare_grid(  # type: ignore[no-any-unimported]
-        file_path: str,
         geodata: gpd.GeoDataFrame,
         grid: gpd.GeoDataFrame,
         target_attribut: str,
@@ -194,7 +197,6 @@ class CBA:
         between grid and input dataset.
 
         Args:
-            file_path: path of the vector file to integrate.
             geodata:  the geodata object corresponding to the vector file.
             grid: initialized mesh.
             target_attribut: target attribute to extract from the vector file.
@@ -209,7 +211,7 @@ class CBA:
 
         # Data verification
         dummification, target, identified_values = CBA._check_and_prepare_param(
-            file_path, geodata, target_attribut, subset_of_target_attribut_values
+            geodata, target_attribut, subset_of_target_attribut_values
         )
 
         # Spatial join of the intersection between the grid and the current map
@@ -226,7 +228,10 @@ class CBA:
 
     @staticmethod
     def _check_and_prepare_param(  # type: ignore[no-any-unimported]
-        filepath: str, geodata: gpd.GeoDataFrame, target: str, attribut_values: list
+        geodata: gpd.GeoDataFrame,
+        target: str,
+        attribut_values: list,
+        target_name: Optional[str] = "Added",
     ) -> Tuple[bool, str, list]:
         """Intermediate utility.
 
@@ -257,12 +262,11 @@ class CBA:
                 when only geometries are considered.
         """
 
-        filename = filepath.split(".")[0].split("\\")[-1]
         dummification = False
         if target == "":
             # Case where we use geometries (e.g. a point file for mineralization)
             # we add a column filled with 1 (presence).
-            target = filename
+            target = target_name
             attribut_values = [1]
             geodata[target] = int(1)
         elif not attribut_values:
@@ -326,7 +330,6 @@ class CBA:
 
     @staticmethod
     def _prepare_disc(  # type: ignore[no-any-unimported]
-        file_path: str,
         geodata: gpd.GeoDataFrame,
         disc: gpd.GeoDataFrame,
         target_attribut: str,
@@ -338,7 +341,6 @@ class CBA:
         attributes.
 
         Args:
-            file_path: path of the vector file to integrate.
             geodata: the geodata object corresponding to the vector file.
             disc: existing disk 'paving'.
             target_attribut: target attribute to extract from the vector file.
@@ -351,7 +353,7 @@ class CBA:
                 vector file
         """
         dummification, target, identified_values = CBA._check_and_prepare_param(
-            file_path, geodata, target_attribut, subset_of_target_attribut_values
+            geodata, target_attribut, subset_of_target_attribut_values
         )
 
         # Spatial join of the intersection between the grid and the current map

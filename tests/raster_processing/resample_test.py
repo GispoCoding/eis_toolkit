@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import numpy as np
 import pytest
 import rasterio
@@ -8,14 +6,12 @@ from rasterio.enums import Resampling
 
 from eis_toolkit.exceptions import NumericValueSignException
 from eis_toolkit.raster_processing.resampling import resample
-
-parent_dir = Path(__file__).parent
-raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
+from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
 
 def test_resample():
     """Test that resample function works as intended."""
-    with rasterio.open(raster_path) as raster:
+    with rasterio.open(SMALL_RASTER_PATH) as raster:
         upscale_factor = 2
         _, resampled_meta = resample(raster, upscale_factor, resampling_method=Resampling.bilinear)
 
@@ -35,5 +31,5 @@ def test_resample():
 def test_resample_negative_upscale_factor():
     """Tests that invalid parameter value for resampling method raises the correct exception."""
     with pytest.raises(NumericValueSignException):
-        with rasterio.open(raster_path) as raster:
+        with rasterio.open(SMALL_RASTER_PATH) as raster:
             resample(raster=raster, upscale_factor=-2, resampling_method=Resampling.cubic)
