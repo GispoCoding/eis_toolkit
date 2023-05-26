@@ -5,10 +5,12 @@ Created on Thu Jan 19 09:17:33 2023.
 
 @author: A.Vella, V. Labbe
 """
-import os
-os.environ['USE_PYGEOS'] = '0'
-from typing import Tuple, Union, Optional
 from numbers import Number
+
+# os.environ['USE_PYGEOS'] = '0'
+from typing import Optional, Tuple, Union
+
+# import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -83,7 +85,7 @@ class CBA:
         self.cba = None
 
         # Reading the vector file
-        geodata = geodataframe.copy(deep = True)
+        geodata = geodataframe.copy(deep=True)
         self.crs = geodata.crs
 
         # Initialization of the grid
@@ -92,16 +94,14 @@ class CBA:
         self.grid = grid
 
         # Filling the grid with overlapped geometries
-        indicators, join_grid = CBA._prepare_grid(
-            geodataframe, grid, column, subset_of_target_attribute_values
-        )
+        indicators, join_grid = CBA._prepare_grid(geodataframe, grid, column, subset_of_target_attribute_values)
         tmp = join_grid[["geom"]].copy(deep=True)
         tmp.rename({"geom": "geometry"}, axis=1, inplace=True)
 
         # Saving results in attributes
         self.cba = gpd.GeoDataFrame(pd.concat([tmp.groupby(tmp.index).first(), indicators], axis=1))
         self.cba = self.cba.set_crs(self.crs, allow_override=True)
-        self.cba = self.cba.astype('int', errors='ignore')
+        self.cba = self.cba.astype("int", errors="ignore")
 
     def add_layer(
         self,
@@ -148,7 +148,7 @@ class CBA:
         assert self.cba is not None
 
         # Reading the vector file
-        geodata = geodataframe.copy(deep = True)
+        geodata = geodataframe.copy(deep=True)
 
         # No buffer
         if buffer is False:
@@ -156,9 +156,7 @@ class CBA:
             grid = gpd.GeoDataFrame(self.cba)
 
             # Adding a column to the CBA
-            dummies, join_grid = CBA._prepare_grid(
-                geodata, grid, column, subset_of_target_attribute_values
-            )
+            dummies, join_grid = CBA._prepare_grid(geodata, grid, column, subset_of_target_attribute_values)
 
         # Buffer of specified value
         else:
@@ -166,9 +164,7 @@ class CBA:
             added_buf = CBA._get_disc(self.cba, self.grid, buffer)
 
             # Adding a column to the CBA
-            dummies, join_disc = CBA._prepare_disc(
-                geodata, added_buf, column, subset_of_target_attribute_values
-            )
+            dummies, join_disc = CBA._prepare_disc(geodata, added_buf, column, subset_of_target_attribute_values)
 
             self.dummies = dummies
             self.join_disc = join_disc
@@ -181,8 +177,8 @@ class CBA:
         self.cba = self.cba.join(dummies).replace(np.nan, 0)
         if column == "":
             self.cba[dummies.name] = self.cba[dummies.name].map(int)
-            
-        self.cba = self.cba.astype('int', errors='ignore')
+
+        self.cba = self.cba.astype("int", errors="ignore")
 
     @staticmethod
     def _prepare_grid(  # type: ignore[no-any-unimported]

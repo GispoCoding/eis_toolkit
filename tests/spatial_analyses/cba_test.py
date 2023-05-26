@@ -1,14 +1,14 @@
 from pathlib import Path
-import os
-# import sys
-os.environ['USE_PYGEOS'] = '0'
 
 import geopandas as gpd
 
+from eis_toolkit.spatial_analyses.cba import CBA
+
+# import os
+# import sys
+# os.environ['USE_PYGEOS'] = '0'
 # sys.path.append(r"C:\Users\vella\Desktop\EIS_Toolkit\eis_toolkit\eis_toolkit\spatial_analyses")
 # from cba import CBA
-
-from eis_toolkit.spatial_analyses.cba import CBA
 
 parent_dir = Path(__file__).parent.parent
 # parent_dir = Path(r"C:/Users/vella/Desktop/EIS_Toolkit/eis_toolkit/tests/")
