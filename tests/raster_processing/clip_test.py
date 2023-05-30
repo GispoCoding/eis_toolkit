@@ -1,20 +1,21 @@
-import pytest
-import numpy as np
 from pathlib import Path
-import rasterio
+
 import geopandas
-from eis_toolkit.raster_processing.clipping import clip_raster
+import numpy as np
+import pytest
+import rasterio
+
 from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
+from eis_toolkit.raster_processing.clipping import clip_raster
 
-
-parent_dir = Path(__file__).parent
-raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
-polygon_path = parent_dir.joinpath("data/remote/small_area.shp")
-point_path = parent_dir.joinpath("data/remote/point.gpkg")
-wrong_crs_polygon_path = parent_dir.joinpath("data/remote/small_area.geojson")
+test_dir = Path(__file__).parent.parent
+raster_path = test_dir.joinpath("data/remote/small_raster.tif")
+polygon_path = test_dir.joinpath("data/remote/small_area.shp")
+point_path = test_dir.joinpath("data/remote/point.gpkg")
+wrong_crs_polygon_path = test_dir.joinpath("data/remote/small_area.geojson")
 
 # Save output to local to not push it
-output_raster_path = parent_dir.joinpath("data/local/test.tif")
+output_raster_path = test_dir.joinpath("data/local/results/clip_test_result.tif")
 
 
 def test_clip_raster():
