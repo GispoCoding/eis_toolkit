@@ -6,6 +6,7 @@ Created on Thu Jan 19 09:17:33 2023.
 @author: A.Vella, V. Labbe
 """
 from numbers import Number
+
 # os.environ['USE_PYGEOS'] = '0'
 from typing import Optional, Tuple, Union
 
