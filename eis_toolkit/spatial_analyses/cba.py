@@ -522,7 +522,7 @@ class CBA:
         tmp.crs = self.crs
         tmp.to_file(output_geojson_file_path + ".geojson", driver="GeoJSON")
 
-    def to_raster(self, output_tiff_path: str, close_at_end: bool=True) -> None:
+    def to_raster(self, output_tiff_path: str) -> None:
         """Intermediate utility.
 
         Saves the object as a raster TIFF file.
@@ -573,5 +573,4 @@ class CBA:
                     z = i + 1
                     new_dataset.write(values[i], z)
                     new_dataset.set_band_description(z, col_name[i])
-        if close_at_end == True:
-            new_dataset.close()
+        new_dataset.close()
