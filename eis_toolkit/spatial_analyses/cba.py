@@ -6,7 +6,6 @@ Created on Thu Jan 19 09:17:33 2023.
 @author: A.Vella, V. Labbe
 """
 from numbers import Number
-
 # os.environ['USE_PYGEOS'] = '0'
 from typing import Optional, Tuple, Union
 
@@ -435,7 +434,7 @@ class CBA:
 
         tmp = input_csv_file_path.split("__")
         cba_grid = CBA()
-#        crs = {"init": tmp[1].split(".")[0].replace("_", ":")}
+        #        crs = {"init": tmp[1].split(".")[0].replace("_", ":")}
         crs = tmp[1].split(".")[0].replace("_", ":")
         df = pd.read_csv(input_csv_file_path)
         df["geometry"] = df["geometry"].apply(wkt.loads)
@@ -555,22 +554,22 @@ class CBA:
             val = val.reshape(X.shape)
             values.append(val)
 
-        transform  = rasterio.transform.from_bounds(min_x, min_y, max_x, max_y, width=width, height=height)
+        transform = rasterio.transform.from_bounds(min_x, min_y, max_x, max_y, width=width, height=height)
 
         with rasterio.open(
-                output_tiff_path + ".tif",
-                mode="w",
-                driver="GTiff",
-                height=height,
-                width=width,
-                count=count,
-                dtype=self.cba[col].dtype,
-                crs=crs_txt,
-                transform=transform,
-                nodata=-9999
+            output_tiff_path + ".tif",
+            mode="w",
+            driver="GTiff",
+            height=height,
+            width=width,
+            count=count,
+            dtype=self.cba[col].dtype,
+            crs=crs_txt,
+            transform=transform,
+            nodata=-9999,
         ) as new_dataset:
-                for i in range(0, len(col_name)):
-                    z = i + 1
-                    new_dataset.write(values[i], z)
-                    new_dataset.set_band_description(z, col_name[i])
+            for i in range(0, len(col_name)):
+                z = i + 1
+                new_dataset.write(values[i], z)
+                new_dataset.set_band_description(z, col_name[i])
         new_dataset.close()
