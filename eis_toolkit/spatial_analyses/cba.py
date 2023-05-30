@@ -14,6 +14,7 @@ from typing import Optional, Tuple, Union
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import rasterio
 from shapely import wkt
 from shapely.geometry import Polygon
 
@@ -39,7 +40,7 @@ class CBA:
         # cba is a GeoDataFrame object with the cell grid and the matrix.
         self.cba = gpd.GeoDataFrame()
 
-        # crs is a string object (Coordinate system of the cba object)
+        # crs is a string object (Coordinate system of the cba object).
         self.crs = str()
 
         # grid is a GeoDataFrame object containing only the cell grid.
@@ -434,7 +435,8 @@ class CBA:
 
         tmp = input_csv_file_path.split("__")
         cba_grid = CBA()
-        crs = {"init": tmp[1].split(".")[0].replace("_", ":")}
+#        crs = {"init": tmp[1].split(".")[0].replace("_", ":")}
+        crs = tmp[1].split(".")[0].replace("_", ":")
         df = pd.read_csv(input_csv_file_path)
         df["geometry"] = df["geometry"].apply(wkt.loads)
         cba_grid.cba = gpd.GeoDataFrame(df, geometry="geometry")
@@ -519,3 +521,57 @@ class CBA:
         tmp = gpd.GeoDataFrame(self.cba)
         tmp.crs = self.crs
         tmp.to_file(output_geojson_file_path + ".geojson", driver="GeoJSON")
+
+    def to_raster(self, output_tiff_path: str, close_at_end: bool=True) -> None:
+        """Intermediate utility.
+
+        Saves the object as a raster TIFF file.
+
+        Args:
+            output_tiff_path: name of the saved file.
+
+        Returns:
+            None
+        """
+
+        crs_txt = f"EPSG:{self.cba.crs.to_epsg()}"
+        count = len(self.cba.columns.drop("geometry"))
+
+        geometries = self.cba["geometry"].values
+        x = np.unique(geometries.centroid.x)
+        y = np.unique(geometries.centroid.y)
+        X, Y = np.meshgrid(x, y)
+        x_resolution = X[0][1] - X[0][0]
+        y_resolution = Y[1][0] - Y[0][0]
+        min_x, min_y, max_x, max_y = self.cba.total_bounds
+        width = (max_x - min_x) / x_resolution
+        height = (max_y - min_y) / y_resolution
+
+        values = []
+        col_name = []
+        for col in self.cba.columns.drop("geometry"):
+            col_name.append(col)
+            val = self.cba[col].values
+            val = val.reshape(X.shape)
+            values.append(val)
+
+        transform  = rasterio.transform.from_bounds(min_x, min_y, max_x, max_y, width=width, height=height)
+
+        with rasterio.open(
+                output_tiff_path + ".tif",
+                mode="w",
+                driver="GTiff",
+                height=height,
+                width=width,
+                count=count,
+                dtype=self.cba[col].dtype,
+                crs=crs_txt,
+                transform=transform,
+                nodata=-9999
+        ) as new_dataset:
+                for i in range(0, len(col_name)):
+                    z = i + 1
+                    new_dataset.write(values[i], z)
+                    new_dataset.set_band_description(z, col_name[i])
+        if close_at_end == True:
+            new_dataset.close()
