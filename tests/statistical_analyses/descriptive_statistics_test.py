@@ -6,12 +6,11 @@ import rasterio
 
 from eis_toolkit.statistical_analyses.descriptive_statistics_raster import descriptive_statistics_raster
 from eis_toolkit.statistical_analyses.descriptive_statistics_vector import descriptive_statistics_vector
-from tests.clip_test import raster_path as SMALL_RASTER_PATH
 
 test_dir = Path(__file__).parent.parent
 test_csv = pd.read_csv(test_dir.joinpath("data/remote/test.csv"))
 test_gpkg = gpd.read_file(test_dir.joinpath("data/remote/test.gpkg"))
-src_raster = rasterio.open(SMALL_RASTER_PATH)
+src_raster = rasterio.open(test_dir.joinpath("data/remote/small_raster.tif"))
 
 
 def test_descriptive_statistics_dataframe():
