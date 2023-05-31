@@ -1,4 +1,7 @@
+from typing import Union
+
 import geopandas as gpd
+import pandas as pd
 from beartype import beartype
 from statsmodels.stats import stattools
 from statsmodels.stats.weightstats import DescrStatsW
@@ -6,7 +9,7 @@ from statsmodels.stats.weightstats import DescrStatsW
 
 # The core descriptive statistics functionality. Used internally by descriptive_statistics.
 def _descriptive_statistics_vector(
-    data: gpd.GeoDataFrame,
+    data: Union[gpd.GeoDataFrame, pd.DataFrame],
     column: str,
 ) -> dict:
     statistics = DescrStatsW(data[column])
@@ -29,13 +32,13 @@ def _descriptive_statistics_vector(
 
 
 @beartype
-def descriptive_statistics_vector(data: gpd.GeoDataFrame, column: str) -> dict:
+def descriptive_statistics_vector(data: Union[gpd.GeoDataFrame, pd.DataFrame], column: str) -> dict:
     """Generate descriptive statistics for selected column from vector data.
 
     Generates mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.
 
     Args:
-        dataframe: Dataset to be described.
+        data: Vector dataset to describe.
         column: Name or index of the column to be described.
 
     Returns:
