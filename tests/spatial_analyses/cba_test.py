@@ -1,8 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""Created on Thu Jun  1 09:28:42 2023.
+
+@author: vella.
+"""
+
 from pathlib import Path
 
 import geopandas as gpd
 
-from eis_toolkit.spatial_analyses.cba import CBA
+import eis_toolkit.spatial_analyses.cba as cba
 
 # import os
 # import sys
@@ -25,85 +32,83 @@ lines_file = gpd.GeoDataFrame.from_file(lines_path)
 
 def test_crs():
     """Test that Coordinate Systems for input dataset and output grids are equivalent."""
-    cba_grid = CBA()
-    cba_grid.init_from_vector_data(
+    grid, cba_grid = cba.init_from_vector_data(
         cell_size=4000, geodataframe=vector_file, column="Litho", subset_of_target_attribute_values="all"
     )
-    shp_cba_grid = CBA()
-    shp_cba_grid = shp_cba_grid.from_vector_file(matrix_path)
-    assert cba_grid.cba.crs == shp_cba_grid.crs
-    assert cba_grid.cba.crs == vector_file.crs
+    shp_cba_grid = cba.from_vector_file(matrix_path)
+    assert cba_grid.crs == shp_cba_grid.crs
+    assert cba_grid.crs == vector_file.crs
 
 
 def test_gridding():
     """Test that cells indexing is coherent."""
-    cba_grid = CBA()
-    cba_grid.init_from_vector_data(
+    grid, cba_grid = cba.init_from_vector_data(
         cell_size=4000, geodataframe=vector_file, column="Litho", subset_of_target_attribute_values="all"
     )
-    shp_cba_grid = CBA()
-    shp_cba_grid = shp_cba_grid.from_vector_file(matrix_path)
-    assert (cba_grid.cba.index == shp_cba_grid.cba.index).all()
+    shp_cba_grid = cba.from_vector_file(matrix_path)
+    assert (cba_grid.index == shp_cba_grid.index).all()
 
 
 def test_code_envs():
     """Test that binary code produced are coherent."""
     names = list(vector_file.Litho.unique())
-    cba_grid = CBA()
-    cba_grid.init_from_vector_data(
+    grid, cba_grid = cba.init_from_vector_data(
         cell_size=4000, geodataframe=vector_file, column="Litho", subset_of_target_attribute_values="all"
     )
-    shp_cba_grid = CBA()
-    shp_cba_grid = shp_cba_grid.from_vector_file(matrix_path)
-    assert (cba_grid.cba[names] == shp_cba_grid.cba[names]).all().all()
+    shp_cba_grid = cba.from_vector_file(matrix_path)
+    assert (cba_grid[names] == shp_cba_grid[names]).all().all()
 
 
 def test_add_points():
     """Test the add_layer() function for points vector file."""
-    cba_grid = CBA()
-    cba_grid.init_from_vector_data(
+    grid, cba_grid = cba.init_from_vector_data(
         cell_size=4000, geodataframe=vector_file, column="Litho", subset_of_target_attribute_values="all"
     )
-    cba_grid.add_layer(
+    cba_grid = cba.add_layer(
+        cba_grid,
+        grid,
         geodataframe=points_file,
         column="",
         subset_of_target_attribute_values=None,
         name="Occ",
         buffer=False,
     )
-    shp_cba_grid = CBA()
-    shp_cba_grid = shp_cba_grid.from_vector_file(matrix_path)
-    assert (cba_grid.cba["Occ"] == shp_cba_grid.cba["Occ"]).all()
+    shp_cba_grid = cba.from_vector_file(matrix_path)
+    assert (cba_grid["Occ"] == shp_cba_grid["Occ"]).all()
 
 
 def test_add_points_buffered():
     """Test the add_layer() function for points vector file with buffer option."""
-    cba_grid = CBA()
-    cba_grid.init_from_vector_data(
+    grid, cba_grid = cba.init_from_vector_data(
         cell_size=4000, geodataframe=vector_file, column="Litho", subset_of_target_attribute_values="all"
     )
-    cba_grid.add_layer(
-        geodataframe=points_file, column="", subset_of_target_attribute_values=None, name="Occ", buffer=4000
+    cba_grid = cba.add_layer(
+        cba_grid,
+        grid,
+        geodataframe=points_file,
+        column="",
+        subset_of_target_attribute_values=None,
+        name="Occ",
+        buffer=4000,
     )
-    shp_cba_grid = CBA()
-    shp_cba_grid = shp_cba_grid.from_vector_file(matrix_path)
-    assert (cba_grid.cba["Occ"] == shp_cba_grid.cba["Occ_B"]).all()
+    shp_cba_grid = cba.from_vector_file(matrix_path)
+    assert (cba_grid["Occ"] == shp_cba_grid["Occ_B"]).all()
 
 
 def test_add_lines():
     """Test the add_layer() function for mutltilines vector file."""
-    cba_grid = CBA()
-    cba_grid.init_from_vector_data(
+    grid, cba_grid = cba.init_from_vector_data(
         cell_size=4000, geodataframe=vector_file, column="Litho", subset_of_target_attribute_values="all"
     )
-    cba_grid.add_layer(
+    cba_grid = cba.add_layer(
+        cba_grid,
+        grid,
         geodataframe=lines_file,
         column="Type",
         subset_of_target_attribute_values=["Thrust", "Normal"],
         name=None,
         buffer=False,
     )
-    shp_cba_grid = CBA()
-    shp_cba_grid = shp_cba_grid.from_vector_file(matrix_path)
-    assert (cba_grid.cba.Normal == shp_cba_grid.cba.Normal).all()
-    assert (cba_grid.cba.Thrust == shp_cba_grid.cba.Thrust).all()
+    shp_cba_grid = cba.from_vector_file(matrix_path)
+    assert (cba_grid.Normal == shp_cba_grid.Normal).all()
+    assert (cba_grid.Thrust == shp_cba_grid.Thrust).all()
