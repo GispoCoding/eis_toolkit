@@ -38,17 +38,17 @@ def fuzzy_overlay(rasters_data: np.ndarray, method: FuzzyMethod, gamma: Optional
     """Compute fuzzy overlay using the specified method.
 
     Args:
-        data: The input data as a 3D Numpy array. The innermost dimension should have data points for
-            all rasters and bands for a pixel. Data points must be in the range [0, 1].
+        data: The input data as a 3D Numpy array. The 3D array consists of 2D arrays that represent single raster
+            bands. Data points must be in the range [0, 1].
         method: The overlay method to use. Options are AND, OR, PROD, SUM and GAMMA.
         gamma: The gamma parameter for the GAMMA method. Must be in the range [0, 1] if provided.
 
     Returns:
-        Array with the results of the overlay operation.
+        2D Numpy array with the results of the overlay operation.
 
     Raises:
         InvalidParameterValueException: If data values or gamma is not in range [0, 1] or gamma is not
-            provided when GAMMA method is selected.
+            provided when GAMMA overlay method is selected.
     """
 
     if any(raster.min() < 0 or raster.max() > 1 for raster in rasters_data):
