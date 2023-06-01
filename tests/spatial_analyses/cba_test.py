@@ -20,10 +20,10 @@ import eis_toolkit.spatial_analyses.cba as cba
 parent_dir = Path(__file__).parent.parent
 # parent_dir = Path(r"C:/Users/vella/Desktop/EIS_Toolkit/eis_toolkit/tests/")
 
-vector_path = str(parent_dir.joinpath("data/remote/Test_Litho.shp"))
-points_path = str(parent_dir.joinpath("data/remote/Test_Occ.shp"))
-lines_path = str(parent_dir.joinpath("data/remote/Test_Faults.shp"))
-matrix_path = str(parent_dir.joinpath("data/remote/Test_CBA_matrix.shp"))
+vector_path = str(parent_dir.joinpath("data/remote/Test_Litho.geojson"))
+points_path = str(parent_dir.joinpath("data/remote/Test_Occ.geojson"))
+lines_path = str(parent_dir.joinpath("data/remote/Test_Faults.geojson"))
+matrix_path = str(parent_dir.joinpath("data/remote/Test_CBA_matrix.geojson"))
 
 vector_file = gpd.GeoDataFrame.from_file(vector_path)
 points_file = gpd.GeoDataFrame.from_file(points_path)
