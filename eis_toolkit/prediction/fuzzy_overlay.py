@@ -40,7 +40,7 @@ def fuzzy_overlay(rasters_data: np.ndarray, method: FuzzyMethod, gamma: Optional
     Args:
         data: The input data as a 3D Numpy array. The 3D array consists of 2D arrays that represent single raster
             bands. Data points must be in the range [0, 1].
-        method: The overlay method to use. Options are AND, OR, PROD, SUM and GAMMA.
+        method: The overlay method to use. Options are AND, OR, PRODUCT, SUM and GAMMA.
         gamma: The gamma parameter for the GAMMA method. Must be in the range [0, 1] if provided.
 
     Returns:
