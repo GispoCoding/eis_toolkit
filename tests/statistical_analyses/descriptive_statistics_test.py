@@ -2,20 +2,25 @@ from pathlib import Path
 
 import geopandas as gpd
 import pandas as pd
+import pytest
 import rasterio
 
-from eis_toolkit.statistical_analyses.descriptive_statistics_raster import descriptive_statistics_raster
-from eis_toolkit.statistical_analyses.descriptive_statistics_vector import descriptive_statistics_vector
+from eis_toolkit.exceptions import InvalidColumnException
+from eis_toolkit.statistical_analyses.descriptive_statistics import (
+    descriptive_statistics_csv_vector,
+    descriptive_statistics_raster,
+)
 
 test_dir = Path(__file__).parent.parent
 test_csv = pd.read_csv(test_dir.joinpath("data/remote/test.csv"))
+test_zero_values = pd.read_csv(test_dir.joinpath("data/remote/test_zero_values.csv"))
 test_gpkg = gpd.read_file(test_dir.joinpath("data/remote/test.gpkg"))
 src_raster = rasterio.open(test_dir.joinpath("data/remote/small_raster.tif"))
 
 
 def test_descriptive_statistics_dataframe():
     """Checks that returned statistics are correct when using DataFrame."""
-    test = descriptive_statistics_vector(test_csv, "random_number")
+    test = descriptive_statistics_csv_vector(test_csv, "random_number")
     assert test["mean"] == 7040.444444444444
     assert test["25%"] == 496
     assert test["50%"] == 1984
@@ -25,9 +30,33 @@ def test_descriptive_statistics_dataframe():
     assert test["skew"] == 1.6136246052760224
 
 
+def test_zero_values_column():
+    """Test column with all values set to 0."""
+    test = descriptive_statistics_csv_vector(test_zero_values, "random_number")
+    assert test["mean"] == 0
+    assert test["25%"] == 0
+    assert test["50%"] == 0
+    assert test["75%"] == 0
+    assert test["standard_deviation"] == 0
+    assert pd.isna(test["relative_standard_deviation"]) is True
+    assert pd.isna(test["skew"]) is True
+
+
+def test_invalid_column_name_df():
+    """Test that invalid column name raises exception."""
+    with pytest.raises(InvalidColumnException):
+        descriptive_statistics_csv_vector(test_csv, "non_existing_column")
+
+
+def test_invalid_column_name_gdf():
+    """Test that invalid column name raises exception."""
+    with pytest.raises(InvalidColumnException):
+        descriptive_statistics_csv_vector(test_gpkg, "non_existing_column")
+
+
 def test_descriptive_statistics_geodataframe():
     """Checks that returned statistics are correct when using GeoDataFrame."""
-    test = descriptive_statistics_vector(test_gpkg, "random_number")
+    test = descriptive_statistics_csv_vector(test_gpkg, "random_number")
     assert test["mean"] == 768.8
     assert test["25%"] == 248
     assert test["50%"] == 496
@@ -37,7 +66,7 @@ def test_descriptive_statistics_geodataframe():
     assert test["skew"] == 0.8890481348169545
 
 
-def test_descriptive_statistics_numpy_ndarray():
+def test_descriptive_statistics_raster():
     """Checks that returned statistics are correct when using numpy.ndarray."""
     test = descriptive_statistics_raster(src_raster)
     assert test["mean"] == 5.186564440993789

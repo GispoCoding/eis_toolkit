@@ -72,3 +72,9 @@ class InvalidColumnIndexException(Exception):
     """Exception error for index out of range."""
 
     pass
+
+
+class InvalidColumnException(Exception):
+    """Exception error for invalid column name."""
+
+    pass
