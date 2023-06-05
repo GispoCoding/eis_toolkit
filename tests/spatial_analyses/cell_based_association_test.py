@@ -9,16 +9,9 @@ from pathlib import Path
 
 import geopandas as gpd
 
-import eis_toolkit.spatial_analyses.cba as cba
-
-# import os
-# import sys
-# os.environ['USE_PYGEOS'] = '0'
-# sys.path.append(r"C:\Users\vella\Desktop\EIS_Toolkit\eis_toolkit\eis_toolkit\spatial_analyses")
-# from cba import CBA
+import eis_toolkit.spatial_analyses.cell_based_association as cba
 
 parent_dir = Path(__file__).parent.parent
-# parent_dir = Path(r"C:/Users/vella/Desktop/EIS_Toolkit/eis_toolkit/tests/")
 
 vector_path = str(parent_dir.joinpath("data/remote/Test_Litho.geojson"))
 points_path = str(parent_dir.joinpath("data/remote/Test_Occ.geojson"))
