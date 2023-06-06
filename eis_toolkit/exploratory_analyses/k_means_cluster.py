@@ -1,3 +1,5 @@
+from typing import Optional
+
 import geopandas as gdp
 import numpy as np
 from beartype import beartype
@@ -8,7 +10,7 @@ from eis_toolkit.exceptions import EmptyDataFrameException
 
 
 def _k_means_clustering(
-    data: gdp.GeoDataFrame, number_of_clusters: int, random_state: int | None = None
+    data: gdp.GeoDataFrame, number_of_clusters: int, random_state: Optional[int] = None
 ) -> gdp.GeoDataFrame:
 
     coordinates = data.geometry.apply(lambda geom: [geom.x, geom.y])
@@ -25,7 +27,7 @@ def _k_means_clustering(
 
 @beartype
 def k_means_clustering(
-    data: gdp.GeoDataFrame, number_of_clusters: int, random_state: int | None = None
+    data: gdp.GeoDataFrame, number_of_clusters: int, random_state: Optional[int] = None
 ) -> gdp.GeoDataFrame:
     """
     Perform k-means clustering on the input data.
