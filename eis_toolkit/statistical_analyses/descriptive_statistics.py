@@ -1,6 +1,7 @@
 from typing import Union
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import rasterio
 from beartype import beartype
@@ -13,15 +14,19 @@ from eis_toolkit.exceptions import InvalidColumnException
 # The core descriptive statistics functionality. Used internally by descriptive_statistics.
 def _descriptive_statistics(data: Union[rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame]) -> dict:
     statistics = DescrStatsW(data)
+    min = np.min(data)
+    max = np.max(data)
     mean = statistics.mean
     quantiles = statistics.quantile(probs=[0.25, 0.50, 0.75], return_pandas=False)
     standard_deviation = statistics.std
-    if mean == 0 or standard_deviation == 0:
-        relative_standard_deviation = float("NaN")  # By default this would be set to infinity.
+    if mean == 0:
+        relative_standard_deviation = np.nan  # By default this would be set to infinity.
     else:
         relative_standard_deviation = standard_deviation / mean
     skew = stattools.robust_skewness(data)
     results_dict = {
+        "min": min,
+        "max": max,
         "mean": mean,
         "25%": quantiles[0],
         "50%": quantiles[1],
@@ -36,9 +41,9 @@ def _descriptive_statistics(data: Union[rasterio.io.DatasetReader, pd.DataFrame,
 
 @beartype
 def descriptive_statistics_csv_vector(input_data: Union[pd.DataFrame, gpd.GeoDataFrame], column: str) -> dict:
-    """Generate descriptive statistics from raster data.
+    """Generate descriptive statistics from vector data.
 
-    Generates mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.
+    Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.
 
     Args:
         input_data: Data to generate descriptive statistics from.
@@ -58,7 +63,7 @@ def descriptive_statistics_csv_vector(input_data: Union[pd.DataFrame, gpd.GeoDat
 def descriptive_statistics_raster(input_data: rasterio.io.DatasetReader) -> dict:
     """Generate descriptive statistics from raster data.
 
-    Generates mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.
+    Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.
 
     Args:
         input_data: Data to generate descriptive statistics from.

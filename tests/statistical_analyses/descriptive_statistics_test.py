@@ -21,6 +21,8 @@ src_raster = rasterio.open(test_dir.joinpath("data/remote/small_raster.tif"))
 def test_descriptive_statistics_dataframe():
     """Checks that returned statistics are correct when using DataFrame."""
     test = descriptive_statistics_csv_vector(test_csv, "random_number")
+    assert test["min"] == 124
+    assert test["max"] == 31744
     assert test["mean"] == 7040.444444444444
     assert test["25%"] == 496
     assert test["50%"] == 1984
@@ -33,6 +35,8 @@ def test_descriptive_statistics_dataframe():
 def test_zero_values_column():
     """Test column with all values set to 0."""
     test = descriptive_statistics_csv_vector(test_zero_values, "random_number")
+    assert test["min"] == 0
+    assert test["max"] == 0
     assert test["mean"] == 0
     assert test["25%"] == 0
     assert test["50%"] == 0
@@ -57,6 +61,8 @@ def test_invalid_column_name_gdf():
 def test_descriptive_statistics_geodataframe():
     """Checks that returned statistics are correct when using GeoDataFrame."""
     test = descriptive_statistics_csv_vector(test_gpkg, "random_number")
+    assert test["min"] == 124
+    assert test["max"] == 1984
     assert test["mean"] == 768.8
     assert test["25%"] == 248
     assert test["50%"] == 496
@@ -69,6 +75,8 @@ def test_descriptive_statistics_geodataframe():
 def test_descriptive_statistics_raster():
     """Checks that returned statistics are correct when using numpy.ndarray."""
     test = descriptive_statistics_raster(src_raster)
+    assert test["min"] == 2.503
+    assert test["max"] == 9.67
     assert test["mean"] == 5.186564440993789
     assert test["25%"] == 3.2675
     assert test["50%"] == 5.1825
