@@ -1,10 +1,8 @@
 from typing import Optional
 
 import geopandas as gdp
-import numpy as np
 from beartype import beartype
 from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
 
 from eis_toolkit.exceptions import EmptyDataFrameException
 
@@ -13,12 +11,10 @@ def _k_means_clustering(
     data: gdp.GeoDataFrame, number_of_clusters: int, random_state: Optional[int]
 ) -> gdp.GeoDataFrame:
 
-    coordinates = data.geometry.apply(lambda geom: [geom.x, geom.y])
-    coordinates_array = np.array(coordinates.tolist())
-    standardized_data = StandardScaler().fit_transform(coordinates_array)
+    coordinates = list(data.geometry.apply(lambda geom: [geom.x, geom.y]))
 
     kmeans = KMeans(n_clusters=number_of_clusters, random_state=random_state)
-    kmeans.fit(standardized_data)
+    kmeans.fit(coordinates)
 
     data["cluster"] = kmeans.labels_
 
