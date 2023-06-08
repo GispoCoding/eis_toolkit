@@ -35,6 +35,8 @@ def k_means_clustering(
     Args:
         gdf: A GeoDataFrame containing the input data.
         number_of_clusters: The number of clusters to form.
+        random_state: A random number generation for centroid initialization to make
+            the randomness deterministic, default=None.
 
     Returns:
         GeoDataFrame containing assigned cluster labels.
