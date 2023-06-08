@@ -4,7 +4,7 @@ import geopandas as gdp
 from beartype import beartype
 from sklearn.cluster import KMeans
 
-from eis_toolkit.exceptions import EmptyDataFrameException
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 
 
 def _k_means_clustering(
@@ -43,6 +43,9 @@ def k_means_clustering(
 
     if data.empty:
         raise EmptyDataFrameException("The input GeoDataFrame is empty.")
+
+    if number_of_clusters < 1:
+        raise InvalidParameterValueException("The input value for number of clusters must be at least one.")
 
     k_means_gdf = _k_means_clustering(data, number_of_clusters, random_state)
     return k_means_gdf

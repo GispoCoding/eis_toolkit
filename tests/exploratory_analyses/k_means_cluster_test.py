@@ -2,7 +2,7 @@ import geopandas as gdp
 import pandas as pd
 import pytest
 
-from eis_toolkit.exceptions import EmptyDataFrameException
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 from eis_toolkit.exploratory_analyses.k_means_cluster import k_means_clustering
 
 df = pd.DataFrame(
@@ -21,6 +21,12 @@ def test_k_means_clustering_output():
     kmeans_labels = kmeans_gdf["cluster"]
     expected_labels = [1, 1, 1, 0, 0, 0]
     assert list(kmeans_labels) == expected_labels
+
+
+def test_number_of_clusters():
+    """Test that number of clusters given as a parameter is non-negative and greater than zero."""
+    with pytest.raises(InvalidParameterValueException):
+        k_means_clustering(data=gdf, number_of_clusters=0)
 
 
 def test_empty_geodataframe():
