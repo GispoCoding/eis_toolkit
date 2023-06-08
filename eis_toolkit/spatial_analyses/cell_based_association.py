@@ -1,40 +1,102 @@
-# -*- coding: utf-8 -*-
-
-"""Created on Thu Jun  1 08:57:13 2023.
-
-@author: vella.
-"""
-
+import os
 from numbers import Number
 
-# os.environ['USE_PYGEOS'] = '0'
-from typing import Optional, Tuple, Union
-
-# import os
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio
+from beartype import beartype
+from beartype.typing import List, Optional, Tuple, Union
 from shapely import wkt
 from shapely.geometry import Polygon
 
+os.environ["USE_PYGEOS"] = "0"
 
-def init_from_vector_data(
+
+@beartype
+def cell_based_association(
+    cell_size: int,
+    geodata: List[gpd.GeoDataFrame],
+    output_path: str,
+    column: Optional[List[str]] = [""],
+    subset_target_attribute_values: Optional[List[Union[None, list]]] = [None],
+    add_name: Optional[List[Union[str, None]]] = [None],
+    add_buffer: Optional[List[Union[Number, bool]]] = [False],
+) -> gpd.GeoDataFrame:
+    """Creation of CBA matrix.
+
+    Initializes a CBA matrix from a vector file. The mesh is calculated
+    according to the geometries contained in this file and the size of cells.
+    Allows to add multiple vector data to the matrix, based on targeted shapes
+    and/or attributes.
+
+    Args:
+        cell_size: Size of the cells.
+        geodata: GeoDataFrame to create the CBA matrix. Additional
+            GeoDataFrame(s) can be imputed to add to the CBA matrix.
+        output_path: Name of the saved .tif file.
+        column: Name of the column of interest. If no attribute is specified,
+            then an artificial attribute is created representing the presence
+            or absence of the geometries of this file for each cell of the CBA
+            grid. If a target attribute is ndicated, it must be categorical.
+            Other types of attributes (numerical/string) are not managed.
+            A categorical attribute will generate as many columns (binary) in
+            the CBA matrix than values considered of interest (dummification).
+            See parameter <subset_target_attribute_values>. Additional
+            column(s) can be imputed for each added GeoDataFrame(s).
+        subset_target_attribute_values: List of values of interest of the
+            target attribute, in case a categorical target attribute has been
+            specified. Allows to filter a subset of relevant values. Additional
+            values can be imputed for each added GeoDataFrame(s).
+        add_name: Name of the column(s) to add to the matrix.
+        add_buffer: Allow the use of a buffer around shapes before the
+            intersection with CBA cells for the added GeoDataFrame(s). Minimize
+            border effects or allow increasing positive samples (i.e. cells
+            with mineralization). The size of the buffer is computed using the
+            CRS (if projected CRS in meters: value in meters).
+
+    Returns:
+        CBA matrix is created.
+    """
+
+    for i, data in enumerate(geodata):
+        if i == 0:
+            # Initialization of the CBA matrix
+            grid, cba = _init_from_vector_data(cell_size, geodata[0], column[0], subset_target_attribute_values[0])
+        else:
+            # If necessary, adding data to matrix
+            cba = _add_layer(
+                cba,
+                grid,
+                geodata[i],
+                column[i],
+                subset_target_attribute_values[i],
+                add_name[i - 1],
+                add_buffer[i - 1],
+            )
+
+    _to_raster(cba, output_path)
+
+    return cba
+
+
+@beartype
+def _init_from_vector_data(
     cell_size: int,
     geodataframe: gpd.GeoDataFrame,
     column: str = "",
-    subset_of_target_attribute_values: Optional[list] = None,
-) -> None:
-    """Creation of CBA object.
+    subset_target_attribute_values: Optional[list] = None,
+) -> Tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
+    """Creation of CBA matrix.
 
     Initializes a CBA matrix from a vector file. The mesh is calculated
     according to the geometries contained in this file and the size
     of cells.
 
     Args:
-        cell_size: size of the cells (ex : 3000).
-        geodataframe: path to vector file.
-        target_attribut: <optionnel> name of the attribute of interest.
+        cell_size: Size of the cells.
+        geodataframe: GeoDataframe to create the CBA matrix.
+        column: Name of the column of interest.
             If no attribute is specified, then an artificial attribute is
             created representing the presence or absence of the geometries of
             this file for each cell of the CBA grid. If a target attribute is
@@ -42,29 +104,28 @@ def init_from_vector_data(
             (numerical/string) are not managed. A categorical attribute will
             generate as many columns (binary) in the CBA matrix than values
             considered of interest(dummification). See parameter
-            <subset_of_target_attribut_values>
-        subset_of_target_attribut_values: <optionnel> list of values
-            of interest of the target attribute, in case a categorical target
-            attribute has been specified. Allows to filter a subset of relevant
-            values.
+            <subset_target_attribute_values>
+        subset_target_attribute_values: List of values of interest of the
+            target column, in case a categorical target attribute has been
+            specified. Allows to filter a subset of relevant values.
 
     Returns:
-        CBA object is initialized.
+        Tuple of GeodataFrames: the grid mesh produced and the CBA matrix.
     """
 
     # Allows a non-mutable default value
-    if subset_of_target_attribute_values is None:
-        subset_of_target_attribute_values = []
+    if subset_target_attribute_values is None:
+        subset_target_attribute_values = []
 
     # Reading the vector file
     geodata = geodataframe.copy(deep=True)
 
     # Initialization of the grid
-    grid = get_grid(geodata, cell_size, cell_size)
+    grid = _get_grid(geodata, cell_size, cell_size)
     grid.crs = geodata.crs
 
     # Filling the grid with overlapped geometries
-    indicators, join_grid = prepare_grid(geodataframe, grid, column, subset_of_target_attribute_values)
+    indicators, join_grid = _prepare_grid(geodataframe, grid, column, subset_target_attribute_values)
     tmp = join_grid[["geometry"]].copy(deep=True)
 
     # Saving results in attributes
@@ -75,15 +136,16 @@ def init_from_vector_data(
     return grid, cba
 
 
-def add_layer(
+@beartype
+def _add_layer(
     cba: gpd.GeoDataFrame,
     grid: gpd.GeoDataFrame,
     geodataframe: gpd.GeoDataFrame,
     column: str = "",
-    subset_of_target_attribute_values: Optional[list] = None,
+    subset_target_attribute_values: Optional[list] = None,
     name: Optional[str] = None,
     buffer: Union[Number, bool] = False,
-) -> None:
+) -> gpd.GeoDataFrame:
     """Add new data to CBA matrix.
 
     Allow to add data to an existing matrix. Mesh size and placement are not
@@ -91,8 +153,10 @@ def add_layer(
     targeted shapes and/or attributes.
 
     Args:
-        geodataframe: path to vector file.
-        target_attribut: <optional> Name of the targeted attribute. If
+        cba: Matrix produced when initializing the CBA.
+        grid: Grid mesh produced when initializing the CBA.
+        geodataframe: GeodataFrame to add to the CBA matrix.
+        column: Name of the targeted attribute. If
             no attribute are specified, added data fo each cell are based on
             the absence/presence intersection between cells and the shapes
             within the selected vector file. If specified, attribute must be
@@ -102,25 +166,23 @@ def add_layer(
             Note: if a file contain multiple target attribute, <add_layer> has
             to be executed as many times as there are target attributes in this
             file.
-        Name: <optional> Name of the coluumn to add to the matrix.
-        buffer: <optional> Allow the use of a buffer around shapes before
+        subset_target_attribute_values: List of categorical values of
+            interest within the targeted column. Allow filtering subset of
+            relevant values.
+        name: Name of the column to add to the matrix.
+        buffer: Allow the use of a buffer around shapes before
             the intersection with CBA cells.Minimize border effects or allow
             increasing positive samples (i.e. cells with mineralization).
-            Default: False; Value (CRS units): size of the buffer.
-        subset_of_target_attribut_values: <optionnel> list of categorical
-            values of interest within the targeted attributes. Allow filtering
-            subset of relevant values.
+            The size of the buffer is computed using the CRS (if projected CRS
+            in meters: value in meters).
 
     Returns:
-        CBA object is completed.
+        Data added to the CBA matrix.
     """
 
     # Allows a non-mutable default value
-    if subset_of_target_attribute_values is None:
-        subset_of_target_attribute_values = []
-
-    # Prerequisite: the CBA grid must already have been initialized
-    assert cba is not None
+    if subset_target_attribute_values is None:
+        subset_target_attribute_values = []
 
     # Reading the vector file
     geodata = geodataframe.copy(deep=True)
@@ -131,15 +193,15 @@ def add_layer(
         grid = gpd.GeoDataFrame(cba)
 
         # Adding a column to the CBA
-        dummies, join_grid = prepare_grid(geodata, grid, column, subset_of_target_attribute_values)
+        dummies, join_grid = _prepare_grid(geodata, grid, column, subset_target_attribute_values)
 
     # Buffer of specified value
     else:
         # Calculation of the buffer disks
-        added_buf = get_disc(cba, grid, buffer)
+        added_buf = _get_disc(cba, grid, buffer)
 
         # Adding a column to the CBA
-        dummies, join_disc = prepare_disc(geodata, added_buf, column, subset_of_target_attribute_values)
+        dummies, join_disc = _prepare_disc(geodata, added_buf, column, subset_target_attribute_values)
 
     # Application of the indicated name (otherwise filename is used)
     if name is not None:
@@ -155,34 +217,33 @@ def add_layer(
     return cba
 
 
-def prepare_grid(
+@beartype
+def _prepare_grid(
     geodata: gpd.GeoDataFrame,
     grid: gpd.GeoDataFrame,
-    target_attribut: str,
-    subset_of_target_attribut_values: list,
-) -> Union[list, gpd.GeoDataFrame]:
+    column: str,
+    subset_target_attribute_values: list,
+) -> Tuple[Union[pd.DataFrame, pd.Series], gpd.GeoDataFrame]:
     """Intermediate utility.
 
     Preparation of the dummification of selected variables and intersection
     between grid and input dataset.
 
     Args:
-        geodata:  the geodata object corresponding to the vector file.
-        grid: initialized mesh.
-        target_attribut: target attribute to extract from the vector file.
-        subset_of_target_attribut_values: subset of the relevant values
-        of the target attribute
+        geodata: The geodata object corresponding to the vector file.
+        grid: Grid mesh produced when initializing the CBA.
+        column: Column attribute to extract from the vector file.
+        subset_target_attribute_values: Subset of the relevant values
+            of the target column.
 
     Returns: pair of variables
-        -> boolean indicating if the target attribute must be dummified
-        -> grid resulting from the intersection between the mesh and the
+        -> Boolean indicating if the target attribute must be dummified
+        -> Grid resulting from the intersection between the mesh and the
         vector file
     """
 
     # Data verification
-    dummification, target, identified_values = check_and_prepare_param(
-        geodata, target_attribut, subset_of_target_attribut_values
-    )
+    dummification, target, identified_values = _check_and_prepare_param(geodata, column, subset_target_attribute_values)
 
     # Spatial join of the intersection between the grid and the current map
     join_grid = gpd.sjoin(grid, geodata, how="inner", predicate="intersects")
@@ -195,10 +256,11 @@ def prepare_grid(
     return indicators, join_grid
 
 
-def check_and_prepare_param(
+@beartype
+def _check_and_prepare_param(
     geodata: gpd.GeoDataFrame,
-    target: str,
-    attribut_values: list,
+    column: str,
+    subset_target_attribute_values: list,
     target_name: Optional[str] = "Added",
 ) -> Tuple[bool, str, list]:
     """Intermediate utility.
@@ -206,9 +268,8 @@ def check_and_prepare_param(
     Prepare the parameters and check their consistency.
 
     Args:
-        filepath: path of the vector file to integrate
-        geodata: the geodata object corresponding to the vector file
-        target: name of the attribute of interest. If no attribute is
+        geodata: Geodata object corresponding to the vector file
+        column: Name of the column of interest. If no attribute is
             specified, a synthetic one is produced to represent the
             absence/presence of geometry from this file within each cell of the
             CBA. If an attribute is specified, it must be categorical. In this
@@ -217,59 +278,55 @@ def check_and_prepare_param(
             <subset_of_target_attribut_values>. Note: if a vector file contains
             several target attributes, it is necessary to run as many times the
             <add_layer> function than target attributes of this file.
-        attribut_values: list of values of interest for the target attribute,
-            in the case where a specific categorical target has been specified.
-            It allows filtering a subset of relevant values. "all": all unique
-            values for the target will be used.
+        subset_target_attribute_values: List of values of interest for the
+            target column, in the case where a specific categorical target
+            has been specified. It allows filtering a subset of relevant
+            values.
+        target_name: Name of the produced boolean column when using all
+            geometries to dummify the data.
 
     Returns: triplet
-        -> dummification: boolean indicating the dummification (processing
+        -> dummification: Boolean indicating the dummification (processing
             of categorical attribute)
-        -> target: targeted variable, can be artificial when only geometries
+        -> target: Targeted variable, can be artificial when only geometries
             are considered.
-        -> identified_values: subset of values of interest, possibly artificial
+        -> identified_values: Subset of values of interest, possibly artificial
             when only geometries are considered.
     """
 
     dummification = False
-    if target == "":
+    if column == "":
         # Case where we use geometries (e.g. a point file for mineralization)
         # we add a column filled with 1 (presence).
-        target = target_name
-        attribut_values = [1]
-        geodata[target] = int(1)
-    elif not attribut_values:
-        # Case where we consider the attribute as it is without dummification
-        # (e.g. numeric or string target attribute).
-        raise ValueError(
-            "target_attribut != '' and subset_of_target_attribut_values == [] (numerical/string) "
-            "FORBIDDEN AT THIS TIME as not managed !"
-        )
+        column = target_name
+        subset_target_attribute_values = [1]
+        geodata[column] = int(1)
     else:
         # Case of a symbolic attribute with identified subset of values of
         # interest.
         dummification = True
-        if attribut_values == "all":
-            attribut_values = geodata[target].unique()
-    assert target in geodata.columns
-    identified_values = pd.Series(attribut_values)
-    assert identified_values.isin(geodata[target]).all()
+        if subset_target_attribute_values == []:
+            subset_target_attribute_values = geodata[column].unique()
+    assert column in geodata.columns
+    identified_values = pd.Series(subset_target_attribute_values)
+    assert identified_values.isin(geodata[column]).all()
     # FORBIDDEN AT THIS TIME as not managed !!!
     # assert target == "" or len(attribut_values) != 0
-    assert len(attribut_values) != 0
+    assert len(subset_target_attribute_values) != 0
 
-    return dummification, target, identified_values
+    return dummification, column, list(identified_values)
 
 
-def get_disc(geodata: gpd.GeoDataFrame, grid: gpd.GeoDataFrame, buff_radius: Union[int, float]) -> gpd.GeoDataFrame:
+@beartype
+def _get_disc(geodata: gpd.GeoDataFrame, grid: gpd.GeoDataFrame, buff_radius: Union[int, float]) -> gpd.GeoDataFrame:
     """Intermediate utility.
 
     Defines disks with radii defined from the centroids of the cells of a grid.
 
     Args:
-        geodata: geodata to intersect with the grid.
-        grid: grid from which the disks will be created.
-        buff_radius: radius for created buffer disks
+        geodata: Geodata to intersect with the grid.
+        grid: Grid from which the discs will be created.
+        buff_radius: Radius for created buffer discs
 
     Returns:
         GeoDataFrame containing the records from the grid buffers/geodata
@@ -297,30 +354,29 @@ def get_disc(geodata: gpd.GeoDataFrame, grid: gpd.GeoDataFrame, buff_radius: Uni
     return gpd.GeoDataFrame(disc, geometry="geometry", crs=geodata.crs)
 
 
-def prepare_disc(
+@beartype
+def _prepare_disc(
     geodata: gpd.GeoDataFrame,
     disc: gpd.GeoDataFrame,
-    target_attribut: str,
-    subset_of_target_attribut_values: list,
-) -> Tuple[list, gpd.GeoDataFrame]:
+    column: str,
+    subset_target_attribute_values: list,
+) -> Tuple[pd.Series, gpd.GeoDataFrame]:
     """Intermediate utility.
 
     Compute spatial join and generate the table of presence of the different
     attributes.
 
     Args:
-        geodata: the geodata object corresponding to the vector file.
-        disc: existing disk 'paving'.
-        target_attribut: target attribute to extract from the vector file.
-        subset_of_target_attribut_values: subset of the relevant values
+        geodata: The geodata object corresponding to the vector file.
+        disc: Existing discs 'paving'.
+        column: Target column to extract from the vector file.
+        subset_target_attribute_values: Subset of the relevant values
             of the target attribute
 
     Returns: A boolean indicating if the target attribute must be dummified
         and an intersection grid between the mesh and the vector file
     """
-    dummification, target, identified_values = check_and_prepare_param(
-        geodata, target_attribut, subset_of_target_attribut_values
-    )
+    dummification, target, identified_values = _check_and_prepare_param(geodata, column, subset_target_attribute_values)
 
     # Spatial join of the intersection between the grid and the current map
     join_grid = gpd.sjoin(disc, geodata, how="inner", predicate="intersects")
@@ -334,7 +390,8 @@ def prepare_disc(
     return indicators, join_grid
 
 
-def get_grid(working_map: gpd.GeoDataFrame, cell_width: int, cell_height: int) -> gpd.GeoDataFrame:
+@beartype
+def _get_grid(working_map: gpd.GeoDataFrame, cell_width: int, cell_height: int) -> gpd.GeoDataFrame:
     """Intermediate utility.
 
     Produces a regular grid based on geodata surface.
@@ -342,9 +399,9 @@ def get_grid(working_map: gpd.GeoDataFrame, cell_width: int, cell_height: int) -
     and East (up to down, left to right paving).
 
     Args:
-        working_map: geodata used as a 'bounding box'.
-        cell_width: width of cells.
-        cell_height: height of cells.
+        working_map: Geodata used as a 'bounding box'.
+        cell_width: Width of cells.
+        cell_height: Height of cells.
 
     Returns:
         GeoDataFrame containing all the cells paving the geodata area.
@@ -380,7 +437,8 @@ def get_grid(working_map: gpd.GeoDataFrame, cell_width: int, cell_height: int) -
     return gpd.GeoDataFrame(result, geometry="geometry", crs=working_map.crs)
 
 
-def from_csv(input_csv_file_path: str) -> gpd.GeoDataFrame:
+@beartype
+def _from_csv(input_csv_file_path: str) -> gpd.GeoDataFrame:
     """Intermediate utility.
 
     Read a CBA grid from CSV file. CSV file must contain "geometry"
@@ -410,7 +468,8 @@ def from_csv(input_csv_file_path: str) -> gpd.GeoDataFrame:
     return cba_grid
 
 
-def from_vector_file(cba_vector_file_path: str) -> gpd.GeoDataFrame:
+@beartype
+def _from_vector_file(cba_vector_file_path: str) -> gpd.GeoDataFrame:
     """Intermediate utility.
 
     Read a CBA grid from a vector file (ESRI shapefile, geojson...).
@@ -419,7 +478,7 @@ def from_vector_file(cba_vector_file_path: str) -> gpd.GeoDataFrame:
     square grid.
 
     Args:
-        cba_vector_file_path: input vector file.
+        cba_vector_file_path: Input vector file.
 
     Returns:
         Corresponding CBA object.
@@ -435,13 +494,15 @@ def from_vector_file(cba_vector_file_path: str) -> gpd.GeoDataFrame:
     return cba_grid
 
 
-def to_csv(cba: gpd.GeoDataFrame, output_path: str) -> None:
+@beartype
+def _to_csv(cba: gpd.GeoDataFrame, output_path: str) -> None:
     """Intermediate utility.
 
     Saves the object in a CSV file.
 
     Args:
-        output_csv_file_path: name of the saved file suffixed with the
+        cba: CBA matrix to save.
+        output_csv_file_path: Name of the saved file suffixed with the
             CRS (spatial projection system).
 
     Returns:
@@ -449,20 +510,22 @@ def to_csv(cba: gpd.GeoDataFrame, output_path: str) -> None:
     """
 
     crs_txt = f"epsg:{cba.crs.to_epsg()}"
-    tmp = pd.DataFrame(cba)
+    tmp = pd.DataFrame(cba.copy())
     tmp["geometry"] = tmp.geometry.apply(lambda x: wkt.dumps(x))
     # tmp = tmp.drop("geometry", axis=1)
     tmp["cell_id"] = cba.index
     tmp.to_csv(output_path + "__" + str(crs_txt).replace(":", "_") + ".csv", index=False)
 
 
-def to_raster(cba: gpd.GeoDataFrame, output_path: str) -> None:
+@beartype
+def _to_raster(cba: gpd.GeoDataFrame, output_path: str) -> None:
     """Intermediate utility.
 
     Saves the object as a raster TIFF file.
 
     Args:
-        output_tiff_path: name of the saved file.
+        cba: CBA matrix to save.
+        output_tiff_path: Name of the saved file.
 
     Returns:
         None
@@ -483,8 +546,7 @@ def to_raster(cba: gpd.GeoDataFrame, output_path: str) -> None:
 
     values = []
     col_name = []
-    # for col in cba.columns.drop("geometry"):
-    for col in cba.select_dtypes(exclude=["geometry"]).columns:
+    for col in cba.select_dtypes(include=["int32", "int64"]).columns:
         col_name.append(col)
         val = cba[col].values
         val = val.reshape(X.shape)
