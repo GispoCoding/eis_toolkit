@@ -10,7 +10,7 @@ from eis_toolkit.exceptions import EmptyDataFrameException
 
 
 def _k_means_clustering(
-    data: gdp.GeoDataFrame, number_of_clusters: int, random_state: Optional[int] = None
+    data: gdp.GeoDataFrame, number_of_clusters: int, random_state: Optional[int]
 ) -> gdp.GeoDataFrame:
 
     coordinates = data.geometry.apply(lambda geom: [geom.x, geom.y])
