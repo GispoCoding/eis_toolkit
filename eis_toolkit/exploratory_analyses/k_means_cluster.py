@@ -61,9 +61,8 @@ def k_means_clustering(
     if data.empty:
         raise EmptyDataFrameException("The input GeoDataFrame is empty.")
 
-    if number_of_clusters is not None:
-        if number_of_clusters < 1:
-            raise InvalidParameterValueException("The input value for number of clusters must be at least one.")
+    if number_of_clusters is not None and number_of_clusters < 1:
+        raise InvalidParameterValueException("The input value for number of clusters must be at least one.")
 
     k_means_gdf = _k_means_clustering(data, number_of_clusters, random_state)
 
