@@ -25,7 +25,7 @@ def test_k_means_clustering_output():
 
 
 def test_invalid_number_of_clusters():
-    """Test that number of clusters given as a parameter is non-negative and greater than zero."""
+    """Test that invalid number of clusters raises the correct exception."""
     with pytest.raises(InvalidParameterValueException):
         k_means_clustering(data=gdf, number_of_clusters=0)
 
