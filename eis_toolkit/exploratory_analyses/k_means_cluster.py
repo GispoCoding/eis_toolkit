@@ -44,8 +44,9 @@ def k_means_clustering(
     Perform k-means clustering on the input data.
 
     Args:
-        gdf: A GeoDataFrame containing the input data.
-        number_of_clusters: The number of clusters to form. Optional parameter.
+        data: A GeoDataFrame containing the input data.
+        number_of_clusters: The number of clusters (>= 1) to form. Optional parameter. If not provided,
+            optimal number of clusters is computed using the elbow method.
         random_state: A random number generation for centroid initialization to make
             the randomness deterministic. Optional parameter.
 
@@ -54,6 +55,7 @@ def k_means_clustering(
 
     Raises:
         EmptyDataFrameException: The input GeoDataFrame is empty.
+        InvalidParameterException: The number of clusters is less than one.
     """
 
     if data.empty:
