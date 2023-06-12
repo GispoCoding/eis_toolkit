@@ -161,7 +161,7 @@ def _add_layer(
             the absence/presence intersection between cells and the shapes
             within the selected vector file. If specified, attribute must be
             categorical (list) and will generate as much columns as it has
-            unique values in <subset_of_target_attribut_values>
+            unique values in <subset_target_attribute_values>
             (dummification).
             Note: if a file contain multiple target attribute, <add_layer> has
             to be executed as many times as there are target attributes in this
@@ -190,7 +190,7 @@ def _add_layer(
     # No buffer
     if buffer is False:
         # Recovery of the grid calculated at the initialization of the CBA
-        grid = gpd.GeoDataFrame(cba)
+        grid = gpd.GeoDataFrame(cba.copy())
 
         # Adding a column to the CBA
         dummies, join_grid = _prepare_grid(geodata, grid, column, subset_target_attribute_values)
@@ -275,7 +275,7 @@ def _check_and_prepare_param(
             CBA. If an attribute is specified, it must be categorical. In this
             case, it will produce as much columns (binary) in the CBA matrix
             than listed values. See parameter
-            <subset_of_target_attribut_values>. Note: if a vector file contains
+            <subset_target_attribute_values>. Note: if a vector file contains
             several target attributes, it is necessary to run as many times the
             <add_layer> function than target attributes of this file.
         subset_target_attribute_values: List of values of interest for the
