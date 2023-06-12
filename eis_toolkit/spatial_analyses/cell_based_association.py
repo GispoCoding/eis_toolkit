@@ -502,7 +502,7 @@ def _to_csv(cba: gpd.GeoDataFrame, output_path: str) -> None:
 
     Args:
         cba: CBA matrix to save.
-        output_csv_file_path: Name of the saved file suffixed with the
+        output_path: Name of the saved file suffixed with the
             CRS (spatial projection system).
 
     Returns:
@@ -525,7 +525,7 @@ def _to_raster(cba: gpd.GeoDataFrame, output_path: str) -> None:
 
     Args:
         cba: CBA matrix to save.
-        output_tiff_path: Name of the saved file.
+        output_path: Name of the saved file.
 
     Returns:
         None
