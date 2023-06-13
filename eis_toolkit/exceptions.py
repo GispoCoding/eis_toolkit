@@ -1,13 +1,9 @@
 class NonMatchingCrsException(Exception):
     """Exception error class for crs mismatches."""
 
-    pass
-
 
 class NotApplicableGeometryTypeException(Exception):
     """Exception error class for not suitable geometry types."""
-
-    pass
 
 
 class MatchingCrsException(Exception):
@@ -17,39 +13,58 @@ class MatchingCrsException(Exception):
 class NumericValueSignException(Exception):
     """Exception error class for numeric value sign exception."""
 
-    pass
-
 
 class InvalidParameterValueException(Exception):
     """Exception error class for invalid parameter values."""
-
-    pass
 
 
 class NonSquarePixelSizeException(Exception):
     """Exception error class for non-square pixel size."""
 
-    pass
-
 
 class InvalidWindowSizeException(Exception):
     """Exception error class for invalid window size values."""
-
-    pass
 
 
 class InvalidPixelSizeException(Exception):
     """Exception error class for invalid pixel size."""
 
-    pass
-
 
 class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
 
-    pass
 
-class InvalidInputDataException(Exception):
-    """Exception error class for invalid input data."""
+class EmptyDataFrameException(Exception):
+    """Exception error class thrown if the dataframe is empty."""
 
-    pass
+
+class InvalidWktFormatException(Exception):
+    """Exception error for invalid WKT format."""
+
+
+class InvalidNumberOfPrincipalComponents(Exception):
+    """Exception error class thrown if the number of principal components is less than 2."""
+
+
+class InvalidColumnException(Exception):
+    """Exception error for invalid column."""
+
+
+class InvalidColumnIndexException(Exception):
+    """Exception error for invalid column index."""
+
+
+class InvalidArgumentTypeException(Exception):
+    """Exception error for invalid argument type."""
+
+
+class InvalidRasterBandException(Exception):
+    """Expection error class for invalid raster band selection."""
+
+
+class FileReadError(Exception):
+    """Exception error class for unsupported file exceptions."""
+
+
+class NonMatchinParameterLengthsException(Exception):
+    """Exception error class for parameters with different lenghts."""

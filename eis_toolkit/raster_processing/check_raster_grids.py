@@ -3,7 +3,7 @@ from typing import List
 import rasterio
 
 from eis_toolkit.checks.crs import check_matching_crs
-from eis_toolkit.checks.raster_checks import check_matching_bounds, check_matching_pixel_alignment
+from eis_toolkit.checks.raster import check_matching_bounds, check_matching_pixel_alignment
 
 
 def _check_raster_grids(  # type: ignore[no-any-unimported]
