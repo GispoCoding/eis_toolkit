@@ -15,9 +15,9 @@ def _dbscan(data: gdp.GeoDataFrame, max_distance: float, min_samples: int) -> gd
     data["cluster"] = dbscan.labels_
 
     core_indices = dbscan.core_sample_indices_
-    mask = np.zeros(len(coordinates), dtype=int)
-    mask[core_indices] = 1
-    data["core"] = mask
+    core_data = np.zeros(len(coordinates), dtype=int)
+    core_data[core_indices] = 1
+    data["core"] = core_data
 
     return data
 
