@@ -35,8 +35,8 @@ def dbscan(data: gdp.GeoDataFrame, max_distance: float = 0.5, min_samples: int =
             Defaults to 5.
 
     Returns:
-        GeoDataFrame containing assigned cluster labels and value 1 if a data point is a core point
-        and 0 otherwise.
+        GeoDataFrame containing two new columns: one with assigned cluster labels and one indicating whether a
+            point is a core point (1) or not (0).
 
     Raises:
         EmptyDataFrameException: The input GeoDataFrame is empty.
