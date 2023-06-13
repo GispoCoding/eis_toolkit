@@ -30,9 +30,9 @@ def dbscan(data: gdp.GeoDataFrame, max_distance: float = 0.5, min_samples: int =
     Args:
         data: GeoDataFrame containing the input data.
         max_distance: The maximum distance between two samples for one to be considered as in the neighborhood of
-            the other. Optional parameter.
+            the other. Defaults to 0.5.
         min_samples: The number of samples in a neighborhood for a point to be considered as a core point.
-            Optional parameter.
+            Defaults to 5.
 
     Returns:
         GeoDataFrame containing assigned cluster labels and value 1 if a data point is a core point
