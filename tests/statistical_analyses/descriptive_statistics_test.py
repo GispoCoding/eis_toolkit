@@ -8,7 +8,7 @@ import rasterio
 from eis_toolkit.exceptions import InvalidColumnException
 from eis_toolkit.statistical_analyses.descriptive_statistics import (
     descriptive_statistics_dataframe,
-    descriptive_statistics_raster
+    descriptive_statistics_raster,
 )
 
 test_dir = Path(__file__).parent.parent
