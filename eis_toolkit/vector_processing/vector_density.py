@@ -1,7 +1,7 @@
 import geopandas as gpd
 import numpy as np
 from beartype import beartype
-from beartype.typing import Optional, Tuple, Union
+from beartype.typing import Literal, Optional, Tuple, Union
 from rasterio import profiles
 
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
@@ -13,6 +13,7 @@ def vector_density(
     resolution: Optional[float] = None,
     base_raster_profile: Optional[Union[profiles.Profile, dict]] = None,
     buffer_value: Optional[float] = None,
+    statistic: Literal["density", "count"] = "density",
 ) -> Tuple[np.ndarray, dict]:
     """Compute density of geometries within raster.
 
@@ -31,7 +32,7 @@ def vector_density(
     Returns:
         Computed density of vector data and metadata.
     """
-    return rasterize_vector(
+    out_raster_array, out_metadata = rasterize_vector(
         geodataframe=geodataframe,
         resolution=resolution,
         base_raster_profile=base_raster_profile,
@@ -41,3 +42,8 @@ def vector_density(
         fill_value=0.0,
         merge_strategy="add",
     )
+    max_count = np.max(out_raster_array)
+    if statistic == "count" or np.isclose(max_count, 0.0):
+        return out_raster_array, out_metadata
+    else:
+        return (out_raster_array / max_count), out_metadata
