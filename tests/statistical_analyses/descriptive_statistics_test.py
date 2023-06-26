@@ -7,8 +7,8 @@ import rasterio
 
 from eis_toolkit.exceptions import InvalidColumnException
 from eis_toolkit.statistical_analyses.descriptive_statistics import (
-    descriptive_statistics_csv_vector,
-    descriptive_statistics_raster,
+    descriptive_statistics_dataframe,
+    descriptive_statistics_raster
 )
 
 test_dir = Path(__file__).parent.parent
@@ -20,7 +20,7 @@ src_raster = rasterio.open(test_dir.joinpath("data/remote/small_raster.tif"))
 
 def test_descriptive_statistics_dataframe():
     """Checks that returned statistics are correct when using DataFrame."""
-    test = descriptive_statistics_csv_vector(test_csv, "random_number")
+    test = descriptive_statistics_dataframe(test_csv, "random_number")
     assert test["min"] == 124
     assert test["max"] == 31744
     assert test["mean"] == 7040.444444444444
@@ -34,7 +34,7 @@ def test_descriptive_statistics_dataframe():
 
 def test_zero_values_column():
     """Test column with all values set to 0."""
-    test = descriptive_statistics_csv_vector(test_zero_values, "random_number")
+    test = descriptive_statistics_dataframe(test_zero_values, "random_number")
     assert test["min"] == 0
     assert test["max"] == 0
     assert test["mean"] == 0
@@ -49,18 +49,18 @@ def test_zero_values_column():
 def test_invalid_column_name_df():
     """Test that invalid column name raises exception."""
     with pytest.raises(InvalidColumnException):
-        descriptive_statistics_csv_vector(test_csv, "non_existing_column")
+        descriptive_statistics_dataframe(test_csv, "non_existing_column")
 
 
 def test_invalid_column_name_gdf():
     """Test that invalid column name raises exception."""
     with pytest.raises(InvalidColumnException):
-        descriptive_statistics_csv_vector(test_gpkg, "non_existing_column")
+        descriptive_statistics_dataframe(test_gpkg, "non_existing_column")
 
 
 def test_descriptive_statistics_geodataframe():
     """Checks that returned statistics are correct when using GeoDataFrame."""
-    test = descriptive_statistics_csv_vector(test_gpkg, "random_number")
+    test = descriptive_statistics_dataframe(test_gpkg, "random_number")
     assert test["min"] == 124
     assert test["max"] == 1984
     assert test["mean"] == 768.8

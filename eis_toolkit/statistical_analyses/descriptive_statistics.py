@@ -40,7 +40,7 @@ def _descriptive_statistics(data: Union[rasterio.io.DatasetReader, pd.DataFrame,
 
 
 @beartype
-def descriptive_statistics_csv_vector(input_data: Union[pd.DataFrame, gpd.GeoDataFrame], column: str) -> dict:
+def descriptive_statistics_dataframe(input_data: Union[pd.DataFrame, gpd.GeoDataFrame], column: str) -> dict:
     """Generate descriptive statistics from vector data.
 
     Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.
