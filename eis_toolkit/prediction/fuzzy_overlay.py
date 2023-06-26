@@ -1,63 +1,110 @@
-from enum import Enum
-from numbers import Number
-from typing import Optional
-
 import numpy as np
 from beartype import beartype
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
-class FuzzyMethod(Enum):
-    """Enum for fuzzy methods."""
+@beartype
+def and_overlay(data: np.ndarray) -> np.ndarray:
+    """Compute an 'and' overlay operation with fuzzy logic.
 
-    AND = 1
-    OR = 2
-    PRODUCT = 3
-    SUM = 4
-    GAMMA = 5
+    Args:
+        data: The input data as a 3D Numpy array. Each 2D array represents a raster band.
+            Data points should be in the range [0, 1].
 
+    Returns:
+        2D Numpy array with the result of the 'and' overlay operation. Values are in range [0, 1].
 
-def _fuzzy_overlay(data: np.ndarray, method: FuzzyMethod, gamma: Optional[float]) -> np.ndarray:
-    if method == FuzzyMethod.AND:  # Intersection
-        return data.min(axis=0)
-    elif method == FuzzyMethod.OR:  # Union
-        return data.max(axis=0)
-    elif method == FuzzyMethod.PRODUCT:
-        return np.prod(data, axis=0)
-    elif method == FuzzyMethod.SUM:
-        return data.sum(axis=0) - np.prod(data, axis=0)
-    elif method == FuzzyMethod.GAMMA:
-        fuzzy_sum = data.sum(axis=0) - np.prod(data, axis=0)
-        fuzzy_product = np.prod(data, axis=0)
-        return fuzzy_product ** (1 - gamma) * fuzzy_sum**gamma
+    Raises:
+        InvalidParameterValueException: If data values are not in range [0, 1].
+    """
+    if any(band_data.min() < 0 or band_data.max() > 1 for band_data in data):
+        raise InvalidParameterValueException("All data must be in range [0, 1]")
+
+    return data.min(axis=0)
 
 
 @beartype
-def fuzzy_overlay(rasters_data: np.ndarray, method: FuzzyMethod, gamma: Optional[Number] = None) -> np.ndarray:
-    """Compute fuzzy overlay using the specified method.
+def or_overlay(data: np.ndarray) -> np.ndarray:
+    """Compute an 'or' overlay operation with fuzzy logic.
 
     Args:
-        data: The input data as a 3D Numpy array. The 3D array consists of 2D arrays that represent single raster
-            bands. Data points must be in the range [0, 1].
-        method: The overlay method to use. Options are AND, OR, PRODUCT, SUM and GAMMA.
-        gamma: The gamma parameter for the GAMMA method. Must be in the range [0, 1] if provided.
+        data: The input data as a 3D Numpy array. Each 2D array represents a raster band.
+            Data points should be in the range [0, 1].
 
     Returns:
-        2D Numpy array with the results of the overlay operation.
+        2D Numpy array with the result of the 'or' overlay operation. Values are in range [0, 1].
 
     Raises:
-        InvalidParameterValueException: If data values or gamma is not in range [0, 1] or gamma is not
-            provided when GAMMA overlay method is selected.
+        InvalidParameterValueException: If data values are not in range [0, 1].
     """
-
-    if any(raster.min() < 0 or raster.max() > 1 for raster in rasters_data):
+    if any(band_data.min() < 0 or band_data.max() > 1 for band_data in data):
         raise InvalidParameterValueException("All data must be in range [0, 1]")
 
-    if gamma is None and method == FuzzyMethod.GAMMA:
-        raise InvalidParameterValueException("The gamma parameter must be provided for the GAMMA method")
+    return data.max(axis=0)
 
-    if gamma and (gamma < 0 or gamma > 1):
+
+@beartype
+def product_overlay(data: np.ndarray) -> np.ndarray:
+    """Compute an 'product' overlay operation with fuzzy logic.
+
+    Args:
+        data: The input data as a 3D Numpy array. Each 2D array represents a raster band.
+            Data points should be in the range [0, 1].
+
+    Returns:
+        2D Numpy array with the result of the 'product' overlay operation. Values are in range [0, 1].
+
+    Raises:
+        InvalidParameterValueException: If data values are not in range [0, 1].
+    """
+    if any(band_data.min() < 0 or band_data.max() > 1 for band_data in data):
+        raise InvalidParameterValueException("All data must be in range [0, 1]")
+
+    return np.prod(data, axis=0)
+
+
+@beartype
+def sum_overlay(data: np.ndarray) -> np.ndarray:
+    """Compute an 'sum' overlay operation with fuzzy logic.
+
+    Args:
+        data: The input data as a 3D Numpy array. Each 2D array represents a raster band.
+            Data points should be in the range [0, 1].
+
+    Returns:
+        2D Numpy array with the result of the 'sum' overlay operation. Values are in range [0, 1].
+
+    Raises:
+        InvalidParameterValueException: If data values are not in range [0, 1].
+    """
+    if any(band_data.min() < 0 or band_data.max() > 1 for band_data in data):
+        raise InvalidParameterValueException("All data must be in range [0, 1]")
+
+    return data.sum(axis=0) - np.prod(data, axis=0)
+
+
+@beartype
+def gamma_overlay(data: np.ndarray, gamma: float) -> np.ndarray:
+    """Compute an 'gamma' overlay operation with fuzzy logic.
+
+    Args:
+        data: The input data as a 3D Numpy array. Each 2D array represents a raster band.
+            Data points should be in the range [0, 1].
+        gamma: The gamma parameter. Must be in the range [0, 1].
+
+    Returns:
+        2D Numpy array with the result of the 'gamma' overlay operation. Values are in range [0, 1].
+
+    Raises:
+        InvalidParameterValueException: If data values or gamma are not in range [0, 1].
+    """
+    if any(band_data.min() < 0 or band_data.max() > 1 for band_data in data):
+        raise InvalidParameterValueException("All data must be in range [0, 1]")
+
+    if gamma < 0 or gamma > 1:
         raise InvalidParameterValueException("The gamma parameter must be in range [0, 1]")
 
-    return _fuzzy_overlay(rasters_data, method, gamma)
+    fuzzy_sum = data.sum(axis=0) - np.prod(data, axis=0)
+    fuzzy_product = np.prod(data, axis=0)
+    return fuzzy_product ** (1 - gamma) * fuzzy_sum**gamma
