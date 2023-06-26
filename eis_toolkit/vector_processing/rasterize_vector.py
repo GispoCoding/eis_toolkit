@@ -1,8 +1,9 @@
 import geopandas as gpd
 import numpy as np
 from beartype import beartype
-from beartype.typing import Optional, Tuple, Union
+from beartype.typing import Literal, Optional, Tuple, Union
 from rasterio import features, profiles, transform
+from rasterio.enums import MergeAlg
 
 from eis_toolkit import exceptions
 
@@ -10,26 +11,36 @@ from eis_toolkit import exceptions
 @beartype
 def rasterize_vector(
     geodataframe: gpd.GeoDataFrame,
-    resolution: float,
+    resolution: Optional[float] = None,
     value_column: Optional[str] = None,
     default_value: float = 1.0,
     fill_value: float = 0.0,
     base_raster_profile: Optional[Union[profiles.Profile, dict]] = None,
     buffer_value: Optional[float] = None,
+    merge_strategy: Literal["replace", "add"] = "replace",
 ) -> Tuple[np.ndarray, dict]:
     """Transform vector data into raster data.
 
     Args:
         geodataframe: The vector dataframe to be rasterized.
-        resolution: The resolution i.e. cell size of the output raster
+        resolution: The resolution i.e. cell size of the output raster.
+            Optional if base_raster_profile is given.
         value_column: The column name with values for each geometry.
             If None, then default_value is used for all geometries.
         default_value: Default value burned into raster cells based on geometries.
         base_raster_profile: Base raster profile
-            to be used for determining the grid on which vectors are burned in.
+            to be used for determining the grid on which vectors are
+            burned in. If None, the geometries and provided resolution
+            value are used to compute grid.
         fill_value: Value used outside the burned/rasterized geometry cells.
         buffer_value: For adding a buffer around passed
             geometries before rasterization.
+        merge_strategy: How to handle overlapping geometries.
+            "add" causes overlapping geometries to add together the
+            values while "replace" does not. Adding them together is the
+            basis for density computations where the density can be
+            calculated by using a default value of 1.0 and the sum in
+            each cell is the count of intersecting geometries.
 
     Returns:
         Rasterized vector data and metadata.
@@ -39,7 +50,11 @@ def rasterize_vector(
         # Empty GeoDataFrame
         raise exceptions.EmptyDataFrameException("Expected geodataframe to contain geometries.")
 
-    if not resolution > 0:
+    if resolution is None and base_raster_profile is None:
+        raise exceptions.InvalidParameterValueException(
+            "Expected either resolution or base_raster_profile to be given."
+        )
+    if resolution is not None and resolution <= 0:
         raise exceptions.NumericValueSignException(
             f"Expected a positive value resolution ({dict(resolution=resolution)})"
         )
@@ -68,6 +83,7 @@ def rasterize_vector(
         fill_value=fill_value,
         base_raster_profile=base_raster_profile,
         resolution=resolution,
+        merge_alg=getattr(MergeAlg, merge_strategy),
     )
 
 
@@ -93,7 +109,8 @@ def _rasterize_vector(
     default_value: float,
     fill_value: float,
     base_raster_profile: Optional[Union[profiles.Profile, dict]],
-    resolution: float,
+    resolution: Optional[float],
+    merge_alg: MergeAlg,
 ) -> Tuple[np.ndarray, dict]:
     # rasterio.features.rasterize expects a shapes parameter which is
     # an iterable of tuples where the first value is a geometry and
@@ -104,14 +121,16 @@ def _rasterize_vector(
     values = geodataframe[value_column].values if value_column is not None else None
     geometry_value_pairs = list(geometries) if values is None else list(zip(geometries, values))
 
-    if base_raster_profile is None:
+    if base_raster_profile is None and resolution is not None:
         width, height, out_transform = _transform_from_geometries(geodataframe=geodataframe, resolution=resolution)
-    else:
+    elif base_raster_profile is not None:
         width, height, out_transform = (
             base_raster_profile["width"],
             base_raster_profile["height"],
             base_raster_profile["transform"],
         )
+    else:
+        raise ValueError("Expected resolution or base_raster_profile to be given.")
 
     out_raster_array = features.rasterize(
         shapes=geometry_value_pairs,
@@ -120,5 +139,6 @@ def _rasterize_vector(
         default_value=default_value,
         transform=out_transform,
         out_shape=(round(height), round(width)),
+        merge_alg=merge_alg,
     )
     return out_raster_array, dict(transform=out_transform, height=height, width=width)
