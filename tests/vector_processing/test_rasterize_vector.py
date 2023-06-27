@@ -1,10 +1,10 @@
 from contextlib import nullcontext
-from typing import NamedTuple, Optional, Union
 
 import geopandas as gpd
 import numpy as np
 import pytest
-from rasterio import profiles, transform
+from beartype.typing import Literal, NamedTuple, Optional, Union
+from rasterio import features, profiles, transform
 from shapely.geometry import LineString, Point, box
 
 from eis_toolkit import exceptions
@@ -28,6 +28,19 @@ SAMPLE_POINT_GEODATAFRAME = gpd.GeoDataFrame(
             Point(2, 2),
             Point(3, 3),
             Point(4, 2),
+            Point(5, 5),
+        ],
+        "values": [1, 2, 3, 4, 5],
+    },
+)
+
+SAMPLE_OVERLAPPING_POINT_GEODATAFRAME = gpd.GeoDataFrame(
+    {
+        "geometry": [
+            Point(0, 0),
+            Point(0, 0),
+            Point(3, 3),
+            Point(5, 5),
             Point(5, 5),
         ],
         "values": [1, 2, 3, 4, 5],
@@ -74,10 +87,23 @@ class RasterizeVectorTestArgs(NamedTuple):
     fill_value: float = 0.0
     base_raster_profile: Optional[Union[profiles.Profile, dict]] = None
     buffer_value: Optional[float] = None
+    merge_strategy: Literal["replace", "add"] = "replace"
 
 
 @pytest.mark.parametrize(
-    "geodataframe,resolution,value_column,default_value,fill_value,base_raster_profile,buffer_value,raises",
+    ",".join(
+        [
+            "geodataframe",
+            "resolution",
+            "value_column",
+            "default_value",
+            "fill_value",
+            "base_raster_profile",
+            "buffer_value",
+            "merge_strategy",
+            "raises",
+        ]
+    ),
     [
         pytest.param(
             *RasterizeVectorTestArgs(geodataframe=SAMPLE_LINE_GEODATAFRAME, resolution=0.05),
@@ -144,12 +170,19 @@ def test_rasterize_vector(
     default_value,
     fill_value,
     base_raster_profile,
-    raises,
+    merge_strategy,
     buffer_value,
+    raises,
 ):
     """Test rasterize_vector."""
     results = None
-    with raises:
+    # Check that warning is raised in rasterio.features.rasterize for empty geometries
+    warns = (
+        pytest.warns(features.ShapeSkipWarning, match="Invalid or empty shape")
+        if any(geodataframe.geometry.is_empty)
+        else nullcontext()
+    )
+    with raises, warns:
         results = rasterize_vector(
             geodataframe=geodataframe,
             resolution=resolution,
@@ -158,6 +191,7 @@ def test_rasterize_vector(
             fill_value=fill_value,
             base_raster_profile=base_raster_profile,
             buffer_value=buffer_value,
+            merge_strategy=merge_strategy,
         )
 
     if results is None:
@@ -173,7 +207,19 @@ def test_rasterize_vector(
 
 
 @pytest.mark.parametrize(
-    "geodataframe,resolution,value_column,default_value,fill_value,base_raster_profile,buffer_value,expected_result",
+    ",".join(
+        [
+            "geodataframe",
+            "resolution",
+            "value_column",
+            "default_value",
+            "fill_value",
+            "base_raster_profile",
+            "buffer_value",
+            "merge_strategy",
+            "expected_result",
+        ]
+    ),
     [
         pytest.param(
             *RasterizeVectorTestArgs(
@@ -233,6 +279,65 @@ def test_rasterize_vector(
             ),
             id="Points_with_small_buffer",
         ),
+        pytest.param(
+            *RasterizeVectorTestArgs(
+                geodataframe=SAMPLE_OVERLAPPING_POINT_GEODATAFRAME,
+                resolution=0.5,
+                value_column=None,
+                default_value=1.0,
+                fill_value=0.0,
+                base_raster_profile=None,
+                buffer_value=0.5,
+            ),
+            np.array(
+                [
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ],
+                dtype=np.uint8,
+            ),
+            id="Overlapping_points_with_small_buffer",
+        ),
+        pytest.param(
+            *RasterizeVectorTestArgs(
+                geodataframe=SAMPLE_OVERLAPPING_POINT_GEODATAFRAME,
+                resolution=0.5,
+                value_column=None,
+                default_value=1.0,
+                fill_value=0.0,
+                base_raster_profile=None,
+                merge_strategy="add",
+                buffer_value=0.5,
+            ),
+            np.array(
+                [
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ],
+                dtype=np.uint8,
+            ),
+            id="Overlapping_points_with_small_buffer_add_strategy",
+        ),
     ],
 )
 def test_rasterize_vector_with_known_result(
@@ -243,6 +348,7 @@ def test_rasterize_vector_with_known_result(
     fill_value,
     base_raster_profile,
     buffer_value,
+    merge_strategy,
     expected_result,
 ):
     """Test rasterize_vector."""
@@ -254,6 +360,7 @@ def test_rasterize_vector_with_known_result(
         fill_value=fill_value,
         base_raster_profile=base_raster_profile,
         buffer_value=buffer_value,
+        merge_strategy=merge_strategy,
     )
 
     assert isinstance(out_raster_array, np.ndarray)
