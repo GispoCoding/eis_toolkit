@@ -4,6 +4,11 @@ from beartype import beartype
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
+def _check_input_data(data):
+    if data.min() < 0 or data.max() > 1:
+        raise InvalidParameterValueException("All data must be in range [0, 1]")
+
+
 @beartype
 def and_overlay(data: np.ndarray) -> np.ndarray:
     """Compute an 'and' overlay operation with fuzzy logic.
@@ -18,8 +23,7 @@ def and_overlay(data: np.ndarray) -> np.ndarray:
     Raises:
         InvalidParameterValueException: If data values are not in range [0, 1].
     """
-    if any(band_data.min() < 0 or band_data.max() > 1 for band_data in data):
-        raise InvalidParameterValueException("All data must be in range [0, 1]")
+    _check_input_data(data=data)
 
     return data.min(axis=0)
 
@@ -38,15 +42,14 @@ def or_overlay(data: np.ndarray) -> np.ndarray:
     Raises:
         InvalidParameterValueException: If data values are not in range [0, 1].
     """
-    if any(band_data.min() < 0 or band_data.max() > 1 for band_data in data):
-        raise InvalidParameterValueException("All data must be in range [0, 1]")
+    _check_input_data(data=data)
 
     return data.max(axis=0)
 
 
 @beartype
 def product_overlay(data: np.ndarray) -> np.ndarray:
-    """Compute an 'product' overlay operation with fuzzy logic.
+    """Compute a 'product' overlay operation with fuzzy logic.
 
     Args:
         data: The input data as a 3D Numpy array. Each 2D array represents a raster band.
@@ -58,15 +61,14 @@ def product_overlay(data: np.ndarray) -> np.ndarray:
     Raises:
         InvalidParameterValueException: If data values are not in range [0, 1].
     """
-    if any(band_data.min() < 0 or band_data.max() > 1 for band_data in data):
-        raise InvalidParameterValueException("All data must be in range [0, 1]")
+    _check_input_data(data=data)
 
     return np.prod(data, axis=0)
 
 
 @beartype
 def sum_overlay(data: np.ndarray) -> np.ndarray:
-    """Compute an 'sum' overlay operation with fuzzy logic.
+    """Compute a 'sum' overlay operation with fuzzy logic.
 
     Args:
         data: The input data as a 3D Numpy array. Each 2D array represents a raster band.
@@ -78,15 +80,14 @@ def sum_overlay(data: np.ndarray) -> np.ndarray:
     Raises:
         InvalidParameterValueException: If data values are not in range [0, 1].
     """
-    if any(band_data.min() < 0 or band_data.max() > 1 for band_data in data):
-        raise InvalidParameterValueException("All data must be in range [0, 1]")
+    _check_input_data(data=data)
 
     return data.sum(axis=0) - np.prod(data, axis=0)
 
 
 @beartype
 def gamma_overlay(data: np.ndarray, gamma: float) -> np.ndarray:
-    """Compute an 'gamma' overlay operation with fuzzy logic.
+    """Compute a 'gamma' overlay operation with fuzzy logic.
 
     Args:
         data: The input data as a 3D Numpy array. Each 2D array represents a raster band.
@@ -101,12 +102,9 @@ def gamma_overlay(data: np.ndarray, gamma: float) -> np.ndarray:
     Raises:
         InvalidParameterValueException: If data values or gamma are not in range [0, 1].
     """
-    if any(band_data.min() < 0 or band_data.max() > 1 for band_data in data):
-        raise InvalidParameterValueException("All data must be in range [0, 1]")
-
     if gamma < 0 or gamma > 1:
         raise InvalidParameterValueException("The gamma parameter must be in range [0, 1]")
 
-    fuzzy_sum = data.sum(axis=0) - np.prod(data, axis=0)
-    fuzzy_product = np.prod(data, axis=0)
-    return fuzzy_product ** (1 - gamma) * fuzzy_sum**gamma
+    sum = sum_overlay(data=data)
+    product = product_overlay(data=data)
+    return product ** (1 - gamma) * sum**gamma
