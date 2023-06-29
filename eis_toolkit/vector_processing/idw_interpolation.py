@@ -15,23 +15,7 @@ def _idw_interpolation(
     resolution: Tuple[Number, Number],
     extent: Optional[Tuple[float, float, float, float]] = None,
     power: Optional[int] = 2
-) -> Tuple[float, float, np.ndarray]:
-
-    """Simple inverse distance weighted (IDW) interpolation.
-
-    Args:
-        geodataframe: The vector dataframe to be interpolated.
-        target_column: The column name with values for each geometry.
-        resolution: The resolution i.e. cell size of the output raster.
-        extent: The extent of the output raster.
-            If None, calculate extent from the input vector data.
-        power: The value for determining the rate at which the weights decrease.
-            As power increases, the weights for distant points decrease rapidly.
-            Defaults to 2.
-
-    Returns:
-        Rasterized vector data and metadata.
-    """
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     if geodataframe.empty:
         # Empty GeoDataFrame
@@ -61,7 +45,7 @@ def _idw_interpolation(
 
     xi, yi = np.meshgrid(x, y)
     xi = xi.flatten()
-    yi = yi[::-1].flatten()  # Reverse the order of y-values
+    yi = yi[::-1].flatten()
 
     origin_x, origin_y = 0, 0
     dist_from_origin = np.hypot(points[:, 0] - origin_x, points[:, 1] - origin_y)
@@ -82,19 +66,12 @@ def _distance_matrix(x0, y0, x1, y1):
 
 
 def _simple_idw(x, y, z, xi, yi, power=2):
-
     dist = _distance_matrix(x, y, xi, yi)
 
     # Add a small epsilon to avoid division by zero
     dist = np.where(dist == 0, 1e-12, dist)
-
-    # In IDW, weights are 1 / (distance ^ power)
     weights = 1.0 / (dist**power)
-
-    # Make weights sum to one
     weights /= weights.sum(axis=0)
-
-    # Multiply the weights for each interpolated point by all observed Z-values
     return np.dot(weights.T, z)
 
 
