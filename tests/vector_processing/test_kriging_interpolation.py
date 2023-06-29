@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
-from eis_toolkit.vector_processing.kriging import kriging
+from eis_toolkit.vector_processing.kriging_interpolation import kriging
 
 np.random.seed(6)
 x = np.random.uniform(0, 5, size=(10, 1))
