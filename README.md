@@ -5,17 +5,21 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 
-Related to EIS Horizon EU project. This repository is in early development stage.
+## Python library for mineral prospectivity mapping
+EIS Toolkit will be a comprehensive Python library for mineral prospectivity mapping and analysis. EIS Toolkit is developed as part of [EIS Horizon EU project](https://eis-he.eu/), which aims to aid EU's efforts in the green transition by securing critical raw materials. EIS Toolkit will serve both as a standalone library that brings together and implements relevant tools for mineral prospectivity mapping and as a computational backend for [EIS QGIS Plugin](https://github.com/GispoCoding/eis_qgis_plugin).
 
-Current contents
-- a bunch of different configuration files
+
+## Repository status
+This repository is still in development. First release is planned for autumn 2023.
+
+Current contents include
+- implementations for most of basic preprocessing tools
+- Jupyter notebooks showing usage and functionality of some of the implemented tools
+- basic tests for implemented features
 - instructions on how to contribute to the repository
-- implementation of one preprocessing tool (clip raster with polygon) to act as an example for further development
-- dummy files and functions for executing the most tentative tests between different environments
 
-*This repository only contains source code related to eis_toolkit python package. The user interface will be implemented into separate repository.*
+This repository contains source code related to eis_toolkit python package, not source code of EIS QGIS Plugin.
 
-Licensed under the EUPL-1.2 or later.
 
 ## Contributing
 
@@ -107,3 +111,8 @@ Here are some additional instructions related to the development of EIS toolkit:
 If you want to set up the development environment without docker, see:
 - [Setup without docker with poetry](./instructions/dev_setup_without_docker.md)
 - [Setup without docker with conda](./instructions/dev_setup_without_docker_with_conda.md)
+
+
+## License
+
+Licensed under the EUPL-1.2 or later.
