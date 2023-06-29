@@ -18,10 +18,10 @@ def cell_based_association(
     cell_size: int,
     geodata: List[gpd.GeoDataFrame],
     output_path: str,
-    column: Optional[List[str]] = [""],
-    subset_target_attribute_values: Optional[List[Union[None, list]]] = [None],
-    add_name: Optional[List[Union[str, None]]] = [None],
-    add_buffer: Optional[List[Union[Number, bool]]] = [False],
+    column: Optional[List[str]] = None,
+    subset_target_attribute_values: Optional[List[Union[None, list]]] = None,
+    add_name: Optional[List[Union[str, None]]] = None,
+    add_buffer: Optional[List[Union[Number, bool]]] = None,
 ) -> gpd.GeoDataFrame:
     """Creation of CBA matrix.
 
