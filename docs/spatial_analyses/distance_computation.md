@@ -1,3 +1,3 @@
 # Distance computation
 
-::: eis_toolkit.distance_computation.distance_computation
+::: eis_toolkit.spatial_analyses.distance_computation
