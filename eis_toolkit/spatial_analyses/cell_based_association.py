@@ -10,6 +10,8 @@ from beartype.typing import List, Optional, Tuple, Union
 from shapely import wkt
 from shapely.geometry import Polygon
 
+from eis_toolkit import exceptions
+
 os.environ["USE_PYGEOS"] = "0"
 
 
@@ -18,10 +20,10 @@ def cell_based_association(
     cell_size: int,
     geodata: List[gpd.GeoDataFrame],
     output_path: str,
-    column: Optional[List[str]] = [""],
-    subset_target_attribute_values: Optional[List[Union[None, list]]] = [None],
-    add_name: Optional[List[Union[str, None]]] = [None],
-    add_buffer: Optional[List[Union[Number, bool]]] = [False],
+    column: Optional[List[str]] = None,
+    subset_target_attribute_values: Optional[List[Union[None, list, str]]] = None,
+    add_name: Optional[List[Union[str, None]]] = None,
+    add_buffer: Optional[List[Union[Number, bool]]] = None,
 ) -> gpd.GeoDataFrame:
     """Creation of CBA matrix.
 
@@ -38,7 +40,7 @@ def cell_based_association(
         column: Name of the column of interest. If no attribute is specified,
             then an artificial attribute is created representing the presence
             or absence of the geometries of this file for each cell of the CBA
-            grid. If a target attribute is ndicated, it must be categorical.
+            grid. If a target attribute is indicated, it must be categorical.
             Other types of attributes (numerical/string) are not managed.
             A categorical attribute will generate as many columns (binary) in
             the CBA matrix than values considered of interest (dummification).
@@ -59,6 +61,40 @@ def cell_based_association(
         CBA matrix is created.
     """
 
+    # Swapping None to list values
+    if column is None:
+        column = [""]
+    if add_buffer is None:
+        add_buffer = [False]
+
+    # Consistency checks on input data
+    for frame in geodata:
+        if frame.empty:
+            raise exceptions.EmptyDataFrameException("The input GeoDataFrame is empty.")
+
+    if cell_size <= 0:
+        raise exceptions.InvalidParameterValueException("Expected cell size to be positive and non-zero.")
+
+    add_buffer = [False if x == 0 else x for x in add_buffer]
+    if any(num < 0 for num in add_buffer):
+        raise exceptions.InvalidParameterValueException("Expected buffer value to be positive, null or False.")
+
+    for i, name in enumerate(column):
+        if column[i] == "":
+            if subset_target_attribute_values[i] is not None:
+                raise exceptions.InvalidParameterValueException("Can't use subset of values if no column is targeted.")
+        elif column[i] not in geodata[i]:
+            raise exceptions.InvalidColumnException("Targeted column not found in the GeoDataFrame.")
+
+    for i, subset in enumerate(subset_target_attribute_values):
+        if subset is not None:
+            for value in subset:
+                if value not in geodata[i][column[i]].unique():
+                    raise exceptions.InvalidParameterValueException(
+                        "Subset of value(s) not found in the targeted column."
+                    )
+
+    # Computation
     for i, data in enumerate(geodata):
         if i == 0:
             # Initialization of the CBA matrix
@@ -75,6 +111,7 @@ def cell_based_association(
                 add_buffer[i - 1],
             )
 
+    # Export
     _to_raster(cba, output_path)
 
     return cba
@@ -99,15 +136,14 @@ def _init_from_vector_data(
         column: Name of the column of interest.
             If no attribute is specified, then an artificial attribute is
             created representing the presence or absence of the geometries of
-            this file for each cell of the CBA grid. If a target attribute is
-            indicated, it must be categorical. Other types of attributes
-            (numerical/string) are not managed. A categorical attribute will
+            this file for each cell of the CBA grid. Categorical attribute will
             generate as many columns (binary) in the CBA matrix than values
             considered of interest(dummification). See parameter
             <subset_target_attribute_values>
         subset_target_attribute_values: List of values of interest of the
             target column, in case a categorical target attribute has been
-            specified. Allows to filter a subset of relevant values.
+            specified. Allows to filter a subset of relevant values. If set to
+            an empty list, each unique value in the targeted column is dummified.
 
     Returns:
         Tuple of GeodataFrames: the grid mesh produced and the CBA matrix.
@@ -120,9 +156,12 @@ def _init_from_vector_data(
     # Reading the vector file
     geodata = geodataframe.copy(deep=True)
 
+    # Converting the targeted column to categorical dtype
+    if column != "":
+        geodata = geodata.astype({column: "category"})
+
     # Initialization of the grid
     grid = _get_grid(geodata, cell_size, cell_size)
-    grid.crs = geodata.crs
 
     # Filling the grid with overlapped geometries
     indicators, join_grid = _prepare_grid(geodataframe, grid, column, subset_target_attribute_values)
@@ -142,7 +181,7 @@ def _add_layer(
     grid: gpd.GeoDataFrame,
     geodataframe: gpd.GeoDataFrame,
     column: str = "",
-    subset_target_attribute_values: Optional[list] = None,
+    subset_target_attribute_values: Optional[Union[list, str]] = None,
     name: Optional[str] = None,
     buffer: Union[Number, bool] = False,
 ) -> gpd.GeoDataFrame:
@@ -187,6 +226,10 @@ def _add_layer(
     # Reading the vector file
     geodata = geodataframe.copy(deep=True)
 
+    # Converting the targeted column to categorical dtype
+    if column != "":
+        geodata = geodata.astype({column: "category"})
+
     # No buffer
     if buffer is False:
         # Recovery of the grid calculated at the initialization of the CBA
@@ -201,11 +244,13 @@ def _add_layer(
         added_buf = _get_disc(cba, grid, buffer)
 
         # Adding a column to the CBA
-        dummies, join_disc = _prepare_disc(geodata, added_buf, column, subset_target_attribute_values)
+        dummies, join_disc = _prepare_grid(geodata, added_buf, column, subset_target_attribute_values)
 
     # Application of the indicated name (otherwise filename is used)
     if name is not None:
         dummies.name = name
+        if column != "":
+            dummies.columns = [str(name) + str(col) for col in dummies.columns]
 
     # Completion of the CBA object (values and names)
     cba = cba.join(dummies).replace(np.nan, 0)
@@ -222,7 +267,7 @@ def _prepare_grid(
     geodata: gpd.GeoDataFrame,
     grid: gpd.GeoDataFrame,
     column: str,
-    subset_target_attribute_values: list,
+    subset_target_attribute_values: Union[list, str],
 ) -> Tuple[Union[pd.DataFrame, pd.Series], gpd.GeoDataFrame]:
     """Intermediate utility.
 
@@ -249,7 +294,7 @@ def _prepare_grid(
     join_grid = gpd.sjoin(grid, geodata, how="inner", predicate="intersects")
     if dummification:
         tmp = pd.get_dummies(join_grid[join_grid[target].isin(identified_values)][[target]], prefix="", prefix_sep="")
-        indicators = tmp.groupby(tmp.index).max()
+        indicators = tmp[[str(x) for x in identified_values]].groupby(tmp.index).max()
     else:
         tmp = join_grid[target]
         indicators = tmp.groupby(tmp.index).max()
@@ -260,7 +305,7 @@ def _prepare_grid(
 def _check_and_prepare_param(
     geodata: gpd.GeoDataFrame,
     column: str,
-    subset_target_attribute_values: list,
+    subset_target_attribute_values: Union[list, str],
     target_name: Optional[str] = "Added",
 ) -> Tuple[bool, str, list]:
     """Intermediate utility.
@@ -305,14 +350,16 @@ def _check_and_prepare_param(
         # Case of a symbolic attribute with identified subset of values of
         # interest.
         dummification = True
+        # Case when selecting all attribute values in the targeted column
         if subset_target_attribute_values == []:
             subset_target_attribute_values = geodata[column].unique()
-    assert column in geodata.columns
     identified_values = pd.Series(subset_target_attribute_values)
-    assert identified_values.isin(geodata[column]).all()
-    # FORBIDDEN AT THIS TIME as not managed !!!
-    # assert target == "" or len(attribut_values) != 0
-    assert len(subset_target_attribute_values) != 0
+    if column not in geodata.columns:
+        raise exceptions.InvalidColumnException("Targeted column not found in the GeoData.")
+    if identified_values.isin(geodata[column]).all() is False:
+        raise exceptions.InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
+    if len(subset_target_attribute_values) == 0:
+        raise exceptions.InvalidParameterValueException("Subset of value(s) is empty.")
 
     return dummification, column, list(identified_values)
 
@@ -352,42 +399,6 @@ def _get_disc(geodata: gpd.GeoDataFrame, grid: gpd.GeoDataFrame, buff_radius: Un
     disc["geometry"] = disc.geometry.buffer(buff_radius, resolution=16)
 
     return gpd.GeoDataFrame(disc, geometry="geometry", crs=geodata.crs)
-
-
-@beartype
-def _prepare_disc(
-    geodata: gpd.GeoDataFrame,
-    disc: gpd.GeoDataFrame,
-    column: str,
-    subset_target_attribute_values: list,
-) -> Tuple[pd.Series, gpd.GeoDataFrame]:
-    """Intermediate utility.
-
-    Compute spatial join and generate the table of presence of the different
-    attributes.
-
-    Args:
-        geodata: The geodata object corresponding to the vector file.
-        disc: Existing discs 'paving'.
-        column: Target column to extract from the vector file.
-        subset_target_attribute_values: Subset of the relevant values
-            of the target attribute
-
-    Returns: A boolean indicating if the target attribute must be dummified
-        and an intersection grid between the mesh and the vector file
-    """
-    dummification, target, identified_values = _check_and_prepare_param(geodata, column, subset_target_attribute_values)
-
-    # Spatial join of the intersection between the grid and the current map
-    join_grid = gpd.sjoin(disc, geodata, how="inner", predicate="intersects")
-
-    if dummification:
-        tmp = pd.get_dummies(join_grid[join_grid[target].isin(identified_values)][[target]], prefix="", prefix_sep="")
-        indicators = tmp.groupby(tmp.index).max()
-    else:
-        tmp = join_grid[target]
-        indicators = tmp.groupby(tmp.index).max()
-    return indicators, join_grid
 
 
 @beartype
