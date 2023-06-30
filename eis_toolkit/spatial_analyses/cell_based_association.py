@@ -40,10 +40,8 @@ def cell_based_association(
         column: Name of the column of interest. If no attribute is specified,
             then an artificial attribute is created representing the presence
             or absence of the geometries of this file for each cell of the CBA
-            grid. If a target attribute is indicated, it must be categorical.
-            Other types of attributes (numerical/string) are not managed.
-            A categorical attribute will generate as many columns (binary) in
-            the CBA matrix than values considered of interest (dummification).
+            grid. A categorical attribute will generate as many columns (binary)
+            in the CBA matrix than values considered of interest (dummification).
             See parameter <subset_target_attribute_values>. Additional
             column(s) can be imputed for each added GeoDataFrame(s).
         subset_target_attribute_values: List of values of interest of the
