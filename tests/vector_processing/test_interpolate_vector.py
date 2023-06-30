@@ -11,7 +11,8 @@ from eis_toolkit import exceptions
 from eis_toolkit.vector_processing.idw_interpolation import idw_interpolation
 
 test_dir = Path(__file__).parent.parent
-reference_solution_path = test_dir.joinpath("data/remote/idw_test_raster.tif")
+extent_set = test_dir.joinpath("data/remote/idw_with_extent.tif")
+no_extent = test_dir.joinpath("data/remote/idw_without_extent.tif")
 
 
 @pytest.fixture
@@ -58,19 +59,19 @@ def test_validated_points(validated_points):
     )
     assert target_column in validated_points.columns
 
-    with rasterio.open(reference_solution_path) as src:
+    with rasterio.open(no_extent) as src:
         external_values = src.read(1)
 
-    print(f"interpolated_values: {interpolated_values}")
-    print(f"external_values: {external_values}")
+    print(f"interpolated_values: {interpolated_values[2]}")
+    #  print(f"external_values: {external_values}")
 
-    np.testing.assert_allclose(interpolated_values, external_values)
+    np.testing.assert_allclose(interpolated_values[2], external_values)
 
 
 def test_validated_points_with_extent(validated_points):
     target_column = 'random_number'
     resolution = (0.005, 0.005)
-    extent = (24.655899, 60.192059, 25.037803604, 60.293407876),
+    extent = (24.655899, 60.192059, 25.037803604, 60.293407876)
     power = 2
 
     interpolated_values = idw_interpolation(
@@ -82,13 +83,13 @@ def test_validated_points_with_extent(validated_points):
     )
     assert target_column in validated_points.columns
 
-    with rasterio.open(reference_solution_path) as src:
+    with rasterio.open(extent_set) as src:
         external_values = src.read(1)
 
-    print(f"interpolated_values: {interpolated_values}")
-    print(f"external_values: {external_values}")
+    #  print(f"interpolated_values: {interpolated_values[2]}")
+    #  print(f"external_values: {external_values}")
 
-    np.testing.assert_allclose(interpolated_values, external_values)
+    np.testing.assert_allclose(interpolated_values[2], external_values)
 
 
 def test_invalid_column(test_points):
@@ -138,10 +139,12 @@ def test_interpolate_vector(test_points):
     )
 
     assert target_column in test_points.columns
-    interpolated_value = interpolated_values
+    interpolated_value = interpolated_values[2]
 
-    # Perform your desired assertions here
-    expected_values = np.array([1.0, 1.97913685, 2.59351418, 3.0, 1.97913685, 2.22978488,
-                                3.0, 3.40648613, 2.59351418, 3.0, 3.77021482, 4.02086285,
-                                3.0, 3.40648613, 4.02086285, 5.0])
+    expected_values = np.array([
+                                [3, 3.40648594, 4.02086331, 5],
+                                [2.59351406, 3, 3.77021471, 4.02086331],
+                                [1.97913669, 2.22978529, 3, 3.40648594],
+                                [1, 1.97913669, 2.59351406, 3]
+                                ])
     np.testing.assert_allclose(interpolated_value, expected_values, rtol=1e-5, atol=1e-5)

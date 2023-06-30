@@ -14,15 +14,16 @@ def _idw_interpolation(
     target_column: str,
     resolution: Tuple[Number, Number],
     extent: Optional[Tuple[float, float, float, float]] = None,
-    power: Optional[int] = 2
+    power: Optional[Number] = 2
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
-    if geodataframe.empty:
-        # Empty GeoDataFrame
-        raise ValueError("Expected geodataframe to contain geometries.")
+    if geodataframe.shape[0] == 0:
+        raise exceptions.EmptyDataFrameException("Expected geodataframe to contain geometries.")
 
     if target_column not in geodataframe.columns:
-        raise ValueError(f"Expected target_column ({target_column}) to be contained in geodataframe columns.")
+        raise exceptions.InvalidParameterValueException(
+            f"Expected value_column ({target_column}) to be contained in geodataframe columns."
+        )
 
     points = np.array(geodataframe.geometry.apply(lambda geom: (geom.x, geom.y)).tolist())
     values = geodataframe[target_column].values
@@ -37,14 +38,18 @@ def _idw_interpolation(
 
     resolution_x, resolution_y = resolution
 
-    num_points_x = int((x_max - x_min) / resolution_x) + 1
-    num_points_y = int((y_max - y_min) / resolution_y) + 1
+    #  num_points_x = int((x_max - x_min) / resolution_x) + 1
+    #  num_points_y = int((y_max - y_min) / resolution_y) + 1
+
+    num_points_x = int((x_max - x_min) / resolution_x)
+    num_points_y = int((y_max - y_min) / resolution_y)
 
     x = np.linspace(x_min, x_max, num_points_x)
     y = np.linspace(y_min, y_max, num_points_y)
 
     xi, yi = np.meshgrid(x, y)
     xi = xi.flatten()
+    # Reverse the order of y-values
     yi = yi[::-1].flatten()
 
     origin_x, origin_y = 0, 0
@@ -59,6 +64,7 @@ def _idw_interpolation(
     return x, y, interpolated_values
 
 
+#  Distance calculations
 def _distance_matrix(x0, y0, x1, y1):
     d0 = np.subtract.outer(x0, x1)
     d1 = np.subtract.outer(y0, y1)
@@ -67,12 +73,13 @@ def _distance_matrix(x0, y0, x1, y1):
 
 def _simple_idw(x, y, z, xi, yi, power=2):
     dist = _distance_matrix(x, y, xi, yi)
-
     # Add a small epsilon to avoid division by zero
     dist = np.where(dist == 0, 1e-12, dist)
     weights = 1.0 / (dist**power)
     weights /= weights.sum(axis=0)
-    return np.dot(weights.T, z)
+    interpolated_values = np.dot(weights.T, z)
+
+    return interpolated_values
 
 
 def idw_interpolation(
