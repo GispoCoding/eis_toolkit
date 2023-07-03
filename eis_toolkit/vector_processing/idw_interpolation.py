@@ -1,9 +1,9 @@
 from numbers import Number
+
+import geopandas as gpd
+import numpy as np
 from beartype import beartype
 from beartype.typing import Optional, Tuple
-import numpy as np
-from shapely.geometry import Point
-import geopandas as gpd
 
 from eis_toolkit import exceptions
 
@@ -14,7 +14,7 @@ def _idw_interpolation(
     target_column: str,
     resolution: Tuple[Number, Number],
     extent: Optional[Tuple[float, float, float, float]] = None,
-    power: Optional[Number] = 2
+    power: Optional[Number] = 2,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     if geodataframe.shape[0] == 0:
@@ -87,10 +87,9 @@ def idw_interpolation(
     target_column: str,
     resolution: Tuple[Number, Number],
     extent: Optional[Tuple[float, float, float, float]] = None,
-    power: Optional[int] = 2
+    power: Optional[int] = 2,
 ) -> Tuple[float, float, dict]:
-
-    """Simple inverse distance weighted (IDW) interpolation.
+    """Calculate simple inverse distance weighted (IDW) interpolation.
 
     Args:
         geodataframe: The vector dataframe to be interpolated.
@@ -105,11 +104,5 @@ def idw_interpolation(
     Returns:
         Rasterized vector data and metadata.
     """
-    x, y, interpolated_values = _idw_interpolation(
-        geodataframe,
-        target_column,
-        resolution,
-        extent,
-        power
-    )
+    x, y, interpolated_values = _idw_interpolation(geodataframe, target_column, resolution, extent, power)
     return x, y, interpolated_values
