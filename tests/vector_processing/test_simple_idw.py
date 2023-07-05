@@ -7,11 +7,11 @@ import rasterio
 from shapely.geometry import Point
 
 from eis_toolkit import exceptions
-from eis_toolkit.vector_processing.idw_interpolation import idw_interpolation
+from eis_toolkit.vector_processing.simple_idw import simple_idw
 
 test_dir = Path(__file__).parent.parent
-extent_set = test_dir.joinpath("data/remote/idw_with_extent.tif")
-no_extent = test_dir.joinpath("data/remote/idw_without_extent.tif")
+extent_set = test_dir.joinpath("data/remote/idw_extent.tif")
+no_extent = test_dir.joinpath("data/remote/idw_no_extent.tif")
 
 
 @pytest.fixture
@@ -53,11 +53,11 @@ def test_empty_gdf():
 def test_validated_points(validated_points):
     """Test IDW without extent set."""
     target_column = "random_number"
-    resolution = (0.005, 0.005)
+    resolution = (0.0049, 0.0047)
     extent = None
     power = 2
 
-    interpolated_values = idw_interpolation(
+    interpolated_values = simple_idw(
         geodataframe=validated_points, target_column=target_column, resolution=resolution, extent=extent, power=power
     )
     assert target_column in validated_points.columns
@@ -65,29 +65,23 @@ def test_validated_points(validated_points):
     with rasterio.open(no_extent) as src:
         external_values = src.read(1)
 
-    print(f"interpolated_values: {interpolated_values[2]}")
-    #  print(f"external_values: {external_values}")
-
     np.testing.assert_allclose(interpolated_values[2], external_values)
 
 
 def test_validated_points_with_extent(validated_points):
     """Test IDW with extent set."""
     target_column = "random_number"
-    resolution = (0.005, 0.005)
-    extent = (24.655899, 60.192059, 25.037803604, 60.293407876)
+    resolution = (0.0049, 0.0047)
+    extent = (24.6558990000000016, 60.1920590000000004, 25.0378036000000002, 60.2934078769999999)
     power = 2
 
-    interpolated_values = idw_interpolation(
+    interpolated_values = simple_idw(
         geodataframe=validated_points, target_column=target_column, resolution=resolution, extent=extent, power=power
     )
     assert target_column in validated_points.columns
 
     with rasterio.open(extent_set) as src:
         external_values = src.read(1)
-
-    #  print(f"interpolated_values: {interpolated_values[2]}")
-    #  print(f"external_values: {external_values}")
 
     np.testing.assert_allclose(interpolated_values[2], external_values)
 
@@ -100,7 +94,7 @@ def test_invalid_column(test_points):
     power = 2
 
     with pytest.raises(exceptions.InvalidParameterValueException):
-        idw_interpolation(
+        simple_idw(
             geodataframe=test_points, target_column=target_column, resolution=resolution, extent=extent, power=power
         )
 
@@ -113,7 +107,7 @@ def test_empty_geodataframe(test_empty_gdf):
     power = 5
 
     with pytest.raises(exceptions.EmptyDataFrameException):
-        idw_interpolation(
+        simple_idw(
             geodataframe=test_empty_gdf, target_column=target_column, resolution=resolution, extent=extent, power=power
         )
 
@@ -125,7 +119,7 @@ def test_interpolate_vector(test_points):
     extent = None
     power = 2
 
-    interpolated_values = idw_interpolation(
+    interpolated_values = simple_idw(
         geodataframe=test_points, target_column=target_column, resolution=resolution, extent=extent, power=power
     )
 

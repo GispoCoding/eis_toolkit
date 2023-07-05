@@ -9,7 +9,7 @@ from eis_toolkit import exceptions
 
 
 @beartype
-def _idw_interpolation(
+def _simple_idw(
     geodataframe: gpd.GeoDataFrame,
     target_column: str,
     resolution: Tuple[Number, Number],
@@ -58,7 +58,7 @@ def _idw_interpolation(
     sorted_points = points[sorted_indices]
     sorted_values = values[sorted_indices]
 
-    interpolated_values = _simple_idw(sorted_points[:, 0], sorted_points[:, 1], sorted_values, xi, yi, power)
+    interpolated_values = _idw(sorted_points[:, 0], sorted_points[:, 1], sorted_values, xi, yi, power)
     interpolated_values = interpolated_values.reshape(num_points_y, num_points_x)
 
     return x, y, interpolated_values
@@ -71,7 +71,7 @@ def _distance_matrix(x0, y0, x1, y1):
     return np.hypot(d0, d1)
 
 
-def _simple_idw(x, y, z, xi, yi, power=2):
+def _idw(x, y, z, xi, yi, power=2):
     dist = _distance_matrix(x, y, xi, yi)
     # Add a small epsilon to avoid division by zero
     dist = np.where(dist == 0, 1e-12, dist)
@@ -82,7 +82,7 @@ def _simple_idw(x, y, z, xi, yi, power=2):
     return interpolated_values
 
 
-def idw_interpolation(
+def simple_idw(
     geodataframe: gpd.GeoDataFrame,
     target_column: str,
     resolution: Tuple[Number, Number],
@@ -104,5 +104,5 @@ def idw_interpolation(
     Returns:
         Rasterized vector data and metadata.
     """
-    x, y, interpolated_values = _idw_interpolation(geodataframe, target_column, resolution, extent, power)
+    x, y, interpolated_values = _simple_idw(geodataframe, target_column, resolution, extent, power)
     return x, y, interpolated_values
