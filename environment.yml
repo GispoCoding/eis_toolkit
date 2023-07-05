@@ -19,5 +19,6 @@ dependencies:
   - beartype >=0.13.1,<2.0.0
   - seaborn >=0.12.2
   - pykrige >=1.7.0
+  - rtree >= 1.0.1
   # Dependencies for testing
   - pytest >=7.2.1
