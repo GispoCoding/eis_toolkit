@@ -21,7 +21,7 @@ def test_k_means_clustering_output():
     kmeans_gdf = k_means_clustering(data=gdf, number_of_clusters=2, random_state=0)
     kmeans_labels = kmeans_gdf["cluster"]
     expected_labels = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]
-    assert list(kmeans_labels) == expected_labels
+    np.testing.assert_array_equal(kmeans_labels, expected_labels)
 
 
 def test_invalid_number_of_clusters():
