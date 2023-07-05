@@ -22,3 +22,4 @@ dependencies:
   - rtree >= 1.0.1
   # Dependencies for testing
   - pytest >=7.2.1
+  - rtree >=1.0.1
