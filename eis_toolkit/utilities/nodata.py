@@ -65,7 +65,7 @@ def nodata_to_nan(data: np.ndarray, nodata_value: Number) -> np.ndarray:
     Returns:
         Input array where specified nodata has been converted to np.nan.
     """
-    if np.issubsctype(data, np.integer):
+    if np.issubdtype(data.dtype, np.integer):
         data = data.astype(float)
 
     return np.where(np.isin(data, nodata_value), np.nan, data)
@@ -82,32 +82,6 @@ def nan_to_nodata(data: np.ndarray, nodata_value: Number) -> np.ndarray:
         Input array where np.nan has been converted to specified nodata.
     """
     return np.where(np.isnan(data), nodata_value, data)
-
-
-@beartype
-def mask_nodata(data: np.ndarray, nodata_value: Number) -> np.ndarray:
-    """
-    Create mask array for specified nodata_value.
-    Args:
-        data: Input data as a numpy array.
-        nodata_value: Value that is set to True.
-    Returns:
-        Input array where specified nodata has been converted into a mask.
-    """
-    return np.ma.masked_values(data, value=nodata_value, shrink=False).mask
-
-
-@beartype
-def unmask_nodata(data: np.ndarray, mask: np.ndarray, nodata_value: Number) -> np.ndarray:
-    """Set specified nodata_value based on a mask.
-    Args:
-        data: Input data as a numpy array.
-        mask: Input mask as a numpy array.
-        nodata_value: Value which will be set back based on the mask.
-    Returns:
-        Array where specified nodata has been restored based on a given mask.
-    """
-    return np.where(mask, nodata_value, data)
 
 
 @beartype

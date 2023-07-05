@@ -5,15 +5,18 @@ from numbers import Number
 from beartype import beartype
 from beartype.typing import Optional, Tuple, Sequence
 
-from eis_toolkit.utilities.miscellaneous import expand_and_zip, cast_dtype_to_int
-from eis_toolkit.utilities.nodata import mask_nodata, unmask_nodata
+from eis_toolkit.utilities.miscellaneous import expand_and_zip, cast_scalar_to_int, check_dtype_for_int
 
-from eis_toolkit.exceptions import InvalidRasterBandException, NonMatchinParameterLengthsException
+from eis_toolkit.exceptions import InvalidRasterBandException, NonMatchingParameterLengthsException
 from eis_toolkit.checks.raster import check_raster_bands
 from eis_toolkit.checks.parameter import check_parameter_length
 
 
-def _binarize(in_array: np.ndarray, threshold: Number) -> np.ndarray:  # type: ignore[no-any-unimported]
+@beartype
+def _binarize(
+    in_array: np.ndarray,
+    threshold: Number,
+) -> np.ndarray:  # type: ignore[no-any-unimported]
     out_array = np.where(in_array <= threshold, 0, 1)
 
     return out_array
@@ -23,7 +26,7 @@ def _binarize(in_array: np.ndarray, threshold: Number) -> np.ndarray:  # type: i
 def binarize(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     bands: Optional[Sequence[int]] = None,
-    thresholds: Sequence[Number] = [],
+    thresholds: Sequence[Number] = [Number],
     nodata: Optional[Number] = None,
 ) -> Tuple[np.ndarray, dict, dict]:
     """
@@ -35,10 +38,11 @@ def binarize(  # type: ignore[no-any-unimported]
     Takes one nodata value which will be re-written after transformation.
 
     If no band/column selection specified, all bands/columns will be used.
-    If only one threshold is specified, it will be used for all (selected) bands.
+    If a parameter contains only 1 entry, it will be applied for all bands.
+    The threshold can be set for each band individually.
 
     Args:
-        raster:  Data object to be transformed.
+        raster: Data object to be transformed.
         bands: Selection of bands to be transformed.
         thresholds: Threshold values for transformation.
         nodata: Nodata value to be considered.
@@ -46,20 +50,20 @@ def binarize(  # type: ignore[no-any-unimported]
     Returns:
         out_array: The transformed data.
         out_meta: Updated metadata.
-        out_settings (dict): Log of input settings and calculated statistics if available.
+        out_settings: Log of input settings and calculated statistics if available.
 
     Raises:
         InvalidRasterBandException: The input contains invalid band numbers.
-        NonMatchinParameterLengthsException: The input does not match the number of selected bands
+        NonMatchingParameterLengthsException: The input does not match the number of selected bands.
     """
     bands = list(range(1, raster.count + 1)) if bands is None else bands
-    nodata = cast_dtype_to_int(raster.nodata if nodata is None else nodata)
+    nodata = cast_scalar_to_int(raster.nodata if nodata is None else nodata)
 
     if check_raster_bands(raster, bands) is False:
-        raise InvalidRasterBandException("Invalid band selection")
+        raise InvalidRasterBandException("Invalid band selection.")
 
     if not check_parameter_length(bands, thresholds):
-        raise NonMatchinParameterLengthsException("Invalid threshold length")
+        raise NonMatchingParameterLengthsException("Invalid threshold length.")
 
     expanded_args = expand_and_zip(bands, thresholds)
     thresholds = [element[1] for element in expanded_args]
@@ -68,14 +72,18 @@ def binarize(  # type: ignore[no-any-unimported]
 
     for i in range(0, len(bands)):
         band_array = raster.read(bands[i])
+        inital_dtype = band_array.dtype
 
-        band_mask = mask_nodata(band_array, nodata)
-        band_array = _binarize(in_array=band_array, threshold=thresholds[i])
-        band_array = unmask_nodata(band_array, band_mask, nodata)
+        band_mask = np.isin(band_array, nodata)
+        band_array = _binarize(band_array, threshold=thresholds[i])
+        band_array = np.where(band_mask, nodata, band_array)
 
-        band_array = band_array.astype(np.min_scalar_type(nodata))
+        if not check_dtype_for_int(nodata):
+            band_array = band_array.astype(inital_dtype)
+        else:
+            band_array = band_array.astype(np.min_scalar_type(nodata))
+
         band_array = np.expand_dims(band_array, axis=0)
-
         out_array = band_array.copy() if i == 0 else np.vstack((out_array, band_array))
 
         current_transform = f"transformation {i + 1}"

@@ -1,189 +1,134 @@
 import numpy as np
-import pandas as pd
-import geopandas as gpd
 import rasterio
-from typing import Optional, Tuple, Union, List, Literal
 
-from eis_toolkit.exceptions import InvalidParameterValueException, InvalidInputDataException
-from eis_toolkit.transformations import utils
-from eis_toolkit.checks import parameter
+from numbers import Number
+from beartype import beartype
+from beartype.typing import Optional, Tuple, Sequence
+
+from eis_toolkit.utilities.miscellaneous import (
+    expand_and_zip,
+    replace_values,
+    truncate_decimal_places,
+    set_max_precision,
+    cast_array_to_float,
+)
+from eis_toolkit.utilities.nodata import nan_to_nodata
+
+from eis_toolkit.exceptions import (
+    InvalidRasterBandException,
+    NonMatchingParameterLengthsException,
+    InvalidParameterValueException,
+)
+from eis_toolkit.checks.raster import check_raster_bands
+from eis_toolkit.checks.parameter import check_parameter_length
 
 
-# Core functions
-def _log_transform_core(  # type: ignore[no-any-unimported]
-    data_array: np.ndarray,
-    base: int,
-    nodata_value: Optional[int | float] = None,
+@beartype
+def _log_transform_ln(  # type: ignore[no-any-unimported]
+    in_array: np.ndarray,
 ) -> np.ndarray:
-    
-    out_array = utils.replace_nan(data_array=data_array, nodata_value=nodata_value, set_nan=True)
-    out_array[out_array <= 0] = np.nan
-    out_array[np.isinf(out_array)] = np.nan
 
-    if base == 2: out_array = np.log2(out_array)
-    if base == 10: out_array = np.log10(out_array)
-
-    out_array = utils.replace_nan(data_array=out_array, nodata_value=nodata_value, set_value=True)
-
-    return out_array
+    return np.log(in_array)
 
 
-# Call functions
-def _log_transform_raster(  # type: ignore[no-any-unimported]
-    in_data: rasterio.io.DatasetReader,
-    bands: Optional[List[int]] = None,
-    base: List[int] = [2],
-    nodata: Optional[List[int | float | None]] = None,
-    method: Literal['replace', 'extract'] = 'replace',
-) -> Tuple[np.ndarray, dict, dict]:
-        raster = in_data
-        
-        if not bands: bands = list(range(1, raster.count + 1))    
-        
-        expanded_args = utils.expand_args(selection=bands, nodata=nodata, base=base)
-        nodata = expanded_args['nodata']
-        base = expanded_args['base']
-         
-        out_array, out_meta, out_meta_nodata, bands_idx = utils.read_raster(raster=raster, selection=bands, method=method)
-        out_settings = {}
+@beartype
+def _log_transform_log2(  # type: ignore[no-any-unimported]
+    in_array: np.ndarray,
+) -> np.ndarray:
 
-        for i, band_idx in enumerate(bands_idx):
-            nodata_value = out_meta_nodata[i] if not nodata or nodata[i] is None else nodata[i]
-            
-            out_array[band_idx] = _log_transform_core(data_array=out_array[band_idx],
-                                                      base=base[i],
-                                                      nodata_value=nodata_value)
-            
-            current_transform = f'transform {band_idx + 1}'
-            current_settings = {'band_origin': bands[i],
-                                'base': base[i],
-                                'nodata_meta': out_meta_nodata[i],
-                                'nodata_used': nodata_value}
-            
-            out_settings[current_transform] = current_settings
+    return np.log2(in_array)
 
-        return out_array, out_meta, out_settings
-    
-    
-def _log_transform_table(  # type: ignore[no-any-unimported]
-    in_data: Union[pd.DataFrame, gpd.GeoDataFrame],
-    columns: Optional[List[str]] = None,
-    base: List[int] = [2],
-    nodata: Optional[List[int | float | None]] = None,
-) -> Tuple[np.ndarray, dict, dict]:
-    dataframe = in_data
-    
-    out_array, out_column_info, selection = utils.df_to_input_ordered_array(dataframe, columns)
-    
-    expanded_args = utils.expand_args(selection=selection, nodata=nodata, base=base)
-    nodata = expanded_args['nodata']
-    base = expanded_args['base']
- 
-    out_settings = {}
-    
-    for i, column in enumerate(selection):
-        nodata_value = nodata[i] if nodata is not None else None
-        
-        out_array[i] = _log_transform_core(data_array=out_array[i],
-                                           base=base[i],
-                                           nodata_value=nodata_value)
 
-        current_transform = f'transform {i + 1}'
-        current_settings = {'original_column_name': column,
-                            'original_column_index': dataframe.columns.get_loc(column),
-                            'array_index': i,
-                            'base': base[i],
-                            'nodata_used': nodata_value}
-        
-        out_settings[current_transform] = current_settings
+@beartype
+def _log_transform_log10(  # type: ignore[no-any-unimported]
+    in_array: np.ndarray,
+) -> np.ndarray:
 
-    return out_array, out_column_info, out_settings 
-   
-    
+    return np.log10(in_array)
+
+
+@beartype
 def log_transform(  # type: ignore[no-any-unimported]
-    in_data: Union[rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame],
-    selection: Optional[List[int]] = None,
-    base: List[int] = [2],
-    nodata: Optional[List[int | float | None]] = None,
-    method: Optional[Literal['replace', 'extract']] = None,
+    raster: rasterio.io.DatasetReader,
+    bands: Optional[Sequence[int]] = None,
+    log_transform: Sequence[str] = ["log2"],
+    nodata: Optional[Number] = None,
 ) -> Tuple[np.ndarray, dict, dict]:
-    """Logarithmic transformation.
-    
-    Transforms input data with log2 or log10.
-        
-    Takes care of data with NoData values, input can be
-    - None
-    - user-defined
-    If None, NoData will be read from raster metadata.
-    If specified, user-input will be preferred.
-    
-    If infinity values occur, they will be replaced by NaN.
-    If values <= 0 occur, they will be replaced by NaN.
-    
-    Works for multiband raster and multi-column dataframes.
-    If no band/column selection specified, all bands/columns will be used.
-    
-    If only one base-value is specified, it will be used for all (selected) bands.
-    If only one NoData value is specified, it will be used for all (selected) bands.
-    Contributed parameters will generally be applied for each band/column separately. This way, data can easily be transformed 
-    by the same parameters or with different parameters for each band/column (values corresponding to each band/column).
+    """
+    Performs a logarithmic transformation on the provided data.
+    Takes one nodata value that will be ignored in calculations.
+    Negative values will not be considered for transformation and replaced by the specific nodata value.
 
-    If method is 'replace', selected bands/colums will be overwritten. Order of bands will not be changed in the output.
-    If method is 'extract', only selected bands/columns will be returned. Order in the output corresponds to the order of the specified selection.
-    
+    If no band/column selection specified, all bands/columns will be used.
+    If a parameter contains only 1 entry, it will be applied for all bands.
+    The log_transform can be set for each band individually.
+
     Args:
-        in_data (rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame): Data object to be transformed.
-        selection (List[int | str], optional): Bands [int] or columns [str] to be processed. Defaults to None.
-        base (List[int]): Log-base to be applied. Possible values are 2 and 10. Defaults to 2.
-        nodata (List[int | float], optional): NoData values to be considered. Defaults to None.
-        method (Optional[Literal['replace', 'extract']]): Applied method for data output. For raster data only. Defaults to none.
+        raster: Data object to be transformed.
+        bands: Selection of bands to be transformed.
+        log_transform: The base for logarithmic transformation. Valid values are 'ln' (base e), 'log2' (base 2) and 'log10' (base 10).
+        nodata: Nodata value to be considered.
 
     Returns:
-        out_array (np.ndarray): The transformed data.
-        out_meta (dict): Updated metadata with new band count. Only for raster data.
-        out_column_info (dict): Dictionary containing transformable and non-transformable columns and geometry information. Only for pandas/geopandas data.
-        out_settings (dict): Return of the input settings related to the new output.
+        out_array: The transformed data.
+        out_meta: Updated metadata.
+        out_settings: Log of input settings and calculated statistics if available.
 
     Raises:
-        InvalidParameterValueException: The input contains invalid values.
-    """    
-    valids = parameter.check_selection(in_data, selection)
-    valids.append(('Base length', parameter.check_parameter_length(selection, base, choice=1)))
-    valids.append(('NoData length', parameter.check_parameter_length(selection, nodata, choice=1, nodata=True)))    
-    valids.append(('Base data type', all(isinstance(item, int) for item in base)))
-    valids.append(('Base value', all([item == 2 or item == 10 for item in base])))
-    
-    if nodata is not None: 
-        valids.append(('NoData data type', all(isinstance(item, Union[int, float, None]) for item in nodata)))
-        
-    if isinstance(in_data, rasterio.DatasetReader):       
-        valids.append(('Output method', method == 'replace' or method == 'extract'))
+        InvalidRasterBandException: The input contains invalid band numbers.
+        NonMatchingParameterLengthsException: The input does not match the number of selected bands
+        InvalidParameterValueException: The input does not match the requirements (values, order of values)
+    """
+    bands = list(range(1, raster.count + 1)) if bands is None else bands
+    nodata = raster.nodata if nodata is None else nodata
 
-        for item in valids:
-            error_msg, validation = item
-            
-            if validation == False:
-                raise InvalidParameterValueException(error_msg)
+    if check_raster_bands(raster, bands) is False:
+        raise InvalidRasterBandException("Invalid band selection")
 
-        out_array, out_meta, out_settings = _log_transform_raster(in_data=in_data,
-                                                                  bands=selection,
-                                                                  base=base,
-                                                                  nodata=nodata,
-                                                                  method=method)
-        
-        return out_array, out_meta, out_settings
-    
-    if isinstance(in_data, Union[pd.DataFrame, gpd.GeoDataFrame]):
-        for item in valids:
-            error_msg, validation = item
-            
-            if validation == False:
-                raise InvalidParameterValueException(error_msg)
-            
-        out_array, out_column_info, out_settings = _log_transform_table(in_data=in_data,
-                                                                        columns=selection,
-                                                                        base=base,
-                                                                        nodata=nodata)
-                            
-        return out_array, out_column_info, out_settings
-        
+    if not check_parameter_length(bands, log_transform):
+        raise NonMatchingParameterLengthsException("Invalid length for log-base values.")
+
+    for item in log_transform:
+        if not (item == "ln" or item == "log2" or item == "log10"):
+            raise InvalidParameterValueException(f"Invalid method: {item}.")
+
+    expanded_args = expand_and_zip(bands, log_transform)
+    log_transform = [element[1] for element in expanded_args]
+
+    out_settings = {}
+    out_decimals = set_max_precision()
+
+    for i in range(0, len(bands)):
+        band_array = raster.read(bands[i])
+        band_array = cast_array_to_float(band_array, cast_int=True)
+        band_array = replace_values(band_array, values_to_replace=[nodata, np.inf], replace_value=np.nan)
+        band_array[band_array <= 0] = np.nan
+
+        if log_transform[i] == "ln":
+            band_array = _log_transform_ln(band_array.astype(np.float64))
+        elif log_transform[i] == "log2":
+            band_array = _log_transform_log2(band_array.astype(np.float64))
+        elif log_transform[i] == "log10":
+            band_array = _log_transform_log10(band_array.astype(np.float64))
+
+        band_array = truncate_decimal_places(band_array, decimal_places=out_decimals)
+        band_array = nan_to_nodata(band_array, nodata_value=nodata)
+        band_array = cast_array_to_float(band_array, scalar=nodata, cast_float=True)
+
+        band_array = np.expand_dims(band_array, axis=0)
+        out_array = band_array.copy() if i == 0 else np.vstack((out_array, band_array))
+
+        current_transform = f"transformation {i + 1}"
+        current_settings = {
+            "band_origin": bands[i],
+            "log_transform": log_transform[i],
+            "nodata": nodata,
+            "decimal_places": out_decimals,
+        }
+
+        out_settings[current_transform] = current_settings
+
+    out_meta = raster.meta.copy()
+    out_meta.update({"count": len(bands), "nodata": nodata, "dtype": out_array.dtype.name})
+
+    return out_array, out_meta, out_settings

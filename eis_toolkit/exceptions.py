@@ -66,5 +66,5 @@ class FileReadError(Exception):
     """Exception error class for unsupported file exceptions."""
 
 
-class NonMatchinParameterLengthsException(Exception):
+class NonMatchingParameterLengthsException(Exception):
     """Exception error class for parameters with different lenghts."""

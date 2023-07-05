@@ -7,12 +7,12 @@ from beartype.typing import Optional, Tuple, Sequence
 
 from eis_toolkit.utilities.miscellaneous import (
     expand_and_zip,
-    replace_values,
-    truncate_decimal_places,
-    set_max_precision,
+    get_max_decimal_points,
+    cast_array_to_int,
+    cast_scalar_to_int,
     cast_array_to_float,
 )
-from eis_toolkit.utilities.nodata import nan_to_nodata
+from eis_toolkit.utilities.nodata import nodata_to_nan, nan_to_nodata
 
 from eis_toolkit.exceptions import (
     InvalidRasterBandException,
@@ -24,46 +24,45 @@ from eis_toolkit.checks.parameter import check_parameter_length, check_minmax_po
 
 
 @beartype
-def _sigmoid_transform(  # type: ignore[no-any-unimported]
+def _clipping(  # type: ignore[no-any-unimported]
     in_array: np.ndarray,
-    bounds: Tuple[Number, Number],
-    slope: Number,
-    center: bool,
+    limits: Tuple[Number | None, Number | None],
 ) -> np.ndarray:
-    lower, upper = bounds[0], bounds[1]
+    limit_lower, limit_upper = limits[0], limits[1]
 
-    if center == True:
-        in_array = in_array - np.nanmean(in_array)
+    out_array = in_array
 
-    out_array = lower + (upper - lower) * (1 / (1 + np.exp(-slope * (in_array))))
+    if limit_lower is not None:
+        out_array = np.where(out_array < limit_lower, limit_lower, out_array)
+
+    if limit_upper is not None:
+        out_array = np.where(out_array > limit_upper, limit_upper, out_array)
 
     return out_array
 
 
 @beartype
-def sigmoid_transform(  # type: ignore[no-any-unimported]
+def clipping(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     bands: Optional[Sequence[int]] = None,
-    bounds: Sequence[Tuple[Number, Number]] = [(0, 1)],
-    slope: Sequence[Number] = [1],
-    center: bool = True,
+    limits: Sequence[Tuple[Number | None, Number | None]] = [(None, None)],
     nodata: Optional[Number] = None,
 ) -> Tuple[np.ndarray, dict, dict]:
     """
-    Transform data into a sigmoid-shape based on a specified new range.
-    Uses the provided new minimum and maximum, shift and slope parameters to transform the data.
+    Clipping data based on specified upper and lower limits.
     Takes one nodata value that will be ignored in calculations.
+
+    Replaces values below the lower limit and above the upper limit with provided values, respecively.
+    Works both one-sided and two-sided but raises error if no limits provided.
 
     If no band/column selection specified, all bands/columns will be used.
     If a parameter contains only 1 entry, it will be applied for all bands.
-    The bounds and slope values can be set for each band individually.
+    The limits can be set for each band individually.
 
     Args:
         raster: Data object to be transformed.
         bands: Selection of bands to be transformed.
-        bounds: Boundaries for the calculation of the sigmoid function (lower, upper).
-        slope: Value which modifies the slope of the resulting sigmoid-curve.
-        center: Center array values around mean = 0 before sigmoid transformation.
+        limits: Lower and upper limits (lower, upper) as real values.
         nodata: Nodata value to be considered.
 
     Returns:
@@ -74,7 +73,7 @@ def sigmoid_transform(  # type: ignore[no-any-unimported]
     Raises:
         InvalidRasterBandException: The input contains invalid band numbers.
         NonMatchingParameterLengthsException: The input does not match the number of selected bands.
-        InvalidParameterValueException: The input does not match the requirements (values, order of values)
+        InvalidParameterValueException: The input does not match the requirements (values, order of values).
     """
     bands = list(range(1, raster.count + 1)) if bands is None else bands
     nodata = raster.nodata if nodata is None else nodata
@@ -82,31 +81,32 @@ def sigmoid_transform(  # type: ignore[no-any-unimported]
     if check_raster_bands(raster, bands) is False:
         raise InvalidRasterBandException("Invalid band selection")
 
-    for parameter_name, parameter in [("bounds", bounds), ("slope", slope)]:
-        if not check_parameter_length(bands, parameter):
-            raise NonMatchingParameterLengthsException(f"Invalid length for {parameter_name}.")
+    if not check_parameter_length(bands, limits):
+        raise NonMatchingParameterLengthsException("Invalid limit length.")
 
-    for item in bounds:
+    for item in limits:
+        if item.count(None) == len(item):
+            raise InvalidParameterValueException(f"Limit values all None: {item}.")
+
         if not check_minmax_position(item):
             raise InvalidParameterValueException(f"Invalid min-max values provided: {item}.")
 
-    expanded_args = expand_and_zip(bands, bounds, slope)
-    bounds = [element[1] for element in expanded_args]
-    slope = [element[2] for element in expanded_args]
+    expanded_args = expand_and_zip(bands, limits)
+    limits = [element[1] for element in expanded_args]
 
     out_settings = {}
-    out_decimals = set_max_precision()
 
     for i in range(0, len(bands)):
         band_array = raster.read(bands[i])
+        inital_dtype = band_array.dtype
+
         band_array = cast_array_to_float(band_array, cast_int=True)
-        band_array = replace_values(band_array, values_to_replace=[nodata, np.inf], replace_value=np.nan)
+        band_array = nodata_to_nan(band_array, nodata_value=nodata)
 
-        band_array = _sigmoid_transform(band_array.astype(np.float64), bounds=bounds[i], slope=slope[i], center=center)
+        band_array = _clipping(band_array, limits=limits[i])
 
-        band_array = truncate_decimal_places(band_array, decimal_places=out_decimals)
         band_array = nan_to_nodata(band_array, nodata_value=nodata)
-        band_array = cast_array_to_float(band_array, scalar=nodata, cast_float=True)
+        band_array = cast_array_to_int(band_array, scalar=nodata, initial_dtype=inital_dtype)
 
         band_array = np.expand_dims(band_array, axis=0)
         out_array = band_array.copy() if i == 0 else np.vstack((out_array, band_array))
@@ -114,12 +114,9 @@ def sigmoid_transform(  # type: ignore[no-any-unimported]
         current_transform = f"transformation {i + 1}"
         current_settings = {
             "band_origin": bands[i],
-            "bound_lower": truncate_decimal_places(bounds[i][0], decimal_places=out_decimals),
-            "bound_upper": truncate_decimal_places(bounds[i][1], decimal_places=out_decimals),
-            "slope": slope[i],
-            "center": center,
-            "nodata": nodata,
-            "decimal_places": out_decimals,
+            "limit_lower": cast_scalar_to_int(limits[i][0]),
+            "limit_upper": cast_scalar_to_int(limits[i][1]),
+            "nodata": cast_scalar_to_int(nodata),
         }
 
         out_settings[current_transform] = current_settings

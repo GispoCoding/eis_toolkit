@@ -1,382 +1,201 @@
 import numpy as np
-import pandas as pd
-import geopandas as gpd
 import rasterio
-from typing import Optional, Tuple, Union, List, Literal
 
-from eis_toolkit.exceptions import InvalidParameterValueException, InvalidInputDataException
-from eis_toolkit.transformations import utils
-from eis_toolkit.checks import parameter
+from numbers import Number
+from beartype import beartype
+from beartype.typing import Optional, Tuple, Sequence
+
+from eis_toolkit.utilities.miscellaneous import (
+    expand_and_zip,
+    replace_values,
+    truncate_decimal_places,
+    set_max_precision,
+    cast_array_to_float,
+)
+from eis_toolkit.utilities.nodata import nan_to_nodata
+
+from eis_toolkit.exceptions import (
+    InvalidRasterBandException,
+    NonMatchingParameterLengthsException,
+    InvalidParameterValueException,
+)
+from eis_toolkit.checks.raster import check_raster_bands
+from eis_toolkit.checks.parameter import check_parameter_length, check_minmax_position
 
 
-# Core functions
-def _z_score_normalization_core(  # type: ignore[no-any-unimported]
-    data_array: np.ndarray,
-    with_mean: bool = True,
-    with_sd: bool = True,
-    nodata_value: Optional[int | float] = None,
-) -> Tuple[np.ndarray, float, float]:
-    
-    out_array = utils.replace_nan(data_array=data_array, nodata_value=nodata_value, set_nan=True)
-    out_array[np.isinf(out_array)] = np.nan
-    
-    mean = 0 if not with_mean else np.nanmean(out_array).astype(np.float32)
-    sd = 1 if not with_sd else np.nanstd(out_array).astype(np.float32)
-    out_array = (out_array - mean) / sd
+@beartype
+def _z_score_normalization(  # type: ignore[no-any-unimported]
+    in_array: np.ndarray,
+) -> Tuple[np.ndarray, Number, Number]:
+    mean = np.nanmean(in_array)
+    sd = np.nanstd(in_array)
 
-    out_array = utils.replace_nan(data_array=out_array, nodata_value=nodata_value, set_value=True)
+    out_array = (in_array - mean) / sd
 
     return out_array, mean, sd
 
 
-def _minmax_scaling_core(  # type: ignore[no-any-unimported]
-    data_array: np.ndarray,
-    new_range: Tuple[int | float , int | float] = (0, 1),
-    nodata_value: Optional[int | float] = None,
+@beartype
+def _min_max_scaling(  # type: ignore[no-any-unimported]
+    in_array: np.ndarray,
+    new_range: Tuple[Number, Number],
 ) -> np.ndarray:
-    
-    out_array = utils.replace_nan(data_array=data_array, nodata_value=nodata_value, set_nan=True)
-    out_array[np.isinf(out_array)] = np.nan  
-    
-    min = np.nanmin(out_array)
-    max = np.nanmax(out_array)
-    scaled_min = new_range[0]
-    scaled_max = new_range[1]
-    
-    scaler = (out_array - min) / (max - min)
+    array_min = np.nanmin(in_array)
+    array_max = np.nanmax(in_array)
+    scaled_min, scaled_max = new_range[0], new_range[1]
+
+    scaler = (in_array - array_min) / (array_max - array_min)
     out_array = (scaler * (scaled_max - scaled_min)) + scaled_min
-        
-    out_array = utils.replace_nan(data_array=out_array, nodata_value=nodata_value, set_value=True)
 
     return out_array
 
 
-# Call functions
-def _z_score_normalization_raster(  # type: ignore[no-any-unimported]
-    in_data: rasterio.io.DatasetReader,
-    bands: Optional[List[int]] = None,
-    with_mean: List[bool] = [True],
-    with_sd: List[bool] = [True],
-    nodata: Optional[List[int | float | None]] = None,
-    method: Literal['replace', 'extract'] = 'replace',
+@beartype
+def z_score_normalization(  # type: ignore[no-any-unimported]
+    raster: rasterio.io.DatasetReader,
+    bands: Optional[Sequence[int]] = None,
+    nodata: Optional[Number] = None,
 ) -> Tuple[np.ndarray, dict, dict]:
-        raster = in_data
-        
-        if not bands: bands = list(range(1, raster.count + 1))  
-          
-        expanded_args = utils.expand_args(selection=bands, nodata=nodata, with_mean=with_mean, with_sd=with_sd)
-        nodata = expanded_args['nodata']
-        with_mean = expanded_args['with_mean']
-        with_sd = expanded_args['with_sd']
+    """
+    Normalizing data based on mean and standard deviation.
+    Results will have a mean = 0 and standard deviation = 1.
 
-        out_array, out_meta, out_meta_nodata, bands_idx = utils.read_raster(raster=raster, selection=bands, method=method)
-        out_settings = {}
+    Takes one nodata value that will be ignored in calculations.
 
-        for i, band_idx in enumerate(bands_idx):
-            nodata_value = out_meta_nodata[i] if not nodata or nodata[i] is None else nodata[i]
-            
-            out_array[band_idx], out_mean, out_sd = _z_score_normalization_core(data_array=out_array[band_idx],
-                                                                                with_mean=with_mean[i],
-                                                                                with_sd=with_sd[i],
-                                                                                nodata_value=nodata_value)
-            
-            current_transform = f'transform {band_idx + 1}'
-            current_settings = {'band_origin': bands[i],
-                                'mean': out_mean,
-                                'sd': out_sd,
-                                'nodata_meta': out_meta_nodata[i],
-                                'nodata_used': nodata_value}
-            
-            out_settings[current_transform] = current_settings
-
-        return out_array, out_meta, out_settings
-    
-
-def _z_score_normalization_table(  # type: ignore[no-any-unimported]
-    in_data: Union[pd.DataFrame, gpd.GeoDataFrame],
-    columns: Optional[List[str]] = None,
-    with_mean: List[bool] = [True],
-    with_sd: List[bool] = [True],
-    nodata: Optional[List[int | float | None]] = None,
-) -> Tuple[np.ndarray, dict, dict]:
-    dataframe = in_data
-    
-    out_array, out_column_info, selection = utils.df_to_input_ordered_array(dataframe, columns)
-    
-    expanded_args = utils.expand_args(selection=selection, nodata=nodata, with_mean=with_mean, with_sd=with_sd)
-    nodata = expanded_args['nodata']
-    with_mean = expanded_args['with_mean']
-    with_sd = expanded_args['with_sd']
- 
-    out_settings = {}
-    
-    for i, column in enumerate(selection):
-        nodata_value = nodata[i] if nodata is not None else None
-        
-        out_array[i], out_mean, out_sd = _z_score_normalization_core(data_array=out_array[i],
-                                                                     with_mean=with_mean[i],
-                                                                     with_sd=with_sd[i],
-                                                                     nodata_value=nodata_value)
-
-        current_transform = f'transform {i + 1}'
-        current_settings = {'original_column_name': column,
-                            'original_column_index': dataframe.columns.get_loc(column),
-                            'array_index': i,
-                            'mean': out_mean,
-                            'sd': out_sd,
-                            'nodata_used': nodata_value}
-        
-        out_settings[current_transform] = current_settings
-
-    return out_array, out_column_info, out_settings
-
-
-def _minmax_scaling_raster(  # type: ignore[no-any-unimported]
-    in_data: rasterio.io.DatasetReader,
-    bands: Optional[List[int]] = None,
-    new_range: List[Tuple[int | float, int | float]] = [(0, 1)],
-    nodata: Optional[List[int | float | None]] = None,
-    method: Literal['replace', 'extract'] = 'replace',
-) -> Tuple[np.ndarray, dict, dict]:
-        raster = in_data
-        
-        if not bands: bands = list(range(1, raster.count + 1))   
-         
-        expanded_args = utils.expand_args(selection=bands, nodata=nodata, new_range=new_range)
-        nodata = expanded_args['nodata']
-        new_range = expanded_args['new_range']
-        
-        out_array, out_meta, out_meta_nodata, bands_idx = utils.read_raster(raster=raster, selection=bands, method=method)
-        out_settings = {}
-
-        for i, band_idx in enumerate(bands_idx):
-            nodata_value = out_meta_nodata[i] if not nodata or nodata[i] is None else nodata[i]
-            
-            out_array[band_idx] = _minmax_scaling_core(data_array=out_array[band_idx],
-                                                       new_range=new_range[i],
-                                                       nodata_value=nodata_value)
-            
-            current_transform = f'transform {band_idx + 1}'
-            current_settings = {'band_origin': bands[i],
-                                'scaled_min': new_range[i][0],
-                                'scaled_max': new_range[i][1],
-                                'nodata_meta': out_meta_nodata[i],
-                                'nodata_used': nodata_value}
-            
-            out_settings[current_transform] = current_settings
-
-        return out_array, out_meta, out_settings
-    
-    
-def _minmax_scaling_table(  # type: ignore[no-any-unimported]
-    in_data: Union[pd.DataFrame, gpd.GeoDataFrame],
-    columns: Optional[List[str]] = None,
-    new_range: List[Tuple[int | float, int | float]] = [(0, 1)],
-    nodata: Optional[List[int | float | None]] = None,
-) -> Tuple[np.ndarray, dict, dict]:
-    dataframe = in_data
-    
-    out_array, out_column_info, selection = utils.df_to_input_ordered_array(dataframe, columns)
-    
-    expanded_args = utils.expand_args(selection=selection, nodata=nodata, new_range=new_range)
-    nodata = expanded_args['nodata']
-    new_range = expanded_args['new_range']
- 
-    out_settings = {}
-    
-    for i, column in enumerate(selection):
-        nodata_value = nodata[i] if nodata is not None else None
-        
-        out_array[i] = _minmax_scaling_core(data_array=out_array[i],
-                                            new_range=new_range[i],
-                                            nodata_value=nodata_value)
-
-        current_transform = f'transform {i + 1}'
-        current_settings = {'original_column_name': column,
-                            'original_column_index': dataframe.columns.get_loc(column),
-                            'array_index': i,
-                            'scaled_min': new_range[i][0],
-                            'scaled_max': new_range[i][1],
-                            'nodata_used': nodata_value}
-        
-        out_settings[current_transform] = current_settings
-
-    return out_array, out_column_info, out_settings
-
-  
-def z_score_norm(  # type: ignore[no-any-unimported]
-    in_data: Union[rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame],
-    selection: Optional[List[int]] = None,
-    with_mean: List[bool] = [True],
-    with_sd: List[bool] = [True],
-    nodata: Optional[List[int | float | None]] = None,
-    method: Optional[Literal['replace', 'extract']] = None,
-) -> Tuple[np.ndarray, dict, dict]:
-    """Z-score normalization.
-    
-    Transforms input data based on mean and standard deviation.
-        
-    Takes care of data with NoData values, input can be
-    - None
-    - user-defined
-    If None, NoData will be read from raster metadata.
-    If specified, user-input will be preferred.
-    
-    If infinity values occur, they will be replaced by NaN.
-    
-    Works for multiband raster and multi-column dataframes.
     If no band/column selection specified, all bands/columns will be used.
-    
-    If only one NoData, with_mean or with_sd value is specified, it will be used for all (selected) bands.
-    Contributed parameters will generally be applied for each band/column separately. This way, data can easily be transformed 
-    by the same parameters or with different parameters for each band/column (values corresponding to each band/column).
-    
-    If method is 'replace', selected bands/colums will be overwritten. Order of bands will not be changed in the output.
-    If method is 'extract', only selected bands/columns will be returned. Order in the output corresponds to the order of the specified selection.
-    
+    If a parameter contains only 1 entry, it will be applied for all bands.
+
     Args:
-        in_data (rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame): Data object to be transformed.
-        selection (List[int | str], optional): Bands [int] or columns [str] to be processed. Defaults to None.
-        with_mean (List[bool]): If True, data-based mean will be used, otherwise mean = 0. Defaults to True.
-        with_sd (List[bool]): If True, data-based standard deviatioin will be used, otherwise sd = 1. Defaults to True.
-        nodata (List[int | float], optional): NoData values to be considered. Defaults to None.
-        method (Optional[Literal['replace', 'extract']]): Applied method for data output. For raster data only. Defaults to none.
+        raster: Data object to be transformed.
+        bands: Selection of bands to be transformed.
+        nodata: Nodata value to be considered.
 
     Returns:
-        out_array (np.ndarray): The transformed data.
-        out_meta (dict): Updated metadata with new band count. Only for raster data.
-        out_column_info (dict): Dictionary containing transformable and non-transformable columns and geometry information. Only for pandas/geopandas data.
-        out_settings (dict): Return of the input settings related to the new output.
+        out_array: The transformed data.
+        out_meta: Updated metadata.
+        out_settings: Log of input settings and calculated statistics if available.
 
     Raises:
-        InvalidParameterValueException: The input contains invalid values.
-    """    
-    valids = parameter.check_selection(in_data, selection)
-    valids.append(('With mean length', parameter.check_parameter_length(selection, with_mean, choice=1)))
-    valids.append(('With sd length', parameter.check_parameter_length(selection, with_sd, choice=1)))
-    valids.append(('NoData length', parameter.check_parameter_length(selection, nodata, choice=1, nodata=True)))       
-    valids.append(('With mean data type', all(isinstance(item, bool) for item in with_mean)))
-    valids.append(('With sd data type', all(isinstance(item, bool) for item in with_sd)))
-    
-    if nodata is not None: 
-        valids.append(('NoData data type', all(isinstance(item, Union[int, float, None]) for item in nodata)))
-    
-    if isinstance(in_data, rasterio.DatasetReader):       
-        valids.append(('Output method', method == 'replace' or method == 'extract'))
+        InvalidRasterBandException: The input contains invalid band numbers.
+        NonMatchingParameterLengthsException: The input does not match the number of selected bands.
+    """
+    bands = list(range(1, raster.count + 1)) if bands is None else bands
+    nodata = raster.nodata if nodata is None else nodata
 
-        for item in valids:
-            error_msg, validation = item
-            
-            if validation == False:
-                raise InvalidParameterValueException(error_msg)
-        
-        out_array, out_meta, out_settings = _z_score_normalization_raster(in_data=in_data,
-                                                                          bands=selection,
-                                                                          with_mean=with_mean,
-                                                                          with_sd=with_sd,
-                                                                          nodata=nodata,
-                                                                          method=method)
-        
-        return out_array, out_meta, out_settings
-    
-    if isinstance(in_data, Union[pd.DataFrame, gpd.GeoDataFrame]):
-        for item in valids:
-            error_msg, validation = item
-            
-            if validation == False:
-                raise InvalidParameterValueException(error_msg)
-        
-        out_array, out_column_info, out_settings = _z_score_normalization_table(in_data=in_data,
-                                                                                columns=selection,
-                                                                                with_mean=with_mean,
-                                                                                with_sd=with_sd,
-                                                                                nodata=nodata)
-        
-        return out_array, out_column_info, out_settings
-    
+    if check_raster_bands(raster, bands) is False:
+        raise InvalidRasterBandException("Invalid band selection.")
 
-def minmax_scaling(  # type: ignore[no-any-unimported]
-    in_data: Union[rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame],
-    selection: Optional[List[int]] = None,
-    new_range: List[Tuple[int | float, int | float]] = [(0, 1)],
-    nodata: Optional[List[int | float | None]] = None,
-    method: Literal['replace', 'extract'] = 'replace',
+    out_settings = {}
+    out_decimals = set_max_precision()
+
+    for i in range(0, len(bands)):
+        band_array = raster.read(bands[i])
+        band_array = cast_array_to_float(band_array, cast_int=True)
+        band_array = replace_values(band_array, values_to_replace=[nodata, np.inf], replace_value=np.nan)
+
+        band_array, mean_array, sd_array = _z_score_normalization(band_array.astype(np.float64))
+
+        band_array = truncate_decimal_places(band_array, decimal_places=out_decimals)
+        band_array = nan_to_nodata(band_array, nodata_value=nodata)
+        band_array = cast_array_to_float(band_array, scalar=nodata, cast_float=True)
+
+        band_array = np.expand_dims(band_array, axis=0)
+        out_array = band_array.copy() if i == 0 else np.vstack((out_array, band_array))
+
+        current_transform = f"transformation {i + 1}"
+        current_settings = {
+            "band_origin": bands[i],
+            "original_mean": truncate_decimal_places(mean_array, decimal_places=out_decimals),
+            "original_sd": truncate_decimal_places(sd_array, decimal_places=out_decimals),
+            "nodata": nodata,
+            "decimal_places": out_decimals,
+        }
+
+        out_settings[current_transform] = current_settings
+
+    out_meta = raster.meta.copy()
+    out_meta.update({"count": len(bands), "nodata": nodata, "dtype": out_array.dtype.name})
+
+    return out_array, out_meta, out_settings
+
+
+@beartype
+def min_max_scaling(  # type: ignore[no-any-unimported]
+    raster: rasterio.io.DatasetReader,
+    bands: Optional[Sequence[int]] = None,
+    new_range: Sequence[Tuple[Number, Number]] = [(0, 1)],
+    nodata: Optional[Number] = None,
 ) -> Tuple[np.ndarray, dict, dict]:
-    '''Min-max scaling.
-    
-    Transforms input data based on specified new min and maximum values.
-        
-    Takes care of data with NoData values, input can be
-    - None
-    - user-defined
-    If None, NoData will be read from raster metadata.
-    If specified, user-input will be preferred.
-    
-    If infinity values occur, they will be replaced by NaN.
-    
-    Works for multiband raster and multi-column dataframes.
-    If no band/column selection specified, all bands/columns will be used.
-    
-    If only one NoData value or range tuple is specified, it will be used for all (selected) bands.
-    Contributed parameters will generally be applied for each band/column separately. This way, data can easily be transformed 
-    by the same parameters or with different parameters for each band/column (values corresponding to each band/column).
+    """
+    Normalizing data based on a specified new range.
+    Uses the provided new minimum and maximum to transform data into the new interval.
+    Takes one nodata value that will be ignored in calculations.
 
-    If method is 'replace', selected bands/colums will be overwritten. Order of bands will not be changed in the output.
-    If method is 'extract', only selected bands/columns will be returned. Order in the output corresponds to the order of the specified selection.
-    
+    If no band/column selection specified, all bands/columns will be used.
+    The new_range can be set for each band individually.
+    If a parameter contains only 1 entry, it will be applied for all bands.
+
     Args:
-        in_data (rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame): Data object to be transformed.
-        selection (List[int], optional): Bands or columns to be processed. Defaults to None.
-        new_range: (List[Tuple[int | float, int | float]]): List containing the range tuple (min, max) for new minimum and maximum. Defaults to (0, 1).
-        nodata (List[int | float], optional): NoData values to be considered. Defaults to None.
-        method (Literal['replace', 'extract']): Switch for data output. Defaults to 'replace'.
+        raster: Data object to be transformed.
+        bands: Selection of bands to be transformed.
+        new_range: The new interval data will be transformed into. First value corresponds to min, second to max.
+        nodata: Nodata value to be considered.
 
     Returns:
-        out_array (np.ndarray): The transformed data.
-        out_meta (dict): Updated metadata with new band count. Onlyfor raster data.
-        out_column_info (dict): Dictionary containing transformable and non-transformable columns and geometry information. Only for pandas/geopandas data.
-        out_settings (dict): Return of the input settings related to the new ordered output.
+        out_array: The transformed data.
+        out_meta: Updated metadata.
+        out_settings: Log of input settings and calculated statistics if available.
 
     Raises:
-        InvalidParameterValueException: The input contains invalid values.
-    '''    
-    valids = parameter.check_selection(in_data, selection)
-    valids.append(('New range length', parameter.check_parameter_length(selection, new_range, choice=1)))
-    valids.append(('NoData length', parameter.check_parameter_length(selection, nodata, choice=1, nodata=True)))    
-    valids.append(('New range values data type', min([all(isinstance(element, Union[int, float]) for element in item) for item in new_range])))
-    valids.append(('New range values length', all(parameter.check_parameter_length(parameter=item, choice=2) for item in new_range)))
-    valids.append(('New range values order', all(parameter.check_numeric_minmax_location(item) for item in new_range)))
+        InvalidRasterBandException: The input contains invalid band numbers.
+        NonMatchingParameterLengthsException: The input does not match the number of selected bands.
+        InvalidParameterValueException: The input does not match the requirements (values, order of values).
+    """
+    bands = list(range(1, raster.count + 1)) if bands is None else bands
+    nodata = raster.nodata if nodata is None else nodata
 
-    if nodata is not None: 
-        valids.append(('NoData data type', all(isinstance(item, Union[int, float, None]) for item in nodata)))
-    
-    if isinstance(in_data, rasterio.DatasetReader):       
-        valids.append(('Output method', method == 'replace' or method == 'extract'))
+    if check_raster_bands(raster, bands) is False:
+        raise InvalidRasterBandException("Invalid band selection")
 
-        for item in valids:
-            error_msg, validation = item
-            
-            if validation == False:
-                raise InvalidParameterValueException(error_msg)
-        
-        out_array, out_meta, out_settings = _minmax_scaling_raster(in_data=in_data,
-                                                                   bands=selection,
-                                                                   new_range=new_range,
-                                                                   nodata=nodata,
-                                                                   method=method)
-        
-        return out_array, out_meta, out_settings
-    
-    if isinstance(in_data, Union[pd.DataFrame, gpd.GeoDataFrame]):
-        for item in valids:
-            error_msg, validation = item
-            
-            if validation == False:
-                raise InvalidParameterValueException(error_msg)
-        
-        out_array, out_column_info, out_settings = _minmax_scaling_table(in_data=in_data,
-                                                                         columns=selection,
-                                                                         new_range=new_range,
-                                                                         nodata=nodata)
-        
-        return out_array, out_column_info, out_settings
+    if not check_parameter_length(bands, new_range):
+        raise NonMatchingParameterLengthsException("Invalid new_range length")
+
+    for item in new_range:
+        if not check_minmax_position(item):
+            raise InvalidParameterValueException(f"Invalid min-max values provided: {item}")
+
+    expanded_args = expand_and_zip(bands, new_range)
+    new_range = [element[1] for element in expanded_args]
+
+    out_settings = {}
+    out_decimals = set_max_precision()
+
+    for i in range(0, len(bands)):
+        band_array = raster.read(bands[i])
+        band_array = cast_array_to_float(band_array, cast_int=True)
+        band_array = replace_values(band_array, values_to_replace=[nodata, np.inf], replace_value=np.nan)
+
+        band_array = _min_max_scaling(band_array.astype(np.float64), new_range=new_range[i])
+
+        band_array = truncate_decimal_places(band_array, decimal_places=out_decimals)
+        band_array = nan_to_nodata(band_array, nodata_value=nodata)
+        band_array = cast_array_to_float(band_array, scalar=nodata, cast_float=True)
+
+        band_array = np.expand_dims(band_array, axis=0)
+        out_array = band_array.copy() if i == 0 else np.vstack((out_array, band_array))
+
+        current_transform = f"transformation {i + 1}"
+        current_settings = {
+            "band_origin": bands[i],
+            "scaled_min": new_range[i][0],
+            "scaled_max": new_range[i][1],
+            "nodata": nodata,
+            "decimal_places": out_decimals,
+        }
+
+        out_settings[current_transform] = current_settings
+
+    out_meta = raster.meta.copy()
+    out_meta.update({"count": len(bands), "nodata": nodata, "dtype": out_array.dtype.name})
+
+    return out_array, out_meta, out_settings

@@ -1,321 +1,165 @@
 import numpy as np
-import pandas as pd
-import geopandas as gpd
 import rasterio
-from typing import Optional, Tuple, Union, List, Literal
 
-from eis_toolkit.exceptions import InvalidParameterValueException, InvalidInputDataException
-from eis_toolkit.transformations import utils
-from eis_toolkit.checks import parameter
+from numbers import Number
+from beartype import beartype
+from beartype.typing import Optional, Tuple, Sequence
 
-# Core functions
-def _winsorize_core(  # type: ignore[no-any-unimported]
-    data_array: np.ndarray,
-    limits: Tuple[int | float | None, int | float | None] = Tuple,
-    replace_type: Literal['absolute', 'percentiles'] = Literal,
-    replace_values: Optional[Tuple[int | float | None, int | float | None]] = None,
-    replace_position: Optional[Literal['inside', 'outside']] = None,
-    nodata_value: Optional[int | float] = None,
-) -> Tuple[np.ndarray, Union[int, float, None], Union[int, float, None]]:  
-    
-    limit_min = limits[0]
-    limit_max = limits[1]
+from eis_toolkit.utilities.miscellaneous import (
+    expand_and_zip,
+    get_max_decimal_points,
+    cast_array_to_int,
+    cast_scalar_to_int,
+    cast_array_to_float,
+)
+from eis_toolkit.utilities.nodata import nodata_to_nan, nan_to_nodata
 
-    out_array = utils.replace_nan(data_array=data_array, nodata_value=nodata_value, set_nan=True)
-    out_array = np.ma.array(out_array, mask=np.isnan(out_array))
-    
-    if replace_type == 'absolute':
-        replace_lower = replace_values[0]
-        replace_upper = replace_values[1]
-        
-        if limit_min is not None: out_array[out_array < limit_min] = replace_lower
-        if limit_max is not None: out_array[out_array > limit_max] = replace_upper
-    
-    if replace_type == 'percentiles':
-        if replace_position == 'inside':
-            method_upper_interval = 'lower'
-            method_lower_interval = 'higher'
-        elif replace_position == 'outside':
-            method_lower_interval = 'higher'
-            method_upper_interval = 'lower'
-            
-        replace_lower = np.nanpercentile(out_array.data, limit_min, method=method_lower_interval) if limit_min is not None else None
-        replace_upper = np.nanpercentile(out_array.data, 100-limit_max, method=method_upper_interval) if limit_max is not None else None
-            
-        if limit_min is not None: out_array[out_array < replace_lower] = replace_lower
-        if limit_max is not None: out_array[out_array > replace_upper] = replace_upper
-
-    out_array = out_array.data
-    out_array = utils.replace_nan(data_array=out_array, nodata_value=nodata_value, set_value=True)
-    
-    return out_array, replace_lower, replace_upper
+from eis_toolkit.exceptions import (
+    InvalidRasterBandException,
+    NonMatchingParameterLengthsException,
+    InvalidParameterValueException,
+)
+from eis_toolkit.checks.raster import check_raster_bands
+from eis_toolkit.checks.parameter import check_parameter_length
 
 
-# Call functions
-def _winsorize_raster(  # type: ignore[no-any-unimported]
-    in_data: rasterio.io.DatasetReader,
-    bands: Optional[List[int]] = None,
-    limits: List[Tuple[int | float | None, int | float, None]] = List[Tuple],
-    replace_type: Literal['absolute', 'percentiles'] = Literal,
-    replace_values: Optional[List[Tuple[int | float | None, int | float, None]]] = None,
-    replace_position: Optional[List[Literal['inside', 'outside']]] = None,
-    nodata: Optional[List[int | float | None]] = None,
-    method: Literal['replace', 'extract'] = 'replace',
-) -> Tuple[np.ndarray, dict, dict]:
-    raster = in_data
-    
-    if not bands: bands = list(range(1, raster.count + 1))
-    
-    if replace_type == 'absolute': 
-        expanded_args = utils.expand_args(selection=bands, replace_values=replace_values)
-        replace_values = expanded_args['replace_values']
-    
-    if replace_type == 'percentiles': 
-        expanded_args = utils.expand_args(selection=bands, replace_position=replace_position)
-        replace_position = expanded_args['replace_position']
-        
-    expanded_args = utils.expand_args(selection=bands, nodata=nodata, limits=limits, replace_type=replace_type)
-    nodata = expanded_args['nodata']
-    limits = expanded_args['limits']
-    replace_type = expanded_args['replace_type']
+@beartype
+def _winsorize(  # type: ignore[no-any-unimported]
+    in_array: np.ndarray,
+    percentiles: Tuple[Number | None, Number | None],
+    inside: bool,
+) -> Tuple[np.ndarray, Number | None, Number | None]:
+    percentile_lower, percentile_upper = percentiles[0], percentiles[1]
+    calculated_lower, calculated_upper = None, None
 
-    out_array, out_meta, out_meta_nodata, bands_idx = utils.read_raster(raster=raster, selection=bands, method=method)
-    out_settings = {} 
+    if inside is True:
+        method_lower = "lower"
+        method_upper = "higher"
+    elif inside is False:
+        method_lower = "higher"
+        method_upper = "lower"
 
-    for i, band_idx in enumerate(bands_idx):
-            nodata_value = out_meta_nodata[i] if not nodata or nodata[i] is None else nodata[i]
-            
-            replacement = replace_values[i] if replace_values else None
-            replacement_position = replace_position[i] if replace_position else None
-            
-            out_array[band_idx], replace_lower, replace_upper = _winsorize_core(data_array=out_array[band_idx],
-                                                                                limits=limits[i],
-                                                                                replace_type=replace_type,
-                                                                                replace_values=replacement,
-                                                                                replace_position=replacement_position,
-                                                                                nodata_value=nodata_value)
-            
-            current_transform = f'transform {band_idx + 1}'
-            current_settings = {'band_origin': bands[i],
-                                'limit_min': limits[i][0],
-                                'limit_max': limits[i][1],
-                                'replace_type': replace_type,
-                                'replace_lower': round(replace_lower, ndigits=12) if replace_lower is not None else None,
-                                'replace_upper': round(replace_upper, ndigits=12) if replace_upper is not None else None,
-                                'replace_position': replace_position[i] if replace_position else None,
-                                'nodata_meta': out_meta_nodata[i],
-                                'nodata_used': nodata_value}
-            out_settings[current_transform] = current_settings
+    out_array = in_array
+    clean_array = np.extract(np.isfinite(in_array), in_array)
 
-    return out_array, out_meta, out_settings
+    if percentile_lower is not None:
+        calculated_lower = np.percentile(clean_array, percentile_lower, method=method_lower)
+        out_array = np.where(out_array < calculated_lower, calculated_lower, out_array)
+
+    if percentile_upper is not None:
+        calculated_upper = np.percentile(clean_array, 100 - percentile_upper, method=method_upper)
+        out_array = np.where(out_array > calculated_upper, calculated_upper, out_array)
+
+    return out_array, calculated_lower, calculated_upper
 
 
-def _winsorize_table(  # type: ignore[no-any-unimported]
-    in_data: Union[pd.DataFrame, gpd.GeoDataFrame],
-    columns: Optional[List[int]] = None,
-    limits: List[Tuple[int | float | None, int | float, None]] = List[Tuple],
-    replace_type: Literal['absolute', 'percentiles'] = Literal,
-    replace_values: Optional[List[Tuple[int | float | None, int | float, None]]] = None,
-    replace_position: Optional[List[Literal['inside', 'outside']]] = None,
-    nodata: Optional[List[int | float | None]] = None,
-) -> Tuple[np.ndarray, dict]:
-    dataframe = in_data
-    
-    out_array, out_column_info, selection = utils.df_to_input_ordered_array(dataframe, columns)
-    
-    if replace_type == 'absolute': 
-        expanded_args = utils.expand_args(selection=selection, replace_values=replace_values)
-        replace_values = expanded_args['replace_values']
-    
-    if replace_type == 'percentiles': 
-        expanded_args = utils.expand_args(selection=selection, replace_position=replace_position)
-        replace_position = expanded_args['replace_position']
-    
-    expanded_args = utils.expand_args(selection=selection, nodata=nodata, limits=limits, replace_type=replace_type)
-    nodata = expanded_args['nodata']
-    limits = expanded_args['limits']
-    replace_type = expanded_args['replace_type']
- 
-    out_settings = {}
-    
-    for i, column in enumerate(selection):
-        nodata_value = nodata[i] if nodata is not None else None
-        
-        replacement = replace_values[i] if replace_values else None
-        replacement_position = replace_position[i] if replace_position else None
-        
-        out_array[i], replace_lower, replace_upper = _winsorize_core(data_array=out_array[i],
-                                                                     limits=limits[i],
-                                                                     replace_type=replace_type,
-                                                                     replace_values=replacement,
-                                                                     replace_position=replacement_position,
-                                                                     nodata_value=nodata_value)
-
-        current_transform = f'transform {i + 1}'
-        current_settings = {'original_column_name': column,
-                            'original_column_index': dataframe.columns.get_loc(column),
-                            'array_index': i,
-                            'limit_min': limits[i][0],
-                            'limit_max': limits[i][1],
-                            'replace_type': replace_type,
-                            'replace_lower': round(replace_lower, ndigits=12) if replace_lower is not None else None,
-                            'replace_upper': round(replace_upper, ndigits=12) if replace_upper is not None else None,
-                            'replace_position': replace_position[i] if replace_position else None,
-                            'nodata_used': nodata_value}
-        
-        out_settings[current_transform] = current_settings
-
-    return out_array, out_column_info, out_settings
-
-# Call functions
+@beartype
 def winsorize(  # type: ignore[no-any-unimported]
-    in_data: Union[rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame],
-    selection: Optional[List[int]] = None,
-    limits: List[Tuple[int | float | None, int | float, None]] = List[Tuple],
-    replace_type: Literal['absolute', 'percentiles'] = Literal,
-    replace_values: Optional[List[Tuple[int | float | None, int | float, None]]] = None,
-    replace_position: Optional[List[Literal['inside', 'outside']]] = None,
-    nodata: Optional[List[int | float | None]] = None,
-    method: Optional[Literal['replace', 'extract']] = None,
+    raster: rasterio.io.DatasetReader,
+    bands: Optional[Sequence[int]] = None,
+    percentiles: Sequence[Tuple[Number | None, Number | None]] = [(None, None)],
+    inside: bool = False,
+    nodata: Optional[Number] = None,
 ) -> Tuple[np.ndarray, dict, dict]:
-    """Replace values below/above a given treshold or percentile value in a data set.
-     
-    Takes care of data with NoData values, input can be
-    - None
-    - user-defined
-    If None, NoData will be read from raster metadata.
-    If specified, user-input will be preferred.
+    """
+    Winsorize data based on specified percentile values.
+    Takes one nodata value that will be ignored in calculations.
 
-    Works for multiband raster and multi-column dataframes.
+    Replaces values between [minimum, lower percentile] and [upper percentile, maximum] if provided.
+    Works both one-sided and two-sided but raises error if no percentile values provided.
+
+    Percentiles are symmetrical, i.e. percentile_lower = 10 corresponds to the interval [min, 10%].
+    And percentile_upper = 10 corresponds to the intervall [90%, max].
+    I.e. percentile_lower = 0 refers to the minimum and percentile_upper = 0 to the data maximum.
+
+    Calculation of percentiles is ambiguous. Users can choose whether to use the value
+    for replacement from inside or outside of the respective interval. Example:
+    Given the np.array[5 10 12 15 20 24 27 30 35] and percentiles(10, 10), the calculated
+    percentiles are (5, 35) for inside and (10, 30) for outside.
+    This results in [5 10 12 15 20 24 27 30 35] and [10 10 12 15 20 24 27 30 30], respectively.
+
     If no band/column selection specified, all bands/columns will be used.
-    
-    If only one NoData value, limit or replace tuple is specified, it will be used for all (selected) bands/columns.
-    Contributed parameters will generally be applied for each band/column separately. This way, data can easily be transformed 
-    by the same parameters or with different parameters for each band/column (values corresponding to each band/column).
-    However, a mix of types ('absolute'/'percentile') is not allowed.
-    
-    If method is 'replace', selected bands/colums will be overwritten. Order of bands will not be changed in the output.
-    If method is 'extract', only selected bands/columns will be returned. Order in the output corresponds to the order of the specified selection.
-         
-    For option 'absolute' values:
-    -----------------------------
-    Replaces values between minimum and lower treshold if limit_min is given.
-    Replaces values between upper treshold and maximum if limit_max is given.
-    Works both one-sided and two-sided but does not replace any values if no limits exist.
-    
-    Length of limits and replace_values is depended of the selected bands.
-    If limits contains only one value, replace_values must be either 1 or length of the selection.
-    If replace_values contains only one value, limits must be either 1 or length of the selection.
-    
-    Specific arguments: limits, replace_values
-    
-    For option 'percentiles':
-    -------------------------
-    Replaces values between minimum and lower percentile if limit_min is given.
-    Replaces values between upper percentile and maximum if limit_max is given.
-    Works both one-sided and two-sided but does not replace any values if no limits exist.
-    The absolute treshold value will be re-calculated for every single band based on the user-defined percentiles.
-    Percentile-values have to be in range [0, 100].
-    
-    Values are symmetric, meaning that a value of limit_min = 10 corresponds to the interval [min, 10%] 
-    and limit_max = 10 corresponds to the intervall [90%, max]. Given this logic, limit_min = 0 refers 
-    to the minimum and limit_max = 0 to the data maximum. 
-    
-    A replacement value corresponds to the data point which is nearest to the calculated 
-    percentile value. Because the calculation of percentiles is ambiguous, the user can choose whether
-    a replacement value should be taken from a data point located inside or outside the respective
-    interval. If inside, data will be replaced with a value from within the computed interval. 
-    If outside, data will be replaced with a value from outside the computed interval.
-    
-    Specific arguments: limits, replace_position
+    If a parameter contains only 1 entry, it will be applied for all bands.
+    The percentiles can be set for each band individually, but inside parameter is same for all bands.
 
     Args:
-        in_data (rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame): Data object to be transformed.
-        selection (List[int | str], optional): Bands [int] or columns [str] to be processed. Defaults to None.
-        limits (List[Tuple[int | float | None, int | float, None]]): Tuple for tresholds below/above values will be replaced (min, max). 
-        replace_type (Literal['absolute', 'percentiles']): Option whether to replace by absolute or percentile values. Applied on whole data set.
-        replace_values (List[Tuple[int | float | None, int | float, None]], optional): Tuple containing the new values (lower, upper). Req. only for replace_type = 'absolute'. Defaults to None.
-        replace_position (List[Literal['inside', 'outside']], optional): List containing whether to use inner our outer values of an interval. Req. only for replace_type = 'percentiles'. Defaults to None.
-        nodata (List[int | float], optional): NoData values to be considered. Defaults to None.
-        method (Optional[Literal['replace', 'extract']]): Applied method for data output. For raster data only. Defaults to none.
-        
+        raster: Data object to be transformed.
+        bands: Selection of bands to be transformed.
+        percentiles: Lower and upper percentile values (lower, upper) between [0, 100].
+        inside: Whether to use the value for replacement from the left or right of the calculated percentile.
+        nodata: Nodata value to be considered.
+
     Returns:
-        out_array (np.ndarray): The transformed data.
-        out_meta (dict): Updated metadata with new band count. Only for raster data.
-        out_column_info (dict): Dictionary containing transformable and non-transformable columns and geometry information. Only for pandas/geopandas data.
-        out_settings (dict): Return of the input settings related to the new output.
+        out_array: The transformed data.
+        out_meta: Updated metadata.
+        out_settings: Log of input settings and calculated statistics if available.
 
     Raises:
-        InvalidParameterValueException: The input contains invalid values.
-    """       
-    valids = parameter.check_selection(in_data, selection)
-    valids.append(('Limits length', parameter.check_parameter_length(selection, limits, choice=1)))
-    valids.append(('Limits values length', all(parameter.check_parameter_length(parameter=item, choice=2) for item in limits)))
-    valids.append(('Limits values data type', all([all(isinstance(element, Union[int, float, None]) for element in item) for item in limits])))
-    valids.append(('Limits values NoneType count', max([sum(element is None for element in item) for item in limits]) < 2))
-    valids.append(('NoData length', parameter.check_parameter_length(selection, nodata, choice=1, nodata=True)))
-    valids.append(('Replace type', replace_type == 'absolute' or replace_type == 'percentiles'))
+        InvalidRasterBandException: The input contains invalid band numbers.
+        NonMatchingParameterLengthsException: The input does not match the number of selected bands.
+        InvalidParameterValueException: The input does not match the requirements (values, order of values)
+    """
+    bands = list(range(1, raster.count + 1)) if bands is None else bands
+    nodata = raster.nodata if nodata is None else nodata
 
-    if nodata is not None: 
-        valids.append(('NoData data type', all(isinstance(item, Union[int, float, None]) for item in nodata)))
-    
-    if replace_type == 'absolute':
-        valids.append(('Limits values order', all(parameter.check_numeric_minmax_location(item) for item in limits if not None in item)))
-            
-        if replace_values is not None:
-            valids.append(('Replace length', parameter.check_parameter_length(selection, replace_values, choice=1)))           
-            valids.append(('Replace values data type', min([all(isinstance(element, Union[int, float, None]) for element in item) for item in replace_values])))
-            valids.append(('Replace values length', all(parameter.check_parameter_length(parameter=item, choice=2) for item in replace_values)))
-            valids.append(('Replace values NoneType count', max([sum(element is None for element in item) for item in replace_values]) < 2))
-            valids.append(('Replace values NoneType position', parameter.check_none_positions(limits) == parameter.check_none_positions(replace_values)))
-        elif replace_values is None:
-            valids.append(('Replace values NoneType', False))
-        
-    if replace_type == 'percentiles':
-        valids.append(('Limits value sum', all([sum(item) < 100 for item in limits if not None in item])))
-        valids.append(('Limits value lower', all([0 < item[0] < 100 and item[0] != 0 for item in limits if item[0] is not None])))
-        valids.append(('Limits value upper', all([0 < item[1] < 100 and item[1] != 0 for item in limits if item[1] is not None])))
+    if check_raster_bands(raster, bands) is False:
+        raise InvalidRasterBandException("Invalid band selection")
 
-        if replace_position is not None:
-            valids.append(('Replace position length', parameter.check_parameter_length(selection, replace_position, choice=1)))
-            valids.append(('Replace position data type', all(isinstance(item, str) for item in replace_position)))
-            valids.append(('Replace position value', all(item == 'inside' or item == 'outside' for item in replace_position)))
-        elif replace_position is None:
-            valids.append(('Replace position NoneType', False))
+    if not check_parameter_length(bands, percentiles):
+        raise NonMatchingParameterLengthsException("Invalid length for percentiles.")
 
-    if isinstance(in_data, rasterio.DatasetReader):
-        valids.append(('Output method', method == 'replace' or method == 'extract'))
+    for item in percentiles:
+        if item.count(None) == len(item):
+            raise InvalidParameterValueException(f"Percentile values all None: {item}.")
 
-        for item in valids:
-            error_msg, validation = item
-            
-            if validation == False:
-                raise InvalidParameterValueException(error_msg)
-       
-        out_array, out_meta, out_settings = _winsorize_raster(in_data=in_data,
-                                                              bands=selection,
-                                                              limits=limits,
-                                                              replace_type=replace_type,
-                                                              replace_values=replace_values,
-                                                              replace_position=replace_position,
-                                                              nodata=nodata,
-                                                              method=method)
-    
-        return out_array, out_meta, out_settings
-    
-    if isinstance(in_data, Union[pd.DataFrame, gpd.GeoDataFrame]):
-        for item in valids:
-            error_msg, validation = item
-            
-            if validation == False:
-                raise InvalidParameterValueException(error_msg)
-       
-        out_array, out_column_info, out_settings = _winsorize_table(in_data=in_data,
-                                                                    columns=selection,
-                                                                    limits=limits,
-                                                                    replace_type=replace_type,
-                                                                    replace_values=replace_values,
-                                                                    replace_position=replace_position,
-                                                                    nodata=nodata)
-    
-        return out_array, out_column_info, out_settings
+        if not None in item and sum(item) >= 100:
+            raise InvalidParameterValueException(f"Sum >= 100: {item}.")
+
+        if item[0] is not None and not (0 < item[0] < 100):
+            raise InvalidParameterValueException(f"Invalid lower percentile value: {item}.")
+
+        if item[1] is not None and not (0 < item[1] < 100):
+            raise InvalidParameterValueException(f"Invalid upper percentile value: {item}.")
+
+    expanded_args = expand_and_zip(bands, percentiles)
+    percentiles = [element[1] for element in expanded_args]
+
+    out_settings = {}
+
+    for i in range(0, len(bands)):
+        band_array = raster.read(bands[i])
+        max_decimals = get_max_decimal_points(band_array)
+        inital_dtype = band_array.dtype
+
+        band_array = cast_array_to_float(band_array, cast_int=True)
+        band_array = nodata_to_nan(band_array, nodata_value=nodata)
+
+        band_array, calculated_lower, calculated_upper = _winsorize(
+            band_array, percentiles=percentiles[i], inside=inside
+        )
+
+        calculated_lower = np.around(calculated_lower, decimals=max_decimals)
+        calculated_upper = np.around(calculated_upper, decimals=max_decimals)
+
+        band_array = nan_to_nodata(band_array, nodata_value=nodata)
+        band_array = cast_array_to_int(band_array, scalar=nodata, initial_dtype=inital_dtype)
+
+        band_array = np.expand_dims(band_array, axis=0)
+        out_array = band_array.copy() if i == 0 else np.vstack((out_array, band_array))
+
+        current_transform = f"transformation {i + 1}"
+        current_settings = {
+            "band_origin": bands[i],
+            "percentile_lower": cast_scalar_to_int(percentiles[i][0]),
+            "percentile_upper": cast_scalar_to_int(percentiles[i][1]),
+            "calculated_lower": cast_scalar_to_int(calculated_lower),
+            "calculated_upper": cast_scalar_to_int(calculated_upper),
+            "nodata": cast_scalar_to_int(nodata),
+        }
+
+        out_settings[current_transform] = current_settings
+
+    out_meta = raster.meta.copy()
+    out_meta.update({"count": len(bands), "nodata": nodata, "dtype": out_array.dtype.name})
+
+    return out_array, out_meta, out_settings
