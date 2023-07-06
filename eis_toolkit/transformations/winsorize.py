@@ -7,7 +7,6 @@ from beartype.typing import Optional, Tuple, Sequence
 
 from eis_toolkit.utilities.miscellaneous import (
     expand_and_zip,
-    get_max_decimal_points,
     cast_array_to_int,
     cast_scalar_to_int,
     cast_array_to_float,
@@ -44,10 +43,12 @@ def _winsorize(  # type: ignore[no-any-unimported]
 
     if percentile_lower is not None:
         calculated_lower = np.percentile(clean_array, percentile_lower, method=method_lower)
+        # calculated_lower = np.percentile(clean_array, percentile_lower, method="nearest")
         out_array = np.where(out_array < calculated_lower, calculated_lower, out_array)
 
     if percentile_upper is not None:
         calculated_upper = np.percentile(clean_array, 100 - percentile_upper, method=method_upper)
+        # calculated_upper = np.percentile(clean_array, 100 - percentile_upper, method="nearest")
         out_array = np.where(out_array > calculated_upper, calculated_upper, out_array)
 
     return out_array, calculated_lower, calculated_upper
@@ -128,7 +129,6 @@ def winsorize(  # type: ignore[no-any-unimported]
 
     for i in range(0, len(bands)):
         band_array = raster.read(bands[i])
-        max_decimals = get_max_decimal_points(band_array)
         inital_dtype = band_array.dtype
 
         band_array = cast_array_to_float(band_array, cast_int=True)
@@ -137,9 +137,6 @@ def winsorize(  # type: ignore[no-any-unimported]
         band_array, calculated_lower, calculated_upper = _winsorize(
             band_array, percentiles=percentiles[i], inside=inside
         )
-
-        calculated_lower = np.around(calculated_lower, decimals=max_decimals)
-        calculated_upper = np.around(calculated_upper, decimals=max_decimals)
 
         band_array = nan_to_nodata(band_array, nodata_value=nodata)
         band_array = cast_array_to_int(band_array, scalar=nodata, initial_dtype=inital_dtype)

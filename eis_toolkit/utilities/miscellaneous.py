@@ -184,27 +184,6 @@ def cast_array_to_int(
 
 
 @beartype
-def get_max_decimal_points(data: np.ndarray) -> Number:
-    """
-    Determines the maximum number decimal places within an array.
-    Args:
-        data: Input array
-    Returns:
-        The highest number of decimal places contained of a number within the array.
-    """
-    if np.issubdtype(data.dtype, np.floating):
-        decimals = np.zeros_like(data, dtype=int)
-        non_integer_mask = np.not_equal(np.mod(data, 1), 0)
-        non_integer_values = data[non_integer_mask]
-        decimals[non_integer_mask] = -np.floor(np.log10(np.abs(np.fmod(non_integer_values, 1)))).astype(int)
-        max_decimals = np.max(decimals)
-    else:
-        max_decimals = 0
-
-    return max_decimals
-
-
-@beartype
 def cast_array_to_float(
     data: np.ndarray,
     scalar: Optional[Number] = None,

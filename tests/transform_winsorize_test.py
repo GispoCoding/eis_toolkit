@@ -5,7 +5,6 @@ from pathlib import Path
 
 from eis_toolkit.transformations import winsorize
 from eis_toolkit.utilities.miscellaneous import (
-    get_max_decimal_points,
     cast_array_to_int,
     cast_scalar_to_int,
     cast_array_to_float,
@@ -54,7 +53,6 @@ def test_winsorizing():
         test_array = cast_array_to_float(test_array, cast_int=True)
 
         for i in range(0, out_meta["count"]):
-            max_decimals = get_max_decimal_points(test_array[i])
             test_array[i] = nodata_to_nan(test_array[i], nodata_value=nodata)
 
             clean_array = np.extract(np.isfinite(test_array[i]), test_array[i])

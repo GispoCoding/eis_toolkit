@@ -7,7 +7,6 @@ from beartype.typing import Optional, Tuple, Sequence
 
 from eis_toolkit.utilities.miscellaneous import (
     expand_and_zip,
-    get_max_decimal_points,
     cast_array_to_int,
     cast_scalar_to_int,
     cast_array_to_float,
