@@ -163,3 +163,4 @@ cython_debug/
 tests/data/local/**
 !tests/data/local/**/
 !tests/data/local/**/.gitkeep
+*.json

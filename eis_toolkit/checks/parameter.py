@@ -36,3 +36,13 @@ def check_numeric_value_sign(parameter_value: Number) -> bool:
         return True
     else:
         return False
+
+
+def check_minmax_position(parameter: tuple) -> bool:  # type: ignore[no-untyped-def]
+    """Check if parameter maximum value > parameter minimum value.
+    Args:
+        parameter: Tuple containing parameter values for min and max.
+    Returns:
+        Bool: True if minimum value < maxiumum value, else False.
+    """
+    return parameter[0] < parameter[1]
