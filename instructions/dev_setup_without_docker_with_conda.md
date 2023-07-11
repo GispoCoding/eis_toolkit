@@ -13,6 +13,19 @@ A recent version of `conda` must be installed. See:
 
 -   <https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html>
 
+The `environment.yml` dependency specification is tested in `eis_toolkit` with
+the `libmamba` solver instead of the default. **If you encounter installation
+issues following this guide further**, especially on Windows, you can enable the
+`libmamba` solver globally(!) as follows:
+
+``` shell
+conda install -n base conda-libmamba-solver
+conda config --set solver libmamba
+```
+
+See <https://conda.github.io/conda-libmamba-solver/getting-started/> for
+further info.
+
 ## Set up a local `conda` environment
 
 *Run all commands in the repository root unless instructed otherwise*
