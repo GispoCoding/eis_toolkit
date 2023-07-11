@@ -10,6 +10,10 @@ class FileReadError(Exception):
     """Exception error class for unsupported file exceptions."""
 
 
+class InconsistentDataTypesException(Exception):
+    """Exception error class for inconsistent data types."""
+
+
 class InvalidColumnException(Exception):
     """Exception error for invalid column."""
 
