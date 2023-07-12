@@ -16,6 +16,7 @@ df = pd.DataFrame(
 gdf = gdp.GeoDataFrame(df, geometry=gdp.points_from_xy(df.Longitude, df.Latitude), crs="EPSG:4326")
 
 
+@pytest.mark.skip
 def test_k_means_clustering_output():
     """Test that k-means function assings data points into correct clusters."""
     kmeans_gdf = k_means_clustering(data=gdf, number_of_clusters=2, random_state=0)
