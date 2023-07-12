@@ -1,10 +1,11 @@
-import pytest
-import rasterio
-import numpy as np
 from pathlib import Path
 
-from eis_toolkit.raster_processing.create_constant_raster import create_constant_raster
+import numpy as np
+import pytest
+import rasterio
+
 from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.raster_processing.create_constant_raster import create_constant_raster
 
 parent_dir = Path(__file__).parent
 raster_path = parent_dir.joinpath("../data/remote/small_raster_multiband.tif")
