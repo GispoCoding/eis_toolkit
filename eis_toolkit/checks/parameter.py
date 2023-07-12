@@ -44,7 +44,7 @@ def check_minmax_position(parameter: tuple) -> bool:  # type: ignore[no-untyped-
 
     Args:
         parameter: Tuple containing parameter values for min and max.
-        
+
     Returns:
         Bool: True if minimum value < maxiumum value, else False.
     """
@@ -58,7 +58,7 @@ def check_dtype_for_int(scalar: Number) -> bool:
 
     Args:
         scalar: Input scalar value.
-        
+
     Returns:
         True if conversion can be done, False if not.
     """

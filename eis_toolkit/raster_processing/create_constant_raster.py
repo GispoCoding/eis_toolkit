@@ -1,16 +1,14 @@
+from numbers import Number
+
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import Tuple, Optional
-from rasterio.transform import from_origin, from_bounds
-from numbers import Number
+from beartype.typing import Optional, Tuple
+from rasterio.transform import from_bounds, from_origin
 
 from eis_toolkit.checks.parameter import check_minmax_position
-from eis_toolkit.utilities.miscellaneous import (
-    cast_scalar_to_int,
-    get_min_int_type,
-)
 from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.utilities.miscellaneous import cast_scalar_to_int, get_min_int_type
 
 
 @beartype
@@ -130,7 +128,6 @@ def create_constant_raster(  # type: ignore[no-any-unimported]
     Raises:
         InvalidParameterValueException: Provide invalid input parameter.
     """
-
 
     if template_raster is not None:
         out_array, out_meta = _create_constant_raster_from_template(constant_value, template_raster, nodata_value)
