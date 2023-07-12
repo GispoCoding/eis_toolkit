@@ -88,7 +88,7 @@ def _create_constant_raster_from_bounds(
 
 
 @beartype
-def create_constant_raster(
+def create_constant_raster(  # type: ignore[no-any-unimported]
     constant_value: Number,
     template_raster: Optional[rasterio.io.DatasetReader] = None,
     coord_west: Optional[Number] = None,
@@ -101,18 +101,18 @@ def create_constant_raster(
     raster_height: Optional[int] = None,
     nodata_value: Optional[Number] = None,
 ):
-    """Creates a constant value raster.
+    """Create a constant raster based on a user-defined value.
 
-    Provides 3 methods for raster creation:
-    1. Extent and coordinate system based on a template raster.
-    2. Extent from origin, based on the western and northern coordinates and the pixel size.
-    3. Extent from bounds, based on western, northern, eastern and southern points.
+    Provide 3 methods for raster creation:
+    1. Set extent and coordinate system based on a template raster.
+    2. Set extent from origin, based on the western and northern coordinates and the pixel size.
+    3. Set extent from bounds, based on western, northern, eastern and southern points.
 
-    Last two options always need values for height and width, which correspond to the desired
-    number of pixels for rows and columns.
+    Always provide values for height and width for the last two options, which correspond to
+    the desired number of pixels for rows and columns.
 
     Args:
-        constant_value: The constant value to be used in the raster.
+        constant_value: The constant value to use in the raster.
         template_raster: An optional raster to use as a template for the output.
         coord_west: The western coordinate of the output raster in [m].
         coord_east: The eastern coordinate of the output raster in [m].
@@ -128,20 +128,21 @@ def create_constant_raster(
         A tuple containing the output raster as a NumPy array and updated metadata.
 
     Raises:
-        InvalidParameterValueException: Invalid input parameter provided.
+        InvalidParameterValueException: Provide invalid input parameter.
     """
+
 
     if template_raster is not None:
         out_array, out_meta = _create_constant_raster_from_template(constant_value, template_raster, nodata_value)
     else:
         if raster_height <= 0 or raster_width <= 0:
-            raise InvalidParameterValueException(f"Invalid raster extent provided.")
+            raise InvalidParameterValueException("Invalid raster extent provided.")
         else:
             if all(coords is not None for coords in [coord_west, coord_east, coord_south, coord_north]):
                 if not check_minmax_position((coord_west, coord_east)):
-                    raise InvalidParameterValueException(f"Invalid longitude values provided.")
+                    raise InvalidParameterValueException("Invalid longitude values provided.")
                 elif not check_minmax_position((coord_south, coord_north)):
-                    raise InvalidParameterValueException(f"Invalid longitude values provided.")
+                    raise InvalidParameterValueException("Invalid longitude values provided.")
                 else:
                     out_array, out_meta = _create_constant_raster_from_bounds(
                         constant_value,
@@ -158,7 +159,7 @@ def create_constant_raster(
                 coords is None for coords in [coord_east, coord_south]
             ):
                 if target_pixel_size <= 0:
-                    raise InvalidParameterValueException(f"Invalid pixel size.")
+                    raise InvalidParameterValueException("Invalid pixel size.")
                 else:
                     out_array, out_meta = _create_constant_raster_from_origin(
                         constant_value,

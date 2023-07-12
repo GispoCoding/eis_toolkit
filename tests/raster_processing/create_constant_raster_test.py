@@ -4,7 +4,7 @@ import numpy as np
 from pathlib import Path
 
 from eis_toolkit.raster_processing.create_constant_raster import create_constant_raster
-from eis_toolkit.exceptions import InvalidParameterValueException, NumericValueSignException
+from eis_toolkit.exceptions import InvalidParameterValueException
 
 parent_dir = Path(__file__).parent
 raster_path = parent_dir.joinpath("../data/remote/small_raster_multiband.tif")
@@ -46,17 +46,16 @@ def test_create_from_origin():
     epsg = 3067
     pixel_size = 20
 
-    with rasterio.open(raster_path) as raster:
-        out_array, out_meta = create_constant_raster(
-            constant_value=constant,
-            coord_west=west,
-            coord_north=north,
-            target_epsg=epsg,
-            target_pixel_size=pixel_size,
-            raster_width=width,
-            raster_height=height,
-            nodata_value=nodata,
-        )
+    out_array, out_meta = create_constant_raster(
+        constant_value=constant,
+        coord_west=west,
+        coord_north=north,
+        target_epsg=epsg,
+        target_pixel_size=pixel_size,
+        raster_width=width,
+        raster_height=height,
+        nodata_value=nodata,
+    )
 
     # Output shapes and types
     assert isinstance(out_array, np.ndarray)
@@ -81,18 +80,17 @@ def test_create_from_bounds():
     south = north - height
     epsg = 3067
 
-    with rasterio.open(raster_path) as raster:
-        out_array, out_meta = create_constant_raster(
-            constant_value=constant,
-            coord_west=west,
-            coord_north=north,
-            coord_east=east,
-            coord_south=south,
-            target_epsg=epsg,
-            raster_width=width,
-            raster_height=height,
-            nodata_value=nodata,
-        )
+    out_array, out_meta = create_constant_raster(
+        constant_value=constant,
+        coord_west=west,
+        coord_north=north,
+        coord_east=east,
+        coord_south=south,
+        target_epsg=epsg,
+        raster_width=width,
+        raster_height=height,
+        nodata_value=nodata,
+    )
 
     # Output shapes and types
     assert isinstance(out_array, np.ndarray)
