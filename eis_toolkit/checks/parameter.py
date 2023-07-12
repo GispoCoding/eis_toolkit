@@ -1,16 +1,15 @@
-import rasterio
-import pandas as pd
-import geopandas as gpd
-from typing import Optional, Tuple, Union, Sequence, List, Any
+from typing import Union, Sequence, Any
 from numbers import Number
 
 
 def check_parameter_value(parameter_value: Union[Number, str], allowed_values: Union[list, tuple]) -> bool:
     """
     Check if used parameter value is valid.
+
     Args:
         parameter_value: value given to a function.
         allowed_values: sequence of values containing allowed parameter values.
+
     Returns:
         Bool: True if parameter value is allowed, False if not.
     """
@@ -20,8 +19,10 @@ def check_parameter_value(parameter_value: Union[Number, str], allowed_values: U
 def check_numeric_value_sign(parameter_value) -> bool:  # type: ignore[no-untyped-def]
     """
     Check if input numeric value is positive.
+
     Args:
         parameter_value: numeric input parameter.
+
     Returns:
         Bool: True if parameter value is positive, False if not.
     """
@@ -30,9 +31,11 @@ def check_numeric_value_sign(parameter_value) -> bool:  # type: ignore[no-untype
 
 def check_dtype_for_int(scalar: Number) -> bool:
     """
-    Determines whether a floating scalar can be converted to integer type.
+    Determine whether a floating scalar can be converted to integer type.
+
     Args:
         scalar: Input scalar value.
+
     Returns:
         True if conversion can be done, False if not.
     """
@@ -42,9 +45,11 @@ def check_dtype_for_int(scalar: Number) -> bool:
 def check_parameter_length(selection: Sequence[int], parameter: Sequence[Any]) -> bool:  # type: ignore[no-untyped-def]
     """
     Check the length of a parameter against the length of selected bands.
+
     Args:
         selection: Selected bands.
         parameter: List containing parameter values.
+
     Returns:
         Bool: True if conditions are valid, else False.
     """
@@ -52,9 +57,12 @@ def check_parameter_length(selection: Sequence[int], parameter: Sequence[Any]) -
 
 
 def check_minmax_position(parameter: tuple) -> bool:  # type: ignore[no-untyped-def]
-    """Check if parameter maximum value > parameter minimum value.
+    """
+    Check if parameter maximum value > parameter minimum value.
+
     Args:
         parameter: Tuple containing parameter values for min and max.
+
     Returns:
         Bool: True if minimum value < maxiumum value, else False.
     """

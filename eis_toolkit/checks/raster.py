@@ -6,9 +6,12 @@ import rasterio
 def check_matching_cell_size(  # type: ignore[no-any-unimported]
     rasters: List[rasterio.io.DatasetReader],
 ) -> bool:
-    """Check if every raster in a list has matching cell size.
+    """
+    Check if every raster in a list has matching cell size.
+
     Args:
         rasters: List of rasters to check.
+
     Returns:
         Bool: True if cell size of each raster matches, False if not.
     """
@@ -23,9 +26,12 @@ def check_matching_cell_size(  # type: ignore[no-any-unimported]
 def check_matching_pixel_alignment(  # type: ignore[no-any-unimported]
     rasters: List[rasterio.io.DatasetReader],
 ) -> bool:
-    """Check if every raster in a list has matching cell size and matching pixel alignment.
+    """
+    Check if every raster in a list has matching cell size and matching pixel alignment.
+
     Args:
         rasters: List of rasters to check.
+
     Returns:
         bool: True if cell size and pixel alignment matches, False if not.
     """
@@ -47,9 +53,12 @@ def check_matching_pixel_alignment(  # type: ignore[no-any-unimported]
 def check_matching_bounds(  # type: ignore[no-any-unimported]
     rasters: List[rasterio.io.DatasetReader],
 ) -> bool:
-    """Check if every raster in a list has matching bounds.
+    """
+    Check if every raster in a list has matching bounds.
+
     Args:
         rasters: List of rasters to check.
+
     Returns:
         Bool: True if bounds of each raster matches, False if not.
     """
@@ -65,9 +74,12 @@ def check_raster_bands(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     bands: Sequence[int],
 ) -> bool:
-    """Check if selection of bands is contained in the raster.
+    """
+    Check if selection of bands is contained in the raster.
+
     Args:
         raster: Raster to be checked.
+
     Returns:
         Bool: True if all bands exist, False if not.
     """

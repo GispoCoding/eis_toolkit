@@ -1,25 +1,24 @@
+from numbers import Number
+
 import numpy as np
 import rasterio
-
-from numbers import Number
 from beartype import beartype
-from beartype.typing import Optional, Tuple, Sequence
+from beartype.typing import Optional, Sequence, Tuple
 
-from eis_toolkit.utilities.miscellaneous import (
-    expand_and_zip,
-    cast_array_to_int,
-    cast_scalar_to_int,
-    cast_array_to_float,
-)
-from eis_toolkit.utilities.nodata import nodata_to_nan, nan_to_nodata
-
+from eis_toolkit.checks.parameter import check_minmax_position, check_parameter_length
+from eis_toolkit.checks.raster import check_raster_bands
 from eis_toolkit.exceptions import (
+    InvalidParameterValueException,
     InvalidRasterBandException,
     NonMatchingParameterLengthsException,
-    InvalidParameterValueException,
 )
-from eis_toolkit.checks.raster import check_raster_bands
-from eis_toolkit.checks.parameter import check_parameter_length, check_minmax_position
+from eis_toolkit.utilities.miscellaneous import (
+    cast_array_to_float,
+    cast_array_to_int,
+    cast_scalar_to_int,
+    expand_and_zip,
+)
+from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
 
 @beartype
@@ -49,8 +48,8 @@ def clipping(  # type: ignore[no-any-unimported]
 ) -> Tuple[np.ndarray, dict, dict]:
     """
     Clipping data based on specified upper and lower limits.
-    Takes one nodata value that will be ignored in calculations.
 
+    Takes one nodata value that will be ignored in calculations.
     Replaces values below the lower limit and above the upper limit with provided values, respecively.
     Works both one-sided and two-sided but raises error if no limits provided.
 
@@ -108,7 +107,11 @@ def clipping(  # type: ignore[no-any-unimported]
         band_array = cast_array_to_int(band_array, scalar=nodata, initial_dtype=inital_dtype)
 
         band_array = np.expand_dims(band_array, axis=0)
-        out_array = band_array.copy() if i == 0 else np.vstack((out_array, band_array))
+
+        if i == 0:
+            out_array = band_array.copy()
+        else:
+            out_array = np.vstack((out_array, band_array))
 
         current_transform = f"transformation {i + 1}"
         current_settings = {

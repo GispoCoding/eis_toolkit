@@ -1,28 +1,29 @@
-import pytest
-import rasterio
-import numpy as np
 from pathlib import Path
 
-from eis_toolkit.transformations import sigmoid
-from eis_toolkit.utilities.miscellaneous import (
-    replace_values,
-    truncate_decimal_places,
-    set_max_precision,
-    cast_array_to_float,
-)
-from eis_toolkit.utilities.nodata import nan_to_nodata
+import numpy as np
+import pytest
+import rasterio
+
 from eis_toolkit.exceptions import (
+    InvalidParameterValueException,
     InvalidRasterBandException,
     NonMatchingParameterLengthsException,
-    InvalidParameterValueException,
 )
+from eis_toolkit.transformations import sigmoid
+from eis_toolkit.utilities.miscellaneous import (
+    cast_array_to_float,
+    replace_values,
+    set_max_precision,
+    truncate_decimal_places,
+)
+from eis_toolkit.utilities.nodata import nan_to_nodata
 
 parent_dir = Path(__file__).parent
 raster_path = parent_dir.joinpath("data/remote/small_raster_multiband.tif")
 
 
 def test_sigmoid_transform():
-    """Test that transformation works as intended"""
+    """Test that transformation works as intended."""
     bands = None
     bounds = [(0, 1)]
     slope = [1]
@@ -59,7 +60,7 @@ def test_sigmoid_transform():
 
             test_array[i] = replace_values(test_array[i], values_to_replace=[nodata, np.inf], replace_value=np.nan)
 
-            if center == True:
+            if center is True:
                 test_array[i] = test_array[i] - np.nanmean(test_array[i])
 
             test_array[i] = lower + (upper - lower) * (1 / (1 + np.exp(-slope[i] * (test_array[i]))))

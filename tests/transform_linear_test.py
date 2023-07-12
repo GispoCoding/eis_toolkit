@@ -1,28 +1,29 @@
-import pytest
-import rasterio
-import numpy as np
 from pathlib import Path
 
-from eis_toolkit.transformations import linear
-from eis_toolkit.utilities.miscellaneous import (
-    replace_values,
-    truncate_decimal_places,
-    set_max_precision,
-    cast_array_to_float,
-)
-from eis_toolkit.utilities.nodata import nan_to_nodata
+import numpy as np
+import pytest
+import rasterio
+
 from eis_toolkit.exceptions import (
+    InvalidParameterValueException,
     InvalidRasterBandException,
     NonMatchingParameterLengthsException,
-    InvalidParameterValueException,
 )
+from eis_toolkit.transformations import linear
+from eis_toolkit.utilities.miscellaneous import (
+    cast_array_to_float,
+    replace_values,
+    set_max_precision,
+    truncate_decimal_places,
+)
+from eis_toolkit.utilities.nodata import nan_to_nodata
 
 parent_dir = Path(__file__).parent
 raster_path = parent_dir.joinpath("data/remote/small_raster_multiband.tif")
 
 
 def test_z_score_normalization():
-    """Test that transformation works as intended"""
+    """Test that transformation works as intended."""
     bands = None
     nodata = 3.748
 
@@ -36,7 +37,7 @@ def test_z_score_normalization():
 
         # Output array (nodata in place)
         test_array = raster.read(list(range(1, out_meta["count"] + 1)))
-        
+
         np.testing.assert_array_equal(
             np.ma.masked_values(out_array, value=nodata, shrink=False).mask,
             np.ma.masked_values(test_array, value=nodata, shrink=False).mask,
@@ -46,7 +47,7 @@ def test_z_score_normalization():
         out_decimals = set_max_precision()
         test_array = cast_array_to_float(test_array, cast_int=True)
         test_array = replace_values(test_array, values_to_replace=[nodata, np.inf], replace_value=np.nan)
-        
+
         for i in range(0, out_meta["count"]):
             test_array[i] = (test_array[i] - float(np.nanmean(test_array[i]))) / float(np.nanstd(test_array[i]))
 
@@ -60,7 +61,7 @@ def test_z_score_normalization():
 
 
 def test_min_max_scaling():
-    """Test that transformation works as intended"""
+    """Test that transformation works as intended."""
     bands = None
     nodata = 3.748
     new_range = [(0, 1)]
@@ -88,7 +89,7 @@ def test_min_max_scaling():
         out_decimals = set_max_precision()
         test_array = cast_array_to_float(test_array, cast_int=True)
         test_array = replace_values(test_array, values_to_replace=[nodata, np.inf], replace_value=np.nan)
-        
+
         for i in range(0, out_meta["count"]):
             min = np.nanmin(test_array[i])
             max = np.nanmax(test_array[i])

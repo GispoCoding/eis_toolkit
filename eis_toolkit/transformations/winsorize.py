@@ -1,25 +1,24 @@
+from numbers import Number
+
 import numpy as np
 import rasterio
-
-from numbers import Number
 from beartype import beartype
-from beartype.typing import Optional, Tuple, Sequence
+from beartype.typing import Optional, Sequence, Tuple
 
-from eis_toolkit.utilities.miscellaneous import (
-    expand_and_zip,
-    cast_array_to_int,
-    cast_scalar_to_int,
-    cast_array_to_float,
-)
-from eis_toolkit.utilities.nodata import nodata_to_nan, nan_to_nodata
-
+from eis_toolkit.checks.parameter import check_parameter_length
+from eis_toolkit.checks.raster import check_raster_bands
 from eis_toolkit.exceptions import (
+    InvalidParameterValueException,
     InvalidRasterBandException,
     NonMatchingParameterLengthsException,
-    InvalidParameterValueException,
 )
-from eis_toolkit.checks.raster import check_raster_bands
-from eis_toolkit.checks.parameter import check_parameter_length
+from eis_toolkit.utilities.miscellaneous import (
+    cast_array_to_float,
+    cast_array_to_int,
+    cast_scalar_to_int,
+    expand_and_zip,
+)
+from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
 
 @beartype
@@ -64,8 +63,8 @@ def winsorize(  # type: ignore[no-any-unimported]
 ) -> Tuple[np.ndarray, dict, dict]:
     """
     Winsorize data based on specified percentile values.
-    Takes one nodata value that will be ignored in calculations.
 
+    Takes one nodata value that will be ignored in calculations.
     Replaces values between [minimum, lower percentile] and [upper percentile, maximum] if provided.
     Works both one-sided and two-sided but raises error if no percentile values provided.
 
@@ -113,7 +112,7 @@ def winsorize(  # type: ignore[no-any-unimported]
         if item.count(None) == len(item):
             raise InvalidParameterValueException(f"Percentile values all None: {item}.")
 
-        if not None in item and sum(item) >= 100:
+        if None not in item and sum(item) >= 100:
             raise InvalidParameterValueException(f"Sum >= 100: {item}.")
 
         if item[0] is not None and not (0 < item[0] < 100):
@@ -142,7 +141,11 @@ def winsorize(  # type: ignore[no-any-unimported]
         band_array = cast_array_to_int(band_array, scalar=nodata, initial_dtype=inital_dtype)
 
         band_array = np.expand_dims(band_array, axis=0)
-        out_array = band_array.copy() if i == 0 else np.vstack((out_array, band_array))
+
+        if i == 0:
+            out_array = band_array.copy()
+        else:
+            out_array = np.vstack((out_array, band_array))
 
         current_transform = f"transformation {i + 1}"
         current_settings = {

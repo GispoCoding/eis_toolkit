@@ -1,26 +1,25 @@
+from numbers import Number
+
 import numpy as np
 import rasterio
-
-from numbers import Number
 from beartype import beartype
-from beartype.typing import Optional, Tuple, Sequence
+from beartype.typing import Optional, Sequence, Tuple
 
-from eis_toolkit.utilities.miscellaneous import (
-    expand_and_zip,
-    replace_values,
-    truncate_decimal_places,
-    set_max_precision,
-    cast_array_to_float,
-)
-from eis_toolkit.utilities.nodata import nan_to_nodata
-
+from eis_toolkit.checks.parameter import check_minmax_position, check_parameter_length
+from eis_toolkit.checks.raster import check_raster_bands
 from eis_toolkit.exceptions import (
+    InvalidParameterValueException,
     InvalidRasterBandException,
     NonMatchingParameterLengthsException,
-    InvalidParameterValueException,
 )
-from eis_toolkit.checks.raster import check_raster_bands
-from eis_toolkit.checks.parameter import check_parameter_length, check_minmax_position
+from eis_toolkit.utilities.miscellaneous import (
+    cast_array_to_float,
+    expand_and_zip,
+    replace_values,
+    set_max_precision,
+    truncate_decimal_places,
+)
+from eis_toolkit.utilities.nodata import nan_to_nodata
 
 
 @beartype
@@ -57,9 +56,9 @@ def z_score_normalization(  # type: ignore[no-any-unimported]
     nodata: Optional[Number] = None,
 ) -> Tuple[np.ndarray, dict, dict]:
     """
-    Normalizing data based on mean and standard deviation.
-    Results will have a mean = 0 and standard deviation = 1.
+    Normalize data based on mean and standard deviation.
 
+    Results will have a mean = 0 and standard deviation = 1.
     Takes one nodata value that will be ignored in calculations.
 
     If no band/column selection specified, all bands/columns will be used.
@@ -100,7 +99,11 @@ def z_score_normalization(  # type: ignore[no-any-unimported]
         band_array = cast_array_to_float(band_array, scalar=nodata, cast_float=True)
 
         band_array = np.expand_dims(band_array, axis=0)
-        out_array = band_array.copy() if i == 0 else np.vstack((out_array, band_array))
+
+        if i == 0:
+            out_array = band_array.copy()
+        else:
+            out_array = np.vstack((out_array, band_array))
 
         current_transform = f"transformation {i + 1}"
         current_settings = {
@@ -127,7 +130,8 @@ def min_max_scaling(  # type: ignore[no-any-unimported]
     nodata: Optional[Number] = None,
 ) -> Tuple[np.ndarray, dict, dict]:
     """
-    Normalizing data based on a specified new range.
+    Normalize data based on a specified new range.
+
     Uses the provided new minimum and maximum to transform data into the new interval.
     Takes one nodata value that will be ignored in calculations.
 
@@ -182,7 +186,11 @@ def min_max_scaling(  # type: ignore[no-any-unimported]
         band_array = cast_array_to_float(band_array, scalar=nodata, cast_float=True)
 
         band_array = np.expand_dims(band_array, axis=0)
-        out_array = band_array.copy() if i == 0 else np.vstack((out_array, band_array))
+
+        if i == 0:
+            out_array = band_array.copy()
+        else:
+            out_array = np.vstack((out_array, band_array))
 
         current_transform = f"transformation {i + 1}"
         current_settings = {

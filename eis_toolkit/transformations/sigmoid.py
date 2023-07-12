@@ -1,26 +1,25 @@
+from numbers import Number
+
 import numpy as np
 import rasterio
-
-from numbers import Number
 from beartype import beartype
-from beartype.typing import Optional, Tuple, Sequence
+from beartype.typing import Optional, Sequence, Tuple
 
-from eis_toolkit.utilities.miscellaneous import (
-    expand_and_zip,
-    replace_values,
-    truncate_decimal_places,
-    set_max_precision,
-    cast_array_to_float,
-)
-from eis_toolkit.utilities.nodata import nan_to_nodata
-
+from eis_toolkit.checks.parameter import check_minmax_position, check_parameter_length
+from eis_toolkit.checks.raster import check_raster_bands
 from eis_toolkit.exceptions import (
+    InvalidParameterValueException,
     InvalidRasterBandException,
     NonMatchingParameterLengthsException,
-    InvalidParameterValueException,
 )
-from eis_toolkit.checks.raster import check_raster_bands
-from eis_toolkit.checks.parameter import check_parameter_length, check_minmax_position
+from eis_toolkit.utilities.miscellaneous import (
+    cast_array_to_float,
+    expand_and_zip,
+    replace_values,
+    set_max_precision,
+    truncate_decimal_places,
+)
+from eis_toolkit.utilities.nodata import nan_to_nodata
 
 
 @beartype
@@ -32,7 +31,7 @@ def _sigmoid_transform(  # type: ignore[no-any-unimported]
 ) -> np.ndarray:
     lower, upper = bounds[0], bounds[1]
 
-    if center == True:
+    if center is True:
         in_array = in_array - np.nanmean(in_array)
 
     out_array = lower + (upper - lower) * (1 / (1 + np.exp(-slope * (in_array))))
@@ -51,6 +50,7 @@ def sigmoid_transform(  # type: ignore[no-any-unimported]
 ) -> Tuple[np.ndarray, dict, dict]:
     """
     Transform data into a sigmoid-shape based on a specified new range.
+
     Uses the provided new minimum and maximum, shift and slope parameters to transform the data.
     Takes one nodata value that will be ignored in calculations.
 
@@ -109,7 +109,11 @@ def sigmoid_transform(  # type: ignore[no-any-unimported]
         band_array = cast_array_to_float(band_array, scalar=nodata, cast_float=True)
 
         band_array = np.expand_dims(band_array, axis=0)
-        out_array = band_array.copy() if i == 0 else np.vstack((out_array, band_array))
+
+        if i == 0:
+            out_array = band_array.copy()
+        else:
+            out_array = np.vstack((out_array, band_array))
 
         current_transform = f"transformation {i + 1}"
         current_settings = {

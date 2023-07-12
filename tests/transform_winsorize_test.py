@@ -1,27 +1,24 @@
-import pytest
-import rasterio
-import numpy as np
 from pathlib import Path
 
-from eis_toolkit.transformations import winsorize
-from eis_toolkit.utilities.miscellaneous import (
-    cast_array_to_int,
-    cast_scalar_to_int,
-    cast_array_to_float,
-)
-from eis_toolkit.utilities.nodata import nodata_to_nan, nan_to_nodata
+import numpy as np
+import pytest
+import rasterio
+
 from eis_toolkit.exceptions import (
+    InvalidParameterValueException,
     InvalidRasterBandException,
     NonMatchingParameterLengthsException,
-    InvalidParameterValueException,
 )
+from eis_toolkit.transformations import winsorize
+from eis_toolkit.utilities.miscellaneous import cast_array_to_float, cast_array_to_int, cast_scalar_to_int
+from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
 parent_dir = Path(__file__).parent
 raster_path = parent_dir.joinpath("data/remote/small_raster_multiband.tif")
 
 
 def test_winsorizing():
-    """Test that transformation works as intended"""
+    """Test that transformation works as intended."""
     bands = None
     percentiles = [(10, 10)]
     inside = False
@@ -57,7 +54,7 @@ def test_winsorizing():
 
             clean_array = np.extract(np.isfinite(test_array[i]), test_array[i])
 
-            if inside == True:
+            if inside is True:
                 lower, upper = "lower", "higher"
             else:
                 lower, upper = "higher", "lower"

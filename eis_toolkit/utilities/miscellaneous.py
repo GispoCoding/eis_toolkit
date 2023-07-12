@@ -1,26 +1,79 @@
 from numbers import Number
-from typing import Optional, Union, List, Tuple, Any
+from typing import Any, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Iterable
+from beartype.typing import Sequence
 
 from eis_toolkit.checks.dataframe import check_columns_valid
 from eis_toolkit.checks.parameter import check_dtype_for_int
 from eis_toolkit.exceptions import InvalidColumnException
 
 
+@beartype
+def replace_values(
+    data: np.ndarray, values_to_replace: Union[Number, Sequence[Number]], replace_value: Number
+) -> np.ndarray:
+    """Replace one or many values in a Numpy array with a new value. Returns a copy of the input array.
+
+    Args:
+        data: Input data as a numpy array.
+        values_to_replace: Values to be replaced with the specified replace value.
+        replace_value: Value that will replace the specified old values.
+
+    Returns:
+        Raster data with replaced values.
+    """
+    out_data = data.copy()
+    return np.where(np.isin(out_data, values_to_replace), replace_value, out_data)  # type: ignore
+
+
+@beartype
+def replace_values_df(
+    df: pd.DataFrame,
+    values_to_replace: Union[Number, Sequence[Number]],
+    replace_value: Number,
+    columns: Optional[Sequence[str]] = None,
+) -> pd.DataFrame:
+    """Replace one or many values in a DataFrame with a new value. Returns a copy of the input array.
+
+    Args:
+        df: Input data as a DataFrame.
+        values_to_replace: Values to be replaced with the specified replace value.
+        replace_value: Value that will replace the specified old values.
+        columns: Column names to target the replacement. Defaults to None (all columns).
+
+    Returns:
+        DataFrame with replaced values.
+    """
+    if columns is None:
+        columns = df.columns
+    elif not check_columns_valid(df, columns):
+        raise InvalidColumnException("All selected columns were not found in the input DataFrame.")
+
+    out_df = df.copy()
+    for col in columns:
+        out_df[col] = out_df[col].replace(values_to_replace, replace_value)
+
+    return out_df
+
+
 def expand_and_zip(selection: List[Any], *args: Union[List[Any], Tuple[Any]], **kwargs: Any) -> List[Tuple[Any]]:
     """
-    Expands and zips a selection with additional arguments and keyword arguments.
-    If an argument is a list or tuple of the same length as the selection, it will be zipped element-wise. Otherwise, it will be repeated
+    Expand and zip a selection with additional arguments and keyword arguments.
+
+    If an argument is a list or tuple of the same length as the selection, it will be zipped element-wise.
+    Otherwise, it will be repeated.
+
     Args:
         selection: A list of items to be zipped.
         *args: Additional arguments to be zipped with the selection.
         **kwargs: Additional keyword arguments to be zipped with the selection. for each element in the selection.
+
     Returns:
-        A list of tuples where each tuple contains an element from the selection and its corresponding elements from the additional arguments and keyword arguments.
+        A list of tuples where each tuple contains an element from the selection and its corresponding
+        elements from the additional arguments and keyword arguments.
     """
     expanded_args = []
     for arg in args:
@@ -35,80 +88,37 @@ def expand_and_zip(selection: List[Any], *args: Union[List[Any], Tuple[Any]], **
             expanded_kwargs.append(value)
         else:
             expanded_kwargs.append(value * len(selection))
-
     zipped_result = zip(selection, *expanded_args, *expanded_kwargs)
     return list(zipped_result)
 
 
 @beartype
-def replace_values(
-    data: np.ndarray, values_to_replace: Union[Number, Iterable[Number]], replace_value: Number
-) -> np.ndarray:
-    """
-    Replace one or many values in a Numpy array with a new value.
-    Args:
-        data: Input data as a numpy array.
-        values_to_replace: Values to be replaced with the specified replace value.
-        replace_value: Value that will replace the specified old values.
-        copy: If the output array is a copy of the input data. Defaults to False.
-    Returns:
-        Raster data with replaced values.
-    """
-    return np.where(np.isin(data, values_to_replace), replace_value, data)
-
-
-@beartype
-def replace_values_df(
-    df: pd.DataFrame,
-    values_to_replace: Union[Number, Iterable[Number]],
-    replace_value: Number,
-    columns: Optional[Iterable[str]] = None,
-    copy: bool = False,
-) -> pd.DataFrame:
-    """
-    Replace one or many values in a DataFrame with a new value.
-    Args:
-        df: Input data as a DataFrame.
-        values_to_replace: Values to be replaced with the specified replace value.
-        replace_value: Value that will replace the specified old values.
-        columns: Column names to target the replacement. Defaults to None (all columns).
-        copy: If the output array is a copy of the input data. Defaults to False.
-    Returns:
-        DataFrame with replaced values.
-    """
-    if columns is None:
-        columns = df.columns
-    else:
-        if not check_columns_valid(df, columns):
-            raise InvalidColumnException("All selected columns were not found in the input DataFrame.")
-
-    if copy:
-        out_df = df.copy()
-    else:
-        out_df = df
-
-    for col in columns:
-        out_df[col] = out_df[col].replace(values_to_replace, replace_value)
-
-    return out_df
-
-
-@beartype
 def cast_scalar_to_int(scalar: Number) -> Number:
     """
-    Casts a numerical value to integer type if possible.
+    Cast a numerical value to integer type if possible.
+
     Args:
         scalar: Input scalar value.
+
     Returns:
         The input scalar as an integer if it can be cast, else the original scalar.
     """
-    if check_dtype_for_int(scalar) == True:
+    if check_dtype_for_int(scalar) is True:
         return int(scalar)
     else:
         return scalar
 
 
-def get_min_int_type(data: np.ndarray | Number) -> np.dtype:
+def get_min_int_type(data: Union[np.ndarray, Number]) -> np.dtype:
+    """
+    Check for the lowest integer dtype.
+
+    Args:
+        data: Input numpy array or single number.
+
+    Returns:
+        The lowest integer dtype possible according to the number(s).
+    """
     if isinstance(data, np.ndarray):
         data_min = np.min(data)
         data_max = np.max(data)
@@ -159,10 +169,12 @@ def cast_array_to_int(
     data: np.ndarray, scalar: Optional[Number] = None, initial_dtype: Optional[np.dtype] = None
 ) -> np.ndarray:
     """
-    Casts an integer array to minimal precision based on both array and scalar value.
+    Cast an integer array to minimal precision based on both array and scalar value.
+
     Args:
         data: Input array
         scalar: Input scalar.
+
     Returns:
         The input array if not of integer type else the casted array with the lowest integer precision possible.
     """
@@ -191,18 +203,20 @@ def cast_array_to_float(
     cast_float: Optional[bool] = None,
 ) -> np.ndarray:
     """
-    Casts an array to a desired dtype.
+    Cast an array to a desired dtype.
+
     Args:
         data: Input array.
         scalar: Input scalar.
+
     Returns:
         The converted input array if a cast option was activated else the unchanged array.
         If cast for integer, dtype float64.
         If cast for floating point, either float32 or float64.
     """
-    if cast_int == True and np.issubdtype(data.dtype, np.integer):
+    if cast_int is True and np.issubdtype(data.dtype, np.integer):
         return data.astype(np.float64)
-    elif cast_float == True and np.issubdtype(data.dtype, np.floating):
+    elif cast_float is True and np.issubdtype(data.dtype, np.floating):
         data_min = np.min(data)
         data_max = np.max(data)
 
@@ -222,10 +236,12 @@ def cast_array_to_float(
 @beartype
 def truncate_decimal_places(data: np.ndarray | Number, decimal_places: Number) -> np.ndarray | Number:
     """
-    Truncates an array or number to a certain number of decimal places.
+    Truncate an array or number to a certain number of decimal places.
+
     Args:
         data: Input array or single numerical value.
         decimal_places: Number of decimal places.
+
     Returns:
         Truncated array or number.
     """
@@ -235,9 +251,11 @@ def truncate_decimal_places(data: np.ndarray | Number, decimal_places: Number) -
 @beartype
 def set_max_precision(data: Optional[np.ndarray] = None) -> int:
     """
-    Determines the precision for an array.
+    Determine the precision for an array.
+
     Args:
         data: Input array.
+
     Returns:
         The precision for a certain dtype if array is floating point, else zero. Default is precision for float32.
     """

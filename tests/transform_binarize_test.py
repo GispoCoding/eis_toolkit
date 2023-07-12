@@ -1,18 +1,19 @@
-import pytest
-import rasterio
-import numpy as np
 from pathlib import Path
 
+import numpy as np
+import pytest
+import rasterio
+
+from eis_toolkit.exceptions import InvalidRasterBandException, NonMatchingParameterLengthsException
 from eis_toolkit.transformations import binarize
 from eis_toolkit.utilities.miscellaneous import cast_scalar_to_int, check_dtype_for_int
-from eis_toolkit.exceptions import InvalidRasterBandException, NonMatchingParameterLengthsException
 
 parent_dir = Path(__file__).parent
 raster_path = parent_dir.joinpath("data/remote/small_raster_multiband.tif")
 
 
 def test_binarize():
-    """Test that transformation works as intended"""
+    """Test that transformation works as intended."""
     bands = None
     thresholds = [2]
     nodata = 3.748

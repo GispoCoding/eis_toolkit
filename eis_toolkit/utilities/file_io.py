@@ -4,18 +4,24 @@ from typing import Union
 import geopandas as gpd
 import pandas as pd
 import rasterio
+from beartype import beartype
 
 from eis_toolkit.exceptions import FileReadError
 
 
+@beartype
 def read_file(file_path: Path) -> Union[rasterio.io.DatasetReader, gpd.GeoDataFrame, pd.DataFrame]:
     """Read an input file trying different readers.
+
     First tries to read to a rasterio DatasetReader, then to a GeoDataFrame, then to a DataFrame.
     If none of the readers succeed, raises an exception.
+
     Args:
         file_path: Input file path.
+
     Returns:
         The input file data in the opened format.
+
     Raises:
         FileReadError:None of the readers succeeded to read the input file.
     """
@@ -40,12 +46,16 @@ def read_file(file_path: Path) -> Union[rasterio.io.DatasetReader, gpd.GeoDataFr
     return data
 
 
+@beartype
 def read_raster(file_path: Path) -> rasterio.io.DatasetReader:
     """Read a raster file to a rasterio DatasetReader.
+
     Args:
         file_path: Input file path.
+
     Returns:
         File data as a Rasterio DatasetReader.
+
     Raises:
         FileReadError: Rasterio failed to open the input file.
     """
@@ -56,12 +66,16 @@ def read_raster(file_path: Path) -> rasterio.io.DatasetReader:
     return data
 
 
+@beartype
 def read_vector(file_path: Path) -> gpd.GeoDataFrame:
     """Read a vector file to a GeoDataFrame.
+
     Args:
         file_path: Input file path.
+
     Returns:
         File data as a GeoDataFrame.
+
     Raises:
         FileReadError: Geopandas failed to read the input file.
     """
@@ -72,12 +86,16 @@ def read_vector(file_path: Path) -> gpd.GeoDataFrame:
     return data
 
 
+@beartype
 def read_tabular(file_path: Path) -> pd.DataFrame:
     """Read tabular data to a DataFrame.
+
     Args:
         file_path: Input file path.
+
     Returns:
         File data as a DataFrame.
+
     Raises:
         FileReadError: Pandas failed to open the input file.
     """

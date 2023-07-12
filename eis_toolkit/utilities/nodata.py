@@ -4,7 +4,7 @@ from typing import Any, Union
 
 import numpy as np
 from beartype import beartype
-from beartype.typing import Callable, Dict, Iterable
+from beartype.typing import Callable, Dict, Sequence
 
 from eis_toolkit.exceptions import InvalidRasterBandException
 from eis_toolkit.utilities.miscellaneous import replace_values
@@ -14,10 +14,13 @@ from eis_toolkit.utilities.miscellaneous import replace_values
 def set_nodata_raster_meta(raster_meta: Dict, nodata_value: Number) -> Dict:
     """
     Set new nodata value for raster metadata.
+
     Note that this function does not convert any data values, only changes/fixes metadata.
+
     Args:
         raster_meta: Raster metadata to be updated.
         nodata_value: Nodata value to be set.
+
     Returns:
         Raster metadata with updated nodata value.
     """
@@ -28,16 +31,21 @@ def set_nodata_raster_meta(raster_meta: Dict, nodata_value: Number) -> Dict:
 
 @beartype
 def replace_raster_nodata_each_band(
-    raster_data: np.ndarray, nodata_per_band: Dict[int, Union[Number, Iterable[Number]]], new_nodata: Number = -9999
+    raster_data: np.ndarray,
+    nodata_per_band: Dict[int, Union[Number, Sequence[Number]]],
+    new_nodata: Number = -9999,  # type: ignore
 ) -> np.ndarray:
     """
     Replace old nodata values with a new nodata value in a raster for each band separately.
+
     Args:
         raster_data: Multiband raster's data.
         nodata_per_band: Mapping of bands and their current nodata values.
         new_nodata: A new nodata value that will be used for all old nodata values and all bands. Defaults to -9999.
+
     Returns:
         The original raster data with replaced nodata values.
+
     Raises:
         InvalidRasterBandException: Invalid band index in nodata mapping.
     """
@@ -57,31 +65,33 @@ def replace_raster_nodata_each_band(
 
 @beartype
 def nodata_to_nan(data: np.ndarray, nodata_value: Number) -> np.ndarray:
-    """
-    Convert specified nodata_value to np.nan.
+    """Convert specified nodata_value to np.nan.
+
     Args:
         data: Input data as a numpy array.
         nodata_value: Value that is converted to np.nan.
+
     Returns:
         Input array where specified nodata has been converted to np.nan.
     """
     if np.issubdtype(data.dtype, np.integer):
         data = data.astype(float)
 
-    return np.where(np.isin(data, nodata_value), np.nan, data)
+    return np.where(np.isin(data, nodata_value), np.nan, data)  # type: ignore
 
 
 @beartype
 def nan_to_nodata(data: np.ndarray, nodata_value: Number) -> np.ndarray:
-    """
-    Convert np.nan values to specified nodata_value.
+    """Convert np.nan values to specified nodata_value.
+
     Args:
         data: Input data as a numpy array.
         nodata_value: Value that np.nan is converted to.
+
     Returns:
         Input array where np.nan has been converted to specified nodata.
     """
-    return np.where(np.isnan(data), nodata_value, data)
+    return np.where(np.isnan(data), nodata_value, data)  # type: ignore
 
 
 @beartype

@@ -1,15 +1,14 @@
+from numbers import Number
+
 import numpy as np
 import rasterio
-
-from numbers import Number
 from beartype import beartype
-from beartype.typing import Optional, Tuple, Sequence
+from beartype.typing import Optional, Sequence, Tuple
 
-from eis_toolkit.utilities.miscellaneous import expand_and_zip, cast_scalar_to_int, check_dtype_for_int
-
-from eis_toolkit.exceptions import InvalidRasterBandException, NonMatchingParameterLengthsException
-from eis_toolkit.checks.raster import check_raster_bands
 from eis_toolkit.checks.parameter import check_parameter_length
+from eis_toolkit.checks.raster import check_raster_bands
+from eis_toolkit.exceptions import InvalidRasterBandException, NonMatchingParameterLengthsException
+from eis_toolkit.utilities.miscellaneous import cast_scalar_to_int, check_dtype_for_int, expand_and_zip
 
 
 @beartype
@@ -84,7 +83,11 @@ def binarize(  # type: ignore[no-any-unimported]
             band_array = band_array.astype(np.min_scalar_type(nodata))
 
         band_array = np.expand_dims(band_array, axis=0)
-        out_array = band_array.copy() if i == 0 else np.vstack((out_array, band_array))
+
+        if i == 0:
+            out_array = band_array.copy()
+        else:
+            out_array = np.vstack((out_array, band_array))
 
         current_transform = f"transformation {i + 1}"
         current_settings = {
