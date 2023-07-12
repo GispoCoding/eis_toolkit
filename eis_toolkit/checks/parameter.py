@@ -38,6 +38,7 @@ def check_numeric_value_sign(parameter_value: Number) -> bool:
         return False
 
 
+@beartype
 def check_minmax_position(parameter: tuple) -> bool:  # type: ignore[no-untyped-def]
     """Check if parameter maximum value > parameter minimum value.
     Args:
@@ -46,3 +47,15 @@ def check_minmax_position(parameter: tuple) -> bool:  # type: ignore[no-untyped-
         Bool: True if minimum value < maxiumum value, else False.
     """
     return parameter[0] < parameter[1]
+
+
+@beartype
+def check_dtype_for_int(scalar: Number) -> bool:
+    """
+    Determines whether a floating scalar can be converted to integer type.
+    Args:
+        scalar: Input scalar value.
+    Returns:
+        True if conversion can be done, False if not.
+    """
+    return True if isinstance(scalar, int) else scalar.is_integer()
