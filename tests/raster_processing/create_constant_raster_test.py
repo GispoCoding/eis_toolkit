@@ -11,7 +11,7 @@ raster_path = parent_dir.joinpath("../data/remote/small_raster_multiband.tif")
 
 
 def test_create_from_template():
-    """Test that the raster creation from template works as intended"""
+    """Test that the raster creation from template works as intended."""
 
     constant = 1
     nodata = 99
@@ -35,7 +35,7 @@ def test_create_from_template():
 
 
 def test_create_from_origin():
-    """Test that the raster creation from origin works as intended"""
+    """Test that the raster creation from origin works as intended."""
 
     constant = 1
     nodata = 99
@@ -68,7 +68,7 @@ def test_create_from_origin():
 
 
 def test_create_from_bounds():
-    """Test that the raster creation from bounds works as intended"""
+    """Test that the raster creation from bounds works as intended."""
 
     constant = 1
     nodata = 99

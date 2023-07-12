@@ -65,18 +65,29 @@ def replace_values_df(
 def cast_scalar_to_int(scalar: Number) -> Number:
     """
     Casts a numerical value to integer type if possible.
+
     Args:
         scalar: Input scalar value.
+
     Returns:
         The input scalar as an integer if it can be cast, else the original scalar.
     """
-    if check_dtype_for_int(scalar) == True:
+    if check_dtype_for_int(scalar) is True:
         return int(scalar)
     else:
         return scalar
 
 
-def get_min_int_type(data: np.ndarray | Number) -> np.dtype:
+def get_min_int_type(data: Union[np.ndarray, Number]) -> np.dtype:
+    """
+    Check for the lowest integer dtype.
+
+    Args:
+        data: Input numpy array or single number.
+
+    Returns:
+        The lowest integer dtype possible according to the number(s).
+    """
     if isinstance(data, np.ndarray):
         data_min = np.min(data)
         data_max = np.max(data)
