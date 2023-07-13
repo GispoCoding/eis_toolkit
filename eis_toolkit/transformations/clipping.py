@@ -24,7 +24,7 @@ from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 @beartype
 def _clipping(  # type: ignore[no-any-unimported]
     in_array: np.ndarray,
-    limits: Tuple[Number | None, Number | None],
+    limits: Tuple[Optional[Number], Optional[Number]],
 ) -> np.ndarray:
     limit_lower, limit_upper = limits[0], limits[1]
 
@@ -42,8 +42,8 @@ def _clipping(  # type: ignore[no-any-unimported]
 @beartype
 def clipping(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
+    limits: Sequence[Tuple[Optional[Number], Optional[Number]]],
     bands: Optional[Sequence[int]] = None,
-    limits: Sequence[Tuple[Number | None, Number | None]] = [(None, None)],
     nodata: Optional[Number] = None,
 ) -> Tuple[np.ndarray, dict, dict]:
     """
@@ -79,7 +79,7 @@ def clipping(  # type: ignore[no-any-unimported]
     if check_raster_bands(raster, bands) is False:
         raise InvalidRasterBandException("Invalid band selection")
 
-    if not check_parameter_length(bands, limits):
+    if check_parameter_length(bands, limits) is False:
         raise NonMatchingParameterLengthsException("Invalid limit length.")
 
     for item in limits:

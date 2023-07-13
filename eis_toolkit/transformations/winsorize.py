@@ -1,9 +1,8 @@
-from numbers import Number
-
 import numpy as np
 import rasterio
 from beartype import beartype
 from beartype.typing import Optional, Sequence, Tuple
+from numbers import Number
 
 from eis_toolkit.checks.parameter import check_parameter_length
 from eis_toolkit.checks.raster import check_raster_bands
@@ -24,9 +23,9 @@ from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 @beartype
 def _winsorize(  # type: ignore[no-any-unimported]
     in_array: np.ndarray,
-    percentiles: Tuple[Number | None, Number | None],
+    percentiles: Tuple[Optional[Number], Optional[Number]],
     inside: bool,
-) -> Tuple[np.ndarray, Number | None, Number | None]:
+) -> Tuple[np.ndarray, Optional[Number], Optional[Number]]:
     percentile_lower, percentile_upper = percentiles[0], percentiles[1]
     calculated_lower, calculated_upper = None, None
 
@@ -56,8 +55,8 @@ def _winsorize(  # type: ignore[no-any-unimported]
 @beartype
 def winsorize(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
+    percentiles: Sequence[Tuple[Optional[Number], Optional[Number]]],
     bands: Optional[Sequence[int]] = None,
-    percentiles: Sequence[Tuple[Number | None, Number | None]] = [(None, None)],
     inside: bool = False,
     nodata: Optional[Number] = None,
 ) -> Tuple[np.ndarray, dict, dict]:
@@ -105,7 +104,7 @@ def winsorize(  # type: ignore[no-any-unimported]
     if check_raster_bands(raster, bands) is False:
         raise InvalidRasterBandException("Invalid band selection")
 
-    if not check_parameter_length(bands, percentiles):
+    if check_parameter_length(bands, percentiles) is False:
         raise NonMatchingParameterLengthsException("Invalid length for percentiles.")
 
     for item in percentiles:

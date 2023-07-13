@@ -234,7 +234,7 @@ def cast_array_to_float(
 
 
 @beartype
-def truncate_decimal_places(data: np.ndarray | Number, decimal_places: Number) -> np.ndarray | Number:
+def truncate_decimal_places(data: Union[np.ndarray, Number], decimal_places: Number) -> Union[np.ndarray, Number]:
     """
     Truncate an array or number to a certain number of decimal places.
 

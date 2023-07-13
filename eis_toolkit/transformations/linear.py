@@ -161,7 +161,7 @@ def min_max_scaling(  # type: ignore[no-any-unimported]
     if check_raster_bands(raster, bands) is False:
         raise InvalidRasterBandException("Invalid band selection")
 
-    if not check_parameter_length(bands, new_range):
+    if check_parameter_length(bands, new_range) is False:
         raise NonMatchingParameterLengthsException("Invalid new_range length")
 
     for item in new_range:

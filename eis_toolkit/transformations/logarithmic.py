@@ -85,7 +85,7 @@ def log_transform(  # type: ignore[no-any-unimported]
     if check_raster_bands(raster, bands) is False:
         raise InvalidRasterBandException("Invalid band selection")
 
-    if not check_parameter_length(bands, log_transform):
+    if check_parameter_length(bands, log_transform) is False:
         raise NonMatchingParameterLengthsException("Invalid length for log-base values.")
 
     for item in log_transform:

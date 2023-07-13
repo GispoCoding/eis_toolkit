@@ -61,7 +61,7 @@ def binarize(  # type: ignore[no-any-unimported]
     if check_raster_bands(raster, bands) is False:
         raise InvalidRasterBandException("Invalid band selection.")
 
-    if not check_parameter_length(bands, thresholds):
+    if check_parameter_length(bands, thresholds) is False:
         raise NonMatchingParameterLengthsException("Invalid threshold length.")
 
     expanded_args = expand_and_zip(bands, thresholds)

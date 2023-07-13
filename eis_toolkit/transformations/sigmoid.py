@@ -83,11 +83,11 @@ def sigmoid_transform(  # type: ignore[no-any-unimported]
         raise InvalidRasterBandException("Invalid band selection")
 
     for parameter_name, parameter in [("bounds", bounds), ("slope", slope)]:
-        if not check_parameter_length(bands, parameter):
+        if check_parameter_length(bands, parameter) is False:
             raise NonMatchingParameterLengthsException(f"Invalid length for {parameter_name}.")
 
     for item in bounds:
-        if not check_minmax_position(item):
+        if check_minmax_position(item) is False:
             raise InvalidParameterValueException(f"Invalid min-max values provided: {item}.")
 
     expanded_args = expand_and_zip(bands, bounds, slope)
