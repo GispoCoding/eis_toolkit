@@ -1,80 +1,58 @@
-class NonMatchingCrsException(Exception):
-    """Exception error class for crs mismatches."""
-
-    pass
+class CoordinatesOutOfBoundsException(Exception):
+    """Exception error class for out of bound coordinates."""
 
 
-class NotApplicableGeometryTypeException(Exception):
-    """Exception error class for not suitable geometry types."""
-
-    pass
+class EmptyDataFrameException(Exception):
+    """Exception error class raised if the dataframe is empty."""
 
 
-class MatchingCrsException(Exception):
-    """Exception error class for crs matches."""
+class FileReadError(Exception):
+    """Exception error class for unsupported file exceptions."""
 
 
-class NumericValueSignException(Exception):
-    """Exception error class for numeric value sign exception."""
+class InvalidColumnException(Exception):
+    """Exception error for invalid column."""
 
-    pass
+
+class InvalidColumnIndexException(Exception):
+    """Exception error for invalid column index."""
 
 
 class InvalidParameterValueException(Exception):
     """Exception error class for invalid parameter values."""
 
-    pass
-
-
-class NonSquarePixelSizeException(Exception):
-    """Exception error class for non-square pixel size."""
-
-    pass
-
-
-class InvalidWindowSizeException(Exception):
-    """Exception error class for invalid window size values."""
-
-    pass
-
 
 class InvalidPixelSizeException(Exception):
     """Exception error class for invalid pixel size."""
 
-    pass
+
+class InvalidRasterBandException(Exception):
+    """Expection error class for invalid raster band selection."""
 
 
-class CoordinatesOutOfBoundsException(Exception):
-    """Exception error class for out of bound coordinates."""
-
-    pass
+class InvalidWktFormatException(Exception):
+    """Exception error for invalid WKT format."""
 
 
-class InvalideContentOfInputDataFrame(Exception):
-    """Exception error class for missing or wrong values in DataFrame."""
-
-    pass
+class MatchingCrsException(Exception):
+    """Exception error class for CRS matches."""
 
 
-class FileReadWriteError(Exception):
-    """Exception error class for an error ocurs during read, write or delete a file."""
-
-    pass
+class MatchingRasterGridException(Exception):
+    """Exception error class for raster grid matches."""
 
 
-class MissingFileOrPath(Exception):
-    """Exception error class for an error ocurs during read, write or delete a file."""
-
-    pass
+class NonMatchingCrsException(Exception):
+    """Exception error class for CRS mismatches."""
 
 
-class NonMatchingImagesExtend(Exception):
-    """Exception error class for extend mismatches."""
-
-    pass
+class NonMatchinParameterLengthsException(Exception):
+    """Exception error class for parameters with different lenghts."""
 
 
-class ModelIsNotFitted(Exception):
-    """Exception error class for not fitted model."""
+class NotApplicableGeometryTypeException(Exception):
+    """Exception error class for not suitable geometry types."""
 
-    pass
+
+class NumericValueSignException(Exception):
+    """Exception error class for numeric value sign exception."""

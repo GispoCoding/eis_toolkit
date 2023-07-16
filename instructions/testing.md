@@ -5,12 +5,16 @@
 We use [pytest](https://docs.pytest.org/) for automated tests. Look to its documentation for examples and guidelines.
 The tests in this repository can also serve as a starting point.
 
-All tests should be under the `tests/` directory. Structure them into modules based on what functionality they are testing.
-For example, `clip_test.py` to test clipping.
+All tests should be under the `tests/` directory under a correct subfolder for the module, e.g. `raster_processing/`. Put test of one module into one file, for example, `clip_test.py` to test clipping functions.
 
 running tests is as simple as executing
 ```console
 pytest
+```
+
+or if you are not inside Poetry shell
+```console
+poetry run pytest
 ```
 in the container's command line.
 
