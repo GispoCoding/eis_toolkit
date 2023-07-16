@@ -1,5 +1,5 @@
 
-# sklearn_model_fit_test.py
+# sklearn_model_validations_test.py
 ##############################
 import pytest
 # import numpy as np
@@ -19,6 +19,7 @@ from eis_toolkit.transformations.all_onehotencoder import *
 from eis_toolkit.transformations.all_unification import *
 from eis_toolkit.model_training.sklearn_randomforest_classifier import *
 from eis_toolkit.model_training.sklearn_model_fit import *
+from eis_toolkit.prediction_methods.sklearn_model_prediction import *
 
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
@@ -28,7 +29,7 @@ from eis_toolkit.model_training.sklearn_model_fit import *
 parent_dir = Path(__file__).parent
 name_fc = str(parent_dir.joinpath(r'data/shps/EIS_gp.gpkg'))
 layer_name = r'Occ_2'
-name_csv = str(parent_dir.joinpath(r'data/csv/Trainings_Test.csv'))
+name_csv = str(parent_dir.joinpath(r'data/csv/Test_Test.csv'))
 
 # grid:
 parent_dir = Path(__file__).parent
@@ -76,20 +77,25 @@ Xdf_enh, eho = all_onehotencoder(df = Xcdf)
 Xdf = all_unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
 # model
 sklearnMl = sklearn_randomforest_classifier(oob_score = True)
+# fit
+sklearnMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
 
 #################################################################
 
-def test_sklearn_model_fit():
-    """Test functionality of fitting of a model."""
+def test_sklearn_model_prediction():
+    """Test functionality of prediction based on a model."""
 
-    myMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
+    ydf = sklearn_model_prediction(sklearnMl = sklearnMl ,Xdf = Xdf) 
 
-def test_sklearn_model_fit_error():
+    assert (isinstance(ydf,pd.DataFrame))
+    assert len(Xdf.index) == len(ydf.index) 
+
+def test_sklearn_model_prediction_error():
     """Test wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        myMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = sklearnMl, ydf = ydf)
+        ydf = sklearn_model_prediction(sklearnMl = Xdf_enh ,Xdf = Xdf)
     with pytest.raises(InvalidParameterValueException):
-        myMl = sklearn_model_fit (sklearnMl = ydf , Xdf = Xdf , ydf = ydf)
+        ydf = sklearn_model_prediction(sklearnMl = sklearnMl ,Xdf = '_') 
 
-test_sklearn_model_fit()
-test_sklearn_model_fit_error()
+test_sklearn_model_prediction()
+test_sklearn_model_prediction_error()

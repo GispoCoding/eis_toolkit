@@ -1,5 +1,5 @@
 
-# sklearn_model_fit_test.py
+# sklearn_model_validations_test.py
 ##############################
 import pytest
 # import numpy as np
@@ -18,7 +18,7 @@ from eis_toolkit.transformations.all_nodata_replace import *
 from eis_toolkit.transformations.all_onehotencoder import *
 from eis_toolkit.transformations.all_unification import *
 from eis_toolkit.model_training.sklearn_randomforest_classifier import *
-from eis_toolkit.model_training.sklearn_model_fit import *
+from eis_toolkit.validation.sklearn_model_validations import *
 
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
@@ -79,17 +79,21 @@ sklearnMl = sklearn_randomforest_classifier(oob_score = True)
 
 #################################################################
 
-def test_sklearn_model_fit():
-    """Test functionality of fitting of a model."""
+def test_sklearn_model_validations():
+    """Test functionality of validation of a model."""
 
-    myMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
+    validation , confusion , comparison , myMl = sklearn_model_validations (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf , comparison = True , confusion_matrix = True , test_size = 0.2)
 
-def test_sklearn_model_fit_error():
+    assert isinstance(validation,pd.DataFrame)
+    assert ((isinstance(confusion,pd.DataFrame)) or (confusion is None))
+    assert ((isinstance(comparison,pd.DataFrame)) or (comparison is None))
+
+def test_sklearn_model_validations_error():
     """Test wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        myMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = sklearnMl, ydf = ydf)
+        validation , confusion , comparison , myMl = sklearn_model_validations (sklearnMl = Xdf , Xdf = Xdf , ydf = ydf , comparison = True , confusion_matrix = True , test_size = 0.2)
     with pytest.raises(InvalidParameterValueException):
-        myMl = sklearn_model_fit (sklearnMl = ydf , Xdf = Xdf , ydf = ydf)
+        validation , confusion , comparison , myMl = sklearn_model_validations (sklearnMl = sklearnMl , Xdf = ' ' , ydf = ydf , comparison = True , confusion_matrix = True , test_size = 0.2)
 
-test_sklearn_model_fit()
-test_sklearn_model_fit_error()
+test_sklearn_model_validations()
+test_sklearn_model_validations_error()

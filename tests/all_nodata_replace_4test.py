@@ -1,6 +1,6 @@
 
-# sklearn_model_fit_test.py
-##############################
+# all_nodata_replace_test.py
+###################################
 import pytest
 # import numpy as np
 import sys
@@ -15,20 +15,15 @@ from eis_toolkit.conversions.all_import_featureclass import *
 from eis_toolkit.conversions.all_import_grid import *
 from eis_toolkit.transformations.all_separation import *
 from eis_toolkit.transformations.all_nodata_replace import *
-from eis_toolkit.transformations.all_onehotencoder import *
-from eis_toolkit.transformations.all_unification import *
-from eis_toolkit.model_training.sklearn_randomforest_classifier import *
-from eis_toolkit.model_training.sklearn_model_fit import *
-
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 #################################################################
 # import of data from all_import_featureclass or all_import_grid
 # fc or csv:
 parent_dir = Path(__file__).parent
-name_fc = str(parent_dir.joinpath(r'data/shps/EIS_gp.gpkg'))
+name_fc = parent_dir.joinpath(r'data/shps/EIS_gp.gpkg')
 layer_name = r'Occ_2'
-name_csv = str(parent_dir.joinpath(r'data/csv/Trainings_Test.csv'))
+name_csv = parent_dir.joinpath(r'data/csv/Trainings_Test.csv') 
 
 # grid:
 parent_dir = Path(__file__).parent
@@ -63,33 +58,30 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
        'Si_Ca':'v','Ca_Fe':'v','Ca_Ti':'v','Mg_Al':'v','Si_Mg':'v','Mg_Fe':'v','Mg_Ti':'v','Si_Al':'v',
        'Al_Fe':'v','Al_Ti':'v','Si_Fe':'v','Si_Ti':'v','Fe_Ti':'v'}
 
+# Import
 # columns , df , urdf , metadata = all_import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
 columns , df , urdf , metadata = all_import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
 #columns , df , metadata = all_import_grid(grids = grids) 
 # Separation
 Xvdf , Xcdf , ydf , igdf = all_separation(df = df, fields = columns) 
-# nodata_replacement of 
-Xcdf = all_nodata_replace(df = Xcdf, rtype = 'most_frequent') 
-# onehotencoder
-Xdf_enh, eho = all_onehotencoder(df = Xcdf)
-# unification
-Xdf = all_unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
-# model
-sklearnMl = sklearn_randomforest_classifier(oob_score = True)
+
 
 #################################################################
 
-def test_sklearn_model_fit():
-    """Test functionality of fitting of a model."""
+def test_all_nodata_replace():
+    """Test functionality of nodata_replace of imported X and seperated X."""
+    Xvdf1 = all_nodata_replace(df = Xvdf, rtype = 'replace') 
+    Xcdf1 = all_nodata_replace(df = Xcdf, rtype = 'most_frequent') 
 
-    myMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
+    assert ((isinstance(Xcdf1,pd.DataFrame)) or (Xcdf1 is None))
+    assert ((isinstance(Xvdf1,pd.DataFrame)) or (Xvdf1 is None))
+    assert len(Xvdf1.index) == len(Xcdf1.index) 
 
-def test_sklearn_model_fit_error():
-    """Test wrong arguments."""
+def test_all_nodata_replace_error():
+    """Test wrong arguments of nodata_replace with wrong argumnts."""
     with pytest.raises(InvalidParameterValueException):
-        myMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = sklearnMl, ydf = ydf)
-    with pytest.raises(InvalidParameterValueException):
-        myMl = sklearn_model_fit (sklearnMl = ydf , Xdf = Xdf , ydf = ydf)
+        ydf1 = all_nodata_replace(df = ydf, rtype = 'wrong')
 
-test_sklearn_model_fit()
-test_sklearn_model_fit_error()
+test_all_nodata_replace()
+test_all_nodata_replace_error()
+

@@ -1,5 +1,5 @@
 
-# sklearn_model_fit_test.py
+# all_separation_test.py
 ##############################
 import pytest
 # import numpy as np
@@ -14,12 +14,6 @@ import pandas as pd
 from eis_toolkit.conversions.all_import_featureclass import *
 from eis_toolkit.conversions.all_import_grid import *
 from eis_toolkit.transformations.all_separation import *
-from eis_toolkit.transformations.all_nodata_replace import *
-from eis_toolkit.transformations.all_onehotencoder import *
-from eis_toolkit.transformations.all_unification import *
-from eis_toolkit.model_training.sklearn_randomforest_classifier import *
-from eis_toolkit.model_training.sklearn_model_fit import *
-
 #from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 #################################################################
@@ -66,30 +60,24 @@ fields_csv=  {'LfdNr':'i','Tgb':'t','TgbNr':'n','SchneiderThiele':'c','SuTNr':'c
 # columns , df , urdf , metadata = all_import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
 columns , df , urdf , metadata = all_import_featureclass(fields = fields_csv , file = name_csv , decimalpoint_german = True) 
 #columns , df , metadata = all_import_grid(grids = grids) 
-# Separation
-Xvdf , Xcdf , ydf , igdf = all_separation(df = df, fields = columns) 
-# nodata_replacement of 
-Xcdf = all_nodata_replace(df = Xcdf, rtype = 'most_frequent') 
-# onehotencoder
-Xdf_enh, eho = all_onehotencoder(df = Xcdf)
-# unification
-Xdf = all_unification(Xvdf = Xvdf, Xcdf = Xdf_enh)
-# model
-sklearnMl = sklearn_randomforest_classifier(oob_score = True)
 
 #################################################################
 
-def test_sklearn_model_fit():
-    """Test functionality of fitting of a model."""
+def test_all_separation():
+    """Test functionality of separation of imported X (Dataframe)."""
+    Xvdf , Xcdf , ydf , igdf = all_separation(df = df, fields = columns) 
 
-    myMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
+    assert ((isinstance(Xcdf,pd.DataFrame)) or (Xcdf is None))
+    assert ((isinstance(Xvdf,pd.DataFrame)) or (Xvdf is None))
+    assert ((isinstance(ydf,pd.DataFrame)) or (ydf is None))
+    assert ((isinstance(igdf,pd.DataFrame)) or (igdf is None))
+    if (Xvdf is not None) and (ydf is not None):
+        assert len(Xcdf.index) == len(ydf.index) 
 
-def test_sklearn_model_fit_error():
-    """Test wrong arguments."""
+def test_all_separation_error():
+    """Test wrong arguments of separation of imported X (Dataframe) with wrong arguments."""
     with pytest.raises(InvalidParameterValueException):
-        myMl = sklearn_model_fit (sklearnMl = sklearnMl , Xdf = sklearnMl, ydf = ydf)
-    with pytest.raises(InvalidParameterValueException):
-        myMl = sklearn_model_fit (sklearnMl = ydf , Xdf = Xdf , ydf = ydf)
+        Xvdf , Xcdf , ydf , igdf = all_separation(df = df, fields = 'eins:3') 
 
-test_sklearn_model_fit()
-test_sklearn_model_fit_error()
+test_all_separation()
+test_all_separation_error()
