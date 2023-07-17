@@ -41,12 +41,10 @@ def _winsorize(  # type: ignore[no-any-unimported]
 
     if percentile_lower is not None:
         calculated_lower = np.percentile(clean_array, percentile_lower, method=method_lower)
-        # calculated_lower = np.percentile(clean_array, percentile_lower, method="nearest")
         out_array = np.where(out_array < calculated_lower, calculated_lower, out_array)
 
     if percentile_upper is not None:
         calculated_upper = np.percentile(clean_array, 100 - percentile_upper, method=method_upper)
-        # calculated_upper = np.percentile(clean_array, 100 - percentile_upper, method="nearest")
         out_array = np.where(out_array > calculated_upper, calculated_upper, out_array)
 
     return out_array, calculated_lower, calculated_upper

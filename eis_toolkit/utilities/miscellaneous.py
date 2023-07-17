@@ -3,7 +3,7 @@ from numbers import Number
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Sequence, Any, List, Optional, Tuple, Union
+from beartype.typing import Any, List, Optional, Sequence, Tuple, Union
 
 from eis_toolkit.checks.dataframe import check_columns_valid
 from eis_toolkit.checks.parameter import check_dtype_for_int
@@ -108,7 +108,7 @@ def cast_scalar_to_int(scalar: Number) -> Number:
         return scalar
 
 
-def get_min_int_type(data: Union[np.ndarray, Number]) -> np.dtype:
+def get_min_int_type(data: Union[np.ndarray, int]) -> np.dtype:
     """
     Check for the lowest integer dtype.
 
@@ -122,48 +122,40 @@ def get_min_int_type(data: Union[np.ndarray, Number]) -> np.dtype:
         data_min = np.min(data)
         data_max = np.max(data)
 
-        if isinstance(data, int):
-            if np.iinfo(np.int8).min <= data_min <= data_max <= np.iinfo(np.int8).max:
-                return np.int8
-            elif np.iinfo(np.uint8).min <= data_min <= data_max <= np.iinfo(np.uint8).max:
-                return np.uint8
-            elif np.iinfo(np.int16).min <= data_min <= data_max <= np.iinfo(np.int16).max:
-                return np.int16
-            elif np.iinfo(np.uint16).min <= data_min <= data_max <= np.iinfo(np.uint16).max:
-                return np.uint16
-            elif np.iinfo(np.int32).min <= data_min <= data_max <= np.iinfo(np.int32).max:
-                return np.int32
-            elif np.iinfo(np.uint32).min <= data_min <= data_max <= np.iinfo(np.uint32).max:
-                return np.uint32
-            elif np.iinfo(np.int64).min <= data_min <= data_max <= np.iinfo(np.int64).max:
-                return np.int64
-            elif np.iinfo(np.uint64).min <= data_min <= data_max <= np.iinfo(np.uint64).max:
-                return np.uint64
-        else:
-            return data.dtype
+        if np.iinfo(np.int8).min <= data_min <= data_max <= np.iinfo(np.int8).max:
+            return np.int8
+        elif np.iinfo(np.uint8).min <= data_min <= data_max <= np.iinfo(np.uint8).max:
+            return np.uint8
+        elif np.iinfo(np.int16).min <= data_min <= data_max <= np.iinfo(np.int16).max:
+            return np.int16
+        elif np.iinfo(np.uint16).min <= data_min <= data_max <= np.iinfo(np.uint16).max:
+            return np.uint16
+        elif np.iinfo(np.int32).min <= data_min <= data_max <= np.iinfo(np.int32).max:
+            return np.int32
+        elif np.iinfo(np.uint32).min <= data_min <= data_max <= np.iinfo(np.uint32).max:
+            return np.uint32
+        elif np.iinfo(np.int64).min <= data_min <= data_max <= np.iinfo(np.int64).max:
+            return np.int64
+        elif np.iinfo(np.uint64).min <= data_min <= data_max <= np.iinfo(np.uint64).max:
+            return np.uint64
 
-    if isinstance(data, Number):
-        data = cast_scalar_to_int(data)
-
-        if isinstance(data, int):
-            if np.iinfo(np.int8).min <= data <= np.iinfo(np.int8).max:
-                return np.int8
-            elif np.iinfo(np.uint8).min <= data <= np.iinfo(np.uint8).max:
-                return np.uint8
-            elif np.iinfo(np.int16).min <= data <= np.iinfo(np.int16).max:
-                return np.int16
-            elif np.iinfo(np.uint16).min <= data <= np.iinfo(np.uint16).max:
-                return np.uint16
-            elif np.iinfo(np.int32).min <= data <= np.iinfo(np.int32).max:
-                return np.int32
-            elif np.iinfo(np.uint32).min <= data <= np.iinfo(np.uint32).max:
-                return np.uint32
-            elif np.iinfo(np.int64).min <= data <= np.iinfo(np.int64).max:
-                return np.int64
-            elif np.iinfo(np.uint64).min <= data <= np.iinfo(np.uint64).max:
-                return np.uint64
-        else:
-            return np.min_scalar_type(data)
+    if isinstance(data, int):
+        if np.iinfo(np.int8).min <= data <= np.iinfo(np.int8).max:
+            return np.int8
+        elif np.iinfo(np.uint8).min <= data <= np.iinfo(np.uint8).max:
+            return np.uint8
+        elif np.iinfo(np.int16).min <= data <= np.iinfo(np.int16).max:
+            return np.int16
+        elif np.iinfo(np.uint16).min <= data <= np.iinfo(np.uint16).max:
+            return np.uint16
+        elif np.iinfo(np.int32).min <= data <= np.iinfo(np.int32).max:
+            return np.int32
+        elif np.iinfo(np.uint32).min <= data <= np.iinfo(np.uint32).max:
+            return np.uint32
+        elif np.iinfo(np.int64).min <= data <= np.iinfo(np.int64).max:
+            return np.int64
+        elif np.iinfo(np.uint64).min <= data <= np.iinfo(np.uint64).max:
+            return np.uint64
 
 
 @beartype
@@ -189,9 +181,13 @@ def cast_array_to_int(
         data_dtype = data.dtype
 
     if scalar is not None:
-        scalar_dtype = get_min_int_type(scalar)
-        if scalar_dtype == np.float16:
-            scalar_dtype = np.float32
+        scalar = cast_scalar_to_int(scalar)
+
+        if isinstance(scalar, int):
+            scalar_dtype = get_min_int_type(scalar)
+        else:
+            if np.min_scalar_type(scalar) == np.float16:
+                scalar_dtype = np.float32
         return data.astype(np.result_type(data_dtype, scalar_dtype))
     else:
         return data.astype(data_dtype)
