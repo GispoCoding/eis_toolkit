@@ -50,7 +50,7 @@ def kriging(data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], limits: l
         raise EmptyDataFrameException("The input GeoDataFrame is empty.")
 
     if sum(resolution) <= 0:
-        raise InvalidParameterValueException("The input value for resolution must be greater than zero.")
+        raise InvalidParameterValueException("The resolution must be greater than zero.")
 
     data_interpolated = _kriging(data, resolution, limits)
 
