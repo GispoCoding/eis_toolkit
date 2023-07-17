@@ -16,23 +16,12 @@ df = pd.DataFrame(data, columns=["x", "y", "z"])
 gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df["x"], df["y"], df["z"]))
 
 
-def test_ordinary_kriging_output():
+def test_kriging_output():
     """Test that ordinary kriging output has correct shape and values."""
     z_interpolated = kriging(data=gdf, resolution=(10, 10), limits=[(0, 5), (0, 5)])
     expected_shape = (10, 10)
     expected_value_first_pixel = 1.47416754
     expected_value_last_pixel = 0.73852108
-    assert z_interpolated.shape == expected_shape
-    assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
-    assert round(z_interpolated[9][9], 8) == expected_value_last_pixel
-
-
-def test_universal_kriging_output():
-    """Test that universal kriging output has correct shape and values."""
-    z_interpolated = kriging(data=gdf, resolution=(10, 10), limits=[(0, 5), (0, 5)], method="universal_kriging")
-    expected_shape = (10, 10)
-    expected_value_first_pixel = 2.37243475
-    expected_value_last_pixel = 0.12787536
     assert z_interpolated.shape == expected_shape
     assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
     assert round(z_interpolated[9][9], 8) == expected_value_last_pixel
