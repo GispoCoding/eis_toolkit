@@ -166,7 +166,7 @@ def cast_array_to_int(
     Cast an integer array to minimal precision based on both array and scalar value.
 
     Args:
-        data: Input array
+        data: Input array.
         scalar: Input scalar.
 
     Returns:
