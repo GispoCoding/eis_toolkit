@@ -1,10 +1,9 @@
 from numbers import Number
-from typing import Any, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Sequence
+from beartype.typing import Sequence, Any, List, Optional, Tuple, Union
 
 from eis_toolkit.checks.dataframe import check_columns_valid
 from eis_toolkit.checks.parameter import check_dtype_for_int
@@ -234,7 +233,7 @@ def cast_array_to_float(
 
 
 @beartype
-def truncate_decimal_places(data: Union[np.ndarray, Number], decimal_places: Number) -> Union[np.ndarray, Number]:
+def truncate_decimal_places(data: Union[np.ndarray, Number], decimal_places: int) -> Union[np.ndarray, Number]:
     """
     Truncate an array or number to a certain number of decimal places.
 

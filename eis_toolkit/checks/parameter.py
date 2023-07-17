@@ -1,3 +1,6 @@
+from typing import Union, Sequence, Any
+from numbers import Number
+
 def check_parameter_value(parameter_value: int, allowed_values: list) -> bool:
     """Check if used parameter value is valid.
 
@@ -27,3 +30,16 @@ def check_numeric_value_sign(parameter_value) -> bool:  # type: ignore[no-untype
         return True
     else:
         return False
+
+
+def check_dtype_for_int(scalar: Number) -> bool:
+    """
+    Determine whether a floating scalar can be converted to integer type.
+
+    Args:
+        scalar: Input scalar value.
+
+    Returns:
+        True if conversion can be done, False if not.
+    """
+    return True if isinstance(scalar, int) else scalar.is_integer()
