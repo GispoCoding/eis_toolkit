@@ -18,7 +18,7 @@ gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df["x"], df["y"], df["z"]
 
 def test_kriging_output():
     """Test that ordinary kriging output has correct shape and values."""
-    z_interpolated = kriging(data=gdf, resolution=(10, 10), limits=[(0, 5), (0, 5)])
+    z_interpolated, out_meta = kriging(data=gdf, resolution=(10, 10), limits=(0, 5, 0, 5))
     expected_shape = (10, 10)
     expected_value_first_pixel = 1.47416754
     expected_value_last_pixel = 0.73852108
@@ -31,10 +31,10 @@ def test_empty_geodataframe():
     """Test that empty geodataframe raises the correct exception."""
     empty_gdf = gpd.GeoDataFrame()
     with pytest.raises(EmptyDataFrameException):
-        kriging(data=empty_gdf, resolution=(10, 10), limits=[(0, 5), (0, 5)])
+        kriging(data=empty_gdf, resolution=(10, 10), limits=(0, 5, 0, 5))
 
 
 def test_invalid_resolution():
     """Test that invalid resolution raises the correct exception."""
     with pytest.raises(InvalidParameterValueException):
-        kriging(data=gdf, resolution=(0, 0), limits=[(0, 5), (0, 5)])
+        kriging(data=gdf, resolution=(0, 0), limits=(0, 5, 0, 5))
