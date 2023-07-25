@@ -7,7 +7,11 @@ from beartype import beartype
 from beartype.typing import Tuple
 from pykrige.ok import OrdinaryKriging
 
-from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
+from eis_toolkit.exceptions import (
+    EmptyDataFrameException,
+    InvalidParameterValueException,
+    NotApplicableGeometryTypeException,
+)
 
 
 def _kriging(
@@ -58,6 +62,9 @@ def kriging(
 
     if sum(resolution) <= 0:
         raise InvalidParameterValueException("The resolution must be greater than zero.")
+
+    if False in set(data.geometry.has_z):
+        raise NotApplicableGeometryTypeException("Data points must have z coordinates.")
 
     data_interpolated, out_meta = _kriging(data, resolution, limits)
 

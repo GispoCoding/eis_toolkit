@@ -3,7 +3,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
+from eis_toolkit.exceptions import (
+    EmptyDataFrameException,
+    InvalidParameterValueException,
+    NotApplicableGeometryTypeException,
+)
 from eis_toolkit.vector_processing.kriging_interpolation import kriging
 
 np.random.seed(6)
@@ -13,7 +17,7 @@ z = np.random.uniform(0, 2, size=(10, 1))
 data = np.hstack((x, y, z))
 
 df = pd.DataFrame(data, columns=["x", "y", "z"])
-gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df["x"], df["y"], df["z"]))
+gdf = gpd.GeoDataFrame(geometry=gpd.points_from_xy(df["x"], df["y"], df["z"]))
 
 
 def test_kriging_output():
@@ -38,3 +42,10 @@ def test_invalid_resolution():
     """Test that invalid resolution raises the correct exception."""
     with pytest.raises(InvalidParameterValueException):
         kriging(data=gdf, resolution=(0, 0), limits=(0, 5, 0, 5))
+
+
+def test_invalid_geometry():
+    """Test that invalid geometries raise the correct exception."""
+    gdf_invalid_geometry = gpd.GeoDataFrame(geometry=gpd.points_from_xy(df["x"], df["y"]))
+    with pytest.raises(NotApplicableGeometryTypeException):
+        kriging(data=gdf_invalid_geometry, resolution=(10, 10), limits=(0, 5, 0, 5))
