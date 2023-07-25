@@ -1,35 +1,41 @@
 from numbers import Number
-from typing import Tuple
 
 import geopandas as gpd
 import numpy as np
 import numpy.ma as ma
 from beartype import beartype
+from beartype.typing import Tuple
 from pykrige.ok import OrdinaryKriging
 
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 
 
-def _kriging(data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], limits: list) -> np.ndarray:
+def _kriging(
+    data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], limits: Tuple[Number, Number, Number, Number]
+) -> Tuple[np.ndarray, dict]:
 
     coordinates = np.array(list(data.geometry.apply(lambda geom: [geom.x, geom.y, geom.z])))
     x = coordinates[:, 0]
     y = coordinates[:, 1]
     z = coordinates[:, 2]
 
-    grid_x = np.linspace(limits[0][0], limits[0][1], resolution[0])
-    grid_y = np.linspace(limits[1][0], limits[1][1], resolution[1])
+    grid_x = np.linspace(limits[0], limits[1], resolution[0])
+    grid_y = np.linspace(limits[2], limits[3], resolution[1])
 
     ordinary_kriging = OrdinaryKriging(x, y, z, variogram_model="linear")
-    z_interpolated, sigma_squared = ordinary_kriging.execute("grid", grid_x, grid_y)
+    z_interpolated, _ = ordinary_kriging.execute("grid", grid_x, grid_y)
 
     z_interpolated = ma.getdata(z_interpolated)
 
-    return z_interpolated
+    out_meta = {"crs": data.crs, "width": len(grid_x), "height": len(grid_y)}
+
+    return z_interpolated, out_meta
 
 
 @beartype
-def kriging(data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], limits: list) -> np.ndarray:
+def kriging(
+    data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], limits: Tuple[Number, Number, Number, Number]
+) -> Tuple[np.ndarray, dict]:
     """
     Perform Kriging interpolation on the input data.
 
@@ -40,6 +46,7 @@ def kriging(data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], limits: l
 
     Returns:
         z_interpolated: Grid containing the interpolated values.
+        out_meta: Metadata
 
     Raises:
         EmptyDataFrameException: The input GeoDataFrame is empty.
@@ -52,6 +59,6 @@ def kriging(data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], limits: l
     if sum(resolution) <= 0:
         raise InvalidParameterValueException("The resolution must be greater than zero.")
 
-    data_interpolated = _kriging(data, resolution, limits)
+    data_interpolated, out_meta = _kriging(data, resolution, limits)
 
-    return data_interpolated
+    return data_interpolated, out_meta
