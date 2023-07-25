@@ -1,12 +1,11 @@
 import numpy as np
-
 from beartype import beartype
 
 
 @beartype
 def convert_rad_to_degree(data: np.ndarray) -> np.ndarray:
     """
-    Unit conversion from radians to degree.
+    Convert radians to degree.
 
     Args:
       data: Input numpy array.
@@ -15,27 +14,28 @@ def convert_rad_to_degree(data: np.ndarray) -> np.ndarray:
       The converted array in degree values.
     """
 
-    return data * (180.0 / np.pi)
+    return np.where(data >= 0, data * (180.0 / np.pi), data)
 
 
+@beartype
 def convert_rad_to_rise(data: np.ndarray) -> np.ndarray:
     """
-    Unit conversion from radians to percent rise.
+    Convert radians to percent rise.
 
     Args:
       data: Input numpy array.
 
     Returns:
       The converted array in percent rise values.
-
     """
 
-    return np.tan(data) * 100.0
+    return np.where(data >= 0, np.tan(data) * 100.0, data)
 
 
+@beartype
 def convert_degree_to_rad(data: np.ndarray) -> np.ndarray:
     """
-    Unit conversion from degree to radians.
+    Convert degree to radians.
 
     Args:
       data: Input numpy array.
@@ -44,4 +44,4 @@ def convert_degree_to_rad(data: np.ndarray) -> np.ndarray:
       The converted array in radian values.
     """
 
-    return (data / 180.0) * np.pi
+    return np.where(data >= 0, (data / 180.0) * np.pi, data)
