@@ -34,7 +34,7 @@ def method_horn(data: np.ndarray, cellsize: Number, parameter: Literal) -> np.nd
 
 
 @beartype
-def method_zevenbergen_thorne(data: np.ndarray, cellsize: Number, parameter: Literal) -> np.ndarray:
+def method_zevenbergen(data: np.ndarray, cellsize: Number, parameter: Literal) -> np.ndarray:
     """
     Calculate the partial derivatives of a surface after Zevenbergen & Thorne (1987).
 
