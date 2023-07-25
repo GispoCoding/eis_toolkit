@@ -6,7 +6,7 @@ import pytest
 import rasterio
 from shapely.geometry import Point
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 from eis_toolkit.vector_processing.simple_idw import simple_idw
 
 test_dir = Path(__file__).parent.parent
@@ -93,7 +93,7 @@ def test_invalid_column(test_points):
     extent = None
     power = 2
 
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         simple_idw(
             geodataframe=test_points, target_column=target_column, resolution=resolution, extent=extent, power=power
         )
@@ -106,7 +106,7 @@ def test_empty_geodataframe(test_empty_gdf):
     extent = None
     power = 5
 
-    with pytest.raises(exceptions.EmptyDataFrameException):
+    with pytest.raises(EmptyDataFrameException):
         simple_idw(
             geodataframe=test_empty_gdf, target_column=target_column, resolution=resolution, extent=extent, power=power
         )

@@ -3,9 +3,9 @@ from numbers import Number
 import geopandas as gpd
 import numpy as np
 from beartype import beartype
-from beartype.typing import Optional, Tuple
+from beartype.typing import Optional, Tuple, Union
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 
 
 @beartype
@@ -13,15 +13,15 @@ def _simple_idw(
     geodataframe: gpd.GeoDataFrame,
     target_column: str,
     resolution: Tuple[Number, Number],
-    extent: Optional[Tuple[float, float, float, float]] = None,
-    power: Optional[Number] = 2,
+    power: Number,
+    extent: Union[Tuple[Number, Number, Number, Number], None],
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     if geodataframe.shape[0] == 0:
-        raise exceptions.EmptyDataFrameException("Expected geodataframe to contain geometries.")
+        raise EmptyDataFrameException("Expected geodataframe to contain geometries.")
 
     if target_column not in geodataframe.columns:
-        raise exceptions.InvalidParameterValueException(
+        raise InvalidParameterValueException(
             f"Expected value_column ({target_column}) to be contained in geodataframe columns."
         )
 
@@ -37,9 +37,6 @@ def _simple_idw(
         x_min, y_min, x_max, y_max = extent
 
     resolution_x, resolution_y = resolution
-
-    #  num_points_x = int((x_max - x_min) / resolution_x) + 1
-    #  num_points_y = int((y_max - y_min) / resolution_y) + 1
 
     num_points_x = int((x_max - x_min) / resolution_x)
     num_points_y = int((y_max - y_min) / resolution_y)
@@ -65,13 +62,13 @@ def _simple_idw(
 
 
 #  Distance calculations
-def _distance_matrix(x0, y0, x1, y1):
+def _distance_matrix(x0, y0, x1, y1: np.ndarray) -> np.ndarray:
     d0 = np.subtract.outer(x0, x1)
     d1 = np.subtract.outer(y0, y1)
     return np.hypot(d0, d1)
 
 
-def _idw(x, y, z, xi, yi, power=2):
+def _idw(x, y, z, xi, yi: np.ndarray, power: Number) -> np.ndarray:
     dist = _distance_matrix(x, y, xi, yi)
     # Add a small epsilon to avoid division by zero
     dist = np.where(dist == 0, 1e-12, dist)
@@ -86,8 +83,8 @@ def simple_idw(
     geodataframe: gpd.GeoDataFrame,
     target_column: str,
     resolution: Tuple[Number, Number],
-    extent: Optional[Tuple[float, float, float, float]] = None,
-    power: Optional[int] = 2,
+    extent: Optional[Tuple[Number, Number, Number, Number]] = None,
+    power: Optional[Number] = 2.0,
 ) -> Tuple[float, float, dict]:
     """Calculate simple inverse distance weighted (IDW) interpolation.
 
@@ -104,5 +101,5 @@ def simple_idw(
     Returns:
         Rasterized vector data and metadata.
     """
-    x, y, interpolated_values = _simple_idw(geodataframe, target_column, resolution, extent, power)
+    x, y, interpolated_values = _simple_idw(geodataframe, target_column, resolution, power, extent)
     return x, y, interpolated_values
