@@ -7,7 +7,11 @@ from numbers import Number
 
 
 @beartype
-def method_horn(data: np.ndarray, cellsize: Number, parameter: Literal) -> np.ndarray:
+def _method_horn(
+    data: np.ndarray,
+    cellsize: Number,
+    parameter: Literal,
+) -> np.ndarray:
     """
     Calculate the partial derivatives of a surface after after Horn (1981).
 
@@ -34,7 +38,11 @@ def method_horn(data: np.ndarray, cellsize: Number, parameter: Literal) -> np.nd
 
 
 @beartype
-def method_zevenbergen(data: np.ndarray, cellsize: Number, parameter: Literal) -> np.ndarray:
+def _method_zevenbergen(
+    data: np.ndarray,
+    cellsize: Number,
+    parameter: Literal,
+) -> np.ndarray:
     """
     Calculate the partial derivatives of a surface after Zevenbergen & Thorne (1987).
 

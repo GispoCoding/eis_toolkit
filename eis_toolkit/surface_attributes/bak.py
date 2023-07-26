@@ -24,11 +24,11 @@ def _get_base_parameters_zevenbergen():
     pass
 
 
-def _get_slope():
+def _slope():
     pass
 
 
-def _get_aspect():
+def _aspect():
     pass
 
 
