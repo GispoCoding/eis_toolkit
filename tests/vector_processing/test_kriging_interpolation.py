@@ -21,7 +21,7 @@ gdf = gpd.GeoDataFrame(geometry=gpd.points_from_xy(df["x"], df["y"], df["z"]))
 
 
 def test_kriging_output():
-    """Test that ordinary kriging output has correct shape and values."""
+    """Test that kriging output has correct shape and values."""
     z_interpolated, out_meta = kriging(data=gdf, resolution=(10, 10), extent=(0, 5, 0, 5))
     expected_shape = (10, 10)
     expected_value_first_pixel = 1.47416754
