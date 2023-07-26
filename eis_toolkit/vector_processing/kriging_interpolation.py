@@ -49,8 +49,7 @@ def kriging(
         limits: Limits of the output grid.
 
     Returns:
-        z_interpolated: Grid containing the interpolated values.
-        out_meta: Raster metadata
+        Grid containing the interpolated values and metadata.
 
     Raises:
         EmptyDataFrameException: The input GeoDataFrame is empty.
