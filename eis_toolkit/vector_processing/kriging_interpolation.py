@@ -55,6 +55,7 @@ def kriging(
     Raises:
         EmptyDataFrameException: The input GeoDataFrame is empty.
         InvalidParameterValueException: The resolution is not greater than zero.
+        NotApplicableGeometryTypeException: GeoDataFrame's geometry is missing z coordinates.
     """
 
     if data.empty:
