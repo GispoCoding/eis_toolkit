@@ -15,7 +15,7 @@ from eis_toolkit.exceptions import (
 
 
 def _kriging(
-    data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], limits: Tuple[Number, Number, Number, Number]
+    data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], extent: Tuple[Number, Number, Number, Number]
 ) -> Tuple[np.ndarray, dict]:
 
     coordinates = np.array(list(data.geometry.apply(lambda geom: [geom.x, geom.y, geom.z])))
@@ -23,8 +23,8 @@ def _kriging(
     y = coordinates[:, 1]
     z = coordinates[:, 2]
 
-    grid_x = np.linspace(limits[0], limits[1], resolution[0])
-    grid_y = np.linspace(limits[2], limits[3], resolution[1])
+    grid_x = np.linspace(extent[0], extent[1], resolution[0])
+    grid_y = np.linspace(extent[2], extent[3], resolution[1])
 
     ordinary_kriging = OrdinaryKriging(x, y, z, variogram_model="linear")
     z_interpolated, _ = ordinary_kriging.execute("grid", grid_x, grid_y)
@@ -38,7 +38,7 @@ def _kriging(
 
 @beartype
 def kriging(
-    data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], limits: Tuple[Number, Number, Number, Number]
+    data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], extent: Tuple[Number, Number, Number, Number]
 ) -> Tuple[np.ndarray, dict]:
     """
     Perform Kriging interpolation on the input data.
@@ -50,7 +50,7 @@ def kriging(
 
     Returns:
         z_interpolated: Grid containing the interpolated values.
-        out_meta: Metadata
+        out_meta: Raster metadata
 
     Raises:
         EmptyDataFrameException: The input GeoDataFrame is empty.
@@ -66,6 +66,6 @@ def kriging(
     if False in set(data.geometry.has_z):
         raise NotApplicableGeometryTypeException("Data points must have z coordinates.")
 
-    data_interpolated, out_meta = _kriging(data, resolution, limits)
+    data_interpolated, out_meta = _kriging(data, resolution, extent)
 
     return data_interpolated, out_meta
