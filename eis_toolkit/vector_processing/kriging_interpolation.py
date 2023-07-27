@@ -15,7 +15,10 @@ from eis_toolkit.exceptions import (
 
 
 def _kriging(
-    data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], extent: Tuple[Number, Number, Number, Number]
+    data: gpd.GeoDataFrame,
+    resolution: Tuple[Number, Number],
+    extent: Tuple[Number, Number, Number, Number],
+    variogram_model: str,
 ) -> Tuple[np.ndarray, dict]:
 
     coordinates = np.array(list(data.geometry.apply(lambda geom: [geom.x, geom.y, geom.z])))
@@ -26,7 +29,7 @@ def _kriging(
     grid_x = np.linspace(extent[0], extent[1], resolution[0])
     grid_y = np.linspace(extent[2], extent[3], resolution[1])
 
-    ordinary_kriging = OrdinaryKriging(x, y, z, variogram_model="linear")
+    ordinary_kriging = OrdinaryKriging(x, y, z, variogram_model)
     z_interpolated, _ = ordinary_kriging.execute("grid", grid_x, grid_y)
 
     z_interpolated = ma.getdata(z_interpolated)
@@ -38,7 +41,10 @@ def _kriging(
 
 @beartype
 def kriging(
-    data: gpd.GeoDataFrame, resolution: Tuple[Number, Number], extent: Tuple[Number, Number, Number, Number]
+    data: gpd.GeoDataFrame,
+    resolution: Tuple[Number, Number],
+    extent: Tuple[Number, Number, Number, Number],
+    variogram_model: str = "linear",
 ) -> Tuple[np.ndarray, dict]:
     """
     Perform Kriging interpolation on the input data.
@@ -47,6 +53,7 @@ def kriging(
         data: GeoDataFrame containing the input data.
         resolution: Size of the output grid.
         extent: Limits of the output grid.
+        variogram_model: Variogram model to be used. Optional parameter.
 
     Returns:
         Grid containing the interpolated values and metadata.
@@ -66,6 +73,11 @@ def kriging(
     if False in set(data.geometry.has_z):
         raise NotApplicableGeometryTypeException("Data points must have z coordinates.")
 
-    data_interpolated, out_meta = _kriging(data, resolution, extent)
+    if variogram_model not in ("linear", "power", "gaussian", "spherical", "exponential", "hole-effect"):
+        raise InvalidParameterValueException(
+            "Variogram model must be 'linear', 'power', 'gaussian', 'spherical', 'exponential' or 'hole-effect'."
+        )
+
+    data_interpolated, out_meta = _kriging(data, resolution, extent, variogram_model)
 
     return data_interpolated, out_meta
