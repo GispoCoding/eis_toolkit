@@ -53,14 +53,14 @@ def kriging(
         data: GeoDataFrame containing the input data.
         resolution: Size of the output grid.
         extent: Limits of the output grid.
-        variogram_model: Variogram model to be used. Optional parameter.
+        variogram_model: Variogram model to be used. Defaults to 'linear'.
 
     Returns:
         Grid containing the interpolated values and metadata.
 
     Raises:
         EmptyDataFrameException: The input GeoDataFrame is empty.
-        InvalidParameterValueException: The resolution is not greater than zero.
+        InvalidParameterValueException: The resolution is not greater than zero or variogram model is invalid.
         NotApplicableGeometryTypeException: GeoDataFrame's geometry is missing z coordinates.
     """
 
