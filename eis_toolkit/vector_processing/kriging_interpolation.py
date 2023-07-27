@@ -46,7 +46,7 @@ def kriging(
     Args:
         data: GeoDataFrame containing the input data.
         resolution: Size of the output grid.
-        limits: Limits of the output grid.
+        extent: Limits of the output grid.
 
     Returns:
         Grid containing the interpolated values and metadata.
@@ -60,7 +60,7 @@ def kriging(
     if data.empty:
         raise EmptyDataFrameException("The input GeoDataFrame is empty.")
 
-    if sum(resolution) <= 0:
+    if resolution[0] <= 0 or resolution[1] <= 0:
         raise InvalidParameterValueException("The resolution must be greater than zero.")
 
     if False in set(data.geometry.has_z):
