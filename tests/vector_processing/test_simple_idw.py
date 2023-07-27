@@ -135,3 +135,16 @@ def test_interpolate_vector(test_points):
         ]
     )
     np.testing.assert_allclose(interpolated_value, expected_values, rtol=1e-5, atol=1e-5)
+
+
+def test_invalid_resolution(test_points):
+    """Test invalid resolution."""
+    target_column = "value1"
+    resolution = (1, -0.5)
+    extent = None
+    power = 2
+
+    with pytest.raises(InvalidParameterValueException):
+        simple_idw(
+            geodataframe=test_points, target_column=target_column, resolution=resolution, extent=extent, power=power
+        )

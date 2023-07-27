@@ -17,14 +17,6 @@ def _simple_idw(
     extent: Union[Tuple[Number, Number, Number, Number], None],
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
-    if geodataframe.shape[0] == 0:
-        raise EmptyDataFrameException("Expected geodataframe to contain geometries.")
-
-    if target_column not in geodataframe.columns:
-        raise InvalidParameterValueException(
-            f"Expected value_column ({target_column}) to be contained in geodataframe columns."
-        )
-
     points = np.array(geodataframe.geometry.apply(lambda geom: (geom.x, geom.y)).tolist())
     values = geodataframe[target_column].values
 
@@ -100,6 +92,22 @@ def simple_idw(
 
     Returns:
         Rasterized vector data and metadata.
+
+    Raises:
+        EmptyDataFrameException: The input GeoDataFrame is empty.
+        InvalidParameterValueException: Invalid resolution or target_column.
     """
+
+    if geodataframe.shape[0] == 0:
+        raise EmptyDataFrameException("Expected geodataframe to contain geometries.")
+
+    if target_column not in geodataframe.columns:
+        raise InvalidParameterValueException(
+            f"Expected target_column ({target_column}) to be contained in geodataframe columns."
+        )
+
+    if resolution[0] <= 0 or resolution[1] <= 0:
+        raise InvalidParameterValueException("Expected height and width greater than zero.")
+
     x, y, interpolated_values = _simple_idw(geodataframe, target_column, resolution, power, extent)
     return x, y, interpolated_values
