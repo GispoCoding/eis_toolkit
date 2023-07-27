@@ -49,3 +49,9 @@ def test_invalid_geometry():
     gdf_invalid_geometry = gpd.GeoDataFrame(geometry=gpd.points_from_xy(df["x"], df["y"]))
     with pytest.raises(NotApplicableGeometryTypeException):
         kriging(data=gdf_invalid_geometry, resolution=(10, 10), extent=(0, 5, 0, 5))
+
+
+def test_invalid_variogram_model():
+    """Test that invalid variogram model raises the correct exception."""
+    with pytest.raises(InvalidParameterValueException):
+        kriging(gdf, resolution=(10, 10), extent=(0, 5, 0, 5), variogram_model="invalid_model")
