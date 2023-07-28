@@ -8,15 +8,12 @@ from beartype.typing import Tuple
 from pykrige.ok import OrdinaryKriging
 from pykrige.uk import UniversalKriging
 
-from eis_toolkit.exceptions import (
-    EmptyDataFrameException,
-    InvalidParameterValueException,
-    NotApplicableGeometryTypeException,
-)
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 
 
 def _kriging(
     data: gpd.GeoDataFrame,
+    target_column: str,
     resolution: Tuple[Number, Number],
     extent: Tuple[Number, Number, Number, Number],
     variogram_model: str,
@@ -24,10 +21,10 @@ def _kriging(
     drift_terms: list,
 ) -> Tuple[np.ndarray, dict]:
 
-    coordinates = np.array(list(data.geometry.apply(lambda geom: [geom.x, geom.y, geom.z])))
+    coordinates = np.array(list(data.geometry.apply(lambda geom: [geom.x, geom.y])))
     x = coordinates[:, 0]
     y = coordinates[:, 1]
-    z = coordinates[:, 2]
+    z = data[target_column].values
 
     grid_x = np.linspace(extent[0], extent[1], resolution[0])
     grid_y = np.linspace(extent[2], extent[3], resolution[1])
@@ -50,6 +47,7 @@ def _kriging(
 @beartype
 def kriging(
     data: gpd.GeoDataFrame,
+    target_column: str,
     resolution: Tuple[Number, Number],
     extent: Tuple[Number, Number, Number, Number],
     variogram_model: str = "linear",
@@ -61,6 +59,7 @@ def kriging(
 
     Args:
         data: GeoDataFrame containing the input data.
+        target_column: The column name with values for each geometry.
         resolution: Size of the output grid.
         extent: Limits of the output grid.
         variogram_model: Variogram model to be used. Defaults to 'linear'.
@@ -72,19 +71,22 @@ def kriging(
 
     Raises:
         EmptyDataFrameException: The input GeoDataFrame is empty.
-        InvalidParameterValueException: The resolution is not greater than zero, variogram model is invalid,
+        InvalidParameterValueException: Target column name is invalid,
+                                        resolution is not greater than zero,
+                                        variogram model is invalid,
                                         kriging method is invalid or any input drift term is invalid.
-        NotApplicableGeometryTypeException: GeoDataFrame's geometry is missing z coordinates.
     """
 
     if data.empty:
         raise EmptyDataFrameException("The input GeoDataFrame is empty.")
 
+    if target_column not in data.columns:
+        raise InvalidParameterValueException(
+            f"Expected target_column ({target_column}) to be contained in geodataframe columns."
+        )
+
     if resolution[0] <= 0 or resolution[1] <= 0:
         raise InvalidParameterValueException("The resolution must be greater than zero.")
-
-    if False in set(data.geometry.has_z):
-        raise NotApplicableGeometryTypeException("Data points must have z coordinates.")
 
     if variogram_model not in ("linear", "power", "gaussian", "spherical", "exponential", "hole-effect"):
         raise InvalidParameterValueException(
@@ -101,6 +103,8 @@ def kriging(
             "Accepted drift terms are 'regional_linear', 'point_log', 'external_Z', 'specified' and 'functional'."
         )
 
-    data_interpolated, out_meta = _kriging(data, resolution, extent, variogram_model, method, drift_terms)
+    data_interpolated, out_meta = _kriging(
+        data, target_column, resolution, extent, variogram_model, method, drift_terms
+    )
 
     return data_interpolated, out_meta
