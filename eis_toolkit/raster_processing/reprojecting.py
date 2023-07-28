@@ -1,45 +1,45 @@
-from typing import Tuple
-
 import numpy as np
 import rasterio
+from beartype import beartype
+from beartype.typing import Tuple
 from rasterio import warp
 
 from eis_toolkit.exceptions import MatchingCrsException
 
 
 # Core reprojecting functionality used internally by reproject_raster and reproject_and_write_raster
-def _reproject_raster(  # type: ignore[no-any-unimported]
-    src: rasterio.io.DatasetReader, target_EPSG: int, resampling_method: warp.Resampling
+def _reproject_raster(
+    raster: rasterio.io.DatasetReader, target_crs: int, resampling_method: warp.Resampling
 ) -> Tuple[np.ndarray, dict]:
 
-    src_arr = src.read()
-    dst_crs = rasterio.crs.CRS.from_epsg(target_EPSG)
+    src_arr = raster.read()
+    dst_crs = rasterio.crs.CRS.from_epsg(target_crs)
 
     dst_transform, dst_width, dst_height = warp.calculate_default_transform(
-        src.crs,
+        raster.crs,
         dst_crs,
-        src.width,
-        src.height,
-        *src.bounds,
+        raster.width,
+        raster.height,
+        *raster.bounds,
     )
 
-    # Initialize base raster (target raster)
-    dst = np.empty((src.count, dst_height, dst_width))
-    dst.fill(-9999)
+    # Initialize output raster
+    dst = np.empty((raster.count, dst_height, dst_width))
+    dst.fill(raster.meta["nodata"])
 
     out_image = warp.reproject(
         source=src_arr,
-        src_transform=src.transform,
-        src_crs=src.crs,
+        src_transform=raster.transform,
+        src_crs=raster.crs,
         destination=dst,
         dst_transform=dst_transform,
         dst_crs=dst_crs,
-        src_nodata=-9999,
-        dst_nodata=src.meta["nodata"],
+        src_nodata=raster.meta["nodata"],
+        dst_nodata=raster.meta["nodata"],
         resampling=resampling_method,
     )[0]
 
-    out_meta = src.meta.copy()
+    out_meta = raster.meta.copy()
     out_meta.update(
         {
             "crs": dst_crs,
@@ -52,25 +52,28 @@ def _reproject_raster(  # type: ignore[no-any-unimported]
     return out_image, out_meta
 
 
-def reproject_raster(  # type: ignore[no-any-unimported]
-    src: rasterio.io.DatasetReader, target_EPSG: int, resampling_method: warp.Resampling = warp.Resampling.nearest
+@beartype
+def reproject_raster(
+    raster: rasterio.io.DatasetReader, target_crs: int, resampling_method: warp.Resampling = warp.Resampling.nearest
 ) -> Tuple[np.ndarray, dict]:
-    """Reprojects raster to match given coordinate system (EPSG).
+    """Reprojects raster to match given coordinate reference system (EPSG).
 
     Args:
-        raster (rasterio.io.DatasetReader): The raster to be clipped.
-        target_EPSG (int): Target crs as EPSG code.
-        resampling_method (warp.Resampling): Resampling method. Most suitable
-            method depends on the dataset and context. Nearest, bilinear and cubic are some
-            common choices. This parameter defaults to nearest.
+        raster: The raster to be reprojected.
+        target_crs: Target CRS as EPSG code.
+        resampling_method: Resampling method. Most suitable method depends on the dataset and context.
+            Nearest, bilinear and cubic are some common choices. This parameter defaults to nearest.
 
     Returns:
-        out_image (numpy.ndarray): Reprojected raster data.
-        out_meta (dict): The updated metadata.
-    """
-    if target_EPSG == int(src.crs.to_string()[5:]):
-        raise MatchingCrsException
+        The reprojected raster data.
+        The updated metadata.
 
-    out_image, out_meta = _reproject_raster(src, target_EPSG, resampling_method)
+    Raises:
+        NonMatchinCrsException: Raster is already in the target CRS.
+    """
+    if target_crs == int(raster.crs.to_string()[5:]):
+        raise MatchingCrsException("Raster is already in the target CRS.")
+
+    out_image, out_meta = _reproject_raster(raster, target_crs, resampling_method)
 
     return out_image, out_meta

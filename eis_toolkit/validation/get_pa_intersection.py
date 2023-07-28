@@ -1,13 +1,13 @@
-from typing import Tuple
-
 import numpy as np
+from beartype import beartype
+from beartype.typing import Tuple
 from shapely.geometry import LineString
 from shapely.geometry.point import Point
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
-def _get_pa_intersection(  # type: ignore[no-any-unimported]
+def _get_pa_intersection(
     true_positive_rate_values: np.ndarray, proportion_of_area_values: np.ndarray, threshold_values: np.ndarray
 ) -> Point:
     true_positive_area_curve = LineString(np.column_stack((threshold_values, true_positive_rate_values)))
@@ -17,6 +17,7 @@ def _get_pa_intersection(  # type: ignore[no-any-unimported]
     return intersection
 
 
+@beartype
 def get_pa_intersection(
     true_positive_rate_values: np.ndarray, proportion_of_area_values: np.ndarray, threshold_values: np.ndarray
 ) -> Tuple[float, float]:
@@ -26,13 +27,13 @@ def get_pa_intersection(
     Area curve uses inverted proportion of area as y-axis.
 
     Args:
-        true_positive_rate_values (np.ndarray): True positive rate values, values should be within range 0-1.
-        proportion_of_area_values (np.ndarray): Proportion of area values, values should be within range 0-1.
-        threshold_values (np.ndarray): Threshold values that were used to calculate true positive rate and proportion of
+        true_positive_rate_values: True positive rate values, values should be within range 0-1.
+        proportion_of_area_values: Proportion of area values, values should be within range 0-1.
+        threshold_values: Threshold values that were used to calculate true positive rate and proportion of
         area.
 
     Returns:
-        Tuple[float, float]: x and y coordinates of the intersection point.
+        X and y coordinates of the intersection point.
 
     Raises:
         InvalidParameterValueException: true_positive_rate_values or proportion_of_area_values values are out of bounds.

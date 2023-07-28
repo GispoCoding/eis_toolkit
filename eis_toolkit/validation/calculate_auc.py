@@ -1,15 +1,16 @@
 import numpy as np
+from beartype import beartype
 from sklearn import metrics
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
 def _calculate_auc(x_values: np.ndarray, y_values: np.ndarray) -> float:
-    auc_value = metrics.auc(x_values, y_values)
+    auc_value = float(metrics.auc(x_values, y_values))
+    return auc_value
 
-    return float(auc_value)
 
-
+@beartype
 def calculate_auc(x_values: np.ndarray, y_values: np.ndarray) -> float:
     """Calculate area under curve (AUC).
 
@@ -17,11 +18,11 @@ def calculate_auc(x_values: np.ndarray, y_values: np.ndarray) -> float:
     always true positive rate. AUC is calculated with sklearn.metrics.auc which uses trapezoidal rule for calculation.
 
     Args:
-        x_values (np.ndarray): Either proportion of area or false positive rate values.
-        y_values (np.ndarray): True positive rate values.
+        x_values: Either proportion of area or false positive rate values.
+        y_values: True positive rate values.
 
     Returns:
-        auc_value (float): AUC
+        The area under curve.
 
     Raises:
         InvalidParameterValueException: x_values or y_values are out of bounds.
