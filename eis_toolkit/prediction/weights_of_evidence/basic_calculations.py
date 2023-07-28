@@ -7,11 +7,12 @@ import numpy as np
 
 def _basic_calculations(
     ev_rst: rasterio.io.DatasetReader,
-    dep_rst: rasterio.io.DatasetReader
+    dep_rst: rasterio.io.DatasetReader,
+    nan_val: float
 ) -> pd.DataFrame:
 
     geol, dep_ar = np.array(ev_rst.read(1)), np.array(dep_rst.read(1))
-    tot_pxls = np.size(geol) - np.count_nonzero(geol <= -1000000000)
+    tot_pxls = np.size(geol) - np.count_nonzero(geol <= nan_val)
     dep1s, dep0s = np.count_nonzero(dep_ar == 1), np.count_nonzero(dep_ar == 0)
     d_flat, g_flat = dep_ar.flatten(), geol.flatten()
     df_flt = pd.DataFrame({"Clss": g_flat, "Ds": d_flat})
@@ -44,13 +45,15 @@ def _basic_calculations(
 
 def basic_calculations(
     ev_rst: rasterio.io.DatasetReader,
-    dep_rst: rasterio.io.DatasetReader
+    dep_rst: rasterio.io.DatasetReader,
+    nan_val: float
 ) -> pd.DataFrame:
     """Performs basic calculations about the number of point pixels per class of the input raster.
 
     Args:
         ev_rst (rasterio.io.DatasetReader): The evidential raster.
         dep_rst (rasterio.io.DatasetReader): Deposit raster
+        nan_val (float): value of no data
 
     Returns:
         basic_clcs (pandas.DataFrame): dataframe with basic calculations.
@@ -58,5 +61,5 @@ def basic_calculations(
     Raises: None
 
     """
-    basic_clcs = _basic_calculations(ev_rst, dep_rst)
+    basic_clcs = _basic_calculations(ev_rst, dep_rst, nan_val)
     return basic_clcs
