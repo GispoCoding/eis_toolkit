@@ -16,7 +16,7 @@ from sklearn.preprocessing import LabelEncoder
 from eis_toolkit import exceptions
 
 
-def _normalize_data(data) -> Tuple[np.ndarray, float, float]:
+def _normalize_data(data: np.ndarray) -> Tuple[np.ndarray, float, float]:
     y_min = data.min(axis=0)
     y_max = data.max(axis=0)
     dy = y_max - y_min
@@ -31,7 +31,7 @@ def _normalize_data(data) -> Tuple[np.ndarray, float, float]:
     return normalized_data, y_min, y_max
 
 
-def _get_default_palette(color_data_numeric):
+def _get_default_palette(color_data_numeric: bool) -> str:
     if color_data_numeric:
         return "Spectral"
     else:
@@ -79,7 +79,7 @@ def _plot_parallel_coordinates(
 
     main_axis.set_xlim(0, normalized_data.shape[1] - 1)
     main_axis.set_xticks(range(normalized_data.shape[1]))
-    main_axis.set_xticklabels(data_labels, fontsize=14)
+    main_axis.set_xticklabels(data_labels, fontsize=10)
     main_axis.tick_params(axis="x", which="major", pad=7)
     main_axis.spines["right"].set_visible(False)
     main_axis.xaxis.tick_top()
@@ -181,7 +181,7 @@ def plot_parallel_coordinates(
     data_labels = filtered_df.columns.values
     data = filtered_df.to_numpy()
 
-    _plot_parallel_coordinates(
+    fig = _plot_parallel_coordinates(
         data=data,
         data_labels=data_labels,
         color_data=color_data,
@@ -190,3 +190,4 @@ def plot_parallel_coordinates(
         palette_name=palette_name,
         curved_lines=curved_lines,
     )
+    return fig
