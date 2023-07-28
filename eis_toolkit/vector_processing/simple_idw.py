@@ -76,7 +76,7 @@ def simple_idw(
     target_column: str,
     resolution: Tuple[Number, Number],
     extent: Optional[Tuple[Number, Number, Number, Number]] = None,
-    power: Optional[Number] = 2.0,
+    power: Number = 2,
 ) -> Tuple[float, float, dict]:
     """Calculate simple inverse distance weighted (IDW) interpolation.
 
