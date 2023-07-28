@@ -12,11 +12,12 @@ from eis_toolkit.prediction.weights_of_evidence.weights_type import weights_type
 def _calculate_weights(
         ev_rst: rasterio.io.DatasetReader,
         bsc_clc: pd.DataFrame,
+        nan_val: float,
         w_type: int = 0, stud_cont: float = 2
 ) -> Tuple[pd.DataFrame, List, dict]:
 
     df_wgts_test, df_nan = weights_type(
-        bsc_clc, w_type)  # df_nan is not needed
+        bsc_clc, nan_val, w_type)  # df_nan is not needed
     wpls_df = positive_weights(df_wgts_test)
     wmns_df = negative_weights(wpls_df, w_type)
     contrast_df = contrast(wmns_df)
@@ -36,6 +37,7 @@ def _calculate_weights(
 def calculate_weights(
         ev_rst: rasterio.io.DatasetReader,
         bsc_clc: pd.DataFrame,
+        nan_val:float,
         w_type: int = 0, stud_cont: float = 2
 ) -> Tuple[pd.DataFrame, List, dict]:
     """ Calculates weights of spatial associations.
@@ -43,6 +45,7 @@ def calculate_weights(
     Args:
         ev_rst (rasterio.io.DatasetReader): The evidential raster.
         bsc_clc(pd.DataFrame): Dataframe obtained from basic_calculations function.
+        nan_val (float): value of no data
         w_type (int, optional): Accepted values are 0 for unique weights, 1 for cumulative ascending weights, 2 for cumulative descending weights. Defaults to 0.
         stud_cont (float, optional): studentized contrast value to be used for genralization of classes. Not needed if w_type = 0. Defaults to 2.
 
@@ -56,5 +59,5 @@ def calculate_weights(
     """
 
     weights_df, gen_arrys, raster_meta = _calculate_weights(
-        ev_rst, bsc_clc, w_type, stud_cont)
+        ev_rst, bsc_clc, nan_val, w_type, stud_cont)
     return weights_df, gen_arrys, raster_meta

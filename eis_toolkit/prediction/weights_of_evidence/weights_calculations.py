@@ -10,19 +10,21 @@ from eis_toolkit.exceptions import NonMatchingCrsException
 def _weights_calculations(
         ev_rst: rasterio.io.DatasetReader,
         dep_rst: rasterio.io.DatasetReader,
+        nan_val: float,
         w_type: int = 0,
         stud_cont: float = 2
 ) -> Tuple[pd.DataFrame, List, dict]:
 
-    bsc_clc_df = basic_calculations(ev_rst, dep_rst)
+    bsc_clc_df = basic_calculations(ev_rst, dep_rst, nan_val)
     weights_df, raster_gen, raster_meta = calculate_weights(
-        ev_rst, bsc_clc_df, w_type, stud_cont)
+        ev_rst, bsc_clc_df, nan_val, w_type, stud_cont)
     return weights_df, raster_gen, raster_meta
 
 
 def weights_calculations(
     ev_rst: rasterio.io.DatasetReader,
     dep_rst: rasterio.io.DatasetReader,
+    nan_val: float,
     w_type: int = 0,
     stud_cont: float = 2
 ) -> Tuple[pd.DataFrame, List, dict]:
@@ -31,6 +33,7 @@ def weights_calculations(
     Args:
         ev_rst (rasterio.io.DatasetReader): The evidential raster with spatial resolution and extent identical to that of the dep_rst.
         dep_rst (rasterio.io.DatasetReader): Raster representing the mineral deposits or occurences point data. 
+        nan_val (float): value of no data
         w_type (int, optional): Accepted values are 0 for unique weights, 1 for cumulative ascending weights, 2 for cumulative descending weights. Defaults to 0.
         stud_cont (float, optional): studentized contrast value to be used for genralization of classes. Not needed if w_type = 0. Defaults to 2.
 
@@ -58,7 +61,7 @@ def weights_calculations(
     ):
         raise NonMatchingCrsException
     """
-    weights_df, raster_gen, raster_meta = _weights_calculations(ev_rst, dep_rst, w_type, stud_cont)
+    weights_df, raster_gen, raster_meta = _weights_calculations(ev_rst, dep_rst, nan_val, w_type, stud_cont)
 
     return weights_df, raster_gen, raster_meta
 
