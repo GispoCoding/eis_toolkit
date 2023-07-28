@@ -4,7 +4,7 @@ import geopandas as gpd
 import numpy as np
 import numpy.ma as ma
 from beartype import beartype
-from beartype.typing import Tuple
+from beartype.typing import Literal, Tuple
 from pykrige.ok import OrdinaryKriging
 from pykrige.uk import UniversalKriging
 
@@ -16,8 +16,8 @@ def _kriging(
     target_column: str,
     resolution: Tuple[Number, Number],
     extent: Tuple[Number, Number, Number, Number],
-    variogram_model: str,
-    method: str,
+    variogram_model: Literal,
+    method: Literal,
     drift_terms: list,
 ) -> Tuple[np.ndarray, dict]:
 
@@ -50,8 +50,8 @@ def kriging(
     target_column: str,
     resolution: Tuple[Number, Number],
     extent: Tuple[Number, Number, Number, Number],
-    variogram_model: str = "linear",
-    method: str = "ordinary",
+    variogram_model: Literal["linear", "power", "gaussian", "spherical", "exponential", "hole-effect"] = "linear",
+    method: Literal["ordinary", "universal"] = "ordinary",
     drift_terms: list = ["regional_linear"],
 ) -> Tuple[np.ndarray, dict]:
     """
@@ -71,10 +71,7 @@ def kriging(
 
     Raises:
         EmptyDataFrameException: The input GeoDataFrame is empty.
-        InvalidParameterValueException: Target column name is invalid,
-                                        resolution is not greater than zero,
-                                        variogram model is invalid,
-                                        kriging method is invalid or any input drift term is invalid.
+        InvalidParameterValueException: Target column name is invalid or resolution is not greater than zero.
     """
 
     if data.empty:
@@ -87,14 +84,6 @@ def kriging(
 
     if resolution[0] <= 0 or resolution[1] <= 0:
         raise InvalidParameterValueException("The resolution must be greater than zero.")
-
-    if variogram_model not in ("linear", "power", "gaussian", "spherical", "exponential", "hole-effect"):
-        raise InvalidParameterValueException(
-            "Variogram model must be 'linear', 'power', 'gaussian', 'spherical', 'exponential' or 'hole-effect'."
-        )
-
-    if method not in ("ordinary", "universal"):
-        raise InvalidParameterValueException("Kriging method must be either 'ordinary' or 'universal'.")
 
     if any(
         term not in ("regional_linear", "point_log", "external_Z", "specified", "functional") for term in drift_terms

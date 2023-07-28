@@ -2,6 +2,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pytest
+from beartype.roar import BeartypeCallHintParamViolation
 
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 from eis_toolkit.vector_processing.kriging_interpolation import kriging
@@ -62,7 +63,7 @@ def test_invalid_resolution():
 
 def test_invalid_variogram_model():
     """Test that invalid variogram model raises the correct exception."""
-    with pytest.raises(InvalidParameterValueException):
+    with pytest.raises(BeartypeCallHintParamViolation):
         kriging(
             data=gdf, target_column=target_column, resolution=resolution, extent=extent, variogram_model="invalid_model"
         )
@@ -70,7 +71,7 @@ def test_invalid_variogram_model():
 
 def test_invalid_method():
     """Test that invalid kriging method raises the correct exception."""
-    with pytest.raises(InvalidParameterValueException):
+    with pytest.raises(BeartypeCallHintParamViolation):
         kriging(data=gdf, target_column=target_column, resolution=resolution, extent=extent, method="invalid_method")
 
 
