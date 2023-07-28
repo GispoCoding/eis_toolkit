@@ -53,7 +53,7 @@ def basic_calculations(
     Args:
         ev_rst (rasterio.io.DatasetReader): The evidential raster.
         dep_rst (rasterio.io.DatasetReader): Deposit raster
-        nan_val (float): value of no data
+        nan_val (float): value of no data.
 
     Returns:
         basic_clcs (pandas.DataFrame): dataframe with basic calculations.
