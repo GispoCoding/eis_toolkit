@@ -1,16 +1,16 @@
-import scipy
-import numpy as np
-
-from beartype import beartype
-from beartype import Literal
 from numbers import Number
+
+import numpy as np
+import scipy
+from beartype import beartype
+from beartype.typing import Literal
 
 
 @beartype
 def _method_horn(
     data: np.ndarray,
     cellsize: Number,
-    parameter: Literal,
+    parameter: Literal["p", "q"],
 ) -> np.ndarray:
     """
     Calculate the partial derivatives of a surface after after Horn (1981).
@@ -41,13 +41,14 @@ def _method_horn(
 def _method_zevenbergen(
     data: np.ndarray,
     cellsize: Number,
-    parameter: Literal,
+    parameter: Literal["p", "q", "r", "s", "t"],
 ) -> np.ndarray:
     """
     Calculate the partial derivatives of a surface after Zevenbergen & Thorne (1987).
 
     Source:
-    Zevenbergen, L.W. and Thorne, C.R., 1987: Quantitative analysis of land surface topography, Earth Surface Processes and Landforms, 12: 47-56.
+    Zevenbergen, L.W. and Thorne, C.R., 1987: Quantitative analysis of land surface topography,
+    Earth Surface Processes and Landforms, 12: 47-56.
 
     Args:
         data: The input raster data as a numpy array.

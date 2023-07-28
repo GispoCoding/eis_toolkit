@@ -1,37 +1,46 @@
-import rasterio
-import numpy as np
-
 from numbers import Number
-from beartype import beartype
-from beartype.typing import Optional, Union, Literal
 
-from eis_toolkit.surface_attributes.partial_derivatives import _method_horn
-from eis_toolkit.utilities.nodata import nodata_to_nan, nan_to_nodata
-from eis_toolkit.utilities.conversions import convert_rad_to_degree
+import numpy as np
+import rasterio
+from beartype import beartype
+from beartype.typing import Literal, Optional
+
 from eis_toolkit.checks.raster import check_quadratic_pixels
 from eis_toolkit.exceptions import InvalidRasterBandException, NonSquarePixelSizeException
+from eis_toolkit.surface_attributes.partial_derivatives import _method_horn
+from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
+from eis_toolkit.utilities.conversions import convert_rad_to_degree, convert_rad_to_rise
 
 
 @beartype
 def _get_slope(
     raster: rasterio.io.DatasetReader,
-    method: Literal,
+    method: Literal["Horn81"],
+    unit: Literal["degree", "radians", "rise"],
     scaling_factor: Number,
-) -> tuple(np.ndarray, dict):
+) -> tuple[np.ndarray, dict]:
 
     cellsize = raster.res[0]
     out_meta = raster.meta.copy()
-    out_array = np.squeeze(raster.read())
+
+    out_array = raster.read()
+    if out_array.ndim >= 3:
+        out_array = np.squeeze(out_array)
 
     out_array = nodata_to_nan(out_array, nodata_value=raster.nodata)
     out_array = out_array * scaling_factor
 
-    if method == "Horn81" and any(coefficient is None for coefficient in (p, q)):
+    if method == "Horn81":
         p = _method_horn(out_array, cellsize=cellsize, parameter="p")
         q = _method_horn(out_array, cellsize=cellsize, parameter="q")
 
     out_array = np.sqrt(np.square(p) + np.square(q))
-    out_array = np.arctan(out_array) * (180.0 / np.pi)
+    out_array = np.arctan(out_array)
+
+    if unit == "degree":
+        out_array = convert_rad_to_degree(out_array)
+    elif unit == "rise":
+        out_array = convert_rad_to_rise(out_array)
 
     out_array = nan_to_nodata(out_array, nodata_value=raster.nodata).astype(np.float16)
     out_meta.update({"dtype": out_array.dtype.name})
@@ -42,9 +51,10 @@ def _get_slope(
 @beartype
 def get_slope(
     raster: rasterio.io.DatasetReader,
-    method: Literal = "Horn81",
+    method: Literal["Horn81"] = "Horn81",
+    unit: Literal["degree", "radians", "rise"] = "degree",
     scaling_factor: Optional[Number] = 1,
-) -> tuple(np.ndarray, dict):
+) -> tuple[np.ndarray, dict]:
     """
     Calculate the slope of a given surface.
 
@@ -63,4 +73,4 @@ def get_slope(
     if check_quadratic_pixels(raster) is False:
         raise NonSquarePixelSizeException("Processing requires quadratic pixel dimensions.")
 
-    return _get_slope(raster, method, scaling_factor)
+    return _get_slope(raster, method, unit, scaling_factor)
