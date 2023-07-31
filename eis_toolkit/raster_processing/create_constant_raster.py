@@ -131,46 +131,49 @@ def create_constant_raster(  # type: ignore[no-any-unimported]
 
     if template_raster is not None:
         out_array, out_meta = _create_constant_raster_from_template(constant_value, template_raster, nodata_value)
-    else:
+
+    elif all(coords is not None for coords in [coord_west, coord_east, coord_south, coord_north]):
         if raster_height <= 0 or raster_width <= 0:
             raise InvalidParameterValueException("Invalid raster extent provided.")
-        else:
-            if all(coords is not None for coords in [coord_west, coord_east, coord_south, coord_north]):
-                if not check_minmax_position((coord_west, coord_east)):
-                    raise InvalidParameterValueException("Invalid longitude values provided.")
-                elif not check_minmax_position((coord_south, coord_north)):
-                    raise InvalidParameterValueException("Invalid longitude values provided.")
-                else:
-                    out_array, out_meta = _create_constant_raster_from_bounds(
-                        constant_value,
-                        coord_west,
-                        coord_north,
-                        coord_east,
-                        coord_south,
-                        target_epsg,
-                        raster_width,
-                        raster_height,
-                        nodata_value,
-                    )
-            elif all(coords is not None for coords in [coord_west, coord_north]) and all(
-                coords is None for coords in [coord_east, coord_south]
-            ):
-                if target_pixel_size <= 0:
-                    raise InvalidParameterValueException("Invalid pixel size.")
-                else:
-                    out_array, out_meta = _create_constant_raster_from_origin(
-                        constant_value,
-                        coord_west,
-                        coord_north,
-                        target_epsg,
-                        target_pixel_size,
-                        raster_width,
-                        raster_height,
-                        nodata_value,
-                    )
+        if not check_minmax_position((coord_west, coord_east) or not check_minmax_position((coord_south, coord_north))):
+            raise InvalidParameterValueException("Invalid coordinate values provided.")
+        
+        out_array, out_meta = _create_constant_raster_from_bounds(
+            constant_value,
+            coord_west,
+            coord_north,
+            coord_east,
+            coord_south,
+            target_epsg,
+            raster_width,
+            raster_height,
+            nodata_value,
+        )
 
-        constant_value = cast_scalar_to_int(constant_value)
-        nodata_value = cast_scalar_to_int(out_meta["nodata"])
+    elif all(coords is not None for coords in [coord_west, coord_north]) and all(
+        coords is None for coords in [coord_east, coord_south]
+    ):
+        if raster_height <= 0 or raster_width <= 0:
+            raise InvalidParameterValueException("Invalid raster extent provided.")
+        if target_pixel_size <= 0:
+            raise InvalidParameterValueException("Invalid pixel size.")
+
+        out_array, out_meta = _create_constant_raster_from_origin(
+            constant_value,
+            coord_west,
+            coord_north,
+            target_epsg,
+            target_pixel_size,
+            raster_width,
+            raster_height,
+            nodata_value,
+        )
+
+    else:
+        raise InvalidParameterValueException("Suitable parameter values were not provided for any of the 3 methods.")
+
+    constant_value = cast_scalar_to_int(constant_value)
+    nodata_value = cast_scalar_to_int(out_meta["nodata"])
 
     if isinstance(constant_value, int) and isinstance(nodata_value, int):
         target_dtype = np.result_type(get_min_int_type(constant_value), get_min_int_type(nodata_value))
