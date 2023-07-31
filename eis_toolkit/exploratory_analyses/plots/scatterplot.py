@@ -3,9 +3,9 @@ from typing import Any, Literal, Optional, Sequence, Tuple, Union
 import matplotlib
 import pandas as pd
 import seaborn as sns
-from plot_utils import get_palette
 
 from eis_toolkit import exceptions
+from eis_toolkit.exploratory_analyses.plots.plot_utils import get_default_palette
 
 
 def scatterplot(
@@ -69,8 +69,8 @@ def scatterplot(
     if (x is None and y is not None) or (x is not None and y is None):
         raise exceptions.InvalidParameterValueException("If x or y is specified, both need to be specified.")
 
-    if palette:
-        palette = get_palette(data, hue, palette)
+    if hue and not palette:
+        palette = get_default_palette(data, hue, palette)
 
     ax = sns.scatterplot(data=data, x=x, y=y, hue=hue, size=size, style=style, palette=palette, legend=legend, **kwargs)
 

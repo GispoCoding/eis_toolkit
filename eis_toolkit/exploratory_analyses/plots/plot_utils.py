@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def get_palette(data, hue, palette):
+def get_default_palette(data, hue, palette):
     """Get default palette based on data type."""
 
     # Check if hue column data is numeric
