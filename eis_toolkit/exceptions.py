@@ -2,12 +2,20 @@ class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
 
 
+class EmptyArrayException(Exception):
+    """Exception error class raised if the array is empty."""
+
+
 class EmptyDataFrameException(Exception):
     """Exception error class raised if the dataframe is empty."""
 
 
 class FileReadError(Exception):
     """Exception error class for unsupported file exceptions."""
+
+
+class InvalidArrayShapeException(Exception):
+    """Exception error class for invalid array shape."""
 
 
 class InvalidColumnException(Exception):
