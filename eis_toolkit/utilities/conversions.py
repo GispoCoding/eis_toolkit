@@ -18,6 +18,21 @@ def convert_rad_to_degree(data: np.ndarray) -> np.ndarray:
 
 
 @beartype
+def _convert_rad_to_rise(data: np.ndarray) -> np.ndarray:
+    """
+    Convert degrees to percent rise.
+
+    Args:
+      data: Input numpy array.
+
+    Returns:
+      The converted array in percent rise values.
+    """
+
+    return np.where(data >= 0, np.tan(data) * 100.0, data)
+
+
+@beartype
 def convert_degree_to_rise(data: np.ndarray) -> np.ndarray:
     """
     Convert degrees to percent rise.
