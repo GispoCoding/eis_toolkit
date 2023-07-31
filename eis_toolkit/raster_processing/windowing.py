@@ -1,19 +1,23 @@
-from typing import Tuple
+from numbers import Number
 
 import numpy as np
 import rasterio
+from beartype import beartype
+from beartype.typing import Tuple
 from rasterio import transform
 from rasterio.windows import Window
 
-from eis_toolkit.exceptions import CoordinatesOutOfBoundsException, InvalidWindowSizeException, NonMatchingCrsException
+from eis_toolkit.exceptions import CoordinatesOutOfBoundsException, InvalidParameterValueException
 
 
-def _extract_window(  # type: ignore[no-any-unimported]
+def _extract_window(
     raster: rasterio.io.DatasetReader,
-    center_coords: Tuple[float, float],
+    center_coords: Tuple[Number, Number],
     height: int,
     width: int,
 ) -> Tuple[np.ndarray, dict]:
+
+    out_meta = raster.meta.copy()
 
     center_x = center_coords[0]
     center_y = center_coords[1]
@@ -44,7 +48,7 @@ def _extract_window(  # type: ignore[no-any-unimported]
     out_image = raster.read(
         boundless=True,
         window=window,
-        fill_value=-9999,
+        fill_value=out_meta["nodata"],
     )
 
     top_left_coordinates = transform.xy(
@@ -63,7 +67,6 @@ def _extract_window(  # type: ignore[no-any-unimported]
         top_left_coordinates[1],
     )
 
-    out_meta = raster.meta.copy()
     out_meta.update(
         {
             "height": out_image.shape[1],
@@ -75,39 +78,34 @@ def _extract_window(  # type: ignore[no-any-unimported]
     return out_image, out_meta
 
 
-def extract_window(  # type: ignore[no-any-unimported]
+@beartype
+def extract_window(
     raster: rasterio.io.DatasetReader,
-    center_coords: Tuple[float, float],
-    center_coord_crs: int,
+    center_coords: Tuple[Number, Number],
     height: int,
     width: int,
 ) -> Tuple[np.ndarray, dict]:
     """Extract window from raster.
 
        Center coordinate must be inside the raster but window can extent outside the raster in which case padding with
-       -9999 is used.
+       raster nodata value is used.
     Args:
-        raster (rasterio.io.DatasetReader): Source raster.
-        center_coords (Tuple[int, int]): center coordinates for window int the form (x, y).
-        center_coord_crs (int): EPSG code that defines the coordinate reference system.
-        height (int): window height in pixels.
-        width (int): window width in pixels.
+        raster: Source raster.
+        center_coords: Center coordinates for window in form (x, y). The coordinates should be in the raster's CRS.
+        height: Window height in pixels.
+        width: Window width in pixels.
 
     Returns:
-        out_image (numpy.ndarray): Extracted raster window.
-        out_meta (dict): The updated metadata.
+        The extracted raster window.
+        The updated metadata.
 
     Raises:
+        InvalidParameterValueException: Window size is too small.
         CoordinatesOutOfBoundException: Window center coordinates are out of raster bounds.
-        InvalidWindowSizeException: Window size is too small.
-        NonMatchingCrsException: Raster and center coordinates are not in same crs.
     """
 
     if height < 1 or width < 1:
-        raise InvalidWindowSizeException
-
-    if center_coord_crs != int(raster.crs.to_string()[5:]):
-        raise NonMatchingCrsException
+        raise InvalidParameterValueException(f"Window size is too small: {height}, {width}.")
 
     center_x = center_coords[0]
     center_y = center_coords[1]
@@ -118,7 +116,7 @@ def extract_window(  # type: ignore[no-any-unimported]
         or center_y < raster.bounds.bottom
         or center_y > raster.bounds.top
     ):
-        raise CoordinatesOutOfBoundsException
+        raise CoordinatesOutOfBoundsException("Window center coordinates are out of raster bounds.")
 
     out_image, out_meta = _extract_window(raster, center_coords, height, width)
 

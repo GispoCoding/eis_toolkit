@@ -1,18 +1,21 @@
+from typing import Optional
+
 import geopandas
 import numpy as np
 import pandas as pd
 import rasterio
+from beartype import beartype
 
 from eis_toolkit.checks.crs import check_matching_crs
 from eis_toolkit.checks.geometry import check_geometry_types
 from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
 
 
-def _calculate_base_metrics(  # type: ignore[no-any-unimported]
+def _calculate_base_metrics(
     raster: rasterio.io.DatasetReader,
     deposits: geopandas.GeoDataFrame,
-    band: int = 1,
-    negatives: geopandas.GeoDataFrame = None,
+    band: int,
+    negatives: geopandas.GeoDataFrame,
 ) -> pd.DataFrame:
     data_array = raster.read(band)
 
@@ -67,11 +70,12 @@ def _calculate_base_metrics(  # type: ignore[no-any-unimported]
     return base_metrics
 
 
-def calculate_base_metrics(  # type: ignore[no-any-unimported]
+@beartype
+def calculate_base_metrics(
     raster: rasterio.io.DatasetReader,
     deposits: geopandas.GeoDataFrame,
     band: int = 1,
-    negatives: geopandas.GeoDataFrame = None,
+    negatives: Optional[geopandas.GeoDataFrame] = None,
 ) -> pd.DataFrame:
     """Calculate true positive rate, proportion of area and false positive rate values for different thresholds.
 
@@ -80,17 +84,17 @@ def calculate_base_metrics(  # type: ignore[no-any-unimported]
     positive rate is optional and is only done if negative point locations are provided.
 
     Args:
-        raster (rasterio.io.DatasetReader): Mineral prospectivity map or evidence layer.
-        deposits (geopandas.GeoDataFrame): Mineral deposit locations as points.
-        band (int): band index of the mineral prospectivity map, defaults to 1.
-        negatives (gepandas.GeoDataFrame): Negative locations as points.
+        raster: Mineral prospectivity map or evidence layer.
+        deposits: Mineral deposit locations as points.
+        band: Band index of the mineral prospectivity map. Defaults to 1.
+        negatives: Negative locations as points.
 
     Returns:
-        base_metrics: data frame containing true positive rate, proportion of area, threshold_values and false positive
+        DataFrame containing true positive rate, proportion of area, threshold values and false positive
             rate (optional) values.
 
     Raises:
-        NonMatchingCrsException: The raster and point data are not in the same crs.
+        NonMatchingCrsException: The raster and point data are not in the same CRS.
         NotApplicableGeometryTypeException: The input geometries contain non-point features.
     """
     if negatives is not None:
@@ -101,13 +105,13 @@ def calculate_base_metrics(  # type: ignore[no-any-unimported]
     if not check_matching_crs(
         objects=[raster, geometries],
     ):
-        raise NonMatchingCrsException
+        raise NonMatchingCrsException("The raster and deposits are not in the same CRS.")
 
     if not check_geometry_types(
         geometries=geometries,
         allowed_types=["Point"],
     ):
-        raise NotApplicableGeometryTypeException
+        raise NotApplicableGeometryTypeException("The input geometries contain non-point features.")
 
     base_metrics = _calculate_base_metrics(raster=raster, deposits=deposits, band=band, negatives=negatives)
 
