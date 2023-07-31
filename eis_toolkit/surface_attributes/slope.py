@@ -9,7 +9,7 @@ from eis_toolkit.checks.raster import check_quadratic_pixels
 from eis_toolkit.exceptions import InvalidRasterBandException, NonSquarePixelSizeException
 from eis_toolkit.surface_attributes.partial_derivatives import _method_horn
 from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
-from eis_toolkit.utilities.conversions import convert_rad_to_degree, convert_rad_to_rise
+from eis_toolkit.utilities.conversions import convert_rad_to_degree, _convert_rad_to_rise
 
 
 @beartype
@@ -40,7 +40,7 @@ def _get_slope(
     if unit == "degree":
         out_array = convert_rad_to_degree(out_array)
     elif unit == "rise":
-        out_array = convert_rad_to_rise(out_array)
+        out_array = _convert_rad_to_rise(out_array)
 
     out_array = nan_to_nodata(out_array, nodata_value=raster.nodata).astype(np.float16)
     out_meta.update({"dtype": out_array.dtype.name})
