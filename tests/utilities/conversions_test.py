@@ -1,6 +1,6 @@
 import numpy as np
 
-from eis_toolkit.utilities.conversions import convert_degree_to_rad, convert_rad_to_degree, convert_degree_to_rise, _convert_rad_to_rise,
+from eis_toolkit.utilities.conversions import convert_degree_to_rad, convert_rad_to_degree, convert_degree_to_rise, _convert_rad_to_rise
 
 
 def test_rad_to_degree():
