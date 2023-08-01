@@ -14,8 +14,8 @@ class FileReadError(Exception):
     """Exception error class for unsupported file exceptions."""
 
 
-class InvalidArrayShapeException(Exception):
-    """Exception error class for invalid array shape."""
+class InvalidArrayException(Exception):
+    """Exception error class for invalid array."""
 
 
 class InvalidColumnException(Exception):

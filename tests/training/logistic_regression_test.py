@@ -8,7 +8,8 @@ from sklearn.model_selection import train_test_split
 from eis_toolkit.exceptions import (
     EmptyArrayException,
     EmptyDataFrameException,
-    InvalidArrayShapeException,
+    InvalidArrayException,
+    InvalidColumnException,
     InvalidParameterValueException,
 )
 from eis_toolkit.training.logistic_regression import logistic_regression
@@ -32,22 +33,45 @@ def test_logistic_regression_output():
     np.testing.assert_array_equal(output["label"], expected_labels)
 
 
+def test_empty_dataframe():
+    """Test that empty DataFrame raises the correct exception."""
+    with pytest.raises(EmptyDataFrameException):
+        logistic_regression(empty_df, x_train, x_test, y_train, y_test)
+
+
 def test_empty_array():
     """Test that empty array raises the correct exception."""
     with pytest.raises(EmptyArrayException):
         logistic_regression(df, x_train, x_test, y_train, y_test=np.array([]))
 
 
-def test_invalid_shape():
+def test_invalid_number_of_columns():
+    """Test that invalid number of columns in input DataFrame raises the correct exception."""
+    df = pd.DataFrame(np.zeros((1, 3)), columns=["A", "B", "C"])
+    with pytest.raises(InvalidColumnException):
+        logistic_regression(df, x_train, x_test, y_train, y_test)
+
+
+def test_invalid_array_shape():
     """Test that array with invalid shape raises the correct exception."""
-    with pytest.raises(InvalidArrayShapeException):
+    with pytest.raises(InvalidArrayException):
         logistic_regression(df, x_train, x_test, y_train, y_test=np.random.rand((5)))
 
 
-def test_empty_dataframe():
-    """Test that empty DataFrame raises the correct exception."""
-    with pytest.raises(EmptyDataFrameException):
-        logistic_regression(empty_df, x_train, x_test, y_train, y_test)
+def test_invalid_dataframe_column_dtype():
+    """Test that invalid data type in any of DataFrame columns raises the correct exception."""
+    invalid_df = pd.DataFrame({"A": [0], "B": [1], "C": [2], "D": ["foo"]})
+    with pytest.raises(InvalidColumnException):
+        logistic_regression(invalid_df, x_train, x_test, y_train, y_test)
+
+
+def test_invalid_array_element_dtype():
+    """Test that array element with invalid dtype raises the correct exception."""
+    a = np.random.randint(3, size=37)
+    b = np.array(["foo"])
+    invalid_y_test = np.concatenate((a, b), axis=None)
+    with pytest.raises(InvalidArrayException):
+        logistic_regression(df, x_train, x_test, y_train, y_test=invalid_y_test)
 
 
 def test_invalid_penalty():

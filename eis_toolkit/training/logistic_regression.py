@@ -7,7 +7,8 @@ from sklearn.linear_model import LogisticRegression
 from eis_toolkit.exceptions import (
     EmptyArrayException,
     EmptyDataFrameException,
-    InvalidArrayShapeException,
+    InvalidArrayException,
+    InvalidColumnException,
     InvalidParameterValueException,
 )
 
@@ -71,20 +72,36 @@ def logistic_regression(
         DataFrame containing the assigned labels.
 
     Raises:
-        EmptyDataFrameException: The input data or training data DataFrame is empty.
+        EmptyDataFrameException: The input DataFrame is empty.
         EmptyArrayException: Any of the input arrays is empty.
-        InvalidArrayShapeException: The corresponding sample and label arrays are of different lengths.
+        InvalidArrayException:  The corresponding sample and label arrays are of different lengths or there is at least
+                                one non-numeric element in one of the input arrays.
         InvalidParameterValueException: The maximum number of iterations is not at least one.
+        InvalidColumnException: The number of columns in DataFrame is not equal to the number of columns in training
+                                sample array or there is at least one non-numeric column in the DataFrame.
     """
-
     if data.empty:
         raise EmptyDataFrameException("The input DataFrame is empty.")
 
     if any([x_train.size == 0, x_test.size == 0, y_train.size == 0, y_test.size == 0]):
         raise EmptyArrayException("All the input arrays must be non-empty.")
 
+    if len(data.columns) != x_train.shape[1]:
+        raise InvalidColumnException("The number of columns in DataFrame and training data array doesn't match.")
+
     if len(x_train) != len(y_train) or len(x_test) != len(y_test):
-        raise InvalidArrayShapeException("Corresponding sample and label arrays must have the same length.")
+        raise InvalidArrayException("Corresponding sample and label arrays must have the same length.")
+
+    if len(data.select_dtypes(include=np.number).columns) != len(data.columns):
+        raise InvalidColumnException("All columns in DataFrame must be numeric.")
+
+    if (
+        not np.issubdtype(x_train.dtype, np.number)
+        or not np.issubdtype(x_test.dtype, np.number)
+        or not np.issubdtype(y_train.dtype, np.integer)
+        or not np.issubdtype(y_test.dtype, np.integer)
+    ):
+        raise InvalidArrayException("All array elements must be numeric.")
 
     if max_iter <= 0:
         raise InvalidParameterValueException("The input value for maximum number of iterations must be at least one.")
