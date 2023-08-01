@@ -20,10 +20,12 @@ from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 def _get_aspect(
     raster: rasterio.io.DatasetReader,
     method: Literal["Horn81"],
+    unit: Literal["degree", "radians"],
 ) -> tuple[np.ndarray, dict]:
 
     cellsize = raster.res[0]
     out_meta = raster.meta.copy()
+    nodata = -9999
 
     out_array = raster.read()
     if out_array.ndim >= 3:
@@ -35,11 +37,12 @@ def _get_aspect(
         p = _method_horn(out_array, cellsize=cellsize, parameter="p")
         q = _method_horn(out_array, cellsize=cellsize, parameter="q")
 
-    out_array = (np.pi + np.arctan2(p, -q)) * (180.0 / np.pi)
+    out_array = np.pi + np.arctan2(p, -q)
+    out_array = np.degrees(out_array) if unit == "degree" else out_array
     out_array = np.where(np.logical_and(p == 0, q == 0), -1, out_array)
+    out_array = nan_to_nodata(out_array, nodata_value=nodata).astype(np.float32)
 
-    out_array = nan_to_nodata(out_array, nodata_value=raster.nodata).astype(np.float16)
-    out_meta.update({"dtype": out_array.dtype.name})
+    out_meta.update({"dtype": out_array.dtype.name, "nodata": nodata})
 
     return out_array, out_meta
 
@@ -53,11 +56,16 @@ def _mask_aspect(
     aspect: np.ndarray,
 ) -> np.ndarray:
 
-    slope = _get_slope(raster, method, scaling_factor)
+    slope, _ = _get_slope(
+        raster,
+        method=method,
+        unit="degree",
+        scaling_factor=scaling_factor,
+    )
 
     out_array = aspect
     out_array = nodata_to_nan(out_array, nodata_value=raster.nodata)
-    out_array = np.where(slope < min_slope, -1, out_array)
+    out_array = np.where(np.logical_and(slope > 0, slope < min_slope), -1, out_array)
     out_array = nan_to_nodata(out_array, nodata_value=raster.nodata)
 
     return out_array
@@ -117,6 +125,7 @@ def _classify_aspect(
 def get_aspect(
     raster: rasterio.io.DatasetReader,
     method: Literal["Horn81"] = "Horn81",
+    unit: Literal["degree", "radians"] = "degree",
     scaling_factor: Optional[Number] = 1,
     min_slope: Optional[Number] = None,
 ) -> tuple[np.ndarray, dict]:
@@ -130,11 +139,12 @@ def get_aspect(
     Args:
         raster: The input raster data.
         method: Basic method used to calculate partial derivatives.
+        unit: Unit for aspect output raster. Either degree or radians.
         scaling_factor: Factor to modify values, e.g. for unit conversion.
         min_slope: Slope value in degree below a cell will be considered as flat surface.
 
     Returns:
-        The calculated aspect in degree (0-360).
+        The calculated aspect in degree [0, 360] or radians [0, 2*pi].
     """
 
     if raster.count > 1:
@@ -143,7 +153,7 @@ def get_aspect(
     if check_quadratic_pixels(raster) is False:
         raise NonSquarePixelSizeException("Processing requires quadratic pixel dimensions.")
 
-    out_array, out_meta = _get_aspect(raster, method)
+    out_array, out_meta = _get_aspect(raster, method, unit)
 
     if min_slope is not None:
         out_array = _mask_aspect(raster, method, scaling_factor, min_slope, aspect=out_array)

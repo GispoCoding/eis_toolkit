@@ -22,6 +22,7 @@ def _get_slope(
 
     cellsize = raster.res[0]
     out_meta = raster.meta.copy()
+    nodata = -9999
 
     out_array = raster.read()
     if out_array.ndim >= 3:
@@ -42,8 +43,8 @@ def _get_slope(
     elif unit == "rise":
         out_array = _convert_rad_to_rise(out_array)
 
-    out_array = nan_to_nodata(out_array, nodata_value=raster.nodata).astype(np.float16)
-    out_meta.update({"dtype": out_array.dtype.name})
+    out_array = nan_to_nodata(out_array, nodata_value=nodata).astype(np.float32)
+    out_meta.update({"dtype": out_array.dtype.name, "nodata": nodata})
 
     return out_array, out_meta
 

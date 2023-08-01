@@ -20,7 +20,7 @@ def convert_rad_to_degree(data: np.ndarray) -> np.ndarray:
 @beartype
 def _convert_rad_to_rise(data: np.ndarray) -> np.ndarray:
     """
-    Convert rad to percent rise.
+    Convert radians to percent rise.
 
     Args:
       data: Input numpy array.
