@@ -16,7 +16,7 @@ from eis_toolkit.utilities.conversions import convert_rad_to_degree, _convert_ra
 def _get_slope(
     raster: rasterio.io.DatasetReader,
     method: Literal["Horn81"],
-    unit: Literal["degree", "radians", "rise"],
+    unit: Literal["degree", "rise"],
     scaling_factor: Number,
 ) -> tuple[np.ndarray, dict]:
 
@@ -52,7 +52,7 @@ def _get_slope(
 def get_slope(
     raster: rasterio.io.DatasetReader,
     method: Literal["Horn81"] = "Horn81",
-    unit: Literal["degree", "radians", "rise"] = "degree",
+    unit: Literal["degree", "rise"] = "degree",
     scaling_factor: Optional[Number] = 1,
 ) -> tuple[np.ndarray, dict]:
     """
