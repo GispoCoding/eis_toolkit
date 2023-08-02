@@ -15,6 +15,7 @@ from eis_toolkit.exceptions import (
 
 def _logistic_regression(
     data: pd.DataFrame,
+    column_name: str,
     x_train: np.ndarray,
     x_test: np.ndarray,
     y_train: np.ndarray,
@@ -22,15 +23,9 @@ def _logistic_regression(
     penalty: Literal,
     max_iter: int,
 ) -> pd.DataFrame:
-
-    # Train the model
     model = _train_model(x_train, x_test, y_train, y_test, penalty, max_iter)
-
-    # Make predictions on data using the trained model
     predictions = model.predict(np.array(data))
-
-    # Add predicted labels into the DataFrame
-    data["label"] = predictions
+    data[column_name] = predictions
 
     return data
 
@@ -49,6 +44,7 @@ def _train_model(
 @beartype
 def logistic_regression(
     data: pd.DataFrame,
+    column_name: str,
     x_train: np.ndarray,
     x_test: np.ndarray,
     y_train: np.ndarray,
@@ -61,6 +57,7 @@ def logistic_regression(
 
     Args:
         data: Data for which predictions are made.
+        column_name: Name of the column in which the predicted labels are put.
         x_train: Train samples.
         x_test: Test samples.
         y_train: Train labels.
@@ -106,4 +103,4 @@ def logistic_regression(
     if max_iter <= 0:
         raise InvalidParameterValueException("The input value for maximum number of iterations must be at least one.")
 
-    return _logistic_regression(data, x_train, x_test, y_train, y_test, penalty, max_iter)
+    return _logistic_regression(data, column_name, x_train, x_test, y_train, y_test, penalty, max_iter)
