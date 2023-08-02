@@ -7,9 +7,9 @@ from beartype.typing import Literal, Optional
 
 from eis_toolkit.checks.raster import check_quadratic_pixels
 from eis_toolkit.exceptions import (
+    InvalidParameterValueException,
     InvalidRasterBandException,
     NonSquarePixelSizeException,
-    InvalidParameterValueException,
 )
 from eis_toolkit.surface_attributes.partial_derivatives import _method_horn
 from eis_toolkit.surface_attributes.slope import _get_slope
@@ -51,16 +51,15 @@ def _get_aspect(
 def _mask_aspect(
     raster: rasterio.io.DatasetReader,
     method: Literal["Horn81"],
-    scaling_factor: Number,
     min_slope: Number,
+    scaling_factor: Number,
     aspect: np.ndarray,
 ) -> np.ndarray:
-
     slope, _ = _get_slope(
         raster,
-        method=method,
+        method,
+        scaling_factor,
         unit="degree",
-        scaling_factor=scaling_factor,
     )
 
     out_array = aspect
@@ -77,9 +76,36 @@ def _classify_aspect(
     unit: Literal["degree", "radians"],
     num_classes: Number,
 ) -> tuple[np.ndarray, dict, dict]:
+    """
+    Classify a provided aspect raster into 8 or 16 directions.
+
+    Directions and interval for 8 classes:
+    N: (337.5, 22.5), NE: (22.5, 67.5),
+    E: (67.5, 112.5), SE: (112.5, 157.5),
+    S: (157.5, 202.5), SW: (202.5, 247.5),
+    W: (247.5, 292.5), NW: (292.5, 337.5)
+
+    Directions and interval for 16 classes:
+    N: (348.75, 11.25), NNE: (11.25, 33.75), NE: (33.75, 56.25), ENE: (56.25, 78.75),
+    E: (78.75, 101.25), ESE: (101.25, 123.75), SE: (123.75, 146.25), SSE: (146.25, 168.75),
+    S: (168.75, 191.25), SSW: (191.25, 213.75), SW: (213.75, 236.25), WSW: (236.25, 258.75),
+    W: (258.75, 281.25), WNW: (281.25, 303.75), NW: (303.75, 326.25), NNW: (326.25, 348.75)
+
+    Flat pixels (input value: -1) will be kept, the class is called ND (not defined).
+
+    Args:
+        raster: The input aspect raster data.
+        unit: Corresponding unit of the input aspect raster, either "degree" or "radians"
+        num_classes: The desired number of classes for classification, either 8 or 16.
+
+    Returns:
+        The classified aspect raster with integer values for each class.
+        The mapping for the corresponding direction for each class.
+        The updated raster meta data.
+    """
 
     aspect = raster.read()
-    nodata = int(raster.nodata) if np.can_cast(raster.nodata, np.integer) else raster.nodata
+    nodata = -9999
 
     if aspect.ndim >= 3:
         aspect = np.squeeze(aspect)
@@ -90,7 +116,7 @@ def _classify_aspect(
     if np.issubdtype(aspect.dtype, np.integer):
         aspect = aspect.astype(float)
 
-    aspect = np.where(np.logical_or(mask_nd, mask_nodata), np.nan)
+    aspect = np.where(np.logical_or(mask_nd, mask_nodata), np.nan, aspect)
 
     if unit == "degree":
         aspect = np.radians(aspect)
@@ -99,24 +125,23 @@ def _classify_aspect(
     aspect = (aspect + np.pi / num_classes) % (2 * np.pi)
 
     if num_classes == 8:
-        dir_classes = np.array(["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
+        dir_classes = np.array(["N", "NE", "E", "SE", "S", "SW", "W", "NW", "ND"])
     elif num_classes == 16:
         dir_classes = np.array(
-            ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+            ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW", "ND"]
         )
-
-    dir_classes = np.append(dir_classes, ["ND", "NODATA"])
 
     # Determine index to each value in the aspect array
     out_array = np.digitize(aspect, np.linspace(0, 2 * np.pi, num_classes + 1))
     out_array = np.where(mask_nd, -1, out_array)
     out_array = np.where(mask_nodata, nodata, out_array)
-    out_array = np.astype(np.result_type(np.int8, nodata))
+    out_array = out_array.astype(np.result_type(np.int8, nodata))
 
-    out_mapping = {direction: i + 1 for i, direction in enumerate(dir_classes)}
+    out_mapping = {direction: i + 1 for i, direction in enumerate(dir_classes[:num_classes])}
+    out_mapping["ND"] = -1
 
     out_meta = raster.meta.copy()
-    out_meta["dtype"] = out_array.dtype.name
+    out_meta.update({"dtype": out_array.dtype.name, "nodata": nodata})
 
     return out_array, out_mapping, out_meta
 
@@ -156,7 +181,7 @@ def get_aspect(
     out_array, out_meta = _get_aspect(raster, method, unit)
 
     if min_slope is not None:
-        out_array = _mask_aspect(raster, method, scaling_factor, min_slope, aspect=out_array)
+        out_array = _mask_aspect(raster, method, min_slope, scaling_factor, aspect=out_array)
 
     return out_array, out_meta
 
@@ -190,9 +215,6 @@ def classify_aspect(
 
     if raster.count > 1:
         raise InvalidRasterBandException("Only one-band raster supported.")
-
-    if unit != "degree" and unit != "radians":
-        raise InvalidParameterValueException("Only 'degree' or 'radians' units allowed.")
 
     if num_classes != 8 and num_classes != 16:
         raise InvalidParameterValueException("Only 8 or 16 classes allowed for classification!")

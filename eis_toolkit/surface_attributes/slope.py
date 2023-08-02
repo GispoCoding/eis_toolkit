@@ -8,16 +8,16 @@ from beartype.typing import Literal, Optional
 from eis_toolkit.checks.raster import check_quadratic_pixels
 from eis_toolkit.exceptions import InvalidRasterBandException, NonSquarePixelSizeException
 from eis_toolkit.surface_attributes.partial_derivatives import _method_horn
+from eis_toolkit.utilities.conversions import _convert_rad_to_rise, convert_rad_to_degree
 from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
-from eis_toolkit.utilities.conversions import convert_rad_to_degree, _convert_rad_to_rise
 
 
 @beartype
 def _get_slope(
     raster: rasterio.io.DatasetReader,
     method: Literal["Horn81"],
-    unit: Literal["degree", "rise"],
     scaling_factor: Number,
+    unit: Literal["degree", "rise"],
 ) -> tuple[np.ndarray, dict]:
 
     cellsize = raster.res[0]
@@ -74,4 +74,4 @@ def get_slope(
     if check_quadratic_pixels(raster) is False:
         raise NonSquarePixelSizeException("Processing requires quadratic pixel dimensions.")
 
-    return _get_slope(raster, method, unit, scaling_factor)
+    return _get_slope(raster, method, scaling_factor, unit)
