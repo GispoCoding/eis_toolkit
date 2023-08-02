@@ -1,7 +1,6 @@
 from enum import Enum
-from numbers import Number
 from pathlib import Path
-from typing import List, Literal, Tuple
+from typing import List, Tuple
 
 import geopandas as gpd
 import rasterio
@@ -181,7 +180,7 @@ def extract_window_cli(
 @app.command()
 def unify_rasters_cli(
     base_raster: Annotated[Path, INPUT_FILE_OPTION],
-    rasters_to_unify: Annotated[List[float], INPUT_FILE_OPTION],
+    rasters_to_unify: Annotated[List[Path], INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     resampling_method: ResamplingMethods = typer.Option(help="resample help", default=ResamplingMethods.nearest),
     same_extent: bool = False,
@@ -250,11 +249,11 @@ def kriging_interpolation_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
     output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
     target_column: str,
-    resolution: Tuple[Number, Number],
-    extent: Tuple[Number, Number, Number, Number],
-    variogram_model: Literal["linear", "power", "gaussian", "spherical", "exponential", "hole-effect"] = "linear",
-    method: Literal["ordinary", "universal"] = "ordinary",
-    drift_terms: list = ["regional_linear"],
+    resolution: Tuple[float, float],
+    extent: Tuple[float, float, float, float],
+    variogram_model: VariogramModel = VariogramModel.linear,
+    method: KrigingMethod = KrigingMethod.ordinary,
+    drift_terms: Annotated[List[str], typer.Option()] = ["regional_linear"],
 ):
     """TODO. Reproject the input vector to given CRS."""
     # from eis_toolkit.vector_processing.kriging_interpolation import kriging
@@ -278,7 +277,7 @@ def kriging_interpolation_cli(
 @app.command()
 def distance_computation_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    geometries: gpd.GeoDataFrame,
+    geometries: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
     """Reproject the input vector to given CRS."""
@@ -302,6 +301,11 @@ def distance_computation_cli(
 def descriptive_statistics_cli(input_file: Annotated[Path, INPUT_FILE_OPTION], column: str):
     """Not implemented yet."""
     pass
+
+
+# if __name__ == "__main__":
+def cli():
+    app()
 
 
 if __name__ == "__main__":
