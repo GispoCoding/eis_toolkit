@@ -9,6 +9,8 @@ class EmptyDataFrameException(Exception):
 class FileReadError(Exception):
     """Exception error class for unsupported file exceptions."""
 
+class FileWriteError(Exception):
+    """Exception error class for writing file exceptions."""
 
 class InvalidColumnException(Exception):
     """Exception error for invalid column."""

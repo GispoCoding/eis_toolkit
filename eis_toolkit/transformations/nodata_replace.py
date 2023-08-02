@@ -1,117 +1,91 @@
-
-from typing import Optional, Literal
-import numpy as np 
+import numpy as np
 import pandas as pd
+from beartype import beartype
+from beartype.typing import Optional, Union, Literal
+
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 # *******************************
-MODE = Literal['replace','mean','median','n_neighbors','most_frequent']
+MODE = Literal["replace", "mean", "median", "n_neighbors", "most_frequent"]
+# MODE = Annotated[str,
+#                  IsEqual['replace']/
+#                  IsEqual['mean']/
+#                  IsEqual['median']/
+#                  IsEqual['n_neighbors']/
+#                  IsEqual['most_frequent']
+# ]
+@beartype
 def _nodata_replace(
     df: pd.DataFrame,
-    rtype: Optional[MODE] = 'replace',
-    replacement_number: Optional[int | float] = 0, # int
-    replacement_string: Optional[str] = 'NaN', 
+    rtype: Optional[MODE] = "replace",
+    replacement_number: Optional[Union[int, float]] = 0,
+    replacement_string: Optional[str] = "NaN",
     n_neighbors: Optional[int] = 2,
-) -> pd.DataFrame:   #,pd.DataFrame]:     #  2th df: new target column
+) -> pd.DataFrame:
 
-    # datatype to float32
-    df.loc[:,df.dtypes=='float64'] = df.loc[:,df.dtypes=='float64'].astype('float32')
-    df.loc[:,df.dtypes=='int64'] = df.loc[:,df.dtypes=='int64'].astype('int32')
+    # datatype to float32 res. int32
+    df.loc[:, df.dtypes == "float64"] = df.loc[:, df.dtypes == "float64"].astype("float32")
+    df.loc[:, df.dtypes == "int64"] = df.loc[:, df.dtypes == "int64"].astype("int32")
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    # for col in df.columns:
-    #     if not is_numeric_dtype(df[col]):     #df[col].dtype != np.number:          # # empty strings cells will get numpy.nan
-    # for empty String: 
-    df.replace(r'^\s*$', np.nan, regex=True, inplace=True)   # or: df.replace(r'\s+', np.nan, regex=True)
-        #else:
-        #     df = df.astype('float32')
-        #     df.replace([np.inf, -np.inf], np.nan, inplace=True)                                   
+    # for empty String:
+    df.replace(r"^\s*$", np.nan, regex=True, inplace=True)
 
     if not (len(df.columns) == 0 or len(df.index) == 0):
-    #     raise InvalidParameterValueException ('***  function nodata_remove: DataFrame has no column')
-    # if len(df.index) == 0:
-    #     raise InvalidParameterValueException ('***  function nodata_remove: DataFrame has no rows')
-        #df = None
-    #else:
-        if rtype == 'replace':               # different between: numbr and string
+        if rtype == "replace":  # different between: number and string
             for cl in df.columns:
-                if df[cl].dtype == 'O':
+                if df[cl].dtype == "O":
                     df[cl].fillna(replacement_string, inplace=True)
                 else:
-                    df[cl].fillna(replacement_number, inplace=True)    #df.replace(np.nan,replacement)
-        elif rtype == 'n_neighbors':
+                    df[cl].fillna(replacement_number, inplace=True)
+        elif rtype == "n_neighbors":
             from sklearn.impute import KNNImputer
+
             im = KNNImputer(n_neighbors=n_neighbors, weights="uniform")
-            #df = im.fit_transform(df)  #im.fit(df)
             df = pd.DataFrame(im.fit_transform(df), columns=df.columns)
-        elif rtype in ['median','mean','most_frequent']:   # most_frequenty and median for categories
+        elif rtype in ["median", "mean", "most_frequent"]:  # most_frequenty and median for categories
             from sklearn.impute import SimpleImputer
+
             im = SimpleImputer(missing_values=np.nan, strategy=rtype)
-            df = pd.DataFrame(im.fit_transform(df), columns=df.columns) # out: dataframe
-        # elif rtype == 'most_frequent':
-        #     from sklearn.impute import SimpleImputer
+            df = pd.DataFrame(im.fit_transform(df), columns=df.columns)  # out: dataframe
         else:
-            raise InvalidParameterValueException ('***  function nodata_remove: nodata replacement not known: ' + rtype) 
+            raise InvalidParameterValueException("nodata replacement not known: " + rtype)
     return df
 
+
 # *******************************
-MODE = Literal['replace','mean','median','n_neighbors','most_frequent']
+MODE = Literal["replace", "mean", "median", "n_neighbors", "most_frequent"]
+@beartype
 def nodata_replace(
     df: pd.DataFrame,
-    rtype: Optional[MODE] = 'replace',
-    replacement_number: Optional[int | float] = 0, # int
-    replacement_string: Optional[str] = 'NaN', 
+    rtype: Optional[MODE] = "replace",
+    replacement_number: Optional[Union[int, float]] = 0,
+    replacement_string: Optional[str] = "NaN",
     n_neighbors: Optional[int] = 2,
-) -> pd.DataFrame:       #,pd.DataFrame]:     #  2. df new target column
+) -> pd.DataFrame:
 
     """
         Replaces nodata values.
         nodata_replace.py shoud be used after separation.py (for each DataFrame separately) and befor unification.py
         There is no need to replace nan values in catagoriesed columns because nhotencoding creats a nan-class.
     Args:
-        - df (Pandas DataFrame)
-        - type (str): 
+        - Pandas DataFrame
+        - type:
             - 'replace': Replace each nodata valu with "replacement" (see below).  Does not work for string categoriesed columns!!
             - 'medium': Replace a nodatavalue with medium of all values of the feature.
             - 'n_neighbors': Replacement calculated with k_neighbar-algorithm (see Argument n_neighbors)
             - 'most_frequent': Its's suitable for categorical columns.
-        replacement_number (int or float, default = 0): Value for replacement for number columns if type is 'replace'.
-        replacement_string (str, default = 'NaN'): Value for replacemant for string columns if type is 'replace'. 
-        n_neighbors (int, default = 2): number of neigbors if type is 'n_neighbors'
+        replacement_number (default = 0): Value for replacement for number columns if type is 'replace'.
+        replacement_string (default = 'NaN'): Value for replacemant for string columns if type is 'replace'.
+        n_neighbors (default = 2): number of neigbors if type is 'n_neighbors'
 
     Returns:
-        - pandas DataFrame: dataframe without nodata values but with the same number of raws.
+        - pandas dataframe without nodata values but with the same number of raws.
     """
 
-   # Argument evaluation
-    fl = []
-    if not (isinstance(df, pd.DataFrame)):
-        fl.append('Argument df is not a DataFrame')
-    if not (isinstance(rtype, str) or (rtype is None)):
-        fl.append('Argument df is not a DataFrame')
-    if len(fl) > 0:
-        raise InvalidParameterValueException (fl[0])
-    fl = []    
-    if rtype is not None:
-        if not (rtype in ['replace','mean','median','n_neighbors','most_frequent']):
-            fl.append('Argument rtype is not in (replace,mean,median,n_neighbors,most_frequent)')
-    if rtype in ['replace']:
-        if not ((replacement_number is None) or isinstance(replacement_number,int) or isinstance(replacement_number,float)):
-            fl.append('Argument replacement is not integer, float and not None')
-        if not ((replacement_string is None) or isinstance(replacement_string,str)):
-            fl.append('Argument replacement is not string and not None')
-    if rtype in ['n_neighbors']:
-        if not ((n_neighbors is None) or isinstance(n_neighbors,int)):
-            fl.append('Argument n_neighbors is not integer and not None')
-    if len(fl) > 0:
-        raise InvalidParameterValueException (fl[0])
-
     return _nodata_replace(
-        df = df,
-        rtype = rtype,
-        replacement_number = replacement_number,
-        replacement_string = replacement_string,
-        n_neighbors = n_neighbors,
+        df=df,
+        rtype=rtype,
+        replacement_number=replacement_number,
+        replacement_string=replacement_string,
+        n_neighbors=n_neighbors,
     )
-
-
-
