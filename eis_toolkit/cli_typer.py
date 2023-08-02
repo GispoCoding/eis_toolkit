@@ -1,6 +1,7 @@
 from enum import Enum
+from numbers import Number
 from pathlib import Path
-from typing import Tuple
+from typing import List, Literal, Tuple
 
 import geopandas as gpd
 import rasterio
@@ -15,6 +16,31 @@ from eis_toolkit.raster_processing.windowing import extract_window
 from eis_toolkit.vector_processing.reproject_vector import reproject_vector
 
 app = typer.Typer()
+
+
+class VariogramModel(str, Enum):
+    """Variogram models for kriging interpolation."""
+
+    linear = "linear"
+    power = "power"
+    gaussian = "gaussian"
+    spherical = "spherical"
+    exponential = "exponential"
+    hole_effect = "hole-effect"
+
+
+class KrigingMethod(str, Enum):
+    """Kriging methods."""
+
+    ordinary = "ordinary"
+    universal = "universal"
+
+
+class MergeStrategy(str, Enum):
+    """Merge strategies for rasterizing."""
+
+    replace = "replace"
+    add = "add"
 
 
 class ResamplingMethods(str, Enum):
@@ -38,6 +64,19 @@ RESAMPLING_MAPPING = {
     "max": warp.Resampling.max,
     "min": warp.Resampling.min,
 }
+
+
+# def file_option(help: str = None, default: Any = None, read: bool = True, write: bool = False):
+#     return typer.Option(
+#         default=default,
+#         help=help,
+#         exists=True,
+#         file_okay=True,
+#         dir_okay=False,
+#         writable=write,
+#         readable=read,
+#         resolve_path=True,
+#     )
 
 
 INPUT_FILE_OPTION = typer.Option(
@@ -138,14 +177,53 @@ def extract_window_cli(
     typer.echo(f"Writing raster to {output_raster}")
 
 
+# UNIFY RASTERS
+@app.command()
+def unify_rasters_cli(
+    base_raster: Annotated[Path, INPUT_FILE_OPTION],
+    rasters_to_unify: Annotated[List[float], INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    resampling_method: ResamplingMethods = typer.Option(help="resample help", default=ResamplingMethods.nearest),
+    same_extent: bool = False,
+):
+    """Extract window from raster. NOT IMPLEMENTED YET."""
+    pass
+
+
 # RASTERIZE
 @app.command()
 def rasterize_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    resolution: float = None,
+    value_column: str = None,
+    default_value: float = 1.0,
+    fill_value: float = 0.0,
+    base_raster_profile: Annotated[Path, INPUT_FILE_OPTION] = None,
+    buffer_value: float = None,
+    merge_strategy: MergeStrategy = MergeStrategy.replace,
 ):
-    """NOT IMPLEMENTED. Rasterize a given vector."""
-    raise Exception("Not implemented yet")
+    """Rasterize input vector."""
+    from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
+
+    geodataframe = gpd.read_file(input_vector)
+
+    out_image, out_meta = rasterize_vector(
+        geodataframe,
+        resolution,
+        value_column,
+        default_value,
+        fill_value,
+        base_raster_profile,
+        buffer_value,
+        merge_strategy,
+    )
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image)
+
+    typer.echo("Rasterizing completed")
+    typer.echo(f"Writing raster to {output_raster}")
 
 
 # REPROJECT VECTOR
@@ -164,6 +242,66 @@ def reproject_vector_cli(
 
     typer.echo("Reprojecting completed")
     typer.echo(f"Writing vector to {output_vector}")
+
+
+# KRIGING INTERPOLATION
+@app.command()
+def kriging_interpolation_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    target_column: str,
+    resolution: Tuple[Number, Number],
+    extent: Tuple[Number, Number, Number, Number],
+    variogram_model: Literal["linear", "power", "gaussian", "spherical", "exponential", "hole-effect"] = "linear",
+    method: Literal["ordinary", "universal"] = "ordinary",
+    drift_terms: list = ["regional_linear"],
+):
+    """TODO. Reproject the input vector to given CRS."""
+    # from eis_toolkit.vector_processing.kriging_interpolation import kriging
+
+    pass
+
+    # geodataframe = gpd.read_file(input_vector)
+
+    # out_image, out_meta = kriging(
+    #     geodataframe=geodataframe,
+    #     target_column=
+    # )
+
+    # reprojected_geodataframe.to_file(output_vector, driver="GeoJSON")
+
+    # typer.echo("Reprojecting completed")
+    # typer.echo(f"Writing vector to {output_vector}")
+
+
+# DISTANCE COMPUTATION
+@app.command()
+def distance_computation_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    geometries: gpd.GeoDataFrame,
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+):
+    """Reproject the input vector to given CRS."""
+    from eis_toolkit.spatial_analyses.distance_computation import distance_computation
+
+    with rasterio.open(input_raster) as raster:
+        profile = raster.profile
+
+    geodataframe = gpd.read_file(geometries)
+
+    out_image = distance_computation(profile, geodataframe)
+
+    with rasterio.open(output_raster, "w", **profile) as dst:
+        dst.write(out_image)
+
+    typer.echo("Distance computation completed")
+    typer.echo(f"Writing raster to {output_raster}")
+
+
+# DESCRIPTIVE STATISTICS
+def descriptive_statistics_cli(input_file: Annotated[Path, INPUT_FILE_OPTION], column: str):
+    """Not implemented yet."""
+    pass
 
 
 if __name__ == "__main__":
