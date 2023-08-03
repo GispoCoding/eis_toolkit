@@ -3,7 +3,7 @@ from beartype import beartype
 
 
 @beartype
-def convert_rad_to_degree(data: np.ndarray) -> np.ndarray:
+def convert_rad_to_deg(data: np.ndarray) -> np.ndarray:
     """
     Convert radians to degree.
 
@@ -14,7 +14,7 @@ def convert_rad_to_degree(data: np.ndarray) -> np.ndarray:
       The converted array in degree values.
     """
 
-    return np.where(data >= 0, data * (180.0 / np.pi), data)
+    return np.where(data >= 0, np.degrees(data), data)
 
 
 @beartype
@@ -33,7 +33,7 @@ def _convert_rad_to_rise(data: np.ndarray) -> np.ndarray:
 
 
 @beartype
-def convert_degree_to_rise(data: np.ndarray) -> np.ndarray:
+def convert_deg_to_rise(data: np.ndarray) -> np.ndarray:
     """
     Convert degrees to percent rise.
 
@@ -48,7 +48,7 @@ def convert_degree_to_rise(data: np.ndarray) -> np.ndarray:
 
 
 @beartype
-def convert_degree_to_rad(data: np.ndarray) -> np.ndarray:
+def convert_deg_to_rad(data: np.ndarray) -> np.ndarray:
     """
     Convert degree to radians.
 
@@ -59,4 +59,19 @@ def convert_degree_to_rad(data: np.ndarray) -> np.ndarray:
       The converted array in radian values.
     """
 
-    return np.where(data >= 0, (data / 180.0) * np.pi, data)
+    return np.where(data >= 0, np.radians(data), data)
+
+
+@beartype
+def convert_rise_to_degree(data: np.ndarray) -> np.ndarray:
+    """
+    Convert percent rise to degrees.
+
+    Args:
+      data: Input numpy array.
+
+    Returns:
+      The converted array in degree.
+    """
+
+    return np.where(data >= 0, np.degrees(np.arctan(data / 100)), data)

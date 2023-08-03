@@ -8,7 +8,7 @@ from beartype.typing import Literal, Optional
 from eis_toolkit.checks.raster import check_quadratic_pixels
 from eis_toolkit.exceptions import InvalidRasterBandException, NonSquarePixelSizeException
 from eis_toolkit.surface_attributes.partial_derivatives import _method_horn
-from eis_toolkit.utilities.conversions import _convert_rad_to_rise, convert_rad_to_degree
+from eis_toolkit.utilities.conversions import _convert_rad_to_rise, convert_rad_to_deg
 from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
 
@@ -17,7 +17,7 @@ def _get_slope(
     raster: rasterio.io.DatasetReader,
     method: Literal["Horn81"],
     scaling_factor: Number,
-    unit: Literal["degree", "rise"],
+    unit: Literal["degrees", "rise"],
 ) -> tuple[np.ndarray, dict]:
 
     cellsize = raster.res[0]
@@ -38,8 +38,8 @@ def _get_slope(
     out_array = np.sqrt(np.square(p) + np.square(q))
     out_array = np.arctan(out_array)
 
-    if unit == "degree":
-        out_array = convert_rad_to_degree(out_array)
+    if unit == "degrees":
+        out_array = convert_rad_to_deg(out_array)
     elif unit == "rise":
         out_array = _convert_rad_to_rise(out_array)
 
@@ -53,7 +53,7 @@ def _get_slope(
 def get_slope(
     raster: rasterio.io.DatasetReader,
     method: Literal["Horn81"] = "Horn81",
-    unit: Literal["degree", "rise"] = "degree",
+    unit: Literal["degrees", "rise"] = "degrees",
     scaling_factor: Optional[Number] = 1,
 ) -> tuple[np.ndarray, dict]:
     """

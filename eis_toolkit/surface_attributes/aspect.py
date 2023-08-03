@@ -20,7 +20,7 @@ from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 def _get_aspect(
     raster: rasterio.io.DatasetReader,
     method: Literal["Horn81"],
-    unit: Literal["degree", "radians"],
+    unit: Literal["degrees", "radians"],
 ) -> tuple[np.ndarray, dict]:
 
     cellsize = raster.res[0]
@@ -38,7 +38,7 @@ def _get_aspect(
         q = _method_horn(out_array, cellsize=cellsize, parameter="q")
 
     out_array = np.pi + np.arctan2(p, -q)
-    out_array = np.degrees(out_array) if unit == "degree" else out_array
+    out_array = np.degrees(out_array) if unit == "degrees" else out_array
     out_array = np.where(np.logical_and(p == 0, q == 0), -1, out_array)
     out_array = nan_to_nodata(out_array, nodata_value=nodata).astype(np.float32)
 
@@ -59,7 +59,7 @@ def _mask_aspect(
         raster,
         method,
         scaling_factor,
-        unit="degree",
+        unit="degrees",
     )
 
     out_array = aspect
@@ -73,7 +73,7 @@ def _mask_aspect(
 @beartype
 def _classify_aspect(
     raster: rasterio.io.DatasetReader,
-    unit: Literal["degree", "radians"],
+    unit: Literal["degrees", "radians"],
     num_classes: Number,
 ) -> tuple[np.ndarray, dict, dict]:
     """
@@ -95,7 +95,7 @@ def _classify_aspect(
 
     Args:
         raster: The input aspect raster data.
-        unit: Corresponding unit of the input aspect raster, either "degree" or "radians"
+        unit: Corresponding unit of the input aspect raster, either "degrees" or "radians"
         num_classes: The desired number of classes for classification, either 8 or 16.
 
     Returns:
@@ -118,7 +118,7 @@ def _classify_aspect(
 
     aspect = np.where(np.logical_or(mask_nd, mask_nodata), np.nan, aspect)
 
-    if unit == "degree":
+    if unit == "degrees":
         aspect = np.radians(aspect)
 
     # Adjust the array to rotate 22.5 degrees counter-clockwise
@@ -150,7 +150,7 @@ def _classify_aspect(
 def get_aspect(
     raster: rasterio.io.DatasetReader,
     method: Literal["Horn81"] = "Horn81",
-    unit: Literal["degree", "radians"] = "degree",
+    unit: Literal["degrees", "radians"] = "degrees",
     scaling_factor: Optional[Number] = 1,
     min_slope: Optional[Number] = None,
 ) -> tuple[np.ndarray, dict]:
@@ -164,7 +164,7 @@ def get_aspect(
     Args:
         raster: The input raster data.
         method: Basic method used to calculate partial derivatives.
-        unit: Unit for aspect output raster. Either degree or radians.
+        unit: Unit for aspect output raster. Either "degrees" or "radians".
         scaling_factor: Factor to modify values, e.g. for unit conversion.
         min_slope: Slope value in degree below a cell will be considered as flat surface.
 
@@ -189,7 +189,7 @@ def get_aspect(
 @beartype
 def classify_aspect(
     raster: rasterio.io.DatasetReader,
-    unit: Literal["degree", "radians"] = "degree",
+    unit: Literal["degrees", "radians"] = "degrees",
     num_classes: int = 8,
 ) -> tuple[np.ndarray, dict, dict]:
     """
@@ -206,7 +206,7 @@ def classify_aspect(
 
     Args:
         raster: The input raster data.
-        unit: The unit of the input raster. Either 'degree' or 'radians'
+        unit: The unit of the input raster. Either "degrees" or "radians"
         num_classes: The number of classes for discretization. Either 8 or 16 classes allowed.
 
     Returns:
