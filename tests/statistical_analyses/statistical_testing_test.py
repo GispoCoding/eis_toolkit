@@ -23,7 +23,13 @@ def test_output():
         output_numerical["correlation matrix"], np.corrcoef(iris_data["data"], rowvar=False)
     )
     np.testing.assert_array_almost_equal(output_numerical["covariance matrix"], np.cov(iris_data["data"], rowvar=False))
-    np.testing.assert_array_almost_equal(output_numerical["normality"], (0.963619, 4.949724e-11))
+    np.testing.assert_array_almost_equal(
+        output_numerical["normality"]["shapiro"]["petal length (cm)"], (0.876269, 7.412652e-10)
+    )
+    np.testing.assert_almost_equal(output_numerical["normality"]["anderson"]["petal width (cm)"][0], 5.105662)
+    np.testing.assert_array_equal(
+        output_numerical["normality"]["anderson"]["petal width (cm)"][1], [0.562, 0.64, 0.767, 0.895, 1.065]
+    )
     np.testing.assert_array_almost_equal(
         (output_categorical["chi-square"], output_categorical["p-value"], output_categorical["degrees of freedom"]),
         (245.870894, 1.292214e-48, 8),

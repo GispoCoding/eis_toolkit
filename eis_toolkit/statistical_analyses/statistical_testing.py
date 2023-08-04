@@ -1,7 +1,7 @@
 import pandas as pd
 from beartype import beartype
 from beartype.typing import Literal, Optional
-from scipy.stats import chi2_contingency, shapiro  # , kstest
+from scipy.stats import anderson, chi2_contingency, shapiro
 
 from eis_toolkit import exceptions
 
@@ -13,12 +13,16 @@ def _statistical_tests(
     if data_type == "numerical":
         correlation_matrix = data.corr(method=method, min_periods=min_periods)
         covariance_matrix = data.cov(min_periods=min_periods, ddof=delta_degrees_of_freedom)
-        # sw_normality = shapiro(data)
-        # ks_normality = ()
-        # for column in data.columns:
-        #     ks_normality + kstest(col, "norm")
-        # normality = {"sw_normality": sw_normality, "ks_normality": ks_normality}
-        normality = shapiro(data)
+
+        normality_shapiro = {}
+        normality_anderson = {}
+        for column in data.columns:
+            normality_shapiro[column] = shapiro(data[column])
+            normality_anderson[column] = anderson(data[column], "norm")
+
+        normality = {}
+        normality["shapiro"] = normality_shapiro
+        normality["anderson"] = normality_anderson
 
         statistics = {
             "correlation matrix": correlation_matrix,
@@ -43,8 +47,8 @@ def statistical_tests(
 ) -> dict:
     """Compute statistical tests on input data.
 
-    Computes correlation and covariance matrices and normality statistics (Shapiro-Wilk test) for numerical data
-    and independence statistic (Chi-square test) for categorical data.
+    Computes correlation and covariance matrices and normality statistics (Shapiro-Wilk and Anderson-Darling tests) for
+    numerical data and independence statistic (Chi-square test) for categorical data.
 
     Args:
         data: DataFrame containing the input data. Contingency table if categorical data.
