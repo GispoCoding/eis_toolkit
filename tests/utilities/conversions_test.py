@@ -53,7 +53,7 @@ def test_precent_rise_to_degree():
     """Test that converting degrees to percent rise works as expected."""
     rise = np.tan(np.arange(0, np.pi / 2, np.pi / 8)) * 100
 
-    conversion = np.round(convert_rise_to_degree(rise), 3)
+    conversion = np.round(convert_rise_to_deg(rise), 3)
     expected = np.array([0, 22.5, 45, 67.5])
 
     assert np.array_equal(conversion, expected)
