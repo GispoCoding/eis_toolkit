@@ -63,7 +63,7 @@ def convert_deg_to_rad(data: np.ndarray) -> np.ndarray:
 
 
 @beartype
-def convert_rise_to_degree(data: np.ndarray) -> np.ndarray:
+def convert_rise_to_deg(data: np.ndarray) -> np.ndarray:
     """
     Convert percent rise to degrees.
 
