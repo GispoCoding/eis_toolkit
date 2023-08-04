@@ -32,26 +32,29 @@ def test_sigmoid_transform():
         # Output shapes and types
         check_transformation_outputs(out_array, out_meta, out_settings, raster, nodata)
 
-        in_array = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        transformation = _sigmoid_transform(in_array, bounds=(0, 1), slope=1, center=True).astype(np.float32)
-        expected = np.array(
-            [
-                0.00669285,
-                0.01798621,
-                0.04742587,
-                0.11920292,
-                0.26894143,
-                0.5,
-                0.7310586,
-                0.8807971,
-                0.95257413,
-                0.98201376,
-                0.9933072,
-            ],
-            dtype=np.float32,
-        )
 
-        np.testing.assert_almost_equal(transformation, expected, decimal=6)
+def test_sigmoid_core():
+    """Test for core functionality with small example computation."""
+    in_array = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    transformation = _sigmoid_transform(in_array, bounds=(0, 1), slope=1, center=True).astype(np.float32)
+    expected = np.array(
+        [
+            0.00669285,
+            0.01798621,
+            0.04742587,
+            0.11920292,
+            0.26894143,
+            0.5,
+            0.7310586,
+            0.8807971,
+            0.95257413,
+            0.98201376,
+            0.9933072,
+        ],
+        dtype=np.float32,
+    )
+
+    np.testing.assert_almost_equal(transformation, expected, decimal=6)
 
 
 def test_sigmoid_band_selection():

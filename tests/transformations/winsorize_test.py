@@ -32,16 +32,18 @@ def test_winsorizing():
         # Output shapes and types
         check_transformation_outputs(out_array, out_meta, out_settings, raster, nodata)
 
-        in_array = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        transformation, lower, upper = _winsorize(in_array, percentiles=(10, 10), inside=True)
 
-        expected = np.array([1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9])
-        expected_lower = 1
-        expected_upper = 9
+def test_winsorize_core():
+    """Test for core functionality with small example computation."""
+    in_array = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    transformation, lower, upper = _winsorize(in_array, percentiles=(10, 10), inside=True)
+    expected = np.array([1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9])
+    expected_lower = 1
+    expected_upper = 9
 
-        np.testing.assert_array_equal(transformation, expected)
-        assert lower == expected_lower
-        assert upper == expected_upper
+    np.testing.assert_array_equal(transformation, expected)
+    assert lower == expected_lower
+    assert upper == expected_upper
 
 
 def test_winsorize_band_selection():

@@ -29,11 +29,14 @@ def test_clipping():
         # Output shapes and types
         check_transformation_outputs(out_array, out_meta, out_settings, raster, nodata)
 
-        in_array = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        transformation = _clipping(in_array, limits=(2, 8))
-        expected = np.array([2, 2, 2, 3, 4, 5, 6, 7, 8, 8, 8])
 
-        np.testing.assert_array_equal(transformation, expected)
+def test_clipping_core():
+    """Test for core functionality with small example computation."""
+    in_array = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    transformation = _clipping(in_array, limits=(2, 8))
+    expected = np.array([2, 2, 2, 3, 4, 5, 6, 7, 8, 8, 8])
+
+    np.testing.assert_array_equal(transformation, expected)
 
 
 def test_clipping_band_selection():

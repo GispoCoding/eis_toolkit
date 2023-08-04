@@ -32,31 +32,34 @@ def test_z_score_normalization():
         # Output shapes and types
         check_transformation_outputs(out_array, out_meta, out_settings, raster, nodata)
 
-        in_array = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        transformation, mean, sd = _z_score_normalization(in_array=in_array)
-        transformation = transformation.astype(np.float32)
-        expected = np.array(
-            [
-                -1.5811388,
-                -1.264911,
-                -0.9486833,
-                -0.6324555,
-                -0.31622776,
-                0.0,
-                0.31622776,
-                0.6324555,
-                0.9486833,
-                1.2649111,
-                1.5811388,
-            ],
-            dtype=np.float32,
-        )
-        expected_mean = 5
-        expected_sd = 3.1622776601683795
 
-        np.testing.assert_array_equal(transformation, expected)
-        assert mean == expected_mean
-        assert sd == expected_sd
+def test_z_score_normalization_core():
+    """Test for core functionality with small example computation."""
+    in_array = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    transformation, mean, sd = _z_score_normalization(in_array=in_array)
+    transformation = transformation.astype(np.float32)
+    expected = np.array(
+        [
+            -1.5811388,
+            -1.264911,
+            -0.9486833,
+            -0.6324555,
+            -0.31622776,
+            0.0,
+            0.31622776,
+            0.6324555,
+            0.9486833,
+            1.2649111,
+            1.5811388,
+        ],
+        dtype=np.float32,
+    )
+    expected_mean = 5
+    expected_sd = 3.1622776601683795
+
+    np.testing.assert_array_equal(transformation, expected)
+    assert mean == expected_mean
+    assert sd == expected_sd
 
 
 def test_min_max_scaling():
@@ -67,20 +70,23 @@ def test_min_max_scaling():
 
     with rasterio.open(raster_path) as raster:
         out_array, out_meta, out_settings = min_max_scaling(
-            raster=raster, bands=bands, new_range=[(0, 1)], nodata=nodata
+            raster=raster, bands=bands, new_range=new_range, nodata=nodata
         )
 
         # Output shapes and types
         check_transformation_outputs(out_array, out_meta, out_settings, raster, nodata)
 
-        in_array = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        transformation = _min_max_scaling(in_array=in_array, new_range=new_range[0])
-        transformation = transformation.astype(np.float32)
-        expected = np.array(
-            [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-            dtype=np.float32,
-        )
-        np.testing.assert_array_equal(transformation, expected)
+
+def test_min_max_scaling_core():
+    """Test for core functionality with small example computation."""
+    in_array = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    transformation = _min_max_scaling(in_array=in_array, new_range=(0, 1))
+    transformation = transformation.astype(np.float32)
+    expected = np.array(
+        [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+        dtype=np.float32,
+    )
+    np.testing.assert_array_equal(transformation, expected)
 
 
 def test_linear_band_selection():
