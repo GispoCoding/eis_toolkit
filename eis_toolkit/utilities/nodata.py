@@ -64,7 +64,7 @@ def replace_raster_nodata_each_band(
 
 
 @beartype
-def nodata_to_nan(data: np.ndarray, nodata_value: Number) -> np.ndarray:
+def nodata_to_nan(data: np.ndarray, nodata_value: Union[Number, None]) -> np.ndarray:
     """Convert specified nodata_value to np.nan.
 
     Args:
