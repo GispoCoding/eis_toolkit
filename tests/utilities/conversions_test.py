@@ -5,7 +5,7 @@ from eis_toolkit.utilities.conversions import (
     convert_deg_to_rad,
     convert_deg_to_rise,
     convert_rad_to_deg,
-    convert_rise_to_degree,
+    convert_rise_to_deg,
 )
 
 
