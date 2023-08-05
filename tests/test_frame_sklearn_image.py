@@ -58,13 +58,13 @@ print("*****************************************************")
 # name_U = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif'))
 # name_target = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif'))
 
-# #  columns-name    column-type  file-name    
-#  type: 
-#      i - identification, 
-#      t target, 
-#      v - values (float/integer), 
-#      c - category, 
-#      n - not to use )
+# #  columns-name,  column-type,  file-name
+#  column-type:
+#      i - identification,
+#      t - target,
+#      v - values (float/integer),
+#      c - category,
+#      n - not to use
 
 # grids =  [{'name':'Total','type':'t','file':name_target},
 #  {'name':'Kalium', 'file':name_K, 'type':'v'},
@@ -85,7 +85,6 @@ print("*****************************************************")
 # # name_tif9 = parent_dir.joinpath(r'data/Ghana/Extr_a2_spc_tho.tif')
 # # name_tif10 = parent_dir.joinpath(r'data/Ghana/Extr_a2_spc_tot.tif')
 # # name_tif11 = parent_dir.joinpath(r'data/Ghana/Extr_a2_spc_ura.tif')
-
 
 # # {'name':'em_hfrf', 'file':name_tif4, 'type':'v'},
 # # {'name':'em_lfif', 'file':name_tif5, 'type':'v'},
@@ -165,7 +164,7 @@ df, nodatmask = nodata_remove(
     df=df,
 )
 #  df_new:  Dataframe without rows containing one or more nodata cells
-#  nodatamask: DataFrame with one column: True - if the row is removed (not stoed in df_new), 
+#  nodatamask: DataFrame with one column: True - if the row is removed (not stoed in df_new),
 #                                          False - if the row is in df_new
 #  Not nessesary for training
 
@@ -224,12 +223,12 @@ validation, confusion, comparison, sklearnMl = sklearn_model_validations(
 )
 # validation, confusion, comparison, sklearnMl = sklearn_model_validations(sklearnMl=sklearnMl,
 #                                                Xdf=train_X, ydf=train_y, test_size=0.1,)
-# validation (dictionary), confusion(DataFrame), comparison (list):  
+# validation (dictionary), confusion(DataFrame), comparison (list):
 #        result of  validation will be saved to csv and json-files with all_export_files)
 # sklearnML:  a fitted model based on the trainings dataset (80% of Xdf)
 print("validation")
 
-# 5.3 calculation of the importance of the columns of X 
+# 5.3 calculation of the importance of the columns of X
 #         (parmeter of the model, permutation importance, very time consuming)
 # importance = sklearn_model_importance(sklearnMl= sklearnMl, Xdf=test_X, ydf = test_y, n_repeats=5)
 # importance: DataFrame (very time consuming)
@@ -336,7 +335,7 @@ print("+++++++++++++++++++++++++++++++++++++++++    Part 3: Preparation for Pred
 # # 10.1: nodata removement
 # df, nodatmask = nodata_remove(df = df)
 #  df_new:  Dataframe without rows containing one or more nodata cells
-#  nodatamask: DataFrame with one column: True 
+#  nodatamask: DataFrame with one column: True
 #       - if the row is removed (not stoed in df_new), False - if the row is in df_new
 
 # # 10.2: preparation for nodata replacement, onehotencoding and further training or prediction

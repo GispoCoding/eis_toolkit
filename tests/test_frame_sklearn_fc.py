@@ -36,7 +36,13 @@ from eis_toolkit.validation.sklearn_model_validations import sklearn_model_valid
 # 1. Input - Interface: for training
 #                        to create by EIS-GUI
 #                        Featureclass-data (gdkg-layer) and Fields-Dictionary
-#                                       field-name and field-type: i - identification, t target, v - values (float/integer), c - category, g - geometry, n - not to use )
+#                            field-name and field-type:
+#                               i - identification,
+#                               t target,
+#                               v - values (float/integer),
+#                               c - category,
+#                               g - geometry,
+#                               n - not to use
 #
 
 parent_dir = Path(__file__).parent
@@ -101,7 +107,8 @@ print("+++++++++++++++++++++++++++++++++++++++++    Part 2: Preparation")
 # 3.1: nodata removement
 # df_new, nodatmask = all_nodata_remove(df = df)
 # # df_new:  Dataframe without rows containing one or more nodata cells
-# # nodatamask: DataFrame with one column: True - if the row is removed (not stoed in df_new), False - if the row is in df_new
+# # nodatamask: DataFrame with one column: True - if the row is removed (not stoed in df_new),
+#                                          False - if the row is in df_new
 
 # 3.2: preparation for nodata replacemnt, onehotencoding and further training or prediction
 Xvdf, Xcdf, ydf, igdf = separation(df=df, fields=fields)
@@ -147,10 +154,12 @@ print("+++++++++++++++++++++++++++++++++++++++++    Part 3: Validation")
 validation, confusion, comparison, sklearnMl = sklearn_model_validations(
     sklearnMl=sklearnMl, Xdf=Xdf, ydf=ydf, comparison=True, confusion_matrix=True, test_size=0.2
 )
-# validation (dictionary), confusion(DataFrame), comparison (list):  result of  validation will be saved to csv and json-files with all_export_files)
+# validation (dictionary), confusion(DataFrame), comparison (list):
+#  result of  validation will be saved to csv and json-files with all_export_files)
 # sklearnML:  a fitted model based on the trainings dataset (0,8 -> 80% of Xdf)
 
-# 5.3 calculation of the importance of the columns of X (parmeter of the model, permutation importance, very time consuming)
+# 5.3 calculation of the importance of the columns of X
+# (parmeter of the model, permutation importance, very time consuming)
 # importance = sklearn_model_importance(sklearnMl= sklearnMl, Xdf=Xdf, ydf = ydf, n_repeats=5)
 # importance: DataFrame  (very time consuming)
 importance = sklearn_model_importance(
