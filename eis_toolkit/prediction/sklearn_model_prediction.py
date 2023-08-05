@@ -41,25 +41,27 @@ def sklearn_model_prediction(
     igdf: Optional[pd.DataFrame] = None,
     fields: Optional[dict] = None,
 ) -> Union[pd.DataFrame, gpd.GeoDataFrame]:
-
     """
-        Prediction based on a SKLEARN model and  of a DataFrame of samples.
+        Perform prediction based on a SKLEARN model and of a DataFrame of samples.
+
         If given the result will be zipped to Id and geometry columns.
     Args:
-        sklearnMl: Existing model to use for the prediction (random rorest classifier, random forest regressor, logistic regression).
+        sklearnMl: Existing model to use for the prediction
+                   (random rorest classifier, random forest regressor, logistic regression).
         Xdf ("array-like")): Features (columns) and samples (raws) of samples to predict y.
         igdf ("array-like"), optional): Columns of ids and geoemtries.
         fields ( optinal): If given it will be used to set the geometry for geodataframe.
+
     Returns:
-        pandas dataframe or geodataframe containing predicted values. (if geodataframe: geoemtry columns are in the geodataframe)
+        pandas dataframe or geodataframe containing predicted values.
+           (if geodataframe: geoemtry columns are in the geodataframe)
     """
 
     # Argument evaluation
     t = sklearnMl.__class__.__name__
-    if not t in ("RandomForestClassifier", "RandomForestRegressor", "LogisticRegression"):
-        raise InvalidParameterValueException(
-            "Argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)"
-        )
+    tmp = "Argument sklearnMl not one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)"
+    if t not in ("RandomForestClassifier", "RandomForestRegressor", "LogisticRegression"):
+        raise InvalidParameterValueException(tmp)
     if len(Xdf.columns) == 0:
         raise InvalidParameterValueException("DataFrame has no column")
     if len(Xdf.index) == 0:

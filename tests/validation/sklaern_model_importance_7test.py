@@ -1,34 +1,43 @@
-# import numpy as np
-import sys
+
 from pathlib import Path
 
 import pytest
-from beartype import beartype
+# from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
-scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-sys.path.append(scripts)
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
 
-import geopandas as gpd
+# import geopandas as gpd
 import pandas as pd
 
-from eis_toolkit.conversions.import_featureclass import *
-from eis_toolkit.conversions.import_grid import *
-from eis_toolkit.exceptions import (  # ,NonMatchingCrsException, NotApplicableGeometryTypeException
-    InvalidParameterValueException,
-)
-from eis_toolkit.prediction.sklearn_model_fit import *
-from eis_toolkit.prediction.sklearn_randomforest_classifier import *
-from eis_toolkit.prediction.sklearn_randomforest_regressor import *
-from eis_toolkit.transformations.nodata_remove import *
-from eis_toolkit.transformations.nodata_replace import *
-from eis_toolkit.transformations.onehotencoder import *
-from eis_toolkit.transformations.separation import *
-from eis_toolkit.transformations.split import *
-from eis_toolkit.transformations.unification import *
-# from eis_toolkit.prediction.sklearn_model_prediction import *
-from eis_toolkit.validation.sklearn_model_crossvalidation import *
-from eis_toolkit.validation.sklearn_model_importance import *
+
+# from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
+# from eis_toolkit.conversions.export_featureclass import export_featureclass
+# from eis_toolkit.conversions.export_grid import export_grid
+from eis_toolkit.conversions.import_featureclass import import_featureclass
+# from eis_toolkit.conversions.import_grid import import_grid
+from eis_toolkit.exceptions import (InvalidParameterValueException)  # FileWriteError, FileReadError)
+# from eis_toolkit.file.export_files import export_files
+# from eis_toolkit.file.import_files import import_files
+from eis_toolkit.prediction.sklearn_model_fit import sklearn_model_fit
+# from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
+
+# from eis_toolkit.prediction.sklearn_model_predict_proba import sklearn_model_predict_proba
+# from eis_toolkit.prediction.sklearn_randomforest_classifier import sklearn_randomforest_classifier
+from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
+
+from eis_toolkit.transformations.nodata_replace import nodata_replace
+from eis_toolkit.transformations.onehotencoder import onehotencoder
+from eis_toolkit.transformations.separation import separation
+from eis_toolkit.transformations.split import split
+from eis_toolkit.transformations.unification import unification
+
+# from eis_toolkit.validation.sklearn_model_crossvalidation import sklearn_model_crossvalidation
+from eis_toolkit.validation.sklearn_model_importance import sklearn_model_importance
+# from eis_toolkit.validation.sklearn_model_validations import sklearn_model_validations
+# from eis_toolkit.transformations.nodata_remove import nodata_remove
+
 
 #################################################################
 # import of data from import_featureclass or import_grid
@@ -211,17 +220,17 @@ def test_sklearn_model_importance_error():
     # with pytest.raises(InvalidParameterValueException):  # raise if no fitted model
     #     importance = sklearn_model_importance (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
     with pytest.raises(InvalidParameterValueException):
-        importance = sklearn_model_importance(sklearnMl=Xdf_enh)
+        sklearn_model_importance(sklearnMl=Xdf_enh)
     with pytest.raises(BeartypeCallHintParamViolation):
-        importance = sklearn_model_importance(sklearnMl=sklearnMl, Xdf="_", ydf=ydf)
+        sklearn_model_importance(sklearnMl=sklearnMl, Xdf="_", ydf=ydf)
     with pytest.raises(InvalidParameterValueException):
-        importance = sklearn_model_importance(sklearnMl=sklearnMl, Xdf=Xdf)
+        sklearn_model_importance(sklearnMl=sklearnMl, Xdf=Xdf)
     with pytest.raises(BeartypeCallHintParamViolation):
-        importance = sklearn_model_importance(sklearnMl=sklearnMl, Xdf=Xdf, ydf=ydf, n_repeats=5.5)
+        sklearn_model_importance(sklearnMl=sklearnMl, Xdf=Xdf, ydf=ydf, n_repeats=5.5)
     with pytest.raises(BeartypeCallHintParamViolation):
-        importance = sklearn_model_importance(sklearnMl=sklearnMl, Xdf=Xdf, ydf=ydf, max_samples="i")
+        sklearn_model_importance(sklearnMl=sklearnMl, Xdf=Xdf, ydf=ydf, max_samples="i")
     with pytest.raises(InvalidParameterValueException):
-        importance = sklearn_model_importance(sklearnMl=sklearnMl, Xdf=Xdf, ydf=ydf_split)
+        sklearn_model_importance(sklearnMl=sklearnMl, Xdf=Xdf, ydf=ydf_split)
 
 
 test_sklearn_model_importance()

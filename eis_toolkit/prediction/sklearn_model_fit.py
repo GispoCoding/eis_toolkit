@@ -5,9 +5,9 @@ from beartype.typing import Any
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 
+
 # *******************************
-
-
+@beartype
 def _sklearn_model_fit(
     sklearnMl: Any,
     Xdf: pd.DataFrame,
@@ -38,15 +38,17 @@ def sklearn_model_fit(
     Xdf: pd.DataFrame,
     ydf: pd.DataFrame,
 ) -> Any:
-
     """
-       Training of a ML model
+       Train a ML model.
+
     Args:
        - sklearnMl: before defined model (random rorest  classifier, random forest regressor, logistic regressor)
        - Xdf (Pandas dataframe or numpy array ("array-like")): features (columns) and samples (rows)
-       - ydf (Pandas dataframe or numpy array ("array-like")): target valus(columns) and samples (rows) (same number as Xdf)
+       - ydf (Pandas dataframe or numpy array ("array-like")): target valus(columns) and samples (rows)
+                                                               (same number as Xdf)
           If ydf is float and the estimator is a classifier: ydf will be rounded to int.
-          Returns:
+
+    Returns:
          Fited ML model
     """
 
@@ -54,10 +56,9 @@ def sklearn_model_fit(
     t = (
         sklearnMl.__class__.__name__
     )
-    if not t in ("RandomForestClassifier", "RandomForestRegressor", "LogisticRegression"):
-        raise InvalidParameterValueException(
-            "argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)"
-        )
+    if t not in ("RandomForestClassifier", "RandomForestRegressor", "LogisticRegression"):
+        tmp = "argument sklearnMl not (RandomForestClassifier,RandomForestRegressor,LogisticRegression)"
+        raise InvalidParameterValueException(tmp)
     if len(Xdf.columns) == 0:
         raise InvalidParameterValueException("DataFrame Xdf has no column")
     if len(Xdf.index) == 0:

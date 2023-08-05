@@ -15,7 +15,9 @@ from eis_toolkit.exceptions import FileReadError, InvalidParameterValueException
 @beartype
 def _import_featureclass(
     fields: dict,
-    df: Optional[Union[gpd.GeoDataFrame, pd.DataFrame]] = None,  # if None:   geofile is needed (geopandas or panda (csv))
+    df: Optional[
+        Union[gpd.GeoDataFrame, pd.DataFrame]
+    ] = None,  # if None:   geofile is needed (geopandas or panda (csv))
     file: Optional[Union[str, pathlib.PosixPath]] = None,  # csv, shp, geojson or file geodatabase, geopackage
     layer: Optional[str] = None,  # if geodatabase/geopackage: layer
     decimalpoint_german: Optional[bool] = False,
@@ -37,12 +39,12 @@ def _import_featureclass(
         if file.__str__().endswith(".csv"):
             try:
                 df = pd.read_csv(file, delimiter=separator, encoding="unicode_escape", decimal=decimal)
-            except:
+            except:  # noqa: E722
                 raise FileReadError("File is not readable " + str(file))
         else:  # shp, FilGDB
             try:
                 df = gpd.read_file(file, layer=layer)
-            except:
+            except:  # noqa: E722
                 raise FileReadError("File is not readable " + str(file))
             # save the coordinata reference system (crs) to metadata
             if df.crs is not None:
@@ -62,9 +64,9 @@ def _import_featureclass(
         if val in ("v", "b", "c", "t"):
             tmpf[key] = val
     if not (set(tmpf.keys()).issubset(set(df.columns))):  # 2. list is the big one, 1. list is the subset
-        l = list(set(list(tmpf.keys())) - set(df.columns))
-        l = ",".join(l)
-        raise InvalidParameterValueException("Wrong columns in dataframe (compared with Fields): " + l)
+        lst = list(set(list(tmpf.keys())) - set(df.columns))
+        lst = ",".join(lst)
+        raise InvalidParameterValueException("Wrong columns in dataframe (compared with Fields): " + lst)
 
     #   alternative code: see separation
     columns = {}
@@ -91,17 +93,19 @@ def _import_featureclass(
 @beartype
 def import_featureclass(
     fields: dict,
-    df: Optional[Union[gpd.GeoDataFrame , pd.DataFrame]] = None,
+    df: Optional[Union[gpd.GeoDataFrame, pd.DataFrame]] = None,
     file: Optional[Union[str, pathlib.PosixPath]] = None,
     layer: Optional[str] = None,  # if geodatabase: layer
     decimalpoint_german: Optional[bool] = False,
 ) -> Tuple[dict, pd.DataFrame, pd.DataFrame, Any]:
-
     """
+        Read a feature class or csv to (geo)DataFrame.
+
         Reading a file to pandas DataFrame or csv or use an existing DataFrame instad of the file.
         Erase all not used colmuns in the DataFrame
         Creats a new fields-dictionary (columns), e.g. {'field1': 'c'}
         Tests whether all v-type are numeric and b-fields contain just 0 and 1
+
     Args:
         - fields: name and type of the fields {'feld1': 'c'}
             field-types:
@@ -114,19 +118,21 @@ def import_featureclass(
             i - identifier
         - df: DataFrame if exists. If not file is given df should be not None.
         - file: To imported feature class (shp ,geodatabase, geopackage,...) or csv -file.
-                        If file is not None, df is not needed.
+                If file is not None, df is not needed.
         - layer: To import feature class (layer) from a geodatabase (geodatabase, geopackage,... )
-        - decimalpoint_german (bool): If the csv is a german coded file with comma as decimal point and semikolon as delemiter (default: False)
+        - decimalpoint_german (bool): If the csv is a german coded file with comma as
+                decimal point and semikolon as delemiter (default: False)
 
     Returns:
-        - dictionary: Columns in order and with the types of the fields in the new dataframe (from imput fields but without 'n'-Fields)
-        - pandas DataFrame to use for
+        dictionary: Columns in order and with the types of the fields in the new dataframe
+                    (from imput fields but without 'n'-Fields)
+        pandas DataFrame to use for
            - model training (with target value),
            - model validation (with target value) or
            - model prediction (without target column)
-        - The original pandas DataFrame from import the file
+        The original pandas DataFrame from import the file
             Used in case of prediction to append a new column as the resul of the prediction
-        - metadata /crs-object: Contains the coordinate reference system (crs) if exists
+        metadata /crs-object: Contains the coordinate reference system (crs) if exists
             optional: metadata dictionary if an geodatandas dataframe is imported.
                       in this case crs is stored in metadata['crs']
     """

@@ -1,40 +1,37 @@
-# import numpy as np
-import sys
+
 from pathlib import Path
 
 import pytest
-from beartype import beartype
+# from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
-scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-sys.path.append(scripts)
-
 import pandas as pd
-from geopandas import GeoDataFrame
+# from geopandas import GeoDataFrame
 
-from eis_toolkit.checks.sklearn_check_prediction import *
-from eis_toolkit.conversions.export_featureclass import *
-from eis_toolkit.conversions.export_grid import *
-from eis_toolkit.conversions.import_featureclass import *
-from eis_toolkit.conversions.import_grid import *
-from eis_toolkit.exceptions import (  # NonMatchingCrsException, NotApplicableGeometryTypeException, MissingFileOrPath
-    FileWriteError,
-    InvalidParameterValueException,
-)
-from eis_toolkit.file.export_files import *
-from eis_toolkit.file.import_files import *
-from eis_toolkit.prediction.sklearn_model_fit import *
-from eis_toolkit.prediction.sklearn_model_prediction import *
-from eis_toolkit.prediction.sklearn_randomforest_classifier import *
-from eis_toolkit.prediction.sklearn_randomforest_regressor import *
-from eis_toolkit.transformations.nodata_replace import *
-from eis_toolkit.transformations.onehotencoder import *
-from eis_toolkit.transformations.separation import *
-from eis_toolkit.transformations.split import *
-from eis_toolkit.transformations.unification import *
-from eis_toolkit.validation.sklearn_model_crossvalidation import *
-from eis_toolkit.validation.sklearn_model_importance import *
-from eis_toolkit.validation.sklearn_model_validations import *
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
+
+from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
+from eis_toolkit.conversions.export_featureclass import export_featureclass
+# from eis_toolkit.conversions.export_grid import export_grid
+from eis_toolkit.conversions.import_featureclass import import_featureclass
+# from eis_toolkit.conversions.import_grid import import_grid
+from eis_toolkit.exceptions import (FileWriteError, InvalidParameterValueException)
+
+from eis_toolkit.file.export_files import export_files
+from eis_toolkit.file.import_files import import_files
+from eis_toolkit.prediction.sklearn_model_fit import sklearn_model_fit
+from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
+from eis_toolkit.prediction.sklearn_randomforest_classifier import sklearn_randomforest_classifier
+# from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
+from eis_toolkit.transformations.nodata_replace import nodata_replace
+from eis_toolkit.transformations.onehotencoder import onehotencoder
+from eis_toolkit.transformations.separation import separation
+# from eis_toolkit.transformations.split import split
+from eis_toolkit.transformations.unification import unification
+# from eis_toolkit.validation.sklearn_model_crossvalidation import sklearn_model_crossvalidation
+# from eis_toolkit.validation.sklearn_model_importance import sklearn_model_importance
+from eis_toolkit.validation.sklearn_model_validations import sklearn_model_validations
 
 #################################################################
 # import of data from import_featureclass or import_grid
@@ -261,9 +258,9 @@ def test_export_featureclass():
 def test_export_featureclass_error():
     """Test wrong arguments."""
     with pytest.raises(BeartypeCallHintParamViolation):
-        ydf = export_featureclass(ydf=path)
+        export_featureclass(ydf=path)
     with pytest.raises(BeartypeCallHintParamViolation):
-        ydf = export_featureclass(
+        export_featureclass(
             ydf=ydfpr,
             dfg=path,
             metadata=metadata,
@@ -274,7 +271,7 @@ def test_export_featureclass_error():
         )
     # Problems because of no geodatbase
     with pytest.raises(FileWriteError):
-        ydf = export_featureclass(
+        export_featureclass(
             ydf=ydfpr,
             dfg=Xdf,
             metadata=metadata,
@@ -284,13 +281,15 @@ def test_export_featureclass_error():
             decimalpoint_german=True,
         )
     # with pytest.raises(FileWriteError):
-    #     ydf = export_featureclass(ydf = ydfpr, metadata = metadata, outpath = path, outfile = 'pr_tst', outextension = 'csv', decimalpoint_german = True)
+    #     ydf = export_featureclass(ydf = ydfpr, metadata = metadata, outpath = path,
+    #                     outfile = 'pr_tst', outextension = 'csv', decimalpoint_german = True)
     # with pytest.raises(FileWriteError):
-    #     ydf = export_featureclass(ydf = ydfpr, metadata = metadata, outpath = path, outfile = 'pr_tst', outextension = 'csv', decimalpoint_german = True)
+    #     ydf = export_featureclass(ydf = ydfpr, metadata = metadata, outpath = path,
+    #                     outfile = 'pr_tst', outextension = 'csv', decimalpoint_german = True)
 
     path_wrong = str(parent_dir.joinpath(r"falsch"))
     with pytest.raises(InvalidParameterValueException):
-        ydf = export_featureclass(
+        export_featureclass(
             ydf=ydfpr,
             dfg=Xdf,
             metadata=metadata,
@@ -300,7 +299,7 @@ def test_export_featureclass_error():
             decimalpoint_german=True,
         )
     with pytest.raises(BeartypeCallHintParamViolation):
-        ydf = export_featureclass(
+        export_featureclass(
             ydf=ydfpr,
             dfg=Xdf,
             metadata=metadata,
@@ -310,7 +309,7 @@ def test_export_featureclass_error():
             decimalpoint_german=True,
         )
     with pytest.raises(InvalidParameterValueException):
-        ydf = export_featureclass(
+        export_featureclass(
             ydf=ydfpr,
             dfg=Xdf,
             metadata=metadata,
@@ -320,7 +319,7 @@ def test_export_featureclass_error():
             decimalpoint_german=True,
         )
     with pytest.raises(BeartypeCallHintParamViolation):
-        ydf = export_featureclass(
+        export_featureclass(
             ydf=ydfpr,
             dfg=Xdf,
             metadata=metadata,
@@ -332,4 +331,4 @@ def test_export_featureclass_error():
 
 
 test_export_featureclass()
-# test_export_featureclass_error()
+test_export_featureclass_error()

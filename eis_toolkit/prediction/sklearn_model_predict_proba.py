@@ -43,29 +43,35 @@ def sklearn_model_predict_proba(
     igdf: Optional[pd.DataFrame] = None,
     fields: Optional[dict] = None,
 ) -> Union[pd.DataFrame, gpd.GeoDataFrame]:
-
     """
-        Probabitity of the Prediction of the classes for each sample (row, cell, ...).
+        Calculate robabitity of the Prediction of the classes for each sample (row, cell, ...).
+
         In case igdf is given. the id and geometry column will be zipped to the probability result.
     Args:
-        - sklearnMl: Existing classifier model to use for calculation of the prediction probability (random forest classifier, logistic regression,... )
+        - sklearnMl: Existing classifier model to use for calculation of the prediction probability
+          (random forest classifier, logistic regression,... )
         - Xdf ("array-like"): Features (columns) and samples (rows) to use for calculation of the prediction probability
         - igdf ("array-like"), optional): Columns of identification and geoemtries of the raws
         - fields (optinal): If given it will be used to set the geometry for geodataframe
+
     Returns:
         pandas Dataframe or geoDataFram containg the prediction probability values for Multiclass prediction
     """
 
     # Argument evaluation
     t = sklearnMl.__class__.__name__
-    if not t in ("RandomForestClassifier", "RandomForestRegressor", "LogisticRegression"):
+    if t not in ("RandomForestClassifier", "RandomForestRegressor", "LogisticRegression"):
         raise InvalidParameterValueException(
-            "Argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)"
+            "Argument sklearnMl is not one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)"
         )
     if len(Xdf.columns) == 0:
         raise InvalidParameterValueException("DataFrame has no column")
     if len(Xdf.index) == 0:
         raise InvalidParameterValueException("DataFrame has no rows")
+    else:
+        if igdf is not None:
+            if len(Xdf.index) != len(igdf.index):
+                raise InvalidParameterValueException("DataFrames have different numbers of rows")
     if not hasattr(sklearnMl, "feature_names_in_"):
         raise InvalidParameterValueException("Model is not fitted")
 

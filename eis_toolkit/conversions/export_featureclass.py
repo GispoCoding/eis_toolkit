@@ -21,8 +21,8 @@ def _export_featureclass(
     igdf: Optional[Union[gpd.GeoDataFrame, pd.DataFrame]] = None,
     metadata: Optional[Any] = None,
     outpath: Optional[Union[str, pathlib.PosixPath]] = None,  # path or geodatabase (.gdb)
-    outfile: Optional[str] = None,         # file or layername if not given: pd.DataFrame will given back
-    outextension: Optional[str] = None,           # if file, e.g. shape-file. shp
+    outfile: Optional[str] = None,  # file or layername if not given: pd.DataFrame will given back
+    outextension: Optional[str] = None,  # if file, e.g. shape-file. shp
     nanmask: Optional[pd.DataFrame] = None,
     decimalpoint_german: Optional[bool] = False,  # german Comma (,) and seperator (;)
     new_version: Optional[bool] = False,
@@ -74,7 +74,7 @@ def _export_featureclass(
         y = yd.join(ig)
         return GeoDataFrame(y, geometry="geometry")
 
-    #### Main program
+    # Main program
     if decimalpoint_german:
         decimal = ","
         separator = ";"
@@ -100,7 +100,7 @@ def _export_featureclass(
             empty = deepcopy(ydf[:1])
             empty.iloc[:] = np.nan
             for cel in nanmask.iloc[:, 0]:
-                if cel == True:
+                if cel is True:
                     dfnew = pd.concat([dfnew, pd.DataFrame(empty)], axis=0, ignore_index=True)
                 else:
                     dfnew = pd.concat([dfnew, pd.DataFrame(ydf.iloc[v]).T], axis=0, ignore_index=True)
@@ -129,7 +129,7 @@ def _export_featureclass(
             v = 0
             lst = []
             for cel in nanmask.iloc[:, 0]:
-                if cel == True:
+                if cel is True:
                     lst.append(np.NaN)
                 else:
                     lst.append(ydf.iloc[v, 0])  # .values.tolist())
@@ -153,7 +153,7 @@ def _export_featureclass(
                 raise FileWriteError("Layer is not a Geodataframe.It cans not be written in geopackage ")
             try:
                 out.to_file(path, driver="GPKG", layer=file)
-            except:
+            except:    # noqa: E722
                 raise FileWriteError("Layer " + str(file) + " can not be written in geopackage " + str(path))
         else:
             # in the other cases a file (csv, shp or geojson) will be stored to the outpath
@@ -162,21 +162,21 @@ def _export_featureclass(
             if outextension == "csv":
                 try:
                     out.to_csv(filename + extension, header=True, sep=separator, decimal=decimal)
-                except:
+                except:    # noqa: E722
                     raise FileWriteError("File can not be written: " + str(filename + extension))
             elif outextension == "shp":
                 if not (isinstance(out, (gpd.GeoDataFrame))):
                     raise FileWriteError(" Dataframe can not be written as shp because it's not a GEOdataframe")
                 try:
                     out.to_file(filename + extension)
-                except:
+                except:    # noqa: E722
                     raise FileWriteError("File can not be written: " + str(filename + extension))
             elif outextension == "geojson":
                 if not (isinstance(out, (gpd.GeoDataFrame))):
                     raise FileWriteError("dfg can not be written as geojson because it's not a GEOdataframe")
                 try:
                     out.to_file(filename + extension, driver="GeoJSON")
-                except:
+                except:    # noqa: E722
                     raise FileWriteError("File can not be written: " + str(filename + extension))
             else:
                 raise InvalidParameterValueException("No data output. Wrong extension of the output-file")
@@ -197,11 +197,13 @@ def export_featureclass(
     decimalpoint_german: Optional[bool] = False,  # german Comma (,) and seperator: ;
     new_version=False,
 ) -> Union[pd.DataFrame, gpd.GeoDataFrame]:
-
     """
+        Write (geo)dataframe to feature class or csv.
+
         Add the result column to the existing geopandas or pandas dataframe (if exists)
-        and saved the (geo)dataframe optionaly to a feature class file (like .shp) or to a csv (text) file.
-        If the file alredy exists, then the old file will be optionaly deleted or the new file will be named with (file-name)1, 2, ...
+            and saved the (geo)dataframe optionaly to a feature class file (like .shp) or to a csv (text) file.
+        If the file alredy exists, then the old file will be optionaly deleted or the new file will be
+            named with (file-name)1, 2, ...
         If outpath is a geopackage, then outfile is the name of the new layer.
             If the layer alredy exists, the new layer will be named with (layer-name)1, 2, ...
         If the column name already exists, the new column will be named as result1, result2,... etc.
@@ -210,7 +212,9 @@ def export_featureclass(
         "True"-cells in nanmask lead to nodata-cells in ydf. So ydf may be added to dfg.
         If no dfg is given:
             no nanmask is needed.
-            if ydf has a geometry columns, it may be stored as a GIS-Layer if the extension of the file name is .shp, geojson or gpkg
+            if ydf has a geometry columns, it may be stored as a GIS-Layer if the extension
+            of the file name is .shp, geojson or gpkg
+
     Args:
         - ydf: is result of prediction (with one "result"-column)
         - dfg: is the primary feature table (dataframe or geodataframe) - to add with ydf
@@ -224,6 +228,7 @@ def export_featureclass(
         - decimalpoint_german: (optional): default False, german decimal comma (,) and separator (;)
         - new_version: = True: is the output file exists, then a new filename will be generated with the next number.
                        = False:  the existing file will be deleted
+
     Returns:
         gpd.GeoDataFrame or pd.DataFrame
         optionaly stored as a file (csv, shp or geojson or feature class layer for a geopackage)

@@ -36,9 +36,9 @@ def _onehotencoder(
 def onehotencoder(
     df: pd.DataFrame, ohe: Optional[OneHotEncoder] = None
 ) -> Tuple[pd.DataFrame, Union[OneHotEncoder, None]]:
-
     """
-        Encodes all categorical columns in a pandas dataframe to binary columns (0/1)
+        Encode all categorical columns in a pandas dataframe to binary columns (0/1).
+
         In case of model training: onehotencoder object is one of the outputs.
         In case of prediction: onehotencoder object created in traing is needed (input Parameter).
            On this way the same binary columns as in training process will be created.

@@ -6,11 +6,10 @@ from sklearn import metrics
 from sklearn.model_selection import train_test_split
 
 from eis_toolkit.exceptions import InvalidParameterValueException
-from eis_toolkit.prediction.sklearn_model_prediction import *
+from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
+
 
 # *******************************
-
-
 @beartype
 def _sklearn_model_validations(
     sklearnMl: Any,   # None: just compare ydf and predict_ydf
@@ -46,7 +45,7 @@ def _sklearn_model_validations(
     else:  # split in test and training datasets
         testtype = "test_split"
         if test_size is not None:
-            if test_size != 0:  #  selftest will be performed
+            if test_size != 0:    # selftest will be performed
                 train_X, test_X, train_y, test_y = train_test_split(
                     Xdf, ydf, test_size=test_size, train_size=train_size, random_state=random_state, shuffle=shuffle
                 )
@@ -140,31 +139,37 @@ def sklearn_model_validations(
     confusion_matrix: Optional[bool] = True,  # calculate confusion matrix
     comparison: Optional[bool] = False,
 ) -> Tuple[pd.DataFrame, Union[pd.DataFrame, None], Union[pd.DataFrame, None], Any]:
-
     """
-       Validation for a ML model based on:
-       - random splited testset from size test_size/train_size.
+       Perform validation for a ML model.
+
+       The validation is based on
+       random splited testset from size test_size/train_size.
          Xdf and ydf will be randomly splitted in a test and a training dataset.
          The training-dataset will be used for model-training.
          The test-dataset will be used for prediction.
-         The result of prediction will be compared with ydf from test-dataset
-       - if predict_ydf ist given:  test_ydf is the known set of data to compare with predict_ydf
+         The result of prediction will be compared with ydf from test-dataset.
+       If predict_ydf ist given:  test_ydf is the known set of data to compare with predict_ydf.
 
     Args:
        - sklearnMl (model). The Model will be fitted based on the training dataset.
-          Even for comparison with a testset (or verification dataset) the model is used to get the model-typ (regression or classification).
+          Even for comparison with a testset (or verification dataset) the model is used to get the
+          model-typ (regression or classification).
        - Xdf ("array-like"): features (columns) and samples (rows)
        - ydf ("array-like"): target valus(one column) and samples (rows) (same number as Xdf)
             In case the estimator is a classifier ydf should be int.
-            If ydf is = None, target column is included in Xdf. In this case "fields" should not be None and one column should be the target ('t').
+            If ydf is = None, target column is included in Xdf. In this case "fields" should not be None
+            and one column should be the target ('t').
        - predict_ydf: ("array-like"): predicted values of a test dataset (validation dataset).
        - test_size (default=None):
-          If float, should be between 0.0 and 1.0 and represent the proportion of the dataset to include in the test split.
+          If float, should be between 0.0 and 1.0 and represent the proportion of the dataset to include in
+          the test split.
           If int, represents the absolute number of test samples.
-          If None (or negative), the value is set to the complement of the train size. If train_size is also None (or <0), it will be set to 0.25.
+          If None (or negative), the value is set to the complement of the train size. If train_size is
+          also None (or <0), it will be set to 0.25.
           If = 0 or 0.0: a selftest will be peformed: test-set = train-set
        - train_size (default=None):
-          If float, should be between 0.0 and 1.0 and represent the proportion of the dataset to include in the train split.
+          If float, should be between 0.0 and 1.0 and represent the proportion of the dataset to include in
+          the train split.
           If int, represents the absolute number of train samples.
           If None or negative, the value is automatically set to the complement of the test size.
           if = 0 or 0.0 a selftest will be performed: : test-set = train-set
@@ -191,7 +196,7 @@ def sklearn_model_validations(
     # Argument evaluation
     t = sklearnMl.__class__.__name__
 
-    if not t in ("RandomForestClassifier", "RandomForestRegressor", "LogisticRegression"):
+    if t not in ("RandomForestClassifier", "RandomForestRegressor", "LogisticRegression"):
         raise InvalidParameterValueException(
             "argument sklearnMl is not one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)"
         )

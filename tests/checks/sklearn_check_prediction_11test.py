@@ -1,35 +1,35 @@
-# import numpy as np
-import sys
+
 from pathlib import Path
 
+# import geopandas as gpd
+import pandas as pd
 import pytest
-from beartype import beartype
+# from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
-scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-sys.path.append(scripts)
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
 
-import geopandas as gpd
-import pandas as pd
-
-from eis_toolkit.checks.sklearn_check_prediction import *
-from eis_toolkit.conversions.import_featureclass import *
-from eis_toolkit.conversions.import_grid import *
-# from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException, InvalideContentOfInputDataFrame
+from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
+from eis_toolkit.conversions.import_featureclass import import_featureclass
+# from eis_toolkit.conversions.import_grid import import_grid
 from eis_toolkit.exceptions import InvalidParameterValueException
-from eis_toolkit.file.export_files import *
-from eis_toolkit.file.import_files import *
-from eis_toolkit.prediction.sklearn_model_fit import *
-from eis_toolkit.prediction.sklearn_randomforest_classifier import *
-from eis_toolkit.transformations.nodata_replace import *
-from eis_toolkit.transformations.onehotencoder import *
-from eis_toolkit.transformations.separation import *
-from eis_toolkit.transformations.split import *
-from eis_toolkit.transformations.unification import *
-from eis_toolkit.validation.sklearn_model_crossvalidation import *
-from eis_toolkit.validation.sklearn_model_importance import *
-# from eis_toolkit.prediction.sklearn_model_prediction import *
-from eis_toolkit.validation.sklearn_model_validations import *
+from eis_toolkit.file.export_files import export_files
+from eis_toolkit.file.import_files import import_files
+from eis_toolkit.prediction.sklearn_model_fit import sklearn_model_fit
+from eis_toolkit.prediction.sklearn_randomforest_classifier import sklearn_randomforest_classifier
+from eis_toolkit.transformations.nodata_replace import nodata_replace
+from eis_toolkit.transformations.onehotencoder import onehotencoder
+from eis_toolkit.transformations.separation import separation
+from eis_toolkit.transformations.split import split
+from eis_toolkit.transformations.unification import unification
+
+# from eis_toolkit.validation.sklearn_model_crossvalidation \
+#     import sklearn_model_crossvalidation
+# from eis_toolkit.validation.sklearn_model_importance import sklearn_model_importance
+# from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
+# from eis_toolkit.validation.sklearn_model_validations import sklearn_model_validations
+
 
 #################################################################
 # import of data from import_featureclass or import_grid
@@ -163,8 +163,8 @@ fields_csv = {
     "Fe_Ti": "v",
 }
 
-# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns, df, urdf, metadata = import_featureclass(fields=fields_csv, file=name_csv, decimalpoint_german=True)
+columns, df, urdf, metadata = import_featureclass(fields=fields_fc, file=name_fc, layer=layer_name)
+# columns, df, urdf, metadata = import_featureclass(fields=fields_csv, file=name_csv, decimalpoint_german=True)
 # columns , df , metadata = import_grid(grids = grids)
 # Separation
 Xvdf, Xcdf, ydf, igdf = separation(df=df, fields=columns)
@@ -181,7 +181,8 @@ sklearnMl = sklearn_randomforest_classifier(oob_score=True)
 # fit
 sklearnMl = sklearn_model_fit(sklearnMl=sklearnMl, Xdf=Xdf, ydf=ydf)
 # validation
-# validation , confusion , comparison , myMl = sklearn_model_validations (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf , comparison = True , confusion_matrix = True , test_size = 0.2)
+# validation , confusion , comparison , myMl = sklearn_model_validations \
+#      (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf , comparison = True , confusion_matrix = True , test_size = 0.2)
 # crossvalidation
 # cv = sklearn_model_crossvalidation (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
 # importance
@@ -218,7 +219,7 @@ Xvdf_test, Xcdf_test, ydf_dmp, igdf_test = separation(df=Xdf_test, fields=myFiel
 Xcdf_test = nodata_replace(df=Xcdf_test, rtype="most_frequent")
 Xvdf_test = nodata_replace(df=Xvdf_test, rtype="mean")
 # onehotencoder
-Xdf_enht, eho = onehotencoder(df=Xcdf_test)  # , ohe = sklearnOhep)
+Xdf_enht, eho = onehotencoder(df=Xcdf_test, ohe=sklearnOhep)
 # unification
 Xdf_tst = unification(Xvdf=Xvdf_test, Xcdf=Xdf_enht)
 
@@ -242,12 +243,12 @@ def test_sklearn_check_prediction_error():
 
     Xdf_wrong = Xdf_test.drop(columns=["Plunge_dip"])
     with pytest.raises(InvalidParameterValueException):
-        X = sklearn_check_prediction(sklearnMl=sklearnMlp, Xdf=Xdf_wrong)
+        sklearn_check_prediction(sklearnMl=sklearnMlp, Xdf=Xdf_wrong)
 
     with pytest.raises(InvalidParameterValueException):
-        X = sklearn_check_prediction(sklearnMl=Xdf_tst, Xdf=Xdf_tst)
+        sklearn_check_prediction(sklearnMl=Xdf_tst, Xdf=Xdf_tst)
     with pytest.raises(BeartypeCallHintParamViolation):
-        X = sklearn_check_prediction(sklearnMl=sklearnMlp, Xdf=999)
+        sklearn_check_prediction(sklearnMl=sklearnMlp, Xdf=999)
 
 
 test_sklearn_check_prediction()

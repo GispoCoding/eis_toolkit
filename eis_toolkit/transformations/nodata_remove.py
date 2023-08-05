@@ -32,14 +32,16 @@ def _nodata_remove(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
 # *******************************
 @beartype
 def nodata_remove(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
-
     """
-        Removes nodata sample (and by the way all inf values).
+        Remove nodata sample (and by the way all inf values).
+
         nodata_remove.py must be used befor separation.py.
             Attention: QGIS Null for cells in a string-column will be not interpreted as None,
             just string with length 0 (empty cell)
+
     Args:
         Pandas DataFrame
+
     Returns:
         - pandas dataframe without nodata values (raws with nodata cells are deleted)
         - pandas dataframe as nodatamask containing

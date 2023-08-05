@@ -1,23 +1,43 @@
-# import numpy as np
-import sys
+
 from copy import deepcopy
 from pathlib import Path
 
 import pytest
-from beartype import beartype
+# from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
-scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-sys.path.append(scripts)
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
 
-import geopandas as gpd
+# import geopandas as gpd
 import pandas as pd
 
-from eis_toolkit.conversions.import_featureclass import *
-from eis_toolkit.conversions.import_grid import *
-from eis_toolkit.transformations.nodata_remove import *
+# from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
+# from eis_toolkit.conversions.export_featureclass import export_featureclass
+# from eis_toolkit.conversions.export_grid import export_grid
+# from eis_toolkit.conversions.import_featureclass import import_featureclass
+from eis_toolkit.conversions.import_grid import import_grid
+# from eis_toolkit.exceptions import (InvalidParameterValueException)  # FileWriteError, FileReadError)
+# from eis_toolkit.file.export_files import export_files
+# from eis_toolkit.file.import_files import import_files
+# from eis_toolkit.prediction.sklearn_model_fit import sklearn_model_fit
+# from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
 
-# from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
+# from eis_toolkit.prediction.sklearn_model_predict_proba import sklearn_model_predict_proba
+# from eis_toolkit.prediction.sklearn_randomforest_classifier import sklearn_randomforest_classifier
+# from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
+
+# from eis_toolkit.transformations.nodata_replace import nodata_replace
+# from eis_toolkit.transformations.onehotencoder import onehotencoder
+# from eis_toolkit.transformations.separation import separation
+# from eis_toolkit.transformations.split import split
+# from eis_toolkit.transformations.unification import unification
+
+# from eis_toolkit.validation.sklearn_model_crossvalidation import sklearn_model_crossvalidation
+# from eis_toolkit.validation.sklearn_model_importance import sklearn_model_importance
+# from eis_toolkit.validation.sklearn_model_validations import sklearn_model_validations
+from eis_toolkit.transformations.nodata_remove import nodata_remove
+
 
 #################################################################
 # import of data from import_featureclass or import_grid
@@ -43,19 +63,21 @@ grids = [
 ]
 
 
-# Ghana:
-deposits = str(parent_dir.joinpath(r"data/Ghana/deposits.tif"))
-emhgas = str(parent_dir.joinpath(r"data/Ghana/em_hfif_gy_asp_sn_s.tif"))
-gysc = str(parent_dir.joinpath(r"data/Ghana/gy_scaled.tif"))
-tccr = str(parent_dir.joinpath(r"data/Ghana/tcnomax_crossings.tif"))
+# grid:
+parent_dir = Path(__file__).parent.parent
+name_K = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_K_.tif"))
+name_Th = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Th_eq_.tif"))
+name_U = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif"))
+name_target = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif"))
 
-# Ghana
+# grids and grid-types for X (training based on tif-files)
 grids = [
-    {"name": "Deposits", "type": "t", "file": deposits},
-    {"name": "em_h", "file": emhgas, "type": "v"},
-    {"name": "gy_scaled", "file": gysc, "type": "v"},
-    {"name": "tc_crossing", "file": tccr, "type": "v"},
+    {"name": "Total", "type": "t", "file": name_target},
+    {"name": "Kalium", "file": name_K, "type": "v"},
+    {"name": "Thorium", "file": name_Th, "type": "v"},
+    {"name": "Uran", "file": name_U, "type": "v"},
 ]
+
 
 # columns and column-types for X (training based on a geopackage-layer)
 fields_fc = {
@@ -186,7 +208,7 @@ def test_nodata_remove():
 def test_nodata_remove_error():
     """Test wrong arguments."""
     with pytest.raises(BeartypeCallHintParamViolation):
-        df_new, nodatmask = nodata_remove(df=[1, 2])
+        nodata_remove(df=[1, 2])
 
 
 test_nodata_remove()

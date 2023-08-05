@@ -1,20 +1,17 @@
-import sys
+
 from pathlib import Path
 
 import pytest
-from beartype import beartype
+# from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
-scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-sys.path.append(scripts)
-
-# import rasterio
 import geopandas as gpd
 import pandas as pd
 
-from eis_toolkit.conversions.import_featureclass import *
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
 
-# from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
+from eis_toolkit.conversions.import_featureclass import import_featureclass
 
 # input from GUI:
 parent_dir = Path(__file__).parent.parent

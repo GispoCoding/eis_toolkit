@@ -12,24 +12,24 @@ def _separation(
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
     cn = df.columns
-    ### Target dataframe
+    # Target dataframe
     name = {i for i in fields if fields[i] == "t"}
     if not set(list(name)).issubset(set(cn)):
         raise InvalidParameterValueException("fields and column names of DataFrame df does not match")
     ydf = df[list(name)]
 
-    ### Values dataframe
+    # Values dataframe
     name = {i for i in fields if fields[i] in ("v", "b")}
     if not set(list(name)).issubset(set(cn)):
         raise InvalidParameterValueException("fields and column names of DataFrame df does not match")
     Xvdf = df[list(name)]
-    ### classes dataframe
+    # classes dataframe
     name = {i for i in fields if fields[i] == "c"}
     if not set(list(name)).issubset(set(cn)):
         raise InvalidParameterValueException("fields and column names of DataFrame df does not match")
     Xcdf = df[list(name)]
 
-    ### identity-geometry dataframe
+    # identity-geometry dataframe
     name = {i for i in fields if fields[i] in ("i", "g")}
     if not set(list(name)).issubset(set(cn)):
         raise InvalidParameterValueException("fields and column names of DataFrame df does not match")
@@ -43,14 +43,17 @@ def _separation(
 def separation(
     df: pd.DataFrame, fields: dict
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-
     """
-        Separates the target column (id exists) to a separate dataframe ydf
-        All categorical columns (fields) will be separated from all other features (columns) in a separate dataframe Xcdf.
-        Separates the id and geometry column to a separate dataframe igdf
+
+        Separates the target column (id exists) to a separate dataframe ydf.
+
+        All categorical columns (fields) will be separated from all other features (columns)
+        in a separate dataframe Xcdf.
+        Separates the id and geometry column to a separate dataframe igdf.
+
     Args:
-        df: Including target column ('t').
-        fields: Column type for each column
+        - df: Including target column ('t').
+        - fields: Column type for each column
             field-types:
             v - values (float or int)
             c - category (int or str)

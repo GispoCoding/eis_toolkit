@@ -24,14 +24,14 @@ def _import_grid(grids: List[dict]) -> Tuple[dict, pd.DataFrame, dict]:
         else:
             try:
                 grid = rasterio.open(dict["file"])
-                dt = grid.read()[0]             # add a new columns to the feature-table (dataFrame)
-            except:
+                dt = grid.read()[0]  # add a new columns to the feature-table (dataFrame)
+            except:  # noqa: E722
                 raise FileReadError("file is not readable")
             dtrans = np.ravel(dt)
             df_nd = pd.DataFrame(dtrans)
             df_nd = df_nd.replace({grid.meta["nodata"]: np.nan})
             df[dict["name"]] = df_nd
-            if q == False:
+            if q is False:
                 meta = grid.meta  # driver, dtype, nodata, width, height, count (=1), crs, transform
                 q = True
             else:
@@ -50,13 +50,15 @@ def _import_grid(grids: List[dict]) -> Tuple[dict, pd.DataFrame, dict]:
 # *******************************
 @beartype
 def import_grid(grids: List[dict]) -> Tuple[dict, pd.DataFrame, dict]:
-
     """
+        Read a number of images to a DataFrame.
+
         Add a list of rasters (grids) as columns to new pandas DataFrame.
             import_grid reads all rasterformats of Python-Modu "rasterio":
             e.g. geoTiff (tif), tif with tfw-file(ESRI), ESRI-Grid (no extension in the filename)... .
         Write the "name" and the "type" of each of this columns to a new dictionary "fields"
         All rasterfiles should have the same crs (coordinates) as well as the same width and height and cellsize.
+
     Args:
         grids: containing
             "name" a unique name for each grid,
@@ -79,8 +81,6 @@ def import_grid(grids: List[dict]) -> Tuple[dict, pd.DataFrame, dict]:
     if len(list(counter for counter, fld in enumerate(grids) if fld["type"] in ["t"])) > 1:
         raise InvalidParameterValueException("There are more then one t-fields in fields argument")
 
-    fields, data_frame, meta = _import_grid(
-        grids=grids
-    )
+    fields, data_frame, meta = _import_grid(grids=grids)
 
     return fields, data_frame, meta

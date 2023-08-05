@@ -14,6 +14,8 @@ MODE = Literal["replace", "mean", "median", "n_neighbors", "most_frequent"]
 #                  IsEqual['n_neighbors']/
 #                  IsEqual['most_frequent']
 # ]
+
+
 @beartype
 def _nodata_replace(
     df: pd.DataFrame,
@@ -54,6 +56,8 @@ def _nodata_replace(
 
 # *******************************
 MODE = Literal["replace", "mean", "median", "n_neighbors", "most_frequent"]
+
+
 @beartype
 def nodata_replace(
     df: pd.DataFrame,
@@ -62,15 +66,19 @@ def nodata_replace(
     replacement_string: Optional[str] = "NaN",
     n_neighbors: Optional[int] = 2,
 ) -> pd.DataFrame:
-
     """
-        Replaces nodata values.
-        nodata_replace.py shoud be used after separation.py (for each DataFrame separately) and befor unification.py
-        There is no need to replace nan values in catagoriesed columns because nhotencoding creats a nan-class.
+        Replace nodata values.
+
+        nodata_replace.py shoud be used after separation.py (for each DataFrame separately) and
+        befor unification.py
+        There is no need to replace nan values in catagoriesed columns because nhotencoding
+        creats a nan-class.
+
     Args:
         - Pandas DataFrame
         - type:
-            - 'replace': Replace each nodata valu with "replacement" (see below).  Does not work for string categoriesed columns!!
+            - 'replace': Replace each nodata valu with "replacement" (see below).
+              Does not work for string categoriesed columns!!
             - 'medium': Replace a nodatavalue with medium of all values of the feature.
             - 'n_neighbors': Replacement calculated with k_neighbar-algorithm (see Argument n_neighbors)
             - 'most_frequent': Its's suitable for categorical columns.

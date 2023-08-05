@@ -1,6 +1,5 @@
 import os
 import pathlib
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -46,7 +45,7 @@ def _export_grid(
         v = 0
         lst = []
         for cel in nanmask.iloc[:, 0]:
-            if cel == True:
+            if cel is True:
                 lst.append(np.NaN)
             else:
                 lst.append(df.iloc[v, 0])  # .values.tolist())
@@ -66,14 +65,12 @@ def _export_grid(
         profile = metadata
         profile.update(
             {"count": 1, "driver": "GTiff", "dtype": "float32"}  # nicht zwingend float32: ggf. int bei classification
-        ) 
+        )
 
         try:
-            with rasterio.open(
-                file, "w", **profile
-            ) as dst:
+            with rasterio.open(file, "w", **profile) as dst:
                 dst.write_band(1, out.astype(rasterio.float32))
-        except:
+        except:  # noqa: E722
             raise FileWriteError("File can not be written: " + str(file))
 
     return out
@@ -88,26 +85,28 @@ def export_grid(
     outfile: Optional[str] = None,  # if not given: pd.DataFrame will given back
     nanmask: Optional[pd.DataFrame] = None,
 ) -> np.ndarray:
-
     """
-        reshape one column of the pandas DataFrame to a new dataframe and store this in a raster file (tif)
+        Write a dataframe to one or more images.
+
+        Reshape one column of the pandas DataFrame to a new dataframe and store this in a raster file (tif).
         In case a nanmask is availabel (nan-cells for prediction input caused droped rows):
            "True"-cells in nanmask lead to nodata-cells in the output dataframe (y).
-        Metadata contains width and height values out of input grids for prediction, as well as the crs (coordinate refrnce system).
+        Metadata contains width and height values out of input grids for prediction,
+           as well as the crs (coordinate refrnce system).
         Nodata marks rows witch are droped because of nodata in the prediction input.
         In case outfile is not None, the dataframe will be saved to a geoTiff-file
 
     Args:
-        df: is the input dataframe created by prediction-method
-        metadata: contains with and height values as weel as coordinate reference system
-        outpath (optional): Path of the output-file
-        outfile (optional): Name of file of the output
+        - df: is the input dataframe created by prediction-method
+        - metadata: contains with and height values as weel as coordinate reference system
+        - outpath (optional): Path of the output-file
+        - outfile (optional): Name of file of the output
             outfile may contain the complete filename.
             outpath should be empty in this case
-        nanmask (optional): in case nodata-samples are removed during "nodata-replacement"
+        - nanmask (optional): in case nodata-samples are removed during "nodata-replacement"
 
     Returns:
-        np.array: 2-d-array (numpy) reddy to output as a tiff, grid,...
+        np.ndarray: 2-d-array (numpy) reddy to output as a tiff, grid,...
     """
 
     out = _export_grid(

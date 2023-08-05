@@ -1,36 +1,39 @@
-# import numpy as np
-import sys
+
 from pathlib import Path
 
 import pytest
-from beartype import beartype
+# from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
-scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-sys.path.append(scripts)
+# import geopandas as gpd
+# import pandas as pd
 
-import geopandas as gpd
-import pandas as pd
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
 
-from eis_toolkit.conversions.import_featureclass import *
-from eis_toolkit.conversions.import_grid import *
-from eis_toolkit.exceptions import (
-    FileReadError,
-)  # NonMatchingCrsException, NotApplicableGeometryTypeException, MissingFileOrPath
-from eis_toolkit.file.export_files import *
-from eis_toolkit.file.import_files import *
-from eis_toolkit.prediction.sklearn_model_fit import *
-from eis_toolkit.prediction.sklearn_randomforest_classifier import *
-from eis_toolkit.prediction.sklearn_randomforest_regressor import *
-from eis_toolkit.transformations.nodata_replace import *
-from eis_toolkit.transformations.onehotencoder import *
-from eis_toolkit.transformations.separation import *
-from eis_toolkit.transformations.unification import *
-from eis_toolkit.validation.sklearn_model_crossvalidation import *
-from eis_toolkit.validation.sklearn_model_importance import *
+# from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
+# from eis_toolkit.conversions.export_featureclass import export_featureclass
+# from eis_toolkit.conversions.export_grid import export_grid
+from eis_toolkit.conversions.import_featureclass import import_featureclass
+# from eis_toolkit.conversions.import_grid import import_grid
+from eis_toolkit.exceptions import (FileReadError,)  # FileWriteError, InvalidParameterValueException)
 
-# from eis_toolkit.prediction.sklearn_model_prediction import *
-from eis_toolkit.validation.sklearn_model_validations import *
+from eis_toolkit.file.export_files import export_files
+from eis_toolkit.file.import_files import import_files
+from eis_toolkit.prediction.sklearn_model_fit import sklearn_model_fit
+# from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
+from eis_toolkit.prediction.sklearn_randomforest_classifier import sklearn_randomforest_classifier
+# from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
+from eis_toolkit.transformations.nodata_replace import nodata_replace
+from eis_toolkit.transformations.onehotencoder import onehotencoder
+from eis_toolkit.transformations.separation import separation
+# from eis_toolkit.transformations.split import split
+from eis_toolkit.transformations.unification import unification
+# from eis_toolkit.validation.sklearn_model_crossvalidation import sklearn_model_crossvalidation
+# from eis_toolkit.validation.sklearn_model_importance import sklearn_model_importance
+# from eis_toolkit.validation.sklearn_model_validations import sklearn_model_validations
+# from eis_toolkit.transformations.nodata_remove import nodata_remove
+
 
 #################################################################
 # import of data from import_featureclass or import_grid
@@ -182,11 +185,12 @@ sklearnMl = sklearn_randomforest_classifier(oob_score=True)
 # fit
 sklearnMl = sklearn_model_fit(sklearnMl=sklearnMl, Xdf=Xdf, ydf=ydf)
 # validation
-# validation , confusion , comparison , myMl = sklearn_model_validations (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf , comparison = True , confusion_matrix = True , test_size = 0.2)
+# validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl = sklearnMl,
+#                  Xdf = Xdf, ydf = ydf, comparison = True, confusion_matrix = True, test_size = 0.2)
 # crossvalidation
-# cv = sklearn_model_crossvalidation (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
+# cv = sklearn_model_crossvalidation (sklearnMl = sklearnMl, Xdf = Xdf, ydf = ydf)
 # importance
-# importance = sklearn_model_importance (sklearnMl = sklearnMl , Xdf = Xdf , ydf = ydf)
+# importance = sklearn_model_importance (sklearnMl = sklearnMl , Xdf = Xdf, ydf = ydf)
 # export_files
 parent_dir = Path(__file__).parent.parent
 path = str(parent_dir.joinpath(r"data"))
@@ -225,7 +229,7 @@ def test_import_files():
 def test_import_files_error():
     """Test wrong arguments."""
     with pytest.raises(BeartypeCallHintParamViolation):
-        mlp, ohep, fldp = import_files(
+        import_files(
             sklearnMl_file=999,
             sklearnOhe_file=filesdict["sklearnOhe"],
             myFields_file=filesdict["myFields"],
@@ -233,7 +237,7 @@ def test_import_files_error():
 
     filesdict["sklearnMl"] = file_wrong
     with pytest.raises(FileReadError):
-        mlp, ohep, fldp = import_files(
+        import_files(
             sklearnMl_file=filesdict["sklearnMl"],
             sklearnOhe_file=filesdict["sklearnOhe"],
             myFields_file=filesdict["myFields"],

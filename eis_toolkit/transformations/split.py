@@ -9,7 +9,8 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 # *******************************
 @beartype
 def _split(
-    Xdf: pd.DataFrame,  # dataframe of Features for traning (to split in training and test dataset) and or for Xdf abnd ydf
+    Xdf: pd.DataFrame,  # dataframe of Features for traning (to split in training and test dataset)
+                        # and/or for Xdf and ydf
     ydf: Optional[
         pd.DataFrame
     ] = None,  # dataframe of known values for training (to split) or known values to compare with test_y
@@ -53,23 +54,24 @@ def split(
     random_state: Optional[int] = None,
     shuffle: Optional[bool] = None,
 ) -> Tuple[pd.DataFrame, Union[pd.DataFrame, None], Union[pd.DataFrame, None], Union[pd.DataFrame, None]]:
-
     """
-        Splits the rows of Xdf and ydf (if given) in Training and Test-Set
-        - random splited testset from size test_size/train_size.
-          Xdf and ydf will be randomly splitted in a test and a training dataset.
-        The funcion may de used to create a validation dataset before starting the training process
+        Split the rows of Xdf and ydf (if given) in Training and Test-Set.
+
+        Xdf and ydf will be randomly splitted in a test and a training dataset.
+        The funcion may de used to create a validation dataset before starting the training process.
 
     Args:
         - Xdf ("array-like") features (columns) and samples (rows)
         - ydf (optional, "array-like") target valus(column) and samples (rows) (same number as Xdf)
         - test_size:
-           If float, should be between 0.0 and 1.0 and represent the proportion of the dataset to include in the test split.
+           If float, should be between 0.0 and 1.0 and represent the proportion of the dataset to include
+           in the test split.
            If int, represents the absolute number of test samples.
            If None or negative, the value is set to the complement of the train size.
              If train_size is also None or negative, it will be set to 0.25.
         - train_size:
-           If float, should be between 0.0 and 1.0 and represent the proportion of the dataset to include in the train split.
+           If float, should be between 0.0 and 1.0 and represent the proportion of the dataset
+           to include in the train split.
            If int, represents the absolute number of train samples.
            If None or negative, the value is automatically set to the complement of the test size.
         - random_state:

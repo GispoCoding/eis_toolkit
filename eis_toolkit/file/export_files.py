@@ -39,7 +39,7 @@ def _export_files(
             else:  # file will be deletet
                 try:
                     os.remove(os.path.abspath(filename + extension))
-                except:
+                except:  # noqa: E722
                     raise FileWriteError("Problem deleting file " + str(filename + extension))
         return filename
 
@@ -64,12 +64,12 @@ def _export_files(
         file = create_file(path, name + "_validation", "csv", new_version=new_version)
         try:
             validations.to_csv(file + ".csv", sep=separator, header=True, decimal=decimal, float_format="%00.5f")
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".csv")
         file = create_file(path, name + "_validation", "json", new_version=new_version)
         try:
             validations.to_json(file + ".json", orient="split", indent=3)
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".json")
 
     if validations is not None and confusion_matrix is not None:
@@ -79,13 +79,13 @@ def _export_files(
             confusion_matrix.to_csv(
                 file + ".csv", sep=separator, index=True, header=True, decimal=decimal
             )
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".csv")
         # to json
         file = create_file(path, name + "_confusion_matrix", "json", new_version=new_version)
         try:
             confusion_matrix.to_json(file + ".json", double_precision=5, orient="table", indent=3)  # to string
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".json")
 
     if crossvalidation is not None:  # cross validation
@@ -107,14 +107,14 @@ def _export_files(
             tmp.to_csv(
                 file + ".csv", sep=";", index=True, header=True, float_format="%00.5f", decimal=decimal
             )  # formatstring
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".csv")
 
         file = create_file(path, name + "_cross_validation", "json", new_version=new_version)
         df = pd.DataFrame.from_dict(ndict)
         try:
             df.to_json(file + ".json", double_precision=5, orient="table", indent=3)  # to string
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".json")
 
     if comparison is not None:
@@ -124,13 +124,13 @@ def _export_files(
             comparison.to_csv(
                 file + ".csv", sep=separator, index=True, header=True, decimal=decimal
             )
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".csv")
         # to json
         file = create_file(path, name + "_comparison", "json", new_version=new_version)
         try:
             comparison.to_json(file + ".json", double_precision=5, orient="table", indent=3)  # to string
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".json")
     if importance is not None:
         # to csv
@@ -139,13 +139,13 @@ def _export_files(
             importance.to_csv(
                 file + ".csv", sep=separator, index=True, header=True, decimal=decimal
             )
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".csv")
         # to json
         file = create_file(path, name + "_importance", "json", new_version=new_version)
         try:
             importance.to_json(file + ".json", double_precision=5, orient="table", indent=3)  # to string
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".json")
 
     if sklearnMl is not None:  # Model
@@ -153,7 +153,7 @@ def _export_files(
         dt["sklearnMl"] = file + ".mdl"
         try:
             joblib.dump(sklearnMl, file + ".mdl")  # save the model
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".mdl")
 
     if sklearnOhe is not None:  # OneHotEncoder
@@ -161,7 +161,7 @@ def _export_files(
         dt["sklearnOhe"] = file + ".ohe"
         try:
             joblib.dump(sklearnOhe, file + ".ohe")
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".ohe")
     # fields
     if myFields is not None:  # Validation
@@ -174,7 +174,7 @@ def _export_files(
                 jsdata = json.dumps(myFields, indent=2)
                 f.write(jsdata)
                 f.close()
-        except:
+        except:  # noqa: E722
             raise FileWriteError("Problem saving file " + file + ".fld")
 
     return dt
@@ -196,36 +196,44 @@ def export_files(
     decimalpoint_german: Optional[bool] = False,
     new_version: Optional[bool] = False,
 ) -> dict:
-
     """
-        Writes files on disc, like the results of validation, fitted model or OneHotEncoder object.
+        Write files on disc, like the results of validation, fitted model or OneHotEncoder object.
+
     Args:
         - name (string, default 'ML'): Name of the ML-process (subject) will be used to build the filenames.
-        - path (string, defalut './data'): Name of the output path. If the path does not exists, the function will raise an exception.
+        - path (string, defalut './data'): Name of the output path. If the path does not exists,
+            the function will raise an exception.
         At least one of the following arguments should be not None:
-        - validation (DataFrame, default = None): Values of metrics according to the type of the model (classification or regression)
+        - validation (DataFrame, default = None): Values of metrics according to the type of the model
+            (classification or regression)
         - crossvalidation (dictionary, default = None): Content of the output file are validation values of each fold.
-        - confusion_matrix (DataFrame,  default = None): Content of the output file is a table .
+        - confusion_matrix (DataFrame,  default = None): Content of the output file is a table.
             Exist only for classifier estimators,
             (will be writte in a file just if validation is used).
-        - importance (DataFrame,  default = None): Content of the output file is a table with values of importance for each feature.
+        - importance (DataFrame,  default = None): Content of the output file is a table with values
+            of importance for each feature.
         - comparison (DataFrame,  default = None): List of all compared value pares: given, predicted
         - sklearnMl (Model Object, default None): Content of the output file, type of the file: SKLAERN Model
-        - sklearnOhe (OneHotEncoder Object, default None): Content of the output file, type of the file: SKLEARN OneHotEncoder
+        - sklearnOhe (OneHotEncoder Object, default None):
+            Content of the output file, type of the file: SKLEARN OneHotEncoder
         - myFields (dictionary, default = None):  Content of the output file: columnslist with name and type of columns
-        - decimalpoint_german (boolen, default False): True if the files above should get "," as decimal point and ";" in csv- files
-        - new_version (boolen, default = False): If the file exists it schould be deletet (new_version = False) or a new version shold be created (new_version = True)
+        - decimalpoint_german (boolen, default False): True if the files above should get "," as decimal point
+            and ";" in csv- files
+        - new_version (boolen, default = False): If the file exists it schould be deletet (new_version = False) or a
+            new version shold be created (new_version = True)
+
     Returns:
         dictionary of the file names of sklearnMl, myOhe, myFields, myMetadata, ...
     """
+
     # Argument evaluation
     t = (
         sklearnMl.__class__.__name__
     )
     if not (t in ("RandomForestClassifier", "RandomForestRegressor", "LogisticRegression") or sklearnMl is None):
-        raise InvalidParameterValueException(
-            "Argument sklearnMl ist not in instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)"
-        )
+        tmp = "Argument sklearnMl not instance of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)"
+        raise InvalidParameterValueException(tmp)
+
     t = sklearnOhe.__class__.__name__
     if not (t in ("OneHotEncoder") or sklearnOhe is None):
         raise InvalidParameterValueException("Argument myOhe ist not in instance of one of OneHotEncoder")

@@ -1,36 +1,39 @@
-# import numpy as np
-import sys
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
-from beartype import beartype
+# from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
-scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-sys.path.append(scripts)
+# import geopandas as gpd
+# import pandas as pd
 
-import geopandas as gpd
-import pandas as pd
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
 
-from eis_toolkit.conversions.import_featureclass import *
-from eis_toolkit.conversions.import_grid import *
-from eis_toolkit.exceptions import FileWriteError, InvalidParameterValueException  # MissingFileOrPath,
-from eis_toolkit.file.export_files import *
-from eis_toolkit.prediction.sklearn_model_fit import *
-from eis_toolkit.prediction.sklearn_randomforest_classifier import *
-from eis_toolkit.prediction.sklearn_randomforest_regressor import *
-from eis_toolkit.transformations.nodata_remove import *
-from eis_toolkit.transformations.nodata_replace import *
-from eis_toolkit.transformations.onehotencoder import *
-from eis_toolkit.transformations.separation import *
-from eis_toolkit.transformations.unification import *
-from eis_toolkit.validation.sklearn_model_crossvalidation import *
-from eis_toolkit.validation.sklearn_model_importance import *
-# from eis_toolkit.prediction.sklearn_model_prediction import *
-from eis_toolkit.validation.sklearn_model_validations import *
+# from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
+# from eis_toolkit.conversions.export_featureclass import export_featureclass
+# # from eis_toolkit.conversions.export_grid import export_grid
+# from eis_toolkit.conversions.import_featureclass import import_featureclass
+from eis_toolkit.conversions.import_grid import import_grid
+from eis_toolkit.exceptions import (FileWriteError, InvalidParameterValueException)   # FileReadError,
 
-# from eis_toolkit.file.import_file import *
+from eis_toolkit.file.export_files import export_files
+# from eis_toolkit.file.import_files import import_files
+from eis_toolkit.prediction.sklearn_model_fit import sklearn_model_fit
+# from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
+# from eis_toolkit.prediction.sklearn_randomforest_classifier import sklearn_randomforest_classifier
+from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
+# from eis_toolkit.transformations.nodata_replace import nodata_replace
+from eis_toolkit.transformations.onehotencoder import onehotencoder
+from eis_toolkit.transformations.separation import separation
+# from eis_toolkit.transformations.split import split
+from eis_toolkit.transformations.unification import unification
+# from eis_toolkit.validation.sklearn_model_crossvalidation import sklearn_model_crossvalidation
+# from eis_toolkit.validation.sklearn_model_importance import sklearn_model_importance
+from eis_toolkit.validation.sklearn_model_validations import sklearn_model_validations
 
+from eis_toolkit.transformations.nodata_remove import nodata_remove
 
 #################################################################
 # import of data from import_featureclass or import_grid
@@ -53,6 +56,17 @@ grids = [
     {"name": "Kalium", "file": name_K, "type": "v"},
     {"name": "Thorium", "file": name_Th, "type": "v"},
     {"name": "Uran", "file": name_U, "type": "v"},
+]
+
+
+name_tif1 = str(parent_dir.joinpath(r"data/test1.tif"))
+name_tif2 = str(parent_dir.joinpath(r"data/test2.tif"))
+name_tif3 = parent_dir.joinpath(r"data/test1.tif")
+
+grids = [
+    {"name": "targe", "type": "t", "file": name_tif1},
+    {"name": "test1", "file": name_tif2, "type": "v"},
+    {"name": "test2", "file": name_tif3, "type": "v"},
 ]
 
 # columns and column-types for X (training based on a geopackage-layer)
@@ -164,20 +178,6 @@ fields_csv = {
     "Fe_Ti": "v",
 }
 
-# Ghana:
-deposits = str(parent_dir.joinpath(r"data/Ghana/deposits.tif"))
-emhgas = str(parent_dir.joinpath(r"data/Ghana/em_hfif_gy_asp_sn_s.tif"))
-gysc = str(parent_dir.joinpath(r"data/Ghana/gy_scaled.tif"))
-tccr = str(parent_dir.joinpath(r"data/Ghana/tcnomax_crossings.tif"))
-
-# Ghana
-grids = [
-    {"name": "Deposits", "type": "t", "file": deposits},
-    {"name": "em_h", "file": emhgas, "type": "v"},
-    {"name": "gy_scaled", "file": gysc, "type": "v"},
-    {"name": "tc_crossing", "file": tccr, "type": "v"},
-]
-
 # columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
 # columns , df , urdf , metadata = import_featureclass(fields = fields_csv, file = name_csv, decimalpoint_german = True)
 columns, dfu, metadata = import_grid(grids=grids)
@@ -255,10 +255,9 @@ def test_export_files():
 
 
 def test_export_files_error():
-
     """Test wrong arguments."""
     with pytest.raises(BeartypeCallHintParamViolation):
-        fd = export_files(
+        export_files(
             name="test_csv",
             path=path,
             validations=["t", "s"],
@@ -274,7 +273,7 @@ def test_export_files_error():
         )
 
     with pytest.raises(FileWriteError):
-        fd = export_files(
+        export_files(
             name="test_csv",
             path=path_wrong,
             validations=validation,
@@ -290,7 +289,7 @@ def test_export_files_error():
         )
     # Error: sklearMl
     with pytest.raises(InvalidParameterValueException):
-        fd = export_files(
+        export_files(
             name="test_csv",
             path=path,
             validations=validation,
@@ -307,7 +306,7 @@ def test_export_files_error():
 
     # Error sklernEho
     with pytest.raises(InvalidParameterValueException):
-        fd = export_files(
+        export_files(
             name="test_csv",
             path=path,
             validations=validation,
@@ -324,7 +323,7 @@ def test_export_files_error():
 
     # Error at decimalpoint_german
     with pytest.raises(BeartypeCallHintParamViolation):
-        fd = export_files(
+        export_files(
             name="test_csv",
             path=path,
             validations=validation,

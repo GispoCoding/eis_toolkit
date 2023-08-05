@@ -20,9 +20,9 @@ def unification(
     Xvdf: pd.DataFrame,
     Xcdf: pd.DataFrame,
 ) -> pd.DataFrame:
-
     """
-       Unifies two dataframes.
+       Unifie two dataframes.
+
     Args:
         Xvdf: Dataframe (with all value und binary fields)
         Xcdf: Dataframe (with all categoriesed fields)

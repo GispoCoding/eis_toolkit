@@ -1,20 +1,18 @@
-import sys
+
 from pathlib import Path
 
 import pytest
-from beartype import beartype
+# from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
-scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-sys.path.append(scripts)
-
-# import rasterio
-import geopandas as gpd
 import pandas as pd
 
-from eis_toolkit.conversions.import_grid import *
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
 
-# from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException, MissingFileOrPath
+from eis_toolkit.conversions.import_grid import import_grid
+from eis_toolkit.exceptions import (FileReadError, MatchingRasterGridException,
+                                    InvalidParameterValueException)
 
 # input from GUI:
 parent_dir = Path(__file__).parent.parent
@@ -24,12 +22,6 @@ name_U = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif"))
 name_target = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif"))
 name_wrong = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_wrong.tif"))
 size_wrong = str(parent_dir.joinpath(r"data/local/data/multiband.tif"))
-
-# Ghana:
-deposits = str(parent_dir.joinpath(r"data/Ghana/deposits.tif"))
-emhgas = str(parent_dir.joinpath(r"data/Ghana/em_hfif_gy_asp_sn_s.tif"))
-gysc = str(parent_dir.joinpath(r"data/Ghana/gy_scaled.tif"))
-tccr = str(parent_dir.joinpath(r"data/Ghana/tcnomax_crossings.tif"))
 
 # grids and grid-types for X (training based on tif-files)
 grids = [
@@ -71,30 +63,16 @@ name_tif1 = str(parent_dir.joinpath(r"data/test1.tif"))
 name_tif2 = str(parent_dir.joinpath(r"data/test2.tif"))
 name_tif3 = parent_dir.joinpath(r"data/test1.tif")
 
-gridst = [
+grids_ = [
     {"name": "targe", "type": "t", "file": name_tif1},
     {"name": "test1", "file": name_tif2, "type": "v"},
     {"name": "test2", "file": name_tif3, "type": "v"},
 ]
 
 
-# Ghana:
-deposits = str(parent_dir.joinpath(r"data/Ghana/deposits.tif"))
-emhgas = str(parent_dir.joinpath(r"data/Ghana/em_hfif_gy_asp_sn_s.tif"))
-gysc = str(parent_dir.joinpath(r"data/Ghana/gy_scaled.tif"))
-tccr = str(parent_dir.joinpath(r"data/Ghana/tcnomax_crossings.tif"))
-
-# Ghana
-grids = [
-    {"name": "Deposits", "type": "t", "file": deposits},
-    {"name": "em_h", "file": emhgas, "type": "v"},
-    {"name": "gy_scaled", "file": gysc, "type": "v"},
-    {"name": "tc_crossing", "file": tccr, "type": "v"},
-]
-
 # ###############################
 def test_import_grid_ok():
-    """Test functionality: import of tif files and creating of X as DataFrame"""
+    """Test functionality: import of tif files and creating of X as DataFrame."""
     columns, df, metadata = import_grid(grids=grids)
 
     assert isinstance(columns, dict)

@@ -85,13 +85,15 @@ def sklearn_model_importance(
     n_jobs: Optional[int] = None,
     max_samples: Optional[Union[float, int]] = 1.0,
 ) -> pd.DataFrame:
-
     """
-       Calcultaes feature importance
-       - without Xdf and ydf:   Importance for RanomForrestClassifier and Regressor
-       - with Xdf and ydf:      Permutation importance - verry time consuming
+       Calculate feature importance.
+
+       without Xdf and ydf:   Importance for RanomForrestClassifier and Regressor
+       with Xdf and ydf:      Permutation importance - verry time consuming
+
     Args:
-       - sklearnMl (model): Even for comparison with a testset the model is used to get the model-typ (regression or classification)
+       - sklearnMl (model): Even for comparison with a testset the model is used to get the model-typ
+         (regression or classification)
        - Xdf ("array-like"): subset of X of training
        - ydf ("array-like"): subset of y of training
        for Permutation importances:
@@ -99,22 +101,26 @@ def sklearn_model_importance(
        - random_state (int, default=None): RandomState instance
           Pseudo-random number generator to control the permutations of each feature.
           Pass an int to get reproducible results across function calls.
-       - max_samples (int or float, default=1.0): The number of samples to draw from X to compute feature importance in each repeat (without replacement).
+       - max_samples (int or float, default=1.0): The number of samples to draw from X to compute feature
+         importance in each repeat (without replacement).
           - If int, then draw max_samples samples.
           - If float, then draw max_samples * X.shape[0] samples.
           - If max_samples is equal to 1.0 or X.shape[0], all samples will be used.
-          While using this option may provide less accurate importance estimates, it keeps the method tractable when evaluating feature importance on large datasets.
-          In combination with n_repeats, this allows to control the computational speed vs statistical accuracy trade-off of this method.
+          While using this option may provide less accurate importance estimates, it keeps the method tractable
+          when evaluating feature importance on large datasets.
+          In combination with n_repeats, this allows to control the computational speed vs statistical accuracy
+          trade-off of this method.
+
     Returns:
-          Importance of Random Forrest:   1 column
-          Permutation importance:   2 colums: mean and std
+          Importance of Random Forrest: 1 column
+          Permutation importance: 2 colums (mean and std)
     """
 
     # Argument evaluation
     t = (sklearnMl.__class__.__name__)
-    if not t in ("RandomForestClassifier", "RandomForestRegressor", "LogisticRegression"):
+    if t not in ("RandomForestClassifier", "RandomForestRegressor", "LogisticRegression"):
         raise InvalidParameterValueException(
-            "Argument sklearnMl is not an instance of one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)"
+            "Argument sklearnMl is not one of (RandomForestClassifier,RandomForestRegressor,LogisticRegression)"
         )
     if Xdf is not None:
         if ydf is None:

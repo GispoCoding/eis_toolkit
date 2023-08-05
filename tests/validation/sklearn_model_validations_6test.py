@@ -1,29 +1,39 @@
-import sys
 from pathlib import Path
 
 import pytest
-from beartype import beartype
+# from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
-scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-sys.path.append(scripts)
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
+
 import pandas as pd
 
-from eis_toolkit.conversions.import_featureclass import *
-from eis_toolkit.conversions.import_grid import *
-from eis_toolkit.exceptions import InvalidParameterValueException
-from eis_toolkit.prediction.sklearn_randomforest_classifier import *
-from eis_toolkit.prediction.sklearn_randomforest_regressor import *
-from eis_toolkit.transformations.nodata_remove import *
-from eis_toolkit.transformations.nodata_replace import *
-from eis_toolkit.transformations.onehotencoder import *
-from eis_toolkit.transformations.separation import *
-from eis_toolkit.transformations.split import *
-from eis_toolkit.transformations.unification import *
-from eis_toolkit.validation.sklearn_model_validations import *
+# from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
+# from eis_toolkit.conversions.export_featureclass import export_featureclass
+# from eis_toolkit.conversions.export_grid import export_grid
+from eis_toolkit.conversions.import_featureclass import import_featureclass
+# from eis_toolkit.conversions.import_grid import import_grid
+from eis_toolkit.exceptions import (InvalidParameterValueException)  # FileWriteError, FileReadError)
+# from eis_toolkit.file.export_files import export_files
+# from eis_toolkit.file.import_files import import_files
+# from eis_toolkit.prediction.sklearn_model_fit import sklearn_model_fit
+# from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
 
-# from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException, MissingFileOrPath
+# from eis_toolkit.prediction.sklearn_model_predict_proba import sklearn_model_predict_proba
+from eis_toolkit.prediction.sklearn_randomforest_classifier import sklearn_randomforest_classifier
+# from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
 
+from eis_toolkit.transformations.nodata_replace import nodata_replace
+from eis_toolkit.transformations.onehotencoder import onehotencoder
+from eis_toolkit.transformations.separation import separation
+from eis_toolkit.transformations.split import split
+from eis_toolkit.transformations.unification import unification
+
+# from eis_toolkit.validation.sklearn_model_crossvalidation import sklearn_model_crossvalidation
+# from eis_toolkit.validation.sklearn_model_importance import sklearn_model_importance
+from eis_toolkit.validation.sklearn_model_validations import sklearn_model_validations
+# from eis_toolkit.transformations.nodata_remove import nodata_remove
 
 
 #################################################################
@@ -212,7 +222,8 @@ y1, ydf_split, y01, y02 = split(ydf, test_size=0.5)
 def test_sklearn_model_validations():
     """Test functionality of validation of a model."""
 
-    # validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl = sklearnMl_r, Xdf = Xdf, ydf = ydf, comparison = True, confusion_matrix = True, test_size = 0.2)
+    # validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl=sklearnMl_r, Xdf=Xdf, ydf=ydf,
+    #                                      comparison=True, confusion_matrix=True, test_size=0.2)
 
     # assert isinstance(validation,pd.DataFrame)
     # assert ((isinstance(confusion,pd.DataFrame)) or (confusion is None))
@@ -234,9 +245,10 @@ def test_sklearn_model_validations_error():
             sklearnMl=sklearnMl_c, Xdf=Xdf, ydf=ydf, comparison=True, confusion_matrix=True, test_size=-1
         )
     # with pytest.raises(InvalidParameterValueException):
-    #     validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl = sklearnMl_r, Xdf = Xdf, ydf = ydf, comparison = True, confusion_matrix = True, test_size = 0.2)
+    #     validation, confusion, comparison, myMl = sklearn_model_validations (sklearnMl=sklearnMl_r, Xdf=Xdf, ydf=ydf,
+    #                    comparison=True, confusion_matrix=True, test_size=0.2)
     with pytest.raises(BeartypeCallHintParamViolation):
-        validation, confusion, comparison, myMl = sklearn_model_validations(
+        sklearn_model_validations(
             sklearnMl=sklearnMl_c, Xdf=Xdf, ydf=ydf, comparison=True, confusion_matrix=True, test_size="2"
         )
     with pytest.raises(BeartypeCallHintParamViolation):
@@ -244,31 +256,31 @@ def test_sklearn_model_validations_error():
             sklearnMl=sklearnMl_c, Xdf=" ", ydf=ydf, comparison=True, confusion_matrix=True, test_size=0.2
         )
     with pytest.raises(BeartypeCallHintParamViolation):
-        validation, confusion, comparison, myMl = sklearn_model_validations(
+        sklearn_model_validations(
             sklearnMl=sklearnMl_c, Xdf=Xdf, ydf=True, comparison=True, confusion_matrix=True, test_size=0.2
         )
     with pytest.raises(BeartypeCallHintParamViolation):
-        validation, confusion, comparison, myMl = sklearn_model_validations(
+        sklearn_model_validations(
             sklearnMl=sklearnMl_c, Xdf=Xdf, ydf=ydf, comparison=ydf, confusion_matrix=True, test_size=0.2
         )
     with pytest.raises(BeartypeCallHintParamViolation):
-        validation, confusion, comparison, myMl = sklearn_model_validations(
+        sklearn_model_validations(
             sklearnMl=sklearnMl_c, Xdf=Xdf, predict_ydf=99, comparison=True, confusion_matrix=True, test_size=0.2
         )
     with pytest.raises(InvalidParameterValueException):
-        validation, confusion, comparison, myMl = sklearn_model_validations(
+        sklearn_model_validations(
             sklearnMl=Xdf, Xdf=Xdf, ydf=ydf, comparison=True, confusion_matrix=True, test_size=0.2
         )
     with pytest.raises(InvalidParameterValueException):
-        validation, confusion, comparison, myMl = sklearn_model_validations(
+        sklearn_model_validations(
             sklearnMl=sklearnMl_c, ydf=ydf, predict_ydf=ydf_split, comparison=True, confusion_matrix=True
         )
     with pytest.raises(InvalidParameterValueException):
-        validation, confusion, comparison, myMl = sklearn_model_validations(
+        sklearn_model_validations(
             sklearnMl=sklearnMl_c, Xdf=Xdf, ydf=ydf, comparison=True, confusion_matrix=True, test_size=-1
         )
     with pytest.raises(InvalidParameterValueException):
-        validation, confusion, comparison, myMl = sklearn_model_validations(
+        sklearn_model_validations(
             sklearnMl=None, Xdf=Xdf, ydf=ydf, test_size=0.1
         )
 
