@@ -17,7 +17,6 @@ from eis_toolkit.transformations.separation import separation
 # scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
 # sys.path.append(scripts)
 
-
 # from eis_toolkit.conversions.import_grid import import_grid
 # from eis_toolkit.exceptions import (InvalidParameterValueException)  # FileWriteError, FileReadError)
 # from eis_toolkit.file.export_files import export_files
@@ -28,7 +27,6 @@ from eis_toolkit.transformations.separation import separation
 # from eis_toolkit.prediction.sklearn_model_predict_proba import sklearn_model_predict_proba
 # from eis_toolkit.prediction.sklearn_randomforest_classifier import sklearn_randomforest_classifier
 # from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
-
 
 # from eis_toolkit.transformations.split import split
 # from eis_toolkit.transformations.unification import unification
@@ -48,18 +46,18 @@ name_csv = str(parent_dir.joinpath(r"data/csv/Trainings_Test.csv"))
 
 # grid:
 parent_dir = Path(__file__).parent.parent
-name_K = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_K_.tif"))
-name_Th = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Th_eq_.tif"))
-name_U = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif"))
-name_target = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif"))
+# name_K = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_K_.tif"))
+# name_Th = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Th_eq_.tif"))
+# name_U = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif"))
+# name_target = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif"))
 
-# grids and grid-types for X (training based on tif-files)
-grids = [
-    {"name": "Total", "type": "t", "file": name_target},
-    {"name": "Kalium", "file": name_K, "type": "v"},
-    {"name": "Thorium", "file": name_Th, "type": "v"},
-    {"name": "Uran", "file": name_U, "type": "v"},
-]
+# # grids and grid-types for X (training based on tif-files)
+# grids = [
+#     {"name": "Total", "type": "t", "file": name_target},
+#     {"name": "Kalium", "file": name_K, "type": "v"},
+#     {"name": "Thorium", "file": name_Th, "type": "v"},
+#     {"name": "Uran", "file": name_U, "type": "v"},
+# ]
 
 # columns and column-types for X (training based on a geopackage-layer)
 fields_fc = {

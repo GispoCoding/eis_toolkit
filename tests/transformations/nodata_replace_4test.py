@@ -6,6 +6,9 @@ import pytest
 # from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
+
 # from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
 # from eis_toolkit.conversions.export_featureclass import export_featureclass
 # from eis_toolkit.conversions.export_grid import export_grid
@@ -13,9 +16,6 @@ from eis_toolkit.conversions.import_featureclass import import_featureclass
 from eis_toolkit.transformations.nodata_replace import nodata_replace
 # from eis_toolkit.transformations.onehotencoder import onehotencoder
 from eis_toolkit.transformations.separation import separation
-
-# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-# sys.path.append(scripts)
 
 
 # from eis_toolkit.conversions.import_grid import import_grid
@@ -49,18 +49,18 @@ name_csv = str(parent_dir.joinpath(r"data/csv/Trainings_Test.csv"))
 
 # grid:
 parent_dir = Path(__file__).parent.parent
-name_K = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_K_.tif"))
-name_Th = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Th_eq_.tif"))
-name_U = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif"))
-name_target = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif"))
+# name_K = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_K_.tif"))
+# name_Th = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Th_eq_.tif"))
+# name_U = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif"))
+# name_target = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif"))
 
-# grids and grid-types for X (training based on tif-files)
-grids = [
-    {"name": "Total", "type": "t", "file": name_target},
-    {"name": "Kalium", "file": name_K, "type": "v"},
-    {"name": "Thorium", "file": name_Th, "type": "v"},
-    {"name": "Uran", "file": name_U, "type": "v"},
-]
+# # grids and grid-types for X (training based on tif-files)
+# grids = [
+#     {"name": "Total", "type": "t", "file": name_target},
+#     {"name": "Kalium", "file": name_K, "type": "v"},
+#     {"name": "Thorium", "file": name_Th, "type": "v"},
+#     {"name": "Uran", "file": name_U, "type": "v"},
+# ]
 
 # columns and column-types for X (training based on a geopackage-layer)
 fields_fc = {

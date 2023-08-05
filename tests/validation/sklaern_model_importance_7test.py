@@ -47,18 +47,18 @@ name_csv = str(parent_dir.joinpath(r"data/csv/Test_Test.csv"))
 
 # grid:
 parent_dir = Path(__file__).parent.parent
-name_K = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_K_.tif"))
-name_Th = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Th_eq_.tif"))
-name_U = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif"))
-name_target = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif"))
+# name_K = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_K_.tif"))
+# name_Th = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Th_eq_.tif"))
+# name_U = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif"))
+# name_target = str(parent_dir.joinpath(r"data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif"))
 
-# grids and grid-types for X (training based on tif-files)
-grids = [
-    {"name": "Total", "type": "t", "file": name_target},
-    {"name": "Kalium", "file": name_K, "type": "v"},
-    {"name": "Thorium", "file": name_Th, "type": "v"},
-    {"name": "Uran", "file": name_U, "type": "v"},
-]
+# # grids and grid-types for X (training based on tif-files)
+# grids = [
+#     {"name": "Total", "type": "t", "file": name_target},
+#     {"name": "Kalium", "file": name_K, "type": "v"},
+#     {"name": "Thorium", "file": name_Th, "type": "v"},
+#     {"name": "Uran", "file": name_U, "type": "v"},
+# ]
 
 name_tif1 = str(parent_dir.joinpath(r"data/test1.tif"))
 name_tif2 = str(parent_dir.joinpath(r"data/test2.tif"))

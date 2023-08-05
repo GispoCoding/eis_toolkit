@@ -26,12 +26,9 @@ from eis_toolkit.transformations.unification import unification
 # scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
 # sys.path.append(scripts)
 
-
 # from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
 
-
 # from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
-
 
 # from eis_toolkit.validation.sklearn_model_crossvalidation import sklearn_model_crossvalidation
 # from eis_toolkit.validation.sklearn_model_importance import sklearn_model_importance
