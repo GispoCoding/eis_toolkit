@@ -1,17 +1,17 @@
 
 from pathlib import Path
 
+import geopandas as gpd
+import pandas as pd
 import pytest
 # from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
-import geopandas as gpd
-import pandas as pd
+from eis_toolkit.conversions.import_featureclass import import_featureclass
 
 # scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
 # sys.path.append(scripts)
 
-from eis_toolkit.conversions.import_featureclass import import_featureclass
 
 # input from GUI:
 parent_dir = Path(__file__).parent.parent

@@ -1,22 +1,26 @@
-
 from copy import deepcopy
 from pathlib import Path
 
+# import geopandas as gpd
+import pandas as pd
 import pytest
 # from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
-
-# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-# sys.path.append(scripts)
-
-# import geopandas as gpd
-import pandas as pd
 
 # from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
 # from eis_toolkit.conversions.export_featureclass import export_featureclass
 # from eis_toolkit.conversions.export_grid import export_grid
 # from eis_toolkit.conversions.import_featureclass import import_featureclass
 from eis_toolkit.conversions.import_grid import import_grid
+# from eis_toolkit.validation.sklearn_model_crossvalidation import sklearn_model_crossvalidation
+# from eis_toolkit.validation.sklearn_model_importance import sklearn_model_importance
+# from eis_toolkit.validation.sklearn_model_validations import sklearn_model_validations
+from eis_toolkit.transformations.nodata_remove import nodata_remove
+
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
+
+
 # from eis_toolkit.exceptions import (InvalidParameterValueException)  # FileWriteError, FileReadError)
 # from eis_toolkit.file.export_files import export_files
 # from eis_toolkit.file.import_files import import_files
@@ -32,11 +36,6 @@ from eis_toolkit.conversions.import_grid import import_grid
 # from eis_toolkit.transformations.separation import separation
 # from eis_toolkit.transformations.split import split
 # from eis_toolkit.transformations.unification import unification
-
-# from eis_toolkit.validation.sklearn_model_crossvalidation import sklearn_model_crossvalidation
-# from eis_toolkit.validation.sklearn_model_importance import sklearn_model_importance
-# from eis_toolkit.validation.sklearn_model_validations import sklearn_model_validations
-from eis_toolkit.transformations.nodata_remove import nodata_remove
 
 
 #################################################################

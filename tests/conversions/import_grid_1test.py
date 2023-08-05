@@ -1,18 +1,17 @@
 
 from pathlib import Path
 
+import pandas as pd
 import pytest
 # from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
-import pandas as pd
+from eis_toolkit.conversions.import_grid import import_grid
+from eis_toolkit.exceptions import FileReadError, InvalidParameterValueException, MatchingRasterGridException
 
 # scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
 # sys.path.append(scripts)
 
-from eis_toolkit.conversions.import_grid import import_grid
-from eis_toolkit.exceptions import (FileReadError, MatchingRasterGridException,
-                                    InvalidParameterValueException)
 
 # input from GUI:
 parent_dir = Path(__file__).parent.parent

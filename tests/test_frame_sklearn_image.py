@@ -2,18 +2,14 @@
 # Test frame for single modules
 #
 
-import sys
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-from rasterio.enums import Resampling
-from rasterio.plot import show
+# import matplotlib.pyplot as plt
+# from rasterio.enums import Resampling
+# from rasterio.plot import show
 
-# parent_dir = Path(__file__).parent.parent
-# scripts = parent_dir.joinpath(r'eis_toolkit/converions')
-scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-sys.path.append(scripts)
-
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
 
 from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
 # from eis_toolkit.conversions.export_featureclass import export_featureclass
@@ -25,22 +21,18 @@ from eis_toolkit.file.export_files import export_files
 from eis_toolkit.file.import_files import import_files
 from eis_toolkit.prediction.sklearn_model_fit import sklearn_model_fit
 from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
-
 # from eis_toolkit.prediction.sklearn_model_predict_proba import sklearn_model_predict_proba
 # from eis_toolkit.prediction.sklearn_randomforest_classifier import sklearn_randomforest_classifier
 from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
-
+from eis_toolkit.transformations.nodata_remove import nodata_remove
 # from eis_toolkit.transformations.nodata_replace import nodata_replace
 from eis_toolkit.transformations.onehotencoder import onehotencoder
 from eis_toolkit.transformations.separation import separation
-from eis_toolkit.transformations.split import split
+# from eis_toolkit.transformations.split import split
 from eis_toolkit.transformations.unification import unification
-
 from eis_toolkit.validation.sklearn_model_crossvalidation import sklearn_model_crossvalidation
 from eis_toolkit.validation.sklearn_model_importance import sklearn_model_importance
 from eis_toolkit.validation.sklearn_model_validations import sklearn_model_validations
-from eis_toolkit.transformations.nodata_remove import nodata_remove
-
 
 rname = "test_images"  # name of the project
 parent_dir = Path(__file__).parent
@@ -66,7 +58,13 @@ print("*****************************************************")
 # name_U = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_U_eq_.tif'))
 # name_target = str(parent_dir.joinpath(r'data/Primary_data/Rad/IOCG_Gm_Rd_Total_Count_.tif'))
 
-# #  columns-name    column-type  file-name     type: i - identification, t target, v - values (float/integer), c - category, n - not to use )
+# #  columns-name    column-type  file-name    
+#  type: 
+#      i - identification, 
+#      t target, 
+#      v - values (float/integer), 
+#      c - category, 
+#      n - not to use )
 
 # grids =  [{'name':'Total','type':'t','file':name_target},
 #  {'name':'Kalium', 'file':name_K, 'type':'v'},
@@ -138,7 +136,6 @@ print("*****************************************************")
 #  {'name':'gy_scaled', 'file':name_tif3, 'type':'v'},
 # ]
 
-
 name_tif1 = str(parent_dir.joinpath(r"data/test1.tif"))
 name_tif2 = str(parent_dir.joinpath(r"data/test2.tif"))
 name_tif3 = parent_dir.joinpath(r"data/test1.tif")
@@ -167,9 +164,10 @@ print("+++++++++++++++++++++++++++++++++++++++++    Part 2: Preparation")
 df, nodatmask = nodata_remove(
     df=df,
 )
-# # df_new:  Dataframe without rows containing one or more nodata cells
-# # nodatamask: DataFrame with one column: True - if the row is removed (not stoed in df_new), False - if the row is in df_new
-#               Not nessesary for training
+#  df_new:  Dataframe without rows containing one or more nodata cells
+#  nodatamask: DataFrame with one column: True - if the row is removed (not stoed in df_new), 
+#                                          False - if the row is in df_new
+#  Not nessesary for training
 
 # 3.2: separation: preparation for nodata replacement, onehotencoding and further training or prediction
 Xvdf, Xcdf, ydf, igdf = separation(
@@ -224,12 +222,15 @@ validation, confusion, comparison, sklearnMl = sklearn_model_validations(
     ydf=ydf,
     test_size=0.1,
 )
-# validation, confusion, comparison, sklearnMl = sklearn_model_validations(sklearnMl = sklearnMl, Xdf = train_X, ydf = train_y, test_size = 0.1,)
-# validation (dictionary), confusion(DataFrame), comparison (list):  result of  validation will be saved to csv and json-files with all_export_files)
+# validation, confusion, comparison, sklearnMl = sklearn_model_validations(sklearnMl=sklearnMl,
+#                                                Xdf=train_X, ydf=train_y, test_size=0.1,)
+# validation (dictionary), confusion(DataFrame), comparison (list):  
+#        result of  validation will be saved to csv and json-files with all_export_files)
 # sklearnML:  a fitted model based on the trainings dataset (80% of Xdf)
 print("validation")
 
-# 5.3 calculation of the importance of the columns of X (parmeter of the model, permutation importance, very time consuming)
+# 5.3 calculation of the importance of the columns of X 
+#         (parmeter of the model, permutation importance, very time consuming)
 # importance = sklearn_model_importance(sklearnMl= sklearnMl, Xdf=test_X, ydf = test_y, n_repeats=5)
 # importance: DataFrame (very time consuming)
 
@@ -334,8 +335,9 @@ print("+++++++++++++++++++++++++++++++++++++++++    Part 3: Preparation for Pred
 
 # # 10.1: nodata removement
 # df, nodatmask = nodata_remove(df = df)
-# # # df_new:  Dataframe without rows containing one or more nodata cells
-# # # nodatamask: DataFrame with one column: True - if the row is removed (not stoed in df_new), False - if the row is in df_new
+#  df_new:  Dataframe without rows containing one or more nodata cells
+#  nodatamask: DataFrame with one column: True 
+#       - if the row is removed (not stoed in df_new), False - if the row is in df_new
 
 # # 10.2: preparation for nodata replacement, onehotencoding and further training or prediction
 # Xvdf, Xcdf, ydf, igdf = separation(df = Xdf, fields = columns)
@@ -389,5 +391,4 @@ Ergebnis = export_grid(
 )
 
 #
-
 print("*****************************************************")

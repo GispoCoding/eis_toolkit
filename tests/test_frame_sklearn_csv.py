@@ -1,52 +1,50 @@
-import sys
 from pathlib import Path
-
-scripts = r"/eis_toolkit"
-sys.path.append(scripts)
-
-
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
 from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
 from eis_toolkit.conversions.export_featureclass import export_featureclass
 # from eis_toolkit.conversions.export_grid import export_grid
 from eis_toolkit.conversions.import_featureclass import import_featureclass
 # from eis_toolkit.conversions.import_grid import import_grid
-from eis_toolkit.exceptions import (InvalidParameterValueException)  # FileWriteError, FileReadError)
+# from eis_toolkit.exceptions import (InvalidParameterValueException)  # FileWriteError, FileReadError)
 from eis_toolkit.file.export_files import export_files
 from eis_toolkit.file.import_files import import_files
 from eis_toolkit.prediction.sklearn_model_fit import sklearn_model_fit
-from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
-
 from eis_toolkit.prediction.sklearn_model_predict_proba import sklearn_model_predict_proba
+from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
 from eis_toolkit.prediction.sklearn_randomforest_classifier import sklearn_randomforest_classifier
-# from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
-
+from eis_toolkit.transformations.nodata_remove import nodata_remove
 from eis_toolkit.transformations.nodata_replace import nodata_replace
 from eis_toolkit.transformations.onehotencoder import onehotencoder
 from eis_toolkit.transformations.separation import separation
 # from eis_toolkit.transformations.split import split
 from eis_toolkit.transformations.unification import unification
-
 from eis_toolkit.validation.sklearn_model_crossvalidation import sklearn_model_crossvalidation
 from eis_toolkit.validation.sklearn_model_importance import sklearn_model_importance
 from eis_toolkit.validation.sklearn_model_validations import sklearn_model_validations
-from eis_toolkit.transformations.nodata_remove import nodata_remove
 
+# from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
 
 ##############################
 # example for CSV - data:
 #            Task:   find the right location of a sample (given by analytics)
 
-# ##############################################################################################
+# #####################################################################################
 # A: Training
 #
 
 # #############################
 # 1. Input - Interface: for training
-#                        to create by EIS-GUI
-#                        Data (csv) and Fields-Dictionary
-#                                       field-name and field-type: i - identification, t target, v - values (float/integer), c - category, n - not to use )
+#        to create by EIS-GUI
+#        Data (csv) and Fields-Dictionary
+#        field-name and field-type:
+#           i - identification,
+#           t target,
+#           v - values (float/integer),
+#           c - category,
+#           n - not to use )
 #
-#
+
 parent_dir = Path(__file__).parent
 name_csv = str(parent_dir.joinpath(r"data/csv/Trainings_Test.csv"))
 
@@ -127,9 +125,9 @@ print("+++++++++++++++++++++++++++++++++++++++++    Part 1: Import")
 columns, df, urdf, metadata = import_featureclass(fields=fields, file=name_csv, decimalpoint_german=True)
 # columns:  field-directory for all imported fields (= columns in df)
 # df: DataFrame with the columns imported (fields with type i, t, v and c)
-# urdf: DataFrame with all imported columns, the will be addd with target column in case of prediction
+# urdf: DataFrame with all imported columns, the will be addd with target column
+# #    in case of prediction
 # metadata: None for csv (importend for featureclasses (crs) or images)
-
 
 #########################################
 # 3. either nodata replacement or nodata removement  (one of both) and onehotencoding
@@ -137,15 +135,17 @@ columns, df, urdf, metadata = import_featureclass(fields=fields, file=name_csv, 
 print("+++++++++++++++++++++++++++++++++++++++++    Part 2: Preparation")
 # 3.1: nodata removement
 # df_new, nodatmask = all_nodata_remove(df = df)
-# # df_new:  Dataframe without rows containing one or more nodata cells
-# # nodatamask: DataFrame with one column: True - if the row is removed (not stoed in df_new), False - if the row is in df_new
+#    df_new:  Dataframe without rows containing one or more nodata cells
+#    nodatamask: DataFrame with one column:
+#     True - if the row is removed (not stoed in df_new), False - if the row is in df_new
 
 # 3.2: preparation for nodata replacemnt, onehotencoding and further training or prediction
 Xvdf, Xcdf, ydf, igdf = separation(df=df, fields=columns)
 # Xvdf: DataFrame with all value columns whitch are not catagories (if no v-field: Xvdf is None)
 # Xcdf: DataFrame with all catagories (if no c-field: Xcdf is None)
 # ydf: DataFrame for the target column (one column, e.g. Location)
-# igdf: DataFrame of (one) identifier-column and (if exists) the geometry column (if no i- and g - field igdf is None)
+# igdf: DataFrame of (one) identifier-column and (if exists) the geometry column
+#       (if no i- and g - field igdf is None)
 
 # 3.3: nodata replacement (if nodata exists and no nodata removal is used)
 # rtypes:
@@ -159,7 +159,7 @@ Xvdf = nodata_replace(df=Xvdf, rtype="mean")
 ydf = nodata_replace(df=ydf, rtype="most_frequent")
 # in case of classification - model: 'most_frequent'
 # (in ydf should not be a nodata cell)
-Xcdf = nodata_replace(df=Xcdf, rtype="most_frequent")  # , replacement_string = 'replace',replacement_number = 0)
+Xcdf = nodata_replace(df=Xcdf, rtype="most_frequent")  # , replacement_string='replace',replacement_number=0)
 
 # 3.4: onehotencoding if catagories fields (c - fields) exists in imported data
 Xdfneu1, enc1 = onehotencoder(df=Xcdf)
@@ -192,10 +192,12 @@ print("+++++++++++++++++++++++++++++++++++++++++    Part 3: Validation")
 validation, confusion, comparison, sklearnMl = sklearn_model_validations(
     sklearnMl=sklearnMl, Xdf=Xdf, ydf=ydf, comparison=True, confusion_matrix=True, test_size=0.2
 )
-# validation (dictionary), confusion(DataFrame), comparison (list):  result of  validation will be saved to csv and json-files with all_export_files)
+# validation (dictionary), confusion(DataFrame), comparison (list):
+#    result of  validation will be saved to csv and json-files with all_export_files)
 # sklearnML:  a fitted model based on the trainings dataset (80% of Xdf)
 
-# 5.3 calculation of the importance of the columns of X (parmeter of the model, permutation importance, very time consuming)
+# 5.3 calculation of the importance of the columns of X
+#     (parmeter of the model, permutation importance, very time consuming)
 # importance = sklearn_model_importance(sklearnMl= sklearnMl, Xdf=Xdf, ydf = ydf, n_repeats=5)
 # importance: DataFrame  (very time consuming)
 importance = sklearn_model_importance(sklearnMl=sklearnMl)
@@ -218,7 +220,7 @@ filesdict = export_files(
     new_version=False,
     decimalpoint_german=True,
 )
-# filesdict: Dictionary of the name of the files:   Interface for EIS-programm (GUI)
+# filesdict: Dictionary of the name of the files:  Interface for EIS-programm (GUI)
 
 #########################################
 # 6. Fiting of the sklearn model
