@@ -14,7 +14,7 @@ def _sklearn_model_crossvalidation(
     Xdf: pd.DataFrame,  # dataframe of Features for traning
     ydf: pd.DataFrame,  # dataframe of known values for training
     scoring: Optional[list] = None,
-    cv: Optional[int] = None,  # int: number of the folds (default 5)
+    cv: Optional[int] = 4,  # int: number of the folds (default 4)
     n_jobs: Optional[int] = None,  # if None: complement size of the test_size
     verbose: Optional[int] = 0,
     pre_dispatch: Optional[int] = None,
@@ -132,7 +132,7 @@ def sklearn_model_crossvalidation(  # type: ignore[no-any-unimported]
     Xdf: pd.DataFrame,  # dataframe of Features for traning
     ydf: pd.DataFrame,  # dataframe of known values for training
     scoring: Optional[list] = None,
-    cv: Optional[int] = None,  # int: number of the folds (None -> 5)
+    cv: Optional[int] = 4,  # int: number of the folds (None -> 4)
     n_jobs: Optional[int] = None,  # if None: complement size of the test_size
     verbose: Optional[int] = 0,
     pre_dispatch: Optional[int] = None,
