@@ -9,6 +9,7 @@ from beartype.roar import BeartypeCallHintParamViolation
 from eis_toolkit.conversions.import_grid import import_grid
 # from eis_toolkit.exceptions import FileReadError, InvalidParameterValueException, MatchingRasterGridException
 
+# import sys
 # scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
 # sys.path.append(scripts)
 

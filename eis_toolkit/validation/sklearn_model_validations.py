@@ -24,7 +24,7 @@ def _sklearn_model_validations(
     test_size: Optional[Union[int, float]] = None,  # int: number of test-samples, if float: 0<ts<1
     train_size: Optional[Union[int, float]] = None,  # if None: complement size of the test_size
     random_state: Optional[int] = None,
-    shuffle: Optional[bool] = None,
+    shuffle: Optional[bool] = True,
     confusion_matrix: Optional[bool] = True,
     comparison: Optional[bool] = False,
 ) -> Tuple[pd.DataFrame, Union[pd.DataFrame, None], Union[pd.DataFrame, None], Any]:

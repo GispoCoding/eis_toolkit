@@ -1,5 +1,7 @@
 
 from pathlib import Path
+
+# import sys
 # scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
 # sys.path.append(scripts)
 from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
@@ -38,7 +40,7 @@ from eis_toolkit.validation.sklearn_model_validations import sklearn_model_valid
 #                        Featureclass-data (gdkg-layer) and Fields-Dictionary
 #                            field-name and field-type:
 #                               i - identification,
-#                               t target,
+#                               t - target,
 #                               v - values (float/integer),
 #                               c - category,
 #                               g - geometry,

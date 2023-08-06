@@ -17,7 +17,7 @@ def _split(
     test_size: Optional[Union[int, float]] = None,  # int: number of test-samples, if float: 0<ts<1
     train_size: Optional[Union[int, float]] = None,  # if None: complement size of the test_size
     random_state: Optional[int] = None,
-    shuffle: Optional[bool] = None,
+    shuffle: Optional[bool] = True,
 ) -> Tuple[pd.DataFrame, Union[pd.DataFrame, None], Union[pd.DataFrame, None], Union[pd.DataFrame, None]]:
 
     # check:
@@ -52,7 +52,7 @@ def split(
     test_size: Optional[Union[int, float]] = None,  # int: namuber of test-samples, if float: 0<ts<1
     train_size: Optional[Union[int, float]] = None,  # if None: complement size of the test_size
     random_state: Optional[int] = None,
-    shuffle: Optional[bool] = None,
+    shuffle: Optional[bool] = True,
 ) -> Tuple[pd.DataFrame, Union[pd.DataFrame, None], Union[pd.DataFrame, None], Union[pd.DataFrame, None]]:
     """
         Split the rows of Xdf and ydf (if given) in Training and Test-Set.

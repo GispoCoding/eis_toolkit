@@ -5,6 +5,7 @@ import pytest
 # from beartype import beartype
 from beartype.roar import BeartypeCallHintParamViolation
 
+# import sys
 # scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
 # sys.path.append(scripts)
 from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction

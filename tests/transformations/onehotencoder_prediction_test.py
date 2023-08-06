@@ -6,6 +6,9 @@ import pytest
 from beartype.roar import BeartypeCallHintParamViolation
 from sklearn.preprocessing import OneHotEncoder
 
+# import sys
+# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
+# sys.path.append(scripts)
 # from eis_toolkit.checks.sklearn_check_prediction import sklearn_check_prediction
 # from eis_toolkit.conversions.export_featureclass import export_featureclass
 # from eis_toolkit.conversions.export_grid import export_grid
@@ -23,9 +26,6 @@ from eis_toolkit.transformations.separation import separation
 from eis_toolkit.transformations.split import split
 from eis_toolkit.transformations.unification import unification
 
-# scripts = r"/eis_toolkit"  # /eis_toolkit/conversions'
-# sys.path.append(scripts)
-
 # from eis_toolkit.prediction.sklearn_model_prediction import sklearn_model_prediction
 
 # from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
@@ -41,7 +41,7 @@ from eis_toolkit.transformations.unification import unification
 parent_dir = Path(__file__).parent.parent
 name_fc = str(parent_dir.joinpath(r"data/shps/EIS_gp.gpkg"))
 layer_name = r"Occ_2"
-name_csv = str(parent_dir.joinpath(r"data/csv/Test_Test.csv"))
+# name_csv = str(parent_dir.joinpath(r"data/csv/Test_Test.csv"))
 
 # columns and column-types for X (training based on a geopackage-layer)
 fields_fc = {
@@ -85,75 +85,75 @@ fields_fc = {
 }
 
 # columns and column-types for X (training based on a csv file)
-fields_csv = {
-    "LfdNr": "i",
-    "Tgb": "t",
-    "TgbNr": "n",
-    "SchneiderThiele": "c",
-    "SuTNr": "c",
-    "Asche_trocken": "v",
-    "C_trocken": "n",
-    "H_trocken": "v",
-    "S_trocken": "v",
-    "N_trocken": "v",
-    "AS_Natrium_ppm": "v",
-    "AS_Kalium_ppm": "v",
-    "AS_Calcium_ppm": "v",
-    "AS_Magnesium_ppm": "v",
-    "AS_Aluminium_ppm": "v",
-    "AS_Silicium_ppm": "v",
-    "AS_Eisen_ppm": "v",
-    "AS_Titan_ppm": "v",
-    "AS_Schwefel_ppm": "n",
-    "H_S": "v",
-    "Na_H": "v",
-    "K_H": "v",
-    "Ca_H": "v",
-    "Mg_H": "v",
-    "Al_H": "v",
-    "Si_H": "v",
-    "Fe_H": "v",
-    "Ti_H": "v",
-    "Na_S": "v",
-    "K_S": "v",
-    "Ca_S": "v",
-    "Mg_S": "v",
-    "AL_S": "v",
-    "Si_S": "v",
-    "Fe_S": "v",
-    "Ti_S": "v",
-    "Na_K": "v",
-    "Na_Ca": "v",
-    "Na_Mg": "v",
-    "Na_Al": "v",
-    "Si_Na": "v",
-    "Na_Fe": "v",
-    "Na_Ti": "v",
-    "K_Ca": "v",
-    "K_Mg": "v",
-    "K_Al": "v",
-    "Si_K": "v",
-    "K_Fe": "v",
-    "K_Ti": "v",
-    "Ca_Mg": "v",
-    "Ca_Al": "v",
-    "Si_Ca": "v",
-    "Ca_Fe": "v",
-    "Ca_Ti": "v",
-    "Mg_Al": "v",
-    "Si_Mg": "v",
-    "Mg_Fe": "v",
-    "Mg_Ti": "v",
-    "Si_Al": "v",
-    "Al_Fe": "v",
-    "Al_Ti": "v",
-    "Si_Fe": "v",
-    "Si_Ti": "v",
-    "Fe_Ti": "v",
-}
+# fields_csv = {
+#     "LfdNr": "i",
+#     "Tgb": "t",
+#     "TgbNr": "n",
+#     "SchneiderThiele": "c",
+#     "SuTNr": "c",
+#     "Asche_trocken": "v",
+#     "C_trocken": "n",
+#     "H_trocken": "v",
+#     "S_trocken": "v",
+#     "N_trocken": "v",
+#     "AS_Natrium_ppm": "v",
+#     "AS_Kalium_ppm": "v",
+#     "AS_Calcium_ppm": "v",
+#     "AS_Magnesium_ppm": "v",
+#     "AS_Aluminium_ppm": "v",
+#     "AS_Silicium_ppm": "v",
+#     "AS_Eisen_ppm": "v",
+#     "AS_Titan_ppm": "v",
+#     "AS_Schwefel_ppm": "n",
+#     "H_S": "v",
+#     "Na_H": "v",
+#     "K_H": "v",
+#     "Ca_H": "v",
+#     "Mg_H": "v",
+#     "Al_H": "v",
+#     "Si_H": "v",
+#     "Fe_H": "v",
+#     "Ti_H": "v",
+#     "Na_S": "v",
+#     "K_S": "v",
+#     "Ca_S": "v",
+#     "Mg_S": "v",
+#     "AL_S": "v",
+#     "Si_S": "v",
+#     "Fe_S": "v",
+#     "Ti_S": "v",
+#     "Na_K": "v",
+#     "Na_Ca": "v",
+#     "Na_Mg": "v",
+#     "Na_Al": "v",
+#     "Si_Na": "v",
+#     "Na_Fe": "v",
+#     "Na_Ti": "v",
+#     "K_Ca": "v",
+#     "K_Mg": "v",
+#     "K_Al": "v",
+#     "Si_K": "v",
+#     "K_Fe": "v",
+#     "K_Ti": "v",
+#     "Ca_Mg": "v",
+#     "Ca_Al": "v",
+#     "Si_Ca": "v",
+#     "Ca_Fe": "v",
+#     "Ca_Ti": "v",
+#     "Mg_Al": "v",
+#     "Si_Mg": "v",
+#     "Mg_Fe": "v",
+#     "Mg_Ti": "v",
+#     "Si_Al": "v",
+#     "Al_Fe": "v",
+#     "Al_Ti": "v",
+#     "Si_Fe": "v",
+#     "Si_Ti": "v",
+#     "Fe_Ti": "v",
+# }
 
-# columns , df , urdf , metadata = import_featureclass(fields = fields_fc , file = name_fc , layer = layer_name)
-columns, df, urdf, metadata = import_featureclass(fields=fields_csv, file=name_csv, decimalpoint_german=True)
+columns, df, urdf, metadata = import_featureclass(fields=fields_fc, file=name_fc, layer=layer_name)
+# columns, df, urdf, metadata = import_featureclass(fields=fields_csv, file=name_csv, decimalpoint_german=True)
 # nodata_remove
 
 # split
