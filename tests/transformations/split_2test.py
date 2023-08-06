@@ -28,7 +28,6 @@ from eis_toolkit.transformations.split import split
 # from eis_toolkit.prediction.sklearn_model_predict_proba import sklearn_model_predict_proba
 # from eis_toolkit.prediction.sklearn_randomforest_classifier import sklearn_randomforest_classifier
 # from eis_toolkit.prediction.sklearn_randomforest_regressor import sklearn_randomforest_regressor
-
 # from eis_toolkit.transformations.unification import unification
 
 # from eis_toolkit.validation.sklearn_model_crossvalidation import sklearn_model_crossvalidation

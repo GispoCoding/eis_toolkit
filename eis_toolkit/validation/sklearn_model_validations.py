@@ -135,7 +135,7 @@ def sklearn_model_validations(
     test_size: Optional[Union[int, float]] = None,  # int: namuber of test-samples, if float: 0<ts<1
     train_size: Optional[Union[int, float]] = None,  # if None: complement size of the test_size
     random_state: Optional[int] = None,
-    shuffle: Optional[bool] = None,
+    shuffle: Optional[bool] = True,
     confusion_matrix: Optional[bool] = True,  # calculate confusion matrix
     comparison: Optional[bool] = False,
 ) -> Tuple[pd.DataFrame, Union[pd.DataFrame, None], Union[pd.DataFrame, None], Any]:
@@ -177,8 +177,8 @@ def sklearn_model_validations(
           Controls the shuffling applied to the data before applying the split.
           Pass an int for reproducible output across multiple function calls.
           No effect with selftest.
-       - shuffle (default=True):
-          Whether or not to shuffle the data before splitting. If shuffle=False then stratify must be None.
+       - shuffle (default=False):
+          Whether or not to shuffle the data before splitting. 
           No effect with selftest
        - confusion_marix (default=True): to create?
        - comparision (default=False): to create?
