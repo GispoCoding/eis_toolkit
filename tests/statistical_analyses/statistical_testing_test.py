@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+import seaborn as sns
 from beartype.roar import BeartypeCallHintParamViolation
 from sklearn.datasets import load_iris
 
@@ -8,17 +9,13 @@ from eis_toolkit import exceptions
 from eis_toolkit.statistical_analyses.statistical_testing import statistical_tests
 
 iris_data = load_iris(as_frame=True)
-
-# Create contingency table based on petal length and species variables
-contingency_table = pd.crosstab(
-    iris_data["target"], pd.cut(iris_data["data"]["petal length (cm)"], bins=[0, 3, 4, 5, 6, np.inf])
-)
+titanic_data = sns.load_dataset("titanic")[["survived", "pclass", "sex"]]
 
 
 def test_output():
     """Test that returned statistics are correct."""
-    output_numerical = statistical_tests(iris_data["data"])
-    output_categorical = statistical_tests(contingency_table, data_type="categorical")
+    output_numerical = statistical_tests(iris_data.data)
+    output_categorical = statistical_tests(titanic_data, data_type="categorical", target_column="survived")
     np.testing.assert_array_almost_equal(
         output_numerical["correlation matrix"], np.corrcoef(iris_data["data"], rowvar=False)
     )
@@ -31,8 +28,12 @@ def test_output():
         output_numerical["normality"]["anderson"]["petal width (cm)"][1], [0.562, 0.64, 0.767, 0.895, 1.065]
     )
     np.testing.assert_array_almost_equal(
-        (output_categorical["chi-square"], output_categorical["p-value"], output_categorical["degrees of freedom"]),
-        (245.870894, 1.292214e-48, 8),
+        (
+            output_categorical["pclass"]["chi-square"],
+            output_categorical["pclass"]["p-value"],
+            output_categorical["pclass"]["degrees of freedom"],
+        ),
+        (102.888989, 4.549252e-23, 2),
     )
 
 
@@ -47,6 +48,12 @@ def test_invalid_data_type():
     """Test that invalid data type raises the correct exception."""
     with pytest.raises(BeartypeCallHintParamViolation):
         statistical_tests(data=iris_data["data"], data_type="invalid_type")
+
+
+def test_missing_target_column():
+    """Test that function call with missing target_column parameter raises the correct exception."""
+    with pytest.raises(exceptions.InvalidParameterValueException):
+        statistical_tests(data=titanic_data, data_type="categorical")
 
 
 def test_invalid_method():
