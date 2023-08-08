@@ -1,8 +1,9 @@
+from numbers import Number
+
 import numpy as np
 import rasterio
 from beartype import beartype
 from beartype.typing import Optional, Sequence, Tuple
-from numbers import Number
 
 from eis_toolkit.checks.parameter import check_parameter_length
 from eis_toolkit.checks.raster import check_raster_bands
