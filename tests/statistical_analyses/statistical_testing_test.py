@@ -3,37 +3,30 @@ import pandas as pd
 import pytest
 import seaborn as sns
 from beartype.roar import BeartypeCallHintParamViolation
-from sklearn.datasets import load_iris
 
 from eis_toolkit import exceptions
 from eis_toolkit.statistical_analyses.statistical_testing import statistical_tests
 
-iris_data = load_iris(as_frame=True)
-titanic_data = sns.load_dataset("titanic")[["survived", "pclass", "sex"]]
+tips_data = sns.load_dataset("tips")
+target_column = "size"
+numerical_columns = tips_data.select_dtypes(include=["float"])
 
 
 def test_output():
     """Test that returned statistics are correct."""
-    output_numerical = statistical_tests(iris_data.data)
-    output_categorical = statistical_tests(titanic_data, data_type="categorical", target_column="survived")
-    np.testing.assert_array_almost_equal(
-        output_numerical["correlation matrix"], np.corrcoef(iris_data["data"], rowvar=False)
-    )
-    np.testing.assert_array_almost_equal(output_numerical["covariance matrix"], np.cov(iris_data["data"], rowvar=False))
-    np.testing.assert_array_almost_equal(
-        output_numerical["normality"]["shapiro"]["petal length (cm)"], (0.876269, 7.412652e-10)
-    )
-    np.testing.assert_almost_equal(output_numerical["normality"]["anderson"]["petal width (cm)"][0], 5.105662)
-    np.testing.assert_array_equal(
-        output_numerical["normality"]["anderson"]["petal width (cm)"][1], [0.562, 0.64, 0.767, 0.895, 1.065]
-    )
+    output = statistical_tests(tips_data, target_column=target_column)
+    np.testing.assert_array_almost_equal(output["correlation matrix"], np.corrcoef(numerical_columns, rowvar=False))
+    np.testing.assert_array_almost_equal(output["covariance matrix"], np.cov(numerical_columns, rowvar=False))
+    np.testing.assert_array_almost_equal(output["normality"]["total_bill"]["shapiro"], (0.919719, 3.324453e-10))
+    np.testing.assert_almost_equal(output["normality"]["total_bill"]["anderson"][0], 5.5207055)
+    np.testing.assert_array_equal(output["normality"]["total_bill"]["anderson"][1], [0.567, 0.646, 0.775, 0.904, 1.075])
     np.testing.assert_array_almost_equal(
         (
-            output_categorical["pclass"]["chi-square"],
-            output_categorical["pclass"]["p-value"],
-            output_categorical["pclass"]["degrees of freedom"],
+            output["sex"]["chi-square"],
+            output["sex"]["p-value"],
+            output["sex"]["degrees of freedom"],
         ),
-        (102.888989, 4.549252e-23, 2),
+        (5.843737, 0.321722, 5),
     )
 
 
@@ -41,28 +34,16 @@ def test_empty_df():
     """Test that empty DataFrame raises the correct exception."""
     empty_df = pd.DataFrame()
     with pytest.raises(exceptions.EmptyDataFrameException):
-        statistical_tests(empty_df)
-
-
-def test_invalid_data_type():
-    """Test that invalid data type raises the correct exception."""
-    with pytest.raises(BeartypeCallHintParamViolation):
-        statistical_tests(data=iris_data["data"], data_type="invalid_type")
-
-
-def test_missing_target_column():
-    """Test that function call with missing target_column parameter raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
-        statistical_tests(data=titanic_data, data_type="categorical")
+        statistical_tests(empty_df, target_column=target_column)
 
 
 def test_invalid_method():
     """Test that invalid method raises the correct exception."""
     with pytest.raises(BeartypeCallHintParamViolation):
-        statistical_tests(data=iris_data["data"], method="invalid_method")
+        statistical_tests(data=tips_data, target_column=target_column, method="invalid_method")
 
 
 def test_invalid_ddof():
     """Test that invalid delta degrees of freedom raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        statistical_tests(data=iris_data["data"], delta_degrees_of_freedom=-1)
+        statistical_tests(data=tips_data, target_column=target_column, delta_degrees_of_freedom=-1)
