@@ -58,8 +58,6 @@ def basic_calculations(
     Returns:
         basic_clcs (pandas.DataFrame): dataframe with basic calculations.
 
-    Raises: None
-
     """
     basic_clcs = _basic_calculations(ev_rst, dep_rst, nan_val)
     return basic_clcs

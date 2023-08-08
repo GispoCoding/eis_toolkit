@@ -39,7 +39,6 @@ def extract_arrays(
     Returns:
          gen_wgts_sum (np.ndarray): Array of sum of generalized weights of all input evidential raster arrays
          var_gen_sum (np.ndarray)]: Array of sum of generalized variance of all input evidential raster arrays
-    Raises:
 
     """
     wgts_gen_ev = [row[1] for row in rasters_gen]
@@ -62,8 +61,6 @@ def pprb(
 
     Returns:
         pprb_array (np.ndarray): Array of posterior probabilites of presence of the targeted mineral deposit for the given evidential layers.
-
-    Raises:
 
     """
     #e = 2.718281828
@@ -89,7 +86,6 @@ def pprb_stat(
         pprb_std (np.ndarray): Standard deviations in the posterior probability calculations because of the deviations in weights of the evidential rasters. 
         pprb_conf(np.ndarray): Confidence of the prospectivity values obtained in the posterior probability array.
 
-    Raises:
 
     """
     pprb_sqr = np.square(pprb_array)

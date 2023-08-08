@@ -90,8 +90,7 @@ def gen_weights_finalization(
     gen_cls = [1, 2]
     gw_1, gw_2 = map(functools.partial(gen_weights, df), gen_cls)
     gw = pd.concat([gw_1, gw_2])
-    for i in range(len(gen_cls)):
-        clss = gen_cls[i]
+    for i, clss in enumerate(gen_cls):
         w = gw.iloc[i, 31]
         s_w = gw.iloc[i, 33]
         v_w = gw.iloc[i, 32]

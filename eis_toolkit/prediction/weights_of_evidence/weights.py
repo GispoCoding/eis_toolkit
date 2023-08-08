@@ -73,8 +73,7 @@ def contrast(df: pd.DataFrame
     Args:
         df (pandas.DataFrame): The dataframe containing the positive and negative weights of spatial associations; obtained from the negative_weights function 
     Returns:
-        df_cont (pandas.DataFrame): The dataframe with contrast and studentized contrast values
-    Raises:   
+        df_cont (pandas.DataFrame): The dataframe with contrast and studentized contrast values  
     """
 
     df_cont = (df

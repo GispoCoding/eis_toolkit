@@ -34,8 +34,6 @@ def calculate_responses(
         pprb_conf(np.ndarray): Confidence of the prospectivity values obtained in the posterior probability array.
         array_meta (dict): Resulting raster array's metadata (for visualizations and writing the array to raster file).
 
-    Raises:
-
     """
     pprb_array, pprb_std, pprb_conf, array_meta = _calculate_responses(
         dep_rst, rasters_gen)

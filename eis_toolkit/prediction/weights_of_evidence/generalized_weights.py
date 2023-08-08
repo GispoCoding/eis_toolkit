@@ -23,7 +23,6 @@ def weights_generalization(
         stud_cont (float, def = 2): studentized contrast value to be used for genralization of classes
     Returns:
         wgts_fnl (pandas.DataFrame): dataframe with generalized weights and generalized classes
-    Raises:
     """
     wgts_fnl=_weights_generalization(df_wgts, w_type, stud_cont)
     return wgts_fnl

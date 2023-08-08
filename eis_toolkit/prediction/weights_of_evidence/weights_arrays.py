@@ -7,8 +7,8 @@ import functools
 
 
 def _raster_array(
-        ev_rst: rasterio.io.DatasetReader,
-        df_wgts_nan: pd.DataFrame, col: str
+    ev_rst: rasterio.io.DatasetReader,
+    df_wgts_nan: pd.DataFrame, col: str
 ) -> np.ndarray:
     #rstr_meta = ev_rst.meta.copy()
     rstr_arry = np.array(ev_rst.read(1))
@@ -26,8 +26,8 @@ def _raster_array(
 
 
 def raster_array(
-        ev_rst: rasterio.io.DatasetReader,
-        df_wgts_nan: pd.DataFrame, col: str
+    ev_rst: rasterio.io.DatasetReader,
+    df_wgts_nan: pd.DataFrame, col: str
 ) -> np.ndarray:
     """Converts the generalized weights dataaframe to numpy arrays with the extent and shape of the input raster
 
@@ -44,9 +44,9 @@ def raster_array(
 
 
 def _weights_arrays(
-        ev_rst: rasterio.io.DatasetReader,
-        df_wgts: pd.DataFrame, 
-        col_names: List
+    ev_rst: rasterio.io.DatasetReader,
+    df_wgts: pd.DataFrame, 
+    col_names: List
 ) -> Tuple[List, dict]:
     rstr_meta = ev_rst.meta.copy()
     list_cols = list(df_wgts.columns)
@@ -61,8 +61,8 @@ def _weights_arrays(
     return gen_arrys, rstr_meta
 
 def weights_arrays(
-        ev_rst: rasterio.io.DatasetReader,
-        df_wgts: pd.DataFrame, col_names: List
+    ev_rst: rasterio.io.DatasetReader,
+    df_wgts: pd.DataFrame, col_names: List
 ) -> Tuple[List, dict]:
     """Calls the raster_arrays function to convert the generalized weights dataaframe to numpy arrays. 
     
