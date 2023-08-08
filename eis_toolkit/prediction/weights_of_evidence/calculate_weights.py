@@ -1,63 +1,67 @@
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 import rasterio
 import pandas as pd
 
-
-from eis_toolkit.prediction.weights_of_evidence.generalized_weights import weights_generalization
-from eis_toolkit.prediction.weights_of_evidence.weights_arrays import weights_arrays
-from eis_toolkit.prediction.weights_of_evidence.save_weights import save_weights
-from eis_toolkit.prediction.weights_of_evidence.weights import positive_weights, negative_weights, contrast
-from eis_toolkit.prediction.weights_of_evidence.weights_type import weights_type
+from eis_toolkit.prediction.weights_of_evidence.weights_calculations import weights_calculations
+from eis_toolkit.prediction.weights_of_evidence.basic_calculations import basic_calculations
+from eis_toolkit.checks.crs import check_matching_crs
+#from eis_toolkit.exceptions import NonMatchingCrsException
 
 def _calculate_weights(
-        ev_rst: rasterio.io.DatasetReader,
-        bsc_clc: pd.DataFrame,
-        nan_val: float,
-        w_type: int = 0, stud_cont: float = 2
-) -> Tuple[pd.DataFrame, List, dict]:
+    ev_rst: rasterio.io.DatasetReader,
+    dep_rst: rasterio.io.DatasetReader,
+    nan_val: float,
+    w_type: int = 0,
+    stud_cont: float = 2
+) -> Tuple[pd.DataFrame, List, Dict]:
 
-    df_wgts_test, df_nan = weights_type(
-        bsc_clc, nan_val, w_type)  # df_nan is not needed
-    wpls_df = positive_weights(df_wgts_test)
-    wmns_df = negative_weights(wpls_df, w_type)
-    contrast_df = contrast(wmns_df)
-
-    if w_type == 0:
-        cat_wgts = save_weights(contrast_df)
-        col_names = ['Class', 'WPlus', 'S_WPlus']
-        gen_arrys, rstr_meta = weights_arrays(ev_rst, cat_wgts, col_names)
-        return cat_wgts, gen_arrys, rstr_meta
-    else:
-        num_weights = weights_generalization(contrast_df, w_type, stud_cont,)
-        col_names = ['Gen_Class', 'Gen_Weights', 'S_Gen_Weights']
-        gen_arrys, rstr_meta = weights_arrays(ev_rst, num_weights, col_names)
-        return num_weights, gen_arrys, rstr_meta
+    bsc_clc_df = basic_calculations(ev_rst, dep_rst, nan_val)
+    weights_df, raster_gen, raster_meta = weights_calculations(
+        ev_rst, bsc_clc_df, nan_val, w_type, stud_cont)
+    return weights_df, raster_gen, raster_meta
 
 
 def calculate_weights(
-        ev_rst: rasterio.io.DatasetReader,
-        bsc_clc: pd.DataFrame,
-        nan_val:float,
-        w_type: int = 0, stud_cont: float = 2
-) -> Tuple[pd.DataFrame, List, dict]:
-    """ Calculates weights of spatial associations.
+    ev_rst: rasterio.io.DatasetReader,
+    dep_rst: rasterio.io.DatasetReader,
+    nan_val: float,
+    w_type: int = 0,
+    stud_cont: float = 2
+) -> Tuple[pd.DataFrame, List, Dict]:
+    """Calculates weights of spatial associations.
 
     Args:
-        ev_rst (rasterio.io.DatasetReader): The evidential raster.
-        bsc_clc(pd.DataFrame): Dataframe obtained from basic_calculations function.
+        ev_rst (rasterio.io.DatasetReader): The evidential raster with spatial resolution and extent identical to that of the dep_rst.
+        dep_rst (rasterio.io.DatasetReader): Raster representing the mineral deposits or occurences point data. 
         nan_val (float): value of no data
         w_type (int, optional): Accepted values are 0 for unique weights, 1 for cumulative ascending weights, 2 for cumulative descending weights. Defaults to 0.
         stud_cont (float, optional): studentized contrast value to be used for genralization of classes. Not needed if w_type = 0. Defaults to 2.
 
     Returns:
-        weights_df (pd.DataFrame): Dataframe with weights of spatial association between the input rasters.
-        gen_arrays (List): List of output raster arrays with generalized or unique classes, generalized weights and standard deviation of generalized weights.
-        raster_meta (dict): Raster array's metadata.
+        weights_df (pd.DataFrame): Dataframe with weights of spatial association between the input rasters
+        raster_gen (List): List of output raster arrays with generalized or unique classes, generalized weights and standard deviation of generalized weights
+        raster_meta (Dict): Raster array's metadata.
 
-    Raises:
-
+    Raises:         
+        ValueError: Accepted values of w_type are 0, 1, 2 for unique, cumulative ascending and cumulative descending weights respectively.
+        The below exceptions will be incorporated into the function later as the development for other related functions progresses in the toolkit.
+        NonMatchingCrsException: The input rasters are not in the same crs
+        InvalidParameterValueException: Accepted values of w_type are 0, 1, 2 for unique, cumulative ascending and cumulative descending weights respectively. (status - pending)
+        NonMatchingTransformException: The input rasters do not have the same cell size and/or same extent (status - pending)
+        NonMatchingCoRegistrationException: The input rasters are not coregistered (status - pending)
     """
 
-    weights_df, gen_arrys, raster_meta = _calculate_weights(
-        ev_rst, bsc_clc, nan_val, w_type, stud_cont)
-    return weights_df, gen_arrys, raster_meta
+    w_type_acc = [0, 1, 2]
+    if w_type not in w_type_acc:
+        raise ValueError(
+            "Invalid parameter values. Accepted values of w_type are 0, 1, 2 for unique, cumulative ascending and cumulative descending weights respectively")
+    """
+    if not check_matching_crs(
+            objects=[ev_rst, dep_rst]
+    ):
+        raise NonMatchingCrsException
+    """
+    weights_df, raster_gen, raster_meta = _calculate_weights(ev_rst, dep_rst, nan_val, w_type, stud_cont)
+
+    return weights_df, raster_gen, raster_meta
+
