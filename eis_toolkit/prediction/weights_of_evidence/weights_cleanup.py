@@ -41,8 +41,10 @@ def _weights_cleanup(
                        's_contrast': 'S_Contrast', 
                        'Stud_Cont': 'Stud. Contrast',
                        }
-    df = df.drop([col for col in drop_cols if col in df.columns],
-                axis=1).rename(columns=cols_rename).round(4)
+    df = (df.drop([col for col in drop_cols if col in df.columns], axis=1)
+            .rename(columns=cols_rename)
+            .round(4)
+            )
     return df
 
 
