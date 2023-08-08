@@ -14,7 +14,8 @@ from eis_toolkit.exceptions import InvalidColumnException
 def replace_values(
     data: np.ndarray, values_to_replace: Union[Number, Sequence[Number]], replace_value: Number
 ) -> np.ndarray:
-    """Replace one or many values in a Numpy array with a new value. Returns a copy of the input array.
+    """
+    Replace one or many values in a Numpy array with a new value. Returns a copy of the input array.
 
     Args:
         data: Input data as a numpy array.
@@ -35,7 +36,8 @@ def replace_values_df(
     replace_value: Number,
     columns: Optional[Sequence[str]] = None,
 ) -> pd.DataFrame:
-    """Replace one or many values in a DataFrame with a new value. Returns a copy of the input array.
+    """
+    Replace one or many values in a DataFrame with a new value. Returns a copy of the input array.
 
     Args:
         df: Input data as a DataFrame.

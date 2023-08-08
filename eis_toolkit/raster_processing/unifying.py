@@ -1,16 +1,16 @@
-from typing import List, Tuple
-
 import numpy as np
 import rasterio
+from beartype import beartype
+from beartype.typing import List, Sequence, Tuple
 from rasterio import warp
 from rasterio.enums import Resampling
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
-def _unify_raster_grids(  # type: ignore[no-any-unimported]
+def _unify_raster_grids(
     base_raster: rasterio.io.DatasetReader,
-    rasters_to_unify: List[rasterio.io.DatasetReader],
+    rasters_to_unify: Sequence[rasterio.io.DatasetReader],
     resampling_method: Resampling,
     same_extent: bool,
 ) -> List[Tuple[np.ndarray, dict]]:
@@ -84,38 +84,32 @@ def _unify_raster_grids(  # type: ignore[no-any-unimported]
     return out_rasters
 
 
-def unify_raster_grids(  # type: ignore[no-any-unimported]
+@beartype
+def unify_raster_grids(
     base_raster: rasterio.io.DatasetReader,
-    raster_list: List[rasterio.io.DatasetReader],
+    rasters_to_unify: Sequence[rasterio.io.DatasetReader],
     resampling_method: Resampling = Resampling.nearest,
     same_extent: bool = False,
 ) -> List[Tuple[np.ndarray, dict]]:
     """Unifies (reprojects, resamples, aligns and optionally clips) given rasters relative to base raster.
 
     Args:
-        base_raster (rasterio.io.DatasetReader): The base raster to determine target raster grid properties.
-        raster_list (list(rasterio.io.DatasetReader)): List of rasters to be unified with the base raster.
-        resampling_method (rasterio.enums.Resampling): Resampling method. Most suitable
+        base_raster: The base raster to determine target raster grid properties.
+        rasters_to_unify: Rasters to be unified with the base raster.
+        resampling_method: Resampling method. Most suitable
             method depends on the dataset and context. Nearest, bilinear and cubic are some
             common choices. This parameter defaults to nearest.
-        same_extent (bool): If the unified rasters will be forced to have the same extent/bounds
+        same_extent: If the unified rasters will be forced to have the same extent/bounds
             as the base raster. Expands smaller rasters with nodata cells. Defaults to False.
 
     Returns:
-        out_rasters (list(tuple(numpy.ndarray, dict))): List of unified rasters' data and metadata.
-            First element is the base raster.
+        List of unified rasters' data and metadata. First element is the base raster.
 
     Raises:
-        InvalidParameterValueException: When the input raster parameters have incorrect types or values.
+        InvalidParameterValueException: Rasters to unify is empty.
     """
-    if not isinstance(base_raster, rasterio.io.DatasetReader):
-        raise InvalidParameterValueException
-    if not isinstance(raster_list, list):
-        raise InvalidParameterValueException
-    if not all(isinstance(raster, rasterio.io.DatasetReader) for raster in raster_list):
-        raise InvalidParameterValueException
-    if len(raster_list) == 0:
-        raise InvalidParameterValueException
+    if len(rasters_to_unify) == 0:
+        raise InvalidParameterValueException("Rasters to unify is empty.")
 
-    out_rasters = _unify_raster_grids(base_raster, raster_list, resampling_method, same_extent)
+    out_rasters = _unify_raster_grids(base_raster, rasters_to_unify, resampling_method, same_extent)
     return out_rasters

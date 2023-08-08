@@ -64,7 +64,7 @@ def replace_raster_nodata_each_band(
 
 
 @beartype
-def nodata_to_nan(data: np.ndarray, nodata_value: Union[Number, None]) -> np.ndarray:
+def nodata_to_nan(data: np.ndarray, nodata_value: Number) -> np.ndarray:
     """Convert specified nodata_value to np.nan.
 
     Args:
@@ -77,7 +77,7 @@ def nodata_to_nan(data: np.ndarray, nodata_value: Union[Number, None]) -> np.nda
     if np.issubdtype(data.dtype, np.integer):
         data = data.astype(float)
 
-    return np.where(np.isin(data, nodata_value), np.nan, data)  # type: ignore
+    return np.where(np.isin(data, nodata_value), np.nan, data)
 
 
 @beartype
@@ -91,7 +91,7 @@ def nan_to_nodata(data: np.ndarray, nodata_value: Number) -> np.ndarray:
     Returns:
         Input array where np.nan has been converted to specified nodata.
     """
-    return np.where(np.isnan(data), nodata_value, data)  # type: ignore
+    return np.where(np.isnan(data), nodata_value, data)
 
 
 @beartype

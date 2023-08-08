@@ -1,5 +1,7 @@
-from typing import Union, Sequence, Any
 from numbers import Number
+from typing import Any, Sequence, Union
+
+from beartype import beartype
 
 
 def check_parameter_value(parameter_value: Union[Number, str], allowed_values: Union[list, tuple]) -> bool:
@@ -16,9 +18,9 @@ def check_parameter_value(parameter_value: Union[Number, str], allowed_values: U
     return parameter_value in allowed_values
 
 
-def check_numeric_value_sign(parameter_value) -> bool:  # type: ignore[no-untyped-def]
-    """
-    Check if input numeric value is positive.
+@beartype
+def check_numeric_value_sign(parameter_value: Number) -> bool:
+    """Check if input numeric value is positive.
 
     Args:
         parameter_value: numeric input parameter.

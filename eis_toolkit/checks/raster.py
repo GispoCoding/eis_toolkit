@@ -1,19 +1,21 @@
-from typing import List, Sequence
-
 import rasterio
+from beartype import beartype
+from beartype.typing import Sequence
+
+from eis_toolkit.checks.crs import check_matching_crs
 
 
-def check_matching_cell_size(  # type: ignore[no-any-unimported]
-    rasters: List[rasterio.io.DatasetReader],
+@beartype
+def check_matching_cell_size(
+    rasters: Sequence[rasterio.io.DatasetReader],
 ) -> bool:
-    """
-    Check if every raster in a list has matching cell size.
+    """Check if all input rasters have matching cell size.
 
     Args:
         rasters: List of rasters to check.
 
     Returns:
-        Bool: True if cell size of each raster matches, False if not.
+        True if cell size of each raster matches, False if not.
     """
 
     pixel_size = [rasters[0].transform.a, rasters[0].transform.e]
@@ -23,17 +25,17 @@ def check_matching_cell_size(  # type: ignore[no-any-unimported]
     return True
 
 
-def check_matching_pixel_alignment(  # type: ignore[no-any-unimported]
-    rasters: List[rasterio.io.DatasetReader],
+@beartype
+def check_matching_pixel_alignment(
+    rasters: Sequence[rasterio.io.DatasetReader],
 ) -> bool:
-    """
-    Check if every raster in a list has matching cell size and matching pixel alignment.
+    """Check if all input rasters have matching cell size and matching pixel alignment.
 
     Args:
         rasters: List of rasters to check.
 
     Returns:
-        bool: True if cell size and pixel alignment matches, False if not.
+        True if cell size and pixel alignment matches, False if not.
     """
 
     if check_matching_cell_size(rasters):
@@ -50,17 +52,17 @@ def check_matching_pixel_alignment(  # type: ignore[no-any-unimported]
         return False
 
 
-def check_matching_bounds(  # type: ignore[no-any-unimported]
-    rasters: List[rasterio.io.DatasetReader],
+@beartype
+def check_matching_bounds(
+    rasters: Sequence[rasterio.io.DatasetReader],
 ) -> bool:
-    """
-    Check if every raster in a list has matching bounds.
+    """Check if all input rasters have matching bounds.
 
     Args:
         rasters: List of rasters to check.
 
     Returns:
-        Bool: True if bounds of each raster matches, False if not.
+        True if bounds of each raster matches, False if not.
     """
 
     bounds = rasters[0].bounds
@@ -70,17 +72,36 @@ def check_matching_bounds(  # type: ignore[no-any-unimported]
     return True
 
 
-def check_raster_bands(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader,
-    bands: Sequence[int],
-) -> bool:
+@beartype
+def check_raster_grids(rasters: Sequence[rasterio.io.DatasetReader], same_extent: bool = False) -> bool:
     """
-    Check if selection of bands is contained in the raster.
+    Check all input rasters for matching gridding and optionally matching bounds.
+
+    Args:
+        rasters: List of rasters to test for matching gridding.
+        same_extent: Optional boolean argument that determines if rasters are tested for matching bounds.
+            Default set to False.
+
+    Returns:
+        True if gridding and optionally bounds matches, False if not.
+    """
+    if not check_matching_crs(rasters):
+        return False
+    if not check_matching_pixel_alignment(rasters):
+        return False
+    if same_extent and not check_matching_bounds(rasters):
+        return False
+    return True
+
+
+@beartype
+def check_raster_bands(raster: rasterio.io.DatasetReader, bands: Sequence[int]) -> bool:
+    """Check if selection of bands is contained in the raster.
 
     Args:
         raster: Raster to be checked.
 
     Returns:
-        Bool: True if all bands exist, False if not.
+        True if all bands exist, False if not.
     """
     return all(band in range(1, raster.count + 1) for band in bands)

@@ -1,0 +1,13 @@
+{
+"type": "FeatureCollection",
+"name": "Test_Occ",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::2154" } },
+"features": [
+{ "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "Point", "coordinates": [ 218651.298236668226309, 6831928.357283757068217 ] } },
+{ "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "Point", "coordinates": [ 240351.805179348797537, 6822361.004815713502467 ] } },
+{ "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "Point", "coordinates": [ 255785.863825271022506, 6814373.742497550323606 ] } },
+{ "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "Point", "coordinates": [ 235803.167609838361386, 6807496.325964965857565 ] } },
+{ "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "Point", "coordinates": [ 231732.544885256094858, 6804862.393613770604134 ] } },
+{ "type": "Feature", "properties": { "Id": 0 }, "geometry": { "type": "Point", "coordinates": [ 234250.854088566440623, 6797173.586569440551102 ] } }
+]
+}

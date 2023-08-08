@@ -1,49 +1,17 @@
-class NonMatchingCrsException(Exception):
-    """Exception error class for crs mismatches."""
-
-
-class NotApplicableGeometryTypeException(Exception):
-    """Exception error class for not suitable geometry types."""
-
-
-class MatchingCrsException(Exception):
-    """Exception error class for crs matches."""
-
-
-class NumericValueSignException(Exception):
-    """Exception error class for numeric value sign exception."""
-
-
-class InvalidParameterValueException(Exception):
-    """Exception error class for invalid parameter values."""
-
-
-class NonSquarePixelSizeException(Exception):
-    """Exception error class for non-square pixel size."""
-
-
-class InvalidWindowSizeException(Exception):
-    """Exception error class for invalid window size values."""
-
-
-class InvalidPixelSizeException(Exception):
-    """Exception error class for invalid pixel size."""
-
-
 class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
 
 
 class EmptyDataFrameException(Exception):
-    """Exception error class thrown if the dataframe is empty."""
+    """Exception error class raised if the dataframe is empty."""
 
 
-class InvalidWktFormatException(Exception):
-    """Exception error for invalid WKT format."""
+class FileReadError(Exception):
+    """Exception error class for unsupported file exceptions."""
 
 
-class InvalidNumberOfPrincipalComponents(Exception):
-    """Exception error class thrown if the number of principal components is less than 2."""
+class InvalidArgumentTypeException(Exception):
+    """Exception error for invalid argument type."""
 
 
 class InvalidColumnException(Exception):
@@ -54,17 +22,49 @@ class InvalidColumnIndexException(Exception):
     """Exception error for invalid column index."""
 
 
-class InvalidArgumentTypeException(Exception):
-    """Exception error for invalid argument type."""
+class InvalidParameterValueException(Exception):
+    """Exception error class for invalid parameter values."""
+
+
+class InvalidPixelSizeException(Exception):
+    """Exception error class for invalid pixel size."""
 
 
 class InvalidRasterBandException(Exception):
     """Expection error class for invalid raster band selection."""
 
 
-class FileReadError(Exception):
-    """Exception error class for unsupported file exceptions."""
+class InvalidWindowSizeException(Exception):
+    """Exception error class for invalid window size values."""
 
 
-class NonMatchingParameterLengthsException(Exception):
+class InvalidWktFormatException(Exception):
+    """Exception error for invalid WKT format."""
+
+
+class MatchingCrsException(Exception):
+    """Exception error class for CRS matches."""
+
+
+class MatchingRasterGridException(Exception):
+    """Exception error class for raster grid matches."""
+
+
+class NotApplicableGeometryTypeException(Exception):
+    """Exception error class for not suitable geometry types."""
+
+
+class NonMatchingCrsException(Exception):
+    """Exception error class for CRS mismatches."""
+
+
+class NonMatchinParameterLengthsException(Exception):
     """Exception error class for parameters with different lenghts."""
+
+
+class NonSquarePixelSizeException(Exception):
+    """Exception error class for non-square pixel size."""
+
+
+class NumericValueSignException(Exception):
+    """Exception error class for numeric value sign exception."""
