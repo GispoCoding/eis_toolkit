@@ -61,7 +61,8 @@ def statistical_tests(
 
     Raises:
         EmptyDataFrameException: The input DataFrame is empty.
-        InvalidParameterValueException: Minimum number of observations per pair is not at least one nor None or
+        InvalidParameterValueException: The target_column is not in input DataFrame or
+            minimum number of observations per pair is not at least one nor None or
             delta degrees of freedom is negative.
 
     Returns:
@@ -69,6 +70,9 @@ def statistical_tests(
     """
     if data.empty:
         raise exceptions.EmptyDataFrameException("The input DataFrame is empty.")
+
+    if target_column not in data.columns:
+        raise exceptions.InvalidParameterValueException("Target column not found in the DataFrame.")
 
     if min_periods is not None and min_periods < 1:
         raise exceptions.InvalidParameterValueException("Minimum number of observations per pair must be at least one.")

@@ -37,6 +37,12 @@ def test_empty_df():
         statistical_tests(empty_df, target_column=target_column)
 
 
+def test_invalid_target_column():
+    """Test that invalid target column raises the correct exception."""
+    with pytest.raises(exceptions.InvalidParameterValueException):
+        statistical_tests(data=tips_data, target_column="invalid_column")
+
+
 def test_invalid_method():
     """Test that invalid method raises the correct exception."""
     with pytest.raises(BeartypeCallHintParamViolation):
