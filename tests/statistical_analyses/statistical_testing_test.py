@@ -49,6 +49,12 @@ def test_invalid_method():
         statistical_tests(data=tips_data, target_column=target_column, method="invalid_method")
 
 
+def test_min_periods_with_kendall():
+    """Test that function call with min_periods and method 'kendall' raises the correct exception."""
+    with pytest.raises(exceptions.InvalidParameterValueException):
+        statistical_tests(data=tips_data, target_column=target_column, method="kendall", min_periods=1)
+
+
 def test_invalid_ddof():
     """Test that invalid delta degrees of freedom raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):

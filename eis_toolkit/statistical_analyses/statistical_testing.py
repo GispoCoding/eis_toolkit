@@ -62,7 +62,7 @@ def statistical_tests(
     Raises:
         EmptyDataFrameException: The input DataFrame is empty.
         InvalidParameterValueException: The target_column is not in input DataFrame or
-            minimum number of observations per pair is not at least one nor None or
+            min_periods argument is used with method 'kendall' or
             delta degrees of freedom is negative.
 
     Returns:
@@ -74,8 +74,10 @@ def statistical_tests(
     if target_column not in data.columns:
         raise exceptions.InvalidParameterValueException("Target column not found in the DataFrame.")
 
-    if min_periods is not None and min_periods < 1:
-        raise exceptions.InvalidParameterValueException("Minimum number of observations per pair must be at least one.")
+    if method == "kendall" and min_periods is not None:
+        raise exceptions.InvalidParameterValueException(
+            "Minimum number of observations argument is available only for methods 'pearson' and 'spearman'."
+        )
 
     if delta_degrees_of_freedom < 0:
         raise exceptions.InvalidParameterValueException("Delta degrees of freedom must be non-negative.")
