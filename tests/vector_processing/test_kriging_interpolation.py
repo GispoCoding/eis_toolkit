@@ -27,7 +27,7 @@ def test_ordinary_kriging_output():
     expected_value_last_pixel = 1.51876801
     assert z_interpolated.shape == expected_shape
     assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
-    assert round(z_interpolated[9][9], 8) == expected_value_last_pixel
+    assert round(z_interpolated[-1][-1], 8) == expected_value_last_pixel
 
 
 def test_universal_kriging_output():
@@ -40,7 +40,18 @@ def test_universal_kriging_output():
     expected_value_last_pixel = 1.86445049
     assert z_interpolated.shape == expected_shape
     assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
-    assert round(z_interpolated[9][9], 8) == expected_value_last_pixel
+    assert round(z_interpolated[-1][-1], 8) == expected_value_last_pixel
+
+
+def test_output_without_extent():
+    """Test that extent computation works as expected."""
+    z_interpolated, _ = kriging(data=gdf, target_column=target_column, resolution=resolution)
+    expected_shape = resolution
+    expected_value_first_pixel = 0.45845479
+    expected_value_last_pixel = 1.52094529
+    assert z_interpolated.shape == expected_shape
+    assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
+    assert round(z_interpolated[-1][-1], 8) == expected_value_last_pixel
 
 
 def test_empty_geodataframe():
