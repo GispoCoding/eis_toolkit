@@ -48,11 +48,11 @@ class InvalidColumnIndexException(Exception):
 
 class UnFavorableClassDoesntExistException(Exception):
     """Exception error class for failure to generalize classes using the given studentised contrast threshold value. Class 1 (unfavorable class)  doesn't exist"""
-  
+
 
 class FavorableClassDoesntExistException(Exception):
     """Exception error class for failure to generalize classes using the given studentised contrast threshold value. Class 2 (favorable class)  doesn't exist"""
-  
+
 
 class NotApplicableGeometryTypeException(Exception):
     """Exception error class for not suitable geometry types."""
