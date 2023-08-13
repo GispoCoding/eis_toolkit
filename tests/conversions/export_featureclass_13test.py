@@ -39,7 +39,7 @@ parent_dir = Path(__file__).parent.parent
 name_fc = str(parent_dir.joinpath(r"data/shps/EIS_gp.gpkg"))
 layer_name = r"Occ_2"
 # name_csv = str(parent_dir.joinpath(r"data/csv/Trainings_Test.csv"))
-name_csv_test = str(parent_dir.joinpath(r"data/csv/Test_Test.csv"))
+# name_csv_test = str(parent_dir.joinpath(r"data/csv/Test_Test.csv"))
 # columns and column-types for X (training based on a geopackage-layer)
 fields_fc = {
     "OBJECTID": "i",
