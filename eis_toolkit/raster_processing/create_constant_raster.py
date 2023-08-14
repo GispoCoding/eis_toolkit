@@ -137,7 +137,7 @@ def create_constant_raster(  # type: ignore[no-any-unimported]
             raise InvalidParameterValueException("Invalid raster extent provided.")
         if not check_minmax_position((coord_west, coord_east) or not check_minmax_position((coord_south, coord_north))):
             raise InvalidParameterValueException("Invalid coordinate values provided.")
-        
+
         out_array, out_meta = _create_constant_raster_from_bounds(
             constant_value,
             coord_west,
