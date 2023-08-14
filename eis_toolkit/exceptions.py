@@ -13,7 +13,7 @@ class FileReadError(Exception):
 class InconsistentDataTypesException(Exception):
     """Exception error class for inconsistent data types."""
 
-   
+
 class InvalidArgumentTypeException(Exception):
     """Exception error for invalid argument type."""
 
