@@ -1,25 +1,21 @@
 from numbers import Number
-from typing import Any
+from typing import Any, Sequence, Union
 
 from beartype import beartype
-from beartype.typing import Iterable
 
 
-@beartype
-def check_parameter_value(parameter_value: Any, allowed_values: Iterable) -> bool:
-    """Check if used parameter value is valid.
+def check_parameter_value(parameter_value: Union[Number, str], allowed_values: Union[list, tuple]) -> bool:
+    """
+    Check if used parameter value is valid.
 
     Args:
         parameter_value: value given to a function.
-        allowed_values: a list of allowed parameter values.
+        allowed_values: sequence of values containing allowed parameter values.
 
     Returns:
-        True if parameter value is allowed, False if not
+        Bool: True if parameter value is allowed, False if not.
     """
-    if parameter_value in allowed_values:
-        return True
-    else:
-        return False
+    return parameter_value in allowed_values
 
 
 @beartype
@@ -27,15 +23,39 @@ def check_numeric_value_sign(parameter_value: Number) -> bool:
     """Check if input numeric value is positive.
 
     Args:
-        parameter value: numeric input parameter
+        parameter_value: numeric input parameter.
 
     Returns:
-        True if parameter value is positive, False if not
+        Bool: True if parameter value is positive, False if not.
     """
-    if parameter_value > 0:  # type: ignore
-        return True
-    else:
-        return False
+    return True if parameter_value > 0 else False
+
+
+def check_dtype_for_int(scalar: Number) -> bool:
+    """
+    Determine whether a floating scalar can be converted to integer type.
+
+    Args:
+        scalar: Input scalar value.
+
+    Returns:
+        True if conversion can be done, False if not.
+    """
+    return True if isinstance(scalar, int) else scalar.is_integer()
+
+
+def check_parameter_length(selection: Sequence[int], parameter: Sequence[Any]) -> bool:  # type: ignore[no-untyped-def]
+    """
+    Check the length of a parameter against the length of selected bands.
+
+    Args:
+        selection: Selected bands.
+        parameter: List containing parameter values.
+
+    Returns:
+        Bool: True if conditions are valid, else False.
+    """
+    return len(parameter) == 1 or len(parameter) == len(selection)
 
 
 @beartype

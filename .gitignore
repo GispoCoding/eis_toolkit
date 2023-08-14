@@ -163,5 +163,3 @@ cython_debug/
 tests/data/local/**
 !tests/data/local/**/
 !tests/data/local/**/.gitkeep
-*.json
-tests/data/remote/small_raster_multiband.tif.aux.xml
