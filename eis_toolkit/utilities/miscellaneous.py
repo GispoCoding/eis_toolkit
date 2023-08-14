@@ -110,7 +110,6 @@ def cast_scalar_to_int(scalar: Number) -> Number:
         return scalar
 
 
-@beartype
 def get_min_int_type(data: Union[np.ndarray, Number]) -> np.dtype:
     """
     Check for the lowest integer dtype.
