@@ -3,7 +3,7 @@ from numbers import Number
 import geopandas as gpd
 import numpy as np
 from beartype import beartype
-from beartype.typing import Optional, Tuple, Union
+from beartype.typing import Optional, Tuple
 
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 
@@ -14,7 +14,7 @@ def _simple_idw(
     target_column: str,
     resolution: Tuple[Number, Number],
     power: Number,
-    extent: Union[Tuple[Number, Number, Number, Number], None],
+    extent: Optional[Tuple[Number, Number, Number, Number]],
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     points = np.array(geodataframe.geometry.apply(lambda geom: (geom.x, geom.y)).tolist())
@@ -47,21 +47,18 @@ def _simple_idw(
     sorted_points = points[sorted_indices]
     sorted_values = values[sorted_indices]
 
-    interpolated_values = _idw(sorted_points[:, 0], sorted_points[:, 1], sorted_values, xi, yi, power)
+    interpolated_values = _simple_idw_core(sorted_points[:, 0], sorted_points[:, 1], sorted_values, xi, yi, power)
     interpolated_values = interpolated_values.reshape(num_points_y, num_points_x)
 
     return x, y, interpolated_values
 
 
 #  Distance calculations
-def _distance_matrix(x0, y0, x1, y1: np.ndarray) -> np.ndarray:
-    d0 = np.subtract.outer(x0, x1)
-    d1 = np.subtract.outer(y0, y1)
-    return np.hypot(d0, d1)
+def _simple_idw_core(x, y, z, xi, yi: np.ndarray, power: Number) -> np.ndarray:
+    d0 = np.subtract.outer(x, xi)
+    d1 = np.subtract.outer(y, yi)
+    dist = np.hypot(d0, d1)
 
-
-def _idw(x, y, z, xi, yi: np.ndarray, power: Number) -> np.ndarray:
-    dist = _distance_matrix(x, y, xi, yi)
     # Add a small epsilon to avoid division by zero
     dist = np.where(dist == 0, 1e-12, dist)
     weights = 1.0 / (dist**power)
@@ -71,13 +68,14 @@ def _idw(x, y, z, xi, yi: np.ndarray, power: Number) -> np.ndarray:
     return interpolated_values
 
 
+@beartype
 def simple_idw(
     geodataframe: gpd.GeoDataFrame,
     target_column: str,
     resolution: Tuple[Number, Number],
     extent: Optional[Tuple[Number, Number, Number, Number]] = None,
     power: Number = 2,
-) -> Tuple[float, float, dict]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate simple inverse distance weighted (IDW) interpolation.
 
     Args:
