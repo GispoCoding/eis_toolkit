@@ -74,7 +74,10 @@ def nodata_to_nan(data: np.ndarray, nodata_value: Number) -> np.ndarray:
     Returns:
         Input array where specified nodata has been converted to np.nan.
     """
-    return np.where(np.isin(data, nodata_value), np.nan, data)  # type: ignore
+    if np.issubdtype(data.dtype, np.integer):
+        data = data.astype(float)
+
+    return np.where(np.isin(data, nodata_value), np.nan, data)
 
 
 @beartype
@@ -88,7 +91,7 @@ def nan_to_nodata(data: np.ndarray, nodata_value: Number) -> np.ndarray:
     Returns:
         Input array where np.nan has been converted to specified nodata.
     """
-    return np.where(np.isnan(data), nodata_value, data)  # type: ignore
+    return np.where(np.isnan(data), nodata_value, data)
 
 
 @beartype
