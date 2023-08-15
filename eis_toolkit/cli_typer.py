@@ -78,6 +78,7 @@ RESAMPLING_MAPPING = {
 #     )
 
 
+# TODO: Check this and output file option
 INPUT_FILE_OPTION = typer.Option(
     exists=True,
     file_okay=True,
@@ -88,10 +89,9 @@ INPUT_FILE_OPTION = typer.Option(
 )
 
 OUTPUT_FILE_OPTION = typer.Option(
-    exists=True,
     file_okay=True,
     dir_okay=False,
-    writable=False,
+    writable=True,
     readable=True,
     resolve_path=True,
 )
@@ -124,12 +124,13 @@ def clip_raster_cli(
 def reproject_raster_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    crs: int = typer.Option(help="crs help"),
+    target_crs: int = typer.Option(help="crs help"),
     resampling_method: ResamplingMethods = typer.Option(help="resample help", default=ResamplingMethods.nearest),
 ):
     """Reproject the input raster to given CRS."""
+    method = RESAMPLING_MAPPING[resampling_method]
     with rasterio.open(input_raster) as raster:
-        out_image, out_meta = reproject_raster(src=raster, target_EPSG=crs, resampling_method=resampling_method)
+        out_image, out_meta = reproject_raster(raster=raster, target_crs=target_crs, resampling_method=method)
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
         dest.write(out_image)
@@ -140,7 +141,7 @@ def reproject_raster_cli(
 
 # SNAP RASTER
 @app.command()
-def snap_with_raster_cli(
+def snap_raster_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     snap_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
@@ -198,7 +199,7 @@ def rasterize_cli(
     value_column: str = None,
     default_value: float = 1.0,
     fill_value: float = 0.0,
-    base_raster_profile: Annotated[Path, INPUT_FILE_OPTION] = None,
+    base_raster_profile_raster: Annotated[Path, INPUT_FILE_OPTION] = None,
     buffer_value: float = None,
     merge_strategy: MergeStrategy = MergeStrategy.replace,
 ):
@@ -206,6 +207,10 @@ def rasterize_cli(
     from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
     geodataframe = gpd.read_file(input_vector)
+
+    if base_raster_profile_raster is not None:
+        with rasterio.open(base_raster_profile_raster) as raster:
+            base_raster_profile = raster.profile
 
     out_image, out_meta = rasterize_vector(
         geodataframe,
@@ -216,6 +221,13 @@ def rasterize_cli(
         base_raster_profile,
         buffer_value,
         merge_strategy,
+    )
+
+    out_meta.update(
+        {
+            "count": 1,
+            "dtype": base_raster_profile["dtype"] if base_raster_profile_raster else float,  # TODO change this
+        }
     )
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
@@ -230,12 +242,12 @@ def rasterize_cli(
 def reproject_vector_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
     output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
-    crs: int = typer.Option(help="crs help"),
+    target_crs: int = typer.Option(help="crs help"),
 ):
     """Reproject the input vector to given CRS."""
     geodataframe = gpd.read_file(input_vector)
 
-    reprojected_geodataframe = reproject_vector(geodataframe=geodataframe, target_EPSG=crs)
+    reprojected_geodataframe = reproject_vector(geodataframe=geodataframe, target_crs=target_crs)
 
     reprojected_geodataframe.to_file(output_vector, driver="GeoJSON")
 
@@ -247,30 +259,43 @@ def reproject_vector_cli(
 @app.command()
 def kriging_interpolation_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
-    target_column: str,
-    resolution: Tuple[float, float],
-    extent: Tuple[float, float, float, float],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    target_column: str = typer.Option(),
+    pixel_size_x: float = typer.Option(),
+    pixel_size_y: float = typer.Option(),
+    extent: Tuple[float, float, float, float] = None,
     variogram_model: VariogramModel = VariogramModel.linear,
     method: KrigingMethod = KrigingMethod.ordinary,
     drift_terms: Annotated[List[str], typer.Option()] = ["regional_linear"],
 ):
-    """TODO. Reproject the input vector to given CRS."""
-    # from eis_toolkit.vector_processing.kriging_interpolation import kriging
+    """Apply kriging interpolation to input vector file."""
+    from eis_toolkit.vector_processing.kriging_interpolation import kriging
 
-    pass
+    geodataframe = gpd.read_file(input_vector)
 
-    # geodataframe = gpd.read_file(input_vector)
+    out_image, out_meta = kriging(
+        data=geodataframe,
+        target_column=target_column,
+        resolution=(pixel_size_x, pixel_size_y),
+        extent=extent,
+        variogram_model=variogram_model,
+        method=method,
+        drift_terms=drift_terms,
+    )
 
-    # out_image, out_meta = kriging(
-    #     geodataframe=geodataframe,
-    #     target_column=
-    # )
+    out_meta.update(
+        {
+            "count": 1,
+            "driver": "GTiff",
+            "dtype": "float32",
+        }
+    )
 
-    # reprojected_geodataframe.to_file(output_vector, driver="GeoJSON")
+    with rasterio.open(out_image, "w", **out_meta) as dst:
+        dst.write(out_image)
 
-    # typer.echo("Reprojecting completed")
-    # typer.echo(f"Writing vector to {output_vector}")
+    typer.echo("Kriging interpolation completed")
+    typer.echo(f"Writing raster to {output_raster}")
 
 
 # DISTANCE COMPUTATION
@@ -291,7 +316,7 @@ def distance_computation_cli(
     out_image = distance_computation(profile, geodataframe)
 
     with rasterio.open(output_raster, "w", **profile) as dst:
-        dst.write(out_image)
+        dst.write(out_image, profile["count"])
 
     typer.echo("Distance computation completed")
     typer.echo(f"Writing raster to {output_raster}")
@@ -305,6 +330,7 @@ def descriptive_statistics_cli(input_file: Annotated[Path, INPUT_FILE_OPTION], c
 
 # if __name__ == "__main__":
 def cli():
+    """CLI app."""
     app()
 
 
