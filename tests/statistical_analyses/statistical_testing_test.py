@@ -1,32 +1,49 @@
 import numpy as np
 import pandas as pd
 import pytest
-import seaborn as sns
 from beartype.roar import BeartypeCallHintParamViolation
 
 from eis_toolkit import exceptions
 from eis_toolkit.statistical_analyses.statistical_testing import statistical_tests
 
-tips_data = sns.load_dataset("tips")
-target_column = "size"
-numerical_columns = tips_data.select_dtypes(include=["float"])
+data = np.array([[0, 1, 2, 1], [2, 0, 1, 2], [2, 1, 0, 2], [0, 1, 2, 1]], dtype=float)
+df = pd.DataFrame(data, columns=["a", "b", "c", "d"])
+df["e"] = [0, 0, 1, 1]
+df["f"] = [True, False, True, True]
+target_column = "e"
 
 
 def test_output():
     """Test that returned statistics are correct."""
-    output = statistical_tests(tips_data, target_column=target_column)
-    np.testing.assert_array_almost_equal(output["correlation matrix"], np.corrcoef(numerical_columns, rowvar=False))
-    np.testing.assert_array_almost_equal(output["covariance matrix"], np.cov(numerical_columns, rowvar=False))
-    np.testing.assert_array_almost_equal(output["normality"]["total_bill"]["shapiro"], (0.919719, 3.324453e-10))
-    np.testing.assert_almost_equal(output["normality"]["total_bill"]["anderson"][0], 5.5207055)
-    np.testing.assert_array_equal(output["normality"]["total_bill"]["anderson"][1], [0.567, 0.646, 0.775, 0.904, 1.075])
-    np.testing.assert_array_almost_equal(
+    output = statistical_tests(df, target_column)
+    expected_correlation_matrix = np.array(
+        [
+            [1.000000, -0.577350, -0.904534, 1.000000],
+            [-0.577350, 1.000000, 0.174078, -0.577350],
+            [-0.904534, 0.174078, 1.000000, -0.904534],
+            [1.000000, -0.577350, -0.904534, 1.000000],
+        ]
+    )
+    expected_covariance_matrix = np.array(
+        [
+            [1.333333, -0.333333, -1.000000, 0.666667],
+            [-0.333333, 0.250000, 0.083333, -0.166667],
+            [-1.000000, 0.083333, 0.916667, -0.500000],
+            [0.666667, -0.166667, -0.500000, 0.333333],
+        ]
+    )
+    np.testing.assert_array_almost_equal(output["correlation matrix"], expected_correlation_matrix)
+    np.testing.assert_array_almost_equal(output["covariance matrix"], expected_covariance_matrix)
+    np.testing.assert_array_almost_equal(output["normality"]["a"]["shapiro"], (0.72863, 0.02386), decimal=5)
+    np.testing.assert_almost_equal(output["normality"]["a"]["anderson"][0], 0.576024, decimal=5)
+    np.testing.assert_array_equal(output["normality"]["a"]["anderson"][1], [1.317, 1.499, 1.799, 2.098, 2.496])
+    np.testing.assert_array_equal(
         (
-            output["sex"]["chi-square"],
-            output["sex"]["p-value"],
-            output["sex"]["degrees of freedom"],
+            output["f"]["chi-square"],
+            output["f"]["p-value"],
+            output["f"]["degrees of freedom"],
         ),
-        (5.843737, 0.321722, 5),
+        (0.0, 1.0, 1),
     )
 
 
@@ -40,22 +57,22 @@ def test_empty_df():
 def test_invalid_target_column():
     """Test that invalid target column raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        statistical_tests(data=tips_data, target_column="invalid_column")
+        statistical_tests(data=df, target_column="invalid_column")
 
 
 def test_invalid_method():
     """Test that invalid method raises the correct exception."""
     with pytest.raises(BeartypeCallHintParamViolation):
-        statistical_tests(data=tips_data, target_column=target_column, method="invalid_method")
+        statistical_tests(data=df, target_column=target_column, method="invalid_method")
 
 
 def test_min_periods_with_kendall():
     """Test that function call with min_periods and method 'kendall' raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        statistical_tests(data=tips_data, target_column=target_column, method="kendall", min_periods=1)
+        statistical_tests(data=df, target_column=target_column, method="kendall", min_periods=1)
 
 
 def test_invalid_ddof():
     """Test that invalid delta degrees of freedom raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        statistical_tests(data=tips_data, target_column=target_column, delta_degrees_of_freedom=-1)
+        statistical_tests(data=df, target_column=target_column, delta_degrees_of_freedom=-1)
