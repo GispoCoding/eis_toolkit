@@ -2,11 +2,11 @@ from numbers import Number
 
 import geopandas as gpd
 import numpy as np
-import numpy.ma as ma
 from beartype import beartype
 from beartype.typing import Literal, Optional, Tuple
 from pykrige.ok import OrdinaryKriging
 from pykrige.uk import UniversalKriging
+from rasterio import transform
 
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 
@@ -21,10 +21,12 @@ def _kriging(
     drift_terms: list,
 ) -> Tuple[np.ndarray, dict]:
 
-    points = np.array(list(data.geometry.apply(lambda geom: [geom.x, geom.y])))
-    x = points[:, 0]
-    y = points[:, 1]
+    # points = np.array(list(data.geometry.apply(lambda geom: [geom.x, geom.y])))
+
+    x = data.geometry.x
+    y = data.geometry.y
     z = data[target_column].values
+    print(z)
 
     if extent is None:
         grid_x_min = data.geometry.total_bounds[0]
@@ -35,8 +37,8 @@ def _kriging(
     else:
         grid_x_min, grid_x_max, grid_y_min, grid_y_max = extent
 
-    grid_x = np.linspace(grid_x_min, grid_x_max, resolution[0])
-    grid_y = np.linspace(grid_y_min, grid_y_max, resolution[1])
+    grid_x = np.arange(grid_x_min, grid_x_max + resolution[0], resolution[0])
+    grid_y = np.arange(grid_y_min, grid_y_max + resolution[1], resolution[1])
 
     if method == "universal":
         universal_kriging = UniversalKriging(x, y, z, variogram_model=variogram_model, drift_terms=drift_terms)
@@ -46,9 +48,12 @@ def _kriging(
         ordinary_kriging = OrdinaryKriging(x, y, z, variogram_model=variogram_model)
         z_interpolated, _ = ordinary_kriging.execute("grid", grid_x, grid_y)
 
-    z_interpolated = ma.getdata(z_interpolated)
-
-    out_meta = {"crs": data.crs, "width": len(grid_x), "height": len(grid_y)}
+    out_meta = {
+        "crs": data.crs,
+        "width": len(grid_x),
+        "height": len(grid_y),
+        "transform": transform.from_bounds(grid_x_min, grid_y_min, grid_x_max, grid_y_max, len(grid_x), len(grid_y)),
+    }
 
     return z_interpolated, out_meta
 
@@ -69,7 +74,7 @@ def kriging(
     Args:
         data: GeoDataFrame containing the input data.
         target_column: The column name with values for each geometry.
-        resolution: Size of the output grid.
+        resolution: The resolution i.e. cell size of the output raster.
         extent: The extent of the output grid.
             If None, calculate extent from the input vector data.
         variogram_model: Variogram model to be used. Defaults to 'linear'.
