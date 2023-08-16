@@ -105,18 +105,25 @@ def clip_raster_cli(
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
     """Clip the input raster with geometries in a geodataframe."""
+
+    typer.echo("Progress: 10%")
+
     geodataframe = gpd.read_file(geometries)
+    typer.echo("Progress: 40%")
+
     with rasterio.open(input_raster) as raster:
         out_image, out_meta = clip_raster(
             raster=raster,
             geodataframe=geodataframe,
         )
 
+    typer.echo("Progress: 70%")
+
     with rasterio.open(output_raster, "w", **out_meta) as dest:
         dest.write(out_image)
 
-    typer.echo("Clipping completed")
-    typer.echo(f"Writing raster to {output_raster}.")
+    typer.echo("Progress: 100%")
+    typer.echo(f"Clipping completed, output raster written to {output_raster}.")
 
 
 # REPROJECT RASTER
