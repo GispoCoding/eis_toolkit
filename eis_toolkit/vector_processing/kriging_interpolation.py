@@ -21,12 +21,9 @@ def _kriging(
     drift_terms: list,
 ) -> Tuple[np.ndarray, dict]:
 
-    # points = np.array(list(data.geometry.apply(lambda geom: [geom.x, geom.y])))
-
     x = data.geometry.x
     y = data.geometry.y
     z = data[target_column].values
-    print(z)
 
     if extent is None:
         grid_x_min = data.geometry.total_bounds[0]
