@@ -1,75 +1,56 @@
 from numbers import Number
 from typing import List, Literal, Optional, Sequence, Tuple, Union
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio
+
+from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
 # from beartype import beartype
 
 # REPLACE signifies if we use replacement of 0 and 1 with the values below
 # If REPLACE is False but laplace_smoothing is set to True, we use the SMOOTH_CONSTANT to compute p_A and p_C
-REPLACE = True
+REPLACE = False
 SMALL_NUMBER = 0.0001
 LARGE_NUMBER = 1.0001
 
-SMOOTH_CONSTANT = 0.5
+SMOOTH_CONSTANT = 1.0
 
 # NODATA_THRESHOLD = 0.0000001
 
 
-def read_and_preprocess_raster(raster: rasterio.io.DatasetReader, nodata: Optional[Number] = None) -> np.ndarray:
+def read_and_preprocess_evidence(raster: rasterio.io.DatasetReader, nodata: Optional[Number] = None) -> np.ndarray:
     """Read raster data and handle NoData values."""
     array = np.array(raster.read(1), dtype=np.float32)
 
     if nodata is not None:
-        nan_mask = np.isclose(array, np.full(raster.shape, nodata))
-        array[nan_mask] = np.nan
+        array[array == nodata] = np.nan
     elif raster.meta["nodata"] is not None:
         array[array == raster.meta["nodata"]] = np.nan
 
     return array
 
 
-def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray, laplace_smoothing: False):
+def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray, laplace_smoothing: bool):
     """Calculate weights/metrics for given data."""
-    A = np.sum(np.logical_and(deposits == 1, evidence == 1))  # Deposit and evidence present
-    B = np.sum(np.logical_and(deposits == 1, evidence == 0))  # Depsoti present and evidence absent
-    C = np.sum(np.logical_and(deposits == 0, evidence == 1))  # Deposit absent and evidence present
-    D = np.sum(np.logical_and(deposits == 0, evidence == 0))  # Depsoti and evidence absent
-
-    original_mask_counts = (A, B, C, D)  # Save originals to return Laplace smoothing is applied in calculations
+    A = np.sum(np.logical_and(deposits == 1, evidence == 1))
+    B = np.sum(np.logical_and(deposits == 1, evidence == 0))
+    C = np.sum(np.logical_and(deposits == 0, evidence == 1))
+    D = np.sum(np.logical_and(deposits == 0, evidence == 0))
 
     if A + B == 0:
         raise Exception("No deposits")
     if C + D == 0:
-        raise Exception("No evidence")
+        raise Exception("All included cells have deposits")
 
     if not laplace_smoothing:
         p_A = A / (A + B)  # probability of presence of evidence given the presence of mineral deposit
         p_C = C / (C + D)  # probability of presence of evidence given the absence of mineral deposit
-
     else:
-        if not REPLACE:
-            p_A = (A + SMOOTH_CONSTANT) / (A + B + 2 * SMOOTH_CONSTANT)
-            p_C = (C + SMOOTH_CONSTANT) / (C + D + 2 * SMOOTH_CONSTANT)
-        else:
-            # NOTE: The 4 lines below are not needed to avoid errors, but are needed to mimic the old implementation
-            if A == 0:
-                A = SMALL_NUMBER
-            if C == 1:
-                C = LARGE_NUMBER
-
-            p_A = A / (A + B)
-            p_C = C / (C + D)
-            if p_A == 0:
-                p_A = SMALL_NUMBER
-            elif p_A == 1:
-                p_A = LARGE_NUMBER
-            if p_C == 0:
-                p_C = SMALL_NUMBER
-            elif p_C == 1:
-                p_C = LARGE_NUMBER
+        p_A = (A + SMOOTH_CONSTANT) / (A + B + 2 * SMOOTH_CONSTANT)
+        p_C = (C + SMOOTH_CONSTANT) / (C + D + 2 * SMOOTH_CONSTANT)
 
     # Calculate metrics
     w_plus = np.log(p_A / p_C) if p_A != 0 and p_C != 0 else 0
@@ -84,12 +65,12 @@ def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray, lapl
     # Calculate studentized contrast
     studentized_contrast = contrast / s_contrast
 
-    return *original_mask_counts, w_plus, s_w_plus, w_minus, s_w_minus, contrast, s_contrast, studentized_contrast
+    return A, B, C, D, w_plus, s_w_plus, w_minus, s_w_minus, contrast, s_contrast, studentized_contrast
 
 
 def unique_weights(deposits: np.ndarray, evidence: np.ndarray, laplace_smoothing: bool) -> dict:
     """Calculate unique weights for each class."""
-    classes = np.unique(evidence[~np.isnan(evidence)])
+    classes = np.unique(evidence)
     return {cls: calculate_metrics_for_class(deposits, evidence == cls, laplace_smoothing) for cls in classes}
 
 
@@ -97,7 +78,7 @@ def cumulative_weights(
     deposits: np.ndarray, evidence: np.ndarray, laplace_smoothing: bool, ascending: bool = True
 ) -> dict:
     """Calculate cumulative weights (ascending or descending) for each class."""
-    classes = sorted(np.unique(evidence[~np.isnan(evidence)]), reverse=not ascending)
+    classes = sorted(np.unique(evidence), reverse=not ascending)
     cumulative_classes = [classes[: i + 1] for i in range(len(classes))]
     return {
         cls[i]: calculate_metrics_for_class(deposits, np.isin(evidence, cls), laplace_smoothing)
@@ -185,7 +166,7 @@ def generate_rasters_from_metrics(
 # @beartype
 def weights_of_evidence(
     evidential_raster: rasterio.io.DatasetReader,
-    deposit_raster: rasterio.io.DatasetReader,
+    deposits: gpd.GeoDataFrame,
     weights_type: Literal["unique", "ascending", "descending"] = "unique",
     studentized_contrast_threshold: Number = 2,
     laplace_smoothing: bool = False,
@@ -195,9 +176,8 @@ def weights_of_evidence(
     Calculate weights of spatial associations.
 
     Args:
-        evidential_raster: The evidential raster with spatial resolution and extent dentical
-            to that of the deposit_raster.
-        deposit_raster: Raster representing the mineral deposits or occurences point data.
+        evidential_raster: The evidential raster.
+        deposits: Vector data representing the mineral deposits or occurences point data.
         weights_type: Accepted values are 'unique' for unique weights, 'ascending' for cumulative ascending weights,
             'descending' for cumulative descending weights. Defaults to 'unique'.
         studentized_contrast_threshold: Studentized contrast threshold value used to reclassify all classes.
@@ -217,16 +197,34 @@ def weights_of_evidence(
     """
 
     # 1. Data preprocessing
-    deposits = read_and_preprocess_raster(deposit_raster)
-    evidence = read_and_preprocess_raster(evidential_raster)
+
+    # Read evidence raster
+    evidence_array = read_and_preprocess_evidence(evidential_raster)
+
+    # Extract raster metadata
+    raster_meta = evidential_raster.meta
+
+    # Rasterize deposits
+    deposit_array, _ = rasterize_vector(
+        geodataframe=deposits, default_value=1.0, base_raster_profile=raster_meta, fill_value=0.0
+    )
+
+    # Mask NaN out of the array
+    nodata_mask = np.isnan(evidence_array)
+    masked_evidence_array = evidence_array[~nodata_mask]
+    masked_deposit_array = deposit_array[~nodata_mask]
 
     # 2. WofE calculations
     if weights_type == "unique":
-        wofe_weights = unique_weights(deposits, evidence, laplace_smoothing)
+        wofe_weights = unique_weights(masked_deposit_array, masked_evidence_array, laplace_smoothing)
     elif weights_type == "ascending":
-        wofe_weights = cumulative_weights(deposits, evidence, laplace_smoothing, ascending=True)
+        wofe_weights = cumulative_weights(
+            masked_deposit_array, masked_evidence_array, laplace_smoothing, ascending=True
+        )
     elif weights_type == "descending":
-        wofe_weights = cumulative_weights(deposits, evidence, laplace_smoothing, ascending=False)
+        wofe_weights = cumulative_weights(
+            masked_deposit_array, masked_evidence_array, laplace_smoothing, ascending=False
+        )
 
     # 3. Create dataframe based on calculated metrics
     df_entries = []
@@ -253,7 +251,7 @@ def weights_of_evidence(
     if weights_type != "unique":
         reclassify_by_studentized_contrast(weights_df, studentized_contrast_threshold)
         # calculate_generalized_weights(weights_df)
-        calculate_generalized_weights_alternative(weights_df, deposits)
+        calculate_generalized_weights_alternative(weights_df, masked_deposit_array)
 
     metrics_to_rasters = rasters_to_generate
     if metrics_to_rasters is None:
@@ -262,9 +260,6 @@ def weights_of_evidence(
             metrics_to_rasters += ["Generalized WPlus", "Generalized S_WPlus"]
 
     # 5. After the wofe_weights computation in the weights_of_evidence function
-    raster_dict = generate_rasters_from_metrics(evidence, weights_df, metrics_to_rasters)
-
-    # 6. Extract raster metadata
-    raster_meta = evidential_raster.meta
+    raster_dict = generate_rasters_from_metrics(evidence_array, weights_df, metrics_to_rasters)
 
     return weights_df, raster_dict, raster_meta
