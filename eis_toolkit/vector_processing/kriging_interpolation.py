@@ -17,6 +17,7 @@ def _kriging(
     resolution: Tuple[Number, Number],
     extent: Optional[Tuple[Number, Number, Number, Number]],
     variogram_model: Literal,
+    coordinates_type: Literal,
     method: Literal,
     drift_terms: list,
 ) -> Tuple[np.ndarray, dict]:
@@ -42,7 +43,7 @@ def _kriging(
         z_interpolated, _ = universal_kriging.execute("grid", grid_x, grid_y)
 
     if method == "ordinary":
-        ordinary_kriging = OrdinaryKriging(x, y, z, variogram_model=variogram_model)
+        ordinary_kriging = OrdinaryKriging(x, y, z, variogram_model=variogram_model, coordinates_type=coordinates_type)
         z_interpolated, _ = ordinary_kriging.execute("grid", grid_x, grid_y)
 
     out_meta = {
@@ -62,6 +63,7 @@ def kriging(
     resolution: Tuple[Number, Number],
     extent: Optional[Tuple[Number, Number, Number, Number]] = None,
     variogram_model: Literal["linear", "power", "gaussian", "spherical", "exponential", "hole-effect"] = "linear",
+    coordinates_type: Literal["euclidean", "geographic"] = "geographic",
     method: Literal["ordinary", "universal"] = "ordinary",
     drift_terms: list = ["regional_linear"],
 ) -> Tuple[np.ndarray, dict]:
@@ -75,6 +77,8 @@ def kriging(
         extent: The extent of the output grid.
             If None, calculate extent from the input vector data.
         variogram_model: Variogram model to be used. Defaults to 'linear'.
+        coordinates_type: Determines are coordinates on a plane ('euclidean') or a sphere ('geographic').
+            Defaults to 'geographic'.
         method: Kriging method. Defaults to 'ordinary'.
         drift_terms: Drift terms used in universal kriging.
 
@@ -105,7 +109,7 @@ def kriging(
         )
 
     data_interpolated, out_meta = _kriging(
-        data, target_column, resolution, extent, variogram_model, method, drift_terms
+        data, target_column, resolution, extent, variogram_model, coordinates_type, method, drift_terms
     )
 
     return data_interpolated, out_meta

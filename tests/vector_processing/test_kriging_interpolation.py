@@ -23,8 +23,8 @@ expected_shape = (10, 10)
 def test_ordinary_kriging_output():
     """Test that ordinary kriging output has correct shape and values."""
     z_interpolated, _ = kriging(data=gdf, target_column=target_column, resolution=resolution, extent=extent)
-    expected_value_first_pixel = 0.4831651
-    expected_value_last_pixel = 1.55695186
+    expected_value_first_pixel = 0.42168577
+    expected_value_last_pixel = 1.58154908
     assert z_interpolated.shape == expected_shape
     assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
     assert round(z_interpolated[-1][-1], 8) == expected_value_last_pixel
@@ -45,8 +45,8 @@ def test_universal_kriging_output():
 def test_output_without_extent():
     """Test that extent computation works as expected."""
     z_interpolated, _ = kriging(data=gdf, target_column=target_column, resolution=resolution)
-    expected_value_first_pixel = 0.45845479
-    expected_value_last_pixel = 1.52579066
+    expected_value_first_pixel = 0.40864907
+    expected_value_last_pixel = 1.53723812
     assert z_interpolated.shape == (11, 7)
     assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
     assert round(z_interpolated[-1][-1], 8) == expected_value_last_pixel
@@ -76,6 +76,18 @@ def test_invalid_variogram_model():
     with pytest.raises(BeartypeCallHintParamViolation):
         kriging(
             data=gdf, target_column=target_column, resolution=resolution, extent=extent, variogram_model="invalid_model"
+        )
+
+
+def test_invalid_coordinates_type():
+    """Test that invalid coordinates type raises the correct exception."""
+    with pytest.raises(BeartypeCallHintParamViolation):
+        kriging(
+            data=gdf,
+            target_column=target_column,
+            resolution=resolution,
+            extent=extent,
+            coordinates_type="invalid_coordinates_type",
         )
 
 
