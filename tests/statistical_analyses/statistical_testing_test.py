@@ -60,16 +60,16 @@ def test_invalid_target_column():
         statistical_tests(data=df, target_column="invalid_column")
 
 
-def test_invalid_method():
-    """Test that invalid method raises the correct exception."""
+def test_invalid_correlation_method():
+    """Test that invalid correlation method raises the correct exception."""
     with pytest.raises(BeartypeCallHintParamViolation):
-        statistical_tests(data=df, target_column=target_column, method="invalid_method")
+        statistical_tests(data=df, target_column=target_column, correlation_method="invalid_method")
 
 
 def test_min_periods_with_kendall():
-    """Test that function call with min_periods and method 'kendall' raises the correct exception."""
+    """Test that function call with min_periods and correlation_method 'kendall' raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        statistical_tests(data=df, target_column=target_column, method="kendall", min_periods=1)
+        statistical_tests(data=df, target_column=target_column, correlation_method="kendall", min_periods=1)
 
 
 def test_invalid_ddof():

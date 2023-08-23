@@ -7,7 +7,11 @@ from eis_toolkit import exceptions
 
 
 def _statistical_tests(
-    data: pd.DataFrame, target_column: str, method: Literal, min_periods: Optional[int], delta_degrees_of_freedom: int
+    data: pd.DataFrame,
+    target_column: str,
+    correlation_method: Literal,
+    min_periods: Optional[int],
+    delta_degrees_of_freedom: int,
 ) -> dict:
 
     statistics = {}
@@ -32,7 +36,7 @@ def _statistical_tests(
     # Create subset of numerical variables only
     numerical_columns = data.select_dtypes(include=["float"])
     if not numerical_columns.empty:
-        statistics["correlation matrix"] = numerical_columns.corr(method=method, min_periods=min_periods)
+        statistics["correlation matrix"] = numerical_columns.corr(method=correlation_method, min_periods=min_periods)
         statistics["covariance matrix"] = numerical_columns.cov(min_periods=min_periods, ddof=delta_degrees_of_freedom)
 
     return statistics
@@ -42,7 +46,7 @@ def _statistical_tests(
 def statistical_tests(
     data: pd.DataFrame,
     target_column: str,
-    method: Literal["pearson", "kendall", "spearman"] = "pearson",
+    correlation_method: Literal["pearson", "kendall", "spearman"] = "pearson",
     min_periods: Optional[int] = None,
     delta_degrees_of_freedom: int = 1,
 ) -> dict:
@@ -55,7 +59,7 @@ def statistical_tests(
     Args:
         data: DataFrame containing the input data.
         target_column: Variable against which independence of other variables is tested.
-        method: Correlation method: 'pearson', 'kendall' or 'spearman. Defaults to 'pearson'.
+        correlation_method: 'pearson', 'kendall' or 'spearman. Defaults to 'pearson'.
         min_periods: Minimum number of observations required per pair of columns to have valid result. Optional.
         delta_degrees_of_freedom: Delta degrees of freedom used in computing covariance matrix. Defaults to 1.
 
@@ -74,12 +78,12 @@ def statistical_tests(
     if target_column not in data.columns:
         raise exceptions.InvalidParameterValueException("Target column not found in the DataFrame.")
 
-    if method == "kendall" and min_periods is not None:
+    if correlation_method == "kendall" and min_periods is not None:
         raise exceptions.InvalidParameterValueException(
-            "Minimum number of observations argument is available only for methods 'pearson' and 'spearman'."
+            "The argument min_periods is available only with correlation methods 'pearson' and 'spearman'."
         )
 
     if delta_degrees_of_freedom < 0:
         raise exceptions.InvalidParameterValueException("Delta degrees of freedom must be non-negative.")
 
-    return _statistical_tests(data, target_column, method, min_periods, delta_degrees_of_freedom)
+    return _statistical_tests(data, target_column, correlation_method, min_periods, delta_degrees_of_freedom)
