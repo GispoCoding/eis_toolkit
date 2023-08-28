@@ -1,3 +1,3 @@
-# Perform DBSCAN clustering
+# DBSCAN
 
 ::: eis_toolkit.exploratory_analyses.dbscan

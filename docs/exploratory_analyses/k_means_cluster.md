@@ -1,3 +1,3 @@
-# Perform k-means clustering
+# K-means clustering
 
 ::: eis_toolkit.exploratory_analyses.k_means_cluster
