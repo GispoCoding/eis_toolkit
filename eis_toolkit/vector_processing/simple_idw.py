@@ -4,6 +4,7 @@ import geopandas as gpd
 import numpy as np
 from beartype import beartype
 from beartype.typing import Optional, Tuple
+from rasterio import transform
 
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 
@@ -15,7 +16,7 @@ def _simple_idw(
     resolution: Tuple[Number, Number],
     power: Number,
     extent: Optional[Tuple[Number, Number, Number, Number]],
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, dict]:
 
     points = np.array(geodataframe.geometry.apply(lambda geom: (geom.x, geom.y)).tolist())
     values = geodataframe[target_column].values
@@ -26,7 +27,7 @@ def _simple_idw(
         y_min = geodataframe.geometry.total_bounds[1]
         y_max = geodataframe.geometry.total_bounds[3]
     else:
-        x_min, y_min, x_max, y_max = extent
+        x_min, x_max, y_min, y_max = extent
 
     resolution_x, resolution_y = resolution
 
@@ -50,7 +51,14 @@ def _simple_idw(
     interpolated_values = _simple_idw_core(sorted_points[:, 0], sorted_points[:, 1], sorted_values, xi, yi, power)
     interpolated_values = interpolated_values.reshape(num_points_y, num_points_x)
 
-    return x, y, interpolated_values
+    out_meta = {
+        "crs": geodataframe.crs,
+        "width": len(x),
+        "height": len(y),
+        "transform": transform.from_bounds(x_min, y_min, x_max, y_max, len(x), len(y)),
+    }
+
+    return interpolated_values, out_meta
 
 
 #  Distance calculations
@@ -75,7 +83,7 @@ def simple_idw(
     resolution: Tuple[Number, Number],
     extent: Optional[Tuple[Number, Number, Number, Number]] = None,
     power: Number = 2,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, dict]:
     """Calculate simple inverse distance weighted (IDW) interpolation.
 
     Args:
@@ -107,5 +115,6 @@ def simple_idw(
     if resolution[0] <= 0 or resolution[1] <= 0:
         raise InvalidParameterValueException("Expected height and width greater than zero.")
 
-    x, y, interpolated_values = _simple_idw(geodataframe, target_column, resolution, power, extent)
-    return x, y, interpolated_values
+    interpolated_values, out_meta = _simple_idw(geodataframe, target_column, resolution, power, extent)
+
+    return interpolated_values, out_meta

@@ -65,14 +65,14 @@ def test_validated_points(validated_points):
     with rasterio.open(no_extent) as src:
         external_values = src.read(1)
 
-    np.testing.assert_allclose(interpolated_values[2], external_values)
+    np.testing.assert_allclose(interpolated_values[0], external_values)
 
 
 def test_validated_points_with_extent(validated_points):
     """Test IDW with extent set."""
     target_column = "random_number"
     resolution = (0.0049, 0.0047)
-    extent = (24.6558990000000016, 60.1920590000000004, 25.0378036000000002, 60.2934078769999999)
+    extent = (24.6558990000000016, 25.0378036000000002, 60.1920590000000004, 60.2934078769999999)
     power = 2
 
     interpolated_values = simple_idw(
@@ -83,7 +83,7 @@ def test_validated_points_with_extent(validated_points):
     with rasterio.open(extent_set) as src:
         external_values = src.read(1)
 
-    np.testing.assert_allclose(interpolated_values[2], external_values)
+    np.testing.assert_allclose(interpolated_values[0], external_values)
 
 
 def test_invalid_column(test_points):
@@ -124,7 +124,7 @@ def test_interpolate_vector(test_points):
     )
 
     assert target_column in test_points.columns
-    interpolated_value = interpolated_values[2]
+    interpolated_value = interpolated_values[0]
 
     expected_values = np.array(
         [
