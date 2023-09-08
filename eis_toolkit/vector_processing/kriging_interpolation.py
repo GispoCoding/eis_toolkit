@@ -19,7 +19,6 @@ def _kriging(
     variogram_model: Literal,
     coordinates_type: Literal,
     method: Literal,
-    drift_terms: list,
 ) -> Tuple[np.ndarray, dict]:
 
     x = data.geometry.x
@@ -39,7 +38,7 @@ def _kriging(
     grid_y = np.arange(grid_y_min, grid_y_max + resolution[1], resolution[1])
 
     if method == "universal":
-        universal_kriging = UniversalKriging(x, y, z, variogram_model=variogram_model, drift_terms=drift_terms)
+        universal_kriging = UniversalKriging(x, y, z, variogram_model=variogram_model, drift_terms=["regional_linear"])
         z_interpolated, _ = universal_kriging.execute("grid", grid_x, grid_y)
 
     if method == "ordinary":
@@ -62,10 +61,9 @@ def kriging(
     target_column: str,
     resolution: Tuple[Number, Number],
     extent: Optional[Tuple[Number, Number, Number, Number]] = None,
-    variogram_model: Literal["linear", "power", "gaussian", "spherical", "exponential", "hole-effect"] = "linear",
+    variogram_model: Literal["linear", "power", "gaussian", "spherical", "exponential"] = "linear",
     coordinates_type: Literal["euclidean", "geographic"] = "geographic",
     method: Literal["ordinary", "universal"] = "ordinary",
-    drift_terms: list = ["regional_linear"],
 ) -> Tuple[np.ndarray, dict]:
     """
     Perform Kriging interpolation on the input data.
@@ -73,14 +71,14 @@ def kriging(
     Args:
         data: GeoDataFrame containing the input data.
         target_column: The column name with values for each geometry.
-        resolution: The resolution i.e. cell size of the output raster.
-        extent: The extent of the output grid.
+        resolution: The resolution i.e. cell size of the output raster as (pixel_size_x, pixel_size_y).
+        extent: The extent of the output raster as (x_min, x_max, y_min, y_max).
             If None, calculate extent from the input vector data.
-        variogram_model: Variogram model to be used. Defaults to 'linear'.
+        variogram_model: Variogram model to be used.
+            Either 'linear', 'power', 'gaussian', 'spherical' or 'exponential'. Defaults to 'linear'.
         coordinates_type: Determines are coordinates on a plane ('euclidean') or a sphere ('geographic').
-            Defaults to 'geographic'.
-        method: Kriging method. Defaults to 'ordinary'.
-        drift_terms: Drift terms used in universal kriging.
+            Used only in ordinary kriging. Defaults to 'geographic'.
+        method: Ordinary or universal kriging. Defaults to 'ordinary'.
 
     Returns:
         Grid containing the interpolated values and metadata.
@@ -101,15 +99,8 @@ def kriging(
     if resolution[0] <= 0 or resolution[1] <= 0:
         raise InvalidParameterValueException("The resolution must be greater than zero.")
 
-    if any(
-        term not in ("regional_linear", "point_log", "external_Z", "specified", "functional") for term in drift_terms
-    ):
-        raise InvalidParameterValueException(
-            "Accepted drift terms are 'regional_linear', 'point_log', 'external_Z', 'specified' and 'functional'."
-        )
-
     data_interpolated, out_meta = _kriging(
-        data, target_column, resolution, extent, variogram_model, coordinates_type, method, drift_terms
+        data, target_column, resolution, extent, variogram_model, coordinates_type, method
     )
 
     return data_interpolated, out_meta

@@ -89,8 +89,8 @@ def simple_idw(
     Args:
         geodataframe: The vector dataframe to be interpolated.
         target_column: The column name with values for each geometry.
-        resolution: The resolution i.e. cell size of the output raster.
-        extent: The extent of the output raster.
+        resolution: The resolution i.e. cell size of the output raster as (pixel_size_x, pixel_size_y).
+        extent: The extent of the output raster as (x_min, x_max, y_min, y_max).
             If None, calculate extent from the input vector data.
         power: The value for determining the rate at which the weights decrease.
             As power increases, the weights for distant points decrease rapidly.
