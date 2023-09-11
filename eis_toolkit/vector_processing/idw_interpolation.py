@@ -4,18 +4,19 @@ import geopandas as gpd
 import numpy as np
 from beartype import beartype
 from beartype.typing import Optional, Tuple
+from rasterio import transform
 
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 
 
 @beartype
-def _simple_idw(
+def _idw_interpolation(
     geodataframe: gpd.GeoDataFrame,
     target_column: str,
     resolution: Tuple[Number, Number],
     power: Number,
     extent: Optional[Tuple[Number, Number, Number, Number]],
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, dict]:
 
     points = np.array(geodataframe.geometry.apply(lambda geom: (geom.x, geom.y)).tolist())
     values = geodataframe[target_column].values
@@ -26,7 +27,7 @@ def _simple_idw(
         y_min = geodataframe.geometry.total_bounds[1]
         y_max = geodataframe.geometry.total_bounds[3]
     else:
-        x_min, y_min, x_max, y_max = extent
+        x_min, x_max, y_min, y_max = extent
 
     resolution_x, resolution_y = resolution
 
@@ -47,14 +48,21 @@ def _simple_idw(
     sorted_points = points[sorted_indices]
     sorted_values = values[sorted_indices]
 
-    interpolated_values = _simple_idw_core(sorted_points[:, 0], sorted_points[:, 1], sorted_values, xi, yi, power)
+    interpolated_values = _idw_core(sorted_points[:, 0], sorted_points[:, 1], sorted_values, xi, yi, power)
     interpolated_values = interpolated_values.reshape(num_points_y, num_points_x)
 
-    return x, y, interpolated_values
+    out_meta = {
+        "crs": geodataframe.crs,
+        "width": len(x),
+        "height": len(y),
+        "transform": transform.from_bounds(x_min, y_min, x_max, y_max, len(x), len(y)),
+    }
+
+    return interpolated_values, out_meta
 
 
 #  Distance calculations
-def _simple_idw_core(x, y, z, xi, yi: np.ndarray, power: Number) -> np.ndarray:
+def _idw_core(x, y, z, xi, yi: np.ndarray, power: Number) -> np.ndarray:
     d0 = np.subtract.outer(x, xi)
     d1 = np.subtract.outer(y, yi)
     dist = np.hypot(d0, d1)
@@ -69,20 +77,20 @@ def _simple_idw_core(x, y, z, xi, yi: np.ndarray, power: Number) -> np.ndarray:
 
 
 @beartype
-def simple_idw(
+def idw(
     geodataframe: gpd.GeoDataFrame,
     target_column: str,
     resolution: Tuple[Number, Number],
     extent: Optional[Tuple[Number, Number, Number, Number]] = None,
     power: Number = 2,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Calculate simple inverse distance weighted (IDW) interpolation.
+) -> Tuple[np.ndarray, dict]:
+    """Calculate inverse distance weighted (IDW) interpolation.
 
     Args:
         geodataframe: The vector dataframe to be interpolated.
         target_column: The column name with values for each geometry.
-        resolution: The resolution i.e. cell size of the output raster.
-        extent: The extent of the output raster.
+        resolution: The resolution i.e. cell size of the output raster as (pixel_size_x, pixel_size_y).
+        extent: The extent of the output raster as (x_min, x_max, y_min, y_max).
             If None, calculate extent from the input vector data.
         power: The value for determining the rate at which the weights decrease.
             As power increases, the weights for distant points decrease rapidly.
@@ -107,5 +115,6 @@ def simple_idw(
     if resolution[0] <= 0 or resolution[1] <= 0:
         raise InvalidParameterValueException("Expected height and width greater than zero.")
 
-    x, y, interpolated_values = _simple_idw(geodataframe, target_column, resolution, power, extent)
-    return x, y, interpolated_values
+    interpolated_values, out_meta = _idw_interpolation(geodataframe, target_column, resolution, power, extent)
+
+    return interpolated_values, out_meta

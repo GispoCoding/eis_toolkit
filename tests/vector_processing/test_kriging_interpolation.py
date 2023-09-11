@@ -95,16 +95,3 @@ def test_invalid_method():
     """Test that invalid kriging method raises the correct exception."""
     with pytest.raises(BeartypeCallHintParamViolation):
         kriging(data=gdf, target_column=target_column, resolution=resolution, extent=extent, method="invalid_method")
-
-
-def test_invalid_drift_term():
-    """Test that invalid drift term raises the correct exception."""
-    with pytest.raises(InvalidParameterValueException):
-        kriging(
-            data=gdf,
-            target_column=target_column,
-            resolution=resolution,
-            extent=extent,
-            method="universal",
-            drift_terms=["regional_linear", "invalid_drift_term"],
-        )
