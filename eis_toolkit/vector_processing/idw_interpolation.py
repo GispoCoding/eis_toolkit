@@ -10,7 +10,7 @@ from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValu
 
 
 @beartype
-def _simple_idw(
+def _idw_interpolation(
     geodataframe: gpd.GeoDataFrame,
     target_column: str,
     resolution: Tuple[Number, Number],
@@ -48,7 +48,7 @@ def _simple_idw(
     sorted_points = points[sorted_indices]
     sorted_values = values[sorted_indices]
 
-    interpolated_values = _simple_idw_core(sorted_points[:, 0], sorted_points[:, 1], sorted_values, xi, yi, power)
+    interpolated_values = _idw_core(sorted_points[:, 0], sorted_points[:, 1], sorted_values, xi, yi, power)
     interpolated_values = interpolated_values.reshape(num_points_y, num_points_x)
 
     out_meta = {
@@ -62,7 +62,7 @@ def _simple_idw(
 
 
 #  Distance calculations
-def _simple_idw_core(x, y, z, xi, yi: np.ndarray, power: Number) -> np.ndarray:
+def _idw_core(x, y, z, xi, yi: np.ndarray, power: Number) -> np.ndarray:
     d0 = np.subtract.outer(x, xi)
     d1 = np.subtract.outer(y, yi)
     dist = np.hypot(d0, d1)
@@ -77,14 +77,14 @@ def _simple_idw_core(x, y, z, xi, yi: np.ndarray, power: Number) -> np.ndarray:
 
 
 @beartype
-def simple_idw(
+def idw(
     geodataframe: gpd.GeoDataFrame,
     target_column: str,
     resolution: Tuple[Number, Number],
     extent: Optional[Tuple[Number, Number, Number, Number]] = None,
     power: Number = 2,
 ) -> Tuple[np.ndarray, dict]:
-    """Calculate simple inverse distance weighted (IDW) interpolation.
+    """Calculate inverse distance weighted (IDW) interpolation.
 
     Args:
         geodataframe: The vector dataframe to be interpolated.
@@ -115,6 +115,6 @@ def simple_idw(
     if resolution[0] <= 0 or resolution[1] <= 0:
         raise InvalidParameterValueException("Expected height and width greater than zero.")
 
-    interpolated_values, out_meta = _simple_idw(geodataframe, target_column, resolution, power, extent)
+    interpolated_values, out_meta = _idw_interpolation(geodataframe, target_column, resolution, power, extent)
 
     return interpolated_values, out_meta
