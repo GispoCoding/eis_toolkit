@@ -98,7 +98,7 @@ def create_constant_raster(  # type: ignore[no-any-unimported]
     raster_width: Optional[int] = None,
     raster_height: Optional[int] = None,
     nodata_value: Optional[Number] = None,
-):
+) -> Tuple[np.ndarray, dict]:
     """Create a constant raster based on a user-defined value.
 
     Provide 3 methods for raster creation:
