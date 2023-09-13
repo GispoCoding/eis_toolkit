@@ -52,6 +52,9 @@ def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray, lapl
         p_A = (A + SMOOTH_CONSTANT) / (A + B + 2 * SMOOTH_CONSTANT)
         p_C = (C + SMOOTH_CONSTANT) / (C + D + 2 * SMOOTH_CONSTANT)
 
+    if A == 0:
+        return A, B, C, D, 0, 0, 0, 0, 0, 0, 0
+
     # Calculate metrics
     w_plus = np.log(p_A / p_C) if p_A != 0 and p_C != 0 else 0
     w_minus = np.log((1 - p_A) / (1 - p_C)) if (1 - p_A) != 0 and (1 - p_C) != 0 else 0
@@ -60,9 +63,10 @@ def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray, lapl
     # Calculate signifigance metrics
     s_w_plus = np.sqrt((1 / A if A != 0 else 0) + (1 / C if C != 0 else 0))
     s_w_minus = np.sqrt((1 / B if B != 0 else 0) + (1 / D if D != 0 else 0))
-    s_contrast = np.sqrt(s_w_plus**2 + s_w_minus**2)
+    # s_w_plus = np.sqrt((1 / A) + (1 / C if C != 0 else 0))
+    # s_w_minus = np.sqrt((1 / B) + (1 / D if D != 0 else 0))
 
-    # Calculate studentized contrast
+    s_contrast = np.sqrt(s_w_plus**2 + s_w_minus**2)
     studentized_contrast = contrast / s_contrast
 
     return A, B, C, D, w_plus, s_w_plus, w_minus, s_w_minus, contrast, s_contrast, studentized_contrast
@@ -89,6 +93,53 @@ def cumulative_weights(
 def reclassify_by_studentized_contrast(df: pd.DataFrame, studentized_contrast_threshold: Number) -> None:
     """Create generalized classes based on the studentized contrast threhsold value."""
     df["Generalized class"] = np.where(df["Studentized contrast"] >= studentized_contrast_threshold, 2, 1)
+
+    # Check if both classes are present
+    unique_classes = df["Generalized class"].unique()
+    if 1 not in unique_classes:
+        raise ValueError("Reclassification failed: 'Unfavorable' class (Class 1) doesn't exist.")
+    elif 2 not in unique_classes:
+        raise ValueError("Reclassification failed: 'Favorable' class (Class 2) doesn't exist.")
+
+
+def reclassify_by_studentized_contrast3(df: pd.DataFrame, studentized_contrast_threshold: Number) -> None:
+    """Create generalized classes based on the studentized contrast threhsold value."""
+    index = df.idxmax()["Contrast"]
+
+    if df.loc[index, "Studentized contrast"] < studentized_contrast_threshold:
+        raise Exception("Failed")
+
+    df["Generalized class"] = 1
+    for i in range(0, index + 1):
+        df.loc[i, "Generalized class"] = 2
+
+    # df["Generalized class"] = np.where(df["Studentized contrast"] >= studentized_contrast_threshold, 2, 1)
+
+    # # Check if both classes are present
+    # unique_classes = df["Generalized class"].unique()
+    # if 1 not in unique_classes:
+    #     raise ValueError("Reclassification failed: 'Unfavorable' class (Class 1) doesn't exist.")
+    # elif 2 not in unique_classes:
+    #     raise ValueError("Reclassification failed: 'Favorable' class (Class 2) doesn't exist.")
+
+
+def reclassify_by_studentized_contrast2(df: pd.DataFrame, studentized_contrast_threshold: Number) -> None:
+    """Create generalized classes based on the studentized contrast threshold value."""
+
+    # Sort the DataFrame based on the 'Contrast' value
+    df.sort_values(by="Contrast", ascending=False, inplace=True)
+
+    # Initialize a flag to check if we have reached the highest contrast class that meets the threshold
+    highest_contrast_reached = False
+
+    for idx, row in df.iterrows():
+        if row["Studentized contrast"] >= studentized_contrast_threshold and not highest_contrast_reached:
+            df.at[idx, "Generalized class"] = 2
+            highest_contrast_reached = True
+        elif highest_contrast_reached:
+            df.at[idx, "Generalized class"] = 2
+        else:
+            df.at[idx, "Generalized class"] = 1
 
     # Check if both classes are present
     unique_classes = df["Generalized class"].unique()
@@ -167,6 +218,7 @@ def generate_rasters_from_metrics(
 def weights_of_evidence(
     evidential_raster: rasterio.io.DatasetReader,
     deposits: gpd.GeoDataFrame,
+    resolution: Optional[float] = None,
     weights_type: Literal["unique", "ascending", "descending"] = "unique",
     studentized_contrast_threshold: Number = 2,
     laplace_smoothing: bool = False,
@@ -178,6 +230,8 @@ def weights_of_evidence(
     Args:
         evidential_raster: The evidential raster.
         deposits: Vector data representing the mineral deposits or occurences point data.
+        resolution: The resolution i.e. cell size of the output raster.
+            Optional parameter, if not given, resolution of evidential raster is used.
         weights_type: Accepted values are 'unique' for unique weights, 'ascending' for cumulative ascending weights,
             'descending' for cumulative descending weights. Defaults to 'unique'.
         studentized_contrast_threshold: Studentized contrast threshold value used to reclassify all classes.
@@ -208,6 +262,11 @@ def weights_of_evidence(
     deposit_array, _ = rasterize_vector(
         geodataframe=deposits, default_value=1.0, base_raster_profile=raster_meta, fill_value=0.0
     )
+
+    # Resample
+    if resolution is not None:
+        # TODO
+        pass
 
     # Mask NaN out of the array
     nodata_mask = np.isnan(evidence_array)
@@ -249,7 +308,7 @@ def weights_of_evidence(
 
     # 4. If we use cumulative weights type, reclassify and calculate generalized weights
     if weights_type != "unique":
-        reclassify_by_studentized_contrast(weights_df, studentized_contrast_threshold)
+        reclassify_by_studentized_contrast3(weights_df, studentized_contrast_threshold)
         # calculate_generalized_weights(weights_df)
         calculate_generalized_weights_alternative(weights_df, masked_deposit_array)
 
