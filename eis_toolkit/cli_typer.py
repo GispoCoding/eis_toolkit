@@ -21,7 +21,6 @@ class VariogramModel(str, Enum):
     gaussian = "gaussian"
     spherical = "spherical"
     exponential = "exponential"
-    hole_effect = "hole-effect"
 
 
 class CoordinatesType(str, Enum):
@@ -279,7 +278,7 @@ def unify_rasters_cli(
     resampling_method: ResamplingMethods = typer.Option(help="resample help", default=ResamplingMethods.nearest),
     same_extent: bool = False,
 ):
-    """Extract window from raster. NOT IMPLEMENTED YET."""
+    """Unify given rasters relative to base raster. NOT IMPLEMENTED YET."""
     # TODO
     pass
 
@@ -320,7 +319,7 @@ def idw_interpolation_cli(
     power: float = 2.0,
     extent: Tuple[float, float, float, float] = None,
 ):
-    """Apply kriging interpolation to input vector file."""
+    """Apply inverse distance weighting (IDW) interpolation to input vector file."""
     from eis_toolkit.vector_processing.idw_interpolation import idw
 
     geodataframe = gpd.read_file(input_vector)
@@ -468,7 +467,7 @@ def vector_density_cli(
     buffer_value: float = None,
     statistic: VectorDensityStatistic = VectorDensityStatistic.density,
 ):
-    """Reproject the input vector to given CRS."""
+    """Compute density of geometries within raster."""
     from eis_toolkit.vector_processing.vector_density import vector_density
 
     geodataframe = gpd.read_file(input_vector)
@@ -509,7 +508,7 @@ def distance_computation_cli(
     geometries: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
-    """Reproject the input vector to given CRS."""
+    """Calculate distance from raster cell to nearest geometry."""
     from eis_toolkit.spatial_analyses.distance_computation import distance_computation
 
     with rasterio.open(input_raster) as raster:
