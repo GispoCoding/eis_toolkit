@@ -533,33 +533,40 @@ def distance_computation_cli(
 # --- STATISTICAL ANALYSES ---
 
 
-# DESCRIPTIVE STATISTICS
+# DESCRIPTIVE STATISTICS (RASTER)
 @app.command()
-def descriptive_statistics_cli(input_file: Annotated[Path, INPUT_FILE_OPTION], column: str = None):
-    """Generate descriptive statistics from raster, vector or tabular data."""
-    from eis_toolkit.statistical_analyses.descriptive_statistics import (
-        descriptive_statistics_dataframe,
-        descriptive_statistics_raster,
-    )
+def descriptive_statistics_raster_cli(input_file: Annotated[Path, INPUT_FILE_OPTION]):
+    """Generate descriptive statistics from raster data."""
+    from eis_toolkit.statistical_analyses.descriptive_statistics import descriptive_statistics_raster
 
-    # TODO modify input file detection
-    try:
-        raster = rasterio.open(input_file)
+    with rasterio.open(input_file) as raster:
         results_dict = descriptive_statistics_raster(raster)
-    except:  # noqa: E722  # TODO Which exception? Applies to the 2 below as well
-        try:
-            gdf = gpd.read_file(input_file)
-            results_dict = descriptive_statistics_dataframe(gdf, column)
-        except:  # noqa: E722
-            try:
-                df = pd.read_csv(input_file)
-                results_dict = descriptive_statistics_dataframe(df, column)
-            except:  # noqa: E722
-                raise Exception("Could not read input file as raster or dataframe")
 
     json_str = json.dumps(results_dict)
     typer.echo(f"Results: {json_str}")
-    typer.echo("Descriptive statistics completed")
+    typer.echo("Descriptive statistics (raster) completed")
+
+
+# DESCRIPTIVE STATISTICS (VECTOR)
+@app.command()
+def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPTION], column: str = None):
+    """Generate descriptive statistics from vector or tabular data."""
+    from eis_toolkit.statistical_analyses.descriptive_statistics import descriptive_statistics_dataframe
+
+    # TODO modify input file detection
+    try:
+        gdf = gpd.read_file(input_file)
+        results_dict = descriptive_statistics_dataframe(gdf, column)
+    except:  # noqa: E722
+        try:
+            df = pd.read_csv(input_file)
+            results_dict = descriptive_statistics_dataframe(df, column)
+        except:  # noqa: E722
+            raise Exception("Could not read input file as raster or dataframe")
+
+    json_str = json.dumps(results_dict)
+    typer.echo(f"Results: {json_str}")
+    typer.echo("Descriptive statistics (vector) completed")
 
 
 # --- PREDICTION ---
