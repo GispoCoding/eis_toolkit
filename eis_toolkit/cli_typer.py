@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import rasterio
 import typer
@@ -403,7 +404,11 @@ def rasterize_cli(
     buffer_value: float = None,
     merge_strategy: MergeStrategy = MergeStrategy.replace,
 ):
-    """Rasterize input vector."""
+    """
+    Rasterize input vector.
+
+    Either resolution or base-raster-profile-raster must be provided.
+    """
     from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
     geodataframe = gpd.read_file(input_vector)
@@ -428,7 +433,7 @@ def rasterize_cli(
     out_meta.update(
         {
             "count": 1,
-            "dtype": base_raster_profile["dtype"] if base_raster_profile_raster else float,  # TODO change this
+            "dtype": base_raster_profile["dtype"] if base_raster_profile_raster else np.float64,  # TODO change this
         }
     )
 
@@ -470,7 +475,11 @@ def vector_density_cli(
     buffer_value: float = None,
     statistic: VectorDensityStatistic = VectorDensityStatistic.density,
 ):
-    """Compute density of geometries within raster."""
+    """
+    Compute density of geometries within raster.
+
+    Either resolution or base_raster_profile_raster must be provided.
+    """
     from eis_toolkit.vector_processing.vector_density import vector_density
 
     geodataframe = gpd.read_file(input_vector)
@@ -492,7 +501,7 @@ def vector_density_cli(
     out_meta.update(
         {
             "count": 1,
-            "dtype": base_raster_profile["dtype"] if base_raster_profile_raster else float,  # TODO change this
+            "dtype": base_raster_profile["dtype"] if base_raster_profile_raster else np.float64,  # TODO change this
         }
     )
 
