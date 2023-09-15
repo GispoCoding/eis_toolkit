@@ -198,9 +198,9 @@ def create_constant_raster_cli(
             raster_height,
             nodata_value,
         )
-
     with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
+        for band_n in range(1, out_meta["count"] + 1):
+            dest.write(out_image, band_n)
 
     typer.echo("Creating constant raster completed")
     typer.echo(f"Writing raster to {output_raster}.")
