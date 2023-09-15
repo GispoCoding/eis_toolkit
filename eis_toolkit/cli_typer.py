@@ -433,7 +433,8 @@ def rasterize_cli(
     )
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, 1)
+        for band_n in range(1, out_meta["count"]):
+            dst.write(out_image, band_n)
 
     typer.echo("Rasterizing completed")
     typer.echo(f"Writing raster to {output_raster}")
@@ -477,6 +478,8 @@ def vector_density_cli(
     if base_raster_profile_raster is not None:
         with rasterio.open(base_raster_profile_raster) as raster:
             base_raster_profile = raster.profile
+    else:
+        base_raster_profile = base_raster_profile_raster
 
     out_image, out_meta = vector_density(
         geodataframe=geodataframe,
@@ -494,7 +497,8 @@ def vector_density_cli(
     )
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
+        for band_n in range(1, out_meta["count"]):
+            dst.write(out_image, band_n)
 
     typer.echo("Vector density computation completed")
     typer.echo(f"Writing raster to {output_raster}")
