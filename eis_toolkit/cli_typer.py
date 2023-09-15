@@ -316,10 +316,13 @@ def idw_interpolation_cli(
     target_column: str = typer.Option(),
     resolution: float = typer.Option(),
     power: float = 2.0,
-    extent: Tuple[float, float, float, float] = None,
+    extent: Tuple[float, float, float, float] = (None, None, None, None),  # TODO Change this
 ):
     """Apply inverse distance weighting (IDW) interpolation to input vector file."""
     from eis_toolkit.vector_processing.idw_interpolation import idw
+
+    if extent == (None, None, None, None):
+        extent = None
 
     geodataframe = gpd.read_file(input_vector)
 
@@ -339,8 +342,8 @@ def idw_interpolation_cli(
         }
     )
 
-    with rasterio.open(out_image, "w", **out_meta) as dst:
-        dst.write(out_image)
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image, 1)
 
     typer.echo("IDW interpolation completed")
     typer.echo(f"Writing raster to {output_raster}")
@@ -353,13 +356,16 @@ def kriging_interpolation_cli(
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     target_column: str = typer.Option(),
     resolution: float = typer.Option(),
-    extent: Tuple[float, float, float, float] = None,
+    extent: Tuple[float, float, float, float] = (None, None, None, None),  # TODO Change this
     variogram_model: VariogramModel = VariogramModel.linear,
     coordinates_type: CoordinatesType = CoordinatesType.geographic,
     method: KrigingMethod = KrigingMethod.ordinary,
 ):
     """Apply kriging interpolation to input vector file."""
     from eis_toolkit.vector_processing.kriging_interpolation import kriging
+
+    if extent == (None, None, None, None):
+        extent = None
 
     geodataframe = gpd.read_file(input_vector)
 
@@ -381,8 +387,8 @@ def kriging_interpolation_cli(
         }
     )
 
-    with rasterio.open(out_image, "w", **out_meta) as dst:
-        dst.write(out_image)
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image, 1)
 
     typer.echo("Kriging interpolation completed")
     typer.echo(f"Writing raster to {output_raster}")
