@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import List, Tuple
 
 import geopandas as gpd
-import numpy as np
 import pandas as pd
 import rasterio
 import typer
@@ -315,8 +314,7 @@ def idw_interpolation_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     target_column: str = typer.Option(),
-    pixel_size_x: float = typer.Option(),
-    pixel_size_y: float = typer.Option(),
+    resolution: float = typer.Option(),
     power: float = 2.0,
     extent: Tuple[float, float, float, float] = None,
 ):
@@ -328,7 +326,7 @@ def idw_interpolation_cli(
     out_image, out_meta = idw(
         geodataframe=geodataframe,
         target_column=target_column,
-        resolution=(pixel_size_x, pixel_size_y),
+        resolution=(resolution, resolution),
         extent=extent,
         power=power,
     )
@@ -354,8 +352,7 @@ def kriging_interpolation_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     target_column: str = typer.Option(),
-    pixel_size_x: float = typer.Option(),
-    pixel_size_y: float = typer.Option(),
+    resolution: float = typer.Option(),
     extent: Tuple[float, float, float, float] = None,
     variogram_model: VariogramModel = VariogramModel.linear,
     coordinates_type: CoordinatesType = CoordinatesType.geographic,
@@ -369,7 +366,7 @@ def kriging_interpolation_cli(
     out_image, out_meta = kriging(
         data=geodataframe,
         target_column=target_column,
-        resolution=(pixel_size_x, pixel_size_y),
+        resolution=(resolution, resolution),
         extent=extent,
         variogram_model=variogram_model,
         coordinates_type=coordinates_type,
@@ -433,7 +430,7 @@ def rasterize_cli(
     out_meta.update(
         {
             "count": 1,
-            "dtype": base_raster_profile["dtype"] if base_raster_profile_raster else np.float64,  # TODO change this
+            "dtype": base_raster_profile["dtype"] if base_raster_profile_raster else "float32",  # TODO change this
         }
     )
 
@@ -501,7 +498,7 @@ def vector_density_cli(
     out_meta.update(
         {
             "count": 1,
-            "dtype": base_raster_profile["dtype"] if base_raster_profile_raster else np.float64,  # TODO change this
+            "dtype": base_raster_profile["dtype"] if base_raster_profile_raster else "float32",  # TODO change this
         }
     )
 
