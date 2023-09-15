@@ -10,16 +10,6 @@ from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
 # from beartype import beartype
 
-# REPLACE signifies if we use replacement of 0 and 1 with the values below
-# If REPLACE is False but laplace_smoothing is set to True, we use the SMOOTH_CONSTANT to compute p_A and p_C
-REPLACE = False
-SMALL_NUMBER = 0.0001
-LARGE_NUMBER = 1.0001
-
-SMOOTH_CONSTANT = 1.0
-
-# NODATA_THRESHOLD = 0.0000001
-
 
 def read_and_preprocess_evidence(raster: rasterio.io.DatasetReader, nodata: Optional[Number] = None) -> np.ndarray:
     """Read raster data and handle NoData values."""
@@ -45,26 +35,33 @@ def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray, lapl
     if C + D == 0:
         raise Exception("All included cells have deposits")
 
-    if not laplace_smoothing:
-        p_A = A / (A + B)  # probability of presence of evidence given the presence of mineral deposit
-        p_C = C / (C + D)  # probability of presence of evidence given the absence of mineral deposit
-    else:
-        p_A = (A + SMOOTH_CONSTANT) / (A + B + 2 * SMOOTH_CONSTANT)
-        p_C = (C + SMOOTH_CONSTANT) / (C + D + 2 * SMOOTH_CONSTANT)
-
     if A == 0:
         return A, B, C, D, 0, 0, 0, 0, 0, 0, 0
 
+    p_A_nominator = A
+    p_C_nominator = C
+    B_adjusted = B
+    D_adjusted = D
+
+    if B == 0:
+        p_A_nominator -= 0.99
+        B_adjusted = 0.99
+
+    if D == 0:
+        p_C_nominator -= 0.99
+        D_adjusted = 0.99
+
+    p_A = p_A_nominator / (A + B)  # probability of presence of evidence given the presence of mineral deposit
+    p_C = p_C_nominator / (C + D)  # probability of presence of evidence given the absence of mineral deposit
+
     # Calculate metrics
-    w_plus = np.log(p_A / p_C) if p_A != 0 and p_C != 0 else 0
-    w_minus = np.log((1 - p_A) / (1 - p_C)) if (1 - p_A) != 0 and (1 - p_C) != 0 else 0
+    w_plus = np.log(p_A / p_C) if p_C != 0 else 0  # Check
+    w_minus = np.log((1 - p_A) / (1 - p_C))
     contrast = w_plus - w_minus
 
     # Calculate signifigance metrics
-    s_w_plus = np.sqrt((1 / A if A != 0 else 0) + (1 / C if C != 0 else 0))
-    s_w_minus = np.sqrt((1 / B if B != 0 else 0) + (1 / D if D != 0 else 0))
-    # s_w_plus = np.sqrt((1 / A) + (1 / C if C != 0 else 0))
-    # s_w_minus = np.sqrt((1 / B) + (1 / D if D != 0 else 0))
+    s_w_plus = np.sqrt((1 / p_A_nominator) + (1 / p_C_nominator))
+    s_w_minus = np.sqrt((1 / B_adjusted) + (1 / D_adjusted))
 
     s_contrast = np.sqrt(s_w_plus**2 + s_w_minus**2)
     studentized_contrast = contrast / s_contrast
@@ -107,7 +104,7 @@ def reclassify_by_studentized_contrast3(df: pd.DataFrame, studentized_contrast_t
     index = df.idxmax()["Contrast"]
 
     if df.loc[index, "Studentized contrast"] < studentized_contrast_threshold:
-        raise Exception("Failed")
+        raise Exception("Failed, studentized contrast is {}".format(df.loc[index, "Studentized contrast"]))
 
     df["Generalized class"] = 1
     for i in range(0, index + 1):
@@ -288,7 +285,7 @@ def weights_of_evidence(
     # 3. Create dataframe based on calculated metrics
     df_entries = []
     for cls, metrics in wofe_weights.items():
-        metrics = [round(metric, 3) if isinstance(metric, np.floating) else metric for metric in metrics]
+        metrics = [round(metric, 4) if isinstance(metric, np.floating) else metric for metric in metrics]
         A, _, C, _, w_plus, s_w_plus, w_minus, s_w_minus, contrast, s_contrast, studentized_contrast = metrics
         df_entries.append(
             {
@@ -308,7 +305,7 @@ def weights_of_evidence(
 
     # 4. If we use cumulative weights type, reclassify and calculate generalized weights
     if weights_type != "unique":
-        reclassify_by_studentized_contrast3(weights_df, studentized_contrast_threshold)
+        reclassify_by_studentized_contrast(weights_df, studentized_contrast_threshold)
         # calculate_generalized_weights(weights_df)
         calculate_generalized_weights_alternative(weights_df, masked_deposit_array)
 
