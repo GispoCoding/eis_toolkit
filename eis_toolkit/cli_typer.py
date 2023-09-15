@@ -219,7 +219,7 @@ def extract_values_from_raster_cli(
     geodataframe = gpd.read_file(geometries)
 
     with rasterio.open(input_raster) as raster:
-        df = extract_values_from_raster(raster=[raster], geodataframe=geodataframe)
+        df = extract_values_from_raster(raster_list=[raster], geodataframe=geodataframe)
 
     df.to_csv(output_vector)
 
