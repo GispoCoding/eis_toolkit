@@ -411,6 +411,8 @@ def rasterize_cli(
     if base_raster_profile_raster is not None:
         with rasterio.open(base_raster_profile_raster) as raster:
             base_raster_profile = raster.profile
+    else:
+        base_raster_profile = base_raster_profile_raster
 
     out_image, out_meta = rasterize_vector(
         geodataframe,
@@ -431,7 +433,7 @@ def rasterize_cli(
     )
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
+        dst.write(out_image, 1)
 
     typer.echo("Rasterizing completed")
     typer.echo(f"Writing raster to {output_raster}")
