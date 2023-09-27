@@ -97,7 +97,7 @@ def test_snap_case6_small_snap_raster_pixel_size():
     """
     # Resample snap raster to smaller pixel size than raster and write to local
     snap_raster = rasterio.open(snap_raster_path)
-    out_image, out_meta = resample(snap_raster, 3)
+    out_image, out_meta = resample(snap_raster, snap_raster.meta["transform"][0] / 3)
     with rasterio.open(small_snap_raster_path, "w", **out_meta) as dest:
         dest.write(out_image)
 
