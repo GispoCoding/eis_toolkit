@@ -23,7 +23,7 @@ def read_and_preprocess_evidence(raster: rasterio.io.DatasetReader, nodata: Opti
     return array
 
 
-def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray, laplace_smoothing: bool):
+def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray):
     """Calculate weights/metrics for given data."""
     A = np.sum(np.logical_and(deposits == 1, evidence == 1))
     B = np.sum(np.logical_and(deposits == 1, evidence == 0))
@@ -69,25 +69,35 @@ def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray, lapl
     return A, B, C, D, w_plus, s_w_plus, w_minus, s_w_minus, contrast, s_contrast, studentized_contrast
 
 
-def unique_weights(deposits: np.ndarray, evidence: np.ndarray, laplace_smoothing: bool) -> dict:
+def unique_weights(deposits: np.ndarray, evidence: np.ndarray) -> dict:
     """Calculate unique weights for each class."""
     classes = np.unique(evidence)
-    return {cls: calculate_metrics_for_class(deposits, evidence == cls, laplace_smoothing) for cls in classes}
+    return {cls: calculate_metrics_for_class(deposits, evidence == cls) for cls in classes}
 
 
-def cumulative_weights(
-    deposits: np.ndarray, evidence: np.ndarray, laplace_smoothing: bool, ascending: bool = True
-) -> dict:
+def cumulative_weights(deposits: np.ndarray, evidence: np.ndarray, ascending: bool = True) -> dict:
     """Calculate cumulative weights (ascending or descending) for each class."""
     classes = sorted(np.unique(evidence), reverse=not ascending)
     cumulative_classes = [classes[: i + 1] for i in range(len(classes))]
     return {
-        cls[i]: calculate_metrics_for_class(deposits, np.isin(evidence, cls), laplace_smoothing)
+        cls[i]: calculate_metrics_for_class(deposits, np.isin(evidence, cls))
         for i, cls in enumerate(cumulative_classes)
     }
 
 
 def reclassify_by_studentized_contrast(df: pd.DataFrame, studentized_contrast_threshold: Number) -> None:
+    """Create generalized classes based on the studentized contrast threhsold value."""
+    index = df.idxmax()["Contrast"]
+
+    if df.loc[index, "Studentized contrast"] < studentized_contrast_threshold:
+        raise Exception("Failed, studentized contrast is {}".format(df.loc[index, "Studentized contrast"]))
+
+    df["Generalized class"] = 1
+    for i in range(0, index + 1):
+        df.loc[i, "Generalized class"] = 2
+
+
+def reclassify_by_studentized_contrast_alternative(df: pd.DataFrame, studentized_contrast_threshold: Number) -> None:
     """Create generalized classes based on the studentized contrast threhsold value."""
     df["Generalized class"] = np.where(df["Studentized contrast"] >= studentized_contrast_threshold, 2, 1)
 
@@ -99,54 +109,41 @@ def reclassify_by_studentized_contrast(df: pd.DataFrame, studentized_contrast_th
         raise ValueError("Reclassification failed: 'Favorable' class (Class 2) doesn't exist.")
 
 
-def reclassify_by_studentized_contrast3(df: pd.DataFrame, studentized_contrast_threshold: Number) -> None:
-    """Create generalized classes based on the studentized contrast threhsold value."""
-    index = df.idxmax()["Contrast"]
+def calculate_generalized_weights(df: pd.DataFrame, deposits) -> None:
+    """
+    Calculate generalized weights.
 
-    if df.loc[index, "Studentized contrast"] < studentized_contrast_threshold:
-        raise Exception("Failed, studentized contrast is {}".format(df.loc[index, "Studentized contrast"]))
+    Implementation for generalized weights that uses the SAME logic than the original implementation.
+    """
+    total_deposits = np.sum(deposits == 1)
+    total_no_deposits = deposits.size - total_deposits
 
-    df["Generalized class"] = 1
-    for i in range(0, index + 1):
-        df.loc[i, "Generalized class"] = 2
+    # Class 2
+    class_2_max_index = df.idxmax()["Contrast"]
+    class_2_count = df.loc[class_2_max_index, "Count"]
+    class_2_point_count = df.loc[class_2_max_index, "Point Count"]
 
-    # df["Generalized class"] = np.where(df["Studentized contrast"] >= studentized_contrast_threshold, 2, 1)
+    class_2_w_gen = np.log(class_2_point_count / total_deposits) - np.log(
+        (class_2_count - class_2_point_count) / total_no_deposits
+    )
+    clas_2_s_wpls_gen = np.sqrt((1 / class_2_point_count) + (1 / (class_2_count - class_2_point_count)))
 
-    # # Check if both classes are present
-    # unique_classes = df["Generalized class"].unique()
-    # if 1 not in unique_classes:
-    #     raise ValueError("Reclassification failed: 'Unfavorable' class (Class 1) doesn't exist.")
-    # elif 2 not in unique_classes:
-    #     raise ValueError("Reclassification failed: 'Favorable' class (Class 2) doesn't exist.")
+    df["Generalized WPlus"] = round(class_2_w_gen, 4)
+    df["Generalized S_WPlus"] = round(clas_2_s_wpls_gen, 4)
 
+    # Class 1
+    class_1_count = df.loc[len(df.index) - 1, "Count"] - class_2_count
+    class_1_point_count = df.loc[len(df.index) - 1, "Point Count"] - class_2_point_count
 
-def reclassify_by_studentized_contrast2(df: pd.DataFrame, studentized_contrast_threshold: Number) -> None:
-    """Create generalized classes based on the studentized contrast threshold value."""
-
-    # Sort the DataFrame based on the 'Contrast' value
-    df.sort_values(by="Contrast", ascending=False, inplace=True)
-
-    # Initialize a flag to check if we have reached the highest contrast class that meets the threshold
-    highest_contrast_reached = False
-
-    for idx, row in df.iterrows():
-        if row["Studentized contrast"] >= studentized_contrast_threshold and not highest_contrast_reached:
-            df.at[idx, "Generalized class"] = 2
-            highest_contrast_reached = True
-        elif highest_contrast_reached:
-            df.at[idx, "Generalized class"] = 2
-        else:
-            df.at[idx, "Generalized class"] = 1
-
-    # Check if both classes are present
-    unique_classes = df["Generalized class"].unique()
-    if 1 not in unique_classes:
-        raise ValueError("Reclassification failed: 'Unfavorable' class (Class 1) doesn't exist.")
-    elif 2 not in unique_classes:
-        raise ValueError("Reclassification failed: 'Favorable' class (Class 2) doesn't exist.")
+    class_1_w_gen = np.log(class_1_point_count / total_deposits) - np.log(
+        (class_1_count - class_1_point_count) / total_no_deposits
+    )
+    clas_1_s_wpls_gen = np.sqrt((1 / class_1_point_count) + (1 / (class_1_count - class_1_point_count)))
+    df.loc[df["Generalized class"] == 1, "Generalized WPlus"] = round(class_1_w_gen, 4)
+    df.loc[df["Generalized class"] == 1, "Generalized S_WPlus"] = round(clas_1_s_wpls_gen, 4)
 
 
-def calculate_generalized_weights(weights_df: pd.DataFrame) -> None:
+def calculate_generalized_weights_alternative(weights_df: pd.DataFrame) -> None:
     """
     Calculate generalized weights.
 
@@ -162,36 +159,6 @@ def calculate_generalized_weights(weights_df: pd.DataFrame) -> None:
         total_count = subset_df["Count"].sum()
 
         generalized_weights.append(round(weighted_w_plus_sum / total_count, 4) if total_count else 0)
-
-    weights_df["Generalized WPlus"] = generalized_weights
-    weights_df["Generalized S_WPlus"] = generalized_s_weights
-
-
-def calculate_generalized_weights_alternative(weights_df: pd.DataFrame, deposits) -> None:
-    """
-    Calculate generalized weights.
-
-    Implementation for generalized weights that uses the SAME logic as the original implementation.
-    """
-    total_deposits = np.sum(deposits == 1)
-    total_no_deposits = deposits.size - total_deposits
-
-    generalized_weights = []
-    generalized_s_weights = []
-
-    for gen_cls in weights_df["Generalized class"].tolist():
-        subset_df = weights_df[weights_df["Generalized class"] == gen_cls]
-
-        cumulative_deposit_count = subset_df["Point Count"].sum()
-        cumulative_no_deposit_count = subset_df["Count"].sum() - cumulative_deposit_count
-
-        W_Gen = np.log(cumulative_deposit_count / total_deposits) - np.log(
-            cumulative_no_deposit_count / total_no_deposits
-        )
-        s_wpls_gen = np.sqrt((1 / cumulative_deposit_count) + (1 / cumulative_no_deposit_count))
-
-        generalized_weights.append(round(W_Gen, 4))
-        generalized_s_weights.append(round(s_wpls_gen, 4))
 
     weights_df["Generalized WPlus"] = generalized_weights
     weights_df["Generalized S_WPlus"] = generalized_s_weights
@@ -218,7 +185,6 @@ def weights_of_evidence(
     resolution: Optional[float] = None,
     weights_type: Literal["unique", "ascending", "descending"] = "unique",
     studentized_contrast_threshold: Number = 2,
-    laplace_smoothing: bool = False,
     rasters_to_generate: Union[Sequence[str], str, None] = None,
 ) -> Tuple[pd.DataFrame, dict, dict]:
     """
@@ -234,8 +200,6 @@ def weights_of_evidence(
         studentized_contrast_threshold: Studentized contrast threshold value used to reclassify all classes.
             Reclassification is used when creating generalized rasters with cumulative weight type selection.
             Not needed if weights_type is 'unique'. Defaults to 2.
-        laplace_smoothing: If smoothing is applied in logarithmic calculations. If no smoothing is applied,
-            the problematic cases result into weight value of 0 for the class. Defaults to False.
         rasters_to_generate: Rasters to generate from the computed weight metrics. All column names
             in the produced weights_df are valid choices. If None, defaults to ["Class", "WPlus", "S_WPlus"]
             for "unique" weights_type or ["Class", "WPlus", "S_WPlus", "Generalized WPlus", "Generalized S_WPlus"]
@@ -272,15 +236,11 @@ def weights_of_evidence(
 
     # 2. WofE calculations
     if weights_type == "unique":
-        wofe_weights = unique_weights(masked_deposit_array, masked_evidence_array, laplace_smoothing)
+        wofe_weights = unique_weights(masked_deposit_array, masked_evidence_array)
     elif weights_type == "ascending":
-        wofe_weights = cumulative_weights(
-            masked_deposit_array, masked_evidence_array, laplace_smoothing, ascending=True
-        )
+        wofe_weights = cumulative_weights(masked_deposit_array, masked_evidence_array, ascending=True)
     elif weights_type == "descending":
-        wofe_weights = cumulative_weights(
-            masked_deposit_array, masked_evidence_array, laplace_smoothing, ascending=False
-        )
+        wofe_weights = cumulative_weights(masked_deposit_array, masked_evidence_array, ascending=False)
 
     # 3. Create dataframe based on calculated metrics
     df_entries = []
@@ -307,7 +267,7 @@ def weights_of_evidence(
     if weights_type != "unique":
         reclassify_by_studentized_contrast(weights_df, studentized_contrast_threshold)
         # calculate_generalized_weights(weights_df)
-        calculate_generalized_weights_alternative(weights_df, masked_deposit_array)
+        calculate_generalized_weights(weights_df, masked_deposit_array)
 
     metrics_to_rasters = rasters_to_generate
     if metrics_to_rasters is None:
