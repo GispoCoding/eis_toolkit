@@ -1,18 +1,18 @@
 from numbers import Number
-from typing import List, Literal, Optional, Sequence, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio
+from beartype import beartype
+from beartype.typing import List, Literal, Optional, Sequence, Tuple, Union
 
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
-
-# from beartype import beartype
 
 
 def read_and_preprocess_evidence(raster: rasterio.io.DatasetReader, nodata: Optional[Number] = None) -> np.ndarray:
     """Read raster data and handle NoData values."""
+
     array = np.array(raster.read(1), dtype=np.float32)
 
     if nodata is not None:
@@ -23,7 +23,7 @@ def read_and_preprocess_evidence(raster: rasterio.io.DatasetReader, nodata: Opti
     return array
 
 
-def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray):
+def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray) -> tuple:
     """Calculate weights/metrics for given data."""
     A = np.sum(np.logical_and(deposits == 1, evidence == 1))
     B = np.sum(np.logical_and(deposits == 1, evidence == 0))
@@ -120,27 +120,27 @@ def calculate_generalized_weights(df: pd.DataFrame, deposits) -> None:
 
     # Class 2
     class_2_max_index = df.idxmax()["Contrast"]
-    class_2_count = df.loc[class_2_max_index, "Count"]
-    class_2_point_count = df.loc[class_2_max_index, "Point Count"]
+    class_2_count = df.loc[class_2_max_index, "Pixel count"]
+    class_2_point_count = df.loc[class_2_max_index, "Deposit count"]
 
     class_2_w_gen = np.log(class_2_point_count / total_deposits) - np.log(
         (class_2_count - class_2_point_count) / total_no_deposits
     )
     clas_2_s_wpls_gen = np.sqrt((1 / class_2_point_count) + (1 / (class_2_count - class_2_point_count)))
 
-    df["Generalized WPlus"] = round(class_2_w_gen, 4)
-    df["Generalized S_WPlus"] = round(clas_2_s_wpls_gen, 4)
+    df["Generalized W+"] = round(class_2_w_gen, 4)
+    df["Generalized S_W+"] = round(clas_2_s_wpls_gen, 4)
 
     # Class 1
-    class_1_count = df.loc[len(df.index) - 1, "Count"] - class_2_count
-    class_1_point_count = df.loc[len(df.index) - 1, "Point Count"] - class_2_point_count
+    class_1_count = df.loc[len(df.index) - 1, "Pixel count"] - class_2_count
+    class_1_point_count = df.loc[len(df.index) - 1, "Deposit count"] - class_2_point_count
 
     class_1_w_gen = np.log(class_1_point_count / total_deposits) - np.log(
         (class_1_count - class_1_point_count) / total_no_deposits
     )
     clas_1_s_wpls_gen = np.sqrt((1 / class_1_point_count) + (1 / (class_1_count - class_1_point_count)))
-    df.loc[df["Generalized class"] == 1, "Generalized WPlus"] = round(class_1_w_gen, 4)
-    df.loc[df["Generalized class"] == 1, "Generalized S_WPlus"] = round(clas_1_s_wpls_gen, 4)
+    df.loc[df["Generalized class"] == 1, "Generalized W+"] = round(class_1_w_gen, 4)
+    df.loc[df["Generalized class"] == 1, "Generalized S_W+"] = round(clas_1_s_wpls_gen, 4)
 
 
 def calculate_generalized_weights_alternative(weights_df: pd.DataFrame) -> None:
@@ -155,17 +155,17 @@ def calculate_generalized_weights_alternative(weights_df: pd.DataFrame) -> None:
     for gen_cls in weights_df["Generalized class"].tolist():
         subset_df = weights_df[weights_df["Generalized class"] == gen_cls]
 
-        weighted_w_plus_sum = sum(subset_df["WPlus"] * subset_df["Count"])
-        total_count = subset_df["Count"].sum()
+        weighted_w_plus_sum = sum(subset_df["WPlus"] * subset_df["Pixel count"])
+        total_count = subset_df["Deposit count"].sum()
 
         generalized_weights.append(round(weighted_w_plus_sum / total_count, 4) if total_count else 0)
 
-    weights_df["Generalized WPlus"] = generalized_weights
-    weights_df["Generalized S_WPlus"] = generalized_s_weights
+    weights_df["Generalized W+"] = generalized_weights
+    weights_df["Generalized S_W+"] = generalized_s_weights
 
 
 def generate_rasters_from_metrics(
-    evidence: np.ndarray, df: pd.DataFrame, metrics_to_include: List[str] = ["Class", "WPlus", "S_WPlus"]
+    evidence: np.ndarray, df: pd.DataFrame, metrics_to_include: List[str] = ["Class", "W+", "S_W+"]
 ) -> dict:
     """Generate rasters for defined metrics based."""
     raster_dict = {}
@@ -178,11 +178,11 @@ def generate_rasters_from_metrics(
     return raster_dict
 
 
-# @beartype
+@beartype
 def weights_of_evidence(
     evidential_raster: rasterio.io.DatasetReader,
     deposits: gpd.GeoDataFrame,
-    resolution: Optional[float] = None,
+    raster_nodata: Optional[Number] = None,
     weights_type: Literal["unique", "ascending", "descending"] = "unique",
     studentized_contrast_threshold: Number = 2,
     rasters_to_generate: Union[Sequence[str], str, None] = None,
@@ -193,16 +193,16 @@ def weights_of_evidence(
     Args:
         evidential_raster: The evidential raster.
         deposits: Vector data representing the mineral deposits or occurences point data.
-        resolution: The resolution i.e. cell size of the output raster.
-            Optional parameter, if not given, resolution of evidential raster is used.
+        raster_nodata: If nodata value of raster is wanted to specify manually. Optional parameter, defaults to None
+            (nodata from raster metadata is used).
         weights_type: Accepted values are 'unique' for unique weights, 'ascending' for cumulative ascending weights,
             'descending' for cumulative descending weights. Defaults to 'unique'.
         studentized_contrast_threshold: Studentized contrast threshold value used to reclassify all classes.
             Reclassification is used when creating generalized rasters with cumulative weight type selection.
             Not needed if weights_type is 'unique'. Defaults to 2.
         rasters_to_generate: Rasters to generate from the computed weight metrics. All column names
-            in the produced weights_df are valid choices. If None, defaults to ["Class", "WPlus", "S_WPlus"]
-            for "unique" weights_type or ["Class", "WPlus", "S_WPlus", "Generalized WPlus", "Generalized S_WPlus"]
+            in the produced weights_df are valid choices. If None, defaults to ["Class", "W+", "S_W+]
+            for "unique" weights_type or ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"]
             for the cumulative weight types.
 
     Returns:
@@ -214,7 +214,7 @@ def weights_of_evidence(
     # 1. Data preprocessing
 
     # Read evidence raster
-    evidence_array = read_and_preprocess_evidence(evidential_raster)
+    evidence_array = read_and_preprocess_evidence(evidential_raster, raster_nodata)
 
     # Extract raster metadata
     raster_meta = evidential_raster.meta
@@ -223,11 +223,6 @@ def weights_of_evidence(
     deposit_array, _ = rasterize_vector(
         geodataframe=deposits, default_value=1.0, base_raster_profile=raster_meta, fill_value=0.0
     )
-
-    # Resample
-    if resolution is not None:
-        # TODO
-        pass
 
     # Mask NaN out of the array
     nodata_mask = np.isnan(evidence_array)
@@ -250,12 +245,12 @@ def weights_of_evidence(
         df_entries.append(
             {
                 "Class": cls,
-                "Count": A + C,
-                "Point Count": A,
-                "WPlus": w_plus,
-                "S_WPlus": s_w_plus,
-                "WMinus": w_minus,
-                "S_WMinus": s_w_minus,
+                "Pixel count": A + C,
+                "Deposit count": A,
+                "W+": w_plus,
+                "S_W+": s_w_plus,
+                "W-": w_minus,
+                "S_W-": s_w_minus,
                 "Contrast": contrast,
                 "S_Contrast": s_contrast,
                 "Studentized contrast": studentized_contrast,
@@ -271,9 +266,9 @@ def weights_of_evidence(
 
     metrics_to_rasters = rasters_to_generate
     if metrics_to_rasters is None:
-        metrics_to_rasters = ["Class", "WPlus", "S_WPlus"]
+        metrics_to_rasters = ["Class", "W+", "S_W+"]
         if weights_type != "unique":
-            metrics_to_rasters += ["Generalized WPlus", "Generalized S_WPlus"]
+            metrics_to_rasters += ["Generalized W+", "Generalized S_W+"]
 
     # 5. After the wofe_weights computation in the weights_of_evidence function
     raster_dict = generate_rasters_from_metrics(evidence_array, weights_df, metrics_to_rasters)
