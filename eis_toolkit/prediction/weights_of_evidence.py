@@ -10,7 +10,7 @@ from beartype.typing import List, Literal, Optional, Sequence, Tuple, Union
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
 
-def read_and_preprocess_evidence(raster: rasterio.io.DatasetReader, nodata: Optional[Number] = None) -> np.ndarray:
+def _read_and_preprocess_evidence(raster: rasterio.io.DatasetReader, nodata: Optional[Number] = None) -> np.ndarray:
     """Read raster data and handle NoData values."""
 
     array = np.array(raster.read(1), dtype=np.float32)
@@ -23,7 +23,7 @@ def read_and_preprocess_evidence(raster: rasterio.io.DatasetReader, nodata: Opti
     return array
 
 
-def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray) -> tuple:
+def _calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray) -> tuple:
     """Calculate weights/metrics for given data."""
     A = np.sum(np.logical_and(deposits == 1, evidence == 1))
     B = np.sum(np.logical_and(deposits == 1, evidence == 0))
@@ -69,23 +69,23 @@ def calculate_metrics_for_class(deposits: np.ndarray, evidence: np.ndarray) -> t
     return A, B, C, D, w_plus, s_w_plus, w_minus, s_w_minus, contrast, s_contrast, studentized_contrast
 
 
-def unique_weights(deposits: np.ndarray, evidence: np.ndarray) -> dict:
+def _unique_weights(deposits: np.ndarray, evidence: np.ndarray) -> dict:
     """Calculate unique weights for each class."""
     classes = np.unique(evidence)
-    return {cls: calculate_metrics_for_class(deposits, evidence == cls) for cls in classes}
+    return {cls: _calculate_metrics_for_class(deposits, evidence == cls) for cls in classes}
 
 
-def cumulative_weights(deposits: np.ndarray, evidence: np.ndarray, ascending: bool = True) -> dict:
+def _cumulative_weights(deposits: np.ndarray, evidence: np.ndarray, ascending: bool = True) -> dict:
     """Calculate cumulative weights (ascending or descending) for each class."""
     classes = sorted(np.unique(evidence), reverse=not ascending)
     cumulative_classes = [classes[: i + 1] for i in range(len(classes))]
     return {
-        cls[i]: calculate_metrics_for_class(deposits, np.isin(evidence, cls))
+        cls[i]: _calculate_metrics_for_class(deposits, np.isin(evidence, cls))
         for i, cls in enumerate(cumulative_classes)
     }
 
 
-def reclassify_by_studentized_contrast(df: pd.DataFrame, studentized_contrast_threshold: Number) -> None:
+def _reclassify_by_studentized_contrast(df: pd.DataFrame, studentized_contrast_threshold: Number) -> None:
     """Create generalized classes based on the studentized contrast threhsold value."""
     index = df.idxmax()["Contrast"]
 
@@ -97,7 +97,7 @@ def reclassify_by_studentized_contrast(df: pd.DataFrame, studentized_contrast_th
         df.loc[i, "Generalized class"] = 2
 
 
-def reclassify_by_studentized_contrast_alternative(df: pd.DataFrame, studentized_contrast_threshold: Number) -> None:
+def _reclassify_by_studentized_contrast_alternative(df: pd.DataFrame, studentized_contrast_threshold: Number) -> None:
     """Create generalized classes based on the studentized contrast threhsold value."""
     df["Generalized class"] = np.where(df["Studentized contrast"] >= studentized_contrast_threshold, 2, 1)
 
@@ -109,7 +109,7 @@ def reclassify_by_studentized_contrast_alternative(df: pd.DataFrame, studentized
         raise ValueError("Reclassification failed: 'Favorable' class (Class 2) doesn't exist.")
 
 
-def calculate_generalized_weights(df: pd.DataFrame, deposits) -> None:
+def _calculate_generalized_weights(df: pd.DataFrame, deposits) -> None:
     """
     Calculate generalized weights.
 
@@ -143,7 +143,7 @@ def calculate_generalized_weights(df: pd.DataFrame, deposits) -> None:
     df.loc[df["Generalized class"] == 1, "Generalized S_W+"] = round(clas_1_s_wpls_gen, 4)
 
 
-def calculate_generalized_weights_alternative(weights_df: pd.DataFrame) -> None:
+def _calculate_generalized_weights_alternative(weights_df: pd.DataFrame) -> None:
     """
     Calculate generalized weights.
 
@@ -164,7 +164,7 @@ def calculate_generalized_weights_alternative(weights_df: pd.DataFrame) -> None:
     weights_df["Generalized S_W+"] = generalized_s_weights
 
 
-def generate_rasters_from_metrics(
+def _generate_rasters_from_metrics(
     evidence: np.ndarray, df: pd.DataFrame, metrics_to_include: List[str] = ["Class", "W+", "S_W+"]
 ) -> dict:
     """Generate rasters for defined metrics based."""
@@ -214,7 +214,7 @@ def weights_of_evidence(
     # 1. Data preprocessing
 
     # Read evidence raster
-    evidence_array = read_and_preprocess_evidence(evidential_raster, raster_nodata)
+    evidence_array = _read_and_preprocess_evidence(evidential_raster, raster_nodata)
 
     # Extract raster metadata
     raster_meta = evidential_raster.meta
@@ -231,11 +231,11 @@ def weights_of_evidence(
 
     # 2. WofE calculations
     if weights_type == "unique":
-        wofe_weights = unique_weights(masked_deposit_array, masked_evidence_array)
+        wofe_weights = _unique_weights(masked_deposit_array, masked_evidence_array)
     elif weights_type == "ascending":
-        wofe_weights = cumulative_weights(masked_deposit_array, masked_evidence_array, ascending=True)
+        wofe_weights = _cumulative_weights(masked_deposit_array, masked_evidence_array, ascending=True)
     elif weights_type == "descending":
-        wofe_weights = cumulative_weights(masked_deposit_array, masked_evidence_array, ascending=False)
+        wofe_weights = _cumulative_weights(masked_deposit_array, masked_evidence_array, ascending=False)
 
     # 3. Create dataframe based on calculated metrics
     df_entries = []
@@ -260,9 +260,9 @@ def weights_of_evidence(
 
     # 4. If we use cumulative weights type, reclassify and calculate generalized weights
     if weights_type != "unique":
-        reclassify_by_studentized_contrast(weights_df, studentized_contrast_threshold)
+        _reclassify_by_studentized_contrast(weights_df, studentized_contrast_threshold)
         # calculate_generalized_weights(weights_df)
-        calculate_generalized_weights(weights_df, masked_deposit_array)
+        _calculate_generalized_weights(weights_df, masked_deposit_array)
 
     metrics_to_rasters = rasters_to_generate
     if metrics_to_rasters is None:
@@ -271,6 +271,6 @@ def weights_of_evidence(
             metrics_to_rasters += ["Generalized W+", "Generalized S_W+"]
 
     # 5. After the wofe_weights computation in the weights_of_evidence function
-    raster_dict = generate_rasters_from_metrics(evidence_array, weights_df, metrics_to_rasters)
+    raster_dict = _generate_rasters_from_metrics(evidence_array, weights_df, metrics_to_rasters)
 
     return weights_df, raster_dict, raster_meta
