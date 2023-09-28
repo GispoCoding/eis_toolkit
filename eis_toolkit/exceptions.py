@@ -2,6 +2,10 @@ class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
 
 
+class ClassificationFailedException(Exception):
+    """Exception error class for classification failures."""
+
+
 class EmptyDataFrameException(Exception):
     """Exception error class raised if the dataframe is empty."""
 
@@ -46,16 +50,12 @@ class InvalidWktFormatException(Exception):
     """Exception error for invalid WKT format."""
 
 
-class InvalidColumnIndexException(Exception):
-    """Exception error for index out of range."""
+class MatchingCrsException(Exception):
+    """Exception error class for CRS matches."""
 
 
-class UnFavorableClassDoesntExistException(Exception):
-    """Exception error class for failure to generalize classes using the given studentised contrast threshold value. Class 1 (unfavorable class)  doesn't exist"""
-
-
-class FavorableClassDoesntExistException(Exception):
-    """Exception error class for failure to generalize classes using the given studentised contrast threshold value. Class 2 (favorable class)  doesn't exist"""
+class MatchingRasterGridException(Exception):
+    """Exception error class for raster grid matches."""
 
 
 class NotApplicableGeometryTypeException(Exception):

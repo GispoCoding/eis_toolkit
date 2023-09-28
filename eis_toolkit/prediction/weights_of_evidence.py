@@ -7,6 +7,7 @@ import rasterio
 from beartype import beartype
 from beartype.typing import List, Literal, Optional, Sequence, Tuple, Union
 
+from eis_toolkit import exceptions
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
 
@@ -89,8 +90,12 @@ def _reclassify_by_studentized_contrast(df: pd.DataFrame, studentized_contrast_t
     """Create generalized classes based on the studentized contrast threhsold value."""
     index = df.idxmax()["Contrast"]
 
-    if df.loc[index, "Studentized contrast"] < studentized_contrast_threshold:
-        raise Exception("Failed, studentized contrast is {}".format(df.loc[index, "Studentized contrast"]))
+    if df.loc[index, "Studentized contrast"] < studentized_contrast_threshold or index == len(df.index) - 1:
+        raise exceptions.ClassificationFailedException(
+            "Failed to create generalized classes with given studentized contrast treshold ({})".format(
+                df.loc[index, "Studentized contrast"]
+            )
+        )
 
     df["Generalized class"] = 1
     for i in range(0, index + 1):
