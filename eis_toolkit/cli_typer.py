@@ -601,7 +601,28 @@ def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPT
 
 
 # BINARIZE
-# TODO
+@app.command()
+def binarize_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    threshold: float = typer.Option(),
+):
+    """
+    Binarize data based on a given threshold.
+
+    Replaces values less or equal threshold with 0.
+    Replaces values greater than the threshold with 1.
+    """
+    from eis_toolkit.transformations.binarize import binarize
+
+    with rasterio.open(input_raster) as raster:
+        out_image, out_meta, _ = binarize(raster=raster, thresholds=[threshold])
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image)
+
+    typer.echo("Binarizing completed")
+    typer.echo(f"Writing raster to {output_raster}")
 
 
 # CLIPPING (PROBLEMATIC NAME, CHANGE!)
