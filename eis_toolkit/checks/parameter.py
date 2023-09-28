@@ -58,9 +58,9 @@ def check_parameter_length(selection: Sequence[int], parameter: Sequence[Any]) -
     return len(parameter) == 1 or len(parameter) == len(selection)
 
 
+@beartype
 def check_minmax_position(parameter: tuple) -> bool:  # type: ignore[no-untyped-def]
-    """
-    Check if parameter maximum value > parameter minimum value.
+    """Check if parameter maximum value > parameter minimum value.
 
     Args:
         parameter: Tuple containing parameter values for min and max.

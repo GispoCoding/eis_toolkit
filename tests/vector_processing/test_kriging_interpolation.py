@@ -15,19 +15,19 @@ data = np.hstack((x, y, z))
 df = pd.DataFrame(data, columns=["x", "y", "value"])
 gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df["x"], df["y"]))
 target_column = "value"
-resolution = (10, 10)
-extent = (0, 5, 0, 5)
+resolution = (0.5, 0.5)
+extent = (0, 4.5, 0, 4.5)
+expected_shape = (10, 10)
 
 
 def test_ordinary_kriging_output():
     """Test that ordinary kriging output has correct shape and values."""
     z_interpolated, _ = kriging(data=gdf, target_column=target_column, resolution=resolution, extent=extent)
-    expected_shape = resolution
-    expected_value_first_pixel = 0.4831651
-    expected_value_last_pixel = 1.51876801
+    expected_value_first_pixel = 0.42168577
+    expected_value_last_pixel = 1.58154908
     assert z_interpolated.shape == expected_shape
     assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
-    assert round(z_interpolated[9][9], 8) == expected_value_last_pixel
+    assert round(z_interpolated[-1][-1], 8) == expected_value_last_pixel
 
 
 def test_universal_kriging_output():
@@ -35,12 +35,21 @@ def test_universal_kriging_output():
     z_interpolated, _ = kriging(
         data=gdf, target_column=target_column, resolution=resolution, extent=extent, method="universal"
     )
-    expected_shape = resolution
     expected_value_first_pixel = -0.21513566
-    expected_value_last_pixel = 1.86445049
+    expected_value_last_pixel = 1.71615605
     assert z_interpolated.shape == expected_shape
     assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
-    assert round(z_interpolated[9][9], 8) == expected_value_last_pixel
+    assert round(z_interpolated[-1][-1], 8) == expected_value_last_pixel
+
+
+def test_output_without_extent():
+    """Test that extent computation works as expected."""
+    z_interpolated, _ = kriging(data=gdf, target_column=target_column, resolution=resolution)
+    expected_value_first_pixel = 0.40864907
+    expected_value_last_pixel = 1.53723812
+    assert z_interpolated.shape == (11, 7)
+    assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
+    assert round(z_interpolated[-1][-1], 8) == expected_value_last_pixel
 
 
 def test_empty_geodataframe():
@@ -70,20 +79,19 @@ def test_invalid_variogram_model():
         )
 
 
-def test_invalid_method():
-    """Test that invalid kriging method raises the correct exception."""
+def test_invalid_coordinates_type():
+    """Test that invalid coordinates type raises the correct exception."""
     with pytest.raises(BeartypeCallHintParamViolation):
-        kriging(data=gdf, target_column=target_column, resolution=resolution, extent=extent, method="invalid_method")
-
-
-def test_invalid_drift_term():
-    """Test that invalid drift term raises the correct exception."""
-    with pytest.raises(InvalidParameterValueException):
         kriging(
             data=gdf,
             target_column=target_column,
             resolution=resolution,
             extent=extent,
-            method="universal",
-            drift_terms=["regional_linear", "invalid_drift_term"],
+            coordinates_type="invalid_coordinates_type",
         )
+
+
+def test_invalid_method():
+    """Test that invalid kriging method raises the correct exception."""
+    with pytest.raises(BeartypeCallHintParamViolation):
+        kriging(data=gdf, target_column=target_column, resolution=resolution, extent=extent, method="invalid_method")
