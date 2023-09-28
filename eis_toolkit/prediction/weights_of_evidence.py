@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 from beartype import beartype
-from beartype.typing import List, Literal, Optional, Sequence, Tuple, Union
+from beartype.typing import List, Literal, Optional, Sequence, Tuple
 
 from eis_toolkit import exceptions
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
@@ -102,18 +102,6 @@ def _reclassify_by_studentized_contrast(df: pd.DataFrame, studentized_contrast_t
         df.loc[i, "Generalized class"] = 2
 
 
-def _reclassify_by_studentized_contrast_alternative(df: pd.DataFrame, studentized_contrast_threshold: Number) -> None:
-    """Create generalized classes based on the studentized contrast threhsold value."""
-    df["Generalized class"] = np.where(df["Studentized contrast"] >= studentized_contrast_threshold, 2, 1)
-
-    # Check if both classes are present
-    unique_classes = df["Generalized class"].unique()
-    if 1 not in unique_classes:
-        raise ValueError("Reclassification failed: 'Unfavorable' class (Class 1) doesn't exist.")
-    elif 2 not in unique_classes:
-        raise ValueError("Reclassification failed: 'Favorable' class (Class 2) doesn't exist.")
-
-
 def _calculate_generalized_weights(df: pd.DataFrame, deposits) -> None:
     """
     Calculate generalized weights.
@@ -148,27 +136,6 @@ def _calculate_generalized_weights(df: pd.DataFrame, deposits) -> None:
     df.loc[df["Generalized class"] == 1, "Generalized S_W+"] = round(clas_1_s_wpls_gen, 4)
 
 
-def _calculate_generalized_weights_alternative(weights_df: pd.DataFrame) -> None:
-    """
-    Calculate generalized weights.
-
-    Implementation for generalized weights that uses a DIFFERENT logic than the original implementation.
-    """
-    generalized_weights = []
-    generalized_s_weights = []
-
-    for gen_cls in weights_df["Generalized class"].tolist():
-        subset_df = weights_df[weights_df["Generalized class"] == gen_cls]
-
-        weighted_w_plus_sum = sum(subset_df["WPlus"] * subset_df["Pixel count"])
-        total_count = subset_df["Deposit count"].sum()
-
-        generalized_weights.append(round(weighted_w_plus_sum / total_count, 4) if total_count else 0)
-
-    weights_df["Generalized W+"] = generalized_weights
-    weights_df["Generalized S_W+"] = generalized_s_weights
-
-
 def _generate_rasters_from_metrics(
     evidence: np.ndarray, df: pd.DataFrame, metrics_to_include: List[str] = ["Class", "W+", "S_W+"]
 ) -> dict:
@@ -190,7 +157,7 @@ def weights_of_evidence(
     raster_nodata: Optional[Number] = None,
     weights_type: Literal["unique", "ascending", "descending"] = "unique",
     studentized_contrast_threshold: Number = 2,
-    rasters_to_generate: Union[Sequence[str], str, None] = None,
+    rasters_to_generate: Sequence[str] = ["Class", "W+", "S_W+"],
 ) -> Tuple[pd.DataFrame, dict, dict]:
     """
     Calculate weights of spatial associations.
@@ -206,8 +173,8 @@ def weights_of_evidence(
             Reclassification is used when creating generalized rasters with cumulative weight type selection.
             Not needed if weights_type is 'unique'. Defaults to 2.
         rasters_to_generate: Rasters to generate from the computed weight metrics. All column names
-            in the produced weights_df are valid choices. If None, defaults to ["Class", "W+", "S_W+]
-            for "unique" weights_type or ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"]
+            in the produced weights_df are valid choices. Defaults to ["Class", "W+", "S_W+]
+            for "unique" weights_type and ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"]
             for the cumulative weight types.
 
     Returns:
@@ -215,13 +182,27 @@ def weights_of_evidence(
         Dictionary of output raster arrays.
         Raster metadata.
     """
+    out_df_col_names = [
+        "Class",
+        "Pixel count",
+        "Deposit count",
+        "W+",
+        "S_W+",
+        "W-",
+        "S_W-",
+        "Contrast",
+        "S_Contrast",
+        "Studentized contrast",
+    ]
+    if rasters_to_generate is not None and not all(col_name in rasters_to_generate for col_name in out_df_col_names):
+        raise exceptions.InvalidColumnException("Rasters to generate list contains metrics / column names.")
+
+    metrics_to_rasters = rasters_to_generate
+    if weights_type != "unique" and rasters_to_generate == ["Class", "W+", "S_W+"]:
+        metrics_to_rasters += ["Generalized W+", "Generalized S_W+"]
 
     # 1. Data preprocessing
-
-    # Read evidence raster
     evidence_array = _read_and_preprocess_evidence(evidential_raster, raster_nodata)
-
-    # Extract raster metadata
     raster_meta = evidential_raster.meta
 
     # Rasterize deposits
@@ -266,14 +247,7 @@ def weights_of_evidence(
     # 4. If we use cumulative weights type, reclassify and calculate generalized weights
     if weights_type != "unique":
         _reclassify_by_studentized_contrast(weights_df, studentized_contrast_threshold)
-        # calculate_generalized_weights(weights_df)
         _calculate_generalized_weights(weights_df, masked_deposit_array)
-
-    metrics_to_rasters = rasters_to_generate
-    if metrics_to_rasters is None:
-        metrics_to_rasters = ["Class", "W+", "S_W+"]
-        if weights_type != "unique":
-            metrics_to_rasters += ["Generalized W+", "Generalized S_W+"]
 
     # 5. After the wofe_weights computation in the weights_of_evidence function
     raster_dict = _generate_rasters_from_metrics(evidence_array, weights_df, metrics_to_rasters)
