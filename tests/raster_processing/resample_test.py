@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 import rasterio
 from rasterio import Affine
@@ -12,18 +11,16 @@ from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 def test_resample():
     """Test that resample function works as intended."""
     with rasterio.open(SMALL_RASTER_PATH) as raster:
-        upscale_factor = 2
-        _, resampled_meta = resample(raster, upscale_factor, resampling_method=Resampling.bilinear)
+        target_resolution = 6
+        _, resampled_meta = resample(raster, target_resolution, resampling_method=Resampling.bilinear)
 
         assert resampled_meta["crs"] == raster.meta["crs"]
-        assert np.array_equal(raster.width * upscale_factor, resampled_meta["width"])
-        assert np.array_equal(raster.height * upscale_factor, resampled_meta["height"])
         assert resampled_meta["transform"] == Affine(
-            raster.transform.a / upscale_factor,
+            target_resolution,
             raster.transform.b,
             raster.transform.c,
             raster.transform.d,
-            raster.transform.e / upscale_factor,
+            -target_resolution,
             raster.transform.f,
         )
 
@@ -32,4 +29,4 @@ def test_resample_negative_upscale_factor():
     """Tests that invalid parameter value for resampling method raises the correct exception."""
     with pytest.raises(NumericValueSignException):
         with rasterio.open(SMALL_RASTER_PATH) as raster:
-            resample(raster=raster, upscale_factor=-2, resampling_method=Resampling.cubic)
+            resample(raster=raster, resolution=-2, resampling_method=Resampling.cubic)
