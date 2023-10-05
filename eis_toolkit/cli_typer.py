@@ -980,7 +980,8 @@ def binarize_cli(
 def clip_transform_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    limits: Tuple[Optional[float], Optional[float]] = typer.Option(),
+    limit_lower: Optional[float] = None,
+    limit_higher: Optional[float] = None,
 ):
     """
     Clips data based on specified upper and lower limits.
@@ -994,7 +995,7 @@ def clip_transform_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta, _ = clip_transform(raster=raster, limits=limits)
+        out_image, out_meta, _ = clip_transform(raster=raster, limits=[(limit_lower, limit_higher)])
     typer.echo("Progress: 70%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
@@ -1123,7 +1124,8 @@ def sigmoid_transform_cli(
 def winsorize_transform_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    percentiles: Tuple[Optional[float], Optional[float]] = typer.Option(),
+    percentile_lower: Optional[float] = None,
+    percentile_higher: Optional[float] = None,
     inside: bool = False,
 ):
     """
@@ -1148,7 +1150,9 @@ def winsorize_transform_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta, _ = winsorize(raster=raster, percentiles=percentiles, inside=inside)
+        out_image, out_meta, _ = winsorize(
+            raster=raster, percentiles=[(percentile_lower, percentile_higher)], inside=inside
+        )
     typer.echo("Progress: 70%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
