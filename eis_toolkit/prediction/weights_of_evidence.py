@@ -74,6 +74,7 @@ def _calculate_metrics_for_class(
     C = np.sum(np.logical_and(deposits == 0, evidence == 1))
     D = np.sum(np.logical_and(deposits == 0, evidence == 0))
 
+    # If data has no deposits or every evidence pixel has a deposit
     if A == 0 or C + D == 0:
         return A, B, C, D, 0, 0, 0, 0, 0, 0, 0
 
@@ -124,7 +125,59 @@ def _cumulative_weights(deposits: np.ndarray, evidence: np.ndarray, ascending: b
     }
 
 
-def _generalized_classes(df: pd.DataFrame, studentized_contrast_threshold: Number) -> pd.DataFrame:
+def _generalized_classes_categorical(df: pd.DataFrame, studentized_contrast_threshold: Number) -> pd.DataFrame:
+    gen_df = df.copy()
+    gen_df[GENERALIZED_CLASS_COLUMN] = gen_df[CLASS_COLUMN]
+
+    reclassified = False
+    for i in range(0, len(gen_df.index)):
+        if abs(gen_df.loc[i, STUDENTIZED_CONTRAST_COLUMN]) < studentized_contrast_threshold:
+            gen_df.loc[i, GENERALIZED_CLASS_COLUMN] = 99
+            reclassified = True
+
+    if not reclassified:
+        raise exceptions.ClassificationFailedException(
+            "Failed to create generalized classes with given studentized contrast treshold ({})".format(
+                studentized_contrast_threshold
+            )
+        )
+
+    gen_df = gen_df.sort_values(by=GENERALIZED_CLASS_COLUMN, ascending=True)
+
+    return gen_df
+
+
+def _calculate_generalized_weights_categorical(df: pd.DataFrame, deposits) -> pd.DataFrame:
+    gen_df = df.copy()
+    total_deposits = np.sum(deposits == 1)
+    total_no_deposits = deposits.size - total_deposits
+
+    # Class 99 (gen class)
+    class_99_count = 0
+    class_99_point_count = 0
+
+    for i in range(0, len(gen_df.index)):
+        if gen_df.loc[i, GENERALIZED_CLASS_COLUMN] == 99:
+            # class_99_count = max(gen_df.loc[i, PIXEL_COUNT_COLUMN], class_99_count)
+            # class_99_point_count = max(gen_df.loc[i, DEPOSIT_COUNT_COLUMN], class_99_point_count)
+            class_99_count += gen_df.loc[i, PIXEL_COUNT_COLUMN]
+            class_99_point_count += gen_df.loc[i, DEPOSIT_COUNT_COLUMN]
+
+    class_99_w_gen = np.log(class_99_point_count / total_deposits) - np.log(
+        (class_99_count - class_99_point_count) / total_no_deposits
+    )
+    clas_99_s_wpls_gen = np.sqrt((1 / class_99_point_count) + (1 / (class_99_count - class_99_point_count)))
+
+    gen_df[GENERALIZED_WEIGHT_PLUS_COLUMN] = gen_df[WEIGHT_PLUS_COLUMN]
+    gen_df[GENERALIZED_S_WEIGHT_PLUS_COLUMN] = gen_df[WEIGHT_S_PLUS_COLUMN]
+
+    gen_df.loc[gen_df[GENERALIZED_CLASS_COLUMN] == 99, GENERALIZED_WEIGHT_PLUS_COLUMN] = round(class_99_w_gen, 4)
+    gen_df.loc[gen_df[GENERALIZED_CLASS_COLUMN] == 99, GENERALIZED_S_WEIGHT_PLUS_COLUMN] = round(clas_99_s_wpls_gen, 4)
+
+    return gen_df
+
+
+def _generalized_classes_cumulative(df: pd.DataFrame, studentized_contrast_threshold: Number) -> pd.DataFrame:
     """Create generalized classes based on contrast and studentized contrast threhsold value."""
     gen_df = df.copy()
     index = gen_df.idxmax()[CONTRAST_COLUMN]
@@ -134,8 +187,8 @@ def _generalized_classes(df: pd.DataFrame, studentized_contrast_threshold: Numbe
         or index == len(gen_df.index) - 1
     ):
         raise exceptions.ClassificationFailedException(
-            "Failed to create generalized classes with given studentized contrast treshold ({})".format(
-                gen_df.loc[index, STUDENTIZED_CONTRAST_COLUMN]
+            "Failed to create generalized classes with given studentized contrast treshold ({} < {})".format(
+                gen_df.loc[index, STUDENTIZED_CONTRAST_COLUMN], studentized_contrast_threshold
             )
         )
 
@@ -146,7 +199,7 @@ def _generalized_classes(df: pd.DataFrame, studentized_contrast_threshold: Numbe
     return gen_df
 
 
-def _calculate_generalized_weights(df: pd.DataFrame, deposits) -> pd.DataFrame:
+def _calculate_generalized_weights_cumulative(df: pd.DataFrame, deposits) -> pd.DataFrame:
     """Calculate generalized weights.for cumulative methods."""
     gen_df = df.copy()
     total_deposits = np.sum(deposits == 1)
@@ -196,7 +249,7 @@ def weights_of_evidence(
     evidential_raster: rasterio.io.DatasetReader,
     deposits: gpd.GeoDataFrame,
     raster_nodata: Optional[Number] = None,
-    weights_type: Literal["unique", "ascending", "descending"] = "unique",
+    weights_type: Literal["unique", "categorical", "ascending", "descending"] = "unique",
     studentized_contrast_threshold: Number = 1,
     rasters_to_generate: Optional[Sequence[str]] = None,
 ) -> Tuple[pd.DataFrame, dict, dict]:
@@ -208,11 +261,16 @@ def weights_of_evidence(
         deposits: Vector data representing the mineral deposits or occurences point data.
         raster_nodata: If nodata value of raster is wanted to specify manually. Optional parameter, defaults to None
             (nodata from raster metadata is used).
-        weights_type: Accepted values are 'unique' for unique weights, 'ascending' for cumulative ascending weights,
-            'descending' for cumulative descending weights. Defaults to 'unique'.
-        studentized_contrast_threshold: Studentized contrast threshold value used to reclassify all classes.
-            Reclassification is used when creating generalized rasters with cumulative weight type selection.
-            Not needed if weights_type is 'unique'. Defaults to 1.
+        weights_type: Accepted values are 'unique', 'categorical', 'ascending' and 'descending'.
+            Unique weights does not create generalized classes and does not use a studentized contrast threshold value
+            while categorical, cumulative ascending and cumulative descending do. Categorical weights are calculated so
+            that all classes with studentized contrast below the defined threshold are grouped into one generalized
+            class. Cumulative ascending and descending weights find the class with max contrast and group classes
+            above/below into generalized classes. Generalized weights are also calculated for generalized classes.
+        studentized_contrast_threshold: Studentized contrast threshold value used with 'categorical', 'ascending' and
+            'descending' weight types. Used either as reclassification threshold directly (categorical) or to check
+            that class with max contrast has studentized contrast value at least the defined value (cumulative).
+            Defaults to 1.
         rasters_to_generate: Rasters to generate from the computed weight metrics. All column names
             in the produced weights_df are valid choices. Defaults to ["Class", "W+", "S_W+]
             for "unique" weights_type and ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"]
@@ -252,12 +310,16 @@ def weights_of_evidence(
     masked_deposit_array = deposit_array[~nodata_mask]
 
     # 2. WofE calculations
-    if weights_type == "unique":
+    if weights_type == "unique" or weights_type == "categorical":
         wofe_weights = _unique_weights(masked_deposit_array, masked_evidence_array)
     elif weights_type == "ascending":
         wofe_weights = _cumulative_weights(masked_deposit_array, masked_evidence_array, ascending=True)
     elif weights_type == "descending":
         wofe_weights = _cumulative_weights(masked_deposit_array, masked_evidence_array, ascending=False)
+    else:
+        raise exceptions.InvalidParameterValueException(
+            "Expected weights_type to be one of unique, categorical, ascending or descending."
+        )
 
     # 3. Create DataFrame based on calculated metrics
     df_entries = []
@@ -281,9 +343,12 @@ def weights_of_evidence(
     weights_df = pd.DataFrame(df_entries)
 
     # 4. If we use cumulative weights type, calculate generalized classes and weights
-    if weights_type != "unique":
-        weights_df = _generalized_classes(weights_df, studentized_contrast_threshold)
-        weights_df = _calculate_generalized_weights(weights_df, masked_deposit_array)
+    if weights_type == "categorical":
+        weights_df = _generalized_classes_categorical(weights_df, studentized_contrast_threshold)
+        weights_df = _calculate_generalized_weights_categorical(weights_df, masked_deposit_array)
+    elif weights_type == "ascending" or weights_type == "descending":
+        weights_df = _generalized_classes_cumulative(weights_df, studentized_contrast_threshold)
+        weights_df = _calculate_generalized_weights_cumulative(weights_df, masked_deposit_array)
 
     # 5. Generate rasters for desired metrics
     raster_dict = _generate_rasters_from_metrics(evidence_array, weights_df, metrics_to_rasters)
