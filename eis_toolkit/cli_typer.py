@@ -114,6 +114,124 @@ OUTPUT_FILE_OPTION = typer.Option(
 )
 
 
+# --- EXPLORATORY ANALYSES ---
+
+
+# DBSCAN
+@app.command()
+def dbscan_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    max_distance: float = 0.5,
+    min_samples: int = 5,
+):
+    """Perform DBSCAN clustering on the input data."""
+    from eis_toolkit.exploratory_analyses.dbscan import dbscan
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    output_geodataframe = dbscan(data=geodataframe, max_distance=max_distance, min_samples=min_samples)
+    typer.echo("Progress: 75%")
+
+    output_geodataframe.to_file(output_vector, driver="GeoJSON")
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"DBSCAN completed, output vector written to {output_vector}.")
+
+
+# K-MEANS CLUSTERING
+@app.command()
+def k_means_clustering_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_clusters: Optional[float] = None,
+    random_state: int = None,  # NOTE: Check typing
+):
+    """Perform k-means clustering on the input data."""
+    from eis_toolkit.exploratory_analyses.k_means_cluster import k_means_clustering
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    output_geodataframe = k_means_clustering(
+        data=geodataframe, number_of_clusters=number_of_clusters, random_state=random_state
+    )
+    typer.echo("Progress: 75%")
+
+    output_geodataframe.to_file(output_vector, driver="GeoJSON")
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"K-means clustering completed, output vector written to {output_vector}.")
+
+
+# PARALLEL COORDINATES
+@app.command()
+def parallel_coordinates_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Optional[Annotated[Path, OUTPUT_FILE_OPTION]] = None,
+    color_column_name: str = typer.Option(),
+    plot_title: Optional[str] = None,
+    palette_name: Optional[str] = None,
+    curved_lines: bool = True,
+    show_plot: bool = False,
+    save_dpi: Optional[int] = None,
+):
+    """Perform k-means clustering on the input data."""
+    import matplotlib as plt
+
+    from eis_toolkit.exploratory_analyses.parallel_coordinates import plot_parallel_coordinates
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    figure = plot_parallel_coordinates(
+        geodataframe,
+        color_column_name=color_column_name,
+        plot_title=plot_title,
+        palette_name=palette_name,
+        curved_lines=curved_lines,
+    )
+    typer.echo("Progress: 75%")
+    if show_plot:
+        plt.show(figure)
+
+    echo_str_end = "."
+    if output_file is not None:
+        dpi = "figure" if save_dpi is None else save_dpi
+        plt.savefig(output_file, dpi=dpi)
+        echo_str_end = f", output figure saved to {output_file}."
+    typer.echo("Progress: 100%")
+
+    typer.echo("Parallel coordinates plot completed" + echo_str_end)
+
+
+# PCA
+@app.command()
+def compute_pca_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_components: int = typer.Option(),
+):
+    """Compute principal components for the input data."""
+    from eis_toolkit.exploratory_analyses.pca import compute_pca
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    pca_df, variance_ratios = compute_pca(data=geodataframe, number_of_components=number_of_components)
+
+    pca_df.to_csv(output_file)
+
+
 # --- RASTER PROCESSING ---
 
 
