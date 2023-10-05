@@ -118,7 +118,24 @@ OUTPUT_FILE_OPTION = typer.Option(
 
 
 # CHECK RASTER GRIDS
-# TODO
+@app.command()
+def check_raster_grids_cli(input_rasters: Annotated[List[Path], INPUT_FILE_OPTION], same_extent: bool = False):
+    """Check all input rasters for matching gridding and optionally matching bounds."""
+    from eis_toolkit.checks.raster import check_raster_grids
+
+    typer.echo("Progress: 10%")
+
+    open_rasters = [rasterio.open(raster) for raster in input_rasters]
+    typer.echo("Progress: 25%")
+
+    result = check_raster_grids(input_rasters=open_rasters, same_extent=same_extent)
+    typer.echo("Progress: 75%")
+
+    [raster.close() for raster in open_rasters]
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Result: {str(result)}")
+    typer.echo("Checking raster grids completed.")
 
 
 # CLIP RASTER
@@ -299,13 +316,30 @@ def snap_raster_cli(
 def unify_rasters_cli(
     base_raster: Annotated[Path, INPUT_FILE_OPTION],
     rasters_to_unify: Annotated[List[Path], INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    output_directory: Annotated[Path, OUTPUT_FILE_OPTION],  # Directory path?
     resampling_method: ResamplingMethods = typer.Option(help="resample help", default=ResamplingMethods.nearest),
     same_extent: bool = False,
 ):
-    """Unify given rasters relative to base raster. NOT IMPLEMENTED YET."""
-    # TODO
-    pass
+    """Unify given rasters relative to base raster. WIP."""
+    from eis_toolkit.raster_processing.unifying import unify_raster_grids
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(base_raster) as raster:
+        to_unify = [rasterio.open(rstr) for rstr in rasters_to_unify]  # Open all rasters to be unfiied
+        unified = unify_raster_grids(
+            base_raster=raster, rasters_to_unify=to_unify, resampling_method=resampling_method, same_extent=same_extent
+        )
+        [rstr.close() for rstr in to_unify]  # Close all rasters
+    typer.echo("Progress: 75%")
+
+    for i, (out_image, out_meta) in enumerate(unified[1:]):  # Skip writing base raster
+        output_raster = output_directory.joinpath(f"unified_raster {i+1}.tif")
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Unifying completed, writing rasters to {output_directory}.")
 
 
 # EXTRACT WINDOW
@@ -654,8 +688,137 @@ def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPT
 # --- PREDICTION ---
 
 
-# FUZZY OVERLAY
-# TODO
+# FUZZY OVERLAYS
+
+# AND OVERLAY
+@app.command()
+def and_overlay_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+):
+    """Compute an 'and' overlay operation with fuzzy logic."""
+    from eis_toolkit.prediction.fuzzy_overlay import and_overlay
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
+        typer.echo("Progress: 25%")
+        out_image = and_overlay(data)
+        out_meta = raster.meta.copy()
+        out_meta["count"] = 1
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image, out_meta["count"])
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"'And' overlay completed, writing raster to {output_raster}.")
+
+
+# OR OVERLAY
+@app.command()
+def or_overlay_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+):
+    """Compute an 'or' overlay operation with fuzzy logic."""
+    from eis_toolkit.prediction.fuzzy_overlay import or_overlay
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
+        typer.echo("Progress: 25%")
+        out_image = or_overlay(data)
+        out_meta = raster.meta.copy()
+        out_meta["count"] = 1
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image, out_meta["count"])
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"'Or' overlay completed, writing raster to {output_raster}.")
+
+
+# PRODUCT OVERLAY
+@app.command()
+def product_overlay_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+):
+    """Compute a 'product' overlay operation with fuzzy logic."""
+    from eis_toolkit.prediction.fuzzy_overlay import product_overlay
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
+        typer.echo("Progress: 25%")
+        out_image = product_overlay(data)
+        out_meta = raster.meta.copy()
+        out_meta["count"] = 1
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image, out_meta["count"])
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"'Product' overlay completed, writing raster to {output_raster}.")
+
+
+# SUM OVERLAY
+@app.command()
+def sum_overlay_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+):
+    """Compute a 'sum' overlay operation with fuzzy logic."""
+    from eis_toolkit.prediction.fuzzy_overlay import sum_overlay
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
+        typer.echo("Progress: 25%")
+        out_image = sum_overlay(data)
+        out_meta = raster.meta.copy()
+        out_meta["count"] = 1
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image, out_meta["count"])
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"'Sum' overlay completed, writing raster to {output_raster}.")
+
+
+# GAMMA OVERLAY
+@app.command()
+def gamme_overlay_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    gamma: float = typer.Option(),
+):
+    """Compute a 'gamma' overlay operation with fuzzy logic."""
+    from eis_toolkit.prediction.fuzzy_overlay import gamma_overlay
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
+        typer.echo("Progress: 25%")
+        out_image = gamma_overlay(data, gamma)
+        out_meta = raster.meta.copy()
+        out_meta["count"] = 1
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image, out_meta["count"])
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"'Gamma' overlay completed, writing raster to {output_raster}.")
 
 
 # WOFE
