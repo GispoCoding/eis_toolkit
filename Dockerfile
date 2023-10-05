@@ -1,19 +1,14 @@
-FROM ubuntu:22.04
+FROM continuumio/miniconda3:latest
 
 EXPOSE 8888
 EXPOSE 8000
 
 WORKDIR /eis_toolkit
 
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y \
-    libgdal-dev \
-    python3-pip
+COPY environment.yml .
 
-RUN pip install poetry pre-commit
-
-COPY poetry.lock pyproject.toml /eis_toolkit/
-
-RUN poetry install
+RUN conda install -n base conda-libmamba-solver
+RUN conda config --set solver libmamba
+RUN conda env create -f environment.yml
 
 COPY . .
