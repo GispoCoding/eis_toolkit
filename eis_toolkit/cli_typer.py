@@ -181,7 +181,7 @@ def parallel_coordinates_cli(
     show_plot: bool = False,
     save_dpi: Optional[int] = None,
 ):
-    """Perform k-means clustering on the input data."""
+    """Generate a parallel coordinates plot."""
     import matplotlib as plt
 
     from eis_toolkit.exploratory_analyses.parallel_coordinates import plot_parallel_coordinates
