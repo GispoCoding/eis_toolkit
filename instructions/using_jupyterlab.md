@@ -9,13 +9,6 @@ The notebooks are found under the `notebooks/` directory. You can import and use
 To start the server from your container run (inside the running container)
 
 ```shell
-poetry run jupyter lab --ip=0.0.0.0 --no-browser --allow-root
-```
-
-or
-
-```shell
-poetry shell
 jupyter lab --ip=0.0.0.0 --no-browser --allow-root
 ```
 
@@ -26,7 +19,7 @@ to the terminal (you can just click it to automatically open it in a browser)
 Start the jupyter server with
 
 ```shell
-poetry run jupyter lab
+jupyter lab
 ```
 
 It should automatically open in a browser.

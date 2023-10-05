@@ -43,8 +43,6 @@ Module names come from the names of the .py files containing function declaratio
 
 - Try to create modules in a way that each module contains only one functionality. Split this functionality into two function declarations: one for external use and one (the core functionality) for internal use. See e.g. implementation of [clipping functionality](./eis_toolkit/raster_processing/clipping.py) for reference.
 
-- For large or complex functionalities, it is okay to include multiple (helper) functions in one module/file. If you have a moderate amount of functions, you can put them in one file, but in case several helper functions are needed (and they are not general and don't belong in the utilities module), you can create a secondary file for your functionality, for example `clipping_functions.py` or `clipping_utilities.py` for `clipping.py`.
-
 3. Functions
 
 Name each function according to what it is supposed to do. Try to express the purpose as simplistic as possible. In principle, each function should be creted for executing one task. We prefer modular structure and low hierarchy by trying to avoid nested function declarations. It is highly recommended to call other functions for executing sub tasks.
@@ -135,40 +133,6 @@ any text changes as `pre-commit` can modify unformatted files:
 pre-commit run --all-files
 ```
 
-### invoke
-
-In order to guarantee consistent coding style, a bunch of different linters and formatters have been brought into use.
-
-> Note that running the invoke lint command is not mandatory anymore, as we have started to use pre-commit! You can still the manual linter to run mypy (which is not part of pre-commit), but it is not strictly required to fix all warning mypy throws.
-
-For more convenient user experience, running
-- mypy (checks type annotations)
-- flake8 (checks the compliance to PEP8)
-- black (formats the code)
-
-and
-
-- isort (sorts the import statements)
-
-have been combined into one task. The task can be executed from container's command line with
-
-``` console
-invoke lint
-```
-
-**Assumption**: you have already executed the following commands
-1. *docker compose up -d* or *docker compose up -d --build* (e.g. if dependencies have been updated)
-2. *docker attach eis_toolkit*
-3. *poetry shell*
-
-before you try to run *invoke lint* command.
-
-Possible errors will be printed onto the command line.
-
-**Please** fix them before committing anything!
-
-- Note that sometimes the best way to "fix" an error is to ignore that particular error code for some spesific line of code. However, be conscious on when to use this approach!
-
 ## Testing
 
 Creating and executing tests improves code quality and helps to ensure that nothing gets broken
@@ -208,15 +172,14 @@ The purpose of this automatic workflow is to double check that nothing gets brok
 
 However, **IF** you make changes to the dependencies of the repository (i.e. edit
 pyproject.toml file), you need to update requirements.txt file in order to the
-workflow tests to stay up-to-date. You can do this by running the following command
+workflow tests to stay up-to-date. You can do this by running the following command in your conda env (inside Docker container or not)
 
 ```console
-poetry export --without-hashes --format=requirements.txt > requirements.txt
+pip list --format=freeze > requirements.txt
 ```
 
 and committing the new version of the particular file into your feature
-branch. Please note that this file is only used for GitHub workflows, otherwise
-we utilize poetry for dependency  handling.
+branch. Please note that this file is only used for GitHub workflows.
 
 
 ## Recent changes

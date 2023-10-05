@@ -12,12 +12,6 @@ running tests is as simple as executing
 pytest
 ```
 
-or if you are not inside Poetry shell
-```console
-poetry run pytest
-```
-in the container's command line.
-
 > All functionality that can reasonably be tested should have tests!
 
 ### Adding data for testing purposes
