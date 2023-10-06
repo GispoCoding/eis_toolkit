@@ -16,12 +16,11 @@ df = pd.DataFrame(
 gdf = gdp.GeoDataFrame(df, geometry=gdp.points_from_xy(df.Longitude, df.Latitude), crs="EPSG:4326")
 
 
-@pytest.mark.skip
 def test_k_means_clustering_output():
     """Test that k-means function assings data points into correct clusters."""
     kmeans_gdf = k_means_clustering(data=gdf, number_of_clusters=2, random_state=0)
     kmeans_labels = kmeans_gdf["cluster"]
-    expected_labels = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]
+    expected_labels = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
     np.testing.assert_array_equal(kmeans_labels, expected_labels)
 
 
