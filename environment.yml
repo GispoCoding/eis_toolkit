@@ -20,5 +20,10 @@ dependencies:
   - seaborn >=0.12.2
   - pykrige >=1.7.0
   - rtree >= 1.0.1
+  - jupyterlab >= 4.0.6
+  - mkdocs >= 1.5.3
+  - mkdocs-material >= 9.4.4
+  - mkdocstrings >= 0.23.0
+  - mkdocstrings-python >= 1.7.2
   # Dependencies for testing
   - pytest >=7.2.1
