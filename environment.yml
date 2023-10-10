@@ -20,5 +20,6 @@ dependencies:
   - seaborn >=0.12.2
   - pykrige >=1.7.0
   - rtree >= 1.0.1
+  - imbalanced-learn >= 0.11.0
   # Dependencies for testing
   - pytest >=7.2.1
