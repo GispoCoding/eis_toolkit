@@ -37,7 +37,7 @@ git clone https://github.com/GispoCoding/eis_toolkit.git
 
 After this you have three options for setting up your local development environment.
 1. Docker - [instructions](./instructions/dev_setup_with_docker.md)
-2. Poetry - [instructions]((./instructions/dev_setup_without_docker.md))
+2. Poetry - [instructions](./instructions/dev_setup_without_docker.md)
 3. Conda - [instructions](./instructions/dev_setup_without_docker_with_conda.md)
 
 
