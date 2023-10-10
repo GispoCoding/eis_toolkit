@@ -12,7 +12,6 @@ from eis_toolkit.raster_processing.reclassify_raster import raster_with_manual_b
 from eis_toolkit.raster_processing.reclassify_raster import raster_with_natural_breaks
 from eis_toolkit.raster_processing.reclassify_raster import raster_with_quantiles
 from eis_toolkit.raster_processing.reclassify_raster import raster_with_standard_deviation
-from eis_toolkit.exceptions import InvalidParameterValueException
 
 parent_dir = Path(__file__).parent
 

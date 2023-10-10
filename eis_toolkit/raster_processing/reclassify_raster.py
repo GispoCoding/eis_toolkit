@@ -110,7 +110,6 @@ def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
 def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     interval_size: int,
-    path_to_file: str,
     bands: Optional[List[int]] = None
 ) -> rasterio.io.DatasetReader:
     """Classify raster with defined intervals.
@@ -325,8 +324,6 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
 
     return src
 
-import numpy.ma as ma
-
 def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_classes: int,
@@ -352,18 +349,15 @@ def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
             min_value = np.nanmin(data_array)
             
             data_array = np.ma.masked_where(np.isnan(data_array), data_array)
-            #ma.set_fill_value(data_array, -999999)
-            values_out = np.zeros_like(data_array) # This should be the same shape as the original raster value array, so simply copy
+            values_out = np.zeros_like(data_array) # This is the same shape as the original raster value array
             if (median_value - min_value) < (max_value - median_value): # Large end tail longer
                 raster_half = data_array[np.where((data_array > median_value) & (data_array != np.nan))]
                 range_half = max_value-median_value
                 raster_half = raster_half - median_value + (range_half)/1000.0
-                #raster_half = [value-median_value+(range_half)/1000.0 for value in raster_half] # raster_half-median_value+(range_half)/1000.0
             else:  # Small end tail longer
                 raster_half = data_array[np.where(data_array < median_value) & (data_array != np.nan)]
                 range_half = median_value-min_value
                 raster_half = raster_half - min_value + (range_half)/1000.0
-                #raster_half = [value-min_value+(range_half)/1000.0 for value in raster_half] # raster_half-min_value+(range_half)/1000.0
 
             min_half = np.nanmin(raster_half)
             max_half = np.nanmax(raster_half)
