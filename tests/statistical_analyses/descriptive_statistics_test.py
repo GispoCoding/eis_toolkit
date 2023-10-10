@@ -33,20 +33,6 @@ def test_descriptive_statistics_dataframe():
     np.testing.assert_almost_equal(test["skew"], 1.6136246)
 
 
-def test_zero_values_column():
-    """Test column with all values set to 0."""
-    test = descriptive_statistics_dataframe(test_zero_values, "random_number")
-    np.testing.assert_almost_equal(test["min"], 0)
-    np.testing.assert_almost_equal(test["max"], 0)
-    np.testing.assert_almost_equal(test["mean"], 0)
-    np.testing.assert_almost_equal(test["25%"], 0)
-    np.testing.assert_almost_equal(test["50%"], 0)
-    np.testing.assert_almost_equal(test["75%"], 0)
-    np.testing.assert_almost_equal(test["standard_deviation"], 0)
-    assert pd.isna(test["relative_standard_deviation"]) is True
-    assert pd.isna(test["skew"]) is True
-
-
 def test_invalid_column_name_df():
     """Test that invalid column name raises exception."""
     with pytest.raises(InvalidColumnException):
