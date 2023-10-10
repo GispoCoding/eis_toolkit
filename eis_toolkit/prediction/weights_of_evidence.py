@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 from beartype import beartype
-from beartype.typing import List, Literal, Optional, Sequence, Tuple
+from beartype.typing import Dict, List, Literal, Optional, Sequence, Tuple
 
 from eis_toolkit import exceptions
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
@@ -199,7 +199,7 @@ def _generalized_classes_cumulative(df: pd.DataFrame, studentized_contrast_thres
     return gen_df
 
 
-def _calculate_generalized_weights_cumulative(df: pd.DataFrame, deposits) -> pd.DataFrame:
+def _calculate_generalized_weights_cumulative(df: pd.DataFrame, deposits: np.ndarray) -> pd.DataFrame:
     """Calculate generalized weights.for cumulative methods."""
     gen_df = df.copy()
     total_deposits = np.sum(deposits == 1)
@@ -232,26 +232,28 @@ def _calculate_generalized_weights_cumulative(df: pd.DataFrame, deposits) -> pd.
     return gen_df
 
 
-def _generate_rasters_from_metrics(evidence: np.ndarray, df: pd.DataFrame, metrics_to_include: List[str]) -> dict:
-    """Generate rasters for defined metrics based."""
-    raster_dict = {}
+def _generate_arrays_from_metrics(
+    evidence: np.ndarray, df: pd.DataFrame, metrics_to_include: List[str]
+) -> Dict[str, np.ndarray]:
+    """Generate arrays for defined metrics."""
+    array_dict = {}
     for metric in metrics_to_include:
-        raster = np.full(evidence.shape, np.nan)
+        metric_array = np.full(evidence.shape, np.nan)
         for _, row in df.iterrows():
             mask = np.isin(evidence, row[CLASS_COLUMN])
-            raster[mask] = row[metric]
-        raster_dict[metric] = raster
-    return raster_dict
+            metric_array[mask] = row[metric]
+        array_dict[metric] = metric_array
+    return array_dict
 
 
 @beartype
-def weights_of_evidence(
+def weights_of_evidence_calculate_weights(
     evidential_raster: rasterio.io.DatasetReader,
     deposits: gpd.GeoDataFrame,
     raster_nodata: Optional[Number] = None,
     weights_type: Literal["unique", "categorical", "ascending", "descending"] = "unique",
     studentized_contrast_threshold: Number = 1,
-    rasters_to_generate: Optional[Sequence[str]] = None,
+    arrays_to_generate: Optional[Sequence[str]] = None,
 ) -> Tuple[pd.DataFrame, dict, dict]:
     """
     Calculate weights of spatial associations.
@@ -271,29 +273,29 @@ def weights_of_evidence(
             'descending' weight types. Used either as reclassification threshold directly (categorical) or to check
             that class with max contrast has studentized contrast value at least the defined value (cumulative).
             Defaults to 1.
-        rasters_to_generate: Rasters to generate from the computed weight metrics. All column names
+        arrays_to_generate: Arrays to generate from the computed weight metrics. All column names
             in the produced weights_df are valid choices. Defaults to ["Class", "W+", "S_W+]
             for "unique" weights_type and ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"]
             for the cumulative weight types.
 
     Returns:
         Dataframe with weights of spatial association between the input data.
-        Dictionary of rasters for specified metrics.
+        Dictionary of arrays for specified metrics.
         Raster metadata.
     """
 
-    if rasters_to_generate is None:
+    if arrays_to_generate is None:
         if weights_type == "unique":
-            metrics_to_rasters = DEFAULT_METRICS_UNIQUE
+            metrics_to_arrays = DEFAULT_METRICS_UNIQUE
         else:
-            metrics_to_rasters = DEFAULT_METRICS_CUMULATIVE
+            metrics_to_arrays = DEFAULT_METRICS_CUMULATIVE
     else:
-        for col_name in rasters_to_generate:
+        for col_name in arrays_to_generate:
             if col_name not in VALID_DF_COLUMNS:
                 raise exceptions.InvalidColumnException(
-                    f"Rasters to generate contains invalid metric / column name: {col_name}."
+                    f"Arrays to generate contains invalid metric / column name: {col_name}."
                 )
-        metrics_to_rasters = rasters_to_generate.copy()
+        metrics_to_arrays = arrays_to_generate.copy()
 
     # 1. Preprocess data
     evidence_array = _read_and_preprocess_evidence(evidential_raster, raster_nodata)
@@ -350,7 +352,41 @@ def weights_of_evidence(
         weights_df = _generalized_classes_cumulative(weights_df, studentized_contrast_threshold)
         weights_df = _calculate_generalized_weights_cumulative(weights_df, masked_deposit_array)
 
-    # 5. Generate rasters for desired metrics
-    raster_dict = _generate_rasters_from_metrics(evidence_array, weights_df, metrics_to_rasters)
+    # 5. Generate arrays for desired metrics
+    arrays_dict = _generate_arrays_from_metrics(evidence_array, weights_df, metrics_to_arrays)
 
-    return weights_df, raster_dict, raster_meta
+    return weights_df, arrays_dict, raster_meta
+
+
+def weights_of_evidence_calculate_responses(
+    weights_df: pd.DataFrame, output_arrays: Sequence[Dict[str, np.ndarray]]
+) -> Tuple[np.ndarray, float, np.ndarray]:
+    """Calculate the posterior probabilities for the given generalized weight arrays.
+
+    Args:
+        weights_df: Output Dataframe from weights of evidence calculations including deposit count and pixel count.
+        output_arrays: List of output array dictionaries returned by weights of evidence calculations.
+            For each dictionary, generalized weight and generalized standard deviation arrays are fetched and summed
+            together pixel-wise to calculate the posterior probabilities.
+
+    Returns:
+        Array of posterior probabilites.
+        Array of standard deviations in the posterior probability calculations.
+        Confidence of the prospectivity values obtained in the posterior probability array.
+    """
+    generalized_weight_arrays_sum = sum([item[GENERALIZED_WEIGHT_PLUS_COLUMN] for item in output_arrays])
+    generalized_weight_std_arrays_sum = sum([item[GENERALIZED_S_WEIGHT_PLUS_COLUMN] for item in output_arrays])
+
+    prior_probabilities = weights_df[DEPOSIT_COUNT_COLUMN] / weights_df[PIXEL_COUNT_COLUMN]
+    prior_odds = np.log(prior_probabilities / (1 - prior_probabilities))
+    posterior_probabilities = np.exp(generalized_weight_arrays_sum + prior_odds) / (
+        1 + np.exp(generalized_weight_arrays_sum + prior_odds)
+    )
+
+    probabilities_squared = np.square(posterior_probabilities)
+    probabilities_probabilities_std = np.sqrt(
+        (weights_df[DEPOSIT_COUNT_COLUMN] + generalized_weight_std_arrays_sum) * probabilities_squared
+    )
+
+    confidence_array = posterior_probabilities / probabilities_probabilities_std
+    return posterior_probabilities, probabilities_probabilities_std, confidence_array
