@@ -6,7 +6,7 @@ import pytest
 import rasterio
 
 from eis_toolkit import exceptions
-from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence
+from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_weights
 
 test_dir = Path(__file__).parent.parent
 EVIDENCE_PATH = test_dir.joinpath("../tests/data/remote/wofe/wofe_evidence_raster.tif")
@@ -18,7 +18,7 @@ deposits = gpd.read_file(DEPOSIT_PATH)
 
 def test_weights_of_evidence():
     """Test that weights of evidence works as intended."""
-    df, rasters, raster_meta = weights_of_evidence(evidence_raster, deposits)
+    df, rasters, raster_meta = weights_of_evidence_calculate_weights(evidence_raster, deposits)
 
     print(df["Studentized contrast"])
     np.testing.assert_equal(df.shape[1], 10)  # 10 columns for unique weights
@@ -30,10 +30,12 @@ def test_weights_of_evidence():
 def test_too_high_studentized_contrast_threshold():
     """Tests that too high studentized contrast threshold for reclassification raises the correct exception."""
     with pytest.raises(exceptions.ClassificationFailedException):
-        weights_of_evidence(evidence_raster, deposits, weights_type="ascending", studentized_contrast_threshold=2)
+        weights_of_evidence_calculate_weights(
+            evidence_raster, deposits, weights_type="ascending", studentized_contrast_threshold=2
+        )
 
 
 def test_invalid_choice_in_rasters_to_generate():
     """Tests that invalid metric/column in rasters to generate raises the correct exception."""
     with pytest.raises(exceptions.InvalidColumnException):
-        weights_of_evidence(evidence_raster, deposits, rasters_to_generate=["invalid_metric"])
+        weights_of_evidence_calculate_weights(evidence_raster, deposits, arrays_to_generate=["invalid_metric"])
