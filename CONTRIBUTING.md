@@ -43,9 +43,7 @@ Module names come from the names of the .py files containing function declaratio
 
 - Try to create modules in a way that each module contains only one functionality. Split this functionality into two function declarations: one for external use and one (the core functionality) for internal use. See e.g. implementation of [clipping functionality](./eis_toolkit/raster_processing/clipping.py) for reference.
 
-- For large or complex functionalities, it is okay to include multiple (helper) functions in one module/file. If you have a moderate amount of functions, you can put them in one file, but in case several helper functions are needed (and they are not general and don't belong in the utilities module), you can create a secondary file for your functionality, for example `clipping_functions.py` or `clipping_utilities.py` for `clipping.py`.
-
-3. Functions
+1. Functions
 
 Name each function according to what it is supposed to do. Try to express the purpose as simplistic as possible. In principle, each function should be creted for executing one task. We prefer modular structure and low hierarchy by trying to avoid nested function declarations. It is highly recommended to call other functions for executing sub tasks.
 
