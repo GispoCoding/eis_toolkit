@@ -1,6 +1,6 @@
 import rasterio
 from beartype import beartype
-from beartype.typing import Sequence
+from beartype.typing import Sequence, Union
 
 from eis_toolkit.checks.crs import check_matching_crs
 
@@ -73,7 +73,9 @@ def check_matching_bounds(
 
 
 @beartype
-def check_raster_grids(rasters: Sequence[rasterio.io.DatasetReader], same_extent: bool = False) -> bool:
+def check_raster_grids(
+    rasters: Sequence[Union[rasterio.io.DatasetReader, rasterio.io.DatasetWriter]], same_extent: bool = False
+) -> bool:
     """
     Check all input rasters for matching gridding and optionally matching bounds.
 
