@@ -18,9 +18,8 @@ deposits = gpd.read_file(DEPOSIT_PATH)
 
 def test_weights_of_evidence():
     """Test that weights of evidence works as intended."""
-    df, rasters, raster_meta = weights_of_evidence_calculate_weights(evidence_raster, deposits)
+    df, rasters, raster_meta, _, _ = weights_of_evidence_calculate_weights(evidence_raster, deposits)
 
-    print(df["Studentized contrast"])
     np.testing.assert_equal(df.shape[1], 10)  # 10 columns for unique weights
     np.testing.assert_equal(df.shape[0], 8)  # 8 classes in the test data
     np.testing.assert_equal(len(rasters), 3)  # 3 rasters should be generated with default rasters_to_generate
