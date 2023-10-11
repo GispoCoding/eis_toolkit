@@ -254,7 +254,7 @@ def weights_of_evidence_calculate_weights(
     weights_type: Literal["unique", "categorical", "ascending", "descending"] = "unique",
     studentized_contrast_threshold: Number = 1,
     arrays_to_generate: Optional[Sequence[str]] = None,
-) -> Tuple[pd.DataFrame, dict, dict]:
+) -> Tuple[pd.DataFrame, dict, dict, int, int]:
     """
     Calculate weights of spatial associations.
 
@@ -282,6 +282,8 @@ def weights_of_evidence_calculate_weights(
         Dataframe with weights of spatial association between the input data.
         Dictionary of arrays for specified metrics.
         Raster metadata.
+        Number of deposit pixels.
+        Number of all evidence pixels.
     """
 
     if arrays_to_generate is None:
@@ -355,11 +357,15 @@ def weights_of_evidence_calculate_weights(
     # 5. Generate arrays for desired metrics
     arrays_dict = _generate_arrays_from_metrics(evidence_array, weights_df, metrics_to_arrays)
 
-    return weights_df, arrays_dict, raster_meta
+    # Return nr. of deposit pixels  and nr. of all evidence pixels for to be used in calculate responses
+    nr_of_deposits = int(np.sum(masked_deposit_array == 1))
+    nr_of_pixels = int(np.size(masked_evidence_array))
+
+    return weights_df, arrays_dict, raster_meta, nr_of_deposits, nr_of_pixels
 
 
 def weights_of_evidence_calculate_responses(
-    weights_df: pd.DataFrame, output_arrays: Sequence[Dict[str, np.ndarray]]
+    output_arrays: Sequence[Dict[str, np.ndarray]], nr_of_deposits: int, nr_of_pixels: int
 ) -> Tuple[np.ndarray, float, np.ndarray]:
     """Calculate the posterior probabilities for the given generalized weight arrays.
 
@@ -368,6 +374,8 @@ def weights_of_evidence_calculate_responses(
         output_arrays: List of output array dictionaries returned by weights of evidence calculations.
             For each dictionary, generalized weight and generalized standard deviation arrays are fetched and summed
             together pixel-wise to calculate the posterior probabilities.
+        nr_of_deposits: Number of deposit pixels in the input data for weights of evidence calculations.
+        nr_of_pixels: Number of evidence pixels in the input data for weights of evidence calculations.
 
     Returns:
         Array of posterior probabilites.
@@ -377,16 +385,14 @@ def weights_of_evidence_calculate_responses(
     generalized_weight_arrays_sum = sum([item[GENERALIZED_WEIGHT_PLUS_COLUMN] for item in output_arrays])
     generalized_weight_std_arrays_sum = sum([item[GENERALIZED_S_WEIGHT_PLUS_COLUMN] for item in output_arrays])
 
-    prior_probabilities = weights_df[DEPOSIT_COUNT_COLUMN] / weights_df[PIXEL_COUNT_COLUMN]
+    prior_probabilities = nr_of_deposits / nr_of_pixels
     prior_odds = np.log(prior_probabilities / (1 - prior_probabilities))
     posterior_probabilities = np.exp(generalized_weight_arrays_sum + prior_odds) / (
         1 + np.exp(generalized_weight_arrays_sum + prior_odds)
     )
 
     probabilities_squared = np.square(posterior_probabilities)
-    probabilities_probabilities_std = np.sqrt(
-        (weights_df[DEPOSIT_COUNT_COLUMN] + generalized_weight_std_arrays_sum) * probabilities_squared
-    )
+    posterior_probabilities_std = np.sqrt((nr_of_deposits + generalized_weight_std_arrays_sum) * probabilities_squared)
 
-    confidence_array = posterior_probabilities / probabilities_probabilities_std
-    return posterior_probabilities, probabilities_probabilities_std, confidence_array
+    confidence_array = posterior_probabilities / posterior_probabilities_std
+    return posterior_probabilities, posterior_probabilities_std, confidence_array
