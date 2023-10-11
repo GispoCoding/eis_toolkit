@@ -1,10 +1,10 @@
-from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
-from sklearn.base import BaseEstimator
-import numpy as np
-from typing import Literal
-import joblib
 from pathlib import Path
 from typing import Literal
+
+import joblib
+import numpy as np
+from sklearn.base import BaseEstimator
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 
 from eis_toolkit import exceptions
 
@@ -34,12 +34,12 @@ def load_model(filename: Path) -> BaseEstimator:
 
 
 def tune_model_parameters(
-    estimator: BaseEstimator, 
-    method: Literal["grid", "random"], 
-    X_train: np.ndarray, 
-    y_train: np.ndarray, 
-    params: dict, 
-    cv: int = 5
+    estimator: BaseEstimator,
+    method: Literal["grid", "random"],
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    params: dict,
+    cv: int = 5,
 ) -> BaseEstimator:
     """
     Hyperparameter tuning using either GridSearch or RandomizedSearch.
@@ -56,9 +56,9 @@ def tune_model_parameters(
         Best model from the search.
     """
 
-    if method == 'grid':
+    if method == "grid":
         search = GridSearchCV(estimator, params, cv=cv)
-    elif method == 'random':
+    elif method == "random":
         search = RandomizedSearchCV(estimator, params, cv=cv, n_iter=10)
     else:
         raise exceptions.InvalidParameterValueException("Method should be either 'grid' or 'random'.")

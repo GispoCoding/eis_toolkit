@@ -1,14 +1,14 @@
+from typing import Literal, Optional
+
+import numpy as np
+import pandas as pd
+from beartype import beartype
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 
-from typing import Optional, Literal
 from eis_toolkit import exceptions
 from eis_toolkit.prediction.model_utils import tune_model_parameters
-
-from beartype import beartype
-import pandas as pd
-import numpy as np
 
 
 @beartype
@@ -21,7 +21,7 @@ def random_forest_classifier_train(
     tune_with_method: Optional[Literal["grid", "random"]] = None,
     tune_parameters: Optional[dict] = None,
     cv: int = 5,
-    **kwargs
+    **kwargs,
 ) -> RandomForestClassifier:
     """
     Train a Random Forest model using Sklearn.
@@ -34,7 +34,7 @@ def random_forest_classifier_train(
         random_state: Seed for random number generation. Defaults to None.
         tune_with_method: If the model parameters should be tuned. Options include
             GridSearchCV and RandomizedSearchCV. Defaults to None, in which case
-            model is not tuned. 
+            model is not tuned.
         tune_parameters: Hyperparameters to be tuned (if model tuning is selected).
             Dictionary where keys parameter names (e.g. n_estimators) and values are lists
             of possible parameter values (e.g. [10, 50, 100]). Tune parameters must be defined
@@ -56,11 +56,7 @@ def random_forest_classifier_train(
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
 
     # Creating the model
-    model = RandomForestClassifier(
-        n_estimators=n_estimators,
-        random_state=random_state,
-        **kwargs
-    )
+    model = RandomForestClassifier(n_estimators=n_estimators, random_state=random_state, **kwargs)
 
     # Training and optionally tuning the model
     if tune_with_method is not None:
@@ -70,7 +66,7 @@ def random_forest_classifier_train(
 
     # Getting predictions for the test set
     y_pred = model.predict(X_test)
-    
+
     # Getting performance metrics
     accuracy = accuracy_score(y_test, y_pred)
     report = classification_report(y_test, y_pred)
@@ -96,15 +92,15 @@ def random_forest_classifier_predict(model: RandomForestClassifier, X: pd.DataFr
 
 @beartype
 def random_forest_regressor_train(
-    X: np.ndarray, 
-    y: np.ndarray, 
+    X: np.ndarray,
+    y: np.ndarray,
     test_size: float = 0.25,
     n_estimators: int = 100,
     random_state: Optional[int] = None,
     tune_with_method: Optional[Literal["grid", "random"]] = None,
     tune_parameters: Optional[dict] = None,
-    cv: int = 5, 
-    **kwargs
+    cv: int = 5,
+    **kwargs,
 ) -> RandomForestRegressor:
     """
     Train a random forest regressor with optional hyperparameter tuning.
@@ -117,7 +113,7 @@ def random_forest_regressor_train(
         random_state: Seed for random number generation. Defaults to None.
         tune_with_method: If the model parameters should be tuned. Options include
             GridSearchCV and RandomizedSearchCV. Defaults to None, in which case
-            model is not tuned. 
+            model is not tuned.
         tune_parameters: Hyperparameters to be tuned (if model tuning is selected).
             Dictionary where keys parameter names (e.g. n_estimators) and values are lists
             of possible parameter values (e.g. [10, 50, 100]). Tune parameters must be defined
@@ -132,15 +128,11 @@ def random_forest_regressor_train(
         raise exceptions.NonMatchingParameterLengthsException(
             f"X and y must have the length {X.shape[0]} != {X.shape[0]}."
         )
-    
+
     # Splitting data into training and testing
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
-    
-    model = RandomForestRegressor(
-        n_estimators=n_estimators,
-        random_state=random_state,
-        **kwargs
-    )
+
+    model = RandomForestRegressor(n_estimators=n_estimators, random_state=random_state, **kwargs)
 
     # Training and optionally tuning the model
     if tune_with_method is not None:
@@ -150,7 +142,7 @@ def random_forest_regressor_train(
 
     # Getting predictions for the test set
     y_pred = model.predict(X_test)
-    
+
     # Getting performance metrics
     accuracy = accuracy_score(y_test, y_pred)
     report = classification_report(y_test, y_pred)
