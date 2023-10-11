@@ -147,7 +147,8 @@ def _generalized_classes_categorical(df: pd.DataFrame, studentized_contrast_thre
     return gen_df
 
 
-def _calculate_generalized_weights_categorical(df: pd.DataFrame, deposits) -> pd.DataFrame:
+def _generalized_weights_categorical(df: pd.DataFrame, deposits) -> pd.DataFrame:
+    """Calculate generalized weights for categorical weights type. Assumes class 99 exists as the general class."""
     gen_df = df.copy()
     total_deposits = np.sum(deposits == 1)
     total_no_deposits = deposits.size - total_deposits
@@ -199,8 +200,12 @@ def _generalized_classes_cumulative(df: pd.DataFrame, studentized_contrast_thres
     return gen_df
 
 
-def _calculate_generalized_weights_cumulative(df: pd.DataFrame, deposits: np.ndarray) -> pd.DataFrame:
-    """Calculate generalized weights.for cumulative methods."""
+def _generalized_weights_cumulative(df: pd.DataFrame, deposits: np.ndarray) -> pd.DataFrame:
+    """
+    Calculate generalized weights for cumulative methods.
+
+    Assumes there are classes 1 and 2 as the general classes.
+    """
     gen_df = df.copy()
     total_deposits = np.sum(deposits == 1)
     total_no_deposits = deposits.size - total_deposits
@@ -349,10 +354,10 @@ def weights_of_evidence_calculate_weights(
     # 4. If we use cumulative weights type, calculate generalized classes and weights
     if weights_type == "categorical":
         weights_df = _generalized_classes_categorical(weights_df, studentized_contrast_threshold)
-        weights_df = _calculate_generalized_weights_categorical(weights_df, masked_deposit_array)
+        weights_df = _generalized_weights_categorical(weights_df, masked_deposit_array)
     elif weights_type == "ascending" or weights_type == "descending":
         weights_df = _generalized_classes_cumulative(weights_df, studentized_contrast_threshold)
-        weights_df = _calculate_generalized_weights_cumulative(weights_df, masked_deposit_array)
+        weights_df = _generalized_weights_cumulative(weights_df, masked_deposit_array)
 
     # 5. Generate arrays for desired metrics
     arrays_dict = _generate_arrays_from_metrics(evidence_array, weights_df, metrics_to_arrays)
@@ -382,17 +387,17 @@ def weights_of_evidence_calculate_responses(
         Array of standard deviations in the posterior probability calculations.
         Confidence of the prospectivity values obtained in the posterior probability array.
     """
-    generalized_weight_arrays_sum = sum([item[GENERALIZED_WEIGHT_PLUS_COLUMN] for item in output_arrays])
-    generalized_weight_std_arrays_sum = sum([item[GENERALIZED_S_WEIGHT_PLUS_COLUMN] for item in output_arrays])
+    gen_weights_sum = sum([item[GENERALIZED_WEIGHT_PLUS_COLUMN] for item in output_arrays])
+    gen_weights_variance_sum = sum([np.square(item[GENERALIZED_S_WEIGHT_PLUS_COLUMN]) for item in output_arrays])
 
     prior_probabilities = nr_of_deposits / nr_of_pixels
     prior_odds = np.log(prior_probabilities / (1 - prior_probabilities))
-    posterior_probabilities = np.exp(generalized_weight_arrays_sum + prior_odds) / (
-        1 + np.exp(generalized_weight_arrays_sum + prior_odds)
-    )
+    posterior_probabilities = np.exp(gen_weights_sum + prior_odds) / (1 + np.exp(gen_weights_sum + prior_odds))
 
-    probabilities_squared = np.square(posterior_probabilities)
-    posterior_probabilities_std = np.sqrt((nr_of_deposits + generalized_weight_std_arrays_sum) * probabilities_squared)
+    posterior_probabilities_squared = np.square(posterior_probabilities)
+    posterior_probabilities_std = np.sqrt(
+        (1 / nr_of_deposits + gen_weights_variance_sum) * posterior_probabilities_squared
+    )
 
     confidence_array = posterior_probabilities / posterior_probabilities_std
     return posterior_probabilities, posterior_probabilities_std, confidence_array
