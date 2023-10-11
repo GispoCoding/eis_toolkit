@@ -18,7 +18,7 @@ keywords = [
 ]
 
 [tool.poetry.scripts]
-eis = "eis_toolkit.cli_typer:app"
+eis = "eis_toolkit.cli:app"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"

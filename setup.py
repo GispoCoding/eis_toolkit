@@ -9,7 +9,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "eis=eis_toolkit.cli_click:cli",
+            "eis=eis_toolkit.cli:cli",
         ],
     },
 )
