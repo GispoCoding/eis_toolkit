@@ -147,7 +147,7 @@ def dbscan_cli(
 def k_means_clustering_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
     output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
-    number_of_clusters: Optional[float] = None,
+    number_of_clusters: Optional[int] = None,
     random_state: int = None,  # NOTE: Check typing
 ):
     """Perform k-means clustering on the input data."""
@@ -187,12 +187,12 @@ def parallel_coordinates_cli(
     from eis_toolkit.exploratory_analyses.parallel_coordinates import plot_parallel_coordinates
 
     typer.echo("Progress: 10%")
-
     geodataframe = gpd.read_file(input_vector)
+    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
     figure = plot_parallel_coordinates(
-        geodataframe,
+        dataframe,
         color_column_name=color_column_name,
         plot_title=plot_title,
         palette_name=palette_name,
@@ -224,10 +224,11 @@ def compute_pca_cli(
 
     typer.echo("Progress: 10%")
 
-    geodataframe = gpd.read_file(input_vector)
+    geodataframe = gpd.read_file(input_vector)  # TODO: Check if gdf to df handling in tool itself
+    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    pca_df, variance_ratios = compute_pca(data=geodataframe, number_of_components=number_of_components)
+    pca_df, variance_ratios = compute_pca(data=dataframe, number_of_components=number_of_components)
 
     pca_df.to_csv(output_file)
 
