@@ -2,7 +2,7 @@
 name = "eis_toolkit"
 version = "0.1.0"
 description = "EIS Toolkit is a comprehensive collection of tools suitable for mineral prospectivity mapping. This toolkit has been developed as part of the Exploration Information System project which has been funded by European Union."
-authors = ["pavetsu14 <pauliina@gispo.fi>"]
+authors = []
 maintainers = ["Gispo Ltd. <info@gispo.fi>"]
 license = "EUPL-1.2"
 readme = "README.md"
@@ -21,7 +21,7 @@ keywords = [
 eis = "eis_toolkit.cli:app"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.9,<3.11"
 gdal = "3.4.3"
 rasterio = "^1.3.0"
 pandas = "^1.4.3"
@@ -32,12 +32,12 @@ statsmodels = "^0.13.2"
 keras = "^2.9.0"
 tensorflow = "^2.9.1"
 mkdocs-material = "^8.4.0"
-plotly = "^5.14.0"
 beartype = "^0.13.1"
 seaborn = "^0.12.2"
 pykrige = "^1.7.0"
 rtree = "^1.0.1"
 typer = {extras = ["all"], version = "^0.9.0"}
+imbalanced-learn = "^0.11.0"
 
 [tool.poetry.dev-dependencies]
 jupyterlab = "^3.4.5"

@@ -18,17 +18,17 @@ def _k_means_clustering(
         # The elbow method
         k_max = 10
         inertia = np.array(
-            [KMeans(n_clusters=k, random_state=0).fit(coordinates).inertia_ for k in range(1, k_max + 1)]
+            [KMeans(n_clusters=k, random_state=0, n_init=10).fit(coordinates).inertia_ for k in range(1, k_max + 1)]
         )
 
         inertia = np.diff(inertia, 2)
         scaled_derivatives = [i * 100 for i in inertia]
         k_optimal = scaled_derivatives.index(min(scaled_derivatives))
 
-        kmeans = KMeans(n_clusters=k_optimal, random_state=random_state)
+        kmeans = KMeans(n_clusters=k_optimal, random_state=random_state, n_init=10)
 
     else:
-        kmeans = KMeans(n_clusters=number_of_clusters, random_state=random_state)
+        kmeans = KMeans(n_clusters=number_of_clusters, random_state=random_state, n_init=10)
 
     kmeans.fit(coordinates)
     data["cluster"] = kmeans.labels_
