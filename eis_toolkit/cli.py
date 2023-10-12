@@ -1,3 +1,9 @@
+# --- ! ---
+# NOTE! Work in progress in the implementation of command-line interface
+# Note also, that this CLI is primarily created for other applications to
+# utilize EIS Toolkit, such as EIS QGIS Plugin
+# --- ! ---
+
 import json
 from enum import Enum
 from pathlib import Path
