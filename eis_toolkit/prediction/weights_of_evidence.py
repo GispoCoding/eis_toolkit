@@ -369,26 +369,41 @@ def weights_of_evidence_calculate_weights(
     return weights_df, arrays_dict, raster_meta, nr_of_deposits, nr_of_pixels
 
 
+@beartype
 def weights_of_evidence_calculate_responses(
     output_arrays: Sequence[Dict[str, np.ndarray]], nr_of_deposits: int, nr_of_pixels: int
-) -> Tuple[np.ndarray, float, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate the posterior probabilities for the given generalized weight arrays.
 
     Args:
-        weights_df: Output Dataframe from weights of evidence calculations including deposit count and pixel count.
         output_arrays: List of output array dictionaries returned by weights of evidence calculations.
-            For each dictionary, generalized weight and generalized standard deviation arrays are fetched and summed
-            together pixel-wise to calculate the posterior probabilities.
+            For each dictionary, generalized weight and generalized standard deviation arrays are used and summed
+            together pixel-wise to calculate the posterior probabilities. If generalized arrays are not found,
+            the W+ and S_W+ arrays are used (so if outputs from unique weight calculations are used for this function).
         nr_of_deposits: Number of deposit pixels in the input data for weights of evidence calculations.
         nr_of_pixels: Number of evidence pixels in the input data for weights of evidence calculations.
 
     Returns:
         Array of posterior probabilites.
         Array of standard deviations in the posterior probability calculations.
-        Confidence of the prospectivity values obtained in the posterior probability array.
+        Array of confidence of the prospectivity values obtained in the posterior probability array.
     """
-    gen_weights_sum = sum([item[GENERALIZED_WEIGHT_PLUS_COLUMN] for item in output_arrays])
-    gen_weights_variance_sum = sum([np.square(item[GENERALIZED_S_WEIGHT_PLUS_COLUMN]) for item in output_arrays])
+    gen_weights_sum = sum(
+        [
+            item[GENERALIZED_WEIGHT_PLUS_COLUMN]
+            if GENERALIZED_WEIGHT_PLUS_COLUMN in item.keys()
+            else item[WEIGHT_PLUS_COLUMN]
+            for item in output_arrays
+        ]
+    )
+    gen_weights_variance_sum = sum(
+        [
+            np.square(item[GENERALIZED_S_WEIGHT_PLUS_COLUMN])
+            if GENERALIZED_S_WEIGHT_PLUS_COLUMN in item.keys()
+            else np.square(item[WEIGHT_S_PLUS_COLUMN])
+            for item in output_arrays
+        ]
+    )
 
     prior_probabilities = nr_of_deposits / nr_of_pixels
     prior_odds = np.log(prior_probabilities / (1 - prior_probabilities))
