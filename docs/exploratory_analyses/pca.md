@@ -1,3 +1,3 @@
-# Compute PCA
+# PCA
 
 ::: eis_toolkit.exploratory_analyses.pca
