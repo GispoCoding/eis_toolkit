@@ -119,6 +119,14 @@ OUTPUT_FILE_OPTION = typer.Option(
     resolve_path=True,
 )
 
+OUTPUT_DIR_OPTION = typer.Option(
+    file_okay=False,
+    dir_okay=True,
+    writable=True,
+    readable=True,
+    resolve_path=True,
+)
+
 
 # --- EXPLORATORY ANALYSES ---
 
@@ -188,7 +196,7 @@ def parallel_coordinates_cli(
     save_dpi: Optional[int] = None,
 ):
     """Generate a parallel coordinates plot."""
-    import matplotlib as plt
+    import matplotlib.pyplot as plt
 
     from eis_toolkit.exploratory_analyses.parallel_coordinates import plot_parallel_coordinates
 
@@ -197,7 +205,7 @@ def parallel_coordinates_cli(
     dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    figure = plot_parallel_coordinates(
+    _ = plot_parallel_coordinates(
         dataframe,
         color_column_name=color_column_name,
         plot_title=plot_title,
@@ -206,7 +214,7 @@ def parallel_coordinates_cli(
     )
     typer.echo("Progress: 75%")
     if show_plot:
-        plt.show(figure)
+        plt.show()
 
     echo_str_end = "."
     if output_file is not None:
@@ -440,8 +448,8 @@ def snap_raster_cli(
 @app.command()
 def unify_rasters_cli(
     base_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_directory: Annotated[Path, OUTPUT_DIR_OPTION],  # Directory path?
     rasters_to_unify: Annotated[List[Path], INPUT_FILE_OPTION],
-    output_directory: Annotated[Path, OUTPUT_FILE_OPTION],  # Directory path?
     resampling_method: ResamplingMethods = typer.Option(help="resample help", default=ResamplingMethods.nearest),
     same_extent: bool = False,
 ):
@@ -453,7 +461,10 @@ def unify_rasters_cli(
     with rasterio.open(base_raster) as raster:
         to_unify = [rasterio.open(rstr) for rstr in rasters_to_unify]  # Open all rasters to be unfiied
         unified = unify_raster_grids(
-            base_raster=raster, rasters_to_unify=to_unify, resampling_method=resampling_method, same_extent=same_extent
+            base_raster=raster,
+            rasters_to_unify=to_unify,
+            resampling_method=RESAMPLING_MAPPING[resampling_method],
+            same_extent=same_extent,
         )
         [rstr.close() for rstr in to_unify]  # Close all rasters
     typer.echo("Progress: 75%")
