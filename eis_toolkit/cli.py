@@ -1044,7 +1044,8 @@ def z_score_normalization_cli(
 def min_max_scaling_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    new_range: Tuple[float, float] = (0, 1),
+    min: float = 0.0,
+    max: float = 1.0,
 ):
     """
     Normalize data based on a specified new range.
@@ -1057,7 +1058,7 @@ def min_max_scaling_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta, _ = min_max_scaling(raster=raster, new_range=[new_range])
+        out_image, out_meta, _ = min_max_scaling(raster=raster, new_range=[(min, max)])
     typer.echo("Progress: 70%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
@@ -1101,7 +1102,8 @@ def log_transform_cli(
 def sigmoid_transform_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    bounds: Tuple[float, float] = (0, 1),
+    limit_lower: float = 0.0,
+    limit_upper: float = 1.0,
     slope: float = 1,
     center: bool = True,
 ):
@@ -1116,7 +1118,9 @@ def sigmoid_transform_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta, _ = sigmoid_transform(raster=raster, bounds=[bounds], slope=[slope], center=center)
+        out_image, out_meta, _ = sigmoid_transform(
+            raster=raster, bounds=[(limit_lower, limit_upper)], slope=[slope], center=center
+        )
     typer.echo("Progress: 70%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
