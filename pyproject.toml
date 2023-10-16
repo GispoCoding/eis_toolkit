@@ -8,7 +8,7 @@ license = "EUPL-1.2"
 readme = "README.md"
 homepage = "https://eis-he.eu"
 repository = "https://github.com/GispoCoding/eis_toolkit"
-documentation = ""
+# documentation = ""
 keywords = [
     "Exploration",
     "Mineral prospectivity",
@@ -16,6 +16,9 @@ keywords = [
     "Geology",
     "Packages"
 ]
+
+[tool.poetry.scripts]
+eis = "eis_toolkit.cli:app"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
@@ -33,6 +36,7 @@ beartype = "^0.13.1"
 seaborn = "^0.12.2"
 pykrige = "^1.7.0"
 rtree = "^1.0.1"
+typer = {extras = ["all"], version = "^0.9.0"}
 imbalanced-learn = "^0.11.0"
 
 [tool.poetry.dev-dependencies]
