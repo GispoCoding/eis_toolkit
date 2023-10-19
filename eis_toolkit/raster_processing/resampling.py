@@ -1,64 +1,65 @@
 from numbers import Number
-from typing import Optional
 
 import numpy as np
 import rasterio
 from beartype import beartype
 from beartype.typing import Tuple
+from rasterio import warp
 from rasterio.enums import Resampling
 
-from eis_toolkit.checks.parameter import check_numeric_value_sign
-from eis_toolkit.exceptions import NumericValueSignException
+from eis_toolkit import exceptions
 
 
-# The core resampling functionality. Used internally by resample.
 def _resample(
-    raster: rasterio.io.DatasetReader,
-    resampling_method: Resampling,
-    upscale_factor: Number,
-    upscale_factor_y: Optional[Number],
+    raster: rasterio.io.DatasetReader, resolution: Number, resampling_method: Resampling
 ) -> Tuple[np.ndarray, dict]:
 
-    if upscale_factor_y is None:
-        upscale_factor_y = upscale_factor
+    resolution = float(resolution)
 
-    out_image = raster.read(
-        out_shape=(raster.count, round(raster.height * upscale_factor), round(raster.width * upscale_factor_y)),
-        resampling=resampling_method,
+    dst_height, dst_width = (
+        int(raster.height * raster.res[0] / resolution),
+        int(raster.width * raster.res[1] / resolution),
     )
+    out_transform = rasterio.Affine(resolution, 0, raster.transform[2], 0, -resolution, raster.transform[5])
 
-    out_transform = raster.transform * raster.transform.scale(
-        (raster.width / out_image.shape[-1]), (raster.height / out_image.shape[-2])
+    dst = np.empty((raster.count, dst_height, dst_width))
+    dst.fill(raster.meta["nodata"])
+
+    out_image = warp.reproject(
+        source=raster.read(),
+        destination=dst,
+        src_transform=raster.transform,
+        src_crs=raster.crs,
+        dst_transform=out_transform,
+        dst_crs=raster.crs,
+        src_nodata=raster.meta["nodata"],
+        dst_nodata=raster.meta["nodata"],
+        resampling=resampling_method,
     )
 
     out_meta = raster.meta.copy()
     out_meta.update(
         {
             "transform": out_transform,
-            "width": out_image.shape[-1],
-            "height": out_image.shape[-2],
+            "width": out_image[0].shape[-1],
+            "height": out_image[0].shape[-2],
         }
     )
 
-    return out_image, out_meta
+    return out_image[0], out_meta
 
 
 @beartype
 def resample(
     raster: rasterio.io.DatasetReader,
-    upscale_factor: Number,
-    upscale_factor_y: Optional[Number] = None,
+    resolution: Number,
     resampling_method: Resampling = Resampling.bilinear,
 ) -> Tuple[np.ndarray, dict]:
-    """Resamples raster according to given upscale factor.
+    """Resamples raster according to given resolution.
 
     Args:
         raster: The raster to be resampled.
-        upscale_factor: Resampling factor for raster width (and height by default).
-            Scale factors over 1 will yield higher resolution data. Value must be positive.
-        upscale_factor_y: Resampling factor for raster height, if different scaling is needed
-            for x and y directions. Defaults to None, in which case upscale_factor is used
-            for both width and height.
+        resolution: Target resolution i.e. cell size of the output raster.
         resampling_method: Resampling method. Most suitable
             method depends on the dataset and context. Nearest, bilinear and cubic are some
             common choices. This parameter defaults to bilinear.
@@ -68,12 +69,10 @@ def resample(
         The updated metadata.
 
     Raises:
-        NumericValueSignException: Upscale factor (y) is not a positive value.
+        NumericValueSignException: Resolution is not a positive value.
     """
-    if not check_numeric_value_sign(upscale_factor):
-        raise NumericValueSignException(f"Upscale factor is not a positive value: {upscale_factor}")
-    if upscale_factor_y is not None and not check_numeric_value_sign(upscale_factor_y):
-        raise NumericValueSignException(f"Upscale factor y is not a positive value: {upscale_factor_y}")
+    if resolution <= 0:
+        raise exceptions.NumericValueSignException(f"Expected a positive value for resolution: {resolution})")
 
-    out_image, out_meta = _resample(raster, resampling_method, upscale_factor, upscale_factor_y)
+    out_image, out_meta = _resample(raster, resolution, resampling_method)
     return out_image, out_meta

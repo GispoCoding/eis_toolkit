@@ -2,6 +2,10 @@ class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
 
 
+class ClassificationFailedException(Exception):
+    """Exception error class for classification failures."""
+
+
 class EmptyDataFrameException(Exception):
     """Exception error class raised if the dataframe is empty."""
 
