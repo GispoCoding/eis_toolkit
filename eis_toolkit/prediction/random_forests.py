@@ -8,7 +8,7 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 
 from eis_toolkit import exceptions
-from eis_toolkit.prediction.model_utils import tune_model_parameters
+from eis_toolkit.prediction.model_utils import evaluate_regression_model, tune_model_parameters
 
 
 @beartype
@@ -24,12 +24,14 @@ def random_forest_classifier_train(
     **kwargs,
 ) -> Tuple[RandomForestClassifier, dict]:
     """
-    Train a Random Forest model using Sklearn.
+    Train a Random Forest classifier model using Sklearn with optional hyperparameter tuning.
+
+    Trains the model with the given parameters and evaluates model performance using test data.
 
     Args:
         X: Training data.
         y: Target labels.
-        test_size: Fraction of the dataset to be used as test data. Defaults to 0.25.
+        test_size: Fraction of the dataset to be used as test data (rest is used for training). Defaults to 0.25.
         n_estimators: The number of trees in the forest. Defaults to 100.
         random_state: Seed for random number generation. Defaults to None.
         tune_with_method: If the model parameters should be tuned. Options include
@@ -40,7 +42,7 @@ def random_forest_classifier_train(
             of possible parameter values (e.g. [10, 50, 100]). Tune parameters must be defined
             is tuning is selected, otherwise this parameter is not used. Defaults to None.
         tune_cv: Number of cross-validation folds used in hyperparameter tuning. Defaults to 5.
-        **kwargs: Additional parameters for RandomForestClassifier.
+        **kwargs: Additional parameters for Sklearn's RandomForestClassifier.
 
     Returns:
         The trained RandomForestClassifier and details of test set performance.
@@ -48,16 +50,9 @@ def random_forest_classifier_train(
     Raises:
         NonMatchingParameterLengthsException: If length of X and y don't match.
     """
-    if isinstance(X, pd.DataFrame):
-        if X.index.size != y.size:
-            raise exceptions.NonMatchingParameterLengthsException(
-                f"X and y must have the length {X.index.size} != {y.size}."
-            )
-    else:
-        if X.shape[0] != y.size:
-            raise exceptions.NonMatchingParameterLengthsException(
-                f"X and y must have the length {X.shape[1]} != {y.size}."
-            )
+    x_size = X.index.size if isinstance(X, pd.DataFrame) else X.shape[0]
+    if x_size != y.size:
+        raise exceptions.NonMatchingParameterLengthsException(f"X and y must have the length {x_size} != {y.size}.")
 
     # Splitting data into training and testing
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
@@ -83,7 +78,7 @@ def random_forest_classifier_train(
 @beartype
 def random_forest_classifier_predict(model: RandomForestClassifier, X: Union[np.ndarray, pd.DataFrame]) -> np.ndarray:
     """
-    Use a trained Random Forest model to make predictions.
+    Use a trained Random Forest classifier model to make predictions.
 
     Args:
         model: Trained RandomForestClassifier.
@@ -92,7 +87,8 @@ def random_forest_classifier_predict(model: RandomForestClassifier, X: Union[np.
     Returns:
         Predicted labels.
     """
-    return model.predict(X)
+    predictions = model.predict(X)
+    return predictions
 
 
 @beartype
@@ -108,12 +104,14 @@ def random_forest_regressor_train(
     **kwargs,
 ) -> Tuple[RandomForestRegressor, dict]:
     """
-    Train a random forest regressor with optional hyperparameter tuning.
+    Train a Random Forest regressor model using Sklearn with optional hyperparameter tuning.
+
+    Trains the model with the given parameters and evaluates model performance using test data.
 
     Args:
         X: Training data.
         y: Target labels.
-        test_size: Fraction of the dataset to be used as test data. Defaults to 0.25.
+        test_size: Fraction of the dataset to be used as test data (rest is used for training). Defaults to 0.25.
         n_estimators: The number of trees in the forest. Defaults to 100.
         random_state: Seed for random number generation. Defaults to None.
         tune_with_method: If the model parameters should be tuned. Options include
@@ -124,15 +122,14 @@ def random_forest_regressor_train(
             of possible parameter values (e.g. [10, 50, 100]). Tune parameters must be defined
             is tuning is selected, otherwise this parameter is not used. Defaults to None.
         cv: Number of cross-validation folds used in hyperparameter tuning. Defaults to 5.
-        **kwargs: Additional parameters for RandomForestRegressor.
+        **kwargs: Additional parameters for Sklearn's RandomForestRegressor.
 
     Returns:
-        Trained random forest regressor.
+        Trained Random Forest regressor.
     """
-    if X.shape[0] != y.shape[0]:
-        raise exceptions.NonMatchingParameterLengthsException(
-            f"X and y must have the length {X.shape[0]} != {X.shape[0]}."
-        )
+    x_size = X.index.size if isinstance(X, pd.DataFrame) else X.shape[0]
+    if x_size != y.size:
+        raise exceptions.NonMatchingParameterLengthsException(f"X and y must have the length {x_size} != {y.size}.")
 
     # Splitting data into training and testing
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
@@ -149,7 +146,7 @@ def random_forest_regressor_train(
     y_pred = model.predict(X_test)
 
     # Performance metrics
-    report = classification_report(y_test, y_pred, output_dict=True)
+    report = evaluate_regression_model(y_test, y_pred)
 
     return model, report
 
@@ -157,13 +154,14 @@ def random_forest_regressor_train(
 @beartype
 def random_forest_regressor_predict(model: RandomForestRegressor, X: Union[np.ndarray, pd.DataFrame]) -> np.ndarray:
     """
-    Use a trained random forest regressor to make predictions.
+    Use a trained Random Forest regressor to make predictions.
 
     Args:
-        model: Trained random forest regressor.
+        model: Trained Random Forest regressor.
         X: Features/data to predict.
 
     Returns:
         Predictions.
     """
-    return model.predict(X)
+    predictions = model.predict(X)
+    return predictions
