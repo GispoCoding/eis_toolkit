@@ -3,11 +3,13 @@ from typing import Sequence
 import numpy as np
 import pandas as pd
 import sklearn.neural_network
+from beartype import beartype
 from sklearn.inspection import permutation_importance
 
 from eis_toolkit.exceptions import InvalidDatasetException
 
 
+@beartype
 def evaluate_feature_importance(
     classifier: sklearn.base.BaseEstimator,
     x_test: np.ndarray,
