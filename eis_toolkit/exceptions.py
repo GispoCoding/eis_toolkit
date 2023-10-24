@@ -76,3 +76,11 @@ class NonSquarePixelSizeException(Exception):
 
 class NumericValueSignException(Exception):
     """Exception error class for numeric value sign exception."""
+
+
+class InvalidModelException(Exception):
+    """Exception error class when model is invalid or null."""
+
+
+class InvalidDatasetException(Exception):
+    """Exception error class when the dataset is null."""
