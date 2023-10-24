@@ -28,7 +28,7 @@ feature_names = [
     "EM_Inph",
 ]
 
-X = pd.read_csv("../data/remote/fake_smote_data.csv").to_numpy()
+X = pd.read_csv("./tests/data/remote/fake_smote_data.csv").to_numpy()
 X = StandardScaler().fit_transform(X)
 labels = np.random.randint(2, size=13)
 
