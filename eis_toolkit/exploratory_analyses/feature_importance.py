@@ -17,7 +17,7 @@ def evaluate_feature_importance(
     feature_names: Sequence[str],
     number_of_repetition: int = 50,
     random_state: int = 0,
-) -> (pd.DataFrame, dict):
+) -> tuple[pd.DataFrame, dict]:
     """
     Evaluate the feature importance of a sklearn classifier or linear model.
 
