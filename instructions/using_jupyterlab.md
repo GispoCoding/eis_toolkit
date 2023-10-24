@@ -22,7 +22,7 @@ jupyter lab --ip=0.0.0.0 --no-browser --allow-root
 A jupyter server should now be available. Access it with the last link jupyter prints
 to the terminal (you can just click it to automatically open it in a browser)
 
-## Wihtout docker
+## Without docker
 Start the jupyter server with
 
 ```shell
