@@ -1,69 +1,50 @@
-import matplotlib.pyplot as plt
+from typing import Sequence
+
+import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import StandardScaler
+import sklearn.neural_network
+from beartype import beartype
+from sklearn.inspection import permutation_importance
 
-from eis_toolkit.feature_importance.feature_importance import evaluate_feature_importance
+from eis_toolkit.exceptions import InvalidDatasetException
 
-# here I set to paths
-data_to_load = "PUT PATH TO X"
-label_to_load = "PUT PATH TO Y"
 
-if __name__ == "__main__":
+@beartype
+def evaluate_feature_importance(
+    classifier: sklearn.base.BaseEstimator,
+    x_test: np.ndarray,
+    y_test: np.ndarray,
+    feature_names: Sequence[str],
+    number_of_repetition: int = 50,
+    random_state: int = 0,
+) -> (pd.DataFrame, dict):
+    """
+    Evaluate the feature importance of a sklearn classifier or linear model.
 
-    feature_names = [
-        "Mag_TMI",
-        "Mag_AS",
-        "DRC135",
-        "DRC180",
-        "DRC45",
-        "DRC90",
-        "Mag_TD",
-        "HDTDR",
-        "Mag_Xdrv",
-        "mag_Ydrv",
-        "Mag_Zdrv",
-        "Pseu_Grv",
-        "Rd_U",
-        "Rd_TC",
-        "Rd_Th",
-        "Rd_K",
-        "EM_ratio",
-        "EM_Ap_rs",
-        "Em_Qd",
-        "EM_Inph",
-    ]
+    Parameters:
+        classifier: Trained classifier.
+        x_test: Testing feature data (X data need to be normalized / standardized).
+        y_test: Testing target data.
+        feature_names: Names of the feature columns.
+        number_of_repetition: Number of iteration used when calculate feature importance (default 50).
+        random_state: random state for repeatability of results (Default 0).
+    Return:
+        A dataframe composed by features name and Importance value
+        The resulted object with importance mean, importance std, and overall importance
+    Raises:
+        InvalidDatasetException: When the dataset is None.
+    """
 
-    # first things first let s load data
-    X = pd.read_csv(f"{data_to_load}").to_numpy()
-    y = pd.read_csv(f"{label_to_load}").to_numpy()
+    if x_test is None or y_test is None:
+        raise InvalidDatasetException
 
-    # standardize the content
-    X = StandardScaler().fit_transform(X)
-
-    # now let s train a MLP classifier
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
-
-    # we can train a MLP classifier
-    clf = MLPClassifier(solver="adam", alpha=0.001, hidden_layer_sizes=(16, 2), random_state=1)
-    clf.fit(X_train, y_train.ravel())
-
-    # we evaluate feature here
-    evaluated_feature_importance, dictionary_of_features = evaluate_feature_importance(
-        clf=clf, x_test=X_test, y_test=y_test, feature_names=feature_names, number_of_repetition=50, random_state=0
+    result = permutation_importance(
+        classifier, x_test, y_test.ravel(), n_repeats=number_of_repetition, random_state=random_state
     )
 
-    print(evaluated_feature_importance)
+    feature_importance = pd.DataFrame({"Feature": feature_names, "Importance": result.importances_mean})
 
-    # how to create a chart from here
-    imp = pd.Series(dictionary_of_features.importances_mean * 100, index=feature_names).sort_values(ascending=True)
-    ax = imp.plot.barh()
-    ax.set_title("MLP Permutation Importance")
-    ax.figure.tight_layout()
-    plt.xlabel("Importance (%)")
-    plt.grid(axis="x", linestyle="--", alpha=0.6)
-    plt.ylabel("Feature")
-    for i, v in enumerate(imp):
-        ax.text(v, i, f"{v:.1f}", color="blue", fontweight="bold", fontsize=8)
-    plt.savefig("testing.png")
+    feature_importance["Importance"] = feature_importance["Importance"] * 100
+    feature_importance = feature_importance.sort_values(by="Importance", ascending=False)
+
+    return feature_importance, result
