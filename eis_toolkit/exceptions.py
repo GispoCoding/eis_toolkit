@@ -72,3 +72,15 @@ class NonSquarePixelSizeException(Exception):
 
 class NumericValueSignException(Exception):
     """Exception error class for numeric value sign exception."""
+
+
+class InvalidCrossValidationSelected(Exception):
+    """Exception thrown when a not valid cv is selected."""
+
+
+class InvalidNumberOfSplit(Exception):
+    """Exception throws when number of split is incompatible."""
+
+
+class InvalidDatasetException(Exception):
+    """Exception throws when the dataset is null."""
