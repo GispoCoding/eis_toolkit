@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.neural_network import MLPClassifier
 
-from eis_toolkit.exceptions import InvalidDatasetException
+from eis_toolkit.exceptions import InvalidArgumentTypeException, InvalidDatasetException
 from eis_toolkit.model_performance_estimation.model_performance_estimation import performance_model_estimation
 
 
@@ -36,12 +36,16 @@ def train_evaluate_predict_with_mlp(
     Return:
         a numpy array with prediction (class if is_class_probability is set to false otherwise it return probability).
     Raises:
-        InvalidDatasetException: When the dataset is None..
+        InvalidDatasetException: When the dataset is None.
+        InvalidArgumentTypeException when the function try to make probability and the threshold is None.
     """
 
     # I need two local vars
     best_score = 0
     best_handler_list = list()
+
+    if is_class_probability is not False and threshold_probability is None:
+        raise InvalidArgumentTypeException
 
     if dataset is None or labels is None:
         raise InvalidDatasetException
