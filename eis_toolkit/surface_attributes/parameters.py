@@ -76,7 +76,9 @@ def first_order(
     slope_direction_unit: Literal["degrees", "radians"] = "radians",
     method: Literal["Horn", "Evans", "Young", "Zevenbergen"] = "Horn",
 ) -> dict:
-    """
+    """Calculates the first order surface attributes.
+
+    For compatibility for slope and aspect calculations with ArcGIS or QGIS, choose Method Horn (1981).
 
     Returns:
         Selected surface attributes and respective updated metadata.
@@ -155,7 +157,21 @@ def second_order_basic_set(
     slope_tolerance: Optional[Number] = 0,
     method: Literal["Evans", "Young", "Zevenbergen"] = "Young",
 ) -> dict:
-    """
+    """Calculates the second order surface attributes.
+
+    References:
+    Young, M., 1978: Terrain analysis program documentation. Report 5 on Grant DA-ERO-591-73-G0040,
+    'Statistical characterization of altitude matrices by computer'. Department of Geography,
+    University of Durham, England: 27 pp.
+
+    Zevenbergen, L.W. and Thorne, C.R., 1987: Quantitative analysis of land surface topography,
+    Earth Surface Processes and Landforms, 12: 47-56.
+
+    Wood, J., 1996: The Geomorphological Characterisation of Digital Elevation Models. Doctoral Thesis.
+    Department of Geography, University of Leicester, England: 466 pp.
+
+    Parameters longc and crosc from are referenced by Zevenbergen & Thorne (1987) as profile and plan curvature.
+    For compatibility with ArcGIS, choose Method Zevenbergen & Thorne (1987) and parameters longc and crosc.
 
     Returns:
         Selected surface attributes and respective updated metadata.
