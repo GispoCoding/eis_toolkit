@@ -126,10 +126,10 @@ def covariance_matrix(
         delta_degrees_of_freedom: Delta degrees of freedom used for computing covariance matrix. Defaults to 1.
 
     Raises:
+        EmptyDataFrameException: The input Dataframe is empty.
         InvalidParameterValueException: Provided value for delta_degrees_of_freedom is negative.
 
     Returns:
-        EmptyDataFrameException: The input Dataframe is empty.
         Dataframe containing the covariance matrix
     """
     if check_empty_dataframe(data):
