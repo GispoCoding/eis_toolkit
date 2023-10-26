@@ -4,7 +4,7 @@ import pytest
 from sklearn.preprocessing import StandardScaler
 
 from eis_toolkit.exceptions import InvalidArgumentTypeException
-from eis_toolkit.prediction.mlp import train_evaluate_predict_with_mlp
+from eis_toolkit.prediction.mlp import mlp_train_evaluate_and_predict
 
 
 def test_the_invalid_argument_exception():
@@ -13,7 +13,7 @@ def test_the_invalid_argument_exception():
     X = StandardScaler().fit_transform(X)
     labels = np.random.randint(2, size=X.shape[0])
     with pytest.raises(InvalidArgumentTypeException):
-        train_evaluate_predict_with_mlp(
+        mlp_train_evaluate_and_predict(
             dataset=X,
             labels=labels,
             cross_validation_type="SKFOLD",
@@ -28,7 +28,7 @@ def test_check_prediction_is_not_empty():
     X = pd.read_csv("../data/remote/fake_smote_data.csv").to_numpy()
     X = StandardScaler().fit_transform(X)
     labels = np.random.randint(2, size=X.shape[0])
-    prediction = train_evaluate_predict_with_mlp(
+    prediction = mlp_train_evaluate_and_predict(
         dataset=X,
         labels=labels,
         cross_validation_type="SKFOLD",
