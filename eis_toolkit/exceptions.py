@@ -6,6 +6,10 @@ class ClassificationFailedException(Exception):
     """Exception error class for classification failures."""
 
 
+class EmptyDataException(Exception):
+    """Exception error class raised if input data is empty."""
+
+
 class EmptyDataFrameException(Exception):
     """Exception error class raised if the dataframe is empty."""
 
