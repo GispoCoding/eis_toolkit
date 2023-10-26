@@ -30,15 +30,17 @@ def train_evaluate_predict_with_mlp(
         labels: Labels data.
         cross_validation_type: selected cross validation method.
         number_of_split: number of split to divide the dataset.
-        is_class_probability: if True the code return probability, otherwise it return class.
-        is_predict_full_map: if True the function will predict the full dataset otherwise predict only the te4st fold.
+        is_class_probability: if True the code return probability, otherwise it returns class.
+     is_predict_full_map: if True the function will predict the full dataset otherwise predict only the test fold.
         threshold_probability: works only if is_class_probability is True, is thresholds of probability.
         solver: this is what in keras is called optimizer.
         alpha: floating point represent regularization.
         hidden_layer_sizes: It represents the number of neurons in the ith hidden layer.
         random_state: random state for repeatability of results.
+
     Return:
-         A Numpy array with prediction (class if is_class_probability is set to false otherwise it return probability).
+    A Numpy array with prediction (class if is_class_probability is set to false otherwise it returns probability).
+
     Raises:
         InvalidDatasetException: When the dataset is None.
         InvalidArgumentTypeException when the function try to make probability and the threshold is None.
