@@ -5,7 +5,6 @@ from beartype.roar import BeartypeCallHintParamViolation
 
 from eis_toolkit import exceptions
 from eis_toolkit.statistical_analyses.statistical_tests import (
-    check_empty_dataframe,
     chi_square_test,
     correlation_matrix,
     covariance_matrix,
@@ -20,14 +19,14 @@ target_column = "e"
 
 def test_chi_square_test():
     """Test that returned statistics for independence are correct."""
-    output_statistics = chi_square_test(data=categorical_data, target_column=target_column)
-    np.testing.assert_array_equal((output_statistics[0]), (0.0, 1.0, 1))
+    output_statistics = chi_square_test(data=categorical_data, target_column=target_column, columns=("f"))
+    np.testing.assert_array_equal((output_statistics["f"]), (0.0, 1.0, 1))
 
 
 def test_normality_test():
     """Test that returned statistics for normality are correct."""
     output_statistics = normality_test(data=numeric_data)
-    np.testing.assert_array_almost_equal(output_statistics[0], (0.72863, 0.02386), decimal=5)
+    np.testing.assert_array_almost_equal(output_statistics["a"], (0.72863, 0.02386), decimal=5)
 
 
 def test_correlation_matrix():
@@ -62,7 +61,13 @@ def test_empty_df():
     """Test that empty DataFrame raises the correct exception."""
     empty_df = pd.DataFrame()
     with pytest.raises(exceptions.EmptyDataFrameException):
-        check_empty_dataframe(data=empty_df)
+        normality_test(data=empty_df)
+
+
+def test_invalid_columns():
+    """Test that invalid column name in raises the correct exception."""
+    with pytest.raises(exceptions.InvalidParameterValueException):
+        chi_square_test(data=categorical_data, target_column=target_column, columns=["f", "x"])
 
 
 def test_invalid_target_column():
