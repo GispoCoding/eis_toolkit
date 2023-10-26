@@ -9,10 +9,9 @@ from eis_toolkit.utilities.nodata import nodata_to_nan
 
 
 @beartype
-def _method_horn(
+def _coefficients_horn(
     data: np.ndarray,
     cellsize: Number,
-    coefficients: Sequence[Literal["p", "q"]],
 ) -> tuple[Union[np.ndarray, None], Union[np.ndarray, None]]:
     """
     Calculate the partial derivatives of a surface after after Horn (1981).
@@ -31,24 +30,17 @@ def _method_horn(
     kernal_p = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
     kernal_q = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
 
-    p = scipy.ndimage.correlate(data, weights=kernal_p) / (8 * cellsize) if "p" in coefficients else None
-    q = scipy.ndimage.correlate(data, weights=kernal_q) / (8 * cellsize) if "q" in coefficients else None
+    p = scipy.ndimage.correlate(data, weights=kernal_p) / (8 * cellsize)
+    q = scipy.ndimage.correlate(data, weights=kernal_q) / (8 * cellsize)
 
     return p, q
 
 
 @beartype
-def _method_zevenbergen_thorne(
+def _coefficients_zevenbergen(
     data: np.ndarray,
     cellsize: Number,
-    coefficients: Sequence[Literal["p", "q", "r", "s", "t"]],
-) -> tuple[
-    Union[np.ndarray, None],
-    Union[np.ndarray, None],
-    Union[np.ndarray, None],
-    Union[np.ndarray, None],
-    Union[np.ndarray, None],
-]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculate the partial derivatives of a surface after Zevenbergen & Thorne (1987).
 
@@ -71,27 +63,20 @@ def _method_zevenbergen_thorne(
     kernal_s = np.array([[-1, 0, 1], [0, 0, 0], [1, 0, -1]])
     kernal_t = np.array([[0, 1, 0], [0, -2, 0], [0, 1, 0]]) / 2
 
-    p = scipy.ndimage.correlate(data, weights=kernal_p) / (2 * cellsize) if "p" in coefficients else None
-    q = scipy.ndimage.correlate(data, weights=kernal_q) / (2 * cellsize) if "q" in coefficients else None
-    r = scipy.ndimage.correlate(data, weights=kernal_r) / (cellsize**2) if "r" in coefficients else None
-    s = scipy.ndimage.correlate(data, weights=kernal_s) / (4 * cellsize**2) if "s" in coefficients else None
-    t = scipy.ndimage.correlate(data, weights=kernal_t) / (cellsize**2) if "t" in coefficients else None
+    p = scipy.ndimage.correlate(data, weights=kernal_p) / (2 * cellsize)
+    q = scipy.ndimage.correlate(data, weights=kernal_q) / (2 * cellsize)
+    r = scipy.ndimage.correlate(data, weights=kernal_r) / (cellsize**2)
+    s = scipy.ndimage.correlate(data, weights=kernal_s) / (4 * cellsize**2)
+    t = scipy.ndimage.correlate(data, weights=kernal_t) / (cellsize**2)
 
     return p, q, r, s, t
 
 
 @beartype
-def _method_evans_young(
+def _coefficients_young(
     data: np.ndarray,
     cellsize: Number,
-    coefficients: Sequence[Literal["p", "q", "r", "s", "t"]],
-) -> tuple[
-    Union[np.ndarray, None],
-    Union[np.ndarray, None],
-    Union[np.ndarray, None],
-    Union[np.ndarray, None],
-    Union[np.ndarray, None],
-]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculate the partial derivatives of a surface after the Evans-Young method (1978).
 
@@ -119,27 +104,20 @@ def _method_evans_young(
     kernal_s = np.array([[-1, 0, 1], [0, 0, 0], [1, 0, -1]])
     kernal_t = np.array([[1, 1, 1], [-2, -2, -2], [1, 1, 1]])
 
-    p = scipy.ndimage.correlate(data, weights=kernal_p) / (6 * cellsize) if "p" in coefficients else None
-    q = scipy.ndimage.correlate(data, weights=kernal_q) / (6 * cellsize) if "q" in coefficients else None
-    r = scipy.ndimage.correlate(data, weights=kernal_r) / (3 * cellsize**2) if "r" in coefficients else None
-    s = scipy.ndimage.correlate(data, weights=kernal_s) / (4 * cellsize**2) if "s" in coefficients else None
-    t = scipy.ndimage.correlate(data, weights=kernal_t) / (3 * cellsize**2) if "t" in coefficients else None
+    p = scipy.ndimage.correlate(data, weights=kernal_p) / (6 * cellsize)
+    q = scipy.ndimage.correlate(data, weights=kernal_q) / (6 * cellsize)
+    r = scipy.ndimage.correlate(data, weights=kernal_r) / (3 * cellsize**2)
+    s = scipy.ndimage.correlate(data, weights=kernal_s) / (4 * cellsize**2)
+    t = scipy.ndimage.correlate(data, weights=kernal_t) / (3 * cellsize**2)
 
     return p, q, r, s, t
 
 
 @beartype
-def _method_evans(
+def _coefficients_evans(
     data: np.ndarray,
     cellsize: Number,
-    coefficients: Sequence[Literal["p", "q", "r", "s", "t"]],
-) -> tuple[
-    Union[np.ndarray, None],
-    Union[np.ndarray, None],
-    Union[np.ndarray, None],
-    Union[np.ndarray, None],
-    Union[np.ndarray, None],
-]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculate the partial derivatives of a surface after Evans (1979).
 
@@ -165,24 +143,18 @@ def _method_evans(
     kernal_t_outer = np.array([[1, 1, 1], [0, 0, 0], [1, 1, 1]])
     kernal_t_inner = np.array([[0, 0, 0], [1, 1, 1], [0, 0, 0]])
 
-    p = scipy.ndimage.correlate(data, weights=kernal_p) / (6 * cellsize) if "p" in coefficients else None
-    q = scipy.ndimage.correlate(data, weights=kernal_q) / (6 * cellsize) if "q" in coefficients else None
+    p = scipy.ndimage.correlate(data, weights=kernal_p) / (6 * cellsize)
+    q = scipy.ndimage.correlate(data, weights=kernal_q) / (6 * cellsize)
 
-    if "r" in coefficients:
-        r_outer = scipy.ndimage.correlate(data, weights=kernal_r_outer) / (6 * cellsize**2)
-        r_inner = scipy.ndimage.correlate(data, weights=kernal_r_inner) / (3 * cellsize**2)
-        r = r_outer - r_inner
-    else:
-        r = None
+    r_outer = scipy.ndimage.correlate(data, weights=kernal_r_outer) / (6 * cellsize**2)
+    r_inner = scipy.ndimage.correlate(data, weights=kernal_r_inner) / (3 * cellsize**2)
+    r = r_outer - r_inner
 
-    s = scipy.ndimage.correlate(data, weights=kernal_s) / (4 * cellsize**2) if "s" in coefficients else None
+    s = scipy.ndimage.correlate(data, weights=kernal_s) / (4 * cellsize**2)
 
-    if "t" in coefficients:
-        t_outer = scipy.ndimage.correlate(data, weights=kernal_t_outer) / (6 * cellsize**2)
-        t_inner = scipy.ndimage.correlate(data, weights=kernal_t_inner) / (3 * cellsize**2)
-        t = t_outer - t_inner
-    else:
-        t = None
+    t_outer = scipy.ndimage.correlate(data, weights=kernal_t_outer) / (6 * cellsize**2)
+    t_inner = scipy.ndimage.correlate(data, weights=kernal_t_inner) / (3 * cellsize**2)
+    t = t_outer - t_inner
 
     return p, q, r, s, t
 
@@ -191,8 +163,7 @@ def _method_evans(
 def coefficients(
     in_array: np.ndarray,
     cellsize: Number,
-    method: Literal["Horn", "ZevenbergenThorne", "EvansYoung", "Evans"],
-    coefficients: Sequence[Literal["p", "q", "r", "s", "t"]],
+    method: Literal["Horn", "Evans", "Young", "Zevenbergen"],
 ) -> tuple[np.ndarray, np.ndarray, Union[np.ndarray, None], Union[np.ndarray, None], Union[np.ndarray, None]]:
     """Calculate the partial derivatives of a given surface.
 
@@ -207,17 +178,17 @@ def coefficients(
     """
 
     if method == "Horn":
-        p, q = _method_horn(in_array, cellsize, coefficients)
+        p, q = _coefficients_horn(in_array, cellsize)
         return p, q, None, None, None
 
-    if method == "ZevenbergenThorne":
-        p, q, r, s, t = _method_zevenbergen_thorne(in_array, cellsize, coefficients)
+    if method == "Zevenbergen":
+        p, q, r, s, t = _coefficients_zevenbergen(in_array, cellsize)
         return p, q, r, s, t
 
-    if method == "EvansYoung":
-        p, q, r, s, t = _method_evans_young(in_array, cellsize, coefficients)
+    if method == "Young":
+        p, q, r, s, t = _coefficients_young(in_array, cellsize)
         return p, q, r, s, t
 
     if method == "Evans":
-        p, q, r, s, t = _method_evans(in_array, cellsize, coefficients)
+        p, q, r, s, t = _coefficients_evans(in_array, cellsize)
         return p, q, r, s, t

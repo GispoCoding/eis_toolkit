@@ -48,30 +48,28 @@ def scale_raster(
 
 @beartype
 def set_flat_pixels(
-    data: np.ndarray,
-    gradient: Union[np.ndarray, tuple[np.ndarray, np.ndarray]],
-    min_slope: Number,
+    in_array: np.ndarray,
+    slope_gradient: Union[np.ndarray, tuple[np.ndarray, np.ndarray]],
+    slope_tolerance: Number,
     parameter: str,
 ) -> np.ndarray:
     """Treating values below a certain gradient as flat surface.
 
     Args:
         data (np.ndarray): Input surface attribute.
-        slope (np.ndarray): Input slope array in degrees.
-        min_slope (Number): Value below a surface will be treated as flat surface.
+        slope_slope (np.ndarray): Input slope array in degrees.
+        slope_tolerance (Number): Value below a surface will be treated as flat surface (degrees).
 
     Returns:
         Array of the modified surface attribute.
     """
-    replacement_value = -1 if parameter == "Aspect" else 0
+    replacement_value = -1 if parameter == "A" else 0
 
-    if min_slope == 0:
-        p, q = gradient
-        out_array = np.where(np.logical_and(p == 0, q == 0), replacement_value, data)
-    elif min_slope > 0:
-        out_array = np.where(np.logical_and(gradient >= 0, gradient < min_slope), replacement_value, data)
-
-    return out_array
+    if slope_tolerance == 0:
+        p, q = slope_gradient
+        return np.where(np.logical_and(p == 0, q == 0), replacement_value, in_array)
+    elif slope_tolerance > 0:
+        return np.where(slope_gradient <= np.radians(slope_tolerance), replacement_value, in_array)
 
 
 @beartype
@@ -107,6 +105,7 @@ def _classify_aspect(
         The mapping for the corresponding direction for each class.
         The updated raster meta data.
     """
+
     aspect = raster.read()
     aspect = np.squeeze(aspect) if aspect.ndim >= 3 else aspect
     out_nodata = -9999
@@ -171,6 +170,7 @@ def classify_aspect(
     Returns:
         The classified aspect raster, a class mapping dictionary and the updated metadata.
     """
+
     if raster.count > 1:
         raise InvalidRasterBandException("Only one-band raster supported.")
 
