@@ -1,14 +1,18 @@
+from typing import Literal
+
 import numpy as np
+from beartype import beartype
 from sklearn.neural_network import MLPClassifier
 
 from eis_toolkit.exceptions import InvalidArgumentTypeException, InvalidDatasetException
-from eis_toolkit.model_performance_estimation.model_performance_estimation import performance_model_estimation
+from eis_toolkit.prediction.model_performance_estimation import performance_model_estimation
 
 
+@beartype
 def train_evaluate_predict_with_mlp(
     dataset: np.ndarray,
     labels: np.ndarray,
-    cross_validation_type: str,
+    cross_validation_type: Literal["LOOCV", "KFOLD", "SKFOLD"],
     number_of_split: int,
     is_class_probability: bool = False,
     threshold_probability: float = None,
@@ -16,7 +20,7 @@ def train_evaluate_predict_with_mlp(
     solver: str = "adam",
     alpha: float = 0.001,
     hidden_layer_sizes: tuple[int, int] = (16, 2),
-    random_state=0,
+    random_state: int = 0,
 ) -> np.ndarray:
     """
     Do the training - evaluation - predictions steps with MLP.
@@ -34,7 +38,7 @@ def train_evaluate_predict_with_mlp(
         hidden_layer_sizes: It represents the number of neurons in the ith hidden layer.
         random_state: random state for repeatability of results.
     Return:
-        a numpy array with prediction (class if is_class_probability is set to false otherwise it return probability).
+         A Numpy array with prediction (class if is_class_probability is set to false otherwise it return probability).
     Raises:
         InvalidDatasetException: When the dataset is None.
         InvalidArgumentTypeException when the function try to make probability and the threshold is None.

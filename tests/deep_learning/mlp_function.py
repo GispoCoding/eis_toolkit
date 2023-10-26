@@ -3,8 +3,8 @@ import pandas as pd
 import pytest
 from sklearn.preprocessing import StandardScaler
 
-from eis_toolkit.deep_learning.mlp_function import train_evaluate_predict_with_mlp
 from eis_toolkit.exceptions import InvalidArgumentTypeException
+from eis_toolkit.prediction.mlp import train_evaluate_predict_with_mlp
 
 
 def test_the_invalid_argument_exception():

@@ -1,11 +1,15 @@
+from typing import Literal
+
 import sklearn
+from beartype import beartype
 from sklearn.model_selection import KFold, LeaveOneOut, StratifiedKFold
 
 from eis_toolkit.exceptions import InvalidCrossValidationSelected, InvalidNumberOfSplit
 
 
+@beartype
 def performance_model_estimation(
-    cross_validation_type: str = "LOOCV", number_of_split: int = 5
+    cross_validation_type: Literal["LOOCV", "KFOLD", "SKFOLD"], number_of_split: int = 5
 ) -> sklearn.model_selection:
     """
     Evaluate the feature importance of a sklearn classifier or linear model.
