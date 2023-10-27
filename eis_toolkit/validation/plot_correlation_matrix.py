@@ -4,7 +4,6 @@ import matplotlib
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from matplotlib import axes
 
 from eis_toolkit import exceptions
 
@@ -15,7 +14,7 @@ def plot_correlation_matrix(
     cmap: Optional[matplotlib.colors.ListedColormap] = None,
     plot_title: Optional[str] = None,
     **kwargs
-) -> axes.Axes:
+) -> matplotlib.axes.Axes:
     """
     Create a Seaborn heatmap to visualize correlation matrix.
 
