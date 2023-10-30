@@ -92,8 +92,84 @@ def evaluate_the_model(
     return score
 
 
+def predict_the_model_with_cross_validation(
+    classifier: sklearn.base.BaseEstimator,
+    test_dataset: np.ndarray,
+    test_labels: np.ndarray,
+    cross_validation_type: Literal["LOOCV", "KFOLD", "SKFOLD"],
+    number_of_split: int,
+    is_class_probability: bool = False,
+    threshold_probability: float = None,
+    is_predict_full_map: bool = False,
+) -> numpy.ndarray:
+
+    """
+    Do the model prediction with cross validation.
+
+    Parameters:
+        classifier: An instance of sklearn base estimator.
+        test_dataset: Test data.
+        test_labels: the test labels.
+        cross_validation_type: selected cross validation method.
+        number_of_split: number of split to divide the dataset.
+        is_class_probability: if True the code return probability, otherwise it returns class.
+        is_predict_full_map: if True the code will predict the full map.
+        threshold_probability: works only if is_class_probability is True, is thresholds of probability.
+    Return:
+        A float point number that shows the accuracy.
+
+    Raises:
+        InvalidDatasetException: When the dataset is None.
+    """
+
+    # I need two local vars
+    best_score = 0
+    best_handler_list = list()
+
+    # select the cross validation method you need
+    selected_cross_validation = performance_model_estimation(
+        cross_validation_type=cross_validation_type, number_of_split=number_of_split
+    )
+
+    # start the training process
+    for fold_number, (train_index, test_index) in enumerate(selected_cross_validation.split(dataset, labels)):
+
+        # train the classifier
+        classifier.fit(test_dataset[train_index], test_labels[train_index])
+        # score
+        fold_score = classifier.score(test_dataset[test_index], test_labels[test_index])
+
+        if fold_number == 0:
+            best_score = fold_score
+            best_handler_list = [classifier, test_dataset[test_index]]
+        else:
+            if best_score < fold_score:
+                best_score = fold_score
+                best_handler_list = [classifier, test_dataset[test_index]]
+
+    # assign to classifier and data a vars I do not like see to much indexing
+    classifier = best_handler_list[0]
+
+    if not is_predict_full_map:
+        data = best_handler_list[1]
+    else:
+        data = dataset
+
+    if not is_class_probability:
+        # predict class
+        prediction = classifier.predict(data)
+    else:
+        # predict proba
+        prediction = classifier.predict_proba(data)
+        # assign proba to threshold
+        prediction[prediction >= threshold_probability] = 1
+
+    return prediction
+
+
+
 @beartype
-def predict_the_model(
+def predict_the_model_without_cross_validation(
     classifier: sklearn.base.BaseEstimator,
     test_dataset: numpy.ndarray,
     is_class_probability: bool = False,
@@ -157,7 +233,7 @@ def mlp_train_evaluate_and_predict(
         cross_validation_type: selected cross validation method.
         number_of_split: number of split to divide the dataset.
         is_class_probability: if True the code return probability, otherwise it returns class.
-     is_predict_full_map: if True the function will predict the full dataset otherwise predict only the test fold.
+        is_predict_full_map: if True the function will predict the full dataset otherwise predict only the test fold.
         threshold_probability: works only if is_class_probability is True, is thresholds of probability.
         solver: this is what in keras is called optimizer.
         alpha: floating point represent regularization.
