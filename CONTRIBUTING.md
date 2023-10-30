@@ -133,39 +133,6 @@ any text changes as `pre-commit` can modify unformatted files:
 pre-commit run --all-files
 ```
 
-### invoke
-
-In order to guarantee consistent coding style, a bunch of different linters and formatters have been brought into use.
-
-> Note that running the invoke lint command is not mandatory anymore, as we have started to use pre-commit! You can still the manual linter to run mypy (which is not part of pre-commit), but it is not strictly required to fix all warning mypy throws.
-
-For more convenient user experience, running
-- mypy (checks type annotations)
-- flake8 (checks the compliance to PEP8)
-- black (formats the code)
-
-and
-
-- isort (sorts the import statements)
-
-have been combined into one task. The task can be executed from container's command line with
-
-``` console
-invoke lint
-```
-
-**Assumption**: you have already executed the following commands
-1. *docker compose up -d* or *docker compose up -d --build* (e.g. if dependencies have been updated)
-2. *docker attach eis_toolkit*
-3. *poetry shell*
-
-before you try to run *invoke lint* command.
-
-Possible errors will be printed onto the command line.
-
-**Please** fix them before committing anything!
-
-- Note that sometimes the best way to "fix" an error is to ignore that particular error code for some spesific line of code. However, be conscious on when to use this approach!
 
 ## Testing
 
