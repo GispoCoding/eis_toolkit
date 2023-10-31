@@ -84,3 +84,11 @@ class InvalidNumberOfSplit(Exception):
 
 class InvalidDatasetException(Exception):
     """Exception throws when the dataset is null."""
+
+
+class CanNotMakeCategoricalLabelException(Exception):
+    """Exception throws when it is not possible to do the one hot encoding."""
+
+
+class NoSuchPathOrDirectory(Exception):
+    """Exception throws when no correct path is found."""

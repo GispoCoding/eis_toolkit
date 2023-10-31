@@ -1,57 +1,89 @@
 import os
-from typing import Any, Literal, Union
+import random
+from typing import Literal, Union
 
 import joblib
 import numpy
 import numpy as np
 import tensorflow as tf
 from beartype import beartype
-from numpy import dtype, ndarray
+from osgeo import gdal
 from sklearn.preprocessing import StandardScaler
+from sklearn.utils.class_weight import compute_sample_weight
+from utilities import create_windows_based_of_geo_coords, parse_the_master_file, return_list_of_N_and_E
 
 
 @beartype
-def return_windows_as_sequence(
-    input_path: str = None,
-) -> tuple[dict[str, ndarray[Any, dtype[Any]]], ndarray[Any, dtype[Any]]]:
+def dataset_loader(
+    deposit_path: str, unlabelled_data_path: str, desired_windows_dimension: int, path_of_features: str
+) -> tuple[dict, list]:
     """
-    Load sets of windows from its folder.
+    Do the load of the data.
 
     Parameters:
-        input_path: this is what in keras is called optimizer.
+        deposit_path: the path to the deposit csv file.
+        unlabelled_data_path the path from the 2M csv file.
+         desired_windows_dimension: the desired windows dimension.
+         path_of_features: nasterfile path.
 
     Return:
-        It returns dataset and labels
+        dataset holder and labels holder.
 
     Raises:
         TODO
     """
-    labels = list()
-    data_dictionary = dict()
-    for folder in os.listdir(f"{input_path}"):
-        concatenated = None
-        for satellites_folder in os.listdir(f"{input_path}/{folder}"):
-            full_path = f"{input_path}/{folder}/{satellites_folder}"
-            # loop in all the folders and get all wins
-            print(f"[WALK] Walking into {full_path}")
-            # rest the win list
-            windows_holder = list()
-            for windows in os.listdir(full_path):
-                # get the class
-                labels.append(windows.split(".")[0].split("_")[-1])
-                windows_holder.append(np.load(f"{full_path}/{windows}"))
-            # make concatenation
-            if concatenated is None:
-                concatenated = np.array(windows_holder)
-            else:
-                concatenated = np.concatenate((concatenated, np.array(windows_holder)), axis=-1)
+    dataset_holder = {}
+    labels_holder = list()
+    already_done = list()
+    same_point = True
 
-        # add the data dict
-        data_dictionary[f"{folder}"] = concatenated.astype("float32")
-    # prepare the labels
-    labels = np.array(labels).astype("uint8")
+    # load the csv file with the deposit annotation
+    coordinates_of_deposit = return_list_of_N_and_E(path_to_data=f"{deposit_path}")
+    coordinates_of_unlabelled_data = return_list_of_N_and_E(path_to_data=f"{unlabelled_data_path}")
 
-    return data_dictionary, labels
+    # parse the master
+    current_dataset = parse_the_master_file(master_file_path=path_of_features)
+
+    for key, val in current_dataset.items():
+        # create a list that hold the windows
+        dataset_holder[key] = list()
+        for tif_obj in current_dataset[key]:
+            # do the same for class 0
+            current_raster = gdal.Open(tif_obj.puhti_path)
+            for windows_counter, (N, E) in enumerate(coordinates_of_deposit):
+                windows = create_windows_based_of_geo_coords(
+                    current_raster_object=tif_obj,
+                    current_E=float(E),
+                    current_N=float(N),
+                    desired_windows_dimension=desired_windows_dimension,
+                    current_loaded_raster=current_raster,
+                )
+                dataset_holder[key].append(windows)
+                labels_holder.append(1)
+
+            # generate 17 random windows
+            rn = 0
+            for i in range(0, len(coordinates_of_deposit)):
+                if not same_point:
+                    # loop until you find a free number
+                    while rn in already_done:
+                        rn = random.randint(0, len(coordinates_of_unlabelled_data))
+                    # add here rn so we do not pick the same windows two time
+                    already_done.append(rn)
+
+                # get the actual windows
+                windows = create_windows_based_of_geo_coords(
+                    current_raster_object=tif_obj,
+                    current_E=float(coordinates_of_unlabelled_data[rn][0]),
+                    current_N=float(coordinates_of_unlabelled_data[rn][1]),
+                    desired_windows_dimension=desired_windows_dimension,
+                    current_loaded_raster=current_raster,
+                )
+
+                dataset_holder[key].append(windows)
+                labels_holder.append(0)
+
+    return dataset_holder, labels_holder
 
 
 @beartype
@@ -400,6 +432,7 @@ def make_prediction(
     validation_labels: numpy.ndarray,
     epochs: int,
     batch_size: int,
+    sample_weights: bool = True,
 ) -> Union[tf.keras.Model, dict, float, int or float, int]:
     """
     Do predictions of the model.
@@ -412,7 +445,7 @@ def make_prediction(
     validation_labels: label of validation or test data.
     epochs: number of epochs for running the model.
     batch_size: batch size to feed the model.
-
+    sample_weights: if you want to sample the weights
     Return:
         return the compiled model, the score, predictions validation
 
@@ -426,6 +459,7 @@ def make_prediction(
         validation_data=(dictionary_of_validation, validation_labels),
         batch_size=batch_size,
         epochs=epochs,
+        sample_weight=compute_sample_weight("balanced", training_labels) if sample_weights is not False else None,
     )
 
     score = compiled_model.evaluate(dictionary_of_validation, validation_labels)
