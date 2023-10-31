@@ -28,5 +28,12 @@ mkdocs serve --dev-addr=0.0.0.0:8000
 - If you are not developing inside a container, a simple `mkdocs serve` works.
 
 ## 3. Build the docs
-- #TODO Update when topical
-
+- To build the docs from the container run:
+```console
+ENABLE_PDF_EXPORT=1 mkdocs build
+```
+- The PDF file is built into `site/pdf/` folder.
+- In Linux, to fix `OSError: cannot load library 'pango-1.0-0'` run
+```console
+apt install python3-pip libpango-1.0-0 libharfbuzz0b libpangoft2-1.0-0
+```
