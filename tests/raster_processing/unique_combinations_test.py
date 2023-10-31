@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import time
 import numpy as np
 import pandas as pd
 import pytest
@@ -9,7 +9,7 @@ from eis_toolkit.raster_processing.unique_combinations import unique_combination
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 parent_dir = Path(__file__).parent
-raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
+raster_path = parent_dir.joinpath("data/local/data/MCF_DEM_EIS.tif")
 expected_1st_row = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0,
 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 46.0]
@@ -22,7 +22,7 @@ def test_unique_combinations():
     with rasterio.open(raster_path) as raster_1, rasterio.open(raster_path) as raster_2:
 
         out_image, out_meta = unique_combinations([raster_1, raster_2])
-
+        
         assert out_meta["count"] == 1
         assert out_meta["crs"] == raster_1.meta["crs"]
         assert out_meta["driver"] == raster_1.meta["driver"]
@@ -32,7 +32,6 @@ def test_unique_combinations():
 
         assert out_image[0].tolist() == expected_1st_row
         assert out_image[1].tolist() == expected_2nd_row
-
 
 def test_unique_combinations_invalid_parameter():
     """Test that invalid parameter values for rasters raises correct exception."""

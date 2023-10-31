@@ -1,4 +1,3 @@
-import itertools
 from typing import Dict, List, Tuple
 
 import numpy as np
@@ -11,17 +10,20 @@ def _unique_combinations(
     bands: List[np.ndarray],
 ) -> np.ndarray:
 
-    out_image = np.empty_like(bands[0])
-    combinations: Dict[tuple, int] = {}
-    for row, column in itertools.product(range(len(bands[0])), range(len(bands[0][0]))):
+    unique_combinations: Dict[int, int] = {}
+    unique_indices = np.zeros(bands[0].shape, dtype=int)
+    combination = 1
 
-        combination = tuple(bands[band][row][column] for band, _ in enumerate(bands))
-
-        if combination not in combinations:
-            combinations[combination] = len(combinations) + 1
-        out_image[row][column] = combinations[combination]
-
-    return out_image
+    for band in bands:
+        for row in range(band.shape[0]):
+            for column in range(band.shape[1]):
+                raster_value = band[row, column]
+                if raster_value not in unique_combinations:
+                    unique_combinations[raster_value] = combination
+                    combination += 1
+                unique_indices[row, column] = unique_combinations[raster_value]
+    
+    return unique_indices
 
 
 def unique_combinations(  # type: ignore[no-any-unimported]
@@ -30,7 +32,7 @@ def unique_combinations(  # type: ignore[no-any-unimported]
     """Get combinations of raster values between rasters.
 
     All bands in all rasters are used for analysis.
-    A single band raster is used for reference when making the output.
+    The first band of the first raster is used for reference when making the output.
 
     Args:
         raster_list (List[rasterio.io.DatasetReader]): Rasters to be used for finding combinations.
