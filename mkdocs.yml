@@ -17,4 +17,5 @@ plugins:
         python:
           options:
             heading_level: 3
-  - with-pdf
+  - with-pdf:
+      enabled_if_env: ENABLE_PDF_EXPORT
