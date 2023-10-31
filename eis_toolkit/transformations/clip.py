@@ -22,7 +22,7 @@ from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
 
 @beartype
-def _clipping(  # type: ignore[no-any-unimported]
+def _clip_transform(  # type: ignore[no-any-unimported]
     in_array: np.ndarray,
     limits: Tuple[Optional[Number], Optional[Number]],
 ) -> np.ndarray:
@@ -40,14 +40,14 @@ def _clipping(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def clipping(  # type: ignore[no-any-unimported]
+def clip_transform(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     limits: Sequence[Tuple[Optional[Number], Optional[Number]]],
     bands: Optional[Sequence[int]] = None,
     nodata: Optional[Number] = None,
 ) -> Tuple[np.ndarray, dict, dict]:
     """
-    Clipping data based on specified upper and lower limits.
+    Clips data based on specified upper and lower limits.
 
     Takes one nodata value that will be ignored in calculations.
     Replaces values below the lower limit and above the upper limit with provided values, respecively.
@@ -101,7 +101,7 @@ def clipping(  # type: ignore[no-any-unimported]
         band_array = cast_array_to_float(band_array, cast_int=True)
         band_array = nodata_to_nan(band_array, nodata_value=nodata)
 
-        band_array = _clipping(band_array, limits=limits[i])
+        band_array = _clip_transform(band_array, limits=limits[i])
 
         band_array = nan_to_nodata(band_array, nodata_value=nodata)
         band_array = cast_array_to_int(band_array, scalar=nodata, initial_dtype=inital_dtype)

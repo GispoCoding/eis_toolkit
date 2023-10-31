@@ -1,5 +1,5 @@
-# Development without docker
-If you do not have docker, you can setup your local development environment as a python virtual environment.
+# Development with Poetry
+If you do not have docker, you can setup your local development environment as a python virtual environment using Poetry.
 
 ## Prerequisites
 
