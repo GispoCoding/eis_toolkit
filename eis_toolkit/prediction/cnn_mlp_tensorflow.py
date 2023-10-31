@@ -5,26 +5,30 @@ from typing import Literal, Union
 import joblib
 import numpy
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 from beartype import beartype
 from osgeo import gdal
+from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils.class_weight import compute_sample_weight
 from utilities import create_windows_based_of_geo_coords, parse_the_master_file, return_list_of_N_and_E
+
+from eis_toolkit.prediction.model_performance_estimation import performance_model_estimation
 
 
 @beartype
 def dataset_loader(
     deposit_path: str, unlabelled_data_path: str, desired_windows_dimension: int, path_of_features: str
-) -> tuple[dict, list]:
+) -> tuple[dict[str, np.ndarray], np.ndarray]:
     """
     Do the load of the data.
 
     Parameters:
         deposit_path: the path to the deposit csv file.
-        unlabelled_data_path the path from the 2M csv file.
-         desired_windows_dimension: the desired windows dimension.
-         path_of_features: nasterfile path.
+        unlabelled_data_path: the path from the 2M csv file.
+        desired_windows_dimension: the desired windows dimension.
+        path_of_features: masterfile path.
 
     Return:
         dataset holder and labels holder.
@@ -46,9 +50,9 @@ def dataset_loader(
 
     for key, val in current_dataset.items():
         # create a list that hold the windows
-        dataset_holder[key] = list()
+        temp_holder = list()
+        concatenated = None
         for tif_obj in current_dataset[key]:
-            # do the same for class 0
             current_raster = gdal.Open(tif_obj.puhti_path)
             for windows_counter, (N, E) in enumerate(coordinates_of_deposit):
                 windows = create_windows_based_of_geo_coords(
@@ -58,7 +62,7 @@ def dataset_loader(
                     desired_windows_dimension=desired_windows_dimension,
                     current_loaded_raster=current_raster,
                 )
-                dataset_holder[key].append(windows)
+                temp_holder.append(windows)
                 labels_holder.append(1)
 
             # generate 17 random windows
@@ -80,9 +84,16 @@ def dataset_loader(
                     current_loaded_raster=current_raster,
                 )
 
-                dataset_holder[key].append(windows)
+                temp_holder.append(windows)
                 labels_holder.append(0)
+            # concatenate the data
+            if concatenated is None:
+                concatenated = np.array(temp_holder).astype("float32")
 
+            else:
+                concatenated = np.concatenate((concatenated, np.array(temp_holder)), axis=-1)
+        dataset_holder[f"{key}"] = concatenated.astype("float32")
+    labels_holder = np.array(labels_holder).astype("int")
     return dataset_holder, labels_holder
 
 
@@ -466,3 +477,139 @@ def make_prediction(
     prediction = compiled_model.predict(dictionary_of_validation)
 
     return compiled_model, history, score[0], prediction, validation_labels[0]
+
+
+@beartype
+def do_training_and_prediction_of_the_model(
+    deposit_path: str,
+    unlabelled_data_path: str,
+    path_to_features: str,
+    desired_windows_dimension: int = 5,
+    cnn_configuration: dict = None,
+    threshold: float = 0,
+    dump: bool = False,
+    epoches: int = 32,
+) -> tuple[pd.DataFrame, tf.keras.Model]:
+    """
+    Do training and evaluation of the model with cross validation.
+
+    Parameters:
+        deposit_path: the poath to the csv with 17 points.
+        unlabelled_data_path: path to the csv file with 2M points.
+        path_to_features: this is a path to a masterfile that contain how to manipulate raster.
+        desired_windows_dimension: dimension of the windows.,
+        cnn_configuration: all parameters needed for the CNN oe MLP,
+        threshold: if you use sigmoid this should be > than 0
+        dump: if you want to save the confusion matrix,
+        epoches: number of epochs
+    Return:
+        return pd dataframe that contains the confusion matrix and instance of the best model.
+
+    Raises:
+        TODO
+    """
+    stacked_true, stacked_prediction = list(), list()
+    best_score = 0
+    model_to_return = None
+
+    # initial cnn config
+    if cnn_configuration is None:
+        cnn_configuration = {
+            "input_aem": None,
+            "kernel_aem": None,
+            "input_gravity": None,
+            "kernel_gravity": None,
+            "input_magnetic": None,
+            "kernel_magnetic": None,
+            "input_radiometric": None,
+            "kernel_radiometric": None,
+            "regularization": tf.keras.regularizers.L2(0.06),
+            "data_augmentation": None,
+            "optimizer": "Adam",
+            "loss": "sparse_categorical_crossentropy",
+            "inputs": 4,
+            "neuron_list": [8, 16],
+            "pool_size": 1,
+            "stride": 1,
+            "dropout_rate": 0.6,
+            "output": 2,
+            "is_a_cnn": True,
+            "last_activation": "softmax",
+        }
+
+    windows_holder, labels_holder = dataset_loader(
+        deposit_path=deposit_path,
+        unlabelled_data_path=unlabelled_data_path,
+        desired_windows_dimension=desired_windows_dimension,
+        path_of_features=path_to_features,
+    )
+
+    # prepare the scaler
+    scaler_dictionary = create_the_scaler(data_dictionary=windows_holder, dump=False)
+
+    # get cross validation methods
+    selected_cs = performance_model_estimation(cross_validation_type="LOOCV", number_of_split=1)
+
+    for i, (train_index, test_index) in enumerate(selected_cs.cross_validation_method.split(windows_holder)):
+        dictionary_of_training = {}
+        dictionary_of_validation = {}
+        for key in windows_holder.keys():
+
+            cnn_configuration[f"input_{key.lower()}"] = (
+                windows_holder[key][train_index].shape[1],
+                windows_holder[key][train_index].shape[2],
+                windows_holder[key][train_index].shape[3],
+            )
+
+            cnn_configuration[f"kernel_{key.lower()}"] = (
+                windows_holder[key][train_index].shape[3],
+                windows_holder[key][train_index].shape[3],
+            )
+
+            dictionary_of_training[f"{key}"] = normalize_the_data(
+                data_to_normalize=windows_holder[f"{key}"][train_index], normalizator=scaler_dictionary[key]
+            )
+
+            dictionary_of_validation[f"{key}"] = normalize_the_data(
+                data_to_normalize=windows_holder[f"{key}"][test_index], normalizator=scaler_dictionary[key]
+            )
+
+        # create multimodal cnn
+        cnn = create_multi_modal_cnn(**cnn_configuration)
+        model, _, score, prediction, true_label = make_prediction(
+            compiled_model=cnn,
+            dictionary_of_training=dictionary_of_training,
+            dictionary_of_validation=dictionary_of_validation,
+            training_labels=labels_holder[train_index],
+            validation_labels=labels_holder[test_index],
+            epochs=epoches,
+            batch_size=int(len(windows_holder) / epoches),
+            sample_weights=True,
+        )
+
+        score = model.evaluate(dictionary_of_validation, labels_holder[test_index])
+
+        if score > best_score:
+            best_score = score
+            model_to_return = model
+
+        stacked_true.append(true_label)
+
+        if cnn_configuration["last_activation"] != "sofmax":
+            stacked_prediction.append(np.argmax(prediction))
+        else:
+            if prediction[0] <= threshold:
+                stacked_prediction.append(0)
+            else:
+                stacked_prediction.append(1)
+
+    # create a cm
+    cm = confusion_matrix(np.array(stacked_true), np.array(stacked_prediction), normalize="all")
+    df = pd.DataFrame(cm, columns=["Non deposit", "deposit"], index=["Non deposit", "deposit"])
+    # save the ds
+    if dump:
+        if not os.path.exists("cm"):
+            os.makedirs("cm")
+        df.to_csv("cm/cm.csv")
+
+    return df, model_to_return
