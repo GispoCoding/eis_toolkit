@@ -102,7 +102,6 @@ def predict_the_model_with_cross_validation(
     threshold_probability: float = None,
     is_predict_full_map: bool = False,
 ) -> numpy.ndarray:
-
     """
     Do the model prediction with cross validation.
 
@@ -132,7 +131,7 @@ def predict_the_model_with_cross_validation(
     )
 
     # start the training process
-    for fold_number, (train_index, test_index) in enumerate(selected_cross_validation.split(dataset, labels)):
+    for fold_number, (train_index, test_index) in enumerate(selected_cross_validation.split(test_dataset, test_labels)):
 
         # train the classifier
         classifier.fit(test_dataset[train_index], test_labels[train_index])
@@ -153,7 +152,7 @@ def predict_the_model_with_cross_validation(
     if not is_predict_full_map:
         data = best_handler_list[1]
     else:
-        data = dataset
+        data = test_dataset
 
     if not is_class_probability:
         # predict class
@@ -165,7 +164,6 @@ def predict_the_model_with_cross_validation(
         prediction[prediction >= threshold_probability] = 1
 
     return prediction
-
 
 
 @beartype
