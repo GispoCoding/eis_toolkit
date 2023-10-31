@@ -6,6 +6,10 @@ class ClassificationFailedException(Exception):
     """Exception error class for classification failures."""
 
 
+class EmptyDataException(Exception):
+    """Exception error class raised if input data is empty."""
+
+
 class EmptyDataFrameException(Exception):
     """Exception error class raised if the dataframe is empty."""
 
@@ -76,3 +80,11 @@ class NonSquarePixelSizeException(Exception):
 
 class NumericValueSignException(Exception):
     """Exception error class for numeric value sign exception."""
+
+
+class InvalidModelException(Exception):
+    """Exception error class when model is invalid or null."""
+
+
+class InvalidDatasetException(Exception):
+    """Exception error class when the dataset is null."""
