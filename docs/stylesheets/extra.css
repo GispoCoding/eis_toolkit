@@ -1,0 +1,11 @@
+.md-typeset table {
+    font-size: 9px;
+}
+
+.quote summary::before {
+    display: none;
+}
+
+.references summary::before {
+    display: none;
+}
