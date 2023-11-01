@@ -10,7 +10,7 @@ from eis_toolkit.exceptions import InvalidCrossValidationSelected, InvalidNumber
 @beartype
 def performance_model_estimation(
     cross_validation_type: Literal["LOOCV", "KFOLD", "SKFOLD"], number_of_split: int = 5
-) -> sklearn.model_selection:
+) -> sklearn.model_selection.BaseCrossValidator:
     """
     Evaluate the feature importance of a sklearn classifier or linear model.
 

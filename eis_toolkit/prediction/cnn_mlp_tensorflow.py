@@ -1,6 +1,6 @@
 import os
 import random
-from typing import Literal, Union
+from typing import Literal, Union, Any
 
 import joblib
 import numpy
@@ -12,10 +12,173 @@ from osgeo import gdal
 from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils.class_weight import compute_sample_weight
-from utilities import create_windows_based_of_geo_coords, parse_the_master_file, return_list_of_N_and_E
 
+from eis_toolkit.exceptions import (NoSuchPathOrDirectory, WrongWindowSize, InvalidDatasetException, CNNException,
+                                    InvalidArgumentTypeException, CNNRunningParameterException)
 from eis_toolkit.prediction.model_performance_estimation import performance_model_estimation
 
+
+@beartype
+def parse_the_master_file(master_file_path) -> dict:
+    """
+    Load sets of windows from its folder.
+
+    Parameters:
+        master_file_path: path of the masterfile.
+
+    Return:
+        Dictionary that contains the following information:
+                current_path: this the path of the feature.
+                no_data: no data value.
+                no_data_value: which value to substitute to the no data.
+                min_range_value: min range of the raster.
+                max_range_value: max range of the.
+                channel: band.
+                windows_dimension: the window dimension.
+                valid_bands: valid band to use.
+                loaded_dataset_as_array: current raster array.
+                current_geo_transform: current set of N and E.
+                model_type: this is not used here.
+    Raises:
+        NoSuchPathOrDirectory when some path point to a not such file or directory.
+    """
+
+    if not os.path.isfile(master_file_path):
+        raise NoSuchPathOrDirectory
+
+    current_dataset = dict()
+    # open the handler
+    handler = open(master_file_path)
+
+    # loop inside each rows
+    for line in handler.readlines():
+        line_to_split = line.strip()
+
+        # get band list and convert to int
+        bands = line_to_split.split(":")[1].split(",")
+
+        # parse features to int
+        bands = [int(x) for x in bands]
+
+        # get other values
+        others_values = line_to_split.split(":")[0].split(",")
+
+        # che sub raster from raster
+        loaded_raster = gdal.Open(f"{others_values[0]}", gdal.GA_ReadOnly)
+        geo = loaded_raster.GetGeoTransform()
+
+        # create a key holder for the dict of feat
+        if others_values[1] not in current_dataset.keys():
+            current_dataset[others_values[1]] = list()
+
+            current_dataset[others_values[1]].append(
+                {
+                    "full_path":f"{others_values[0]}",
+                    "current_path": f"{others_values[0].split('/')[-2]}/{others_values[0].split('/')[-1]}",
+                    "no_data": float(others_values[3]) if others_values[3] != "" else "",
+                    "no_data_value": float(others_values[4]) if others_values[4] != "" else 255,
+                    "min_range_value": float(others_values[5]) if others_values[5] != "" else "",
+                    "max_range_value": float(others_values[6]) if others_values[6] != "" else "",
+                    "channel": others_values[1],
+                    "windows_dimension": int(others_values[2]),
+                    "valid_bands": bands,
+                    "loaded_dataset_as_array": loaded_raster.ReadAsArray()[bands, :, :]
+                    if loaded_raster.ReadAsArray().ndim > 2
+                    else loaded_raster.ReadAsArray(),
+                    "current_geo_transform": geo,
+                    "model_type": others_values[7],
+                }
+            )
+    handler.close()
+    return current_dataset
+
+
+@beartype
+def return_list_of_N_and_E(path_to_data: str) -> list[list[Any]]:
+    """
+    Load the list of N and E coordinates.
+
+    Parameters:
+        input_path: this is what in keras is called optimizer.
+
+    Return:
+        a list that contain all N end E
+
+    Raises:
+        NoSuchPathOrDirectory when some path point to a not such file or directory.
+    """
+
+    if not os.path.isfile(path_to_data):
+        raise NoSuchPathOrDirectory
+
+    # load the csv file with the deposit annotation
+    handler = open(path_to_data, "r")
+    coords = list()
+    for row_counter, row in enumerate(handler.readlines()):
+        if row_counter != 0:
+            coords.append([row.strip().split(",")[-2], row.strip().split(",")[-3]])
+    return coords
+
+
+@beartype
+def create_windows_based_of_geo_coords(
+    current_raster_object: dict,
+    current_E: float,
+    current_N: float,
+    desired_windows_dimension: int,
+    current_loaded_raster: gdal.Dataset or None,
+) -> np.ndarray:
+    """
+    Create windows from geo coordinates.
+
+    Parameters:
+       current_raster_object: raster iformation from the masterfile.
+       current_E: float point showing the E.
+       current_N: float point showing the N.
+       desired_windows_dimension: int dimension of the window.
+       current_loaded_raster: load tif with gdal
+
+    Return:
+        numpy array with the windows inside.
+
+    """
+
+    if current_loaded_raster is None:
+        # get the loaded raster and the pix
+        current_raster = gdal.Open(current_raster_object["current_path"])
+    else:
+        current_raster = current_loaded_raster
+
+    spatial_pixel_resolution = current_raster_object["current_geo_transform"][1]
+
+    # get the coords
+    start_N = current_N + (desired_windows_dimension / 2) * spatial_pixel_resolution
+    end_N = start_N + desired_windows_dimension * spatial_pixel_resolution
+
+    start_E = current_E - (desired_windows_dimension / 2) * spatial_pixel_resolution
+    end_E = start_E + desired_windows_dimension * spatial_pixel_resolution
+
+    raster = gdal.Warp(
+        "",
+        current_raster,
+        outputBounds=[start_E, end_N, end_E, start_N],
+        format="MEM",
+        xRes=spatial_pixel_resolution,
+        yRes=-spatial_pixel_resolution,
+    )
+
+    values_with_need = raster.ReadAsArray()
+
+    # create the window I m testing with float
+    window = (
+        np.array(values_with_need).astype("float32").reshape((desired_windows_dimension, desired_windows_dimension, -1))
+    )
+
+    # remove no data value:
+    if current_raster_object["no_data"] != "":
+        window[window == current_raster_object["no_data"]] = current_raster_object["no_data_value"]
+
+    return window
 
 @beartype
 def dataset_loader(
@@ -34,8 +197,16 @@ def dataset_loader(
         dataset holder and labels holder.
 
     Raises:
-        TODO
+        NoSuchPathOrDirectory: when some path point to a not such file or directory.
+        WrongWindowSize:When the size of the windows is <= 1.
     """
+
+    if not os.path.isfile(deposit_path) or not os.path.isfile(unlabelled_data_path):
+        raise NoSuchPathOrDirectory
+
+    if desired_windows_dimension <= 1:
+        raise WrongWindowSize
+
     dataset_holder = {}
     labels_holder = list()
     already_done = list()
@@ -53,7 +224,7 @@ def dataset_loader(
         temp_holder = list()
         concatenated = None
         for tif_obj in current_dataset[key]:
-            current_raster = gdal.Open(tif_obj.puhti_path)
+            current_raster = gdal.Open(tif_obj['full_path'])
             for windows_counter, (N, E) in enumerate(coordinates_of_deposit):
                 windows = create_windows_based_of_geo_coords(
                     current_raster_object=tif_obj,
@@ -110,8 +281,12 @@ def create_the_scaler(data_dictionary: dict, dump: bool = False):
         normalized data dictionary
 
     Raises:
-        TODO
+        InvalidDatasetException: when the dataset is null.
     """
+
+    if len(data_dictionary.keys()) <= 0:
+        raise InvalidDatasetException
+
     if dump and os.path.exists("scaler"):
         os.makedirs("scaler")
 
@@ -141,18 +316,20 @@ def normalize_the_data(data_to_normalize, normalizator) -> np.ndarray:
         normalized dataset
 
     Raises:
-        TODO
+        InvalidDatasetException: when the dataset is null.
     """
-    try:
-        number_of_samples, h, w, c = data_to_normalize.shape
-        temp = data_to_normalize.reshape(-1, data_to_normalize.shape[-1])
-        normalized_input = normalizator.transform(temp)
-        return normalized_input.reshape(number_of_samples, h, w, c)
-    except Exception as ex:
-        print(f"[EXCEPTION] Main throws exception {ex}")
+
+    if data_to_normalize.shape[0] <= 0:
+        raise InvalidDatasetException
+
+    number_of_samples, h, w, c = data_to_normalize.shape
+    temp = data_to_normalize.reshape(-1, data_to_normalize.shape[-1])
+    normalized_input = normalizator.transform(temp)
+    return normalized_input.reshape(number_of_samples, h, w, c)
 
 
-@beartype
+
+
 def convolutional_body_of_the_cnn(
     input_layer: tf.keras.Input,
     neuron_list: Union[int],
@@ -176,8 +353,16 @@ def convolutional_body_of_the_cnn(
         return the block of hidden layer
 
     Raises:
-        TODO
+        CNNException: this exception is raised if the input is null.
+        InvalidArgumentTypeException: when a parameters i wrong or <= 0.
     """
+
+    if input_layer is None:
+        raise CNNException
+
+    if len(neuron_list) <= 0 or kernel_size[0] == 0 or pool_size <= 0 or dropout <= 0:
+        raise InvalidArgumentTypeException
+
     # we do dynamically the conv2d
     for layer_number, neuron in enumerate(neuron_list):
         if layer_number == 0:
@@ -221,8 +406,15 @@ def dense_nodes(input_layer: tf.keras.Input, neuron_list: Union[int], dropout: f
         return the block of dense layer
 
     Raises:
-        TODO
+        CNNException: this exception is raised if the input is null.
+        InvalidArgumentTypeException: when a parameters i wrong or <= 0.
     """
+
+    if input_layer is None:
+        raise CNNException
+
+    if len(neuron_list) <= 0 or dropout <= 0:
+        raise InvalidArgumentTypeException
 
     for layer_number, neuron in enumerate(neuron_list):
         if layer_number == 0:
@@ -238,7 +430,7 @@ def dense_nodes(input_layer: tf.keras.Input, neuron_list: Union[int], dropout: f
     return x
 
 
-@beartype
+
 def create_multi_modal_cnn(
     input_aem: tuple[int, int, int] or tuple[int, int] = None,
     kernel_aem: tuple[int, int] = None,
@@ -255,7 +447,7 @@ def create_multi_modal_cnn(
     inputs: int = 1,
     neuron_list: Union[int] = [16],
     pool_size: int = 2,
-    dropout_rate: Literal[None, float] = None,
+    dropout_rate: Union[None, float] = None,
     is_a_cnn: bool = True,
     output: int = 2,
     last_activation: Literal["softmax", "sigmoid"] = "softmax",
@@ -288,8 +480,12 @@ def create_multi_modal_cnn(
         return the compiled model.
 
     Raises:
-        TODO
+        InvalidArgumentTypeException: one of the arguments is invalid.
     """
+
+    if len(neuron_list) <= 0 or inputs <= 0 or pool_size <= 0:
+        raise InvalidArgumentTypeException
+
     if input_aem is not None:
         input_layer = tf.keras.Input(shape=input_aem, name="AEM")
         kernel = kernel_aem
@@ -434,7 +630,6 @@ def create_multi_modal_cnn(
         return model
 
 
-@beartype
 def make_prediction(
     compiled_model: tf.keras.Model,
     dictionary_of_training: dict,
@@ -461,8 +656,22 @@ def make_prediction(
         return the compiled model, the score, predictions validation
 
     Raises:
-        TODO
+        CNNException: if the compiled model is null.
+        InvalidDatasetException: if the dataset is null.
+        CNNRunningParameterException: parameters like epochs and batch ize can be <= 0
     """
+
+    if compiled_model is None:
+        raise CNNException
+
+    if epochs <= 0:
+        raise CNNRunningParameterException
+
+    if len(dictionary_of_training.keys()) <= 0 or len(dictionary_of_validation.keys()) <= 0:
+        raise InvalidDatasetException
+
+    if training_labels.shape[0] <= 0 or validation_labels.shape[0] <= 0:
+        raise InvalidDatasetException
 
     history = compiled_model.fit(
         dictionary_of_training,
@@ -479,7 +688,7 @@ def make_prediction(
     return compiled_model, history, score[0], prediction, validation_labels[0]
 
 
-@beartype
+
 def do_training_and_prediction_of_the_model(
     deposit_path: str,
     unlabelled_data_path: str,
@@ -506,8 +715,13 @@ def do_training_and_prediction_of_the_model(
         return pd dataframe that contains the confusion matrix and instance of the best model.
 
     Raises:
-        TODO
+        NoSuchPathOrDirectory when some path point to a not such file or directory.
     """
+
+    if not os.path.isfile(deposit_path) or not os.path.isfile(unlabelled_data_path):
+        raise NoSuchPathOrDirectory
+
+
     stacked_true, stacked_prediction = list(), list()
     best_score = 0
     model_to_return = None
@@ -530,7 +744,6 @@ def do_training_and_prediction_of_the_model(
             "inputs": 4,
             "neuron_list": [8, 16],
             "pool_size": 1,
-            "stride": 1,
             "dropout_rate": 0.6,
             "output": 2,
             "is_a_cnn": True,
@@ -550,7 +763,7 @@ def do_training_and_prediction_of_the_model(
     # get cross validation methods
     selected_cs = performance_model_estimation(cross_validation_type="LOOCV", number_of_split=1)
 
-    for i, (train_index, test_index) in enumerate(selected_cs.cross_validation_method.split(windows_holder)):
+    for i, (train_index, test_index) in enumerate(selected_cs.split(windows_holder)):
         dictionary_of_training = {}
         dictionary_of_validation = {}
         for key in windows_holder.keys():
@@ -587,7 +800,7 @@ def do_training_and_prediction_of_the_model(
             sample_weights=True,
         )
 
-        score = model.evaluate(dictionary_of_validation, labels_holder[test_index])
+        score = model.evaluate(dictionary_of_validation, labels_holder[test_index])[0]
 
         if score > best_score:
             best_score = score
@@ -613,3 +826,5 @@ def do_training_and_prediction_of_the_model(
         df.to_csv("cm/cm.csv")
 
     return df, model_to_return
+
+

@@ -92,3 +92,13 @@ class CanNotMakeCategoricalLabelException(Exception):
 
 class NoSuchPathOrDirectory(Exception):
     """Exception throws when no correct path is found."""
+
+
+class WrongWindowSize(Exception):
+    """Exception throws when wrong windows size occurs."""
+
+class CNNException(Exception):
+    """Exception throws when something is invalid in the cnn."""
+
+class CNNRunningParameterException(Exception):
+    """Exception throws when running parameters are wrong."""
