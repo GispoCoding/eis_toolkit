@@ -22,7 +22,7 @@ def _unique_combinations(
                     unique_combinations[raster_value] = combination
                     combination += 1
                 unique_indices[row, column] = unique_combinations[raster_value]
-    
+
     return unique_indices
 
 
@@ -52,24 +52,24 @@ def unique_combinations(  # type: ignore[no-any-unimported]
             bands.append(raster.read(band))
 
     if len(bands) == 1:
-        raise InvalidParameterValueException
+        raise InvalidParameterValueException("Expected to have more bands than 1")
 
     # Check if all rasters have the same pixel width.
     if not all(raster.transform[0] == raster_list[0].transform[0] for raster in raster_list):
-        raise InvalidParameterValueException
+        raise InvalidParameterValueException("Expected all raster files to have the same pixel width")
 
     # Check if all rasters have the same pixel height.
     if not all(raster.transform[4] == raster_list[0].transform[4] for raster in raster_list):
-        raise InvalidParameterValueException
+        raise InvalidParameterValueException("Expected all raster files to have the same pixel height")
 
     if not all(raster.meta["crs"] == out_meta["crs"] for raster in raster_list):
-        raise InvalidParameterValueException
+        raise InvalidParameterValueException("Expected all raster files to have the same coordinate system")
 
     if not all(len(band) == height for band in bands):
-        raise InvalidParameterValueException
+        raise InvalidParameterValueException("Expected all raster files to have the same height")
 
     if not all(len(band[0]) == width for band in bands):
-        raise InvalidParameterValueException
+        raise InvalidParameterValueException("Expected all raster files to have the same width")
 
     out_image = _unique_combinations(bands)
     return out_image, out_meta
