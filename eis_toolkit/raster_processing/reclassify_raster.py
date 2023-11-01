@@ -4,7 +4,7 @@ import mapclassify as mc
 import numpy as np
 import rasterio
 
-#from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException
 
 
 def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
@@ -110,6 +110,7 @@ def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
 def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     interval_size: int,
+    path_to_file: str,
     bands: Optional[List[int]] = None
 ) -> rasterio.io.DatasetReader:
     """Classify raster with defined intervals.
@@ -133,7 +134,7 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
         elif len(bands) > raster.count:
             raise InvalidParameterValueException
 
-    src = _raster_with_defined_intervals(raster, interval_size, bands)
+    src = _raster_with_defined_intervals(raster, interval_size, path_to_file, bands)
 
     return src
 
@@ -339,7 +340,7 @@ def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
         array_of_bands = raster.read()
     with rasterio.open(path_to_file, "w", **raster.meta) as dst:
         for i in range(len(bands)):
-            # read one of the bands
+
             data_array = array_of_bands[i]
             #missing = -1.e+32
             data_array[data_array == -1.e+32] = np.nan
@@ -384,7 +385,7 @@ def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
 
             values_out[np.where(((median_value+width[k+1])<data_array) & (data_array != np.nan))] = k+1
             values_out[np.where(((median_value-width[k+1])>data_array) & (data_array != np.nan))] = -k-1
-            values_out[np.where(median_value = data_array)] = 0
+            values_out[np.where(median_value == data_array)] = 0
             # Write data to the correct band
             if custom_band_list:
                 dst.write(values_out, bands[i])
