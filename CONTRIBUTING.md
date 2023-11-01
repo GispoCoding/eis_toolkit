@@ -39,12 +39,12 @@ current package division via creating an issue for it! Note that the packages ca
 
 2. Modules
 
-Module names come from the names of the .py files containing function declarations. You will need to create a new python file for each functionality. The name of the file containing the function declaration(s) for providing the functionality will be essentially the same as the function’s name but instead of the basic form we will be using –ing form.
+Module names come from the names of the .py files containing function declarations. You will need to create a new python file for each functionality. The name of the file containing the function declaration(s) for providing the functionality will be essentially the same as the function’s name but instead of the basic form use –ing form if it makes sense.
 
 - Try to create modules in a way that each module contains only one functionality. Split this functionality into two function declarations: one for external use and one (the core functionality) for internal use. See e.g. implementation of [clipping functionality](./eis_toolkit/raster_processing/clipping.py) for reference.
 
-3. Functions
- 
+1. Functions
+
 Name each function according to what it is supposed to do. Try to express the purpose as simplistic as possible. In principle, each function should be creted for executing one task. We prefer modular structure and low hierarchy by trying to avoid nested function declarations. It is highly recommended to call other functions for executing sub tasks.
 
 **Example (packages, modules & functions):**
@@ -53,13 +53,14 @@ Create a function which clips a raster file with polygon -> name the function as
 
 4. Classes
 
-A class can be defined inside of a module or a function. Class names should begin with a capital letter and follow the CamelCase naming convention: if a class name contains multiple words, the spaces are simply ignored and each separate word begins with capital letters. 
+A class can be defined inside of a module or a function. Class names should begin with a capital letter and follow the CamelCase naming convention: if a class name contains multiple words, the spaces are simply ignored and each separate word begins with capital letters.
 
+When implementing the toolkit functions, create classes only when they are clearly beneficial.
 > If you create new custom exception classes, add them directly into eis_toolkit/eis_toolkit/exceptions.py file.
 
 5. Variables
 
-Avoid using global variables.
+Avoid using global variables. Name your variables clearly for code maintainability and to avoid bugs.
 
 6. Docstrings and code comments 
 
@@ -70,42 +71,68 @@ For creating docstrings, we rely on google convention (see section 3.8 in [link]
 General guidelines about naming policy (applies to package, module, function, class and variable names):
 - all names should be given in English
 - avoid too cryptic names by using complete words
-- if the name consists of multiple words, replace space with underscore character (_)
+- if the name consists of multiple words, use snake_case so replace space with underscore character (_) (CamelCase is used for classes as an exception to this rule)
 - do not include special characters, capital letters or numbers into the names unless in case of using numbers in variable names and there is an unavoidable need for it / using numbers significantly increases clarity
 
 ## Code style
 
-In order to guarantee consistent coding style, a bunch of different linters and formatters have been brought into use.
+### pre-commit
 
-> **Please** note that running code style checks is not optional!
+> Note that pre-commit was added as the primary style check tool later in the project and you need to install and enable it manually! 
 
-For more convenient user experience, running
-- mypy (checks type annotations)
-- flake8 (checks the compliance to PEP8)
-- black (formats the code)
+The repository contains a `.pre-commit-config.yaml` file that has configuration
+to run a set of [`pre-commit`](https://pre-commit.com) hooks. As the name
+implies, they run before committing code and reject commits that would include
+code that is not formatted or contains linting errors. `pre-commit` must be
+installed on your system **and** the hooks must be enabled within your local
+copy of the repository to run.
 
-and
-
-- isort (sorts the import statements)
-
-have been combined into one task. The task can be executed from container's command line with
+To install `pre-commit` on Debian or Ubuntu -based systems with `apt` as
+the package manager you should be able to run: 
 
 ``` console
-invoke lint
+apt update
+apt install pre-commit
 ```
 
-**Assumption**: you have already executed the following commands
-1. *docker compose up -d* or *docker compose up -d --build* (e.g. if dependencies have been updated)
-2. *docker attach eis_toolkit*
-3. *poetry shell*
+Alternatively, it can be installed with the system installation of `Python`:
 
-before you try to run *invoke lint* command.
+``` console
+pip install pre-commit
+```
 
-Possible errors will be printed onto the command line.
+Visit the `pre-commit` website for more guidance on various system installation
+methods (<https://pre-commit.com>).
 
-**Please** fix them before committing anything!
+To enable the hooks locally, enter the directory with your local
+version of `eis_toolkit`, and run:
 
-- Note that sometimes the best way to "fix" an error is to ignore that particular error code for some spesific line of code. However, be conscious on when to use this approach!
+``` console
+pre-commit install
+```
+
+Within this local repository, before any commits, the hooks should now run.
+Note that the `black` formatting hook will modify files and consequently, the
+edits by `pre-commit` will be unstaged. Stage the changes to add them back to
+the commit. 
+
+To disable the hooks and allow commits even with errors pointed out by
+`pre-commit`, you can add the `--no-verify` option to the `git` command-line:
+
+``` console
+git commit -m "<message>" --no-verify
+```
+
+However, this is not recommended and you should instead fix any issues pointed
+out by `pre-commit`.
+
+You can also run the hooks without committing on all files. Make sure you save
+any text changes as `pre-commit` can modify unformatted files:
+
+``` console
+pre-commit run --all-files
+```
+
 
 ## Testing
 
@@ -155,3 +182,61 @@ poetry export --without-hashes --format=requirements.txt > requirements.txt
 and committing the new version of the particular file into your feature
 branch. Please note that this file is only used for GitHub workflows, otherwise
 we utilize poetry for dependency  handling.
+
+
+## Recent changes
+Some changes have been made to the style guide:
+- Use `numbers.Number` as the type when both floats and integers are accepted by functions:
+```python
+from numbers import Number
+
+def func(int_or_float: Number):
+    ...
+- Write comments to exceptions:
+```python
+raise InvalidParameterValueException(f"Window size is too small: {height}, {width}.")
+```
+- Use beartype's decorator for automatic function argument type checking and import types from `beartype.typing` if a warning is raised by beartype on imports from `typing`:
+```python
+from beartype import beartype
+from beartype.typing import Sequence
+
+@beartype
+def my_function(parameter_1: float, parameter_2: bool, parameter_seq: Sequence):
+- Don't put parameter types and return variable name into function docstring:
+```python
+# OLD
+    """Description here.
+
+    Args:
+        parameter_1 (float): A parameter.
+        parameter_2 (bool): A parameter.
+
+    Returns:
+        return_value (bool): The return value.
+    """
+
+# NEW
+    """Description here.
+
+    Args:
+        parameter_1: A parameter.
+        parameter_2: A parameter.
+
+    Returns:
+        The return value.
+    """
+```
+
+## Developer's checklist
+Here are some things to remember while implementing a new tool:
+
+- Create an issue **before or when you start** developing a functionality
+- Adhere to the style guide
+  - Look at existing implementations and copy the form
+  - Enable pre-commit and fix style/other issues according to the error messages
+- Remember to use typing hints
+- Write tests for your functions
+- Add a .md file for you functionality
+- If you think the tool you are developing could use a separate general utility function, make an issue about this need before starting to develop it on your own. Also check if a utility function exists already
+- Remember to implement only the minimum what is required for the tool! With data functions, you can usually assume file reading/writing, nodata handling and other such processes are done before/after executing your tool

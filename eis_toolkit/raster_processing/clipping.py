@@ -1,8 +1,8 @@
-from typing import Iterable, Tuple
-
 import geopandas
 import numpy as np
 import rasterio
+from beartype import beartype
+from beartype.typing import Sequence, Tuple
 from rasterio.mask import mask
 
 from eis_toolkit.checks.crs import check_matching_crs
@@ -11,9 +11,7 @@ from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometr
 
 
 # The core clipping functionality. Used internally by clip.
-def _clip_raster(  # type: ignore[no-any-unimported] # noqa: E261
-    raster: rasterio.io.DatasetReader, geometries: Iterable
-) -> Tuple[np.ndarray, dict]:
+def _clip_raster(raster: rasterio.io.DatasetReader, geometries: Sequence) -> Tuple[np.ndarray, dict]:
     out_image, out_transform = mask(dataset=raster, shapes=geometries, crop=True, all_touched=True)
     out_meta = raster.meta.copy()
     out_meta.update(
@@ -23,21 +21,21 @@ def _clip_raster(  # type: ignore[no-any-unimported] # noqa: E261
     return out_image, out_meta
 
 
-def clip_raster(  # type: ignore[no-any-unimported] # noqa: E261,E262
-    raster: rasterio.io.DatasetReader, geodataframe: geopandas.GeoDataFrame
-) -> Tuple[np.ndarray, dict]:
-    """Clips a raster with a geodataframe.
+@beartype
+def clip_raster(raster: rasterio.io.DatasetReader, geodataframe: geopandas.GeoDataFrame) -> Tuple[np.ndarray, dict]:
+    """Clips a raster with polygon geometries.
 
     Args:
-        raster (rasterio.io.DatasetReader): The raster to be clipped.
-        geodataframe (geopandas.GeoDataFrame): A geodataframe containing the geometries to do the clipping with.
+        raster: The raster to be clipped.
+        geodataframe: A geodataframe containing the geometries to do the clipping with.
+            Should contain only polygon features.
 
     Returns:
-        out_image (np.ndarray): The clipped raster data.
-        out_meta (dict): The updated metadata.
+        The clipped raster data.
+        The updated metadata.
 
     Raises:
-        NonMatchingCrsException: The raster and polygons are not in the same crs.
+        NonMatchingCrsException: The raster and geodataframe are not in the same CRS.
         NotApplicableGeometryTypeException: The input geometries contain non-polygon features.
     """
     geometries = geodataframe["geometry"]
@@ -45,13 +43,13 @@ def clip_raster(  # type: ignore[no-any-unimported] # noqa: E261,E262
     if not check_matching_crs(
         objects=[raster, geometries],
     ):
-        raise NonMatchingCrsException
+        raise NonMatchingCrsException("The raster and geodataframe are not in the same CRS.")
 
     if not check_geometry_types(
         geometries=geometries,
         allowed_types=["Polygon", "MultiPolygon"],
     ):
-        raise NotApplicableGeometryTypeException
+        raise NotApplicableGeometryTypeException("The input geometries contain non-polygon features.")
 
     out_image, out_meta = _clip_raster(
         raster=raster,

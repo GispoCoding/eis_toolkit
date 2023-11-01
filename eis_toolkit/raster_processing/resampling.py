@@ -1,62 +1,78 @@
-from typing import Tuple
+from numbers import Number
 
 import numpy as np
 import rasterio
+from beartype import beartype
+from beartype.typing import Tuple
+from rasterio import warp
 from rasterio.enums import Resampling
 
-from eis_toolkit.checks.parameter import check_numeric_value_sign
-from eis_toolkit.exceptions import NumericValueSignException
+from eis_toolkit import exceptions
 
 
-# The core resampling functionality. Used internally by resample.
-def _resample(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, upscale_factor: float, resampling_method: Resampling
+def _resample(
+    raster: rasterio.io.DatasetReader, resolution: Number, resampling_method: Resampling
 ) -> Tuple[np.ndarray, dict]:
 
-    out_image = raster.read(
-        out_shape=(raster.count, int(raster.height * upscale_factor), int(raster.width * upscale_factor)),
-        resampling=resampling_method,
-    )
+    resolution = float(resolution)
 
-    out_transform = raster.transform * raster.transform.scale(
-        (raster.width / out_image.shape[-1]), (raster.height / out_image.shape[-2])
+    dst_height, dst_width = (
+        int(raster.height * raster.res[0] / resolution),
+        int(raster.width * raster.res[1] / resolution),
+    )
+    out_transform = rasterio.Affine(resolution, 0, raster.transform[2], 0, -resolution, raster.transform[5])
+
+    dst = np.empty((raster.count, dst_height, dst_width))
+    dst.fill(raster.meta["nodata"])
+
+    out_image = warp.reproject(
+        source=raster.read(),
+        destination=dst,
+        src_transform=raster.transform,
+        src_crs=raster.crs,
+        dst_transform=out_transform,
+        dst_crs=raster.crs,
+        src_nodata=raster.meta["nodata"],
+        dst_nodata=raster.meta["nodata"],
+        resampling=resampling_method,
     )
 
     out_meta = raster.meta.copy()
     out_meta.update(
         {
             "transform": out_transform,
-            "width": out_image.shape[-1],
-            "height": out_image.shape[-2],
-            "nodata": 0,
+            "width": out_image[0].shape[-1],
+            "height": out_image[0].shape[-2],
         }
     )
 
-    return out_image, out_meta
+    return out_image[0], out_meta
 
 
-def resample(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, upscale_factor: float, resampling_method: Resampling = Resampling.bilinear
+@beartype
+def resample(
+    raster: rasterio.io.DatasetReader,
+    resolution: Number,
+    resampling_method: Resampling = Resampling.bilinear,
 ) -> Tuple[np.ndarray, dict]:
-    """Resamples raster according to given upscale factor.
+    """Resamples raster according to given resolution.
 
     Args:
-        raster (rasterio.io.DatasetReader): The raster to be resampled.
-        upscale_factor (float): Resampling factor. Scale factors over 1 will yield
-            higher resolution data. Value must be positive.
-        resampling_method (rasterio.enums.Resampling): Resampling method. Most suitable
+        raster: The raster to be resampled.
+        resolution: Target resolution i.e. cell size of the output raster.
+        resampling_method: Resampling method. Most suitable
             method depends on the dataset and context. Nearest, bilinear and cubic are some
             common choices. This parameter defaults to bilinear.
 
     Returns:
-        out_image (numpy.ndarray): Resampled raster data.
-        out_meta (dict): The updated metadata.
+        The resampled raster data.
+        The updated metadata.
 
     Raises:
-        NumericValueSignException: Upscale factor is not a positive value.
+        NumericValueSignException: Resolution is not a positive value.
     """
-    if not check_numeric_value_sign(upscale_factor):
-        raise NumericValueSignException
+    if resolution <= 0:
+        raise exceptions.NumericValueSignException(f"Expected a positive value for resolution: {resolution})")
 
-    out_image, out_meta = _resample(raster, upscale_factor, resampling_method)
+    out_image, out_meta = _resample(raster, resolution, resampling_method)
     return out_image, out_meta
