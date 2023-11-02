@@ -1,13 +1,10 @@
-from pathlib import Path
-
 import pytest
 import rasterio
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.raster_processing.unique_combinations import unique_combinations
+from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
-parent_dir = Path(__file__).parent
-raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
 expected_1st_row = [
     1.0,
     2.0,
@@ -108,7 +105,7 @@ expected_2nd_row = [
 
 def test_unique_combinations():
     """Test unique combinations creates expected output."""
-    with rasterio.open(raster_path) as raster_1, rasterio.open(raster_path) as raster_2:
+    with rasterio.open(SMALL_RASTER_PATH) as raster_1, rasterio.open(SMALL_RASTER_PATH) as raster_2:
 
         out_image, out_meta = unique_combinations([raster_1, raster_2])
 
@@ -126,5 +123,5 @@ def test_unique_combinations():
 def test_unique_combinations_invalid_parameter():
     """Test that invalid parameter values for rasters raises correct exception."""
     with pytest.raises(InvalidParameterValueException):
-        with rasterio.open(raster_path) as raster:
+        with rasterio.open(SMALL_RASTER_PATH) as raster:
             unique_combinations([raster])
