@@ -7,7 +7,7 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.raster_processing.unique_combinations import unique_combinations
 
 parent_dir = Path(__file__).parent
-raster_path = parent_dir.joinpath("data/remote/data/small_raster.tif")
+raster_path = parent_dir.joinpath("data/remote/small_raster.tif")
 expected_1st_row = [
     1.0,
     2.0,
