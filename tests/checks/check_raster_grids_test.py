@@ -2,7 +2,7 @@ from pathlib import Path
 
 import rasterio
 
-from eis_toolkit.checks.raster import check_raster_grids
+from eis_toolkit.utilities.checks.raster import check_raster_grids
 
 # Test rasters.
 test_dir = Path(__file__).parent.parent

@@ -7,7 +7,7 @@ import rasterio
 from shapely.geometry import Point
 
 from eis_toolkit import exceptions
-from eis_toolkit.spatial_analyses.distance_computation import distance_computation
+from eis_toolkit.vector_processing.distance_computation import distance_computation
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
 with rasterio.open(SMALL_RASTER_PATH) as raster:

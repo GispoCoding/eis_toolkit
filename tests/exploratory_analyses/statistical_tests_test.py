@@ -4,7 +4,7 @@ import pytest
 from beartype.roar import BeartypeCallHintParamViolation
 
 from eis_toolkit import exceptions
-from eis_toolkit.statistical_analyses.statistical_tests import (
+from eis_toolkit.exploratory_analyses.statistical_tests import (
     chi_square_test,
     correlation_matrix,
     covariance_matrix,
