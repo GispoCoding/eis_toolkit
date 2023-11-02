@@ -20,18 +20,21 @@ band_numbers = [1]
 
 def test_raster_with_defined_intervals():
     """Test raster with defined intervals by comparing the output of the function to the original data."""
-    interval_size = 5
-    
-    raster = rasterio.open(raster_path, 'r+')
-    band_1 = raster.read(1)
+    with rasterio.open(raster_path) as raster:
+        interval_size = 5
 
-    output = raster_with_defined_intervals(raster, interval_size, raster_copy_path, band_numbers)
+        output = raster_with_defined_intervals(raster, interval_size, raster_copy_path, band_numbers)
 
-    assert not np.array_equal(output.read(1), band_1)
+        hist, edges = np.histogram(raster.read(1), bins=interval_size)
+
+        data = np.digitize(raster.read(1), edges)
+
+        assert np.array_equal(data, output.read(1))
+
 
 def raster_with_equal_intervals():
     """Test raster with equal intervals by comparing the output to numpy's digitized result."""
-    with rasterio.open(raster_path, 'r+') as raster:
+    with rasterio.open(raster_path) as raster:
 
         number_of_intervals = 100
 
