@@ -3,7 +3,7 @@ import pytest
 from sklearn.datasets import make_classification
 
 from eis_toolkit import exceptions
-from eis_toolkit.data_tools.class_balancing import balance_SMOTETomek
+from eis_toolkit.training_data_tools.class_balancing import balance_SMOTETomek
 
 # CREATE TEST DATA
 X, y = make_classification(

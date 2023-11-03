@@ -5,9 +5,9 @@ import pandas as pd
 from beartype import beartype
 from beartype.typing import Any, List, Optional, Sequence, Tuple, Union
 
-from eis_toolkit.checks.dataframe import check_columns_valid
-from eis_toolkit.checks.parameter import check_dtype_for_int
 from eis_toolkit.exceptions import InvalidColumnException
+from eis_toolkit.utilities.checks.dataframe import check_columns_valid
+from eis_toolkit.utilities.checks.parameter import check_dtype_for_int
 
 
 @beartype

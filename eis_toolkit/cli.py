@@ -254,7 +254,7 @@ def compute_pca_cli(
 @app.command()
 def check_raster_grids_cli(input_rasters: Annotated[List[Path], INPUT_FILE_OPTION], same_extent: bool = False):
     """Check all input rasters for matching gridding and optionally matching bounds."""
-    from eis_toolkit.checks.raster import check_raster_grids
+    from eis_toolkit.utilities.checks.raster import check_raster_grids
 
     typer.echo("Progress: 10%")
 
