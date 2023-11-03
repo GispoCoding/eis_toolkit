@@ -1,8 +1,10 @@
+from typing import Sequence
+
 import numpy as np
 import pandas as pd
 from beartype import beartype
 
-from eis_toolkit.exceptions import NonNumericDataException
+from eis_toolkit.exceptions import DataframeShapeException, NonNumericDataException
 
 
 @beartype
@@ -18,7 +20,7 @@ def _replace_zeros_with_nan_inplace(df: pd.DataFrame, rtol: float = 1e-5, atol: 
 
 
 @beartype
-def _get_rows_with_no_missing_values(df: pd.DataFramem) -> pd.Series:
+def _get_rows_with_no_missing_values(df: pd.DataFrame) -> pd.Series:
     return ~df.isna().any(axis=1)
 
 
@@ -32,6 +34,41 @@ def _linear_normalization(df: pd.DataFrame) -> pd.DataFrame:
     return dfc
 
 
+# @beartype
+def _ALR_transform(df: pd.DataFrame, columns: Sequence[any], idx=-1) -> pd.DataFrame:
+    """
+    Perform additive logratio transformation on the selected columns.
+
+    Args:
+        df: A Dataframe of shape containing compositional data.
+        columns: Columns selected for the transformation.
+        ind: The index of the column in the dataframe to be used as denominator.
+                If left blank, the last column will be used.
+
+    Returns:
+        DataFrame: A new DataFrame of shape (N, D-1) with the ALR transformed values.
+    """
+    cols = df.columns
+    if len(cols) < 2 or len(columns) > len(cols):
+        raise DataframeShapeException
+    if idx >= len(cols) or idx < -len(cols):
+        raise IndexError
+
+    # (todo: check columns exist)
+
+    dfc = df.copy()
+
+    # Only include the relevant columns
+    numerators = dfc.loc[:, columns]
+    denominator = dfc.iloc[:, idx]
+
+    # dfc = dfc.loc[:, columns].join(dfc.iloc[:, idx])
+    ratio = numerators.divide(denominator.iloc[0], axis="index")
+
+    return np.log(ratio)
+
+
 @beartype
-def _ALR_transform(df: pd.DataFrame) -> pd.DataFrame:
-    return pd.DataFrame()
+def _ALR_transform_row(row: pd.Series, ind=-1):
+
+    return pd.Series()
