@@ -44,3 +44,15 @@ def check_empty_dataframe(df: pd.DataFrame) -> bool:
         True if dataframe is empty, otherwise False.
     """
     return df.empty
+
+
+@beartype
+def check_column_index_in_dataframe(df: pd.DataFrame, idx: int) -> bool:
+    """
+    Check if the column's integer position based index is within the dataframe.
+
+    Args:
+        df: Dataframe to be checked.
+        idx: Column index to check.
+    """
+    return len(df.columns) <= idx < -len(df.columns)

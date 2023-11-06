@@ -92,7 +92,3 @@ class InvalidDatasetException(Exception):
 
 class NonNumericDataException(Exception):
     """Exception error class for when the given data includes non-numeric values."""
-
-
-class DataframeShapeException(Exception):
-    """Exception error class for an unexpected amount of rows or columns in DataFrame."""
