@@ -6,7 +6,7 @@ import pytest
 import rasterio
 from pandas.testing import assert_series_equal
 
-from eis_toolkit.exceptions import NonMatchinParameterLengthsException
+from eis_toolkit.exceptions import NonMatchingParameterLengthsException
 from eis_toolkit.raster_processing.extract_values_from_raster import extract_values_from_raster
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
@@ -78,5 +78,5 @@ def test_extract_values_from_raster_nonmatching_parameter_lengths():
     raster_list = [single_band_raster]
     raster_column_names = ["singleband_raster", "singleband_raster_2"]
 
-    with pytest.raises(NonMatchinParameterLengthsException):
+    with pytest.raises(NonMatchingParameterLengthsException):
         extract_values_from_raster(raster_list=raster_list, geodataframe=gdf, raster_column_names=raster_column_names)

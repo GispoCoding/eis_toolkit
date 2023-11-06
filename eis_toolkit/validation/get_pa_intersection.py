@@ -29,8 +29,7 @@ def get_pa_intersection(
     Args:
         true_positive_rate_values: True positive rate values, values should be within range 0-1.
         proportion_of_area_values: Proportion of area values, values should be within range 0-1.
-        threshold_values: Threshold values that were used to calculate true positive rate and proportion of
-        area.
+        threshold_values: Threshold values that were used to calculate true positive rate and proportion of area.
 
     Returns:
         X and y coordinates of the intersection point.

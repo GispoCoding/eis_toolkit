@@ -1,3 +1,3 @@
-# Calculate auc
-## Documentation for the calculate auc module
+# Calculate AUC
+
 ::: eis_toolkit.validation.calculate_auc

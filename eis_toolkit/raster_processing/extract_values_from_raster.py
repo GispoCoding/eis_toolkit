@@ -7,7 +7,7 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Sequence
 
-from eis_toolkit.exceptions import NonMatchinParameterLengthsException
+from eis_toolkit.exceptions import NonMatchingParameterLengthsException
 
 
 def _extract_values_from_raster(
@@ -63,13 +63,13 @@ def extract_values_from_raster(
         Dataframe with x & y coordinates and the values from the raster file(s) as columns.
 
     Raises:
-        NonMatchingParameterLenghtsException: raster_list and raster_columns_names have different lengths.
+        NonMatchingParameterLengthsException: raster_list and raster_columns_names have different lengths.
     """
     if raster_column_names == []:
         raster_column_names = None
 
     if raster_column_names is not None and len(raster_list) != len(raster_column_names):
-        raise NonMatchinParameterLengthsException("Raster list and raster columns names have different lengths.")
+        raise NonMatchingParameterLengthsException("Raster list and raster columns names have different lengths.")
 
     data_frame = _extract_values_from_raster(
         raster_list=raster_list, geodataframe=geodataframe, raster_column_names=raster_column_names

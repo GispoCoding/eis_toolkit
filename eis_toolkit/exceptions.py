@@ -2,8 +2,12 @@ class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
 
 
-class EmptyArrayException(Exception):
-    """Exception error class raised if the array is empty."""
+class ClassificationFailedException(Exception):
+    """Exception error class for classification failures."""
+
+
+class EmptyDataException(Exception):
+    """Exception error class raised if input data is empty."""
 
 
 class EmptyDataFrameException(Exception):
@@ -14,8 +18,12 @@ class FileReadError(Exception):
     """Exception error class for unsupported file exceptions."""
 
 
-class InvalidArrayException(Exception):
-    """Exception error class for invalid array."""
+class InconsistentDataTypesException(Exception):
+    """Exception error class for inconsistent data types."""
+
+
+class InvalidArgumentTypeException(Exception):
+    """Exception error for invalid argument type."""
 
 
 class InvalidColumnException(Exception):
@@ -38,6 +46,10 @@ class InvalidRasterBandException(Exception):
     """Expection error class for invalid raster band selection."""
 
 
+class InvalidWindowSizeException(Exception):
+    """Exception error class for invalid window size values."""
+
+
 class InvalidWktFormatException(Exception):
     """Exception error for invalid WKT format."""
 
@@ -50,17 +62,29 @@ class MatchingRasterGridException(Exception):
     """Exception error class for raster grid matches."""
 
 
-class NonMatchingCrsException(Exception):
-    """Exception error class for CRS mismatches."""
-
-
-class NonMatchinParameterLengthsException(Exception):
-    """Exception error class for parameters with different lenghts."""
-
-
 class NotApplicableGeometryTypeException(Exception):
     """Exception error class for not suitable geometry types."""
 
 
+class NonMatchingCrsException(Exception):
+    """Exception error class for CRS mismatches."""
+
+
+class NonMatchingParameterLengthsException(Exception):
+    """Exception error class for parameters with different lenghts."""
+
+
+class NonSquarePixelSizeException(Exception):
+    """Exception error class for non-square pixel size."""
+
+
 class NumericValueSignException(Exception):
     """Exception error class for numeric value sign exception."""
+
+
+class InvalidModelException(Exception):
+    """Exception error class when model is invalid or null."""
+
+
+class InvalidDatasetException(Exception):
+    """Exception error class when the dataset is null."""
