@@ -9,10 +9,10 @@
       
       
       
-        <link rel="prev" href="../check_raster_grids/">
+        <link rel="prev" href="../sigmoid/">
       
       
-        <link rel="next" href="../create_constant_raster/">
+        <link rel="next" href="../../validation/calculate_auc/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -20,7 +20,7 @@
     
     
       
-        <title>Clipping - EIS Toolkit</title>
+        <title>Winsorize - EIS Toolkit</title>
       
     
     
@@ -69,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#clipping" class="md-skip">
+        <a href="#winsorize" class="md-skip">
           Skip to content
         </a>
       
@@ -105,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Clipping
+              Winsorize
             
           </span>
         </div>
@@ -603,20 +603,18 @@
       
   
   
-    
-  
   
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
@@ -630,7 +628,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Raster processing
@@ -643,7 +641,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../check_raster_grids/" class="md-nav__link">
+      <a href="../../raster_processing/check_raster_grids/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -661,29 +659,9 @@
                 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Clipping
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../raster_processing/clipping/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -692,40 +670,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.clipping" class="md-nav__link">
-    clipping
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.clipping.clip_raster" class="md-nav__link">
-    clip_raster()
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -737,7 +681,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../create_constant_raster/" class="md-nav__link">
+      <a href="../../raster_processing/create_constant_raster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -757,7 +701,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../extract_values_from_raster/" class="md-nav__link">
+      <a href="../../raster_processing/extract_values_from_raster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -777,7 +721,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reprojecting/" class="md-nav__link">
+      <a href="../../raster_processing/reprojecting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -797,7 +741,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../resampling/" class="md-nav__link">
+      <a href="../../raster_processing/resampling/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -817,7 +761,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../snapping/" class="md-nav__link">
+      <a href="../../raster_processing/snapping/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -837,7 +781,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../unifying/" class="md-nav__link">
+      <a href="../../raster_processing/unifying/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -857,7 +801,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../windowing/" class="md-nav__link">
+      <a href="../../raster_processing/windowing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -945,18 +889,20 @@
       
   
   
+    
+  
   
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
@@ -970,7 +916,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             Transformations
@@ -983,7 +929,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../transformations/binarize/" class="md-nav__link">
+      <a href="../binarize/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1003,7 +949,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../transformations/clip/" class="md-nav__link">
+      <a href="../clip/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1023,7 +969,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../transformations/linear/" class="md-nav__link">
+      <a href="../linear/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1043,7 +989,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../transformations/logarithmic/" class="md-nav__link">
+      <a href="../logarithmic/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1063,7 +1009,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../transformations/sigmoid/" class="md-nav__link">
+      <a href="../sigmoid/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1081,9 +1027,29 @@
                 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../transformations/winsorize/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Winsorize
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1092,6 +1058,40 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.transformations.winsorize" class="md-nav__link">
+    winsorize
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.transformations.winsorize.winsorize" class="md-nav__link">
+    winsorize()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1477,15 +1477,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.clipping" class="md-nav__link">
-    clipping
+  <a href="#eis_toolkit.transformations.winsorize" class="md-nav__link">
+    winsorize
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.clipping.clip_raster" class="md-nav__link">
-    clip_raster()
+  <a href="#eis_toolkit.transformations.winsorize.winsorize" class="md-nav__link">
+    winsorize()
   </a>
   
 </li>
@@ -1508,14 +1508,14 @@
   
 
 
-<h1 id="clipping">Clipping</h1>
+<h1 id="winsorize">Winsorize</h1>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<a id="eis_toolkit.raster_processing.clipping"></a>
+<a id="eis_toolkit.transformations.winsorize"></a>
   <div class="doc doc-contents first">
 
   
@@ -1536,15 +1536,29 @@
 
 
 
-<h3 id="eis_toolkit.raster_processing.clipping.clip_raster" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">clip_raster</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="n">geodataframe</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.transformations.winsorize.winsorize" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">winsorize</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="n">percentiles</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inside</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Clips a raster with polygon geometries.</p>
+      <p>Winsorize data based on specified percentile values.</p>
+<p>Takes one nodata value that will be ignored in calculations.
+Replaces values between [minimum, lower percentile] and [upper percentile, maximum] if provided.
+Works both one-sided and two-sided but raises error if no percentile values provided.</p>
+<p>Percentiles are symmetrical, i.e. percentile_lower = 10 corresponds to the interval [min, 10%].
+And percentile_upper = 10 corresponds to the intervall [90%, max].
+I.e. percentile_lower = 0 refers to the minimum and percentile_upper = 0 to the data maximum.</p>
+<p>Calculation of percentiles is ambiguous. Users can choose whether to use the value
+for replacement from inside or outside of the respective interval. Example:
+Given the np.array[5 10 12 15 20 24 27 30 35] and percentiles(10, 10), the calculated
+percentiles are (5, 35) for inside and (10, 30) for outside.
+This results in [5 10 12 15 20 24 27 30 35] and [10 10 12 15 20 24 27 30 30], respectively.</p>
+<p>If no band/column selection specified, all bands/columns will be used.
+If a parameter contains only 1 entry, it will be applied for all bands.
+The percentiles can be set for each band individually, but inside parameter is same for all bands.</p>
 
 
 
@@ -1566,7 +1580,7 @@
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The raster to be clipped.</p>
+              <p>Data object to be transformed.</p>
             </div>
           </td>
           <td>
@@ -1574,18 +1588,59 @@
           </td>
         </tr>
         <tr>
-          <td><code>geodataframe</code></td>
+          <td><code>bands</code></td>
           <td>
-                <code><span title="geopandas.GeoDataFrame">GeoDataFrame</span></code>
+                <code><span title="beartype.typing.Optional">Optional</span>[<span title="beartype.typing.Sequence">Sequence</span>[int]]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>A geodataframe containing the geometries to do the clipping with.
-Should contain only polygon features.</p>
+              <p>Selection of bands to be transformed.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>percentiles</code></td>
+          <td>
+                <code><span title="beartype.typing.Sequence">Sequence</span>[<span title="beartype.typing.Tuple">Tuple</span>[<span title="beartype.typing.Optional">Optional</span>[<span title="numbers.Number">Number</span>], <span title="beartype.typing.Optional">Optional</span>[<span title="numbers.Number">Number</span>]]]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Lower and upper percentile values (lower, upper) between [0, 100].</p>
             </div>
           </td>
           <td>
               <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>inside</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Whether to use the value for replacement from the left or right of the calculated percentile.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>nodata</code></td>
+          <td>
+                <code><span title="beartype.typing.Optional">Optional</span>[<span title="numbers.Number">Number</span>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Nodata value to be considered.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
           </td>
         </tr>
     </tbody>
@@ -1597,28 +1652,38 @@ Should contain only polygon features.</p>
   <table>
     <thead>
       <tr>
-        <th>Type</th>
+<th>Name</th>        <th>Type</th>
         <th>Description</th>
       </tr>
     </thead>
     <tbody>
         <tr>
-          <td>
+<td><code>out_array</code></td>          <td>
                 <code><span title="numpy.ndarray">ndarray</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The clipped raster data.</p>
+              <p>The transformed data.</p>
             </div>
           </td>
         </tr>
         <tr>
-          <td>
+<td><code>out_meta</code></td>          <td>
                 <code>dict</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The updated metadata.</p>
+              <p>Updated metadata.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+<td><code>out_settings</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Log of input settings and calculated statistics if available.</p>
             </div>
           </td>
         </tr>
@@ -1638,21 +1703,31 @@ Should contain only polygon features.</p>
     <tbody>
         <tr>
           <td>
-                <code><span title="eis_toolkit.exceptions.NonMatchingCrsException">NonMatchingCrsException</span></code>
+                <code><span title="eis_toolkit.exceptions.InvalidRasterBandException">InvalidRasterBandException</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The raster and geodataframe are not in the same CRS.</p>
+              <p>The input contains invalid band numbers.</p>
             </div>
           </td>
         </tr>
         <tr>
           <td>
-                <code><span title="eis_toolkit.exceptions.NotApplicableGeometryTypeException">NotApplicableGeometryTypeException</span></code>
+                <code><span title="eis_toolkit.exceptions.NonMatchingParameterLengthsException">NonMatchingParameterLengthsException</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The input geometries contain non-polygon features.</p>
+              <p>The input does not match the number of selected bands.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.InvalidParameterValueException">InvalidParameterValueException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The input does not match the requirements (values, order of values)</p>
             </div>
           </td>
         </tr>
@@ -1660,78 +1735,226 @@ Should contain only polygon features.</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/raster_processing/clipping.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">clip_raster</span><span class="p">(</span><span class="n">raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">geodataframe</span><span class="p">:</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clips a raster with polygon geometries.</span>
+            <summary>Source code in <code>eis_toolkit/transformations/winsorize.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">winsorize</span><span class="p">(</span>  <span class="c1"># type: ignore[no-any-unimported]</span>
+    <span class="n">raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span>
+    <span class="n">percentiles</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]]],</span>
+    <span class="n">bands</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">inside</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Winsorize data based on specified percentile values.</span>
+
+<span class="sd">    Takes one nodata value that will be ignored in calculations.</span>
+<span class="sd">    Replaces values between [minimum, lower percentile] and [upper percentile, maximum] if provided.</span>
+<span class="sd">    Works both one-sided and two-sided but raises error if no percentile values provided.</span>
+
+<span class="sd">    Percentiles are symmetrical, i.e. percentile_lower = 10 corresponds to the interval [min, 10%].</span>
+<span class="sd">    And percentile_upper = 10 corresponds to the intervall [90%, max].</span>
+<span class="sd">    I.e. percentile_lower = 0 refers to the minimum and percentile_upper = 0 to the data maximum.</span>
+
+<span class="sd">    Calculation of percentiles is ambiguous. Users can choose whether to use the value</span>
+<span class="sd">    for replacement from inside or outside of the respective interval. Example:</span>
+<span class="sd">    Given the np.array[5 10 12 15 20 24 27 30 35] and percentiles(10, 10), the calculated</span>
+<span class="sd">    percentiles are (5, 35) for inside and (10, 30) for outside.</span>
+<span class="sd">    This results in [5 10 12 15 20 24 27 30 35] and [10 10 12 15 20 24 27 30 30], respectively.</span>
+
+<span class="sd">    If no band/column selection specified, all bands/columns will be used.</span>
+<span class="sd">    If a parameter contains only 1 entry, it will be applied for all bands.</span>
+<span class="sd">    The percentiles can be set for each band individually, but inside parameter is same for all bands.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        raster: The raster to be clipped.</span>
-<span class="sd">        geodataframe: A geodataframe containing the geometries to do the clipping with.</span>
-<span class="sd">            Should contain only polygon features.</span>
+<span class="sd">        raster: Data object to be transformed.</span>
+<span class="sd">        bands: Selection of bands to be transformed.</span>
+<span class="sd">        percentiles: Lower and upper percentile values (lower, upper) between [0, 100].</span>
+<span class="sd">        inside: Whether to use the value for replacement from the left or right of the calculated percentile.</span>
+<span class="sd">        nodata: Nodata value to be considered.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The clipped raster data.</span>
-<span class="sd">        The updated metadata.</span>
+<span class="sd">        out_array: The transformed data.</span>
+<span class="sd">        out_meta: Updated metadata.</span>
+<span class="sd">        out_settings: Log of input settings and calculated statistics if available.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        NonMatchingCrsException: The raster and geodataframe are not in the same CRS.</span>
-<span class="sd">        NotApplicableGeometryTypeException: The input geometries contain non-polygon features.</span>
+<span class="sd">        InvalidRasterBandException: The input contains invalid band numbers.</span>
+<span class="sd">        NonMatchingParameterLengthsException: The input does not match the number of selected bands.</span>
+<span class="sd">        InvalidParameterValueException: The input does not match the requirements (values, order of values)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">geometries</span> <span class="o">=</span> <span class="n">geodataframe</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span>
+    <span class="n">bands</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">raster</span><span class="o">.</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="k">if</span> <span class="n">bands</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">bands</span>
+    <span class="n">nodata</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">nodata</span> <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nodata</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_matching_crs</span><span class="p">(</span>
-        <span class="n">objects</span><span class="o">=</span><span class="p">[</span><span class="n">raster</span><span class="p">,</span> <span class="n">geometries</span><span class="p">],</span>
-    <span class="p">):</span>
-        <span class="k">raise</span> <span class="n">NonMatchingCrsException</span><span class="p">(</span><span class="s2">&quot;The raster and geodataframe are not in the same CRS.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">check_raster_bands</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="n">bands</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidRasterBandException</span><span class="p">(</span><span class="s2">&quot;Invalid band selection&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_geometry_types</span><span class="p">(</span>
-        <span class="n">geometries</span><span class="o">=</span><span class="n">geometries</span><span class="p">,</span>
-        <span class="n">allowed_types</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Polygon&quot;</span><span class="p">,</span> <span class="s2">&quot;MultiPolygon&quot;</span><span class="p">],</span>
-    <span class="p">):</span>
-        <span class="k">raise</span> <span class="n">NotApplicableGeometryTypeException</span><span class="p">(</span><span class="s2">&quot;The input geometries contain non-polygon features.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">check_parameter_length</span><span class="p">(</span><span class="n">bands</span><span class="p">,</span> <span class="n">percentiles</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">NonMatchingParameterLengthsException</span><span class="p">(</span><span class="s2">&quot;Invalid length for percentiles.&quot;</span><span class="p">)</span>
 
-    <span class="n">out_image</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_clip_raster</span><span class="p">(</span>
-        <span class="n">raster</span><span class="o">=</span><span class="n">raster</span><span class="p">,</span>
-        <span class="n">geometries</span><span class="o">=</span><span class="n">geometries</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">percentiles</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Percentile values all None: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">out_image</span><span class="p">,</span> <span class="n">out_meta</span>
+        <span class="k">if</span> <span class="kc">None</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">item</span> <span class="ow">and</span> <span class="nb">sum</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sum &gt;= 100: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid lower percentile value: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid upper percentile value: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="n">expanded_args</span> <span class="o">=</span> <span class="n">expand_and_zip</span><span class="p">(</span><span class="n">bands</span><span class="p">,</span> <span class="n">percentiles</span><span class="p">)</span>
+    <span class="n">percentiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">expanded_args</span><span class="p">]</span>
+
+    <span class="n">out_settings</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bands</span><span class="p">)):</span>
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">bands</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">inital_dtype</span> <span class="o">=</span> <span class="n">band_array</span><span class="o">.</span><span class="n">dtype</span>
+
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">cast_array_to_float</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">cast_int</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">nodata_to_nan</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">nodata_value</span><span class="o">=</span><span class="n">nodata</span><span class="p">)</span>
+
+        <span class="n">band_array</span><span class="p">,</span> <span class="n">calculated_lower</span><span class="p">,</span> <span class="n">calculated_upper</span> <span class="o">=</span> <span class="n">_winsorize</span><span class="p">(</span>
+            <span class="n">band_array</span><span class="p">,</span> <span class="n">percentiles</span><span class="o">=</span><span class="n">percentiles</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">inside</span><span class="o">=</span><span class="n">inside</span>
+        <span class="p">)</span>
+
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">nan_to_nodata</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">nodata_value</span><span class="o">=</span><span class="n">nodata</span><span class="p">)</span>
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">cast_array_to_int</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">scalar</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span> <span class="n">initial_dtype</span><span class="o">=</span><span class="n">inital_dtype</span><span class="p">)</span>
+
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">out_array</span> <span class="o">=</span> <span class="n">band_array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">out_array</span><span class="p">,</span> <span class="n">band_array</span><span class="p">))</span>
+
+        <span class="n">current_transform</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;transformation </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">current_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;band_origin&quot;</span><span class="p">:</span> <span class="n">bands</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="s2">&quot;percentile_lower&quot;</span><span class="p">:</span> <span class="n">cast_scalar_to_int</span><span class="p">(</span><span class="n">percentiles</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="s2">&quot;percentile_upper&quot;</span><span class="p">:</span> <span class="n">cast_scalar_to_int</span><span class="p">(</span><span class="n">percentiles</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="s2">&quot;calculated_lower&quot;</span><span class="p">:</span> <span class="n">cast_scalar_to_int</span><span class="p">(</span><span class="n">calculated_lower</span><span class="p">),</span>
+            <span class="s2">&quot;calculated_upper&quot;</span><span class="p">:</span> <span class="n">cast_scalar_to_int</span><span class="p">(</span><span class="n">calculated_upper</span><span class="p">),</span>
+            <span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="n">cast_scalar_to_int</span><span class="p">(</span><span class="n">nodata</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="n">out_settings</span><span class="p">[</span><span class="n">current_transform</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_settings</span>
+
+    <span class="n">out_meta</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">out_meta</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">bands</span><span class="p">),</span> <span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="n">nodata</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">out_array</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span><span class="p">,</span> <span class="n">out_settings</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>

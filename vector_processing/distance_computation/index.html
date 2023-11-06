@@ -9,22 +9,22 @@
       
       
       
-        <link rel="prev" href="../../spatial_analyses/distance_computation/">
+        <link rel="prev" href="../cell_based_association/">
       
       
-        <link rel="next" href="../../validation/calculate_auc/">
+        <link rel="next" href="../idw_interpolation/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
     
     
       
-        <title>Descriptive statistics - EIS Toolkit</title>
+        <title>Distance computation - EIS Toolkit</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.35e1ed30.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.4b4a2bd9.min.css">
       
       
 
@@ -44,6 +44,8 @@
     
     
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -67,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#descriptive-statistics" class="md-skip">
+        <a href="#distance-computation" class="md-skip">
           Skip to content
         </a>
       
@@ -103,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Descriptive statistics
+              Distance computation
             
           </span>
         </div>
@@ -353,7 +355,7 @@
             
   
   <span class="md-ellipsis">
-    Data tools
+    Exploratory analyses
   </span>
   
 
@@ -362,69 +364,6 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            Data tools
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../data_tools/class_balancing/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Class balancing
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Exploratory analyses
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Exploratory analyses
           </label>
@@ -441,6 +380,46 @@
   
   <span class="md-ellipsis">
     DBSCAN
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exploratory_analyses/descriptive_statistics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Descriptive statistics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exploratory_analyses/feature_importance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Feature importance
   </span>
   
 
@@ -510,6 +489,26 @@
 
               
             
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exploratory_analyses/statistical_testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Statistical (hypothesis) testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -532,10 +531,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -546,8 +545,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Prediction
           </label>
@@ -615,10 +614,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -629,8 +628,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Raster processing
           </label>
@@ -838,24 +837,24 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   <span class="md-ellipsis">
-    Spatial analyses
+    Training data tools
   </span>
   
 
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
-            Spatial analyses
+            Training data tools
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -865,161 +864,15 @@
   
   
     <li class="md-nav__item">
-      <a href="../../spatial_analyses/cell_based_association/" class="md-nav__link">
+      <a href="../../training_data_tools/class_balancing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Cell-Based Association
+    Class balancing
   </span>
   
 
       </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../spatial_analyses/distance_computation/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Distance computation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Statistical analyses
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_9">
-            <span class="md-nav__icon md-icon"></span>
-            Statistical analyses
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-    
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Descriptive statistics
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  <span class="md-ellipsis">
-    Descriptive statistics
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.statistical_analyses.descriptive_statistics" class="md-nav__link">
-    descriptive_statistics
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.statistical_analyses.descriptive_statistics.descriptive_statistics_dataframe" class="md-nav__link">
-    descriptive_statistics_dataframe()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.statistical_analyses.descriptive_statistics.descriptive_statistics_raster" class="md-nav__link">
-    descriptive_statistics_raster()
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1047,10 +900,173 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Transformations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Transformations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../transformations/binarize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Binarize
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../transformations/clip/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Clip
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../transformations/linear/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linear
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../transformations/logarithmic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Logarithmic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../transformations/sigmoid/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sigmoid
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../transformations/winsorize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Winsorize
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1061,8 +1077,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             Validation
           </label>
@@ -1134,6 +1150,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../validation/plot_correlation_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plot correlation matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../validation/plot_prediction_area_curves/" class="md-nav__link">
         
   
@@ -1179,21 +1215,23 @@
       
   
   
+    
+  
   
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
         
           
-          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1204,8 +1242,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_11">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             Vector processing
           </label>
@@ -1217,7 +1255,101 @@
   
   
     <li class="md-nav__item">
-      <a href="../../vector_processing/idw_interpolation/" class="md-nav__link">
+      <a href="../cell_based_association/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cell-Based Association
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Distance computation
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Distance computation
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.vector_processing.distance_computation" class="md-nav__link">
+    distance_computation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.vector_processing.distance_computation.distance_computation" class="md-nav__link">
+    distance_computation()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../idw_interpolation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1237,7 +1369,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../vector_processing/kriging_interpolation/" class="md-nav__link">
+      <a href="../kriging_interpolation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1257,7 +1389,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../vector_processing/rasterize_vector/" class="md-nav__link">
+      <a href="../rasterize_vector/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1277,7 +1409,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../vector_processing/reproject_vector/" class="md-nav__link">
+      <a href="../reproject_vector/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1297,7 +1429,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../vector_processing/vector_density/" class="md-nav__link">
+      <a href="../vector_density/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1345,22 +1477,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.statistical_analyses.descriptive_statistics" class="md-nav__link">
-    descriptive_statistics
+  <a href="#eis_toolkit.vector_processing.distance_computation" class="md-nav__link">
+    distance_computation
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.statistical_analyses.descriptive_statistics.descriptive_statistics_dataframe" class="md-nav__link">
-    descriptive_statistics_dataframe()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.statistical_analyses.descriptive_statistics.descriptive_statistics_raster" class="md-nav__link">
-    descriptive_statistics_raster()
+  <a href="#eis_toolkit.vector_processing.distance_computation.distance_computation" class="md-nav__link">
+    distance_computation()
   </a>
   
 </li>
@@ -1383,14 +1508,14 @@
   
 
 
-<h1 id="descriptive-statistics">Descriptive statistics</h1>
+<h1 id="distance-computation">Distance computation</h1>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<a id="eis_toolkit.statistical_analyses.descriptive_statistics"></a>
+<a id="eis_toolkit.vector_processing.distance_computation"></a>
   <div class="doc doc-contents first">
 
   
@@ -1411,16 +1536,15 @@
 
 
 
-<h2 id="eis_toolkit.statistical_analyses.descriptive_statistics.descriptive_statistics_dataframe" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">descriptive_statistics_dataframe</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.vector_processing.distance_computation.distance_computation" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">distance_computation</span><span class="p">(</span><span class="n">raster_profile</span><span class="p">,</span> <span class="n">geometries</span><span class="p">)</span></code>
 
-</h2>
+</h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Generate descriptive statistics from vector data.</p>
-<p>Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.</p>
+      <p>Calculate distance from raster cell to nearest geometry.</p>
 
 
 
@@ -1436,13 +1560,14 @@
     </thead>
     <tbody>
         <tr>
-          <td><code>input_data</code></td>
+          <td><code>raster_profile</code></td>
           <td>
-                <code><span title="typing.Union">Union</span>[<span title="pandas.DataFrame">DataFrame</span>, <span title="geopandas.GeoDataFrame">GeoDataFrame</span>]</code>
+                <code><span title="typing.Union">Union</span>[<span title="rasterio.profiles.Profile">Profile</span>, dict]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Data to generate descriptive statistics from.</p>
+              <p>The raster profile of the raster in which the distances
+to the nearest geometry are determined.</p>
             </div>
           </td>
           <td>
@@ -1450,13 +1575,13 @@
           </td>
         </tr>
         <tr>
-          <td><code>column</code></td>
+          <td><code>geometries</code></td>
           <td>
-                <code>str</code>
+                <code><span title="geopandas.GeoDataFrame">GeoDataFrame</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Specify the column to generate descriptive statistics from.</p>
+              <p>The geometries to determine distance to.</p>
             </div>
           </td>
           <td>
@@ -1479,11 +1604,11 @@
     <tbody>
         <tr>
           <td>
-                <code>dict</code>
+                <code><span title="numpy.ndarray">ndarray</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The descriptive statistics in previously described order.</p>
+              <p>A 2D numpy array with the distances computed.</p>
             </div>
           </td>
         </tr>
@@ -1491,8 +1616,29 @@
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/statistical_analyses/descriptive_statistics.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">42</span>
+            <summary>Source code in <code>eis_toolkit/vector_processing/distance_computation.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
 <span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span>
@@ -1506,135 +1652,42 @@
 <span class="normal">53</span>
 <span class="normal">54</span>
 <span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">descriptive_statistics_dataframe</span><span class="p">(</span><span class="n">input_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">],</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate descriptive statistics from vector data.</span>
-
-<span class="sd">    Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.</span>
+<span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">distance_computation</span><span class="p">(</span><span class="n">raster_profile</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">profiles</span><span class="o">.</span><span class="n">Profile</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">geometries</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate distance from raster cell to nearest geometry.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        input_data: Data to generate descriptive statistics from.</span>
-<span class="sd">        column: Specify the column to generate descriptive statistics from.</span>
+<span class="sd">        raster_profile: The raster profile of the raster in which the distances</span>
+<span class="sd">            to the nearest geometry are determined.</span>
+<span class="sd">        geometries: The geometries to determine distance to.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The descriptive statistics in previously described order.</span>
+<span class="sd">        A 2D numpy array with the distances computed.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">input_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">InvalidColumnException</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">input_data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
-    <span class="n">statistics</span> <span class="o">=</span> <span class="n">_descriptive_statistics</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">statistics</span>
-</code></pre></div></td></tr></table></div>
-          </details>
-  </div>
+    <span class="k">if</span> <span class="n">raster_profile</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;crs&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">geometries</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">NonMatchingCrsException</span><span class="p">(</span><span class="s2">&quot;Expected coordinate systems to match between raster and geometries. &quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">geometries</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;Expected GeoDataFrame to not be empty.&quot;</span><span class="p">)</span>
 
-</div>
+    <span class="n">raster_width</span> <span class="o">=</span> <span class="n">raster_profile</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">)</span>
+    <span class="n">raster_height</span> <span class="o">=</span> <span class="n">raster_profile</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raster_width</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raster_height</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Expected raster_profile to contain integer width and height. </span><span class="si">{</span><span class="n">raster_profile</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
-<div class="doc doc-object doc-function">
+    <span class="n">raster_transform</span> <span class="o">=</span> <span class="n">raster_profile</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;transform&quot;</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raster_transform</span><span class="p">,</span> <span class="n">transform</span><span class="o">.</span><span class="n">Affine</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Expected raster_profile to contain an affine transformation. </span><span class="si">{</span><span class="n">raster_profile</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
-
-
-<h2 id="eis_toolkit.statistical_analyses.descriptive_statistics.descriptive_statistics_raster" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">descriptive_statistics_raster</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span></code>
-
-</h2>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Generate descriptive statistics from raster data.</p>
-<p>Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.</p>
-
-
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>input_data</code></td>
-          <td>
-                <code><span title="rasterio.io.DatasetReader">DatasetReader</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Data to generate descriptive statistics from.</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>dict</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The descriptive statistics in previously described order.</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-          <details class="quote">
-            <summary>Source code in <code>eis_toolkit/statistical_analyses/descriptive_statistics.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">descriptive_statistics_raster</span><span class="p">(</span><span class="n">input_data</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate descriptive statistics from raster data.</span>
-
-<span class="sd">    Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        input_data: Data to generate descriptive statistics from.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        The descriptive statistics in previously described order.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-    <span class="n">statistics</span> <span class="o">=</span> <span class="n">_descriptive_statistics</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">statistics</span>
+    <span class="k">return</span> <span class="n">_distance_computation</span><span class="p">(</span>
+        <span class="n">raster_width</span><span class="o">=</span><span class="n">raster_width</span><span class="p">,</span> <span class="n">raster_height</span><span class="o">=</span><span class="n">raster_height</span><span class="p">,</span> <span class="n">raster_transform</span><span class="o">=</span><span class="n">raster_transform</span><span class="p">,</span> <span class="n">geometries</span><span class="o">=</span><span class="n">geometries</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>

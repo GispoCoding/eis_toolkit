@@ -9,10 +9,10 @@
       
       
       
-        <link rel="prev" href="../check_raster_grids/">
+        <link rel="prev" href="../../raster_processing/windowing/">
       
       
-        <link rel="next" href="../create_constant_raster/">
+        <link rel="next" href="../../transformations/binarize/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -20,7 +20,7 @@
     
     
       
-        <title>Clipping - EIS Toolkit</title>
+        <title>Class balancing - EIS Toolkit</title>
       
     
     
@@ -69,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#clipping" class="md-skip">
+        <a href="#class-balancing" class="md-skip">
           Skip to content
         </a>
       
@@ -105,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Clipping
+              Class balancing
             
           </span>
         </div>
@@ -603,20 +603,18 @@
       
   
   
-    
-  
   
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
@@ -630,7 +628,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Raster processing
@@ -643,7 +641,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../check_raster_grids/" class="md-nav__link">
+      <a href="../../raster_processing/check_raster_grids/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -661,29 +659,9 @@
                 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Clipping
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../raster_processing/clipping/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -692,40 +670,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.clipping" class="md-nav__link">
-    clipping
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.clipping.clip_raster" class="md-nav__link">
-    clip_raster()
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -737,7 +681,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../create_constant_raster/" class="md-nav__link">
+      <a href="../../raster_processing/create_constant_raster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -757,7 +701,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../extract_values_from_raster/" class="md-nav__link">
+      <a href="../../raster_processing/extract_values_from_raster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -777,7 +721,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reprojecting/" class="md-nav__link">
+      <a href="../../raster_processing/reprojecting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -797,7 +741,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../resampling/" class="md-nav__link">
+      <a href="../../raster_processing/resampling/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -817,7 +761,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../snapping/" class="md-nav__link">
+      <a href="../../raster_processing/snapping/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -837,7 +781,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../unifying/" class="md-nav__link">
+      <a href="../../raster_processing/unifying/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -857,7 +801,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../windowing/" class="md-nav__link">
+      <a href="../../raster_processing/windowing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -882,18 +826,20 @@
       
   
   
+    
+  
   
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
@@ -907,7 +853,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             Training data tools
@@ -918,9 +864,29 @@
                 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../training_data_tools/class_balancing/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Class balancing
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -929,6 +895,40 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.training_data_tools.class_balancing" class="md-nav__link">
+    class_balancing
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.training_data_tools.class_balancing.balance_SMOTETomek" class="md-nav__link">
+    balance_SMOTETomek()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1477,15 +1477,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.clipping" class="md-nav__link">
-    clipping
+  <a href="#eis_toolkit.training_data_tools.class_balancing" class="md-nav__link">
+    class_balancing
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.clipping.clip_raster" class="md-nav__link">
-    clip_raster()
+  <a href="#eis_toolkit.training_data_tools.class_balancing.balance_SMOTETomek" class="md-nav__link">
+    balance_SMOTETomek()
   </a>
   
 </li>
@@ -1508,14 +1508,14 @@
   
 
 
-<h1 id="clipping">Clipping</h1>
+<h1 id="class-balancing">Class balancing</h1>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<a id="eis_toolkit.raster_processing.clipping"></a>
+<a id="eis_toolkit.training_data_tools.class_balancing"></a>
   <div class="doc doc-contents first">
 
   
@@ -1536,15 +1536,15 @@
 
 
 
-<h3 id="eis_toolkit.raster_processing.clipping.clip_raster" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">clip_raster</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="n">geodataframe</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.training_data_tools.class_balancing.balance_SMOTETomek" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">balance_SMOTETomek</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sampling_strategy</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Clips a raster with polygon geometries.</p>
+      <p>Balances the classes of input dataset using SMOTETomek resampling method.</p>
 
 
 
@@ -1560,13 +1560,13 @@
     </thead>
     <tbody>
         <tr>
-          <td><code>raster</code></td>
+          <td><code>X</code></td>
           <td>
-                <code><span title="rasterio.io.DatasetReader">DatasetReader</span></code>
+                <code><span title="typing.Union">Union</span>[<span title="pandas.DataFrame">DataFrame</span>, <span title="numpy.ndarray">ndarray</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The raster to be clipped.</p>
+              <p>The feature matrix (input data as a DataFrame).</p>
             </div>
           </td>
           <td>
@@ -1574,18 +1574,50 @@
           </td>
         </tr>
         <tr>
-          <td><code>geodataframe</code></td>
+          <td><code>y</code></td>
           <td>
-                <code><span title="geopandas.GeoDataFrame">GeoDataFrame</span></code>
+                <code><span title="typing.Union">Union</span>[<span title="pandas.Series">Series</span>, <span title="numpy.ndarray">ndarray</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>A geodataframe containing the geometries to do the clipping with.
-Should contain only polygon features.</p>
+              <p>The target labels corresponding to the feature matrix.</p>
             </div>
           </td>
           <td>
               <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>sampling_strategy</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[float, str, dict]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Parameter controlling how to perform the resampling.
+If float, specifies the ratio of samples in minority class to samples of majority class,
+if str, specifies classes to be resampled ("minority", "not minority", "not majority", "all", "auto"),
+if dict, the keys should be targeted classes and values the desired number of samples for the class.
+Defaults to "auto", which will resample all classes except the majority class.</p>
+            </div>
+          </td>
+          <td>
+                <code>&#39;auto&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>random_state</code></td>
+          <td>
+                <code><span title="typing.Optional">Optional</span>[int]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Parameter controlling randomization of the algorithm. Can be given a seed (number).
+Defaults to None, which randomizes the seed.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
           </td>
         </tr>
     </tbody>
@@ -1604,21 +1636,11 @@ Should contain only polygon features.</p>
     <tbody>
         <tr>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code>tuple[<span title="typing.Union">Union</span>[<span title="pandas.DataFrame">DataFrame</span>, <span title="numpy.ndarray">ndarray</span>], <span title="typing.Union">Union</span>[<span title="pandas.Series">Series</span>, <span title="numpy.ndarray">ndarray</span>]]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The clipped raster data.</p>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-                <code>dict</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The updated metadata.</p>
+              <p>Resampled feature matrix and target labels.</p>
             </div>
           </td>
         </tr>
@@ -1638,21 +1660,11 @@ Should contain only polygon features.</p>
     <tbody>
         <tr>
           <td>
-                <code><span title="eis_toolkit.exceptions.NonMatchingCrsException">NonMatchingCrsException</span></code>
+                <code>NonMatchingParameterLengthsException</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The raster and geodataframe are not in the same CRS.</p>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-                <code><span title="eis_toolkit.exceptions.NotApplicableGeometryTypeException">NotApplicableGeometryTypeException</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The input geometries contain non-polygon features.</p>
+              <p>If X and y have different length.</p>
             </div>
           </td>
         </tr>
@@ -1660,8 +1672,21 @@ Should contain only polygon features.</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/raster_processing/clipping.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
+            <summary>Source code in <code>eis_toolkit/training_data_tools/class_balancing.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
 <span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span>
@@ -1681,57 +1706,40 @@ Should contain only polygon features.</p>
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">clip_raster</span><span class="p">(</span><span class="n">raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">geodataframe</span><span class="p">:</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clips a raster with polygon geometries.</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">balance_SMOTETomek</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">sampling_strategy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Balances the classes of input dataset using SMOTETomek resampling method.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        raster: The raster to be clipped.</span>
-<span class="sd">        geodataframe: A geodataframe containing the geometries to do the clipping with.</span>
-<span class="sd">            Should contain only polygon features.</span>
+<span class="sd">        X: The feature matrix (input data as a DataFrame).</span>
+<span class="sd">        y: The target labels corresponding to the feature matrix.</span>
+<span class="sd">        sampling_strategy: Parameter controlling how to perform the resampling.</span>
+<span class="sd">            If float, specifies the ratio of samples in minority class to samples of majority class,</span>
+<span class="sd">            if str, specifies classes to be resampled (&quot;minority&quot;, &quot;not minority&quot;, &quot;not majority&quot;, &quot;all&quot;, &quot;auto&quot;),</span>
+<span class="sd">            if dict, the keys should be targeted classes and values the desired number of samples for the class.</span>
+<span class="sd">            Defaults to &quot;auto&quot;, which will resample all classes except the majority class.</span>
+<span class="sd">        random_state: Parameter controlling randomization of the algorithm. Can be given a seed (number).</span>
+<span class="sd">            Defaults to None, which randomizes the seed.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The clipped raster data.</span>
-<span class="sd">        The updated metadata.</span>
+<span class="sd">        Resampled feature matrix and target labels.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        NonMatchingCrsException: The raster and geodataframe are not in the same CRS.</span>
-<span class="sd">        NotApplicableGeometryTypeException: The input geometries contain non-polygon features.</span>
+<span class="sd">        NonMatchingParameterLengthsException: If X and y have different length.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">geometries</span> <span class="o">=</span> <span class="n">geodataframe</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_matching_crs</span><span class="p">(</span>
-        <span class="n">objects</span><span class="o">=</span><span class="p">[</span><span class="n">raster</span><span class="p">,</span> <span class="n">geometries</span><span class="p">],</span>
-    <span class="p">):</span>
-        <span class="k">raise</span> <span class="n">NonMatchingCrsException</span><span class="p">(</span><span class="s2">&quot;The raster and geodataframe are not in the same CRS.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">NonMatchingParameterLengthsException</span><span class="p">(</span>
+            <span class="s2">&quot;Feature matrix X and target labels y must have the same length.&quot;</span>
+        <span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_geometry_types</span><span class="p">(</span>
-        <span class="n">geometries</span><span class="o">=</span><span class="n">geometries</span><span class="p">,</span>
-        <span class="n">allowed_types</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Polygon&quot;</span><span class="p">,</span> <span class="s2">&quot;MultiPolygon&quot;</span><span class="p">],</span>
-    <span class="p">):</span>
-        <span class="k">raise</span> <span class="n">NotApplicableGeometryTypeException</span><span class="p">(</span><span class="s2">&quot;The input geometries contain non-polygon features.&quot;</span><span class="p">)</span>
-
-    <span class="n">out_image</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_clip_raster</span><span class="p">(</span>
-        <span class="n">raster</span><span class="o">=</span><span class="n">raster</span><span class="p">,</span>
-        <span class="n">geometries</span><span class="o">=</span><span class="n">geometries</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">out_image</span><span class="p">,</span> <span class="n">out_meta</span>
+    <span class="n">X_res</span><span class="p">,</span> <span class="n">y_res</span> <span class="o">=</span> <span class="n">SMOTETomek</span><span class="p">(</span><span class="n">sampling_strategy</span><span class="o">=</span><span class="n">sampling_strategy</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span><span class="o">.</span><span class="n">fit_resample</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">X_res</span><span class="p">,</span> <span class="n">y_res</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>

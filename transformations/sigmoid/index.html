@@ -9,22 +9,22 @@
       
       
       
-        <link rel="prev" href="../../raster_processing/windowing/">
+        <link rel="prev" href="../logarithmic/">
       
       
-        <link rel="next" href="../distance_computation/">
+        <link rel="next" href="../winsorize/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
     
     
       
-        <title>Cell-Based Association - EIS Toolkit</title>
+        <title>Sigmoid - EIS Toolkit</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.35e1ed30.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.4b4a2bd9.min.css">
       
       
 
@@ -44,6 +44,8 @@
     
     
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -67,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cell-based-association" class="md-skip">
+        <a href="#sigmoid" class="md-skip">
           Skip to content
         </a>
       
@@ -103,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Cell-Based Association
+              Sigmoid
             
           </span>
         </div>
@@ -353,7 +355,7 @@
             
   
   <span class="md-ellipsis">
-    Data tools
+    Exploratory analyses
   </span>
   
 
@@ -362,69 +364,6 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            Data tools
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../data_tools/class_balancing/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Class balancing
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Exploratory analyses
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Exploratory analyses
           </label>
@@ -441,6 +380,46 @@
   
   <span class="md-ellipsis">
     DBSCAN
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exploratory_analyses/descriptive_statistics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Descriptive statistics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exploratory_analyses/feature_importance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Feature importance
   </span>
   
 
@@ -510,6 +489,26 @@
 
               
             
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exploratory_analyses/statistical_testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Statistical (hypothesis) testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -532,10 +531,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -546,8 +545,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Prediction
           </label>
@@ -615,10 +614,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -629,8 +628,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Raster processing
           </label>
@@ -827,6 +826,69 @@
       
   
   
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Training data tools
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Training data tools
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../training_data_tools/class_balancing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Class balancing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -847,7 +909,7 @@
             
   
   <span class="md-ellipsis">
-    Spatial analyses
+    Transformations
   </span>
   
 
@@ -857,9 +919,89 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
-            Spatial analyses
+            Transformations
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../binarize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Binarize
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clip/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Clip
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../linear/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linear
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logarithmic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Logarithmic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -880,7 +1022,7 @@
           
   
   <span class="md-ellipsis">
-    Cell-Based Association
+    Sigmoid
   </span>
   
 
@@ -891,7 +1033,7 @@
         
   
   <span class="md-ellipsis">
-    Cell-Based Association
+    Sigmoid
   </span>
   
 
@@ -913,15 +1055,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.spatial_analyses.cell_based_association" class="md-nav__link">
-    cell_based_association
+  <a href="#eis_toolkit.transformations.sigmoid" class="md-nav__link">
+    sigmoid
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.spatial_analyses.cell_based_association.cell_based_association" class="md-nav__link">
-    cell_based_association()
+  <a href="#eis_toolkit.transformations.sigmoid.sigmoid_transform" class="md-nav__link">
+    sigmoid_transform()
   </a>
   
 </li>
@@ -941,11 +1083,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../distance_computation/" class="md-nav__link">
+      <a href="../winsorize/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Distance computation
+    Winsorize
   </span>
   
 
@@ -984,7 +1126,7 @@
             
   
   <span class="md-ellipsis">
-    Statistical analyses
+    Validation
   </span>
   
 
@@ -993,69 +1135,6 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_9">
-            <span class="md-nav__icon md-icon"></span>
-            Statistical analyses
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../statistical_analyses/descriptive_statistics/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Descriptive statistics
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
-        
-          
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Validation
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             Validation
           </label>
@@ -1127,6 +1206,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../validation/plot_correlation_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plot correlation matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../validation/plot_prediction_area_curves/" class="md-nav__link">
         
   
@@ -1183,10 +1282,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1197,12 +1296,52 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_11">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             Vector processing
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../vector_processing/cell_based_association/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cell-Based Association
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../vector_processing/distance_computation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distance computation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -1338,15 +1477,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.spatial_analyses.cell_based_association" class="md-nav__link">
-    cell_based_association
+  <a href="#eis_toolkit.transformations.sigmoid" class="md-nav__link">
+    sigmoid
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.spatial_analyses.cell_based_association.cell_based_association" class="md-nav__link">
-    cell_based_association()
+  <a href="#eis_toolkit.transformations.sigmoid.sigmoid_transform" class="md-nav__link">
+    sigmoid_transform()
   </a>
   
 </li>
@@ -1369,14 +1508,14 @@
   
 
 
-<h1 id="cell-based-association">Cell-Based Association</h1>
+<h1 id="sigmoid">Sigmoid</h1>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<a id="eis_toolkit.spatial_analyses.cell_based_association"></a>
+<a id="eis_toolkit.transformations.sigmoid"></a>
   <div class="doc doc-contents first">
 
   
@@ -1397,19 +1536,20 @@
 
 
 
-<h2 id="eis_toolkit.spatial_analyses.cell_based_association.cell_based_association" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">cell_based_association</span><span class="p">(</span><span class="n">cell_size</span><span class="p">,</span> <span class="n">geodata</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subset_target_attribute_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_buffer</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.transformations.sigmoid.sigmoid_transform" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">sigmoid_transform</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">slope</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
-</h2>
+</h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Creation of CBA matrix.</p>
-<p>Initializes a CBA matrix from a vector file. The mesh is calculated
-according to the geometries contained in this file and the size of cells.
-Allows to add multiple vector data to the matrix, based on targeted shapes
-and/or attributes.</p>
+      <p>Transform data into a sigmoid-shape based on a specified new range.</p>
+<p>Uses the provided new minimum and maximum, shift and slope parameters to transform the data.
+Takes one nodata value that will be ignored in calculations.</p>
+<p>If no band/column selection specified, all bands/columns will be used.
+If a parameter contains only 1 entry, it will be applied for all bands.
+The bounds and slope values can be set for each band individually.</p>
 
 
 
@@ -1425,13 +1565,13 @@ and/or attributes.</p>
     </thead>
     <tbody>
         <tr>
-          <td><code>cell_size</code></td>
+          <td><code>raster</code></td>
           <td>
-                <code>int</code>
+                <code><span title="rasterio.io.DatasetReader">DatasetReader</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Size of the cells.</p>
+              <p>Data object to be transformed.</p>
             </div>
           </td>
           <td>
@@ -1439,48 +1579,13 @@ and/or attributes.</p>
           </td>
         </tr>
         <tr>
-          <td><code>geodata</code></td>
+          <td><code>bands</code></td>
           <td>
-                <code><span title="beartype.typing.List">List</span>[<span title="geopandas.GeoDataFrame">GeoDataFrame</span>]</code>
+                <code><span title="beartype.typing.Optional">Optional</span>[<span title="beartype.typing.Sequence">Sequence</span>[int]]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>GeoDataFrame to create the CBA matrix. Additional
-GeoDataFrame(s) can be imputed to add to the CBA matrix.</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>output_path</code></td>
-          <td>
-                <code>str</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Name of the saved .tif file.</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>column</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="beartype.typing.List">List</span>[str]]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Name of the column of interest. If no attribute is specified,
-then an artificial attribute is created representing the presence
-or absence of the geometries of this file for each cell of the CBA
-grid. A categorical attribute will generate as many columns (binary)
-in the CBA matrix than values considered of interest (dummification).
-See parameter <subset_target_attribute_values>. Additional
-column(s) can be imputed for each added GeoDataFrame(s).</p>
+              <p>Selection of bands to be transformed.</p>
             </div>
           </td>
           <td>
@@ -1488,48 +1593,55 @@ column(s) can be imputed for each added GeoDataFrame(s).</p>
           </td>
         </tr>
         <tr>
-          <td><code>subset_target_attribute_values</code></td>
+          <td><code>bounds</code></td>
           <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="beartype.typing.List">List</span>[<span title="beartype.typing.Union">Union</span>[None, list, str]]]</code>
+                <code><span title="beartype.typing.Sequence">Sequence</span>[<span title="beartype.typing.Tuple">Tuple</span>[<span title="numbers.Number">Number</span>, <span title="numbers.Number">Number</span>]]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>List of values of interest of the
-target attribute, in case a categorical target attribute has been
-specified. Allows to filter a subset of relevant values. Additional
-values can be imputed for each added GeoDataFrame(s).</p>
+              <p>Boundaries for the calculation of the sigmoid function (lower, upper).</p>
             </div>
           </td>
           <td>
-                <code>None</code>
+                <code>[(0, 1)]</code>
           </td>
         </tr>
         <tr>
-          <td><code>add_name</code></td>
+          <td><code>slope</code></td>
           <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="beartype.typing.List">List</span>[<span title="beartype.typing.Union">Union</span>[str, None]]]</code>
+                <code><span title="beartype.typing.Sequence">Sequence</span>[<span title="numbers.Number">Number</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Name of the column(s) to add to the matrix.</p>
+              <p>Value which modifies the slope of the resulting sigmoid-curve.</p>
             </div>
           </td>
           <td>
-                <code>None</code>
+                <code>[1]</code>
           </td>
         </tr>
         <tr>
-          <td><code>add_buffer</code></td>
+          <td><code>center</code></td>
           <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="beartype.typing.List">List</span>[<span title="beartype.typing.Union">Union</span>[<span title="numbers.Number">Number</span>, bool]]]</code>
+                <code>bool</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Allow the use of a buffer around shapes before the
-intersection with CBA cells for the added GeoDataFrame(s). Minimize
-border effects or allow increasing positive samples (i.e. cells
-with mineralization). The size of the buffer is computed using the
-CRS (if projected CRS in meters: value in meters).</p>
+              <p>Center array values around mean = 0 before sigmoid transformation.</p>
+            </div>
+          </td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>nodata</code></td>
+          <td>
+                <code><span title="beartype.typing.Optional">Optional</span>[<span title="numbers.Number">Number</span>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Nodata value to be considered.</p>
             </div>
           </td>
           <td>
@@ -1545,6 +1657,50 @@ CRS (if projected CRS in meters: value in meters).</p>
   <table>
     <thead>
       <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>out_array</code></td>          <td>
+                <code><span title="numpy.ndarray">ndarray</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The transformed data.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+<td><code>out_meta</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Updated metadata.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+<td><code>out_settings</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Log of input settings and calculated statistics if available.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
         <th>Type</th>
         <th>Description</th>
       </tr>
@@ -1552,11 +1708,31 @@ CRS (if projected CRS in meters: value in meters).</p>
     <tbody>
         <tr>
           <td>
-                <code><span title="geopandas.GeoDataFrame">GeoDataFrame</span></code>
+                <code><span title="eis_toolkit.exceptions.InvalidRasterBandException">InvalidRasterBandException</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>CBA matrix is created.</p>
+              <p>The input contains invalid band numbers.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.NonMatchingParameterLengthsException">NonMatchingParameterLengthsException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The input does not match the number of selected bands.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.InvalidParameterValueException">InvalidParameterValueException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The input does not match the requirements (values, order of values)</p>
             </div>
           </td>
         </tr>
@@ -1564,32 +1740,8 @@ CRS (if projected CRS in meters: value in meters).</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/spatial_analyses/cell_based_association.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 18</span>
-<span class="normal"> 19</span>
-<span class="normal"> 20</span>
-<span class="normal"> 21</span>
-<span class="normal"> 22</span>
-<span class="normal"> 23</span>
-<span class="normal"> 24</span>
-<span class="normal"> 25</span>
-<span class="normal"> 26</span>
-<span class="normal"> 27</span>
-<span class="normal"> 28</span>
-<span class="normal"> 29</span>
-<span class="normal"> 30</span>
-<span class="normal"> 31</span>
-<span class="normal"> 32</span>
-<span class="normal"> 33</span>
-<span class="normal"> 34</span>
-<span class="normal"> 35</span>
-<span class="normal"> 36</span>
-<span class="normal"> 37</span>
-<span class="normal"> 38</span>
-<span class="normal"> 39</span>
-<span class="normal"> 40</span>
-<span class="normal"> 41</span>
-<span class="normal"> 42</span>
+            <summary>Source code in <code>eis_toolkit/transformations/sigmoid.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 42</span>
 <span class="normal"> 43</span>
 <span class="normal"> 44</span>
 <span class="normal"> 45</span>
@@ -1662,104 +1814,118 @@ CRS (if projected CRS in meters: value in meters).</p>
 <span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span>
-<span class="normal">115</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">cell_based_association</span><span class="p">(</span>
-    <span class="n">cell_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">geodata</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">],</span>
-    <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">column</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">subset_target_attribute_values</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">add_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">add_buffer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Number</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creation of CBA matrix.</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">sigmoid_transform</span><span class="p">(</span>  <span class="c1"># type: ignore[no-any-unimported]</span>
+    <span class="n">raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span>
+    <span class="n">bands</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">bounds</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Number</span><span class="p">,</span> <span class="n">Number</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span>
+    <span class="n">slope</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="n">center</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transform data into a sigmoid-shape based on a specified new range.</span>
 
-<span class="sd">    Initializes a CBA matrix from a vector file. The mesh is calculated</span>
-<span class="sd">    according to the geometries contained in this file and the size of cells.</span>
-<span class="sd">    Allows to add multiple vector data to the matrix, based on targeted shapes</span>
-<span class="sd">    and/or attributes.</span>
+<span class="sd">    Uses the provided new minimum and maximum, shift and slope parameters to transform the data.</span>
+<span class="sd">    Takes one nodata value that will be ignored in calculations.</span>
+
+<span class="sd">    If no band/column selection specified, all bands/columns will be used.</span>
+<span class="sd">    If a parameter contains only 1 entry, it will be applied for all bands.</span>
+<span class="sd">    The bounds and slope values can be set for each band individually.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        cell_size: Size of the cells.</span>
-<span class="sd">        geodata: GeoDataFrame to create the CBA matrix. Additional</span>
-<span class="sd">            GeoDataFrame(s) can be imputed to add to the CBA matrix.</span>
-<span class="sd">        output_path: Name of the saved .tif file.</span>
-<span class="sd">        column: Name of the column of interest. If no attribute is specified,</span>
-<span class="sd">            then an artificial attribute is created representing the presence</span>
-<span class="sd">            or absence of the geometries of this file for each cell of the CBA</span>
-<span class="sd">            grid. A categorical attribute will generate as many columns (binary)</span>
-<span class="sd">            in the CBA matrix than values considered of interest (dummification).</span>
-<span class="sd">            See parameter &lt;subset_target_attribute_values&gt;. Additional</span>
-<span class="sd">            column(s) can be imputed for each added GeoDataFrame(s).</span>
-<span class="sd">        subset_target_attribute_values: List of values of interest of the</span>
-<span class="sd">            target attribute, in case a categorical target attribute has been</span>
-<span class="sd">            specified. Allows to filter a subset of relevant values. Additional</span>
-<span class="sd">            values can be imputed for each added GeoDataFrame(s).</span>
-<span class="sd">        add_name: Name of the column(s) to add to the matrix.</span>
-<span class="sd">        add_buffer: Allow the use of a buffer around shapes before the</span>
-<span class="sd">            intersection with CBA cells for the added GeoDataFrame(s). Minimize</span>
-<span class="sd">            border effects or allow increasing positive samples (i.e. cells</span>
-<span class="sd">            with mineralization). The size of the buffer is computed using the</span>
-<span class="sd">            CRS (if projected CRS in meters: value in meters).</span>
+<span class="sd">        raster: Data object to be transformed.</span>
+<span class="sd">        bands: Selection of bands to be transformed.</span>
+<span class="sd">        bounds: Boundaries for the calculation of the sigmoid function (lower, upper).</span>
+<span class="sd">        slope: Value which modifies the slope of the resulting sigmoid-curve.</span>
+<span class="sd">        center: Center array values around mean = 0 before sigmoid transformation.</span>
+<span class="sd">        nodata: Nodata value to be considered.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        CBA matrix is created.</span>
+<span class="sd">        out_array: The transformed data.</span>
+<span class="sd">        out_meta: Updated metadata.</span>
+<span class="sd">        out_settings: Log of input settings and calculated statistics if available.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        InvalidRasterBandException: The input contains invalid band numbers.</span>
+<span class="sd">        NonMatchingParameterLengthsException: The input does not match the number of selected bands.</span>
+<span class="sd">        InvalidParameterValueException: The input does not match the requirements (values, order of values)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bands</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">raster</span><span class="o">.</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="k">if</span> <span class="n">bands</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">bands</span>
+    <span class="n">nodata</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">nodata</span> <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nodata</span>
 
-    <span class="c1"># Swapping None to list values</span>
-    <span class="k">if</span> <span class="n">column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">column</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">add_buffer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">add_buffer</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">check_raster_bands</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="n">bands</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidRasterBandException</span><span class="p">(</span><span class="s2">&quot;Invalid band selection&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Consistency checks on input data</span>
-    <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">geodata</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;The input GeoDataFrame is empty.&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">&quot;bounds&quot;</span><span class="p">,</span> <span class="n">bounds</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;slope&quot;</span><span class="p">,</span> <span class="n">slope</span><span class="p">)]:</span>
+        <span class="k">if</span> <span class="n">check_parameter_length</span><span class="p">(</span><span class="n">bands</span><span class="p">,</span> <span class="n">parameter</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NonMatchingParameterLengthsException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid length for </span><span class="si">{</span><span class="n">parameter_name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">cell_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Expected cell size to be positive and non-zero.&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">check_minmax_position</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid min-max values provided: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
-    <span class="n">add_buffer</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">add_buffer</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">num</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">add_buffer</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Expected buffer value to be positive, null or False.&quot;</span><span class="p">)</span>
+    <span class="n">expanded_args</span> <span class="o">=</span> <span class="n">expand_and_zip</span><span class="p">(</span><span class="n">bands</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">slope</span><span class="p">)</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">expanded_args</span><span class="p">]</span>
+    <span class="n">slope</span> <span class="o">=</span> <span class="p">[</span><span class="n">element</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">expanded_args</span><span class="p">]</span>
 
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">column</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">column</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">subset_target_attribute_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Can&#39;t use subset of values if no column is targeted.&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">column</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">geodata</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidColumnException</span><span class="p">(</span><span class="s2">&quot;Targeted column not found in the GeoDataFrame.&quot;</span><span class="p">)</span>
+    <span class="n">out_settings</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">out_decimals</span> <span class="o">=</span> <span class="n">set_max_precision</span><span class="p">()</span>
 
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subset_target_attribute_values</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">subset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">geodata</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">column</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
-                    <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span>
-                        <span class="s2">&quot;Subset of value(s) not found in the targeted column.&quot;</span>
-                    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bands</span><span class="p">)):</span>
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">bands</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">cast_array_to_float</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">cast_int</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">replace_values</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">values_to_replace</span><span class="o">=</span><span class="p">[</span><span class="n">nodata</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">],</span> <span class="n">replace_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
 
-    <span class="c1"># Computation</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">geodata</span><span class="p">):</span>
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">_sigmoid_transform</span><span class="p">(</span><span class="n">band_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">slope</span><span class="o">=</span><span class="n">slope</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">center</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
+
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">truncate_decimal_places</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">decimal_places</span><span class="o">=</span><span class="n">out_decimals</span><span class="p">)</span>
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">nan_to_nodata</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">nodata_value</span><span class="o">=</span><span class="n">nodata</span><span class="p">)</span>
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">cast_array_to_float</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">scalar</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span> <span class="n">cast_float</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># Initialization of the CBA matrix</span>
-            <span class="n">grid</span><span class="p">,</span> <span class="n">cba</span> <span class="o">=</span> <span class="n">_init_from_vector_data</span><span class="p">(</span><span class="n">cell_size</span><span class="p">,</span> <span class="n">geodata</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">column</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">subset_target_attribute_values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">out_array</span> <span class="o">=</span> <span class="n">band_array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If necessary, adding data to matrix</span>
-            <span class="n">cba</span> <span class="o">=</span> <span class="n">_add_layer</span><span class="p">(</span>
-                <span class="n">cba</span><span class="p">,</span>
-                <span class="n">grid</span><span class="p">,</span>
-                <span class="n">geodata</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                <span class="n">column</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                <span class="n">subset_target_attribute_values</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                <span class="n">add_name</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span>
-                <span class="n">add_buffer</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span>
-            <span class="p">)</span>
+            <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">out_array</span><span class="p">,</span> <span class="n">band_array</span><span class="p">))</span>
 
-    <span class="c1"># Export</span>
-    <span class="n">_to_raster</span><span class="p">(</span><span class="n">cba</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
+        <span class="n">current_transform</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;transformation </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">current_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;band_origin&quot;</span><span class="p">:</span> <span class="n">bands</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="s2">&quot;bound_lower&quot;</span><span class="p">:</span> <span class="n">truncate_decimal_places</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">decimal_places</span><span class="o">=</span><span class="n">out_decimals</span><span class="p">),</span>
+            <span class="s2">&quot;bound_upper&quot;</span><span class="p">:</span> <span class="n">truncate_decimal_places</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">decimal_places</span><span class="o">=</span><span class="n">out_decimals</span><span class="p">),</span>
+            <span class="s2">&quot;slope&quot;</span><span class="p">:</span> <span class="n">slope</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="s2">&quot;center&quot;</span><span class="p">:</span> <span class="n">center</span><span class="p">,</span>
+            <span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="n">nodata</span><span class="p">,</span>
+            <span class="s2">&quot;decimal_places&quot;</span><span class="p">:</span> <span class="n">out_decimals</span><span class="p">,</span>
+        <span class="p">}</span>
 
-    <span class="k">return</span> <span class="n">cba</span>
+        <span class="n">out_settings</span><span class="p">[</span><span class="n">current_transform</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_settings</span>
+
+    <span class="n">out_meta</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">out_meta</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">bands</span><span class="p">),</span> <span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="n">nodata</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">out_array</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span><span class="p">,</span> <span class="n">out_settings</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>

@@ -9,10 +9,10 @@
       
       
       
-        <link rel="prev" href="../../exploratory_analyses/statistical_testing/">
+        <link rel="prev" href="../pca/">
       
       
-        <link rel="next" href="../weights_of_evidence/">
+        <link rel="next" href="../../prediction/fuzzy_overlay/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -20,7 +20,7 @@
     
     
       
-        <title>Fuzzy overlay - EIS Toolkit</title>
+        <title>Statistical (hypothesis) testing - EIS Toolkit</title>
       
     
     
@@ -69,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#fuzzy-overlay" class="md-skip">
+        <a href="#statistical-hypothesis-testing" class="md-skip">
           Skip to content
         </a>
       
@@ -105,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Fuzzy overlay
+              Statistical (hypothesis) testing
             
           </span>
         </div>
@@ -337,18 +337,20 @@
       
   
   
+    
+  
   
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
@@ -362,7 +364,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Exploratory analyses
@@ -375,7 +377,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/dbscan/" class="md-nav__link">
+      <a href="../dbscan/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -395,7 +397,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/descriptive_statistics/" class="md-nav__link">
+      <a href="../descriptive_statistics/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -415,7 +417,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/feature_importance/" class="md-nav__link">
+      <a href="../feature_importance/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -435,7 +437,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/k_means_cluster/" class="md-nav__link">
+      <a href="../k_means_cluster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -455,7 +457,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/parallel_coordinates/" class="md-nav__link">
+      <a href="../parallel_coordinates/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -475,7 +477,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/pca/" class="md-nav__link">
+      <a href="../pca/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -488,71 +490,6 @@
   
 
               
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../exploratory_analyses/statistical_testing/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Statistical (hypothesis) testing
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Prediction
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_5">
-            <span class="md-nav__icon md-icon"></span>
-            Prediction
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
             
               
                 
@@ -573,7 +510,7 @@
           
   
   <span class="md-ellipsis">
-    Fuzzy overlay
+    Statistical (hypothesis) testing
   </span>
   
 
@@ -584,7 +521,7 @@
         
   
   <span class="md-ellipsis">
-    Fuzzy overlay
+    Statistical (hypothesis) testing
   </span>
   
 
@@ -606,43 +543,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.prediction.fuzzy_overlay" class="md-nav__link">
-    fuzzy_overlay
+  <a href="#eis_toolkit.exploratory_analyses.statistical_tests" class="md-nav__link">
+    statistical_tests
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.prediction.fuzzy_overlay.and_overlay" class="md-nav__link">
-    and_overlay()
+  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.chi_square_test" class="md-nav__link">
+    chi_square_test()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.prediction.fuzzy_overlay.gamma_overlay" class="md-nav__link">
-    gamma_overlay()
+  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.correlation_matrix" class="md-nav__link">
+    correlation_matrix()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.prediction.fuzzy_overlay.or_overlay" class="md-nav__link">
-    or_overlay()
+  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.covariance_matrix" class="md-nav__link">
+    covariance_matrix()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.prediction.fuzzy_overlay.product_overlay" class="md-nav__link">
-    product_overlay()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.prediction.fuzzy_overlay.sum_overlay" class="md-nav__link">
-    sum_overlay()
+  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.normality_test" class="md-nav__link">
+    normality_test()
   </a>
   
 </li>
@@ -656,13 +586,76 @@
 
               
             
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Prediction
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Prediction
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
               
                 
   
   
   
     <li class="md-nav__item">
-      <a href="../weights_of_evidence/" class="md-nav__link">
+      <a href="../../prediction/fuzzy_overlay/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fuzzy overlay
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prediction/weights_of_evidence/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1505,43 +1498,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.prediction.fuzzy_overlay" class="md-nav__link">
-    fuzzy_overlay
+  <a href="#eis_toolkit.exploratory_analyses.statistical_tests" class="md-nav__link">
+    statistical_tests
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.prediction.fuzzy_overlay.and_overlay" class="md-nav__link">
-    and_overlay()
+  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.chi_square_test" class="md-nav__link">
+    chi_square_test()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.prediction.fuzzy_overlay.gamma_overlay" class="md-nav__link">
-    gamma_overlay()
+  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.correlation_matrix" class="md-nav__link">
+    correlation_matrix()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.prediction.fuzzy_overlay.or_overlay" class="md-nav__link">
-    or_overlay()
+  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.covariance_matrix" class="md-nav__link">
+    covariance_matrix()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.prediction.fuzzy_overlay.product_overlay" class="md-nav__link">
-    product_overlay()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.prediction.fuzzy_overlay.sum_overlay" class="md-nav__link">
-    sum_overlay()
+  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.normality_test" class="md-nav__link">
+    normality_test()
   </a>
   
 </li>
@@ -1564,14 +1550,14 @@
   
 
 
-<h1 id="fuzzy-overlay">Fuzzy overlay</h1>
+<h1 id="statistical-hypothesis-testing">Statistical (hypothesis) testing</h1>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<a id="eis_toolkit.prediction.fuzzy_overlay"></a>
+<a id="eis_toolkit.exploratory_analyses.statistical_tests"></a>
   <div class="doc doc-contents first">
 
   
@@ -1592,15 +1578,17 @@
 
 
 
-<h3 id="eis_toolkit.prediction.fuzzy_overlay.and_overlay" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">and_overlay</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.exploratory_analyses.statistical_tests.chi_square_test" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">chi_square_test</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">target_column</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Compute an 'and' overlay operation with fuzzy logic.</p>
+      <p>Compute Chi-square test for independence on the input data.</p>
+<p>It is assumed that the variables in the input data are independent and that they are categorical, i.e. strings,
+booleans or integers, but not floats.</p>
 
 
 
@@ -1618,40 +1606,43 @@
         <tr>
           <td><code>data</code></td>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The input data as a 3D Numpy array. Each 2D array represents a raster band.
-Data points should be in the range [0, 1].</p>
+              <p>Dataframe containing the input data</p>
             </div>
           </td>
           <td>
               <em>required</em>
           </td>
         </tr>
-    </tbody>
-  </table>
-
-
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
         <tr>
+          <td><code>target_column</code></td>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code>str</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>2D Numpy array with the result of the 'and' overlay operation. Values are in range [0, 1].</p>
+              <p>Variable against which independence of other variables is tested.</p>
             </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>columns</code></td>
+          <td>
+                <code><span title="beartype.typing.Sequence">Sequence</span>[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Variables that are tested against the variable in target_column. If None, every column is used.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
           </td>
         </tr>
     </tbody>
@@ -1670,11 +1661,45 @@ Data points should be in the range [0, 1].</p>
     <tbody>
         <tr>
           <td>
+                <code>EmptyDataFrameException</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The input Dataframe is empty.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
                 <code>InvalidParameterValueException</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>If data values are not in range [0, 1].</p>
+              <p>The target_column is not in input Dataframe or invalid column is provided.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Test statistics for each variable (except target_column).</p>
             </div>
           </td>
         </tr>
@@ -1682,8 +1707,12 @@ Data points should be in the range [0, 1].</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/prediction/fuzzy_overlay.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">14</span>
+            <summary>Source code in <code>eis_toolkit/exploratory_analyses/statistical_tests.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
 <span class="normal">15</span>
 <span class="normal">16</span>
 <span class="normal">17</span>
@@ -1699,23 +1728,69 @@ Data points should be in the range [0, 1].</p>
 <span class="normal">27</span>
 <span class="normal">28</span>
 <span class="normal">29</span>
-<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">and_overlay</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute an &#39;and&#39; overlay operation with fuzzy logic.</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">chi_square_test</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">target_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute Chi-square test for independence on the input data.</span>
+
+<span class="sd">    It is assumed that the variables in the input data are independent and that they are categorical, i.e. strings,</span>
+<span class="sd">    booleans or integers, but not floats.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        data: The input data as a 3D Numpy array. Each 2D array represents a raster band.</span>
-<span class="sd">            Data points should be in the range [0, 1].</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        2D Numpy array with the result of the &#39;and&#39; overlay operation. Values are in range [0, 1].</span>
+<span class="sd">        data: Dataframe containing the input data</span>
+<span class="sd">        target_column: Variable against which independence of other variables is tested.</span>
+<span class="sd">        columns: Variables that are tested against the variable in target_column. If None, every column is used.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        InvalidParameterValueException: If data values are not in range [0, 1].</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_check_input_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+<span class="sd">        EmptyDataFrameException: The input Dataframe is empty.</span>
+<span class="sd">        InvalidParameterValueException: The target_column is not in input Dataframe or invalid column is provided.</span>
 
-    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Test statistics for each variable (except target_column).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">check_empty_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;The input Dataframe is empty.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_columns_valid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">target_column</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Target column not found in the Dataframe.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">columns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">invalid_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span> <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">invalid_columns</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The following variables are not in the dataframe: </span><span class="si">{</span><span class="n">invalid_columns</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span>
+
+    <span class="n">statistics</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="o">!=</span> <span class="n">target_column</span><span class="p">:</span>
+            <span class="n">contingency_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">target_column</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">])</span>
+            <span class="n">chi_square</span><span class="p">,</span> <span class="n">p_value</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">chi2_contingency</span><span class="p">(</span><span class="n">contingency_table</span><span class="p">)</span>
+            <span class="n">statistics</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">chi_square</span><span class="p">,</span> <span class="n">p_value</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">statistics</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1728,15 +1803,16 @@ Data points should be in the range [0, 1].</p>
 
 
 
-<h3 id="eis_toolkit.prediction.fuzzy_overlay.gamma_overlay" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">gamma_overlay</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.exploratory_analyses.statistical_tests.correlation_matrix" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">correlation_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">correlation_method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Compute a 'gamma' overlay operation with fuzzy logic.</p>
+      <p>Compute correlation matrix on the input data.</p>
+<p>It is assumed that the data is numeric, i.e. integers or floats.</p>
 
 
 
@@ -1754,12 +1830,11 @@ Data points should be in the range [0, 1].</p>
         <tr>
           <td><code>data</code></td>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The input data as a 3D Numpy array. Each 2D array represents a raster band.
-Data points should be in the range [0, 1].</p>
+              <p>Dataframe containing the input data.</p>
             </div>
           </td>
           <td>
@@ -1767,43 +1842,31 @@ Data points should be in the range [0, 1].</p>
           </td>
         </tr>
         <tr>
-          <td><code>gamma</code></td>
+          <td><code>correlation_method</code></td>
           <td>
-                <code>float</code>
+                <code><span title="beartype.typing.Literal">Literal</span>[pearson, kendall, spearman]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The gamma parameter. With gamma value 0, result will be same as 'product'overlay.
-When gamma is closer to 1, the weight of 'sum' overlay is increased.
-Value must be in the range [0, 1].</p>
+              <p>'pearson', 'kendall', or 'spearman'. Defaults to 'pearson'.</p>
             </div>
           </td>
           <td>
-              <em>required</em>
+                <code>&#39;pearson&#39;</code>
           </td>
         </tr>
-    </tbody>
-  </table>
-
-
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
         <tr>
+          <td><code>min_periods</code></td>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code><span title="beartype.typing.Optional">Optional</span>[int]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>2D Numpy array with the result of the 'gamma' overlay operation. Values are in range [0, 1].</p>
+              <p>Minimum number of observations required per pair of columns to have valid result. Optional.</p>
             </div>
+          </td>
+          <td>
+                <code>None</code>
           </td>
         </tr>
     </tbody>
@@ -1822,11 +1885,45 @@ Value must be in the range [0, 1].</p>
     <tbody>
         <tr>
           <td>
+                <code>EmptyDataFrameException</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The input Dataframe is empty.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
                 <code>InvalidParameterValueException</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>If data values or gamma are not in range [0, 1].</p>
+              <p>min_periods argument is used with method 'kendall'.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dataframe containing the correlation matrix</p>
             </div>
           </td>
         </tr>
@@ -1834,8 +1931,18 @@ Value must be in the range [0, 1].</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/prediction/fuzzy_overlay.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 90</span>
+            <summary>Source code in <code>eis_toolkit/exploratory_analyses/statistical_tests.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
 <span class="normal"> 91</span>
 <span class="normal"> 92</span>
 <span class="normal"> 93</span>
@@ -1858,28 +1965,38 @@ Value must be in the range [0, 1].</p>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">gamma_overlay</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a &#39;gamma&#39; overlay operation with fuzzy logic.</span>
+<span class="k">def</span> <span class="nf">correlation_matrix</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">correlation_method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;pearson&quot;</span><span class="p">,</span> <span class="s2">&quot;kendall&quot;</span><span class="p">,</span> <span class="s2">&quot;spearman&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;pearson&quot;</span><span class="p">,</span>
+    <span class="n">min_periods</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute correlation matrix on the input data.</span>
+
+<span class="sd">    It is assumed that the data is numeric, i.e. integers or floats.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        data: The input data as a 3D Numpy array. Each 2D array represents a raster band.</span>
-<span class="sd">            Data points should be in the range [0, 1].</span>
-<span class="sd">        gamma: The gamma parameter. With gamma value 0, result will be same as &#39;product&#39;overlay.</span>
-<span class="sd">            When gamma is closer to 1, the weight of &#39;sum&#39; overlay is increased.</span>
-<span class="sd">            Value must be in the range [0, 1].</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        2D Numpy array with the result of the &#39;gamma&#39; overlay operation. Values are in range [0, 1].</span>
+<span class="sd">        data: Dataframe containing the input data.</span>
+<span class="sd">        correlation_method: &#39;pearson&#39;, &#39;kendall&#39;, or &#39;spearman&#39;. Defaults to &#39;pearson&#39;.</span>
+<span class="sd">        min_periods: Minimum number of observations required per pair of columns to have valid result. Optional.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        InvalidParameterValueException: If data values or gamma are not in range [0, 1].</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">gamma</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">gamma</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;The gamma parameter must be in range [0, 1]&quot;</span><span class="p">)</span>
+<span class="sd">        EmptyDataFrameException: The input Dataframe is empty.</span>
+<span class="sd">        InvalidParameterValueException: min_periods argument is used with method &#39;kendall&#39;.</span>
 
-    <span class="nb">sum</span> <span class="o">=</span> <span class="n">sum_overlay</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-    <span class="n">product</span> <span class="o">=</span> <span class="n">product_overlay</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">product</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">*</span> <span class="nb">sum</span><span class="o">**</span><span class="n">gamma</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dataframe containing the correlation matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">check_empty_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;The input Dataframe is empty.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">correlation_method</span> <span class="o">==</span> <span class="s2">&quot;kendall&quot;</span> <span class="ow">and</span> <span class="n">min_periods</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span>
+            <span class="s2">&quot;The argument min_periods is available only with correlation methods &#39;pearson&#39; and &#39;spearman&#39;.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">correlation_method</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="n">min_periods</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">matrix</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1892,15 +2009,16 @@ Value must be in the range [0, 1].</p>
 
 
 
-<h3 id="eis_toolkit.prediction.fuzzy_overlay.or_overlay" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">or_overlay</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.exploratory_analyses.statistical_tests.covariance_matrix" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">covariance_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delta_degrees_of_freedom</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
 
 </h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Compute an 'or' overlay operation with fuzzy logic.</p>
+      <p>Compute covariance matrix on the input data.</p>
+<p>It is assumed that the data is numeric, i.e. integers or floats.</p>
 
 
 
@@ -1918,12 +2036,209 @@ Value must be in the range [0, 1].</p>
         <tr>
           <td><code>data</code></td>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The input data as a 3D Numpy array. Each 2D array represents a raster band.
-Data points should be in the range [0, 1].</p>
+              <p>Dataframe containing the input data.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>min_periods</code></td>
+          <td>
+                <code><span title="beartype.typing.Optional">Optional</span>[int]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Minimum number of observations required per pair of columns to have valid result. Optional.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>delta_degrees_of_freedom</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Delta degrees of freedom used for computing covariance matrix. Defaults to 1.</p>
+            </div>
+          </td>
+          <td>
+                <code>1</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>EmptyDataFrameException</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The input Dataframe is empty.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>InvalidParameterValueException</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Provided value for delta_degrees_of_freedom is negative.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dataframe containing the covariance matrix</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>eis_toolkit/exploratory_analyses/statistical_tests.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">covariance_matrix</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">min_periods</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">delta_degrees_of_freedom</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute covariance matrix on the input data.</span>
+
+<span class="sd">    It is assumed that the data is numeric, i.e. integers or floats.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Dataframe containing the input data.</span>
+<span class="sd">        min_periods: Minimum number of observations required per pair of columns to have valid result. Optional.</span>
+<span class="sd">        delta_degrees_of_freedom: Delta degrees of freedom used for computing covariance matrix. Defaults to 1.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        EmptyDataFrameException: The input Dataframe is empty.</span>
+<span class="sd">        InvalidParameterValueException: Provided value for delta_degrees_of_freedom is negative.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dataframe containing the covariance matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">check_empty_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;The input Dataframe is empty.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">delta_degrees_of_freedom</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Delta degrees of freedom must be non-negative.&quot;</span><span class="p">)</span>
+
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">min_periods</span><span class="o">=</span><span class="n">min_periods</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="n">delta_degrees_of_freedom</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">matrix</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="eis_toolkit.exploratory_analyses.statistical_tests.normality_test" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">normality_test</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Compute Shapiro-Wilk test for normality on the input data.</p>
+<p>It is assumed that the input data is normally distributed and numeric, i.e. integers or floats.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>data</code></td>
+          <td>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dataframe containing the input data.</p>
             </div>
           </td>
           <td>
@@ -1946,11 +2261,11 @@ Data points should be in the range [0, 1].</p>
     <tbody>
         <tr>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code>dict</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>2D Numpy array with the result of the 'or' overlay operation. Values are in range [0, 1].</p>
+              <p>Test statistics for each variable.</p>
             </div>
           </td>
         </tr>
@@ -1970,11 +2285,11 @@ Data points should be in the range [0, 1].</p>
     <tbody>
         <tr>
           <td>
-                <code>InvalidParameterValueException</code>
+                <code>EmptyDataFrameException</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>If data values are not in range [0, 1].</p>
+              <p>The input Dataframe is empty.</p>
             </div>
           </td>
         </tr>
@@ -1982,146 +2297,8 @@ Data points should be in the range [0, 1].</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/prediction/fuzzy_overlay.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">or_overlay</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute an &#39;or&#39; overlay operation with fuzzy logic.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        data: The input data as a 3D Numpy array. Each 2D array represents a raster band.</span>
-<span class="sd">            Data points should be in the range [0, 1].</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        2D Numpy array with the result of the &#39;or&#39; overlay operation. Values are in range [0, 1].</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        InvalidParameterValueException: If data values are not in range [0, 1].</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_check_input_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-          </details>
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-
-<h3 id="eis_toolkit.prediction.fuzzy_overlay.product_overlay" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">product_overlay</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Compute a 'product' overlay operation with fuzzy logic.</p>
-
-
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>data</code></td>
-          <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The input data as a 3D Numpy array. Each 2D array represents a raster band.
-Data points should be in the range [0, 1].</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>2D Numpy array with the result of the 'product' overlay operation. Values are in range [0, 1].</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-  <p><strong>Raises:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>InvalidParameterValueException</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>If data values are not in range [0, 1].</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-          <details class="quote">
-            <summary>Source code in <code>eis_toolkit/prediction/fuzzy_overlay.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
+            <summary>Source code in <code>eis_toolkit/exploratory_analyses/statistical_tests.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">54</span>
 <span class="normal">55</span>
 <span class="normal">56</span>
 <span class="normal">57</span>
@@ -2135,159 +2312,39 @@ Data points should be in the range [0, 1].</p>
 <span class="normal">65</span>
 <span class="normal">66</span>
 <span class="normal">67</span>
-<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">product_overlay</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a &#39;product&#39; overlay operation with fuzzy logic.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        data: The input data as a 3D Numpy array. Each 2D array represents a raster band.</span>
-<span class="sd">            Data points should be in the range [0, 1].</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        2D Numpy array with the result of the &#39;product&#39; overlay operation. Values are in range [0, 1].</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        InvalidParameterValueException: If data values are not in range [0, 1].</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_check_input_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-          </details>
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-
-<h3 id="eis_toolkit.prediction.fuzzy_overlay.sum_overlay" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">sum_overlay</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Compute a 'sum' overlay operation with fuzzy logic.</p>
-
-
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>data</code></td>
-          <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The input data as a 3D Numpy array. Each 2D array represents a raster band.
-Data points should be in the range [0, 1].</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>2D Numpy array with the result of the 'sum' overlay operation. Values are in range [0, 1].</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-  <p><strong>Raises:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>InvalidParameterValueException</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>If data values are not in range [0, 1].</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-          <details class="quote">
-            <summary>Source code in <code>eis_toolkit/prediction/fuzzy_overlay.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">71</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
 <span class="normal">72</span>
 <span class="normal">73</span>
 <span class="normal">74</span>
 <span class="normal">75</span>
 <span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">sum_overlay</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a &#39;sum&#39; overlay operation with fuzzy logic.</span>
+<span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">normality_test</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute Shapiro-Wilk test for normality on the input data.</span>
+
+<span class="sd">    It is assumed that the input data is normally distributed and numeric, i.e. integers or floats.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        data: The input data as a 3D Numpy array. Each 2D array represents a raster band.</span>
-<span class="sd">            Data points should be in the range [0, 1].</span>
+<span class="sd">        data: Dataframe containing the input data.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        2D Numpy array with the result of the &#39;sum&#39; overlay operation. Values are in range [0, 1].</span>
+<span class="sd">        Test statistics for each variable.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        InvalidParameterValueException: If data values are not in range [0, 1].</span>
+<span class="sd">        EmptyDataFrameException: The input Dataframe is empty.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_check_input_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">check_empty_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;The input Dataframe is empty.&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">statistics</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">statistic</span><span class="p">,</span> <span class="n">p_value</span> <span class="o">=</span> <span class="n">shapiro</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">])</span>
+        <span class="n">statistics</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">statistic</span><span class="p">,</span> <span class="n">p_value</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">statistics</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>

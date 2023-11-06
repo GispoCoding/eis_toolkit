@@ -9,22 +9,22 @@
       
       
       
-        <link rel="prev" href="../../conversions/raster_to_dataframe/">
+        <link rel="prev" href="../../training_data_tools/class_balancing/">
       
       
-        <link rel="next" href="../../exploratory_analyses/dbscan/">
+        <link rel="next" href="../clip/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
     
     
       
-        <title>Class balancing - EIS Toolkit</title>
+        <title>Binarize - EIS Toolkit</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.35e1ed30.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.4b4a2bd9.min.css">
       
       
 
@@ -44,6 +44,8 @@
     
     
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -67,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#class-balancing" class="md-skip">
+        <a href="#binarize" class="md-skip">
           Skip to content
         </a>
       
@@ -103,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Class balancing
+              Binarize
             
           </span>
         </div>
@@ -335,125 +337,6 @@
       
   
   
-    
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Data tools
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            Data tools
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-    
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Class balancing
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  <span class="md-ellipsis">
-    Class balancing
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.data_tools.class_balancing" class="md-nav__link">
-    class_balancing
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.data_tools.class_balancing.balance_SMOTETomek" class="md-nav__link">
-    balance_SMOTETomek()
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
   
     
     
@@ -465,10 +348,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -479,8 +362,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Exploratory analyses
           </label>
@@ -497,6 +380,46 @@
   
   <span class="md-ellipsis">
     DBSCAN
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exploratory_analyses/descriptive_statistics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Descriptive statistics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exploratory_analyses/feature_importance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Feature importance
   </span>
   
 
@@ -566,6 +489,26 @@
 
               
             
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exploratory_analyses/statistical_testing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Statistical (hypothesis) testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -588,10 +531,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -602,8 +545,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Prediction
           </label>
@@ -671,10 +614,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -685,8 +628,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Raster processing
           </label>
@@ -894,24 +837,24 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   <span class="md-ellipsis">
-    Spatial analyses
+    Training data tools
   </span>
   
 
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
-            Spatial analyses
+            Training data tools
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -921,11 +864,150 @@
   
   
     <li class="md-nav__item">
-      <a href="../../spatial_analyses/cell_based_association/" class="md-nav__link">
+      <a href="../../training_data_tools/class_balancing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Cell-Based Association
+    Class balancing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Transformations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Transformations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Binarize
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Binarize
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.transformations.binarize" class="md-nav__link">
+    binarize
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.transformations.binarize.binarize" class="md-nav__link">
+    binarize()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clip/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Clip
   </span>
   
 
@@ -941,11 +1023,71 @@
   
   
     <li class="md-nav__item">
-      <a href="../../spatial_analyses/distance_computation/" class="md-nav__link">
+      <a href="../linear/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Distance computation
+    Linear
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logarithmic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Logarithmic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sigmoid/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sigmoid
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../winsorize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Winsorize
   </span>
   
 
@@ -984,7 +1126,7 @@
             
   
   <span class="md-ellipsis">
-    Statistical analyses
+    Validation
   </span>
   
 
@@ -993,69 +1135,6 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_9">
-            <span class="md-nav__icon md-icon"></span>
-            Statistical analyses
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../statistical_analyses/descriptive_statistics/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Descriptive statistics
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-    
-    
-    
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
-        
-          
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Validation
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             Validation
           </label>
@@ -1127,6 +1206,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../validation/plot_correlation_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plot correlation matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../validation/plot_prediction_area_curves/" class="md-nav__link">
         
   
@@ -1183,10 +1282,10 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1197,12 +1296,52 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_11">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             Vector processing
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../vector_processing/cell_based_association/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cell-Based Association
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../vector_processing/distance_computation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distance computation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -1338,15 +1477,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.data_tools.class_balancing" class="md-nav__link">
-    class_balancing
+  <a href="#eis_toolkit.transformations.binarize" class="md-nav__link">
+    binarize
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.data_tools.class_balancing.balance_SMOTETomek" class="md-nav__link">
-    balance_SMOTETomek()
+  <a href="#eis_toolkit.transformations.binarize.binarize" class="md-nav__link">
+    binarize()
   </a>
   
 </li>
@@ -1369,14 +1508,14 @@
   
 
 
-<h1 id="class-balancing">Class balancing</h1>
+<h1 id="binarize">Binarize</h1>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<a id="eis_toolkit.data_tools.class_balancing"></a>
+<a id="eis_toolkit.transformations.binarize"></a>
   <div class="doc doc-contents first">
 
   
@@ -1397,15 +1536,21 @@
 
 
 
-<h2 id="eis_toolkit.data_tools.class_balancing.balance_SMOTETomek" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">balance_SMOTETomek</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sampling_strategy</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.transformations.binarize.binarize" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">binarize</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thresholds</span><span class="o">=</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">nodata</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
-</h2>
+</h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Balances the classes of input dataset using SMOTETomek resampling method.</p>
+      <p>Binarize data based on a given threshold.</p>
+<p>Replaces values less or equal threshold with 0.
+Replaces values greater than the threshold with 1.</p>
+<p>Takes one nodata value which will be re-written after transformation.</p>
+<p>If no band/column selection specified, all bands/columns will be used.
+If a parameter contains only 1 entry, it will be applied for all bands.
+The threshold can be set for each band individually.</p>
 
 
 
@@ -1421,13 +1566,13 @@
     </thead>
     <tbody>
         <tr>
-          <td><code>X</code></td>
+          <td><code>raster</code></td>
           <td>
-                <code><span title="typing.Union">Union</span>[<span title="pandas.DataFrame">DataFrame</span>, <span title="numpy.ndarray">ndarray</span>]</code>
+                <code><span title="rasterio.io.DatasetReader">DatasetReader</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The feature matrix (input data as a DataFrame).</p>
+              <p>Data object to be transformed.</p>
             </div>
           </td>
           <td>
@@ -1435,46 +1580,41 @@
           </td>
         </tr>
         <tr>
-          <td><code>y</code></td>
+          <td><code>bands</code></td>
           <td>
-                <code><span title="typing.Union">Union</span>[<span title="pandas.Series">Series</span>, <span title="numpy.ndarray">ndarray</span>]</code>
+                <code><span title="beartype.typing.Optional">Optional</span>[<span title="beartype.typing.Sequence">Sequence</span>[int]]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The target labels corresponding to the feature matrix.</p>
+              <p>Selection of bands to be transformed.</p>
             </div>
           </td>
           <td>
-              <em>required</em>
+                <code>None</code>
           </td>
         </tr>
         <tr>
-          <td><code>sampling_strategy</code></td>
+          <td><code>thresholds</code></td>
           <td>
-                <code><span title="typing.Union">Union</span>[float, str, dict]</code>
+                <code><span title="beartype.typing.Sequence">Sequence</span>[<span title="numbers.Number">Number</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Parameter controlling how to perform the resampling.
-If float, specifies the ratio of samples in minority class to samples of majority class,
-if str, specifies classes to be resampled ("minority", "not minority", "not majority", "all", "auto"),
-if dict, the keys should be targeted classes and values the desired number of samples for the class.
-Defaults to "auto", which will resample all classes except the majority class.</p>
+              <p>Threshold values for transformation.</p>
             </div>
           </td>
           <td>
-                <code>&#39;auto&#39;</code>
+                <code>[<span title="numbers.Number">Number</span>]</code>
           </td>
         </tr>
         <tr>
-          <td><code>random_state</code></td>
+          <td><code>nodata</code></td>
           <td>
-                <code><span title="typing.Optional">Optional</span>[int]</code>
+                <code><span title="beartype.typing.Optional">Optional</span>[<span title="numbers.Number">Number</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Parameter controlling randomization of the algorithm. Can be given a seed (number).
-Defaults to None, which randomizes the seed.</p>
+              <p>Nodata value to be considered.</p>
             </div>
           </td>
           <td>
@@ -1490,18 +1630,38 @@ Defaults to None, which randomizes the seed.</p>
   <table>
     <thead>
       <tr>
-        <th>Type</th>
+<th>Name</th>        <th>Type</th>
         <th>Description</th>
       </tr>
     </thead>
     <tbody>
         <tr>
-          <td>
-                <code>tuple[<span title="typing.Union">Union</span>[<span title="pandas.DataFrame">DataFrame</span>, <span title="numpy.ndarray">ndarray</span>], <span title="typing.Union">Union</span>[<span title="pandas.Series">Series</span>, <span title="numpy.ndarray">ndarray</span>]]</code>
+<td><code>out_array</code></td>          <td>
+                <code><span title="numpy.ndarray">ndarray</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Resampled feature matrix and target labels.</p>
+              <p>The transformed data.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+<td><code>out_meta</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Updated metadata.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+<td><code>out_settings</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Log of input settings and calculated statistics if available.</p>
             </div>
           </td>
         </tr>
@@ -1521,11 +1681,21 @@ Defaults to None, which randomizes the seed.</p>
     <tbody>
         <tr>
           <td>
-                <code>NonMatchingParameterLengthsException</code>
+                <code><span title="eis_toolkit.exceptions.InvalidRasterBandException">InvalidRasterBandException</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>If X and y have different length.</p>
+              <p>The input contains invalid band numbers.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.NonMatchingParameterLengthsException">NonMatchingParameterLengthsException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The input does not match the number of selected bands.</p>
             </div>
           </td>
         </tr>
@@ -1533,74 +1703,168 @@ Defaults to None, which randomizes the seed.</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/data_tools/class_balancing.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">balance_SMOTETomek</span><span class="p">(</span>
-    <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-    <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-    <span class="n">sampling_strategy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
-    <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Balances the classes of input dataset using SMOTETomek resampling method.</span>
+            <summary>Source code in <code>eis_toolkit/transformations/binarize.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">binarize</span><span class="p">(</span>  <span class="c1"># type: ignore[no-any-unimported]</span>
+    <span class="n">raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span>
+    <span class="n">bands</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">thresholds</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">Number</span><span class="p">],</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Binarize data based on a given threshold.</span>
+
+<span class="sd">    Replaces values less or equal threshold with 0.</span>
+<span class="sd">    Replaces values greater than the threshold with 1.</span>
+
+<span class="sd">    Takes one nodata value which will be re-written after transformation.</span>
+
+<span class="sd">    If no band/column selection specified, all bands/columns will be used.</span>
+<span class="sd">    If a parameter contains only 1 entry, it will be applied for all bands.</span>
+<span class="sd">    The threshold can be set for each band individually.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        X: The feature matrix (input data as a DataFrame).</span>
-<span class="sd">        y: The target labels corresponding to the feature matrix.</span>
-<span class="sd">        sampling_strategy: Parameter controlling how to perform the resampling.</span>
-<span class="sd">            If float, specifies the ratio of samples in minority class to samples of majority class,</span>
-<span class="sd">            if str, specifies classes to be resampled (&quot;minority&quot;, &quot;not minority&quot;, &quot;not majority&quot;, &quot;all&quot;, &quot;auto&quot;),</span>
-<span class="sd">            if dict, the keys should be targeted classes and values the desired number of samples for the class.</span>
-<span class="sd">            Defaults to &quot;auto&quot;, which will resample all classes except the majority class.</span>
-<span class="sd">        random_state: Parameter controlling randomization of the algorithm. Can be given a seed (number).</span>
-<span class="sd">            Defaults to None, which randomizes the seed.</span>
+<span class="sd">        raster: Data object to be transformed.</span>
+<span class="sd">        bands: Selection of bands to be transformed.</span>
+<span class="sd">        thresholds: Threshold values for transformation.</span>
+<span class="sd">        nodata: Nodata value to be considered.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Resampled feature matrix and target labels.</span>
+<span class="sd">        out_array: The transformed data.</span>
+<span class="sd">        out_meta: Updated metadata.</span>
+<span class="sd">        out_settings: Log of input settings and calculated statistics if available.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        NonMatchingParameterLengthsException: If X and y have different length.</span>
+<span class="sd">        InvalidRasterBandException: The input contains invalid band numbers.</span>
+<span class="sd">        NonMatchingParameterLengthsException: The input does not match the number of selected bands.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bands</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">raster</span><span class="o">.</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="k">if</span> <span class="n">bands</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">bands</span>
+    <span class="n">nodata</span> <span class="o">=</span> <span class="n">cast_scalar_to_int</span><span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span> <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nodata</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">NonMatchingParameterLengthsException</span><span class="p">(</span>
-            <span class="s2">&quot;Feature matrix X and target labels y must have the same length.&quot;</span>
-        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">check_raster_bands</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="n">bands</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidRasterBandException</span><span class="p">(</span><span class="s2">&quot;Invalid band selection.&quot;</span><span class="p">)</span>
 
-    <span class="n">X_res</span><span class="p">,</span> <span class="n">y_res</span> <span class="o">=</span> <span class="n">SMOTETomek</span><span class="p">(</span><span class="n">sampling_strategy</span><span class="o">=</span><span class="n">sampling_strategy</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span><span class="o">.</span><span class="n">fit_resample</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">X_res</span><span class="p">,</span> <span class="n">y_res</span>
+    <span class="k">if</span> <span class="n">check_parameter_length</span><span class="p">(</span><span class="n">bands</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">NonMatchingParameterLengthsException</span><span class="p">(</span><span class="s2">&quot;Invalid threshold length.&quot;</span><span class="p">)</span>
+
+    <span class="n">expanded_args</span> <span class="o">=</span> <span class="n">expand_and_zip</span><span class="p">(</span><span class="n">bands</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">)</span>
+    <span class="n">thresholds</span> <span class="o">=</span> <span class="p">[</span><span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">expanded_args</span><span class="p">]</span>
+
+    <span class="n">out_settings</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bands</span><span class="p">)):</span>
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">bands</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">inital_dtype</span> <span class="o">=</span> <span class="n">band_array</span><span class="o">.</span><span class="n">dtype</span>
+
+        <span class="n">band_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">nodata</span><span class="p">)</span>
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">_binarize</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">band_mask</span><span class="p">,</span> <span class="n">nodata</span><span class="p">,</span> <span class="n">band_array</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check_dtype_for_int</span><span class="p">(</span><span class="n">nodata</span><span class="p">):</span>
+            <span class="n">band_array</span> <span class="o">=</span> <span class="n">band_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">inital_dtype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">band_array</span> <span class="o">=</span> <span class="n">band_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min_scalar_type</span><span class="p">(</span><span class="n">nodata</span><span class="p">))</span>
+
+        <span class="n">band_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">band_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">out_array</span> <span class="o">=</span> <span class="n">band_array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">out_array</span><span class="p">,</span> <span class="n">band_array</span><span class="p">))</span>
+
+        <span class="n">current_transform</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;transformation </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">current_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;band_origin&quot;</span><span class="p">:</span> <span class="n">bands</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="n">nodata</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">out_settings</span><span class="p">[</span><span class="n">current_transform</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_settings</span>
+
+    <span class="n">out_meta</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">out_meta</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">bands</span><span class="p">),</span> <span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="n">nodata</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">out_array</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span><span class="p">,</span> <span class="n">out_settings</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
