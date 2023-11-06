@@ -41,7 +41,7 @@ def _linear_normalization(df: pd.DataFrame) -> pd.DataFrame:
 
 @beartype
 def _ALR_transform(
-    df: pd.DataFrame, columns: Optional[Sequence[any]] = None, idx: int = -1, keep_redundant_column: bool = False
+    df: pd.DataFrame, columns: Optional[Sequence[str]] = None, idx: int = -1, keep_redundant_column: bool = False
 ) -> pd.DataFrame:
     """
     Perform additive logratio transformation on the selected columns.
@@ -68,32 +68,22 @@ def _ALR_transform(
 
     columns = df.columns if columns is None else columns
 
-    if len(columns) < 2:
-        raise InvalidParameterValueException("Not enough columns to perform the transformation on.")
-
     if check_column_index_in_dataframe(df, idx):
         raise InvalidColumnIndexException
 
-    # denominator_column_name = df.columns[idx]
+    denominator_column = df.columns[idx]
+
+    if not keep_redundant_column and denominator_column in columns:
+        columns.remove(denominator_column)
+
+    if len(columns) < 2:
+        raise InvalidParameterValueException("Not enough columns to perform the transformation on.")
 
     # TODO: check for zeros
     # TODO: decide if NaNs should be handled here
 
-    dfc = df.copy()
-
-    # Only include the relevant columns
-    if keep_redundant_column:
-        # TODO
-        pass
-
-    numerators = dfc.loc[:, columns]
-    denominator = dfc.iloc[:, idx]
-
-    # dfc = dfc.loc[:, columns].join(dfc.iloc[:, idx])
-    # TODO: fix division
-    ratio = numerators.divide(denominator[0], axis="index")
-
-    return np.log(ratio)
+    ratios = df[columns].div(df[denominator_column], axis=0)
+    return np.log(ratios)
 
 
 @beartype
