@@ -2,6 +2,7 @@ from typing import List, Tuple
 
 import numpy as np
 import rasterio
+from beartype import beartype
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.raster_processing.check_raster_grids import check_raster_grids
@@ -30,6 +31,7 @@ def _unique_combinations(
     return unique_combination_indices
 
 
+@beartype
 def unique_combinations(  # type: ignore[no-any-unimported]
     raster_list: List[rasterio.io.DatasetReader],
 ) -> Tuple[np.ndarray, dict]:
