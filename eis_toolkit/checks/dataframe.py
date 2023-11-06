@@ -56,3 +56,14 @@ def check_column_index_in_dataframe(df: pd.DataFrame, idx: int) -> bool:
         idx: Column index to check.
     """
     return len(df.columns) <= idx < -len(df.columns)
+
+
+@beartype
+def check_dataframe_contains_nonzero_numbers(df: pd.DataFrame) -> bool:
+    """
+    Check if the dataframe contains any zeros.
+
+    Args:
+        df: Dataframe to be checked.
+    """
+    return 0 in df.values

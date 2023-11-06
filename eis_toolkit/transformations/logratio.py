@@ -3,7 +3,11 @@ import pandas as pd
 from beartype import beartype
 from beartype.typing import Optional, Sequence
 
-from eis_toolkit.checks.dataframe import check_column_index_in_dataframe, check_columns_valid
+from eis_toolkit.checks.dataframe import (
+    check_column_index_in_dataframe,
+    check_columns_valid,
+    check_dataframe_contains_nonzero_numbers,
+)
 from eis_toolkit.exceptions import (
     InvalidColumnException,
     InvalidColumnIndexException,
@@ -30,16 +34,6 @@ def _get_rows_with_no_missing_values(df: pd.DataFrame) -> pd.Series:
 
 
 @beartype
-def _linear_normalization(df: pd.DataFrame) -> pd.DataFrame:
-    dfc = df.copy()
-    for idx, row in dfc[_get_rows_with_no_missing_values(dfc)].iterrows():
-        min = row.iloc[row.argmin()] * 1.0
-        max = row.iloc[row.argmax()]
-        dfc.iloc[idx] = row.transform(lambda x: (x - min) / (max - min))
-    return dfc
-
-
-@beartype
 def _ALR_transform(
     df: pd.DataFrame, columns: Optional[Sequence[str]] = None, idx: int = -1, keep_redundant_column: bool = False
 ) -> pd.DataFrame:
@@ -47,20 +41,21 @@ def _ALR_transform(
     Perform additive logratio transformation on the selected columns.
 
     Args:
-        df: A Dataframe of shape containing compositional data.
-        columns: Columns selected for the transformation.
-                If none are given, all columns will be used.
-        idx: The index of the column in the dataframe to be used as denominator.
-                If left blank, the last column will be used.
-        keep_redundant_column:
+        df: A dataframe containing compositional data.
+        columns: Names of the columns to be transformed. If none are given, all columns are used.
+        idx: The integer position based index of the column of the dataframe to be used as denominator.
+            If not provided, the last column will be used.
+        keep_redundant_column: Whether to include the denominator column in the result. If True, it is
+            included in the output dataframe regardless of whether it was in the list of given input columns.
 
     Returns:
-        DataFrame: A new DataFrame of shape (N, D-1) with the ALR transformed values.
+        DataFrame: A new dataframe containing the ALR transformed values.
 
     Raises:
-        InvalidColumnException
-        InvalidParameterValueException
-        InvalidColumnIndexException
+        InvalidColumnException: One or more input columns are not found in the given dataframe, or the
+            numerator or denominator columns contain zeros.
+        InvalidParameterValueException: Too few columns to perform the transformation.
+        InvalidColumnIndexException: The input index for the denominator column is out of bounds.
     """
     if columns is not None:
         if check_columns_valid(df, columns) is False:
@@ -68,25 +63,22 @@ def _ALR_transform(
 
     columns = df.columns if columns is None else columns
 
+    if len(columns) < 2:
+        raise InvalidParameterValueException("Too few columns to perform the transformation.")
+
     if check_column_index_in_dataframe(df, idx):
         raise InvalidColumnIndexException
 
     denominator_column = df.columns[idx]
 
+    if denominator_column not in columns:
+        columns.append(denominator_column)
+
+    if check_dataframe_contains_nonzero_numbers(df[columns]):
+        raise InvalidColumnException("The given columns or the divisor column contain zeros.")
+
     if not keep_redundant_column and denominator_column in columns:
         columns.remove(denominator_column)
 
-    if len(columns) < 2:
-        raise InvalidParameterValueException("Not enough columns to perform the transformation on.")
-
-    # TODO: check for zeros
-    # TODO: decide if NaNs should be handled here
-
     ratios = df[columns].div(df[denominator_column], axis=0)
     return np.log(ratios)
-
-
-@beartype
-def _ALR_transform_row(row: pd.Series, ind=-1):
-
-    return pd.Series()
