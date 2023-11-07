@@ -82,3 +82,8 @@ def _ALR_transform(
 
     ratios = df[columns].div(df[denominator_column], axis=0)
     return np.log(ratios)
+
+
+def _inverse_ALR(df: pd.DataFrame, denominator_column: pd.Series) -> pd.DataFrame:
+    # TODO: implement
+    return pd.DataFrame()
