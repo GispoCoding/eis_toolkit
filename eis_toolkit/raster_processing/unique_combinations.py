@@ -1,8 +1,7 @@
-from typing import List, Tuple
-
 import numpy as np
 import rasterio
 from beartype import beartype
+from beartype.typing import List, Tuple
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.raster_processing.check_raster_grids import check_raster_grids
@@ -16,19 +15,13 @@ def _unique_combinations(
 
     combined_array_2d = combined_array.reshape(-1, len(bands))
 
-    _, unique_indices = np.unique(combined_array_2d, axis=0, return_index=True)
+    _, unique_indices, inverse_indices = np.unique(combined_array_2d, axis=0, return_index=True, return_inverse=True)
 
-    unique_combinations = combined_array_2d[np.sort(unique_indices)]
+    unique_combinations = inverse_indices.reshape(bands[0].shape)
 
-    combination_to_index = {tuple(combo): index for index, combo in enumerate(unique_combinations)}
+    unique_combinations += 1
 
-    unique_combination_indices = np.array([combination_to_index[tuple(combo)] for combo in combined_array_2d])
-
-    unique_combination_indices = unique_combination_indices.reshape(bands[0].shape)
-
-    unique_combination_indices += 1
-
-    return unique_combination_indices
+    return unique_combinations
 
 
 @beartype
