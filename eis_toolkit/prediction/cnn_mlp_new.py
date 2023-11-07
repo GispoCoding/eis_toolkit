@@ -25,13 +25,7 @@ from eis_toolkit import exceptions
 # 1. Which optimizers are relevant?
 # 2. Defaults values ok?
 # 3. Sensible set of parameters exposed for the user? Do we want to try add **kwargs for extra inputs?
-# 4. Train-validation-test data splitting ok, do we need option to give separate datasets as input?
-# 5.
-
-
-OPTIMIZERS = {
-    "adam": keras.optimizers.Adam,
-}
+# 4. Train-validation-test data splitting ok? Do we need option to give separate datasets as input?
 
 
 # --- Inner functions, utils etc. ---
@@ -42,7 +36,7 @@ def check_keras_training_arguments(func):
 
     @wraps(func)
     def decorated_func(*args, **kwargs):
-        # Check certain inputs
+
         neurons = kwargs.get("neurons")
         if len(neurons) == 0:
             raise exceptions.InvalidParameterValueException("Neurons parameter must be a non-empty list.")
@@ -110,13 +104,15 @@ def _train_and_validate(
         )
     )
 
+    optimizer = keras.optimizers.get(optimizer)
+
     # Compile the model
-    model.compile(optimizer=OPTIMIZERS[optimizer](learning_rate=learning_rate), loss=loss_function, metrics=metrics)
+    model.compile(optimizer=optimizer(learning_rate=learning_rate), loss=loss_function, metrics=metrics)
 
     # Early stopping callback
     callbacks = [keras.callbacks.EarlyStopping(monitor="val_loss", patience=es_patience)] if early_stopping else []
 
-    # Split the data
+    # Separate test data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_split, random_state=random_state)
 
     # Validation split should be the defined fraction of the whole dataset before test split
@@ -127,7 +123,7 @@ def _train_and_validate(
         X_train, y_train, epochs=epochs, validation_split=validation_split, batch_size=batch_size, callbacks=callbacks
     )
 
-    # Evaluate the model
+    # Evaluate the model using test data
     evaluation = model.evaluate(X_test, y_test)
 
     return model, history.history, evaluation
@@ -156,9 +152,7 @@ def train_and_validate_MLP(
     dropout_rate: Optional[float] = None,
     early_stopping: bool = True,
     es_patience: int = 5,
-    metrics: Optional[Sequence[Literal["accuracy", "precision", "recall"]]] = [
-        "accuracy"
-    ],  # NOTE: Is this a useful parameter? Should there be more options?
+    metrics: Optional[Sequence[Literal["accuracy", "precision", "recall"]]] = ["accuracy"],
 ) -> Tuple[keras.Sequential, dict, list]:
     """
     Train and validate MLP (Multilayer Perceptron) using Keras.
@@ -187,7 +181,7 @@ def train_and_validate_MLP(
         Trained MLP, training history and scalar test loss or list of scalars.
     """
 
-    # 1 Create model and add layers
+    # Step 1 Create model and add layers
     model = keras.Sequential()
 
     regularizer = keras.regularizers.get(kernel_regularizer)
@@ -198,7 +192,7 @@ def train_and_validate_MLP(
         if dropout_rate is not None:
             model.add(keras.layers.Dropout(dropout_rate))
 
-    # 2 Train model and validate
+    # Step 2 Train model and validate
     model, history, evaluation = _train_and_validate(
         X=X,
         y=y,
@@ -263,9 +257,7 @@ def train_and_validate_CNN(
     es_patience: int = 5,
     batch_size: int = 32,
     epochs: int = 50,
-    metrics: Optional[Sequence[Literal["accuracy", "precision", "recall"]]] = [
-        "accuracy"
-    ],  # NOTE: Is this a useful parameter? Should there be more options?
+    metrics: Optional[Sequence[Literal["accuracy", "precision", "recall"]]] = ["accuracy"],
 ) -> Tuple[keras.Sequential, dict, list]:
     """
     Train and validate CNN (Convolutional Neural Network) using Keras.
