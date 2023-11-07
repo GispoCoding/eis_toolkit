@@ -55,7 +55,7 @@ def check_column_index_in_dataframe(df: pd.DataFrame, idx: int) -> bool:
         df: Dataframe to be checked.
         idx: Column index to check.
     """
-    return len(df.columns) <= idx < -len(df.columns)
+    return -len(df.columns) <= idx < len(df.columns)
 
 
 @beartype

@@ -66,8 +66,8 @@ def _ALR_transform(
     if len(columns) < 2:
         raise InvalidParameterValueException("Too few columns to perform the transformation.")
 
-    if check_column_index_in_dataframe(df, idx):
-        raise InvalidColumnIndexException
+    if check_column_index_in_dataframe(df, idx) is False:
+        raise InvalidColumnIndexException("Denominator column index out of bounds.")
 
     denominator_column = df.columns[idx]
 
