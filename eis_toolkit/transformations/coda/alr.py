@@ -61,7 +61,7 @@ def _ALR_transform(
         if check_columns_valid(df, columns) is False:
             raise InvalidColumnException("Not all of the given columns were found in the input DataFrame.")
 
-    columns = df.columns if columns is None else columns
+    columns = [col for col in df.columns] if columns is None else columns
 
     if len(columns) < 2:
         raise InvalidParameterValueException("Too few columns to perform the transformation.")
