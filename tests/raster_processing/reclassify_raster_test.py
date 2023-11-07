@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import mapclassify as mc
 import numpy as np
 import pytest
 import rasterio
@@ -22,7 +23,7 @@ band_numbers = [1]
 
 
 def test_raster_with_defined_intervals():
-    """Test raster with defined intervals by comparing the output of the function to the original data."""
+    """Test raster with defined intervals by comparing the output of the function to numpy's digitized result."""
     with rasterio.open(raster_path) as raster:
         interval_size = 5
 
@@ -79,27 +80,46 @@ def test_raster_with_manual_breaks():
 
 
 def test_raster_with_natural_breaks():
-    """Test raster with natural break intervals by comparing the output of the function to the original data."""
-    number_of_classes = 10
+    """Test raster with natural break intervals by comparing the output of the function to MapClassify Jenks Caspall and numpy's digitized result"""
+    with rasterio.open(raster_path, "r+") as raster:
+        number_of_classes = 10
 
-    raster = rasterio.open(raster_path, "r+")
-    band_1 = raster.read(1)
+        band_1 = raster.read(1)
 
-    output = raster_with_natural_breaks(raster, number_of_classes, raster_copy_path, band_numbers)
+        output = raster_with_natural_breaks(raster, number_of_classes, raster_copy_path, band_numbers)
 
-    assert not np.array_equal(output.read(1), band_1)
+        breaks = mc.JenksCaspall(band_1, number_of_classes)
+        data = np.digitize(band_1, np.sort(breaks.bins))
+
+        assert np.array_equal(output.read(1), data)
 
 
 def raster_with_standard_deviation():
     """Test raster with standard deviation intervals by comparing the output of the function to the original data."""
-    intervals = 75
+    with rasterio.open(raster_path) as raster:
+        number_of_intervals = 75
 
-    raster = rasterio.open(raster_path, "r+")
-    band_1 = raster.read(1)
+        output = raster_with_standard_deviation(raster, number_of_intervals, raster_copy_path, band_numbers)
 
-    output = raster_with_standard_deviation(raster, intervals, raster_copy_path, band_numbers)
+        band = raster.read(1)
 
-    assert not np.array_equal(output.read(1), band_1)
+        stddev = raster.statistics(band + 1).std
+        mean = raster.statistics(band + 1).mean
+        interval_size = 2 * stddev / number_of_intervals
+
+        classified = np.empty_like(band)
+
+        below_mean = band < (mean - stddev)
+        above_mean = band > (mean + stddev)
+
+        classified[below_mean] = -number_of_intervals
+        classified[above_mean] = number_of_intervals
+
+        in_between = ~below_mean & ~above_mean
+        interval = ((band - (mean - stddev)) / interval_size).astype(int)
+        classified[in_between] = interval[in_between] - number_of_intervals // 2
+
+        assert np.array_equal(output.read(1), classified)
 
 
 def test_raster_with_quantiles():
