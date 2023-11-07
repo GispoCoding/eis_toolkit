@@ -6,8 +6,8 @@ from beartype import beartype
 from beartype.typing import Optional, Tuple
 from rasterio.transform import from_bounds, from_origin
 
-from eis_toolkit.checks.parameter import check_minmax_position
 from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.utilities.checks.parameter import check_minmax_position
 from eis_toolkit.utilities.miscellaneous import cast_scalar_to_int, get_min_int_type
 
 

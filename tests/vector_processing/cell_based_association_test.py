@@ -6,7 +6,7 @@ import numpy
 import pytest
 import rasterio
 
-import eis_toolkit.spatial_analyses.cell_based_association as cba
+import eis_toolkit.vector_processing.cell_based_association as cba
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidColumnException, InvalidParameterValueException
 
 with TemporaryDirectory() as tmp_dir:
