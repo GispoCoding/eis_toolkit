@@ -423,37 +423,38 @@ def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
 ) -> rasterio.io.DatasetReader:
 
     custom_band_list = False if bands is None else True
-    array_of_bands = []
-    if bands is not None:
-        for band in raster.read(bands):
-            array_of_bands.append(band)
-    else:
-        array_of_bands = raster.read()
-        bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-        for band in range(len(bands)):
-            data_array = array_of_bands[band]
-            stddev = raster.statistics(band + 1).std
-            mean = raster.statistics(band + 1).mean
-            interval_size = 2 * stddev / number_of_intervals
+    band_statistics = []
+    if bands is not None:
+        for band in bands:
+            stats = raster.statistics(band)
+            band_statistics.append((stats.mean, stats.std))
+    else:
+        for band in range(1, raster.count + 1):
+            stats = raster.statistics(band)
+            band_statistics.append((stats.mean, stats.std))
+
+    with rasterio.open(path_to_file, "w", **raster.meta) as dst:
+        for band, (mean, std) in enumerate(band_statistics):
+            data_array = raster.read(band + 1)
+            interval_size = 2 * std / number_of_intervals
 
             classified = np.empty_like(data_array)
-        with rasterio.open(path_to_file, "w", **raster.meta) as dst:
-            for row in range(data_array.shape[0]):
-                for col in range(data_array.shape[1]):
-                    value = data_array[row, col]
-                    if value < mean - stddev:
-                        classified[row, col] = -number_of_intervals
-                    elif value > mean + stddev:
-                        classified[row, col] = number_of_intervals
-                    else:
-                        interval = int((value - mean + stddev) / interval_size)
-                        classified[row, col] = interval - number_of_intervals // 2
+
+            below_mean = data_array < (mean - std)
+            above_mean = data_array > (mean + std)
+
+            classified[below_mean] = -number_of_intervals
+            classified[above_mean] = number_of_intervals
+
+            in_between = ~below_mean & ~above_mean
+            interval = ((data_array - (mean - std)) / interval_size).astype(int)
+            classified[in_between] = interval[in_between] - number_of_intervals // 2
 
             if custom_band_list:
-                dst.write(classified, bands[band])
+                dst.write(classified, band + 1)
             else:
-                dst.write(classified, bands[band] + 1)
+                dst.write(classified, band + 2)
 
     src = rasterio.open(path_to_file)
     return src
