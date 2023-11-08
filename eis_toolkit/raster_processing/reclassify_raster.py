@@ -56,16 +56,16 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     """
     if bands is not None:
         if not isinstance(bands, list):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected bands parameter to be a list")
         elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected bands to be a list of integers")
         elif len(bands) > raster.count:
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
     if breaks is None:
-        raise InvalidParameterValueException
+        raise InvalidParameterValueException("Expected breaks to be set as a parameter")
     else:
         if not all(isinstance(_break, int) for _break in breaks):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected breaks to contain only integers")
 
     src = _raster_with_manual_breaks(raster, breaks, path_to_file, bands)
 
@@ -122,11 +122,11 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
     """
     if bands is not None:
         if not isinstance(bands, list):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected bands parameter to be a list")
         elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected bands to be a list of integers")
         elif len(bands) > raster.count:
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
     src = _raster_with_defined_intervals(raster, interval_size, path_to_file, bands)
 
@@ -181,11 +181,11 @@ def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     """
     if bands is not None:
         if not isinstance(bands, list):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected bands parameter to be a list")
         elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected bands to be a list of integers")
         elif len(bands) > raster.count:
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
     src = _raster_with_equal_intervals(raster, number_of_intervals, path_to_file, bands)
 
@@ -297,11 +297,11 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
     """
     if bands is not None:
         if not isinstance(bands, list):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected bands parameter to be a list")
         elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected bands to be a list of integers")
         elif len(bands) > raster.count:
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
     src = _raster_with_natural_breaks(raster, number_of_classes, path_to_file, bands)
 
@@ -407,11 +407,11 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
     """
     if bands is not None:
         if not isinstance(bands, list):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected bands parameter to be a list")
         elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected bands to be a list of integers")
         elif len(bands) > raster.count:
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
     src = _raster_with_geometrical_intervals(raster, number_of_classes, path_to_file, bands)
 
@@ -478,11 +478,11 @@ def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
     """
     if bands is not None:
         if not isinstance(bands, list):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected bands parameter to be a list")
         elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("Expected bands to be a list of integers")
         elif len(bands) > raster.count:
-            raise InvalidParameterValueException
+            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
     src = _raster_with_standard_deviation(raster, number_of_intervals, path_to_file, bands)
 

@@ -29,7 +29,7 @@ def test_raster_with_defined_intervals():
 
         output = raster_with_defined_intervals(raster, interval_size, raster_copy_path, band_numbers)
 
-        hist, edges = np.histogram(raster.read(1), bins=interval_size)
+        _, edges = np.histogram(raster.read(1), bins=interval_size)
 
         data = np.digitize(raster.read(1), edges)
 
@@ -80,7 +80,8 @@ def test_raster_with_manual_breaks():
 
 
 def test_raster_with_natural_breaks():
-    """Test raster with natural break intervals by comparing the output of the function to MapClassify Jenks Caspall and numpy's digitized result"""
+    """Test raster with natural break intervals by comparing the output of the function 
+    to MapClassify's Jenks Caspall and numpy's digitized result"""
     with rasterio.open(raster_path, "r+") as raster:
         number_of_classes = 10
 
@@ -124,11 +125,14 @@ def raster_with_standard_deviation():
 
 def test_raster_with_quantiles():
     """Test raster with quantile intervals by comparing the output of the function to the original data."""
-    quantiles = 4
+    with rasterio.open(raster_path) as raster:
+        number_of_quantiles = 4
 
-    raster = rasterio.open(raster_path, "r+")
-    band_1 = raster.read(1)
+        band = raster.read(1)
 
-    output = raster_with_quantiles(raster, quantiles, raster_copy_path, band_numbers)
+        output = raster_with_quantiles(raster, number_of_quantiles, raster_copy_path, band_numbers)
 
-    assert not np.array_equal(output.read(1), band_1)
+        intervals = [np.percentile(band, i * 100 / number_of_quantiles) for i in range(number_of_quantiles)]
+        data = np.digitize(band, intervals)
+
+        assert np.array_equal(output.read(1), data)
