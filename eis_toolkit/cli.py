@@ -811,9 +811,6 @@ def distance_computation_cli(
     typer.echo(f"Distance computation completed, writing raster to {output_raster}.")
 
 
-# --- SPATIAL ANALYSES ---
-
-
 # CBA
 # TODO
 
