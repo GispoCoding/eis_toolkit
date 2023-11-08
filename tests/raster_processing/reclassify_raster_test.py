@@ -66,7 +66,7 @@ def test_raster_with_geometrical_intervals():
 
 def test_raster_with_manual_breaks():
     """Test raster with manual break intervals by comparing the output of the function to numpy's digitized result."""
-    with rasterio.open(raster_path, "r+") as raster:
+    with rasterio.open(raster_path) as raster:
 
         breaks = [-2000, -1000, 500, 1000]
 
@@ -82,7 +82,7 @@ def test_raster_with_manual_breaks():
 def test_raster_with_natural_breaks():
     """Test raster with natural break intervals by comparing the output of the function
     to MapClassify's Jenks Caspall and numpy's digitized result"""
-    with rasterio.open(raster_path, "r+") as raster:
+    with rasterio.open(raster_path) as raster:
         number_of_classes = 10
 
         band_1 = raster.read(1)
