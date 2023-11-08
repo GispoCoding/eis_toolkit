@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 
 from eis_toolkit import exceptions
-from eis_toolkit.checks.dataframe import check_columns_valid
+from eis_toolkit.utilities.checks.dataframe import check_columns_valid
 
 
 def one_hot_encode(
