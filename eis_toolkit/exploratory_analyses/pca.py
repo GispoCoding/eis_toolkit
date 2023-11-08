@@ -205,7 +205,7 @@ def plot_pca(
         pca_df: A DataFrame containing computed principal components.
         explained_variances: The explained variance ratios for each principal component. Used for labeling
             axes in the plot. Optional parameter. Defaults to None.
-        color_column: Name of the column that will be used for color-coding data points. Typically a
+        color_column_name: Name of the column that will be used for color-coding data points. Typically a
             categorical variable in the original data. Optional parameter, no colors if not provided.
             Defaults to None.
         save_path: The save path for the plot. Optional parameter, no saving if not provided. Defaults to None.
