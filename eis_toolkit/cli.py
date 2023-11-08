@@ -247,6 +247,54 @@ def compute_pca_cli(
     pca_df.to_csv(output_file)
 
 
+# DESCRIPTIVE STATISTICS (RASTER)
+@app.command()
+def descriptive_statistics_raster_cli(input_file: Annotated[Path, INPUT_FILE_OPTION]):
+    """Generate descriptive statistics from raster data."""
+    from eis_toolkit.exploratory_analyses.descriptive_statistics import descriptive_statistics_raster
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_file) as raster:
+        typer.echo("Progress: 25%")
+        results_dict = descriptive_statistics_raster(raster)
+    typer.echo("Progress: 75%")
+
+    json_str = json.dumps(results_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo("Descriptive statistics (raster) completed")
+
+
+# DESCRIPTIVE STATISTICS (VECTOR)
+@app.command()
+def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPTION], column: str = None):
+    """Generate descriptive statistics from vector or tabular data."""
+    from eis_toolkit.exploratory_analyses.descriptive_statistics import descriptive_statistics_dataframe
+
+    typer.echo("Progress: 10%")
+
+    # TODO modify input file detection
+    try:
+        gdf = gpd.read_file(input_file)
+        typer.echo("Progress: 25%")
+        results_dict = descriptive_statistics_dataframe(gdf, column)
+    except:  # noqa: E722
+        try:
+            df = pd.read_csv(input_file)
+            typer.echo("Progress: 25%")
+            results_dict = descriptive_statistics_dataframe(df, column)
+        except:  # noqa: E722
+            raise Exception("Could not read input file as raster or dataframe")
+    typer.echo("Progress: 75%")
+
+    json_str = json.dumps(results_dict)
+    typer.echo("Progress: 10%")
+
+    typer.echo(f"Results: {json_str}")
+    typer.echo("Descriptive statistics (vector) completed")
+
+
 # --- RASTER PROCESSING ---
 
 
@@ -735,9 +783,6 @@ def vector_density_cli(
     typer.echo(f"Vector density computation completed, writing raster to {output_raster}.")
 
 
-# --- SPATIAL ANALYSES ---
-
-
 # DISTANCE COMPUTATION
 @app.command()
 def distance_computation_cli(
@@ -746,7 +791,7 @@ def distance_computation_cli(
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
     """Calculate distance from raster cell to nearest geometry."""
-    from eis_toolkit.spatial_analyses.distance_computation import distance_computation
+    from eis_toolkit.vector_processing.distance_computation import distance_computation
 
     typer.echo("Progress: 10%")
 
@@ -766,59 +811,11 @@ def distance_computation_cli(
     typer.echo(f"Distance computation completed, writing raster to {output_raster}.")
 
 
+# --- SPATIAL ANALYSES ---
+
+
 # CBA
 # TODO
-
-
-# --- STATISTICAL ANALYSES ---
-
-
-# DESCRIPTIVE STATISTICS (RASTER)
-@app.command()
-def descriptive_statistics_raster_cli(input_file: Annotated[Path, INPUT_FILE_OPTION]):
-    """Generate descriptive statistics from raster data."""
-    from eis_toolkit.statistical_analyses.descriptive_statistics import descriptive_statistics_raster
-
-    typer.echo("Progress: 10%")
-
-    with rasterio.open(input_file) as raster:
-        typer.echo("Progress: 25%")
-        results_dict = descriptive_statistics_raster(raster)
-    typer.echo("Progress: 75%")
-
-    json_str = json.dumps(results_dict)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
-    typer.echo("Descriptive statistics (raster) completed")
-
-
-# DESCRIPTIVE STATISTICS (VECTOR)
-@app.command()
-def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPTION], column: str = None):
-    """Generate descriptive statistics from vector or tabular data."""
-    from eis_toolkit.statistical_analyses.descriptive_statistics import descriptive_statistics_dataframe
-
-    typer.echo("Progress: 10%")
-
-    # TODO modify input file detection
-    try:
-        gdf = gpd.read_file(input_file)
-        typer.echo("Progress: 25%")
-        results_dict = descriptive_statistics_dataframe(gdf, column)
-    except:  # noqa: E722
-        try:
-            df = pd.read_csv(input_file)
-            typer.echo("Progress: 25%")
-            results_dict = descriptive_statistics_dataframe(df, column)
-        except:  # noqa: E722
-            raise Exception("Could not read input file as raster or dataframe")
-    typer.echo("Progress: 75%")
-
-    json_str = json.dumps(results_dict)
-    typer.echo("Progress: 10%")
-
-    typer.echo(f"Results: {json_str}")
-    typer.echo("Descriptive statistics (vector) completed")
 
 
 # --- PREDICTION ---
