@@ -86,4 +86,4 @@ def _ALR_transform(
 
 def _inverse_ALR(df: pd.DataFrame, denominator_column: pd.Series) -> pd.DataFrame:
     # TODO: implement
-    return pd.DataFrame()
+    return df
