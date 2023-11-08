@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from beartype import beartype
 
@@ -12,4 +13,8 @@ def _CLR_transform(df: pd.DataFrame) -> pd.DataFrame:
     if check_dataframe_contains_nonzero_numbers(df):
         raise InvalidColumnException("The dataframe contains one or more zeros.")
 
-    return pd.DataFrame()
+    dfc = df.copy()
+
+    dfc = dfc.div(df.sum(axis=1), axis=0)
+
+    return np.log(dfc)
