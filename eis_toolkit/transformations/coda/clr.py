@@ -3,8 +3,8 @@ import pandas as pd
 from beartype import beartype
 from beartype.typing import Optional, Sequence
 
-from eis_toolkit.checks.dataframe import check_columns_valid, check_dataframe_contains_nonzero_numbers
 from eis_toolkit.exceptions import InvalidColumnException
+from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_dataframe_contains_nonzero_numbers
 
 
 @beartype
