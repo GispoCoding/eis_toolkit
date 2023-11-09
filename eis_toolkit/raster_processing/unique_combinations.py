@@ -1,14 +1,14 @@
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import List, Tuple
+from beartype.typing import Sequence, Tuple
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.raster_processing.check_raster_grids import check_raster_grids
 
 
 def _unique_combinations(
-    bands: List[np.ndarray],
+    bands: Sequence[np.ndarray],
 ) -> np.ndarray:
 
     combined_array = np.stack(bands, axis=-1)
@@ -26,7 +26,7 @@ def _unique_combinations(
 
 @beartype
 def unique_combinations(  # type: ignore[no-any-unimported]
-    raster_list: List[rasterio.io.DatasetReader],
+    raster_list: Sequence[rasterio.io.DatasetReader],
 ) -> Tuple[np.ndarray, dict]:
     """Get combinations of raster values between rasters.
 
@@ -34,11 +34,11 @@ def unique_combinations(  # type: ignore[no-any-unimported]
     The first band of the first raster is used for reference when making the output.
 
     Args:
-        raster_list (List[rasterio.io.DatasetReader]): Rasters to be used for finding combinations.
+        raster_list: Rasters to be used for finding combinations.
 
     Returns:
-        out_image (numpy.ndarray): Combinations of rasters.
-        out_meta (dict): The metadata of the first raster in raster_list.
+        out_image: Combinations of rasters.
+        out_meta: The metadata of the first raster in raster_list.
     """
     bands = []
     out_meta = raster_list[0].meta
