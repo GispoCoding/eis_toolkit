@@ -2,7 +2,7 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Sequence, Union
 
-from eis_toolkit.checks.crs import check_matching_crs
+from eis_toolkit.utilities.checks.crs import check_matching_crs
 
 
 @beartype

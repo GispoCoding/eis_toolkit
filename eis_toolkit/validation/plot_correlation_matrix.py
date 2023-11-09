@@ -13,7 +13,7 @@ def plot_correlation_matrix(
     annotate: bool = True,
     cmap: Optional[matplotlib.colors.ListedColormap] = None,
     plot_title: Optional[str] = None,
-    **kwargs
+    **kwargs: dict
 ) -> matplotlib.axes.Axes:
     """
     Create a Seaborn heatmap to visualize correlation matrix.

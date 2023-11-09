@@ -5,13 +5,13 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Optional, Sequence, Tuple
 
-from eis_toolkit.checks.parameter import check_minmax_position, check_parameter_length
-from eis_toolkit.checks.raster import check_raster_bands
 from eis_toolkit.exceptions import (
     InvalidParameterValueException,
     InvalidRasterBandException,
     NonMatchingParameterLengthsException,
 )
+from eis_toolkit.utilities.checks.parameter import check_minmax_position, check_parameter_length
+from eis_toolkit.utilities.checks.raster import check_raster_bands
 from eis_toolkit.utilities.miscellaneous import (
     cast_array_to_float,
     expand_and_zip,

@@ -4,7 +4,7 @@ from beartype.typing import Literal, Optional, Sequence
 from scipy.stats import chi2_contingency, shapiro
 
 from eis_toolkit import exceptions
-from eis_toolkit.checks.dataframe import check_columns_valid, check_empty_dataframe
+from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_empty_dataframe
 
 
 @beartype

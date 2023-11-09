@@ -6,9 +6,9 @@ import pandas as pd
 import rasterio
 from beartype import beartype
 
-from eis_toolkit.checks.crs import check_matching_crs
-from eis_toolkit.checks.geometry import check_geometry_types
 from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
+from eis_toolkit.utilities.checks.crs import check_matching_crs
+from eis_toolkit.utilities.checks.geometry import check_geometry_types
 
 
 def _calculate_base_metrics(
