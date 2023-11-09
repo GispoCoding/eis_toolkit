@@ -5,11 +5,11 @@ import pytest
 from eis_toolkit.exceptions import InvalidColumnException
 from eis_toolkit.transformations.coda.clr import _CLR_transform
 
+SINGLE_ROW_DATAFRAME = pd.DataFrame(np.array([1, 1, 1, 2])[None], columns=["c1", "c2", "c3", "c4"])
+
 ONES_DATAFRAME_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["c1", "c2", "c3", "c4"])
 
 ZEROS_DATAFRAME_4x4 = pd.DataFrame(np.zeros((4, 4)), columns=["c1", "c2", "c3", "c4"])
-
-SIMPLE_ROW_1 = pd.DataFrame(np.array([1, 1, 1, 2])[None], columns=["c1", "c2", "c3", "c4"])
 
 SAMPLE_DATAFRAME = pd.DataFrame(
     np.array(
@@ -31,32 +31,32 @@ SAMPLE_DATAFRAME = pd.DataFrame(
 
 
 def test_clr_transform_subcomposition():
-    """TODO: docstring."""
+    """Test CLR transformation with a subcomposition."""
     subcomposition = ["c1", "c2", "c3"]
-    result = _CLR_transform(SIMPLE_ROW_1, subcomposition)
+    result = _CLR_transform(SINGLE_ROW_DATAFRAME, subcomposition)
     pd.testing.assert_frame_equal(pd.DataFrame(np.zeros((1, 3)), columns=subcomposition), result)
 
 
 def test_clr_transform_subcomposition_single_component():
-    """TODO: docstring."""
-    result = _CLR_transform(SIMPLE_ROW_1, ["c4"])
+    """Test CLR transformation with a single component."""
+    result = _CLR_transform(SINGLE_ROW_DATAFRAME, ["c4"])
     pd.testing.assert_frame_equal(pd.DataFrame(np.zeros((1, 1)), columns=["c4"]), result)
 
 
 def test_clr_transform_simple():
-    """TODO: docstring."""
+    """Test CLR transform core functionality."""
     result = _CLR_transform(ONES_DATAFRAME_4x4)
     pd.testing.assert_frame_equal(result, ZEROS_DATAFRAME_4x4)
 
 
 def test_clr_transform_subset_returns_correct_size():
-    """TODO: docstring."""
+    """Test that the output dataframe contains the same amount of columns as was specified in the parameters."""
     result = _CLR_transform(SAMPLE_DATAFRAME, ["c1", "c3", "c4"])
     assert result.shape == (10, 3)
 
 
 def test_clr_transform_contains_zeros():
-    """TODO: docstring."""
+    """Test that running CLR transform for a dataframe containing zeros raises the correct exception."""
     with pytest.raises(InvalidColumnException):
         df = SAMPLE_DATAFRAME.copy()
         df.iloc[0, 0] = 0
@@ -64,6 +64,6 @@ def test_clr_transform_contains_zeros():
 
 
 def test_clr_transform_with_unexpected_column_name():
-    """TODO: docstring."""
+    """Test that providing an invalid column name raises the correct exception."""
     with pytest.raises(InvalidColumnException):
         _CLR_transform(SAMPLE_DATAFRAME, ["c1", "c5"])
