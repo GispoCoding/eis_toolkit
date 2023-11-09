@@ -152,7 +152,7 @@ def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     with rasterio.open(path_to_file, "w", **raster.meta) as dst:
         for i in range(len(bands)):
             data_array = array_of_bands[i]
-            percentiles = np.linspace(0, 100, number_of_intervals)
+            percentiles = np.linspace(np.nanmin(data_array), np.nanmax(data_array), number_of_intervals)
             intervals = np.percentile(data_array, percentiles)
             data = np.digitize(data_array, intervals)
             if custom_band_list:
@@ -330,7 +330,7 @@ def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
             min_value = np.nanmin(data_array)
 
             data_array = np.ma.masked_where(np.isnan(data_array), data_array)
-            values_out = np.zeros_like(data_array)  # This is the same shape as the original raster value array
+            values_out = np.zeros_like(data_array)  # The same shape as the original raster value array
             if (median_value - min_value) < (max_value - median_value):  # Large end tail longer
                 raster_half = data_array[np.where((data_array > median_value) & (data_array != np.nan))]
                 range_half = max_value - median_value
