@@ -8,34 +8,31 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 
 from eis_toolkit import exceptions
-from eis_toolkit.prediction.model_utils import evaluate_regression_model, tune_model_parameters
+from eis_toolkit.prediction.model_utils import evaluate_regression_model
 
 
 @beartype
 def gradient_boosting_classifier_train(
     X: Union[np.ndarray, pd.DataFrame],
     y: Union[np.ndarray, pd.Series],
-    test_size: float = 0.25,
+    test_size: float = 0.2,
     loss: Literal["log_loss", "exponential"] = "log_loss",
     learning_rate: float = 0.1,
     n_estimators: int = 100,
     max_depth: int = 3,
     subsample: float = 1.0,
     random_state: Optional[int] = None,
-    tune_with_method: Optional[Literal["grid", "random"]] = None,
-    tune_parameters: Optional[dict] = None,
-    tune_cv: int = 5,
     **kwargs,
 ) -> Tuple[GradientBoostingClassifier, dict]:
     """
-    Train a Gradient Boosting classifier model using Sklearn with optional hyperparameter tuning.
+    Train a Gradient Boosting classifier model using Sklearn.
 
     Trains the model with the given parameters and evaluates model performance using test data.
 
     Args:
         X: Training data.
         y: Target labels.
-        test_size: Fraction of the dataset to be used as test data (rest is used for training). Defaults to 0.25.
+        test_size: Fraction of the dataset to be used as test data (rest is used for training). Defaults to 0.2.
         loss: The loss function to be optimized. Defaults to "log_loss" (same as in logistic regression).
         learning_rate: Shrinks the contribution of each tree. Values must be > 0. Defaults to 0.1.
         n_estimators: The number of boosting stages to run. Gradient boosting is fairly robust to over-fitting
@@ -47,14 +44,6 @@ def gradient_boosting_classifier_train(
             parameter n_estimators. Choosing subsample < 1.0 leads to a reduction of variance and an increase in bias.
             Values must be in the range 0.0 < x <= 1.0. Defaults to 1.
         random_state: Seed for random number generation. Defaults to None.
-        tune_with_method: If the model parameters should be tuned. Options include
-            GridSearchCV and RandomizedSearchCV. Defaults to None, in which case
-            model is not tuned.
-        tune_parameters: Hyperparameters to be tuned (if model tuning is selected).
-            Dictionary where keys parameter names (e.g. n_estimators) and values are lists
-            of possible parameter values (e.g. [10, 50, 100]). Tune parameters must be defined
-            is tuning is selected, otherwise this parameter is not used. Defaults to None.
-        tune_cv: Number of cross-validation folds used in hyperparameter tuning. Defaults to 5.
         **kwargs: Additional parameters for Sklearn's GradientBoostingClassifier.
 
     Returns:
@@ -80,11 +69,8 @@ def gradient_boosting_classifier_train(
         **kwargs,
     )
 
-    # Training and optionally tuning the model
-    if tune_with_method is not None:
-        model = tune_model_parameters(model, tune_with_method, X_train, y_train, tune_parameters, cv=tune_cv)
-    else:
-        model.fit(X_train, y_train)
+    # Training the model
+    model.fit(X_train, y_train)
 
     # Predictions for test data
     y_pred = model.predict(X_test)
@@ -117,27 +103,24 @@ def gradient_boosting_classifier_predict(
 def gradient_boosting_regressor_train(
     X: Union[np.ndarray, pd.DataFrame],
     y: Union[np.ndarray, pd.Series],
-    test_size: float = 0.25,
+    test_size: float = 0.2,
     loss: Literal["squared_error", "absolute_error", "huber", "quantile"] = "squared_error",
     learning_rate: float = 0.1,
     n_estimators: int = 100,
     max_depth: int = 3,
     subsample: float = 1.0,
     random_state: Optional[int] = None,
-    tune_with_method: Optional[Literal["grid", "random"]] = None,
-    tune_parameters: Optional[dict] = None,
-    tune_cv: int = 5,
     **kwargs,
 ) -> Tuple[GradientBoostingRegressor, dict]:
     """
-    Train a Gradient Boosting regressor model using Sklearn with optional hyperparameter tuning.
+    Train a Gradient Boosting regressor model using Sklearn.
 
     Trains the model with the given parameters and evaluates model performance using test data.
 
     Args:
         X: Training data.
         y: Target labels.
-        test_size: Fraction of the dataset to be used as test data (rest is used for training). Defaults to 0.25.
+        test_size: Fraction of the dataset to be used as test data (rest is used for training). Defaults to 0.2.
         loss: The loss function to be optimized. Defaults to "squared_error".
         learning_rate: Shrinks the contribution of each tree. Values must be > 0. Defaults to 0.1.
         n_estimators: The number of boosting stages to run. Gradient boosting is fairly robust to over-fitting
@@ -149,14 +132,6 @@ def gradient_boosting_regressor_train(
             parameter n_estimators. Choosing subsample < 1.0 leads to a reduction of variance and an increase in bias.
             Values must be in the range 0.0 < x <= 1.0. Defaults to 1.
         random_state: Seed for random number generation. Defaults to None.
-        tune_with_method: If the model parameters should be tuned. Options include
-            GridSearchCV and RandomizedSearchCV. Defaults to None, in which case
-            model is not tuned.
-        tune_parameters: Hyperparameters to be tuned (if model tuning is selected).
-            Dictionary where keys parameter names (e.g. n_estimators) and values are lists
-            of possible parameter values (e.g. [10, 50, 100]). Tune parameters must be defined
-            is tuning is selected, otherwise this parameter is not used. Defaults to None.
-        tune_cv: Number of cross-validation folds used in hyperparameter tuning. Defaults to 5.
         **kwargs: Additional parameters for Sklearn's GradientBoostingRegressor.
 
     Returns:
@@ -182,11 +157,8 @@ def gradient_boosting_regressor_train(
         **kwargs,
     )
 
-    # Training and optionally tuning the model
-    if tune_with_method is not None:
-        model = tune_model_parameters(model, tune_with_method, X_train, y_train, tune_parameters, cv=tune_cv)
-    else:
-        model.fit(X_train, y_train)
+    # Training the model
+    model.fit(X_train, y_train)
 
     # Predictions for test data
     y_pred = model.predict(X_test)
