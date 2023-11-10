@@ -7,6 +7,15 @@ copyright: 'Made by <a href="info@gispo.fi">Gispo Ltd.</a>'
 theme:
   name: "material"
 
+extra_css:
+  - stylesheets/extra.css
+
 plugins:
-- search
-- mkdocstrings
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            heading_level: 3
+  - with-pdf:
+      enabled_if_env: ENABLE_PDF_EXPORT

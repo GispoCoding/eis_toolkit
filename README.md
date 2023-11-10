@@ -10,13 +10,15 @@ EIS Toolkit will be a comprehensive Python library for mineral prospectivity map
 
 
 ## Repository status
-This repository is still in development. First release is planned for autumn 2023.
+This repository is still in development. First release is planned for autumn 2023. 
 
 Current contents include
 - implementations for most of basic preprocessing tools
 - Jupyter notebooks showing usage and functionality of some of the implemented tools
 - basic tests for implemented features
 - instructions on how to contribute to the repository
+
+To check the implementation status of the toolkit and planned tools, visit the [wiki page of EIS Toolkit](https://github.com/GispoCoding/eis_toolkit/wiki).
 
 This repository contains source code related to eis_toolkit python package, not source code of EIS QGIS Plugin.
 
