@@ -1,5 +1,8 @@
+from typing import Literal, Union
+
 import matplotlib
 import numpy as np
+import pandas as pd
 from beartype import beartype
 from matplotlib import pyplot as plt
 
@@ -7,7 +10,9 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.validation.calculate_auc import calculate_auc
 
 
-def _plot_rate_curve(x_values: np.ndarray, y_values: np.ndarray, label: str, xlab: str) -> matplotlib.figure.Figure:
+def _plot_rate_curve(
+    x_values: Union[np.ndarray, pd.Series], y_values: Union[np.ndarray, pd.Series], label: str, xlab: str
+) -> matplotlib.figure.Figure:
     fig = plt.figure(figsize=(10, 7))
     plt.plot(x_values, y_values, label=label)
     plt.xlim(-0.01, 1)
@@ -26,9 +31,9 @@ def _plot_rate_curve(x_values: np.ndarray, y_values: np.ndarray, label: str, xla
 
 @beartype
 def plot_rate_curve(
-    x_values: np.ndarray,
-    y_values: np.ndarray,
-    plot_type: str = "success_rate",
+    x_values: Union[np.ndarray, pd.Series],
+    y_values: Union[np.ndarray, pd.Series],
+    plot_type: Literal["success_rate", "prediction_rate", "roc"] = "success_rate",
 ) -> matplotlib.figure.Figure:
     """Plot success rate, prediction rate or ROC curve.
 
