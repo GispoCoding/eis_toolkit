@@ -22,10 +22,7 @@ def _idw_interpolation(
     values = geodataframe[target_column].values
 
     if extent is None:
-        x_min = geodataframe.geometry.total_bounds[0]
-        x_max = geodataframe.geometry.total_bounds[2]
-        y_min = geodataframe.geometry.total_bounds[1]
-        y_max = geodataframe.geometry.total_bounds[3]
+        x_min, y_min, x_max, y_max = geodataframe.geometry.total_bounds
     else:
         x_min, x_max, y_min, y_max = extent
 
@@ -36,19 +33,9 @@ def _idw_interpolation(
 
     x = np.linspace(x_min, x_max, num_points_x)
     y = np.linspace(y_min, y_max, num_points_y)
+    y = y[::-1].reshape(-1,1)
 
-    xi, yi = np.meshgrid(x, y)
-    xi = xi.flatten()
-    # Reverse the order of y-values
-    yi = yi[::-1].flatten()
-
-    origin_x, origin_y = 0, 0
-    dist_from_origin = np.hypot(points[:, 0] - origin_x, points[:, 1] - origin_y)
-    sorted_indices = np.argsort(dist_from_origin)
-    sorted_points = points[sorted_indices]
-    sorted_values = values[sorted_indices]
-
-    interpolated_values = _idw_core(sorted_points[:, 0], sorted_points[:, 1], sorted_values, xi, yi, power)
+    interpolated_values = _idw_core(points[:, 0], points[:, 1], values, x, y, power)
     interpolated_values = interpolated_values.reshape(num_points_y, num_points_x)
 
     out_meta = {
@@ -63,16 +50,18 @@ def _idw_interpolation(
 
 #  Distance calculations
 def _idw_core(x, y, z, xi, yi: np.ndarray, power: Number) -> np.ndarray:
-    d0 = np.subtract.outer(x, xi)
-    d1 = np.subtract.outer(y, yi)
-    dist = np.hypot(d0, d1)
+    over = np.zeros( (len(yi), len(xi)) )
+    under = np.zeros( (len(yi), len(xi)) )
+    for n in range(len(x)):
+        dist = np.hypot(xi -x[n], yi -y[n])
+        # Add a small epsilon to avoid division by zero
+        dist = np.where(dist == 0, 1e-12, dist)
+        dist = dist ** power
 
-    # Add a small epsilon to avoid division by zero
-    dist = np.where(dist == 0, 1e-12, dist)
-    weights = 1.0 / (dist**power)
-    weights /= weights.sum(axis=0)
-    interpolated_values = np.dot(weights.T, z)
+        over += (z[n] / dist)
+        under += 1.0 / dist
 
+    interpolated_values = over / under
     return interpolated_values
 
 
