@@ -78,6 +78,8 @@ def ALR_transform(
 
     denominator_column = df.columns[idx]
 
+    # TODO: decide: should redundant column maintain its relative
+    # position to the other columns in the resulting dataframe?
     if denominator_column not in columns:
         columns.append(denominator_column)
 
