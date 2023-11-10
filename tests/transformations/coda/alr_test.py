@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidColumnIndexException, InvalidParameterValueException
-from eis_toolkit.transformations.coda.alr import _ALR_transform
+from eis_toolkit.transformations.coda.alr import ALR_transform
 
 ONES_DATAFRAME_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["c1", "c2", "c3", "c4"])
 
@@ -28,49 +28,44 @@ SAMPLE_DATAFRAME = pd.DataFrame(
 )
 
 
-def test_alr_transform_simple():
-    """TODO: docstring."""
-    output = _ALR_transform(ONES_DATAFRAME_4x4)
+def testALR_transform_simple():
+    """Test ALR transformation core functionality."""
+    output = ALR_transform(ONES_DATAFRAME_4x4)
     pd.testing.assert_frame_equal(output, ZEROS_DATAFRAME_4x3)
 
 
-def test_alr_transform():
-    """TODO: docstring."""
-    return
-
-
-def test_alr_transform_contains_zeros():
-    """TODO: docstring."""
+def testALR_transform_contains_zeros():
+    """Test that running the transformation for a dataframe containing zeros raises the correct exception."""
     with pytest.raises(InvalidColumnException):
         zeros_data = SAMPLE_DATAFRAME.copy()
         zeros_data.iloc[0, 0] = 0
-        _ALR_transform(zeros_data)
+        ALR_transform(zeros_data)
 
 
-def test_alr_transform_with_unexpected_column_name():
-    """TODO: docstring."""
+def testALR_transform_with_unexpected_column_name():
+    """Test that providing an invalid column name raises the correct exception."""
     with pytest.raises(InvalidColumnException):
-        _ALR_transform(SAMPLE_DATAFRAME, ["c1", "c2", "comp3"])
+        ALR_transform(SAMPLE_DATAFRAME, ["c1", "c2", "comp3"])
 
 
-def test_alr_transform_with_out_of_bounds_denominator_column():
-    """TODO: docstring."""
+def testALR_transform_with_out_of_bounds_denominator_column():
+    """Test that providing a column index that is out of bounds raises the correct exception."""
     with pytest.raises(InvalidColumnIndexException):
-        _ALR_transform(SAMPLE_DATAFRAME, None, -5)
+        ALR_transform(SAMPLE_DATAFRAME, None, -5)
 
 
-def test_alr_transform_with_too_few_columns():
-    """TODO: docstring."""
+def testALR_transform_with_too_few_columns():
+    """Test that providing just one column raises the correct exception."""
     with pytest.raises(InvalidParameterValueException):
-        _ALR_transform(SAMPLE_DATAFRAME, ["c1"])
+        ALR_transform(SAMPLE_DATAFRAME, ["c1"])
 
 
-def test_alr_transform_with_nonnumeric_index():
+def testALR_transform_with_nonnumeric_index():
     """TODO: docstring."""
     return
 
 
-def test_alr_transform_redundant_column():
+def testALR_transform_redundant_column():
     """TODO: docstring."""
     return
 

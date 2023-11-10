@@ -12,7 +12,7 @@ from eis_toolkit.exceptions import (
 from eis_toolkit.utilities.checks.dataframe import (
     check_column_index_in_dataframe,
     check_columns_valid,
-    check_dataframe_contains_nonzero_numbers,
+    check_dataframe_contains_zeros,
 )
 
 
@@ -34,14 +34,21 @@ def _get_rows_with_no_missing_values(df: pd.DataFrame) -> pd.Series:
 
 
 @beartype
-def _ALR_transform(
+def _ALR_transform(df: pd.DataFrame, columns: Sequence[str], denominator_column: str) -> pd.DataFrame:
+
+    ratios = df[columns].div(df[denominator_column], axis=0)
+    return np.log(ratios)
+
+
+@beartype
+def ALR_transform(
     df: pd.DataFrame, columns: Optional[Sequence[str]] = None, idx: int = -1, keep_redundant_column: bool = False
 ) -> pd.DataFrame:
     """
-    Perform additive logratio transformation on the selected columns.
+    Perform an additive logratio transformation on the selected columns.
 
     Args:
-        df: A dataframe containing compositional data.
+        df: A dataframe of compositional data.
         columns: Names of the columns to be transformed. If none are given, all columns are used.
         idx: The integer position based index of the column of the dataframe to be used as denominator.
             If not provided, the last column will be used.
@@ -49,7 +56,7 @@ def _ALR_transform(
             included in the output dataframe regardless of whether it was in the list of given input columns.
 
     Returns:
-        DataFrame: A new dataframe containing the ALR transformed values.
+        A new dataframe containing the ALR transformed values.
 
     Raises:
         InvalidColumnException: One or more input columns are not found in the given dataframe, or the
@@ -74,16 +81,15 @@ def _ALR_transform(
     if denominator_column not in columns:
         columns.append(denominator_column)
 
-    if check_dataframe_contains_nonzero_numbers(df[columns]):
+    if check_dataframe_contains_zeros(df[columns]):
         raise InvalidColumnException("The given columns or the divisor column contain zeros.")
 
     if not keep_redundant_column and denominator_column in columns:
         columns.remove(denominator_column)
 
-    ratios = df[columns].div(df[denominator_column], axis=0)
-    return np.log(ratios)
+    return _ALR_transform(df, columns, denominator_column)
 
 
-def _inverse_ALR(df: pd.DataFrame, denominator_column: pd.Series) -> pd.DataFrame:
-    # TODO: implement
-    return df
+def inverse_ALR():
+    """Perform the inverse transformation for a set of ALR transformed data."""
+    raise NotImplementedError()

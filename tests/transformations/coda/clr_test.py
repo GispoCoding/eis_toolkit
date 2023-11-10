@@ -56,7 +56,7 @@ def test_clr_transform_subset_returns_correct_size():
 
 
 def test_clr_transform_contains_zeros():
-    """Test that running CLR transform for a dataframe containing zeros raises the correct exception."""
+    """Test that running the transformation for a dataframe containing zeros raises the correct exception."""
     with pytest.raises(InvalidColumnException):
         df = SAMPLE_DATAFRAME.copy()
         df.iloc[0, 0] = 0
@@ -67,3 +67,6 @@ def test_clr_transform_with_unexpected_column_name():
     """Test that providing an invalid column name raises the correct exception."""
     with pytest.raises(InvalidColumnException):
         CLR_transform(SAMPLE_DATAFRAME, ["c1", "c5"])
+
+
+# TODO: test with unnamed columns
