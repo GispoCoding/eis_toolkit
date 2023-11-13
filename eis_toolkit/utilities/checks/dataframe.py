@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from beartype import beartype
 from beartype.typing import Sequence
@@ -67,3 +68,9 @@ def check_dataframe_contains_zeros(df: pd.DataFrame) -> bool:
         df: Dataframe to be checked.
     """
     return 0 in df.values
+
+
+@beartype
+def check_dataframe_contains_only_positive_numbers(df: pd.DataFrame) -> np.bool_:
+    """Check that the dataframe only contains positive, nonzero values."""
+    return np.all([val > 0 for val in df.values])

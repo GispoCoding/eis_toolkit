@@ -92,3 +92,7 @@ class InvalidDatasetException(Exception):
 
 class NonNumericDataException(Exception):
     """Exception error class for when the given data includes non-numeric values."""
+
+
+class InvalidCompositionException(Exception):
+    """Exception error class for when the data is not in suitable form for compositional data transforms."""
