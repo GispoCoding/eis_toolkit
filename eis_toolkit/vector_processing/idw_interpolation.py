@@ -33,7 +33,7 @@ def _idw_interpolation(
 
     x = np.linspace(x_min, x_max, num_points_x)
     y = np.linspace(y_min, y_max, num_points_y)
-    y = y[::-1].reshape(-1,1)
+    y = y[::-1].reshape(-1, 1)
 
     interpolated_values = _idw_core(points[:, 0], points[:, 1], values, x, y, power)
     interpolated_values = interpolated_values.reshape(num_points_y, num_points_x)
@@ -50,15 +50,15 @@ def _idw_interpolation(
 
 #  Distance calculations
 def _idw_core(x, y, z, xi, yi: np.ndarray, power: Number) -> np.ndarray:
-    over = np.zeros( (len(yi), len(xi)) )
-    under = np.zeros( (len(yi), len(xi)) )
+    over = np.zeros((len(yi), len(xi)))
+    under = np.zeros((len(yi), len(xi)))
     for n in range(len(x)):
-        dist = np.hypot(xi -x[n], yi -y[n])
+        dist = np.hypot(xi - x[n], yi - y[n])
         # Add a small epsilon to avoid division by zero
         dist = np.where(dist == 0, 1e-12, dist)
-        dist = dist ** power
+        dist = dist**power
 
-        over += (z[n] / dist)
+        over += z[n] / dist
         under += 1.0 / dist
 
     interpolated_values = over / under
