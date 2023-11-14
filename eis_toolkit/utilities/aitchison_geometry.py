@@ -24,6 +24,7 @@ def check_composition_belongs_to_unit_simplex_sample_space(df: pd.DataFrame) -> 
         return False
         # raise NumericValueSignException("Data contains zeros or negative values.")
 
+    # TODO: switch to checking that the sum is the same value for each column
     df_sum = np.sum(df, axis=1)
     if len(df_sum[df_sum.iloc[:] != 1]) != 0:
         return False
