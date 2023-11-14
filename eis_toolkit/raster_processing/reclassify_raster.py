@@ -152,7 +152,7 @@ def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     with rasterio.open(path_to_file, "w", **raster.meta) as dst:
         for i in range(len(bands)):
             data_array = array_of_bands[i]
-            percentiles = np.linspace(np.nanmin(data_array), np.nanmax(data_array), number_of_intervals)
+            percentiles = np.linspace(0, 100, number_of_intervals)
             intervals = np.percentile(data_array, percentiles)
             data = np.digitize(data_array, intervals)
             if custom_band_list:
