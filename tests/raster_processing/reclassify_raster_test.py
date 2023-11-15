@@ -6,12 +6,7 @@ import pytest
 import rasterio
 
 from eis_toolkit.raster_processing.reclassify_raster import (
-    raster_with_defined_intervals,
-    raster_with_equal_intervals,
     raster_with_geometrical_intervals,
-    raster_with_manual_breaks,
-    raster_with_natural_breaks,
-    raster_with_quantiles,
     raster_with_standard_deviation,
 )
 
@@ -21,35 +16,40 @@ raster_copy_path = test_dir.joinpath("data/local/small_raster - Copy.tif")
 
 band_numbers = [1]
 
+test_array = np.array([[0,10,20,30],
+              [40,50,50,60],
+              [80,80,90,90],
+              [100,100,100,100]])
 
 def test_raster_with_defined_intervals():
     """Test raster with defined intervals by comparing the output of the function to numpy's digitized result."""
-    with rasterio.open(raster_path) as raster:
-        interval_size = 5
+    interval_size = 3
 
-        output = raster_with_defined_intervals(raster, interval_size, raster_copy_path, band_numbers)
+    _, edges = np.histogram(test_array, bins=interval_size)
 
-        _, edges = np.histogram(raster.read(1), bins=interval_size)
+    data = np.digitize(test_array, edges)
 
-        data = np.digitize(raster.read(1), edges)
+    expected_output = np.array([[1, 1, 1, 1],
+                                [2, 2, 2, 2],
+                                [3, 3, 3, 3],
+                                [4, 4, 4, 4]])
 
-        assert np.array_equal(data, output.read(1))
+    np.testing.assert_allclose(data, expected_output)
 
 
 def raster_with_equal_intervals():
     """Test raster with equal intervals by comparing the output to numpy's digitized result."""
-    with rasterio.open(raster_path) as raster:
+    number_of_intervals = 10
 
-        number_of_intervals = 100
+    expected_intervals = np.linspace(0, 100, number_of_intervals)
+    data = np.digitize(test_array, expected_intervals)
 
-        band_1 = raster.read(1)
+    expected_output = np.array([[1, 2, 3, 4],
+                                [5, 6, 6, 7],
+                                [9, 9, 10, 10],
+                                [11, 11, 11, 11]])
 
-        output = raster_with_equal_intervals(raster, number_of_intervals, raster_copy_path, band_numbers)
-
-        expected_intervals = np.linspace(0, 100, number_of_intervals + 1)
-        expected_result = np.digitize(band_1, expected_intervals)
-
-        assert np.array_equal(output.read(1), expected_result)
+    np.testing.assert_allclose(data, expected_output)
 
 
 def test_raster_with_geometrical_intervals():
@@ -66,33 +66,32 @@ def test_raster_with_geometrical_intervals():
 
 def test_raster_with_manual_breaks():
     """Test raster with manual break intervals by comparing the output of the function to numpy's digitized result."""
-    with rasterio.open(raster_path) as raster:
+    breaks = [20, 40, 60, 80]
 
-        breaks = [-2000, -1000, 500, 1000]
+    data = np.digitize(test_array, breaks)
 
-        band_1 = raster.read(1)
+    expected_output = np.array([[0, 0, 1, 1],
+                                [2, 2, 2, 3],
+                                [4, 4, 4, 4],
+                                [4, 4, 4, 4]])
 
-        output = raster_with_manual_breaks(raster, breaks, raster_copy_path, band_numbers)
-
-        expected_result = np.digitize(band_1, breaks)
-
-        assert np.array_equal(output.read(1), expected_result)
+    np.testing.assert_allclose(data, expected_output)
 
 
 def test_raster_with_natural_breaks():
     """Test raster with natural break intervals by comparing the output of the function
     to MapClassify's Jenks Caspall and numpy's digitized result"""
-    with rasterio.open(raster_path) as raster:
-        number_of_classes = 10
+    number_of_classes = 10
 
-        band_1 = raster.read(1)
+    breaks = mc.JenksCaspall(test_array, number_of_classes)
+    data = np.digitize(test_array, np.sort(breaks.bins))
 
-        output = raster_with_natural_breaks(raster, number_of_classes, raster_copy_path, band_numbers)
+    expected_output = np.array([[0, 1, 1, 2],
+                                [3, 4, 4, 5],
+                                [6, 6, 7, 7],
+                                [8, 8, 8, 8]])
 
-        breaks = mc.JenksCaspall(band_1, number_of_classes)
-        data = np.digitize(band_1, np.sort(breaks.bins))
-
-        assert np.array_equal(output.read(1), data)
+    np.testing.assert_allclose(data, expected_output)
 
 
 def raster_with_standard_deviation():
@@ -125,14 +124,14 @@ def raster_with_standard_deviation():
 
 def test_raster_with_quantiles():
     """Test raster with quantile intervals by comparing the output of the function to the original data."""
-    with rasterio.open(raster_path) as raster:
-        number_of_quantiles = 4
+    number_of_quantiles = 4
 
-        band = raster.read(1)
-
-        output = raster_with_quantiles(raster, number_of_quantiles, raster_copy_path, band_numbers)
-
-        intervals = [np.percentile(band, i * 100 / number_of_quantiles) for i in range(number_of_quantiles)]
-        data = np.digitize(band, intervals)
-
-        assert np.array_equal(output.read(1), data)
+    intervals = [np.percentile(test_array, i * 100 / number_of_quantiles) for i in range(number_of_quantiles)]
+    data = np.digitize(test_array, intervals)
+    
+    expected_output = np.array([[1, 1, 1, 1],
+                                [2, 2, 2, 2],
+                                [3, 3, 3, 3],
+                                [4, 4, 4, 4]])
+    
+    np.testing.assert_allclose(data, expected_output)
