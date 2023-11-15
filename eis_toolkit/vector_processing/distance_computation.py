@@ -1,21 +1,12 @@
-from typing import Union
-
 import geopandas as gpd
 import numpy as np
 from beartype import beartype
+from beartype.typing import Union
 from rasterio import profiles, transform
 from shapely.geometry import Point
+from shapely.geometry.base import BaseGeometry, BaseMultipartGeometry
 
 from eis_toolkit import exceptions
-
-
-def _shortest_distance_to_point(point: Point, geometries: gpd.GeoDataFrame) -> float:
-    """Calculate shortest distance from geometries to point."""
-    # This could be sped up by using a spatial index to first choose only
-    # geometries that are close to the point
-    distances_to_point = geometries.distance(point)
-    shortest_distance: float = distances_to_point.min()
-    return shortest_distance
 
 
 @beartype
@@ -57,14 +48,17 @@ def distance_computation(raster_profile: Union[profiles.Profile, dict], geometri
 
 
 def _calculate_row_distances(
-    row: int, cols: np.ndarray, raster_transform: transform.Affine, geometries: gpd.GeoDataFrame
+    row: int,
+    cols: np.ndarray,
+    raster_transform: transform.Affine,
+    geometries_unary_union: Union[BaseGeometry, BaseMultipartGeometry],
 ) -> np.ndarray:
     # transform.xy accepts either cols or rows as an array. The other then has
     # to be an integer. The resulting x and y point coordinates are therefore
     # in a 1D array
     point_xs, point_ys = transform.xy(transform=raster_transform, cols=cols, rows=row)
     row_points = [Point(x, y) for x, y in zip(point_xs, point_ys)]
-    row_distances = np.array([_shortest_distance_to_point(point=point, geometries=geometries) for point in row_points])
+    row_distances = np.array([point.distance(geometries_unary_union) for point in row_points])
     return row_distances
 
 
@@ -75,9 +69,13 @@ def _distance_computation(
     cols = np.arange(raster_width)
     rows = np.arange(raster_height)
 
+    geometries_unary_union = geometries.geometry.unary_union
+
     distance_matrix = np.array(
         [
-            _calculate_row_distances(row=row, cols=cols, raster_transform=raster_transform, geometries=geometries)
+            _calculate_row_distances(
+                row=row, cols=cols, raster_transform=raster_transform, geometries_unary_union=geometries_unary_union
+            )
             for row in rows
         ]
     )
