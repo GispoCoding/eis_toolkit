@@ -16,10 +16,8 @@ raster_copy_path = test_dir.joinpath("data/local/small_raster - Copy.tif")
 
 band_numbers = [1]
 
-test_array = np.array([[0,10,20,30],
-              [40,50,50,60],
-              [80,80,90,90],
-              [100,100,100,100]])
+test_array = np.array([[0, 10, 20, 30], [40, 50, 50, 60], [80, 80, 90, 90], [100, 100, 100, 100]])
+
 
 def test_raster_with_defined_intervals():
     """Test raster with defined intervals by comparing the output of the function to numpy's digitized result."""
@@ -29,10 +27,7 @@ def test_raster_with_defined_intervals():
 
     data = np.digitize(test_array, edges)
 
-    expected_output = np.array([[1, 1, 1, 1],
-                                [2, 2, 2, 2],
-                                [3, 3, 3, 3],
-                                [4, 4, 4, 4]])
+    expected_output = np.array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3], [4, 4, 4, 4]])
 
     np.testing.assert_allclose(data, expected_output)
 
@@ -44,10 +39,7 @@ def raster_with_equal_intervals():
     expected_intervals = np.linspace(0, 100, number_of_intervals)
     data = np.digitize(test_array, expected_intervals)
 
-    expected_output = np.array([[1, 2, 3, 4],
-                                [5, 6, 6, 7],
-                                [9, 9, 10, 10],
-                                [11, 11, 11, 11]])
+    expected_output = np.array([[1, 2, 3, 4], [5, 6, 6, 7], [9, 9, 10, 10], [11, 11, 11, 11]])
 
     np.testing.assert_allclose(data, expected_output)
 
@@ -70,10 +62,7 @@ def test_raster_with_manual_breaks():
 
     data = np.digitize(test_array, breaks)
 
-    expected_output = np.array([[0, 0, 1, 1],
-                                [2, 2, 2, 3],
-                                [4, 4, 4, 4],
-                                [4, 4, 4, 4]])
+    expected_output = np.array([[0, 0, 1, 1], [2, 2, 2, 3], [4, 4, 4, 4], [4, 4, 4, 4]])
 
     np.testing.assert_allclose(data, expected_output)
 
@@ -86,10 +75,7 @@ def test_raster_with_natural_breaks():
     breaks = mc.JenksCaspall(test_array, number_of_classes)
     data = np.digitize(test_array, np.sort(breaks.bins))
 
-    expected_output = np.array([[0, 1, 1, 2],
-                                [3, 4, 4, 5],
-                                [6, 6, 7, 7],
-                                [8, 8, 8, 8]])
+    expected_output = np.array([[0, 1, 1, 2], [3, 4, 4, 5], [6, 6, 7, 7], [8, 8, 8, 8]])
 
     np.testing.assert_allclose(data, expected_output)
 
@@ -128,10 +114,7 @@ def test_raster_with_quantiles():
 
     intervals = [np.percentile(test_array, i * 100 / number_of_quantiles) for i in range(number_of_quantiles)]
     data = np.digitize(test_array, intervals)
-    
-    expected_output = np.array([[1, 1, 1, 1],
-                                [2, 2, 2, 2],
-                                [3, 3, 3, 3],
-                                [4, 4, 4, 4]])
-    
+
+    expected_output = np.array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3], [4, 4, 4, 4]])
+
     np.testing.assert_allclose(data, expected_output)
