@@ -7,18 +7,18 @@ from eis_toolkit.utilities.checks.dataframe import check_dataframe_contains_only
 
 
 @beartype
-def check_composition_belongs_to_unit_simplex_sample_space(df: pd.DataFrame) -> bool:
+def check_in_simplex_sample_space(df: pd.DataFrame, k: np.float64 = None) -> bool:
     """
-    Check that the compositions represented by the data rows belong to the unit simplex sample space.
+    Check that the compositions represented by the data rows belong to a simplex sample space.
 
-    Check that each compositional data point belongs to the set of positive real numbers.
-    Check that each composition is normalized to 1.
+    Checks that each compositional data point belongs to the set of positive real numbers.
+    Checks that each composition is normalized to the same value.
 
     #TODO: Args, Returns, Raises
 
-    Returns:
-        InvalidCompositionException: Data is not normalized to 1.
-        NumericValueSignException: Data contains zeros or negative values.
+    # Raises:
+    #     InvalidCompositionException: Data is not normalized to the expected value.
+    #     NumericValueSignException: Data contains zeros or negative values.
     """
     if not check_dataframe_contains_only_positive_numbers(df):
         return False
@@ -26,15 +26,53 @@ def check_composition_belongs_to_unit_simplex_sample_space(df: pd.DataFrame) -> 
 
     # TODO: switch to checking that the sum is the same value for each column
     df_sum = np.sum(df, axis=1)
-    if len(df_sum[df_sum.iloc[:] != 1]) != 0:
+    expected_sum = k if k is not None else df_sum.iloc[0]
+    if len(df_sum[df_sum.iloc[:] != expected_sum]) != 0:
         return False
-        # raise InvalidCompositionException("Not each composition is normalized to 1.")
+        # raise InvalidCompositionException("Not each composition is normalized to the same value.")
 
     return True
 
 
 @beartype
-def _normalize_to_one(row: pd.Series, columns: Sequence[str]) -> Tuple[pd.Series, np.float64]:
+def check_in_unit_simplex_sample_space(df: pd.DataFrame) -> bool:
+    """
+    Check that the compositions represented by the data rows belong to the unit simplex sample space.
+
+    Checks that each compositional data point belongs to the set of positive real numbers.
+    Checks that each composition is normalized to 1.
+
+    #TODO: Args, Returns, Raises
+
+    # Raises:
+    #     InvalidCompositionException: Data is not normalized to 1.
+    #     NumericValueSignException: Data contains zeros or negative values.
+    """
+    return check_in_simplex_sample_space(df, np.float64(1))
+
+
+@beartype
+def _scale(df: pd.DataFrame, scale: np.float64) -> pd.DataFrame:
+    """TODO: docstring."""
+    return scale * df
+
+
+@beartype
+def _normalize(
+    row: pd.Series, columns: Optional[Sequence[str]] = None, sum: np.float64 = 1.0
+) -> Tuple[pd.Series, np.float64]:
+    """TODO: docstring."""
+    if columns is None:
+        scale = np.float64(np.sum(row)) / sum
+        row = np.divide(row, scale)
+    else:
+        scale = np.float64(np.sum(row[columns])) / sum
+        row[columns] = np.divide(row[columns], scale)
+    return row, scale
+
+
+@beartype
+def _normalize_to_one(row: pd.Series, columns: Optional[Sequence[str]] = None) -> Tuple[pd.Series, np.float64]:
     """
     Normalize the series to one.
 
@@ -44,8 +82,12 @@ def _normalize_to_one(row: pd.Series, columns: Sequence[str]) -> Tuple[pd.Series
     Returns:
         A tuple containing a new series with the normalized values and the scale factor used.
     """
-    scale = np.float64(np.sum(row[columns]))
-    row[columns] = np.divide(row[columns], scale)
+    if columns is None:
+        scale = np.float64(np.sum(row))
+        row = np.divide(row, scale)
+    else:
+        scale = np.float64(np.sum(row[columns]))
+        row[columns] = np.divide(row[columns], scale)
     return row, scale
 
 
@@ -68,7 +110,10 @@ def _closure(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> Tuple
     Raises:
         # TODO
     """
-    columns = df.columns if columns is None else columns
+
+    # TODO: add check/requirement for df having to contain non-numeric column names
+
+    columns = [col for col in df.columns] if columns is None else columns
 
     dfc = df.copy()
     scales = pd.Series(np.zeros((len(dfc),)))
