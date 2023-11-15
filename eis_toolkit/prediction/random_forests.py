@@ -1,139 +1,132 @@
-from typing import Optional, Tuple, Union
-
 import numpy as np
 import pandas as pd
 from beartype import beartype
+from beartype.typing import Literal, Optional, Sequence, Tuple, Union
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import classification_report
-from sklearn.model_selection import train_test_split
 
 from eis_toolkit import exceptions
-from eis_toolkit.prediction.model_utils import evaluate_regression_model
+from eis_toolkit.prediction.model_utils import _train_and_evaluate_sklearn_model
 
 
 @beartype
 def random_forest_classifier_train(
     X: Union[np.ndarray, pd.DataFrame],
     y: Union[np.ndarray, pd.Series],
-    test_size: float = 0.2,
+    test_method: Literal["simple_split", "kfold_cv", "skfold_cv", "loo_cv", "none"] = "simple_split",
+    metrics: Sequence[Literal["accuracy", "precision", "recall", "f1"]] = ["accuracy"],
+    simple_split_size: float = 0.2,
+    cv_folds: int = 5,
     n_estimators: int = 100,
-    random_state: Optional[int] = None,
+    random_state: Optional[int] = 42,
     **kwargs,
 ) -> Tuple[RandomForestClassifier, dict]:
     """
-    Train a Random Forest classifier model using Sklearn.
+    Train and optionally validate a Random Forest classifier model using Sklearn.
 
-    Trains the model with the given parameters and evaluates model performance using test data.
+    Various options and configurations for model performance evaluation are available. No validation,
+    simple train-test and cross-validation can be chosen. If validation is performed, metric(s) to
+    calculate can be defined and validation process configured (cross-validation method, number of folds,
+    size of the simple train-test split). Depending on the details of the validation process, the output
+    metrics dictionary can be empty, one-dimensional or nested.
 
     Args:
         X: Training data.
         y: Target labels.
-        test_size: Fraction of the dataset to be used as test data (rest is used for training). Defaults to 0.2.
+        test_method: Test / validation method to use. "simple_split" divides data into two parts, "kfold_cv"
+            performs k-fold cross-validation, "skfold_cv" performs stratified k-fold cross-validation,
+            "loo_cv" performs leave-one-out cross-validation and "none" will not test / validate model at all
+            (in this case, all X and y will be used solely for training).
+        metrics: Metrics to use for scoring the model. Defaults to "accuracy".
+        simple_split_size: Fraction of the dataset to be used as test data (rest is used for training).
+            Used only when test_method is "simple_split". Defaults to 0.2.
+        cv_folds: Number of folds used in cross-validation. Used only when test_method is "kfold_cv"
+            or "skfold_cv". Defaults to 5.
         n_estimators: The number of trees in the forest. Defaults to 100.
-        random_state: Seed for random number generation. Defaults to None.
+        random_state: Seed for random number generation. Defaults to 42.
         **kwargs: Additional parameters for Sklearn's RandomForestClassifier.
 
     Returns:
-        The trained RandomForestClassifier and details of test set performance.
+        The trained RandomForestClassifier and metric scores as a dictionary.
 
     Raises:
-        NonMatchingParameterLengthsException: If length of X and y don't match.
+        InvalidParameterValueException: If some of the numeric parameters are given invalid input values.
     """
-    x_size = X.index.size if isinstance(X, pd.DataFrame) else X.shape[0]
-    if x_size != y.size:
-        raise exceptions.NonMatchingParameterLengthsException(f"X and y must have the length {x_size} != {y.size}.")
+    if not n_estimators >= 1:
+        raise exceptions.InvalidParameterValueException("N-estimators must be at least 1.")
 
-    # Splitting data into training and testing
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
-
-    # Creating the model
     model = RandomForestClassifier(n_estimators=n_estimators, random_state=random_state, **kwargs)
 
-    # Training the model
-    model.fit(X_train, y_train)
+    model, metrics = _train_and_evaluate_sklearn_model(
+        X=X,
+        y=y,
+        model=model,
+        test_method=test_method,
+        metrics=metrics,
+        simple_split_size=simple_split_size,
+        cv_folds=cv_folds,
+        random_state=random_state,
+    )
 
-    # Predictions for test data
-    y_pred = model.predict(X_test)
-
-    # Performance metrics
-    report = classification_report(y_test, y_pred, output_dict=True)
-
-    return model, report
-
-
-@beartype
-def random_forest_classifier_predict(model: RandomForestClassifier, X: Union[np.ndarray, pd.DataFrame]) -> np.ndarray:
-    """
-    Use a trained Random Forest classifier model to make predictions.
-
-    Args:
-        model: Trained RandomForestClassifier.
-        X: Features for which predictions are to be made.
-
-    Returns:
-        Predicted labels.
-    """
-    predictions = model.predict(X)
-    return predictions
+    return model, metrics
 
 
 @beartype
 def random_forest_regressor_train(
     X: Union[np.ndarray, pd.DataFrame],
     y: Union[np.ndarray, pd.Series],
-    test_size: float = 0.2,
+    test_method: Literal["simple_split", "kfold_cv", "skfold_cv", "loo_cv", "none"] = "simple_split",
+    metrics: Sequence[Literal["mse", "rmse", "mae", "r2"]] = ["mse"],
+    simple_split_size: float = 0.2,
+    cv_folds: int = 5,
     n_estimators: int = 100,
-    random_state: Optional[int] = None,
+    random_state: Optional[int] = 42,
     **kwargs,
 ) -> Tuple[RandomForestRegressor, dict]:
     """
-    Train a Random Forest regressor model using Sklearn.
+    Train and optionally validate a Random Forest regressor model using Sklearn.
 
-    Trains the model with the given parameters and evaluates model performance using test data.
+    Various options and configurations for model performance evaluation are available. No validation,
+    simple train-test and cross-validation can be chosen. If validation is performed, metric(s) to
+    calculate can be defined and validation process configured (cross-validation method, number of folds,
+    size of the simple train-test split). Depending on the details of the validation process, the output
+    metrics dictionary can be empty, one-dimensional or nested.
 
     Args:
         X: Training data.
         y: Target labels.
-        test_size: Fraction of the dataset to be used as test data (rest is used for training). Defaults to 0.2.
+        test_method: Test / validation method to use. "simple_split" divides data into two parts, "kfold_cv"
+            performs k-fold cross-validation, "skfold_cv" performs stratified k-fold cross-validation,
+            "loo_cv" performs leave-one-out cross-validation and "none" will not test / validate model at all
+            (in this case, all X and y will be used solely for training).
+        metrics: Metrics to use for scoring the model. Defaults to "mse".
+        simple_split_size: Fraction of the dataset to be used as test data (rest is used for training).
+            Used only when test_method is "simple_split". Defaults to 0.2.
+        cv_folds: Number of folds used in cross-validation. Used only when test_method is "kfold_cv"
+            or "skfold_cv". Defaults to 5.
         n_estimators: The number of trees in the forest. Defaults to 100.
-        random_state: Seed for random number generation. Defaults to None.
+        random_state: Seed for random number generation. Defaults to 42.
         **kwargs: Additional parameters for Sklearn's RandomForestRegressor.
 
     Returns:
-        Trained Random Forest regressor.
-    """
-    x_size = X.index.size if isinstance(X, pd.DataFrame) else X.shape[0]
-    if x_size != y.size:
-        raise exceptions.NonMatchingParameterLengthsException(f"X and y must have the length {x_size} != {y.size}.")
+        The trained RandomForestRegressor and metric scores as a dictionary.
 
-    # Splitting data into training and testing
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+    Raises:
+        InvalidParameterValueException: If some of the numeric parameters are given invalid input values.
+    """
+    if not n_estimators >= 1:
+        raise exceptions.InvalidParameterValueException("N-estimators must be at least 1.")
 
     model = RandomForestRegressor(n_estimators=n_estimators, random_state=random_state, **kwargs)
 
-    # Training the model
-    model.fit(X_train, y_train)
+    model, metrics = _train_and_evaluate_sklearn_model(
+        X=X,
+        y=y,
+        model=model,
+        test_method=test_method,
+        metrics=metrics,
+        simple_split_size=simple_split_size,
+        cv_folds=cv_folds,
+        random_state=random_state,
+    )
 
-    # Predictions for test data
-    y_pred = model.predict(X_test)
-
-    # Performance metrics
-    report = evaluate_regression_model(y_test, y_pred)
-
-    return model, report
-
-
-@beartype
-def random_forest_regressor_predict(model: RandomForestRegressor, X: Union[np.ndarray, pd.DataFrame]) -> np.ndarray:
-    """
-    Use a trained Random Forest regressor to make predictions.
-
-    Args:
-        model: Trained Random Forest regressor.
-        X: Features/data to predict.
-
-    Returns:
-        Predictions.
-    """
-    predictions = model.predict(X)
-    return predictions
+    return model, metrics
