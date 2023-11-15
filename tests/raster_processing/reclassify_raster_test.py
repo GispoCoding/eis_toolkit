@@ -80,7 +80,7 @@ def test_raster_with_natural_breaks():
     np.testing.assert_allclose(data, expected_output)
 
 
-def raster_with_standard_deviation():
+def test_raster_with_standard_deviation():
     """Test raster with standard deviation intervals by comparing the output of the function to the original data."""
     with rasterio.open(raster_path) as raster:
         number_of_intervals = 75
