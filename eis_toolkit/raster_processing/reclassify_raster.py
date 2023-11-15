@@ -1,4 +1,4 @@
-from typing import List, Optional
+from beartype.typing import Optional, Sequence
 
 import mapclassify as mc
 import numpy as np
@@ -9,9 +9,9 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 
 def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
-    breaks: List[int],
+    breaks: Sequence[int],
     path_to_file: str,
-    bands: Optional[List[int]] = None,
+    bands: Optional[Sequence[int]] = None,
 ) -> rasterio.io.DatasetReader:
 
     custom_band_list = False if bands is None else True
@@ -38,18 +38,19 @@ def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     return src
 
 
+@beartype
 def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, breaks: List[int], path_to_file: str, bands: Optional[List[int]] = None
+    raster: rasterio.io.DatasetReader, breaks: Sequence[int], path_to_file: str, bands: Optional[Sequence[int]] = None
 ) -> rasterio.io.DatasetReader:
     """Classify raster with manual breaks.
 
     If bands are not given, all bands are used for classification.
 
     Args:
-        raster (rasterio.io.DatasetReader): Raster to be classified.
-        breaks (List[int]): List of break values for the classification.
-        path_to_file (str): Path to file including the name of the file.
-        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+        raster: Raster to be classified.
+        breaks: List of break values for the classification.
+        path_to_file: Path to file including the name of the file.
+        bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
         rasterio.io.DatasetReader: Raster classified with manual breaks.
@@ -104,18 +105,19 @@ def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
     return src
 
 
+@beartype
 def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, interval_size: int, path_to_file: str, bands: Optional[List[int]] = None
+    raster: rasterio.io.DatasetReader, interval_size: int, path_to_file: str, bands: Optional[Sequence[int]] = None
 ) -> rasterio.io.DatasetReader:
     """Classify raster with defined intervals.
 
     If bands are not given, all bands are used for classification.
 
     Args:
-        raster (rasterio.io.DatasetReader): Raster to be classified.
-        interval_size (int): The number of units in each interval.
-        path_to_file (str): Path to file including the name of the file.
-        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+        raster: Raster to be classified.
+        interval_size: The number of units in each interval.
+        path_to_file: Path to file including the name of the file.
+        bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
         rasterio.io.DatasetReader: Raster classified with defined intervals.
@@ -137,7 +139,7 @@ def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
     path_to_file: str,
-    bands: Optional[List[int]] = None,
+    bands: Optional[Sequence[int]] = None,
 ) -> rasterio.io.DatasetReader:
 
     custom_band_list = False if bands is None else True
@@ -163,18 +165,19 @@ def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     return src
 
 
+@beartype
 def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_intervals: int, path_to_file: str, bands: Optional[List[int]] = None
+    raster: rasterio.io.DatasetReader, number_of_intervals: int, path_to_file: str, bands: Optional[Sequence[int]] = None
 ) -> rasterio.io.DatasetReader:
     """Classify raster with equal intervals.
 
     If bands are not given, all bands are used for classification.
 
     Args:
-        raster (rasterio.io.DatasetReader): Raster to be classified.
-        number_of_intervals (int): The number of intervals.
-        path_to_file (str): Path to file including the name of the file.
-        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+        raster: Raster to be classified.
+        number_of_intervals: The number of intervals.
+        path_to_file: Path to file including the name of the file.
+        bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
         rasterio.io.DatasetReader: Raster classified with equal intervals.
@@ -193,7 +196,7 @@ def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
 
 
 def _raster_with_quantiles(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_quantiles: int, path_to_file: str, bands: Optional[List[int]] = None
+    raster: rasterio.io.DatasetReader, number_of_quantiles: int, path_to_file: str, bands: Optional[Sequence[int]] = None
 ) -> rasterio.io.DatasetReader:
 
     custom_band_list = False if bands is None else True
@@ -219,21 +222,22 @@ def _raster_with_quantiles(  # type: ignore[no-any-unimported]
     return src
 
 
+@beartype
 def raster_with_quantiles(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_quantiles: int, path_to_file: str, bands: Optional[List[int]] = None
+    raster: rasterio.io.DatasetReader, number_of_quantiles: int, path_to_file: str, bands: Optional[Sequence[int]] = None
 ) -> rasterio.io.DatasetReader:
     """Classify raster with quantiles.
 
     If bands are not given, all bands are used for classification.
 
     Args:
-        raster (rasterio.io.DatasetReader): Raster to be classified.
-        number_of_quantiles (int): The number of quantiles.
-        path_to_file (str): Path to file including the name of the file.
-        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+        raster: Raster to be classified.
+        number_of_quantiles: The number of quantiles.
+        path_to_file: Path to file including the name of the file.
+        bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        rasterio.io.DatasetReader: Raster classified with quantiles.
+        Raster classified with quantiles.
     """
     if bands is not None:
         if not isinstance(bands, list):
@@ -252,7 +256,7 @@ def _raster_with_natural_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_classes: int,
     path_to_file: str,
-    bands: Optional[List[int]] = None,
+    bands: Optional[Sequence[int]] = None,
 ) -> rasterio.io.DatasetReader:
 
     custom_band_list = False if bands is None else True
@@ -279,18 +283,19 @@ def _raster_with_natural_breaks(  # type: ignore[no-any-unimported]
     return src
 
 
+@beartype
 def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_classes: int, path_to_file: str, bands: Optional[List[int]] = None
+    raster: rasterio.io.DatasetReader, number_of_classes: int, path_to_file: str, bands: Optional[Sequence[int]] = None
 ) -> rasterio.io.DatasetReader:
     """Classify raster with natural breaks (Jenks Caspall).
 
     If bands are not given, all bands are used for classification.
 
     Args:
-        raster (rasterio.io.DatasetReader): Raster to be classified.
-        number_of_classes (int),: The number of classes.
-        path_to_file (str): Path to file including the name of the file.
-        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+        raster: Raster to be classified.
+        number_of_classes: The number of classes.
+        path_to_file: Path to file including the name of the file.
+        bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
         rasterio.io.DatasetReader: Raster classified with natural breaks (Jenks Caspall).
@@ -309,7 +314,7 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
 
 
 def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_classes: int, path_to_file: str, bands: Optional[List[int]] = None
+    raster: rasterio.io.DatasetReader, number_of_classes: int, path_to_file: str, bands: Optional[Sequence[int]] = None
 ) -> rasterio.io.DatasetReader:
     array_of_bands = []
     custom_band_list = False if bands is None else True
@@ -388,19 +393,20 @@ def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
     return src
 
 
+@beartype
 def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_classes: int, path_to_file: str, bands: Optional[List[int]] = None
+    raster: rasterio.io.DatasetReader, number_of_classes: int, path_to_file: str, bands: Optional[Sequence[int]] = None
 ) -> rasterio.io.DatasetReader:
     """Classify raster with geometrical intervals (Torppa, 2023).
 
     If bands are not given, all bands are used for classification.
 
     Args:
-        raster (rasterio.io.DatasetReader): Raster to be classified.
-        number_of_classes (int): The number of classes. The true number of classes is at most double the amount,
+        raster: Raster to be classified.
+        number_of_classes: The number of classes. The true number of classes is at most double the amount,
         depending how symmetrical the input data is.
-        path_to_file (str): Path to file including the name of the file.
-        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+        path_to_file: Path to file including the name of the file.
+        bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
         rasterio.io.DatasetReader: Raster classified with geometrical intervals (Torppa, 2023).
@@ -421,7 +427,7 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
 
 
 def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_intervals: int, path_to_file: str, bands: Optional[List[int]] = None
+    raster: rasterio.io.DatasetReader, number_of_intervals: int, path_to_file: str, bands: Optional[Sequence[int]] = None
 ) -> rasterio.io.DatasetReader:
 
     custom_band_list = False if bands is None else True
@@ -462,18 +468,19 @@ def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
     return src
 
 
+@beartype
 def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_intervals: int, path_to_file: str, bands: Optional[List[int]] = None
+    raster: rasterio.io.DatasetReader, number_of_intervals: int, path_to_file: str, bands: Optional[Sequence[int]] = None
 ) -> rasterio.io.DatasetReader:
     """Classify raster with standard deviation.
 
     If bands are not given, all bands are used for classification.
 
     Args:
-        raster (rasterio.io.DatasetReader): Raster to be classified.
-        number_of_intervals (int): The number of intervals.
-        path_to_file (str): Path to file including the name of the file.
-        bands (List[int], optional): Selected bands from multiband raster. Indexing begins from one. Defaults to None.
+        raster: Raster to be classified.
+        number_of_intervals: The number of intervals.
+        path_to_file: Path to file including the name of the file.
+        bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
         rasterio.io.DatasetReader: Raster classified with standard deviation.
