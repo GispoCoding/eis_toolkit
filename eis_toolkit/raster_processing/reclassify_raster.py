@@ -412,6 +412,8 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
             raise InvalidParameterValueException("Expected bands to be a list of integers")
         elif len(bands) > raster.count:
             raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
+    if number_of_classes == 0:
+        raise InvalidParameterValueException("number_of_classes parameter is 0")
 
     src = _raster_with_geometrical_intervals(raster, number_of_classes, path_to_file, bands)
 
