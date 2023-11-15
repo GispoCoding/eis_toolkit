@@ -1,8 +1,8 @@
-from beartype.typing import Optional, Sequence
-
 import mapclassify as mc
 import numpy as np
 import rasterio
+from beartype import beartype
+from beartype.typing import Optional, Sequence
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 
@@ -167,7 +167,10 @@ def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
 
 @beartype
 def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_intervals: int, path_to_file: str, bands: Optional[Sequence[int]] = None
+    raster: rasterio.io.DatasetReader,
+    number_of_intervals: int,
+    path_to_file: str,
+    bands: Optional[Sequence[int]] = None,
 ) -> rasterio.io.DatasetReader:
     """Classify raster with equal intervals.
 
@@ -196,7 +199,10 @@ def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
 
 
 def _raster_with_quantiles(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_quantiles: int, path_to_file: str, bands: Optional[Sequence[int]] = None
+    raster: rasterio.io.DatasetReader,
+    number_of_quantiles: int,
+    path_to_file: str,
+    bands: Optional[Sequence[int]] = None,
 ) -> rasterio.io.DatasetReader:
 
     custom_band_list = False if bands is None else True
@@ -224,7 +230,10 @@ def _raster_with_quantiles(  # type: ignore[no-any-unimported]
 
 @beartype
 def raster_with_quantiles(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_quantiles: int, path_to_file: str, bands: Optional[Sequence[int]] = None
+    raster: rasterio.io.DatasetReader,
+    number_of_quantiles: int,
+    path_to_file: str,
+    bands: Optional[Sequence[int]] = None,
 ) -> rasterio.io.DatasetReader:
     """Classify raster with quantiles.
 
@@ -427,7 +436,10 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
 
 
 def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_intervals: int, path_to_file: str, bands: Optional[Sequence[int]] = None
+    raster: rasterio.io.DatasetReader,
+    number_of_intervals: int,
+    path_to_file: str,
+    bands: Optional[Sequence[int]] = None,
 ) -> rasterio.io.DatasetReader:
 
     custom_band_list = False if bands is None else True
@@ -470,7 +482,10 @@ def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
 
 @beartype
 def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_intervals: int, path_to_file: str, bands: Optional[Sequence[int]] = None
+    raster: rasterio.io.DatasetReader,
+    number_of_intervals: int,
+    path_to_file: str,
+    bands: Optional[Sequence[int]] = None,
 ) -> rasterio.io.DatasetReader:
     """Classify raster with standard deviation.
 
