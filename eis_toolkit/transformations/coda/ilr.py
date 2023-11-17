@@ -5,7 +5,6 @@ from beartype.typing import Sequence
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
-from eis_toolkit.transformations.coda.clr import _centered_ratio
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_dataframe_contains_zeros
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
 
@@ -31,12 +30,21 @@ def _calculate_scaling_factor(c1: int, c2: int) -> np.float64:
     return np.sqrt((c1 * c2) / np.float64(c1 + c2))
 
 
+# TODO: name better
+@beartype
+def _logratio(row: pd.Series, subcomposition_1: Sequence[str], subcomposition_2: Sequence[str]) -> np.float64:
+    """TODO: docstring."""
+    numerator = gmean(row[subcomposition_1])
+    denominator = gmean(row[subcomposition_2])
+    return np.log(numerator / denominator)
+
+
 # TODO: note: this should only return a single column/series
 # TODO: possibly modify to handle a single row
 @beartype
 def _single_ILR_transform(
     df: pd.DataFrame, subcomposition_1: Sequence[str], subcomposition_2: Sequence[str]
-) -> pd.DataFrame:
+) -> pd.Series:
     """TODO: docstring."""
 
     dfc = df.copy()
@@ -44,19 +52,21 @@ def _single_ILR_transform(
     c1 = len(subcomposition_1)
     c2 = len(subcomposition_2)
 
-    # TODO: move _centered_ratio from CLR to a shared module
-    dfc[subcomposition_1] = dfc[subcomposition_1].apply(gmean, axis=1)
-    dfc[subcomposition_2] = dfc[subcomposition_2].apply(_centered_ratio, axis=1)
+    # A Series to hold the transformed rows
+    ilr_values = pd.Series([0.0] * df.shape[0])
 
-    dfc = np.log(dfc) * _calculate_scaling_factor(c1, c2)
+    for idx, row in dfc.iterrows():
+        ilr_values[idx] = _logratio(row, subcomposition_1, subcomposition_2)
 
-    return dfc
+    ilr_values = _calculate_scaling_factor(c1, c2) * ilr_values
+
+    return ilr_values
 
 
 @beartype
 def single_ILR_transform(
     df: pd.DataFrame, subcomposition_1: Sequence[str], subcomposition_2: Sequence[str]
-) -> pd.DataFrame:
+) -> pd.Series:
     """
     Perform a single isometric logratio transformation on the provided subcompositions.
 
