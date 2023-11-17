@@ -50,7 +50,7 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        
+        Raster classified with manual breaks and metadata.
     """
     if bands is not None:
         if not isinstance(bands, list):
@@ -113,7 +113,7 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        rasterio.io.DatasetReader: Raster classified with defined intervals.
+        Raster classified with defined intervals and metadata.
     """
     if bands is not None:
         if not isinstance(bands, list):
@@ -131,12 +131,13 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
 def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
-    path_to_file: str,
     bands: Optional[Sequence[int]] = None,
-) -> rasterio.io.DatasetReader:
+) -> Tuple[Sequence[np.ndarray], dict]:
 
-    custom_band_list = False if bands is None else True
     array_of_bands = []
+    out_image: Sequence = []
+    out_meta = raster.meta.copy()
+
     if bands is not None:
         for band in raster.read(bands):
             array_of_bands.append(band)
@@ -144,27 +145,22 @@ def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
         array_of_bands = raster.read()
         bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-    with rasterio.open(path_to_file, "w", **raster.meta) as dst:
-        for i in range(len(bands)):
-            data_array = array_of_bands[i]
-            percentiles = np.linspace(0, 100, number_of_intervals)
-            intervals = np.percentile(data_array, percentiles)
-            data = np.digitize(data_array, intervals)
-            if custom_band_list:
-                dst.write(data, bands[i])
-            else:
-                dst.write(data, bands[i] + 1)
-    src = rasterio.open(path_to_file)
-    return src
+    for i in range(len(bands)):
+        data_array = array_of_bands[i]
+        percentiles = np.linspace(0, 100, number_of_intervals)
+        intervals = np.percentile(data_array, percentiles)
+        data = np.digitize(data_array, intervals)
+        out_image.append(data)
+
+    return out_image, out_meta
 
 
 @beartype
 def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
-    path_to_file: str,
     bands: Optional[Sequence[int]] = None,
-) -> rasterio.io.DatasetReader:
+) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with equal intervals.
 
     If bands are not given, all bands are used for classification.
@@ -172,7 +168,6 @@ def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     Args:
         raster: Raster to be classified.
         number_of_intervals: The number of intervals.
-        path_to_file: Path to file including the name of the file.
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
@@ -186,20 +181,21 @@ def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
         elif len(bands) > raster.count:
             raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
-    src = _raster_with_equal_intervals(raster, number_of_intervals, path_to_file, bands)
+    out_image, out_meta = _raster_with_equal_intervals(raster, number_of_intervals, bands)
 
-    return src
+    return out_image, out_meta
 
 
 def _raster_with_quantiles(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_quantiles: int,
-    path_to_file: str,
     bands: Optional[Sequence[int]] = None,
-) -> rasterio.io.DatasetReader:
+) -> Tuple[Sequence[np.ndarray], dict]:
 
-    custom_band_list = False if bands is None else True
     array_of_bands = []
+    out_image: Sequence = []
+    out_meta = raster.meta.copy()
+
     if bands is not None:
         for band in raster.read(bands):
             array_of_bands.append(band)
@@ -207,27 +203,22 @@ def _raster_with_quantiles(  # type: ignore[no-any-unimported]
         array_of_bands = raster.read()
         bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-    with rasterio.open(path_to_file, "w", **raster.meta) as dst:
-        for i in range(len(bands)):
-            data_array = array_of_bands[i]
-            intervals = [np.percentile(data_array, i * 100 / number_of_quantiles) for i in range(number_of_quantiles)]
-            data = np.digitize(data_array, intervals)
+    for i in range(len(bands)):
+        data_array = array_of_bands[i]
+        intervals = [np.percentile(data_array, i * 100 / number_of_quantiles) for i in range(number_of_quantiles)]
+        data = np.digitize(data_array, intervals)
 
-            if custom_band_list:
-                dst.write(data, bands[i])
-            else:
-                dst.write(data, bands[i] + 1)
-    src = rasterio.open(path_to_file)
-    return src
+        out_image.append(data)
+
+    return out_image, out_meta
 
 
 @beartype
 def raster_with_quantiles(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_quantiles: int,
-    path_to_file: str,
     bands: Optional[Sequence[int]] = None,
-) -> rasterio.io.DatasetReader:
+) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with quantiles.
 
     If bands are not given, all bands are used for classification.
@@ -235,11 +226,10 @@ def raster_with_quantiles(  # type: ignore[no-any-unimported]
     Args:
         raster: Raster to be classified.
         number_of_quantiles: The number of quantiles.
-        path_to_file: Path to file including the name of the file.
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        Raster classified with quantiles.
+        Raster classified with quantiles and metadata.
     """
     if bands is not None:
         if not isinstance(bands, list):
@@ -249,20 +239,21 @@ def raster_with_quantiles(  # type: ignore[no-any-unimported]
         elif len(bands) > raster.count:
             raise InvalidParameterValueException
 
-    src = _raster_with_quantiles(raster, number_of_quantiles, path_to_file, bands)
+    out_image, out_meta = _raster_with_quantiles(raster, number_of_quantiles, bands)
 
-    return src
+    return out_image, out_meta
 
 
 def _raster_with_natural_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_classes: int,
-    path_to_file: str,
     bands: Optional[Sequence[int]] = None,
-) -> rasterio.io.DatasetReader:
+) -> Tuple[Sequence[np.ndarray], dict]:
 
-    custom_band_list = False if bands is None else True
     array_of_bands = []
+    out_image: Sequence = []
+    out_meta = raster.meta.copy()
+
     if bands is not None:
         for band in raster.read(bands):
             array_of_bands.append(band)
@@ -270,25 +261,20 @@ def _raster_with_natural_breaks(  # type: ignore[no-any-unimported]
         array_of_bands = raster.read()
         bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-    with rasterio.open(path_to_file, "w", **raster.meta) as dst:
-        for i in range(len(bands)):
-            data_array = array_of_bands[i]
-            breaks = mc.JenksCaspall(data_array, number_of_classes)
-            data = np.digitize(data_array, np.sort(breaks.bins))
+    for i in range(len(bands)):
+        data_array = array_of_bands[i]
+        breaks = mc.JenksCaspall(data_array, number_of_classes)
+        data = np.digitize(data_array, np.sort(breaks.bins))
 
-            if custom_band_list:
-                dst.write(data, bands[i])
-            else:
-                dst.write(data, bands[i] + 1)
+        out_image.append(data)
 
-    src = rasterio.open(path_to_file)
-    return src
+    return out_image, out_meta
 
 
 @beartype
 def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_classes: int, path_to_file: str, bands: Optional[Sequence[int]] = None
-) -> rasterio.io.DatasetReader:
+    raster: rasterio.io.DatasetReader, number_of_classes: int, bands: Optional[Sequence[int]] = None
+) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with natural breaks (Jenks Caspall).
 
     If bands are not given, all bands are used for classification.
@@ -296,11 +282,10 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
     Args:
         raster: Raster to be classified.
         number_of_classes: The number of classes.
-        path_to_file: Path to file including the name of the file.
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        rasterio.io.DatasetReader: Raster classified with natural breaks (Jenks Caspall).
+        Raster classified with natural breaks (Jenks Caspall) and metadata.
     """
     if bands is not None:
         if not isinstance(bands, list):
@@ -310,95 +295,94 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
         elif len(bands) > raster.count:
             raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
-    src = _raster_with_natural_breaks(raster, number_of_classes, path_to_file, bands)
+    out_image, out_meta = _raster_with_natural_breaks(raster, number_of_classes, bands)
 
-    return src
+    return out_image, out_meta
 
 
 def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_classes: int, path_to_file: str, bands: Optional[Sequence[int]] = None
-) -> rasterio.io.DatasetReader:
+    raster: rasterio.io.DatasetReader, number_of_classes: int, bands: Optional[Sequence[int]] = None
+) -> Tuple[Sequence[np.ndarray], dict]:
+
     array_of_bands = []
-    custom_band_list = False if bands is None else True
+    out_image: Sequence = []
+    out_meta = raster.meta.copy()
+
     if bands is not None:
         for band in raster.read(bands):
             array_of_bands.append(band)
     else:
         array_of_bands = raster.read()
-    with rasterio.open(path_to_file, "w", **raster.meta) as dst:
-        for i in range(len(bands)):
 
-            data_array = array_of_bands[i]
-            # missing = -1.e+32
-            data_array[data_array == -1.0e32] = np.nan
+    for i in range(len(array_of_bands)):
 
-            median_value = np.nanmedian(data_array)
-            max_value = np.nanmax(data_array)
-            min_value = np.nanmin(data_array)
+        data_array = array_of_bands[i]
+        # missing = -1.e+32
+        data_array[data_array == -1.0e32] = np.nan
 
-            data_array = np.ma.masked_where(np.isnan(data_array), data_array)
-            values_out = np.zeros_like(data_array)  # The same shape as the original raster value array
-            if (median_value - min_value) < (max_value - median_value):  # Large end tail longer
-                raster_half = data_array[np.where((data_array > median_value) & (data_array != np.nan))]
-                range_half = max_value - median_value
-                raster_half = raster_half - median_value + (range_half) / 1000.0
-            else:  # Small end tail longer
-                raster_half = data_array[np.where(data_array < median_value) & (data_array != np.nan)]
-                range_half = median_value - min_value
-                raster_half = raster_half - min_value + (range_half) / 1000.0
+        median_value = np.nanmedian(data_array)
+        max_value = np.nanmax(data_array)
+        min_value = np.nanmin(data_array)
 
-            min_half = np.nanmin(raster_half)
-            max_half = np.nanmax(raster_half)
+        data_array = np.ma.masked_where(np.isnan(data_array), data_array)
+        values_out = np.zeros_like(data_array)  # The same shape as the original raster value array
+        if (median_value - min_value) < (max_value - median_value):  # Large end tail longer
+            raster_half = data_array[np.where((data_array > median_value) & (data_array != np.nan))]
+            range_half = max_value - median_value
+            raster_half = raster_half - median_value + (range_half) / 1000.0
+        else:  # Small end tail longer
+            raster_half = data_array[np.where(data_array < median_value) & (data_array != np.nan)]
+            range_half = median_value - min_value
+            raster_half = raster_half - min_value + (range_half) / 1000.0
 
-            # number of classes
-            fac = (max_half / min_half) ** (1 / number_of_classes)
+        min_half = np.nanmin(raster_half)
+        max_half = np.nanmax(raster_half)
 
-            ibp = 1
-            brpt_half = [min_half]
-            brpt = [min_half]
-            width = [0]
+        # number of classes
+        fac = (max_half / min_half) ** (1 / number_of_classes)
 
-            while brpt[-1] < max_half:
-                ibp += 1
-                brpt.append(min_half * fac ** (ibp - 1))
-                brpt_half.append(brpt[-1])
-                width.append(brpt_half[-1] - brpt_half[0])
-            k = 0
+        ibp = 1
+        brpt_half = [min_half]
+        brpt = [min_half]
+        width = [0]
 
-            for j in range(1, len(width) - 2):
-                values_out[
-                    np.where(
-                        ((median_value + width[j]) < data_array)
-                        & (data_array <= (median_value + width[j + 1]))
-                        & (data_array != np.nan)
-                    )
-                ] = (j + 1)
-                values_out[
-                    np.where(
-                        ((median_value - width[j]) > data_array)
-                        & (data_array >= (median_value - width[j + 1]))
-                        & (data_array != np.nan)
-                    )
-                ] = (-j - 1)
-                k = j
+        while brpt[-1] < max_half:
+            ibp += 1
+            brpt.append(min_half * fac ** (ibp - 1))
+            brpt_half.append(brpt[-1])
+            width.append(brpt_half[-1] - brpt_half[0])
+        k = 0
 
-            values_out[np.where(((median_value + width[k + 1]) < data_array) & (data_array != np.nan))] = k + 1
-            values_out[np.where(((median_value - width[k + 1]) > data_array) & (data_array != np.nan))] = -k - 1
-            values_out[np.where(median_value == data_array)] = 0
-            # Write data to the correct band
-            if custom_band_list:
-                dst.write(values_out, bands[i])
-            else:
-                dst.write(values_out, bands[i] + 1)
+        for j in range(1, len(width) - 2):
+            values_out[
+                np.where(
+                    ((median_value + width[j]) < data_array)
+                    & (data_array <= (median_value + width[j + 1]))
+                    & (data_array != np.nan)
+                )
+            ] = (j + 1)
+            values_out[
+                np.where(
+                    ((median_value - width[j]) > data_array)
+                    & (data_array >= (median_value - width[j + 1]))
+                    & (data_array != np.nan)
+                )
+            ] = (-j - 1)
+            k = j
 
-    src = rasterio.open(path_to_file)
-    return src
+        values_out[np.where(((median_value + width[k + 1]) < data_array) & (data_array != np.nan))] = k + 1
+        values_out[np.where(((median_value - width[k + 1]) > data_array) & (data_array != np.nan))] = -k - 1
+        values_out[np.where(median_value == data_array)] = 0
+        
+        out_image.append(values_out)
+
+    return out_image, out_meta
 
 
 @beartype
 def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_classes: int, path_to_file: str, bands: Optional[Sequence[int]] = None
-) -> rasterio.io.DatasetReader:
+    raster: rasterio.io.DatasetReader, number_of_classes: int, bands: Optional[Sequence[int]] = None
+) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with geometrical intervals (Torppa, 2023).
 
     If bands are not given, all bands are used for classification.
@@ -407,11 +391,10 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
         raster: Raster to be classified.
         number_of_classes: The number of classes. The true number of classes is at most double the amount,
         depending how symmetrical the input data is.
-        path_to_file: Path to file including the name of the file.
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        rasterio.io.DatasetReader: Raster classified with geometrical intervals (Torppa, 2023).
+        Raster classified with geometrical intervals (Torppa, 2023) and metadata.
     """
     if bands is not None:
         if not isinstance(bands, list):
@@ -423,19 +406,19 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
     if number_of_classes == 0:
         raise InvalidParameterValueException("number_of_classes parameter is 0")
 
-    src = _raster_with_geometrical_intervals(raster, number_of_classes, path_to_file, bands)
+    out_image, out_meta = _raster_with_geometrical_intervals(raster, number_of_classes, bands)
 
-    return src
+    return out_image, out_meta
 
 
 def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
-    path_to_file: str,
     bands: Optional[Sequence[int]] = None,
-) -> rasterio.io.DatasetReader:
+) -> Tuple[Sequence[np.ndarray], dict]:
 
-    custom_band_list = False if bands is None else True
+    out_image: Sequence = []
+    out_meta = raster.meta.copy()
 
     band_statistics = []
     if bands is not None:
@@ -447,39 +430,33 @@ def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
             stats = raster.statistics(band)
             band_statistics.append((stats.mean, stats.std))
 
-    with rasterio.open(path_to_file, "w", **raster.meta) as dst:
-        for band, (mean, std) in enumerate(band_statistics):
-            data_array = raster.read(band + 1)
-            interval_size = 2 * std / number_of_intervals
+    for band, (mean, std) in enumerate(band_statistics):
+        data_array = raster.read(band + 1)
+        interval_size = 2 * std / number_of_intervals
 
-            classified = np.empty_like(data_array)
+        classified = np.empty_like(data_array)
 
-            below_mean = data_array < (mean - std)
-            above_mean = data_array > (mean + std)
+        below_mean = data_array < (mean - std)
+        above_mean = data_array > (mean + std)
 
-            classified[below_mean] = -number_of_intervals
-            classified[above_mean] = number_of_intervals
+        classified[below_mean] = -number_of_intervals
+        classified[above_mean] = number_of_intervals
 
-            in_between = ~below_mean & ~above_mean
-            interval = ((data_array - (mean - std)) / interval_size).astype(int)
-            classified[in_between] = interval[in_between] - number_of_intervals // 2
+        in_between = ~below_mean & ~above_mean
+        interval = ((data_array - (mean - std)) / interval_size).astype(int)
+        classified[in_between] = interval[in_between] - number_of_intervals // 2
 
-            if custom_band_list:
-                dst.write(classified, band + 1)
-            else:
-                dst.write(classified, band + 2)
+        out_image.append(classified)
 
-    src = rasterio.open(path_to_file)
-    return src
+    return out_image, out_meta
 
 
 @beartype
 def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
-    path_to_file: str,
     bands: Optional[Sequence[int]] = None,
-) -> rasterio.io.DatasetReader:
+) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with standard deviation.
 
     If bands are not given, all bands are used for classification.
@@ -487,11 +464,10 @@ def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
     Args:
         raster: Raster to be classified.
         number_of_intervals: The number of intervals.
-        path_to_file: Path to file including the name of the file.
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        rasterio.io.DatasetReader: Raster classified with standard deviation.
+        Raster classified with standard deviation and metadata.
     """
     if bands is not None:
         if not isinstance(bands, list):
@@ -501,6 +477,6 @@ def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
         elif len(bands) > raster.count:
             raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
-    src = _raster_with_standard_deviation(raster, number_of_intervals, path_to_file, bands)
+    out_image, out_meta = _raster_with_standard_deviation(raster, number_of_intervals, bands)
 
-    return src
+    return out_image, out_meta
