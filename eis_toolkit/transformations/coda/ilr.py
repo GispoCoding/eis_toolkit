@@ -4,9 +4,10 @@ from beartype import beartype
 from beartype.typing import Sequence
 from scipy.stats import gmean
 
-from eis_toolkit.exceptions import InvalidColumnException
+from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
 from eis_toolkit.transformations.coda.clr import _centered_ratio
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_dataframe_contains_zeros
+from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
 
 
 @beartype
@@ -19,14 +20,15 @@ def _calculate_scaling_factor(c1: int, c2: int) -> np.float64:
         c2: The cardinality of the second subcomposition.
 
     Returns:
-        # TODO
+        The scaling factor.
 
     Raises:
-        # TODO
+        InvalidParameterValueException: One or both of the input values are zero or negative.
     """
-    # TODO: check for zeros
+    if not (check_numeric_value_sign(c1) and check_numeric_value_sign(c2)):
+        raise InvalidParameterValueException("Input values must both be positive integers.")
 
-    return np.sqrt((c1 * c2) / (c1 + np.float64(c2)))
+    return np.sqrt((c1 * c2) / np.float64(c1 + c2))
 
 
 # TODO: note: this should only return a single column/series

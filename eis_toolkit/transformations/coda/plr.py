@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 from beartype import beartype
 
-from eis_toolkit.exceptions import InvalidColumnException
+from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
+from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
 
 
 @beartype
@@ -15,8 +16,14 @@ def _calculate_scaling_factor(c: int) -> np.float64:
 
     Returns:
         The scaling factor used performing a single PLR transform for a composition.
+
+    Raises:
+        InvalidParameterValueException: The input value is zero or negative.
     """
-    return np.sqrt(c / (1 + c))
+    if not (check_numeric_value_sign(c)):
+        raise InvalidParameterValueException("The input value must be a positive integer.")
+
+    return np.sqrt(c / np.float64(1 + c))
 
 
 @beartype
