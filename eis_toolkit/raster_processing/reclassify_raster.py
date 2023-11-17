@@ -2,7 +2,7 @@ import mapclassify as mc
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import Optional, Sequence
+from beartype.typing import Optional, Sequence, Tuple
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 
@@ -10,12 +10,14 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     breaks: Sequence[int],
-    path_to_file: str,
     bands: Optional[Sequence[int]] = None,
-) -> rasterio.io.DatasetReader:
+) -> Tuple[Sequence[np.ndarray], dict]:
 
-    custom_band_list = False if bands is None else True
     array_of_bands = []
+    out_image: Sequence = []
+
+    out_meta = raster.meta.copy()
+
     if bands is not None:
         for band in raster.read(bands):
             array_of_bands.append(band)
@@ -23,25 +25,21 @@ def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
         array_of_bands = raster.read()
         bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-    with rasterio.open(path_to_file, "w", **raster.meta) as dst:
-        for i in range(len(bands)):
+    for i in range(len(bands)):
 
-            data_array = array_of_bands[i]
+        data_array = array_of_bands[i]
 
-            data = np.digitize(data_array, breaks)
+        data = np.digitize(data_array, breaks)
 
-            if custom_band_list:
-                dst.write(data, bands[i])
-            else:
-                dst.write(data, bands[i] + 1)
-    src = rasterio.open(path_to_file)
-    return src
+        out_image.append(data)
+
+    return out_image, out_meta
 
 
 @beartype
 def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, breaks: Sequence[int], path_to_file: str, bands: Optional[Sequence[int]] = None
-) -> rasterio.io.DatasetReader:
+    raster: rasterio.io.DatasetReader, breaks: Sequence[int], bands: Optional[Sequence[int]] = None
+) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with manual breaks.
 
     If bands are not given, all bands are used for classification.
@@ -49,11 +47,10 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     Args:
         raster: Raster to be classified.
         breaks: List of break values for the classification.
-        path_to_file: Path to file including the name of the file.
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        rasterio.io.DatasetReader: Raster classified with manual breaks.
+        
     """
     if bands is not None:
         if not isinstance(bands, list):
@@ -68,7 +65,7 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
         if not all(isinstance(_break, int) for _break in breaks):
             raise InvalidParameterValueException("Expected breaks to contain only integers")
 
-    src = _raster_with_manual_breaks(raster, breaks, path_to_file, bands)
+    src = _raster_with_manual_breaks(raster, breaks, bands)
 
     return src
 
@@ -76,12 +73,13 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
 def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     interval_size: int,
-    path_to_file: str,
-    bands: Optional[List[int]] = None,
-) -> rasterio.io.DatasetWriter:
+    bands: Optional[Sequence[int]] = None,
+) -> Tuple[Sequence[np.ndarray], dict]:
 
-    custom_band_list = False if bands is None else True
     array_of_bands = []
+    out_image: Sequence = []
+    out_meta = raster.meta.copy()
+
     if bands is not None:
         for band in raster.read(bands):
             array_of_bands.append(band)
@@ -89,26 +87,22 @@ def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
         array_of_bands = raster.read()
         bands = np.arange(0, len(array_of_bands), 1).tolist()
 
-    with rasterio.open(path_to_file, "w", **raster.meta) as dst:
-        for i in range(len(bands)):
-            data_array = array_of_bands[i]
+    for i in range(len(bands)):
+        data_array = array_of_bands[i]
 
-            hist, edges = np.histogram(data_array, bins=interval_size)
+        _, edges = np.histogram(data_array, bins=interval_size)
 
-            data = np.digitize(data_array, edges)
+        data = np.digitize(data_array, edges)
 
-            if custom_band_list:
-                dst.write(data, bands[i])
-            else:
-                dst.write(data, bands[i] + 1)
-    src = rasterio.open(path_to_file)
-    return src
+        out_image.append(data)
+    
+    return out_image, out_meta
 
 
 @beartype
 def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, interval_size: int, path_to_file: str, bands: Optional[Sequence[int]] = None
-) -> rasterio.io.DatasetReader:
+    raster: rasterio.io.DatasetReader, interval_size: int, bands: Optional[Sequence[int]] = None
+) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with defined intervals.
 
     If bands are not given, all bands are used for classification.
@@ -116,7 +110,6 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
     Args:
         raster: Raster to be classified.
         interval_size: The number of units in each interval.
-        path_to_file: Path to file including the name of the file.
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
@@ -130,9 +123,9 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
         elif len(bands) > raster.count:
             raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
-    src = _raster_with_defined_intervals(raster, interval_size, path_to_file, bands)
+    out_image, out_meta = _raster_with_defined_intervals(raster, interval_size, bands)
 
-    return src
+    return out_image, out_meta
 
 
 def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
