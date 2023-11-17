@@ -31,6 +31,30 @@ def test_calculate_scaling_factor():
     assert result == expected_result
 
 
+def test_single_ILR_transform_with_single_composition():
+    """TODO: docstring."""
+    c_arr = np.array([80, 15, 5])
+    C = pd.DataFrame(c_arr[None], columns=["a", "b", "c"])
+
+    result = single_ILR_transform(C, ["a"], ["b"])
+    assert result[0] == pytest.approx(1.18, abs=1e-2)
+
+    result = single_ILR_transform(C, ["a", "b"], ["c"])
+    assert result[0] == pytest.approx(1.58, abs=1e-2)
+
+
+def test_single_ILR_transform_with_simple_data():
+    """TODO: docstring."""
+    c_arr = np.array([[80, 15, 5], [75, 18, 7]])
+    C = pd.DataFrame(c_arr, columns=["a", "b", "c"])
+
+    result = single_ILR_transform(C, ["a"], ["b"])
+    assert result[1] == pytest.approx(1.01, abs=1e-2)
+
+    result = single_ILR_transform(C, ["a", "b"], ["c"])
+    assert result[1] == pytest.approx(1.35, abs=1e-2)
+
+
 def test_ilr_transform_contains_zeros():
     """TODO: docstring."""
     with pytest.raises(InvalidColumnException):
