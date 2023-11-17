@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from eis_toolkit.exceptions import InvalidColumnException
-from eis_toolkit.transformations.coda.ilr import _ILR_transform
+from eis_toolkit.transformations.coda.ilr import _calculate_scaling_factor, single_ILR_transform
 
 SAMPLE_DATAFRAME = pd.DataFrame(
     np.array(
@@ -24,15 +24,22 @@ SAMPLE_DATAFRAME = pd.DataFrame(
 )
 
 
+def test_calculate_scaling_factor():
+    """TODO: docstring."""
+    result = _calculate_scaling_factor(2, 1)
+    expected_result = np.sqrt(2 / 3.0)  # 0.816496580927726
+    assert result == expected_result
+
+
 def test_ilr_transform_contains_zeros():
     """TODO: docstring."""
     with pytest.raises(InvalidColumnException):
         zeros_data = SAMPLE_DATAFRAME.copy()
         zeros_data.iloc[0, 0] = 0
-        _ILR_transform(zeros_data)
+        single_ILR_transform(zeros_data, ["c1"], ["c2"])
 
 
-def test_alr_transform_with_unexpected_column_name():
+def test_ilr_transform_with_unexpected_column_name():
     """TODO: docstring."""
     with pytest.raises(InvalidColumnException):
-        _ILR_transform(SAMPLE_DATAFRAME, ["c1", "c2", "comp3"])
+        single_ILR_transform(SAMPLE_DATAFRAME, ["c1", "c2"], ["comp3"])

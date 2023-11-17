@@ -70,3 +70,12 @@ def test_clr_transform_with_unexpected_column_name():
 
 
 # TODO: test with unnamed columns
+
+
+# def test_inverse_clr_simple():
+#     """TODO: docstring."""
+#     result, scale = inverse_CLR(ZEROS_DATAFRAME_4x4)
+#     pd.testing.assert_frame_equal(_scale(result, scale), ONES_DATAFRAME_4x4)  # TODO: call each row with its scale
+
+
+# TODO: test inverse subcomposition

@@ -1,18 +1,18 @@
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Optional, Sequence
+from beartype.typing import Optional, Sequence, Tuple
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException
+from eis_toolkit.utilities.aitchison_geometry import _closure
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_dataframe_contains_zeros
 
 
 @beartype
 def _centered_ratio(row: pd.Series) -> pd.Series:
 
-    N = len(row) * 1.0
-    return row / np.float_power(gmean(row), 1 / N)
+    return row / gmean(row)
 
 
 @beartype
@@ -45,15 +45,17 @@ def CLR_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> 
     # TODO: deal with potential negative values
 
     if columns is not None:
-        if check_columns_valid(df, columns) is False:
+        if not check_columns_valid(df, columns):
             raise InvalidColumnException("Not all of the given columns were found in the input DataFrame.")
 
+    # TODO: possibly only check the subcomposition columns
     if check_dataframe_contains_zeros(df):
         raise InvalidColumnException("The dataframe contains one or more zeros.")
 
     return _CLR_transform(df, columns)
 
 
-def inverse_CLR():
+def inverse_CLR(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> Tuple[pd.DataFrame, np.float64]:
     """Perform the inverse transformation for a set of CLR transformed data."""
-    raise NotImplementedError()
+
+    return _closure(np.exp(df))

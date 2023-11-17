@@ -65,7 +65,7 @@ def ALR_transform(
         InvalidColumnIndexException: The input index for the denominator column is out of bounds.
     """
     if columns is not None:
-        if check_columns_valid(df, columns) is False:
+        if not check_columns_valid(df, columns):
             raise InvalidColumnException("Not all of the given columns were found in the input DataFrame.")
 
     columns = [col for col in df.columns] if columns is None else columns
@@ -73,7 +73,7 @@ def ALR_transform(
     if len(columns) < 2:
         raise InvalidParameterValueException("Too few columns to perform the transformation.")
 
-    if check_column_index_in_dataframe(df, idx) is False:
+    if not check_column_index_in_dataframe(df, idx):
         raise InvalidColumnIndexException("Denominator column index out of bounds.")
 
     denominator_column = df.columns[idx]
@@ -83,6 +83,7 @@ def ALR_transform(
     if denominator_column not in columns:
         columns.append(denominator_column)
 
+    # TODO: possibly only check the subcomposition columns
     if check_dataframe_contains_zeros(df[columns]):
         raise InvalidColumnException("The given columns or the divisor column contain zeros.")
 
