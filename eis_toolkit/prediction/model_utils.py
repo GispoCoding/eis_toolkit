@@ -93,7 +93,7 @@ def _train_and_evaluate_sklearn_model(
     # Approach 2: Simple split
     elif test_method == SIMPLE_SPLIT:
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=simple_split_size, random_state=random_state
+            X, y, test_size=simple_split_size, random_state=random_state, shuffle=True
         )
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
