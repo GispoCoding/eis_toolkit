@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from beartype import beartype
+from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
@@ -28,39 +29,57 @@ def _calculate_scaling_factor(c: int) -> np.float64:
 
 @beartype
 def _single_PLR_transform(df: pd.DataFrame, column: str) -> pd.Series:
-    """TODO: docstring."""
-
     dfc = df.copy()
-
-    if column not in dfc.columns:
-        raise InvalidColumnException()
-
-    idx = dfc.columns.index(column)
-
-    if idx == len(dfc.columns) - 1:
-        raise InvalidColumnException()
+    idx = dfc.columns.get_loc(column)
 
     # The denominator is a subcomposition of all the parts "to the right" of the column:
-    # columns = [col for col in df.columns]
-    # subcomposition = [columns[i] for i in len(columns) if i > idx]
+    columns = [col for col in df.columns]
+    subcomposition = [columns[i] for i in range(len(columns)) if i > idx]
+    c = len(subcomposition)
+    scaling_factor = _calculate_scaling_factor(c)
 
-    # TODO: finish implementation
+    # A series to hold the transformed rows
+    plr_values = pd.Series([0.0] * df.shape[0])
 
-    dfc = np.log()
+    for idx, row in dfc.iterrows():
+        plr_values[idx] = scaling_factor * np.log(row[column] / gmean(row[subcomposition]))
 
-    return np.log(df)
+    return plr_values
 
 
 @beartype
-def single_PLR_transform(df: pd.DataFrame):
+def single_PLR_transform(df: pd.DataFrame, column: str) -> pd.Series:
     """
-    Perform a pivot logratio transformation on the selected columns.
+    Perform a pivot logratio transformation on the selected column.
 
     Pivot logratio is a special case of ILR, where the numerator in the ratio is always a single
     part and the denominator all of the parts to the right in the ordered list of parts.
 
     Column order matters.
 
-    TODO: Args, Returns, Raises
+    Args:
+        df: A dataframe of shape [N, D] of compositional data.
+        column: The name of the numerator column to use for the transformation.
+
+    Returns:
+        A series of length N containing the transforms.
+
+    Raises:
+        InvalidColumnException: The input column isn't found in the dataframe, or there are no columns
+            to the right of the given column.
     """
-    return
+
+    if column not in df.columns:
+        raise InvalidColumnException()
+
+    idx = df.columns.get_loc(column)
+
+    if idx == len(df.columns) - 1:
+        raise InvalidColumnException()
+
+    return _single_PLR_transform(df, column)
+
+
+@beartype
+def _inverse_PLR():
+    raise NotImplementedError()
