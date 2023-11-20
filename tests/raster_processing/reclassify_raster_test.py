@@ -12,7 +12,6 @@ from eis_toolkit.raster_processing.reclassify_raster import (
 
 test_dir = Path(__file__).parent.parent
 raster_path = test_dir.joinpath("data/remote/small_raster.tif")
-raster_copy_path = test_dir.joinpath("data/local/small_raster - Copy.tif")
 
 band_numbers = [1]
 
@@ -46,14 +45,75 @@ def raster_with_equal_intervals():
 
 def test_raster_with_geometrical_intervals():
     """Test raster with geometrical intervals by comparing the output of the function to the original data."""
-    with rasterio.open(raster_path) as raster:
-        number_of_classes = 10
+    number_of_classes = 10
 
-        band_1 = raster.read(1)
+    median_value = np.nanmedian(test_array)
+    max_value = np.nanmax(test_array)
+    min_value = np.nanmin(test_array)
+    print(median_value)
 
-        output = raster_with_geometrical_intervals(raster, number_of_classes, raster_copy_path, band_numbers)
+    test_array_flat = test_array.flatten()
+    test_array_flat = np.ma.masked_where(np.isnan(test_array_flat), test_array_flat)
 
-        assert not np.array_equal(output.read(1), band_1)
+    values_out = np.zeros_like(test_array_flat)  # The same shape as the flattened array
+
+    if (median_value - min_value) < (max_value - median_value):  # Large end tail longer
+        raster_half = test_array_flat[np.where((test_array_flat > median_value) & (test_array_flat != np.nan))]
+        range_half = max_value - median_value
+        raster_half = raster_half - median_value + (range_half) / 1000.0
+    else:  # Small end tail longer
+        raster_half = test_array_flat[np.where((test_array_flat < median_value) & (test_array_flat != np.nan))]
+        range_half = median_value - min_value
+        raster_half = raster_half - min_value + (range_half) / 1000.0
+
+    min_half = np.nanmin(raster_half)
+    max_half = np.nanmax(raster_half)
+
+    # Number of classes
+    fac = (max_half / min_half) ** (1 / number_of_classes)
+
+    ibp = 1
+    brpt_half = [min_half]
+    brpt = [min_half]
+    width = [0]
+
+    while brpt[-1] < max_half:
+        ibp += 1
+        brpt.append(min_half * fac ** (ibp - 1))
+        brpt_half.append(brpt[-1])
+        width.append(brpt_half[-1] - brpt_half[0])
+
+    k = 0
+
+    for j in range(1, len(width) - 2):
+        values_out[
+            np.where(
+                ((median_value + width[j]) < test_array_flat)
+                & (test_array_flat <= (median_value + width[j + 1]))
+                & (test_array_flat != np.nan)
+            )
+        ] = (j + 1)
+        values_out[
+            np.where(
+                ((median_value - width[j]) > test_array_flat)
+                & (test_array_flat >= (median_value - width[j + 1]))
+                & (test_array_flat != np.nan)
+            )
+        ] = (-j - 1)
+        k = j
+
+    values_out[np.where(((median_value + width[k + 1]) < test_array_flat) & (test_array_flat != np.nan))] = k + 1
+    values_out[np.where(((median_value - width[k + 1]) > test_array_flat) & (test_array_flat != np.nan))] = -k - 1
+    values_out[np.where(median_value == test_array_flat)] = 0
+
+    values_out = values_out.reshape(test_array.shape)
+
+    expected_output = np.array([[-9, -9, -9, -9],
+        [-9, -9, -9, -8],
+        [ 8,  8,  9,  9],
+        [ 9,  9,  9,  9]])
+
+    np.testing.assert_allclose(values_out, expected_output)
 
 
 def test_raster_with_manual_breaks():
@@ -85,12 +145,13 @@ def test_raster_with_standard_deviation():
     with rasterio.open(raster_path) as raster:
         number_of_intervals = 75
 
-        output = raster_with_standard_deviation(raster, number_of_intervals, raster_copy_path, band_numbers)
+        out_img, out_meta = raster_with_standard_deviation(raster, number_of_intervals, band_numbers)
 
         band = raster.read(1)
 
-        stddev = raster.statistics(band + 1).std
-        mean = raster.statistics(band + 1).mean
+        statistics = raster.statistics(1)
+        stddev = statistics.std
+        mean = statistics.mean
         interval_size = 2 * stddev / number_of_intervals
 
         classified = np.empty_like(band)
@@ -105,7 +166,7 @@ def test_raster_with_standard_deviation():
         interval = ((band - (mean - stddev)) / interval_size).astype(int)
         classified[in_between] = interval[in_between] - number_of_intervals // 2
 
-        assert np.array_equal(output.read(1), classified)
+        np.testing.assert_allclose(out_img[0], classified)
 
 
 def test_raster_with_quantiles():
