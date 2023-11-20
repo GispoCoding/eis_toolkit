@@ -17,6 +17,7 @@ def random_forest_classifier_train(
     simple_split_size: float = 0.2,
     cv_folds: int = 5,
     n_estimators: int = 100,
+    max_depth: Optional[int] = None,
     random_state: Optional[int] = 42,
     **kwargs,
 ) -> Tuple[RandomForestClassifier, dict]:
@@ -42,6 +43,8 @@ def random_forest_classifier_train(
         cv_folds: Number of folds used in cross-validation. Used only when test_method is "kfold_cv"
             or "skfold_cv". Defaults to 5.
         n_estimators: The number of trees in the forest. Defaults to 100.
+        max_depth: The maximum depth of the tree. If None, then nodes are expanded until all leaves are
+            pure or until all leaves contain less than min_samples_split samples. Defaults to None.
         random_state: Seed for random number generation. Defaults to 42.
         **kwargs: Additional parameters for Sklearn's RandomForestClassifier.
 
@@ -54,7 +57,7 @@ def random_forest_classifier_train(
     if not n_estimators >= 1:
         raise exceptions.InvalidParameterValueException("N-estimators must be at least 1.")
 
-    model = RandomForestClassifier(n_estimators=n_estimators, random_state=random_state, **kwargs)
+    model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=random_state, **kwargs)
 
     model, metrics = _train_and_evaluate_sklearn_model(
         X=X,
@@ -79,6 +82,7 @@ def random_forest_regressor_train(
     simple_split_size: float = 0.2,
     cv_folds: int = 5,
     n_estimators: int = 100,
+    max_depth: Optional[int] = None,
     random_state: Optional[int] = 42,
     **kwargs,
 ) -> Tuple[RandomForestRegressor, dict]:
@@ -104,6 +108,8 @@ def random_forest_regressor_train(
         cv_folds: Number of folds used in cross-validation. Used only when test_method is "kfold_cv"
             or "skfold_cv". Defaults to 5.
         n_estimators: The number of trees in the forest. Defaults to 100.
+        max_depth: The maximum depth of the tree. If None, then nodes are expanded until all leaves are
+            pure or until all leaves contain less than min_samples_split samples. Defaults to None.
         random_state: Seed for random number generation. Defaults to 42.
         **kwargs: Additional parameters for Sklearn's RandomForestRegressor.
 
@@ -116,7 +122,7 @@ def random_forest_regressor_train(
     if not n_estimators >= 1:
         raise exceptions.InvalidParameterValueException("N-estimators must be at least 1.")
 
-    model = RandomForestRegressor(n_estimators=n_estimators, random_state=random_state, **kwargs)
+    model = RandomForestRegressor(n_estimators=n_estimators, max_depth=max_depth, random_state=random_state, **kwargs)
 
     model, metrics = _train_and_evaluate_sklearn_model(
         X=X,

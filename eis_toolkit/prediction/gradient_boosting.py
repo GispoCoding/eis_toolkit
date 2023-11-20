@@ -52,7 +52,7 @@ def gradient_boosting_classifier_train(
         n_estimators: The number of boosting stages to run. Gradient boosting is fairly robust to over-fitting
             so a large number can result in better performance. Values must be >= 1. Defaults to 100.
         max_depth: Maximum depth of the individual regression estimators. The maximum depth limits the number
-            of nodes in the tree. Values must be >= 1. Defaults to 100.
+            of nodes in the tree. Values must be >= 1. Defaults to 3.
         subsample: The fraction of samples to be used for fitting the individual base learners.
             If smaller than 1.0 this results in Stochastic Gradient Boosting. Subsample interacts with the
             parameter n_estimators. Choosing subsample < 1.0 leads to a reduction of variance and an increase in bias.
@@ -141,7 +141,7 @@ def gradient_boosting_regressor_train(
         n_estimators: The number of boosting stages to run. Gradient boosting is fairly robust to over-fitting
             so a large number can result in better performance. Values must be >= 1. Defaults to 100.
         max_depth: Maximum depth of the individual regression estimators. The maximum depth limits the number
-            of nodes in the tree. Values must be >= 1. Defaults to 100.
+            of nodes in the tree. Values must be >= 1. Defaults to 3.
         subsample: The fraction of samples to be used for fitting the individual base learners.
             If smaller than 1.0 this results in Stochastic Gradient Boosting. Subsample interacts with the
             parameter n_estimators. Choosing subsample < 1.0 leads to a reduction of variance and an increase in bias.
