@@ -23,6 +23,7 @@ def gradient_boosting_classifier_train(
     n_estimators: int = 100,
     max_depth: int = 3,
     subsample: Number = 1.0,
+    verbose: int = 0,
     random_state: Optional[int] = 42,
     **kwargs,
 ) -> Tuple[GradientBoostingClassifier, dict]:
@@ -57,6 +58,8 @@ def gradient_boosting_classifier_train(
             If smaller than 1.0 this results in Stochastic Gradient Boosting. Subsample interacts with the
             parameter n_estimators. Choosing subsample < 1.0 leads to a reduction of variance and an increase in bias.
             Values must be in the range 0.0 < x <= 1.0. Defaults to 1.0.
+        verbose: Specifies if modeling progress and performance should be printed. 0 doesn't print,
+            1 prints once in a while depending on the number of tress, 2 or above will print for every tree.
         random_state: Seed for random number generation. Defaults to 42.
         **kwargs: Additional parameters for Sklearn's GradientBoostingClassifier.
 
@@ -74,6 +77,8 @@ def gradient_boosting_classifier_train(
         raise exceptions.InvalidParameterValueException("Max depth must be at least 1.")
     if not (0 < subsample <= 1):
         raise exceptions.InvalidParameterValueException("Subsample must be more than 0 and at most 1.")
+    if verbose < 0:
+        raise exceptions.InvalidParameterValueException("Verbose must be a non-negative number.")
 
     model = GradientBoostingClassifier(
         loss=loss,
@@ -82,6 +87,7 @@ def gradient_boosting_classifier_train(
         max_depth=max_depth,
         subsample=subsample,
         random_state=random_state,
+        verbose=verbose,
         **kwargs,
     )
 
@@ -112,6 +118,7 @@ def gradient_boosting_regressor_train(
     n_estimators: int = 100,
     max_depth: int = 3,
     subsample: Number = 1.0,
+    verbose: int = 0,
     random_state: Optional[int] = 42,
     **kwargs,
 ) -> Tuple[GradientBoostingRegressor, dict]:
@@ -146,6 +153,8 @@ def gradient_boosting_regressor_train(
             If smaller than 1.0 this results in Stochastic Gradient Boosting. Subsample interacts with the
             parameter n_estimators. Choosing subsample < 1.0 leads to a reduction of variance and an increase in bias.
             Values must be in the range 0.0 < x <= 1.0. Defaults to 1.
+        verbose: Specifies if modeling progress and performance should be printed. 0 doesn't print,
+            1 prints once in a while depending on the number of tress, 2 or above will print for every tree.
         random_state: Seed for random number generation. Defaults to 42.
         **kwargs: Additional parameters for Sklearn's GradientBoostingRegressor.
 
@@ -163,6 +172,8 @@ def gradient_boosting_regressor_train(
         raise exceptions.InvalidParameterValueException("Max depth must be at least 1.")
     if not (0 < subsample <= 1):
         raise exceptions.InvalidParameterValueException("Subsample must be more than 0 and at most 1.")
+    if verbose < 0:
+        raise exceptions.InvalidParameterValueException("Verbose must be a non-negative number.")
 
     model = GradientBoostingRegressor(
         loss=loss,
@@ -171,6 +182,7 @@ def gradient_boosting_regressor_train(
         max_depth=max_depth,
         subsample=subsample,
         random_state=random_state,
+        verbose=verbose,
         **kwargs,
     )
 

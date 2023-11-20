@@ -18,8 +18,10 @@ def logistic_regression_train(
     cv_folds: int = 5,
     penalty: Literal["l1", "l2", "elasicnet", None] = "l2",
     max_iter: int = 100,
-    random_state: Optional[int] = 42,
     solver: Literal["lbfgs", "liblinear", "newton-cg", "newton-cholesky", "sag", "saga"] = "lbfgs",
+    verbose: int = 0,
+    random_state: Optional[int] = 42,
+    **kwargs
 ) -> Tuple[LogisticRegression, dict]:
     """
     Train and optionally validate a Logistic Regression classifier model using Sklearn.
@@ -52,8 +54,11 @@ def logistic_regression_train(
             or "skfold_cv". Defaults to 5.
         penalty: Specifies the norm of the penalty. Defaults to 'l2'.
         max_iter: Maximum number of iterations taken for the solvers to converge. Defaults to 100.
-        random_state: Seed for random number generation. Defaults to 42.
         solver: Algorithm to use in the optimization problem. Defaults to 'lbfgs'.
+        verbose: Specifies if modeling progress and performance should be printed. 0 doesn't print,
+            values 1 or above will produce prints.
+        random_state: Seed for random number generation. Defaults to 42.
+        **kwargs: Additional parameters for Sklearn's LogisticRegression.
 
     Returns:
         The trained Logistric Regression classifier and metric scores as a dictionary.
@@ -63,8 +68,12 @@ def logistic_regression_train(
     """
     if max_iter < 1:
         raise exceptions.InvalidParameterValueException("Max iter must be > 0.")
+    if verbose < 0:
+        raise exceptions.InvalidParameterValueException("Verbose must be a non-negative number.")
 
-    model = LogisticRegression(penalty=penalty, max_iter=max_iter, random_state=random_state, solver=solver)
+    model = LogisticRegression(
+        penalty=penalty, max_iter=max_iter, random_state=random_state, solver=solver, verbose=verbose, **kwargs
+    )
 
     model, metrics = _train_and_evaluate_sklearn_model(
         X=X,
