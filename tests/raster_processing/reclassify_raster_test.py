@@ -5,10 +5,7 @@ import numpy as np
 import pytest
 import rasterio
 
-from eis_toolkit.raster_processing.reclassify_raster import (
-    raster_with_geometrical_intervals,
-    raster_with_standard_deviation,
-)
+from eis_toolkit.raster_processing.reclassify_raster import raster_with_standard_deviation
 
 test_dir = Path(__file__).parent.parent
 raster_path = test_dir.joinpath("data/remote/small_raster.tif")
@@ -108,10 +105,7 @@ def test_raster_with_geometrical_intervals():
 
     values_out = values_out.reshape(test_array.shape)
 
-    expected_output = np.array([[-9, -9, -9, -9],
-        [-9, -9, -9, -8],
-        [ 8,  8,  9,  9],
-        [ 9,  9,  9,  9]])
+    expected_output = np.array([[-9, -9, -9, -9], [-9, -9, -9, -8], [8, 8, 9, 9], [9, 9, 9, 9]])
 
     np.testing.assert_allclose(values_out, expected_output)
 
@@ -128,8 +122,7 @@ def test_raster_with_manual_breaks():
 
 
 def test_raster_with_natural_breaks():
-    """Test raster with natural break intervals by comparing the output of the function
-    to MapClassify's Jenks Caspall and numpy's digitized result"""
+    """Test raster with natural break intervals by comparing the output of the function to MapClassify's Jenks Caspall and numpy's digitized result."""
     number_of_classes = 10
 
     breaks = mc.JenksCaspall(test_array, number_of_classes)
