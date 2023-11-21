@@ -37,8 +37,12 @@ def extract_shared_lines(polygons: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         Returns: 
             Geodataframe containing the shared lines that were found between the polygons
      """
+    if polygons.shape[0] == 0:
+        raise exceptions.EmptyDataFrameException("Geodataframe is empty.")
+
+
     if polygons.shape[0] < 2:
-        raise exceptions.EmptyDataFrameException("Expected GeoDataFrame to have at least 2 polygons.")
+        raise exceptions.InvalidParameterValueException("Expected GeoDataFrame to have at least 2 polygons.")
     
     shared_lines = _extract_shared_lines(polygons)
 
