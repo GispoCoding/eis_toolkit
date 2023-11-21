@@ -1,17 +1,20 @@
+from typing import Union
+
 import numpy as np
+import pandas as pd
 from beartype import beartype
 from sklearn import metrics
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
-def _calculate_auc(x_values: np.ndarray, y_values: np.ndarray) -> float:
+def _calculate_auc(x_values: Union[np.ndarray, pd.Series], y_values: Union[np.ndarray, pd.Series]) -> float:
     auc_value = float(metrics.auc(x_values, y_values))
     return auc_value
 
 
 @beartype
-def calculate_auc(x_values: np.ndarray, y_values: np.ndarray) -> float:
+def calculate_auc(x_values: Union[np.ndarray, pd.Series], y_values: Union[np.ndarray, pd.Series]) -> float:
     """Calculate area under curve (AUC).
 
     Calculates AUC for curve. X-axis should be either proportion of area ore false positive rate. Y-axis should be
