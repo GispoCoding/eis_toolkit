@@ -39,8 +39,8 @@ def CLR_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> 
         A new dataframe containing the CLR transformed columns.
 
     Raises:
-        InvalidColumnException: One or more input columns are not found in the given dataframe, or the
-            numerator or denominator columns contain zeros.
+        InvalidColumnException: One or more input columns are not found in the given dataframe,
+            or the data contain zeros.
     """
     # TODO: deal with potential negative values
 
