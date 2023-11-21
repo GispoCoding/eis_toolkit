@@ -95,7 +95,7 @@ def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
         data = np.digitize(data_array, edges)
 
         out_image.append(data)
-    
+
     return out_image, out_meta
 
 
@@ -373,7 +373,7 @@ def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
         values_out[np.where(((median_value + width[k + 1]) < data_array) & (data_array != np.nan))] = k + 1
         values_out[np.where(((median_value - width[k + 1]) > data_array) & (data_array != np.nan))] = -k - 1
         values_out[np.where(median_value == data_array)] = 0
-        
+
         out_image.append(values_out)
 
     return out_image, out_meta

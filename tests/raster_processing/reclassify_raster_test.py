@@ -122,7 +122,7 @@ def test_raster_with_manual_breaks():
 
 
 def test_raster_with_natural_breaks():
-    """Test raster with natural break intervals by comparing the output of the function to MapClassify's Jenks Caspall and numpy's digitized result."""
+    """Test raster with natural break intervals by comparing the output of the function to MapClassify's Jenks Caspall."""
     number_of_classes = 10
 
     breaks = mc.JenksCaspall(test_array, number_of_classes)
