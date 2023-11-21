@@ -1,6 +1,7 @@
 import geopandas as gpd
 from shapely.geometry import Polygon
 from shapely.geometry import MultiLineString
+from shapely.geometry import LineString
 from beartype import beartype
 from eis_toolkit import exceptions
 
@@ -39,7 +40,6 @@ def extract_shared_lines(polygons: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
      """
     if polygons.shape[0] == 0:
         raise exceptions.EmptyDataFrameException("Geodataframe is empty.")
-
 
     if polygons.shape[0] < 2:
         raise exceptions.InvalidParameterValueException("Expected GeoDataFrame to have at least 2 polygons.")

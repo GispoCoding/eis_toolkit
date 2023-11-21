@@ -2,13 +2,11 @@
 import geopandas as gpd
 import pytest
 from shapely.geometry import Polygon
+from shapely.geometry import MultiLineString
+from shapely.geometry import LineString
 
 from eis_toolkit.vector_processing.extract_shared_lines import extract_shared_lines
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
-
-
-
-
 
 @pytest.fixture
 def example_polygons():
@@ -20,11 +18,8 @@ def example_polygons():
     gdf = gpd.GeoDataFrame(data)
     return gdf
 
-
-
 def test_validated_extracted_shared_lines(example_polygons):
     result = extract_shared_lines(example_polygons)
-
     expected_lines = [
         LineString([(1, 1), (1, 0)]),
         LineString([(1, 0), (1, 1)]),
@@ -33,11 +28,11 @@ def test_validated_extracted_shared_lines(example_polygons):
     ]
 
     result = extract_shared_lines(example_polygons)
+    
+    assert len(result) == len(expected_lines) / 2, "Unexpected amount of lines"
 
-    assert len(result) == len(expected_lines) / 2, "Odottamaton määrä rajoja"
-
-    for line in expected_lines:
-        assert any(result['geometry'].equals(line)), f"Odotettua rajaviivaa {line} ei löytynyt"
+    for line in result['geometry']:
+        assert any(line.equals(expected_line) for expected_line in expected_lines), f"Line {line} was not found in expected lines"
 
 @pytest.fixture
 def example_not_enough_polygons():
@@ -52,10 +47,10 @@ def example_empty_geodataframe():
     gdf = gpd.GeoDataFrame()
     return gdf
 
-def test_empy_geodataframe(test_empty_gdf):
+def test_empy_geodataframe(example_empty_geodataframe):
     with pytest.raises(EmptyDataFrameException):
         extract_shared_lines(example_empty_geodataframe)
 
 def test_not_enough_polygons(example_not_enough_polygons):
-    with pytest.raises(InvalidParameterValueException)
+    with pytest.raises(InvalidParameterValueException):
         extract_shared_lines(example_not_enough_polygons)
