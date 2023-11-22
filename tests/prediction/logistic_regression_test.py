@@ -12,16 +12,19 @@ X_IRIS, Y_IRIS = load_iris(return_X_y=True)
 
 def test_logistic_regression():
     """Test that Logistic Regression works as expected."""
-    metrics = ["accuracy"]
-    model, out_metrics = logistic_regression_train(X_IRIS, Y_IRIS, random_state=42)
+    metrics = ["accuracy", "precision", "recall", "f1"]
+    model, out_metrics = logistic_regression_train(X_IRIS, Y_IRIS, metrics=metrics, max_iter=150, random_state=42)
     predicted_labels = model.predict(X_IRIS)
+    count_false = np.count_nonzero(predicted_labels - Y_IRIS)
 
     assert isinstance(model, LogisticRegression)
     np.testing.assert_equal(len(predicted_labels), len(Y_IRIS))
 
-    # Test that all predicted labels have perfect metric scores since we are predicting with the test data
-    for metric in metrics:
-        np.testing.assert_equal(out_metrics[metric], 1.0)
+    np.testing.assert_equal(count_false, 3)
+    np.testing.assert_equal(out_metrics["accuracy"], 1.0)
+    np.testing.assert_equal(out_metrics["precision"], 1.0)
+    np.testing.assert_equal(out_metrics["recall"], 1.0)
+    np.testing.assert_equal(out_metrics["f1"], 1.0)
 
 
 def test_invalid_penalty():

@@ -63,7 +63,7 @@ def random_forest_classifier_train(
         raise exceptions.InvalidParameterValueException("Verbose must be a non-negative number.")
 
     model = RandomForestClassifier(
-        n_estimators=n_estimators, max_depth=max_depth, random_state=random_state, verbose=verbose**kwargs
+        n_estimators=n_estimators, max_depth=max_depth, random_state=random_state, verbose=verbose, **kwargs
     )
 
     model, metrics = _train_and_evaluate_sklearn_model(
