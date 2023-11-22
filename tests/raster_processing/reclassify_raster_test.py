@@ -2,10 +2,6 @@ from pathlib import Path
 
 import mapclassify as mc
 import numpy as np
-import pytest
-import rasterio
-
-from eis_toolkit.raster_processing.reclassify_raster import raster_with_standard_deviation
 
 test_dir = Path(__file__).parent.parent
 raster_path = test_dir.joinpath("data/remote/small_raster.tif")
@@ -153,10 +149,7 @@ def test_raster_with_standard_deviation():
     interval = ((test_array - (mean - stddev)) / interval_size).astype(int)
     classified[in_between] = interval[in_between] - number_of_intervals // 2
 
-    expected_output = np.array([[-75, -75, -75, -36],
-       [-25, -14, -14,  -3],
-       [ 20,  20,  31,  31],
-       [ 75,  75,  75,  75]])
+    expected_output = np.array([[-75, -75, -75, -36], [-25, -14, -14, -3], [20, 20, 31, 31], [75, 75, 75, 75]])
 
     np.testing.assert_allclose(classified, expected_output)
 
