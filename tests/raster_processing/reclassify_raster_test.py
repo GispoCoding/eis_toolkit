@@ -1,12 +1,5 @@
-from pathlib import Path
-
 import mapclassify as mc
 import numpy as np
-
-test_dir = Path(__file__).parent.parent
-raster_path = test_dir.joinpath("data/remote/small_raster.tif")
-
-band_numbers = [1]
 
 test_array = np.array([[0, 10, 20, 30], [40, 50, 50, 60], [80, 80, 90, 90], [100, 100, 100, 100]])
 
