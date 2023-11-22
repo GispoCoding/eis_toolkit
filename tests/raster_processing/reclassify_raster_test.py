@@ -122,7 +122,7 @@ def test_raster_with_manual_breaks():
 
 
 def test_raster_with_natural_breaks():
-    """Test raster with natural break intervals by comparing the output of the function to MapClassify's Jenks Caspall."""
+    """Test raster with natural breaks by comparing the output of the function to MapClassify's Jenks Caspall."""
     number_of_classes = 10
 
     breaks = mc.JenksCaspall(test_array, number_of_classes)
@@ -135,31 +135,30 @@ def test_raster_with_natural_breaks():
 
 def test_raster_with_standard_deviation():
     """Test raster with standard deviation intervals by comparing the output of the function to the original data."""
-    with rasterio.open(raster_path) as raster:
-        number_of_intervals = 75
+    number_of_intervals = 75
 
-        out_img, out_meta = raster_with_standard_deviation(raster, number_of_intervals, band_numbers)
+    stddev = np.nanstd(test_array)
+    mean = np.nanmean(test_array)
+    interval_size = 2 * stddev / number_of_intervals
 
-        band = raster.read(1)
+    classified = np.empty_like(test_array)
 
-        statistics = raster.statistics(1)
-        stddev = statistics.std
-        mean = statistics.mean
-        interval_size = 2 * stddev / number_of_intervals
+    below_mean = test_array < (mean - stddev)
+    above_mean = test_array > (mean + stddev)
 
-        classified = np.empty_like(band)
+    classified[below_mean] = -number_of_intervals
+    classified[above_mean] = number_of_intervals
 
-        below_mean = band < (mean - stddev)
-        above_mean = band > (mean + stddev)
+    in_between = ~below_mean & ~above_mean
+    interval = ((test_array - (mean - stddev)) / interval_size).astype(int)
+    classified[in_between] = interval[in_between] - number_of_intervals // 2
 
-        classified[below_mean] = -number_of_intervals
-        classified[above_mean] = number_of_intervals
+    expected_output = np.array([[-75, -75, -75, -36],
+       [-25, -14, -14,  -3],
+       [ 20,  20,  31,  31],
+       [ 75,  75,  75,  75]])
 
-        in_between = ~below_mean & ~above_mean
-        interval = ((band - (mean - stddev)) / interval_size).astype(int)
-        classified[in_between] = interval[in_between] - number_of_intervals // 2
-
-        np.testing.assert_allclose(out_img[0], classified)
+    np.testing.assert_allclose(classified, expected_output)
 
 
 def test_raster_with_quantiles():

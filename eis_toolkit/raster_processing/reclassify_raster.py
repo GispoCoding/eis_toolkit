@@ -423,12 +423,14 @@ def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
     band_statistics = []
     if bands is not None:
         for band in bands:
-            stats = raster.statistics(band)
-            band_statistics.append((stats.mean, stats.std))
+            stddev = np.nanstd(band)
+            mean = np.nanmean(band)
+            band_statistics.append((mean, stddev))
     else:
         for band in range(1, raster.count + 1):
-            stats = raster.statistics(band)
-            band_statistics.append((stats.mean, stats.std))
+            stddev = np.nanstd(band)
+            mean = np.nanmean(band)
+            band_statistics.append((mean, std))
 
     for band, (mean, std) in enumerate(band_statistics):
         data_array = raster.read(band + 1)
