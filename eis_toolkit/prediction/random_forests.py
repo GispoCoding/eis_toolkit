@@ -44,8 +44,9 @@ def random_forest_classifier_train(
         cv_folds: Number of folds used in cross-validation. Used only when test_method is "kfold_cv"
             or "skfold_cv". Defaults to 5.
         n_estimators: The number of trees in the forest. Defaults to 100.
-        max_depth: The maximum depth of the tree. If None, then nodes are expanded until all leaves are
-            pure or until all leaves contain less than min_samples_split samples. Defaults to None.
+        max_depth: The maximum depth of the tree. Values must be >= 1 or None, in which case nodes are
+            expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.
+            Defaults to None.
         verbose: Specifies if modeling progress and performance should be printed. 0 doesn't print,
             values 1 or above will produce prints.
         random_state: Seed for random number generation. Defaults to 42.
@@ -59,6 +60,8 @@ def random_forest_classifier_train(
     """
     if not n_estimators >= 1:
         raise exceptions.InvalidParameterValueException("N-estimators must be at least 1.")
+    if max_depth is not None and not max_depth >= 1:
+        raise exceptions.InvalidParameterValueException("Max depth must be at least 1 or None.")
     if verbose < 0:
         raise exceptions.InvalidParameterValueException("Verbose must be a non-negative number.")
 
@@ -116,8 +119,9 @@ def random_forest_regressor_train(
         cv_folds: Number of folds used in cross-validation. Used only when test_method is "kfold_cv"
             or "skfold_cv". Defaults to 5.
         n_estimators: The number of trees in the forest. Defaults to 100.
-        max_depth: The maximum depth of the tree. If None, then nodes are expanded until all leaves are
-            pure or until all leaves contain less than min_samples_split samples. Defaults to None.
+        max_depth: The maximum depth of the tree. Values must be >= 1 or None, in which case nodes are
+            expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.
+            Defaults to None.
         verbose: Specifies if modeling progress and performance should be printed. 0 doesn't print,
             values 1 or above will produce prints.
         random_state: Seed for random number generation. Defaults to 42.
@@ -131,6 +135,8 @@ def random_forest_regressor_train(
     """
     if not n_estimators >= 1:
         raise exceptions.InvalidParameterValueException("N-estimators must be at least 1.")
+    if max_depth is not None and not max_depth >= 1:
+        raise exceptions.InvalidParameterValueException("Max depth must be at least 1 or None.")
     if verbose < 0:
         raise exceptions.InvalidParameterValueException("Verbose must be a non-negative number.")
 

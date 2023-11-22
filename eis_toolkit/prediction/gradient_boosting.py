@@ -21,7 +21,7 @@ def gradient_boosting_classifier_train(
     loss: Literal["log_loss", "exponential"] = "log_loss",
     learning_rate: Number = 0.1,
     n_estimators: int = 100,
-    max_depth: int = 3,
+    max_depth: Optional[int] = 3,
     subsample: Number = 1.0,
     verbose: int = 0,
     random_state: Optional[int] = 42,
@@ -53,7 +53,8 @@ def gradient_boosting_classifier_train(
         n_estimators: The number of boosting stages to run. Gradient boosting is fairly robust to over-fitting
             so a large number can result in better performance. Values must be >= 1. Defaults to 100.
         max_depth: Maximum depth of the individual regression estimators. The maximum depth limits the number
-            of nodes in the tree. Values must be >= 1. Defaults to 3.
+            of nodes in the tree. Values must be >= 1 or None, in which case nodes are expanded until all leaves
+            are pure or until all leaves contain less than min_samples_split samples. Defaults to 3.
         subsample: The fraction of samples to be used for fitting the individual base learners.
             If smaller than 1.0 this results in Stochastic Gradient Boosting. Subsample interacts with the
             parameter n_estimators. Choosing subsample < 1.0 leads to a reduction of variance and an increase in bias.
@@ -73,8 +74,8 @@ def gradient_boosting_classifier_train(
         raise exceptions.InvalidParameterValueException("Learning rate must be non-negative.")
     if not n_estimators >= 1:
         raise exceptions.InvalidParameterValueException("N-estimators must be at least 1.")
-    if not max_depth >= 1:
-        raise exceptions.InvalidParameterValueException("Max depth must be at least 1.")
+    if max_depth is not None and not max_depth >= 1:
+        raise exceptions.InvalidParameterValueException("Max depth must be at least 1 or None.")
     if not (0 < subsample <= 1):
         raise exceptions.InvalidParameterValueException("Subsample must be more than 0 and at most 1.")
     if verbose < 0:
@@ -116,7 +117,7 @@ def gradient_boosting_regressor_train(
     loss: Literal["squared_error", "absolute_error", "huber", "quantile"] = "squared_error",
     learning_rate: Number = 0.1,
     n_estimators: int = 100,
-    max_depth: int = 3,
+    max_depth: Optional[int] = 3,
     subsample: Number = 1.0,
     verbose: int = 0,
     random_state: Optional[int] = 42,
@@ -148,7 +149,8 @@ def gradient_boosting_regressor_train(
         n_estimators: The number of boosting stages to run. Gradient boosting is fairly robust to over-fitting
             so a large number can result in better performance. Values must be >= 1. Defaults to 100.
         max_depth: Maximum depth of the individual regression estimators. The maximum depth limits the number
-            of nodes in the tree. Values must be >= 1. Defaults to 3.
+            of nodes in the tree. Values must be >= 1 or None, in which case nodes are expanded until all leaves
+            are pure or until all leaves contain less than min_samples_split samples. Defaults to 3.
         subsample: The fraction of samples to be used for fitting the individual base learners.
             If smaller than 1.0 this results in Stochastic Gradient Boosting. Subsample interacts with the
             parameter n_estimators. Choosing subsample < 1.0 leads to a reduction of variance and an increase in bias.
@@ -168,8 +170,8 @@ def gradient_boosting_regressor_train(
         raise exceptions.InvalidParameterValueException("Learning rate must be non-negative.")
     if not n_estimators >= 1:
         raise exceptions.InvalidParameterValueException("N-estimators must be at least 1.")
-    if not max_depth >= 1:
-        raise exceptions.InvalidParameterValueException("Max depth must be at least 1.")
+    if max_depth is not None and not max_depth >= 1:
+        raise exceptions.InvalidParameterValueException("Max depth must be at least 1 or None.")
     if not (0 < subsample <= 1):
         raise exceptions.InvalidParameterValueException("Subsample must be more than 0 and at most 1.")
     if verbose < 0:
