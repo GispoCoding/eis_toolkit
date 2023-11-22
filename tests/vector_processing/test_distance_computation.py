@@ -1,10 +1,11 @@
 from contextlib import nullcontext
+from functools import partial
 
 import geopandas as gpd
 import numpy as np
 import pytest
 import rasterio
-from shapely.geometry import Point
+from shapely.geometry import LineString, Point, box
 
 from eis_toolkit import exceptions
 from eis_toolkit.vector_processing.distance_computation import distance_computation
@@ -13,27 +14,58 @@ from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 with rasterio.open(SMALL_RASTER_PATH) as raster:
     SMALL_RASTER_PROFILE = raster.profile
 
-GEOMETRIES_WITHIN_SMALL_RASTER = gpd.GeoDataFrame(
-    {
-        "geometry": [
-            Point(384745.000, 6671375.000),
-            Point(384800.000, 6671375.000),
-        ]
-    },
-    crs=SMALL_RASTER_PROFILE["crs"],
+geodataframe_with_raster_crs = partial(gpd.GeoDataFrame, crs=SMALL_RASTER_PROFILE["crs"])
+
+EXPECTED_SMALL_RASTER_SHAPE = SMALL_RASTER_PROFILE["height"], SMALL_RASTER_PROFILE["width"]
+
+
+POINT_GEOMETRIES_WITHIN_SMALL_RASTER = geodataframe_with_raster_crs(
+    geometry=[
+        Point(384745.000, 6671375.000),
+        Point(384800.000, 6671375.000),
+    ]
+)
+LINE_GEOMETRIES_WITHIN_SMALL_RASTER = geodataframe_with_raster_crs(
+    geometry=[
+        LineString([Point(384745.000, 6671375.000), Point(384800.000, 6671375.000)]),
+        LineString([Point(384745.000, 6671375.000), Point(384745.000, 6671375.000)]),
+    ]
+)
+POLYGON_GEOMETRIES_WITHIN_SMALL_RASTER = geodataframe_with_raster_crs(
+    geometry=[
+        box(384744.000, 6671272.000, 384764.000, 6671292.000),
+        box(384784.000, 6671280.000, 384800.000, 6671300.000),
+    ]
 )
 
 
 @pytest.mark.parametrize(
     "raster_profile,geometries,expected_shape,expected_min,expected_max",
     [
-        (
+        pytest.param(
             SMALL_RASTER_PROFILE,
-            GEOMETRIES_WITHIN_SMALL_RASTER,
-            (56, 46),
+            POINT_GEOMETRIES_WITHIN_SMALL_RASTER,
+            EXPECTED_SMALL_RASTER_SHAPE,
             0.0,
             107.83784122468327,
-        )
+            id="point_geometries_within_small_raster",
+        ),
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            LINE_GEOMETRIES_WITHIN_SMALL_RASTER,
+            EXPECTED_SMALL_RASTER_SHAPE,
+            0.0,
+            107.83784122468327,
+            id="line_geometries_within_small_raster",
+        ),
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            POLYGON_GEOMETRIES_WITHIN_SMALL_RASTER,
+            EXPECTED_SMALL_RASTER_SHAPE,
+            0.0,
+            91.0,
+            id="polygon_geometries_within_small_raster",
+        ),
     ],
 )
 def test_distance_computation_with_expected_results(
@@ -54,27 +86,27 @@ def test_distance_computation_with_expected_results(
     [
         (
             SMALL_RASTER_PROFILE,
-            GEOMETRIES_WITHIN_SMALL_RASTER,
+            POINT_GEOMETRIES_WITHIN_SMALL_RASTER,
             nullcontext(),
         ),
         (
             {**SMALL_RASTER_PROFILE, "height": None},
-            GEOMETRIES_WITHIN_SMALL_RASTER,
+            POINT_GEOMETRIES_WITHIN_SMALL_RASTER,
             pytest.raises(exceptions.InvalidParameterValueException),
         ),
         (
             {**SMALL_RASTER_PROFILE, "height": 0.123},
-            GEOMETRIES_WITHIN_SMALL_RASTER,
+            POINT_GEOMETRIES_WITHIN_SMALL_RASTER,
             pytest.raises(exceptions.InvalidParameterValueException),
         ),
         (
             {**SMALL_RASTER_PROFILE, "width": 0.123},
-            GEOMETRIES_WITHIN_SMALL_RASTER,
+            POINT_GEOMETRIES_WITHIN_SMALL_RASTER,
             pytest.raises(exceptions.InvalidParameterValueException),
         ),
         (
             {**SMALL_RASTER_PROFILE, "transform": None},
-            GEOMETRIES_WITHIN_SMALL_RASTER,
+            POINT_GEOMETRIES_WITHIN_SMALL_RASTER,
             pytest.raises(exceptions.InvalidParameterValueException),
         ),
     ],

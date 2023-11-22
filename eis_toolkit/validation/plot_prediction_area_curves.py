@@ -1,5 +1,8 @@
+from typing import Union
+
 import matplotlib
 import numpy as np
+import pandas as pd
 from beartype import beartype
 from matplotlib import pyplot as plt
 
@@ -8,7 +11,9 @@ from eis_toolkit.validation.get_pa_intersection import get_pa_intersection
 
 
 def _plot_prediction_area_curves(
-    true_positive_rate_values: np.ndarray, proportion_of_area_values: np.ndarray, threshold_values: np.ndarray
+    true_positive_rate_values: Union[np.ndarray, pd.Series],
+    proportion_of_area_values: Union[np.ndarray, pd.Series],
+    threshold_values: Union[np.ndarray, pd.Series],
 ) -> matplotlib.figure.Figure:
     intersection = get_pa_intersection(true_positive_rate_values, proportion_of_area_values, threshold_values)
 
@@ -40,7 +45,9 @@ def _plot_prediction_area_curves(
 
 @beartype
 def plot_prediction_area_curves(
-    true_positive_rate_values: np.ndarray, proportion_of_area_values: np.ndarray, threshold_values: np.ndarray
+    true_positive_rate_values: Union[np.ndarray, pd.Series],
+    proportion_of_area_values: Union[np.ndarray, pd.Series],
+    threshold_values: Union[np.ndarray, pd.Series],
 ) -> matplotlib.figure.Figure:
     """Plot prediction-area (P-A) plot.
 

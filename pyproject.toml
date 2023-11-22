@@ -33,7 +33,7 @@ keras = "^2.9.0"
 tensorflow = "^2.9.1"
 mapclassify = "^2.6.1"
 beartype = "^0.13.1"
-seaborn = "^0.12.2"
+seaborn = "^0.13.0"
 pykrige = "^1.7.0"
 rtree = "^1.0.1"
 typer = {extras = ["all"], version = "^0.9.0"}

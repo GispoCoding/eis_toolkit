@@ -107,7 +107,7 @@ def correlation_matrix(
             "The argument min_periods is available only with correlation methods 'pearson' and 'spearman'."
         )
 
-    matrix = data.corr(method=correlation_method, min_periods=min_periods)
+    matrix = data.corr(method=correlation_method, min_periods=min_periods, numeric_only=True)
 
     return matrix
 
