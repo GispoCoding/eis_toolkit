@@ -32,7 +32,7 @@ def test_encode_dataframe_sparse_selected_columns(sample_dataframe):
     assert "C" in encoded_df.columns
     assert "A_fish" in encoded_df.columns
     assert encoded_df_without_column_C.dtypes.apply(pd.api.types.is_sparse).all()
-    assert encoded_df["C"].dtype == int
+    assert encoded_df["C"].dtype in (int, np.dtype("int64"))
 
 
 def test_encode_dataframe_dense(sample_dataframe):

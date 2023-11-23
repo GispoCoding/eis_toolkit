@@ -68,4 +68,4 @@ def check_minmax_position(parameter: tuple) -> bool:  # type: ignore[no-untyped-
     Returns:
         Bool: True if minimum value < maxiumum value, else False.
     """
-    return parameter[0] < parameter[1]
+    return bool(parameter[0] < parameter[1])
