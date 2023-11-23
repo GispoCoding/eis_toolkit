@@ -5,6 +5,7 @@ from beartype.typing import Sequence
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
+from eis_toolkit.utilities.checks.coda import check_compositional
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_dataframe_contains_zeros
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
 
@@ -39,8 +40,6 @@ def _logratio(row: pd.Series, subcomposition_1: Sequence[str], subcomposition_2:
     return np.log(numerator / denominator)
 
 
-# TODO: note: this should only return a single column/series
-# TODO: possibly modify to handle a single row
 @beartype
 def _single_ILR_transform(
     df: pd.DataFrame, subcomposition_1: Sequence[str], subcomposition_2: Sequence[str]
@@ -64,6 +63,7 @@ def _single_ILR_transform(
 
 
 @beartype
+@check_compositional
 def single_ILR_transform(
     df: pd.DataFrame, subcomposition_1: Sequence[str], subcomposition_2: Sequence[str]
 ) -> pd.Series:

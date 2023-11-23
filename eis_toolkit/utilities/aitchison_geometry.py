@@ -14,22 +14,20 @@ def check_in_simplex_sample_space(df: pd.DataFrame, k: np.float64 = None) -> boo
     Checks that each compositional data point belongs to the set of positive real numbers.
     Checks that each composition is normalized to the same value.
 
-    #TODO: Args, Returns, Raises
+    Args:
+        df: Dataframe to check.
+        k: The expected sum of each row. If None, simply checks that the sum of each row is equal.
 
-    # Raises:
-    #     InvalidCompositionException: Data is not normalized to the expected value.
-    #     NumericValueSignException: Data contains zeros or negative values.
+    Returns:
+        True if values are valid and the sum of each row is k.
     """
     if not check_dataframe_contains_only_positive_numbers(df):
         return False
-        # raise NumericValueSignException("Data contains zeros or negative values.")
 
-    # TODO: switch to checking that the sum is the same value for each column
     df_sum = np.sum(df, axis=1)
     expected_sum = k if k is not None else df_sum.iloc[0]
     if len(df_sum[df_sum.iloc[:] != expected_sum]) != 0:
         return False
-        # raise InvalidCompositionException("Not each composition is normalized to the same value.")
 
     return True
 
@@ -42,11 +40,11 @@ def check_in_unit_simplex_sample_space(df: pd.DataFrame) -> bool:
     Checks that each compositional data point belongs to the set of positive real numbers.
     Checks that each composition is normalized to 1.
 
-    #TODO: Args, Returns, Raises
+    Args:
+        df: Dataframe to check.
 
-    # Raises:
-    #     InvalidCompositionException: Data is not normalized to 1.
-    #     NumericValueSignException: Data contains zeros or negative values.
+    Returns:
+        True if values are valid and the sum of each row is 1.
     """
     return check_in_simplex_sample_space(df, np.float64(1))
 

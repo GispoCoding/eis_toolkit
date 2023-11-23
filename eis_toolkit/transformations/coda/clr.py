@@ -6,7 +6,8 @@ from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException
 from eis_toolkit.utilities.aitchison_geometry import _closure
-from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_dataframe_contains_zeros
+from eis_toolkit.utilities.checks.coda import check_compositional
+from eis_toolkit.utilities.checks.dataframe import check_columns_valid
 
 
 @beartype
@@ -27,6 +28,7 @@ def _CLR_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) ->
 
 
 @beartype
+@check_compositional
 def CLR_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> pd.DataFrame:
     """
     Perform a centered logratio transformation on the selected columns.
@@ -42,15 +44,9 @@ def CLR_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> 
         InvalidColumnException: One or more input columns are not found in the given dataframe,
             or the data contain zeros.
     """
-    # TODO: deal with potential negative values
-
     if columns is not None:
         if not check_columns_valid(df, columns):
             raise InvalidColumnException("Not all of the given columns were found in the input DataFrame.")
-
-    # TODO: possibly only check the subcomposition columns
-    if check_dataframe_contains_zeros(df):
-        raise InvalidColumnException("The dataframe contains one or more zeros.")
 
     return _CLR_transform(df, columns)
 

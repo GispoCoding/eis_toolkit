@@ -4,6 +4,7 @@ from beartype import beartype
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
+from eis_toolkit.utilities.checks.coda import check_compositional
 from eis_toolkit.utilities.checks.dataframe import check_dataframe_contains_zeros
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
 
@@ -68,6 +69,7 @@ def _single_PLR_transform(df: pd.DataFrame, column: str) -> pd.Series:
 
 
 @beartype
+@check_compositional
 def single_PLR_transform(df: pd.DataFrame, column: str) -> pd.Series:
     """
     Perform a pivot logratio transformation on the selected column.
@@ -114,6 +116,7 @@ def _PLR_transform(df: pd.DataFrame) -> pd.DataFrame:
 
 
 @beartype
+@check_compositional
 def PLR_transform(df: pd.DataFrame) -> pd.DataFrame:
     """
     Perform a pivot logratio transformation on the dataframe, returning the full set of transforms.
