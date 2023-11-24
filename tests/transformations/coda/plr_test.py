@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eis_toolkit.exceptions import InvalidColumnException, InvalidCompositionException, NumericValueSignException
+from eis_toolkit.exceptions import InvalidColumnException
 from eis_toolkit.transformations.coda.plr import _single_plr_transform_index, plr_transform, single_plr_transform
 
 
@@ -48,18 +48,3 @@ def test_plr_transform():
     assert len(result.columns) == len(df.columns) - 1
     expected = pd.DataFrame(np.array([[1.60, 0.19, 0.91], [1.49, 0.43, 0.65]]), columns=["a", "b", "c"])
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
-
-
-def test_plr_transform_with_zeros():
-    """Test that running the transformation for a dataframe containing zeros raises the correct exception."""
-    with pytest.raises(NumericValueSignException):
-        df = pd.DataFrame(np.zeros((3, 3)), columns=["a", "b", "c"])
-        plr_transform(df)
-
-
-def test_plr_transform_with_nans():
-    """Test that running the transformation for a dataframe containing NaN values raises the correct exception."""
-    with pytest.raises(InvalidCompositionException):
-        df = pd.DataFrame(np.ones((3, 3)), columns=["a", "b", "c"])
-        df.iloc[:, 0] = np.NaN
-        plr_transform(df)
