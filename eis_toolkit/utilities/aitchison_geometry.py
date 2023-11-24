@@ -51,7 +51,7 @@ def check_in_unit_simplex_sample_space(df: pd.DataFrame) -> bool:
 
 @beartype
 def _scale(df: pd.DataFrame, scale: np.float64) -> pd.DataFrame:
-    """TODO: docstring."""
+
     return scale * df
 
 

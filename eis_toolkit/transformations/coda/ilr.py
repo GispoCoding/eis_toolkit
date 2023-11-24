@@ -6,7 +6,7 @@ from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
 from eis_toolkit.utilities.checks.coda import check_compositional
-from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_dataframe_contains_zeros
+from eis_toolkit.utilities.checks.dataframe import check_columns_valid
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
 
 
@@ -31,10 +31,11 @@ def _calculate_scaling_factor(c1: int, c2: int) -> np.float64:
     return np.sqrt((c1 * c2) / np.float64(c1 + c2))
 
 
-# TODO: name better
 @beartype
-def _logratio(row: pd.Series, subcomposition_1: Sequence[str], subcomposition_2: Sequence[str]) -> np.float64:
-    """TODO: docstring."""
+def _geometric_mean_logratio(
+    row: pd.Series, subcomposition_1: Sequence[str], subcomposition_2: Sequence[str]
+) -> np.float64:
+
     numerator = gmean(row[subcomposition_1])
     denominator = gmean(row[subcomposition_2])
     return np.log(numerator / denominator)
@@ -44,7 +45,6 @@ def _logratio(row: pd.Series, subcomposition_1: Sequence[str], subcomposition_2:
 def _single_ilr_transform(
     df: pd.DataFrame, subcomposition_1: Sequence[str], subcomposition_2: Sequence[str]
 ) -> pd.Series:
-    """TODO: docstring."""
 
     dfc = df.copy()
 
@@ -55,7 +55,7 @@ def _single_ilr_transform(
     ilr_values = pd.Series([0.0] * df.shape[0])
 
     for idx, row in dfc.iterrows():
-        ilr_values[idx] = _logratio(row, subcomposition_1, subcomposition_2)
+        ilr_values[idx] = _geometric_mean_logratio(row, subcomposition_1, subcomposition_2)
 
     ilr_values = _calculate_scaling_factor(c1, c2) * ilr_values
 
@@ -74,25 +74,22 @@ def single_ilr_transform(
     Column order matters.
 
     Args:
-        df: # TODO
-        subcomposition_1: # TODO
-        subcomposition_2: # TODO
+        df: A dataframe of shape [N, D] of compositional data.
+        subcomposition_1: Names of the columns in the numerator part of the ratio.
+        subcomposition_2: Names of the columns in the denominator part of the ratio.
 
     Returns:
-        # TODO
+        A series of length N containing the transforms.
 
     Raises:
-        # TODO
+        InvalidColumnException: One or more subcomposition columns are not found in the input dataframe.
+        See check_compositional for other exceptions.
     """
 
     # TODO: verify whether the subcompositions are allowed to have overlap
 
     if not (check_columns_valid(df, subcomposition_1) and check_columns_valid(df, subcomposition_2)):
-        raise InvalidColumnException("Not all of the given columns were found in the input DataFrame.")
-
-    # TODO: possibly only check the subcomposition columns
-    if check_dataframe_contains_zeros(df):
-        raise InvalidColumnException("The dataframe contains one or more zeros.")
+        raise InvalidColumnException("Not all of the input columns were found in the input dataframe.")
 
     return _single_ilr_transform(df, subcomposition_1, subcomposition_2)
 

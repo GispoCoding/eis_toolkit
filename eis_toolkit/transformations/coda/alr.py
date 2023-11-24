@@ -3,16 +3,9 @@ import pandas as pd
 from beartype import beartype
 from beartype.typing import Sequence
 
-from eis_toolkit.exceptions import InvalidColumnIndexException, InvalidCompositionException
+from eis_toolkit.exceptions import InvalidColumnIndexException
 from eis_toolkit.utilities.checks.coda import check_compositional
 from eis_toolkit.utilities.checks.dataframe import check_column_index_in_dataframe
-
-
-@beartype
-def _alr_transform_old(df: pd.DataFrame, columns: Sequence[str], denominator_column: str) -> pd.DataFrame:
-
-    ratios = df[columns].div(df[denominator_column], axis=0)
-    return np.log(ratios)
 
 
 @beartype
@@ -39,13 +32,9 @@ def alr_transform(df: pd.DataFrame, idx: int = -1, keep_redundant_column: bool =
         A new dataframe containing the ALR transformed data.
 
     Raises:
-        InvalidColumnException: One or more input columns are not found in the given dataframe, or the
-            numerator or denominator columns contain zeros.
         InvalidColumnIndexException: The input index for the denominator column is out of bounds.
-        InvalidParameterValueException: Too few columns to perform the transformation.
+        See check_compositional for other exceptions.
     """
-    if df.isnull().values.any():
-        raise InvalidCompositionException("Data contains NaN values.")
 
     columns = [col for col in df.columns]
 

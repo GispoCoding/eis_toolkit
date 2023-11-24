@@ -5,7 +5,6 @@ from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
 from eis_toolkit.utilities.checks.coda import check_compositional
-from eis_toolkit.utilities.checks.dataframe import check_dataframe_contains_zeros
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
 
 
@@ -31,6 +30,7 @@ def _calculate_scaling_factor(c: int) -> np.float64:
 
 @beartype
 def _single_plr_transform_index(df: pd.DataFrame, column_ind: int) -> pd.Series:
+
     dfc = df.copy()
     # The denominator is a subcomposition of all the parts "to the right" of the column:
     columns = [col for col in df.columns]
@@ -49,6 +49,7 @@ def _single_plr_transform_index(df: pd.DataFrame, column_ind: int) -> pd.Series:
 
 @beartype
 def _single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
+
     dfc = df.copy()
     idx = dfc.columns.get_loc(column)
 
@@ -89,6 +90,7 @@ def single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
     Raises:
         InvalidColumnException: The input column isn't found in the dataframe, or there are no columns
             to the right of the given column.
+        See check_compositional for other exceptions.
     """
 
     if column not in df.columns:
@@ -129,11 +131,8 @@ def plr_transform(df: pd.DataFrame) -> pd.DataFrame:
 
     Raises:
         InvalidColumnException: The data contains one or more zeros.
+        See check_compositional for other exceptions.
     """
-    # TODO: possibly allow performing PLR transform for a subcomposition
-    if check_dataframe_contains_zeros(df):
-        raise InvalidColumnException("The dataframe contains one or more zeros.")
-
     return _plr_transform(df)
 
 

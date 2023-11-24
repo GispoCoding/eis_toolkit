@@ -9,7 +9,6 @@ from eis_toolkit.exceptions import InvalidCompositionException, NumericValueSign
 from eis_toolkit.utilities.checks.dataframe import check_dataframe_contains_only_positive_numbers
 
 
-# TODO: decide/ask: should only the columns selected be checked? 2 versions of the wrapper?
 def check_compositional(func: Callable) -> Callable:
     """
     Check if the dataframe argument in the callable is a valid composition.
@@ -38,7 +37,7 @@ def check_compositional(func: Callable) -> Callable:
 
 
 @beartype
-def check_in_simplex_sample_space(df: pd.DataFrame, k: np.float64 = None):
+def check_in_simplex_sample_space(df: pd.DataFrame, k: np.float64 = None) -> None:
     """
     Check that the compositions represented by the data rows belong to a simplex sample space.
 
