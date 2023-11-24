@@ -17,7 +17,16 @@ def _centered_ratio(row: pd.Series) -> pd.Series:
 
 
 @beartype
-def _clr_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> pd.DataFrame:
+def _clr_transform(df: pd.DataFrame) -> pd.DataFrame:
+
+    dfc = df.copy()
+    dfc = dfc.apply(_centered_ratio, axis=1)
+
+    return np.log(dfc)
+
+
+@beartype
+def _clr_transform_old(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> pd.DataFrame:
 
     columns = df.columns if columns is None else columns
 
@@ -29,7 +38,7 @@ def _clr_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) ->
 
 @beartype
 @check_compositional
-def clr_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> pd.DataFrame:
+def clr_transform_old(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> pd.DataFrame:
     """
     Perform a centered logratio transformation on the selected columns.
 
@@ -48,7 +57,25 @@ def clr_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> 
         if not check_columns_valid(df, columns):
             raise InvalidColumnException("Not all of the given columns were found in the input DataFrame.")
 
-    return _clr_transform(df, columns)
+    return _clr_transform_old(df, columns)
+
+
+@beartype
+@check_compositional
+def clr_transform(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Perform a centered logratio transformation on the data.
+
+    Args:
+        df: A dataframe of compositional data.
+
+    Returns:
+        A new dataframe containing the CLR transformed data.
+
+    Raises:
+        See check_compositional.
+    """
+    return _clr_transform(df)
 
 
 def inverse_clr(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> Tuple[pd.DataFrame, np.float64]:

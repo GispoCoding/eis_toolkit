@@ -7,12 +7,13 @@ from eis_toolkit.exceptions import (
     InvalidColumnIndexException,
     InvalidCompositionException,
     InvalidParameterValueException,
+    NumericValueSignException,
 )
-from eis_toolkit.transformations.coda.alr import alr_transform
+from eis_toolkit.transformations.coda.alr import alr_transform, alr_transform_old
 
-ONES_DATAFRAME_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["c1", "c2", "c3", "c4"])
+ONES_DATAFRAME_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["a", "b", "c", "d"])
 
-ZEROS_DATAFRAME_4x3 = pd.DataFrame(np.zeros((4, 3)), columns=["c1", "c2", "c3"])
+ZEROS_DATAFRAME_4x3 = pd.DataFrame(np.zeros((4, 3)), columns=["a", "b", "c"])
 
 SAMPLE_DATAFRAME = pd.DataFrame(
     np.array(
@@ -29,7 +30,7 @@ SAMPLE_DATAFRAME = pd.DataFrame(
             [0.000198, 0.000160, 0.000474, 0.000068],
         ]
     ),
-    columns=["c1", "c2", "c3", "c4"],
+    columns=["a", "b", "c", "d"],
 )
 
 
@@ -41,28 +42,30 @@ def test_alr_transform_simple():
 
 def test_alr_transform_contains_zeros():
     """Test that running the transformation for a dataframe containing zeros raises the correct exception."""
-    with pytest.raises(InvalidColumnException):
-        zeros_data = SAMPLE_DATAFRAME.copy()
-        zeros_data.iloc[0, 0] = 0
-        alr_transform(zeros_data)
+    with pytest.raises(NumericValueSignException):
+        arr = np.array([[80, 0, 5], [75, 18, 7]])
+        df = pd.DataFrame(arr, columns=["a", "b", "c"])
+        alr_transform(df)
 
 
 def test_alr_transform_with_unexpected_column_name():
     """Test that providing an invalid column name raises the correct exception."""
     with pytest.raises(InvalidColumnException):
-        alr_transform(SAMPLE_DATAFRAME, ["c1", "c2", "comp3"])
+        alr_transform_old(SAMPLE_DATAFRAME, ["a", "b", "comp3"])
 
 
 def test_alr_transform_with_out_of_bounds_denominator_column():
     """Test that providing a column index that is out of bounds raises the correct exception."""
     with pytest.raises(InvalidColumnIndexException):
-        alr_transform(SAMPLE_DATAFRAME, None, -5)
+        arr = np.array([[65, 12, 18, 5], [63, 16, 15, 6]])
+        df = pd.DataFrame(arr, columns=["a", "b", "c", "d"])
+        alr_transform(df, -5)
 
 
 def test_alr_transform_with_too_few_columns():
     """Test that providing just one column raises the correct exception."""
     with pytest.raises(InvalidParameterValueException):
-        alr_transform(SAMPLE_DATAFRAME, ["c1"])
+        alr_transform_old(SAMPLE_DATAFRAME, ["a"])
 
 
 def test_alr_transform_redundant_column():
@@ -72,10 +75,12 @@ def test_alr_transform_redundant_column():
     Test that the redundant column is found in the result, and that it contains the expected
     values when requesting to keep the redundant column in the alr transformed data.
     """
-    cols = ["c2", "c3"]
     idx = -1
-    redundant_column = SAMPLE_DATAFRAME.columns[idx]
-    result = alr_transform(SAMPLE_DATAFRAME, cols, -1, keep_redundant_column=True)
+    arr = np.array([[65, 12, 18, 5], [63, 16, 15, 6]])
+    df = pd.DataFrame(arr, columns=["a", "b", "c", "d"])
+
+    redundant_column = df.columns[idx]
+    result = alr_transform(df, idx, keep_redundant_column=True)
 
     assert redundant_column in result.columns
     assert all([val == 0 for val in result.iloc[:, -1].values])
