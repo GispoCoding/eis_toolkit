@@ -6,6 +6,7 @@ from beartype.typing import Optional, Sequence
 from eis_toolkit.exceptions import (
     InvalidColumnException,
     InvalidColumnIndexException,
+    InvalidCompositionException,
     InvalidParameterValueException,
     NonNumericDataException,
 )
@@ -64,6 +65,9 @@ def alr_transform(
         InvalidParameterValueException: Too few columns to perform the transformation.
         InvalidColumnIndexException: The input index for the denominator column is out of bounds.
     """
+    if df.isnull().values.any():
+        raise InvalidCompositionException("Data contains NaN values.")
+
     if columns is not None:
         if not check_columns_valid(df, columns):
             raise InvalidColumnException("Not all of the given columns were found in the input DataFrame.")

@@ -2,7 +2,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eis_toolkit.exceptions import InvalidColumnException, InvalidColumnIndexException, InvalidParameterValueException
+from eis_toolkit.exceptions import (
+    InvalidColumnException,
+    InvalidColumnIndexException,
+    InvalidCompositionException,
+    InvalidParameterValueException,
+)
 from eis_toolkit.transformations.coda.alr import alr_transform
 
 ONES_DATAFRAME_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["c1", "c2", "c3", "c4"])
@@ -74,6 +79,14 @@ def test_alr_transform_redundant_column():
 
     assert redundant_column in result.columns
     assert all([val == 0 for val in result.iloc[:, -1].values])
+
+
+def test_alr_transform_with_nans():
+    """Test that running the transformation for a dataframe containing NaN values raises the correct exception."""
+    with pytest.raises(InvalidCompositionException):
+        df = pd.DataFrame(np.ones((3, 3)), columns=["a", "b", "c"])
+        df.iloc[:, 0] = np.NaN
+        alr_transform(df)
 
 
 # TODO: test with unnamed columns

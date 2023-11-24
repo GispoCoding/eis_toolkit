@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eis_toolkit.exceptions import InvalidColumnException, NumericValueSignException
+from eis_toolkit.exceptions import InvalidColumnException, InvalidCompositionException, NumericValueSignException
 from eis_toolkit.transformations.coda.ilr import _calculate_scaling_factor, single_ilr_transform
 
 
@@ -37,7 +37,7 @@ def test_single_ilr_transform():
     assert result[1] == pytest.approx(1.35, abs=1e-2)
 
 
-# TODO: handle case where 0 is not in selected columns
+# TODO: handle case where 0 is not among the selected columns
 def test_ilr_transform_with_zeros():
     """Test that running the transformation for a dataframe containing zeros raises the correct exception."""
     with pytest.raises(NumericValueSignException):
@@ -52,3 +52,11 @@ def test_ilr_transform_with_unexpected_column_name():
         arr = np.array([[65, 12, 18, 5], [63, 16, 15, 6]])
         df = pd.DataFrame(arr, columns=["a", "b", "c", "d"])
         single_ilr_transform(df, ["a", "b"], ["comp3"])
+
+
+def test_ilr_transform_with_nans():
+    """Test that running the transformation for a dataframe containing NaN values raises the correct exception."""
+    with pytest.raises(InvalidCompositionException):
+        df = pd.DataFrame(np.ones((3, 3)), columns=["a", "b", "c"])
+        df.iloc[:, 0] = np.NaN
+        single_ilr_transform(df)

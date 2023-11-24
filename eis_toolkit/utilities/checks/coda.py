@@ -56,6 +56,9 @@ def check_in_simplex_sample_space(df: pd.DataFrame, k: np.float64 = None):
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
+    if df.isnull().values.any():
+        raise InvalidCompositionException("Data contains NaN values.")
+
     if not check_dataframe_contains_only_positive_numbers(df):
         raise NumericValueSignException("Data contains zeros or negative values.")
 
