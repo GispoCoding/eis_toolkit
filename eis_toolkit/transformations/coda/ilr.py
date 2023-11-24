@@ -41,7 +41,7 @@ def _logratio(row: pd.Series, subcomposition_1: Sequence[str], subcomposition_2:
 
 
 @beartype
-def _single_ILR_transform(
+def _single_ilr_transform(
     df: pd.DataFrame, subcomposition_1: Sequence[str], subcomposition_2: Sequence[str]
 ) -> pd.Series:
     """TODO: docstring."""
@@ -64,7 +64,7 @@ def _single_ILR_transform(
 
 @beartype
 @check_compositional
-def single_ILR_transform(
+def single_ilr_transform(
     df: pd.DataFrame, subcomposition_1: Sequence[str], subcomposition_2: Sequence[str]
 ) -> pd.Series:
     """
@@ -73,7 +73,16 @@ def single_ILR_transform(
     Returns ILR balances.
     Column order matters.
 
-    TODO: Args, Returns, Raises
+    Args:
+        df: # TODO
+        subcomposition_1: # TODO
+        subcomposition_2: # TODO
+
+    Returns:
+        # TODO
+
+    Raises:
+        # TODO
     """
 
     # TODO: verify whether the subcompositions are allowed to have overlap
@@ -85,9 +94,9 @@ def single_ILR_transform(
     if check_dataframe_contains_zeros(df):
         raise InvalidColumnException("The dataframe contains one or more zeros.")
 
-    return _single_ILR_transform(df, subcomposition_1, subcomposition_2)
+    return _single_ilr_transform(df, subcomposition_1, subcomposition_2)
 
 
 @beartype
-def _ILR_inverse():
+def _ilr_inverse():
     raise NotImplementedError()

@@ -30,7 +30,7 @@ def _calculate_scaling_factor(c: int) -> np.float64:
 
 
 @beartype
-def _single_PLR_transform_index(df: pd.DataFrame, column_ind: int) -> pd.Series:
+def _single_plr_transform_index(df: pd.DataFrame, column_ind: int) -> pd.Series:
     dfc = df.copy()
     # The denominator is a subcomposition of all the parts "to the right" of the column:
     columns = [col for col in df.columns]
@@ -48,7 +48,7 @@ def _single_PLR_transform_index(df: pd.DataFrame, column_ind: int) -> pd.Series:
 
 
 @beartype
-def _single_PLR_transform(df: pd.DataFrame, column: str) -> pd.Series:
+def _single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
     dfc = df.copy()
     idx = dfc.columns.get_loc(column)
 
@@ -70,7 +70,7 @@ def _single_PLR_transform(df: pd.DataFrame, column: str) -> pd.Series:
 
 @beartype
 @check_compositional
-def single_PLR_transform(df: pd.DataFrame, column: str) -> pd.Series:
+def single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
     """
     Perform a pivot logratio transformation on the selected column.
 
@@ -99,25 +99,25 @@ def single_PLR_transform(df: pd.DataFrame, column: str) -> pd.Series:
     if idx == len(df.columns) - 1:
         raise InvalidColumnException()
 
-    return _single_PLR_transform(df, column)
+    return _single_plr_transform(df, column)
 
 
 @beartype
-def _PLR_transform(df: pd.DataFrame) -> pd.DataFrame:
+def _plr_transform(df: pd.DataFrame) -> pd.DataFrame:
     dfc = df.copy()
 
     # A dataframe to hold the transformed values
     plr_values = pd.DataFrame(0.0, index=dfc.index, columns=dfc.columns[:-1])
 
     for i in range(len(df.columns) - 1):
-        plr_values.iloc[:, i] = _single_PLR_transform_index(dfc, i)
+        plr_values.iloc[:, i] = _single_plr_transform_index(dfc, i)
 
     return plr_values
 
 
 @beartype
 @check_compositional
-def PLR_transform(df: pd.DataFrame) -> pd.DataFrame:
+def plr_transform(df: pd.DataFrame) -> pd.DataFrame:
     """
     Perform a pivot logratio transformation on the dataframe, returning the full set of transforms.
 
@@ -134,9 +134,9 @@ def PLR_transform(df: pd.DataFrame) -> pd.DataFrame:
     if check_dataframe_contains_zeros(df):
         raise InvalidColumnException("The dataframe contains one or more zeros.")
 
-    return _PLR_transform(df)
+    return _plr_transform(df)
 
 
 @beartype
-def _inverse_PLR():
+def _inverse_plr():
     raise NotImplementedError()

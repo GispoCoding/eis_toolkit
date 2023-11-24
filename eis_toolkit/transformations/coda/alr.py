@@ -34,14 +34,14 @@ def _get_rows_with_no_missing_values(df: pd.DataFrame) -> pd.Series:
 
 
 @beartype
-def _ALR_transform(df: pd.DataFrame, columns: Sequence[str], denominator_column: str) -> pd.DataFrame:
+def _alr_transform(df: pd.DataFrame, columns: Sequence[str], denominator_column: str) -> pd.DataFrame:
 
     ratios = df[columns].div(df[denominator_column], axis=0)
     return np.log(ratios)
 
 
 @beartype
-def ALR_transform(
+def alr_transform(
     df: pd.DataFrame, columns: Optional[Sequence[str]] = None, idx: int = -1, keep_redundant_column: bool = False
 ) -> pd.DataFrame:
     """
@@ -90,9 +90,9 @@ def ALR_transform(
     if not keep_redundant_column and denominator_column in columns:
         columns.remove(denominator_column)
 
-    return _ALR_transform(df, columns, denominator_column)
+    return _alr_transform(df, columns, denominator_column)
 
 
-def inverse_ALR():
+def inverse_alr():
     """Perform the inverse transformation for a set of ALR transformed data."""
     raise NotImplementedError()
