@@ -97,8 +97,10 @@ class NoSuchPathOrDirectory(Exception):
 class WrongWindowSize(Exception):
     """Exception throws when wrong windows size occurs."""
 
+
 class CNNException(Exception):
     """Exception throws when something is invalid in the cnn."""
+
 
 class CNNRunningParameterException(Exception):
     """Exception throws when running parameters are wrong."""

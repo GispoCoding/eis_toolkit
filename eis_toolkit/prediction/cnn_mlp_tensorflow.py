@@ -1,6 +1,6 @@
 import os
 import random
-from typing import Literal, Union, Any
+from typing import Any, Literal, Union
 
 import joblib
 import numpy
@@ -13,8 +13,14 @@ from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import StandardScaler
 from sklearn.utils.class_weight import compute_sample_weight
 
-from eis_toolkit.exceptions import (NoSuchPathOrDirectory, WrongWindowSize, InvalidDatasetException, CNNException,
-                                    InvalidArgumentTypeException, CNNRunningParameterException)
+from eis_toolkit.exceptions import (
+    CNNException,
+    CNNRunningParameterException,
+    InvalidArgumentTypeException,
+    InvalidDatasetException,
+    NoSuchPathOrDirectory,
+    WrongWindowSize,
+)
 from eis_toolkit.prediction.model_performance_estimation import performance_model_estimation
 
 
@@ -73,7 +79,7 @@ def parse_the_master_file(master_file_path) -> dict:
 
             current_dataset[others_values[1]].append(
                 {
-                    "full_path":f"{others_values[0]}",
+                    "full_path": f"{others_values[0]}",
                     "current_path": f"{others_values[0].split('/')[-2]}/{others_values[0].split('/')[-1]}",
                     "no_data": float(others_values[3]) if others_values[3] != "" else "",
                     "no_data_value": float(others_values[4]) if others_values[4] != "" else 255,
@@ -180,6 +186,7 @@ def create_windows_based_of_geo_coords(
 
     return window
 
+
 @beartype
 def dataset_loader(
     deposit_path: str, unlabelled_data_path: str, desired_windows_dimension: int, path_of_features: str
@@ -224,7 +231,7 @@ def dataset_loader(
         temp_holder = list()
         concatenated = None
         for tif_obj in current_dataset[key]:
-            current_raster = gdal.Open(tif_obj['full_path'])
+            current_raster = gdal.Open(tif_obj["full_path"])
             for windows_counter, (N, E) in enumerate(coordinates_of_deposit):
                 windows = create_windows_based_of_geo_coords(
                     current_raster_object=tif_obj,
@@ -328,8 +335,6 @@ def normalize_the_data(data_to_normalize, normalizator) -> np.ndarray:
     return normalized_input.reshape(number_of_samples, h, w, c)
 
 
-
-
 def convolutional_body_of_the_cnn(
     input_layer: tf.keras.Input,
     neuron_list: Union[int],
@@ -428,7 +433,6 @@ def dense_nodes(input_layer: tf.keras.Input, neuron_list: Union[int], dropout: f
     # we flatten
     x = tf.keras.layers.Flatten()(x)
     return x
-
 
 
 def create_multi_modal_cnn(
@@ -688,7 +692,6 @@ def make_prediction(
     return compiled_model, history, score[0], prediction, validation_labels[0]
 
 
-
 def do_training_and_prediction_of_the_model(
     deposit_path: str,
     unlabelled_data_path: str,
@@ -720,7 +723,6 @@ def do_training_and_prediction_of_the_model(
 
     if not os.path.isfile(deposit_path) or not os.path.isfile(unlabelled_data_path):
         raise NoSuchPathOrDirectory
-
 
     stacked_true, stacked_prediction = list(), list()
     best_score = 0
@@ -808,7 +810,7 @@ def do_training_and_prediction_of_the_model(
 
         stacked_true.append(true_label)
 
-        if cnn_configuration["last_activation"] != "sofmax":
+        if cnn_configuration["last_activation"] == "softmax":
             stacked_prediction.append(np.argmax(prediction))
         else:
             if prediction[0] <= threshold:
@@ -826,5 +828,3 @@ def do_training_and_prediction_of_the_model(
         df.to_csv("cm/cm.csv")
 
     return df, model_to_return
-
-
