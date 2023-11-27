@@ -33,10 +33,14 @@ def extract_shared_lines(polygons: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     Args:
         polygons: The geodataframe that contains the polygon geometries to be examined
-                    for shared lines.
+            for shared lines.
 
     Returns:
-        Geodataframe containing the shared lines that were found between the polygons
+        Geodataframe containing the shared lines that were found between the polygons.
+    
+    Raises:
+        EmptyDataFrameException if input geodataframe is empty.
+        InvalidParameterValueException if input geodataframe doesn't contain at least 2 polygons.
     """
     if polygons.shape[0] == 0:
         raise exceptions.EmptyDataFrameException("Geodataframe is empty.")
