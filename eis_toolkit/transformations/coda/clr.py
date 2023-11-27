@@ -6,6 +6,7 @@ from scipy.stats import gmean
 
 from eis_toolkit.utilities.aitchison_geometry import _closure
 from eis_toolkit.utilities.checks.coda import check_compositional
+from eis_toolkit.utilities.miscellaneous import rename_columns
 
 
 @beartype
@@ -38,7 +39,7 @@ def clr_transform(df: pd.DataFrame) -> pd.DataFrame:
     Raises:
         See check_compositional.
     """
-    return _clr_transform(df)
+    return rename_columns(_clr_transform(df))
 
 
 def inverse_clr(df: pd.DataFrame) -> Tuple[pd.DataFrame, np.float64]:

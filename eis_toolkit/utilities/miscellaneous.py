@@ -271,3 +271,16 @@ def set_max_precision(data: Optional[np.ndarray] = None) -> int:
             return 0
     else:
         return np.finfo(np.float32).precision
+
+
+@beartype
+def rename_columns(df: pd.DataFrame, pattern: str = None) -> pd.DataFrame:
+    """Rename dataframe columns with a pattern and running number."""
+    columns = [col for col in df.columns]
+    pattern = pattern if pattern is not None else "V"
+    names = dict()
+
+    for i in range(len(columns)):
+        names[columns[i]] = f"{pattern}{i + 1}"
+
+    return df.rename(columns=names)
