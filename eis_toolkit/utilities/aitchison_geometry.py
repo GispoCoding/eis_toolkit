@@ -56,6 +56,12 @@ def _scale(df: pd.DataFrame, scale: np.float64) -> pd.DataFrame:
 
 
 @beartype
+def _multiply_by_scale(df: pd.DataFrame, scale: pd.Series) -> pd.DataFrame:
+
+    return df.mul(scale, axis=0)
+
+
+@beartype
 def _normalize(
     row: pd.Series, columns: Optional[Sequence[str]] = None, sum: np.float64 = 1.0
 ) -> Tuple[pd.Series, np.float64]:
@@ -117,7 +123,7 @@ def _closure(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> Tuple
     scales = pd.Series(np.zeros((len(dfc),)))
 
     for idx, row in df.iterrows():
-        row, scale = _normalize_to_one(row, columns)
+        row, scale = _normalize(row, columns)
         dfc.iloc[idx] = row
         scales.iloc[idx] = scale
 

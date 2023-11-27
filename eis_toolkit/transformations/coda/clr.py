@@ -1,12 +1,12 @@
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Tuple
+from beartype.typing import Optional, Sequence
 from scipy.stats import gmean
 
-from eis_toolkit.utilities.aitchison_geometry import _closure
+from eis_toolkit.utilities.aitchison_geometry import _closure, _scale
 from eis_toolkit.utilities.checks.coda import check_compositional
-from eis_toolkit.utilities.miscellaneous import rename_columns
+from eis_toolkit.utilities.miscellaneous import rename_columns, rename_columns_by_pattern
 
 
 @beartype
@@ -39,10 +39,29 @@ def clr_transform(df: pd.DataFrame) -> pd.DataFrame:
     Raises:
         See check_compositional.
     """
-    return rename_columns(_clr_transform(df))
+    return rename_columns_by_pattern(_clr_transform(df))
 
 
-def inverse_clr(df: pd.DataFrame) -> Tuple[pd.DataFrame, np.float64]:
-    """Perform the inverse transformation for a set of CLR transformed data."""
+@beartype
+def inverse_clr(df: pd.DataFrame, colnames: Optional[Sequence[str]] = None, scale: float = 1.0) -> pd.DataFrame:
+    """
+    Perform the inverse transformation for a set of CLR transformed data.
 
-    return _closure(np.exp(df))
+    Args:
+        df: CLR transformed compositional data.
+        colnames: List of column names to rename the columns to.
+        scale: The value to which each composition should be normalized. Eg., if the composition is expressed
+            as percentages, scale=100.
+
+    Returns:
+        A dataframe containing the inverse transformed data.
+    """
+
+    inverse, _ = _closure(np.exp(df))
+
+    inverse = _scale(inverse, np.float64(scale))
+
+    if colnames is not None:
+        return rename_columns(inverse, colnames)
+
+    return inverse
