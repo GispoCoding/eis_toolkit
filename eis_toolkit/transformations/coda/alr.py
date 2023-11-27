@@ -6,6 +6,7 @@ from beartype.typing import Sequence
 from eis_toolkit.exceptions import InvalidColumnIndexException
 from eis_toolkit.utilities.checks.coda import check_compositional
 from eis_toolkit.utilities.checks.dataframe import check_column_index_in_dataframe
+from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
 
 
 @beartype
@@ -51,7 +52,7 @@ def alr_transform(df: pd.DataFrame, idx: int = -1, keep_redundant_column: bool =
     if not keep_redundant_column and denominator_column in columns:
         columns.remove(denominator_column)
 
-    return _alr_transform(df, columns, denominator_column)
+    return rename_columns_by_pattern(_alr_transform(df, columns, denominator_column))
 
 
 def inverse_alr():

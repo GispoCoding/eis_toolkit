@@ -6,6 +6,7 @@ from scipy.stats import gmean
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
 from eis_toolkit.utilities.checks.coda import check_compositional
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
+from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
 
 
 @beartype
@@ -133,7 +134,7 @@ def plr_transform(df: pd.DataFrame) -> pd.DataFrame:
         InvalidColumnException: The data contains one or more zeros.
         See check_compositional for other exceptions.
     """
-    return _plr_transform(df)
+    return rename_columns_by_pattern(_plr_transform(df))
 
 
 @beartype

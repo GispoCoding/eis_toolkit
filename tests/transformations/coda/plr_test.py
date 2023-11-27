@@ -46,5 +46,5 @@ def test_plr_transform():
     df = pd.DataFrame(arr, columns=["a", "b", "c", "d"])
     result = plr_transform(df)
     assert len(result.columns) == len(df.columns) - 1
-    expected = pd.DataFrame(np.array([[1.60, 0.19, 0.91], [1.49, 0.43, 0.65]]), columns=["a", "b", "c"])
+    expected = pd.DataFrame(np.array([[1.60, 0.19, 0.91], [1.49, 0.43, 0.65]]), columns=["V1", "V2", "V3"])
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)

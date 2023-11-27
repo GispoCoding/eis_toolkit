@@ -5,18 +5,16 @@ import pytest
 from eis_toolkit.exceptions import InvalidColumnIndexException
 from eis_toolkit.transformations.coda.alr import alr_transform
 
-ONES_DATAFRAME_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["a", "b", "c", "d"])
-
-ZEROS_DATAFRAME_4x3 = pd.DataFrame(np.zeros((4, 3)), columns=["a", "b", "c"])
-
 sample_array = np.array([[65, 12, 18, 5], [63, 16, 15, 6]])
 SAMPLE_DATAFRAME = pd.DataFrame(sample_array, columns=["a", "b", "c", "d"])
 
 
 def test_alr_transform_simple():
     """Test ALR transformation core functionality."""
-    result = alr_transform(ONES_DATAFRAME_4x4)
-    pd.testing.assert_frame_equal(result, ZEROS_DATAFRAME_4x3)
+    ones_df_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["a", "b", "c", "d"])
+    zeros_df_4x4 = pd.DataFrame(np.zeros((4, 3)), columns=["V1", "V2", "V3"])
+    result = alr_transform(ones_df_4x4)
+    pd.testing.assert_frame_equal(result, zeros_df_4x4)
 
 
 def test_alr_transform_with_out_of_bounds_denominator_column():
@@ -35,11 +33,7 @@ def test_alr_transform_redundant_column():
     values when requesting to keep the redundant column in the alr transformed data.
     """
     idx = -1
-    redundant_column = SAMPLE_DATAFRAME.columns[idx]
     result = alr_transform(SAMPLE_DATAFRAME, idx, keep_redundant_column=True)
 
-    assert redundant_column in result.columns
-    assert all([val == 0 for val in result.iloc[:, -1].values])
-
-
-# TODO: test with unnamed columns
+    assert result.shape == SAMPLE_DATAFRAME.shape
+    assert all([val == 0 for val in result.iloc[:, idx].values])

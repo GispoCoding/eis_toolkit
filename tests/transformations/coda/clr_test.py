@@ -3,20 +3,16 @@ import pandas as pd
 
 from eis_toolkit.transformations.coda.clr import clr_transform, inverse_clr
 
-SINGLE_ROW_DATAFRAME = pd.DataFrame(np.array([1, 1, 1, 2])[None], columns=["a", "b", "c", "d"])
-
-ONES_DATAFRAME_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["a", "b", "c", "d"])
-
-ZEROS_DATAFRAME_4x4 = pd.DataFrame(np.zeros((4, 4)), columns=["V1", "V2", "V3", "V4"])
-
 sample_array = np.array([[65, 12, 18, 5], [63, 16, 15, 6]], dtype=np.float64)
 SAMPLE_DATAFRAME = pd.DataFrame(sample_array, columns=["a", "b", "c", "d"])
 
 
 def test_clr_transform_simple():
     """Test CLR transform core functionality."""
-    result = clr_transform(ONES_DATAFRAME_4x4)
-    pd.testing.assert_frame_equal(result, ZEROS_DATAFRAME_4x4)
+    ones_df_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["a", "b", "c", "d"])
+    zeros_df_4x4 = pd.DataFrame(np.zeros((4, 4)), columns=["V1", "V2", "V3", "V4"])
+    result = clr_transform(ones_df_4x4)
+    pd.testing.assert_frame_equal(result, zeros_df_4x4)
 
 
 def test_clr_transform():
@@ -30,8 +26,10 @@ def test_clr_transform():
 
 def test_inverse_clr_simple():
     """Test CLR inverse core functionality."""
-    result = inverse_clr(ZEROS_DATAFRAME_4x4, ["a", "b", "c", "d"], 4.0)
-    pd.testing.assert_frame_equal(result, ONES_DATAFRAME_4x4)
+    zeros_df_4x4 = pd.DataFrame(np.zeros((4, 4)), columns=["V1", "V2", "V3", "V4"])
+    ones_df_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["a", "b", "c", "d"])
+    result = inverse_clr(zeros_df_4x4, ["a", "b", "c", "d"], 4.0)
+    pd.testing.assert_frame_equal(result, ones_df_4x4)
 
 
 def test_inverse_clr():
