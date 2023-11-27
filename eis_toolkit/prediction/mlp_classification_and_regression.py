@@ -38,13 +38,12 @@ def make_one_hot_encoding(labels):
     return label_encoded
 
 
-@beartype
 def do_the_mlp(
-    input_shape_for_mlp: tuple[int, int, int] or tuple[int, int],
-    neuron_list: Union[int] = [16],
+    input_shape_for_mlp: Union[tuple[int, int, int], tuple[int, int]],
+    neuron_list: list[int] = [16],
     dropout_rate: Union[None, float] = None,
     last_activation: Literal["softmax", "sigmoid"] = "softmax",
-    regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2] = None,
+    regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2, None] = None,
     data_augmentation: bool = False,
     optimizer: str = "Adam",
     loss=Union[tf.keras.losses.BinaryCrossentropy, tf.keras.losses.CategoricalCrossentropy],
@@ -71,7 +70,6 @@ def do_the_mlp(
         InvalidArgumentTypeException: one of the arguments is invalid.
         CNNException: raised when the input is not valid
     """
-
     # if regression and binary we can not uses more than 1
     if output_units > 1 and loss == tf.keras.losses.BinaryCrossentropy:
         raise InvalidArgumentTypeException
@@ -108,13 +106,13 @@ def do_the_mlp(
 
     # create the model
     model = tf.keras.Model(inputs=input_layer, outputs=classifier, name="the_mlp_model")
-
-    model = model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
-
+    model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
     return model
 
 
 # now let's prepare two mega function one for classification and one for regression
+
+
 @beartype
 def train_and_predict_for_classification(
     X: np.ndarray,
@@ -122,12 +120,12 @@ def train_and_predict_for_classification(
     batch_size: int,
     epochs: int,
     cross_validation: Literal["LOOCV", "KFOLD", "SKFOLD"],
-    input_shape_for_mlp: tuple[int, int, int] or tuple[int, int],
-    sample_weights: True or False,
-    neuron_list: Union[int] = [16],
+    input_shape_for_mlp: Union[tuple[int, int, int], tuple[int, int], tuple[int], int],
+    sample_weights: bool = False,
+    neuron_list: list[int] = [16],
     dropout_rate: Union[None, float] = None,
     last_activation: Literal["softmax", "sigmoid"] = "softmax",
-    regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2] = None,
+    regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2, None] = None,
     data_augmentation: bool = False,
     optimizer: str = "Adam",
     loss=Union[tf.keras.losses.BinaryCrossentropy, tf.keras.losses.CategoricalCrossentropy],
@@ -160,6 +158,7 @@ def train_and_predict_for_classification(
         CNNRunningParameterException: when the batch size or epochs are wrong integer
         InvalidArgumentTypeException: when you try to use sigmoid or BinaryCrossEntropy for classification.
     """
+
     if batch_size <= 0 or epochs <= 0:
         raise CNNRunningParameterException
 
@@ -181,7 +180,7 @@ def train_and_predict_for_classification(
         loss=loss,
         output_units=output_units,
     )
-
+    print(mlp_model)
     # prepare the scaler
     scaler_agent = StandardScaler()
     scaler_agent.fit(X.reshape(-1, X.shape[-1]))
@@ -236,12 +235,12 @@ def train_and_predict_for_regression(
     epochs: int,
     threshold: float,
     cross_validation: Literal["LOOCV", "KFOLD", "SKFOLD"],
-    input_shape_for_mlp: tuple[int, int, int] or tuple[int, int],
-    sample_weights: True or False,
-    neuron_list: Union[int] = [16],
+    input_shape_for_mlp: Union[tuple[int, int, int], tuple[int, int], tuple[int], int],
+    sample_weights: bool = False,
+    neuron_list: list[int] = [16],
     dropout_rate: Union[None, float] = None,
     last_activation: Literal["softmax", "sigmoid"] = "softmax",
-    regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2] = None,
+    regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2, None] = None,
     data_augmentation: bool = False,
     optimizer: str = "Adam",
     loss=Union[tf.keras.losses.BinaryCrossentropy, tf.keras.losses.CategoricalCrossentropy],
