@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Optional, Sequence, Tuple
+from beartype.typing import Optional, Sequence
 
 from eis_toolkit.utilities.checks.dataframe import check_dataframe_contains_only_positive_numbers
 
@@ -50,35 +50,11 @@ def check_in_unit_simplex_sample_space(df: pd.DataFrame) -> bool:
 
 
 @beartype
-def _scale(df: pd.DataFrame, scale: np.float64) -> pd.DataFrame:
-
-    return scale * df
-
-
-@beartype
-def _multiply_by_scale(df: pd.DataFrame, scale: pd.Series) -> pd.DataFrame:
-
-    return df.mul(scale, axis=0)
-
-
-@beartype
-def _normalize(
-    row: pd.Series, columns: Optional[Sequence[str]] = None, sum: np.float64 = 1.0
-) -> Tuple[pd.Series, np.float64]:
-    """TODO: docstring."""
-    if columns is None:
-        scale = np.float64(np.sum(row)) / sum
-        row = np.divide(row, scale)
-    else:
-        scale = np.float64(np.sum(row[columns])) / sum
-        row[columns] = np.divide(row[columns], scale)
-    return row, scale
-
-
-@beartype
-def _normalize_to_one(row: pd.Series, columns: Optional[Sequence[str]] = None) -> Tuple[pd.Series, np.float64]:
+def _normalize(row: pd.Series, columns: Optional[Sequence[str]] = None, sum: np.float64 = 1.0) -> pd.Series:
     """
-    Normalize the series to one.
+    Normalize the series to a given value.
+
+    If no value is provided, normalize to 1.
 
     Args:
         row: The series to normalize.
@@ -87,16 +63,16 @@ def _normalize_to_one(row: pd.Series, columns: Optional[Sequence[str]] = None) -
         A tuple containing a new series with the normalized values and the scale factor used.
     """
     if columns is None:
-        scale = np.float64(np.sum(row))
+        scale = np.float64(np.sum(row)) / sum
         row = np.divide(row, scale)
     else:
-        scale = np.float64(np.sum(row[columns]))
+        scale = np.float64(np.sum(row[columns])) / sum
         row[columns] = np.divide(row[columns], scale)
-    return row, scale
+    return row
 
 
 @beartype
-def _closure(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> Tuple[pd.DataFrame, pd.Series]:
+def _closure(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> pd.DataFrame:
     """
     Perform the closure operation on the dataframe.
 
@@ -110,30 +86,22 @@ def _closure(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> Tuple
         A new dataframe of shape (N, D), in which the specified columns have been normalized to 1,
         and other columns retain the data they had.
         A series containing the scale factor used to normalize each row. Uses the same indexing as the dataframe rows.
-
-    Raises:
-        # TODO
     """
-
-    # TODO: add check/requirement for df having to contain non-numeric column names
-
     columns = [col for col in df.columns] if columns is None else columns
 
     dfc = df.copy()
-    scales = pd.Series(np.zeros((len(dfc),)))
 
     for idx, row in df.iterrows():
-        row, scale = _normalize(row, columns)
+        row = _normalize(row, columns)
         dfc.iloc[idx] = row
-        scales.iloc[idx] = scale
 
-    return dfc, scales
+    return dfc
 
 
 # TODO (below): operations in the Aitchison geometry/simplex
 
-# (POSSIBLE TODO: perturbation operation function)
+# (TODO: perturbation operation function)
 
-# (POSSIBLE TODO: powering operation function)
+# (TODO: powering operation function)
 
-# (POSSIBLE TODO: inner product operation)
+# (TODO: inner product operation)

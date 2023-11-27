@@ -4,7 +4,6 @@ import pandas as pd
 from eis_toolkit.utilities.aitchison_geometry import (
     _closure,
     _normalize,
-    _normalize_to_one,
     check_in_simplex_sample_space,
     check_in_unit_simplex_sample_space,
 )
@@ -37,7 +36,7 @@ def test_check_for_unit_simplex_sample_space():
 
 def test_normalizing():
     """Test normalizing a series to a given value."""
-    output, _ = _normalize(SERIES, sum=np.float64(20))
+    output = _normalize(SERIES, sum=np.float64(20))
     expected_output = pd.Series([2, 4, 6, 8], dtype=np.float64)
     assert np.sum(output) == 20
     pd.testing.assert_series_equal(output, expected_output)
@@ -45,7 +44,7 @@ def test_normalizing():
 
 def test_normalizing_to_one():
     """Test normalizing a series to 1."""
-    output, _ = _normalize_to_one(SERIES)
+    output = _normalize(SERIES)
     expected_output = pd.Series([0.1, 0.2, 0.3, 0.4])
     assert np.sum(output) == 1
     pd.testing.assert_series_equal(output, expected_output)
@@ -53,13 +52,13 @@ def test_normalizing_to_one():
 
 def test_closure():
     """Test the closure operation."""
-    output, _ = _closure(SIMPLEX_DATAFRAME)
+    output = _closure(SIMPLEX_DATAFRAME)
     expected_output = pd.DataFrame([[0.1, 0.2, 0.3, 0.4], [0.2, 0.3, 0.2, 0.3]], columns=["a", "b", "c", "d"])
     pd.testing.assert_frame_equal(output, expected_output)
 
 
 def test_closure_of_specified_columns():
     """Test that the closure operation works with a selection of columns."""
-    output, _ = _closure(SIMPLEX_DATAFRAME, ["a", "c"])
+    output = _closure(SIMPLEX_DATAFRAME, ["a", "c"])
     expected_output = pd.DataFrame([[0.25, 2, 0.75, 4], [0.5, 3, 0.5, 3]], columns=["a", "b", "c", "d"])
     pd.testing.assert_frame_equal(output, expected_output)

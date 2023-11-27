@@ -4,7 +4,7 @@ from beartype import beartype
 from beartype.typing import Optional, Sequence
 from scipy.stats import gmean
 
-from eis_toolkit.utilities.aitchison_geometry import _closure, _scale
+from eis_toolkit.utilities.aitchison_geometry import _closure
 from eis_toolkit.utilities.checks.coda import check_compositional
 from eis_toolkit.utilities.miscellaneous import rename_columns, rename_columns_by_pattern
 
@@ -57,9 +57,7 @@ def inverse_clr(df: pd.DataFrame, colnames: Optional[Sequence[str]] = None, scal
         A dataframe containing the inverse transformed data.
     """
 
-    inverse, _ = _closure(np.exp(df))
-
-    inverse = _scale(inverse, np.float64(scale))
+    inverse = _closure(np.exp(df)) * scale
 
     if colnames is not None:
         return rename_columns(inverse, colnames)
