@@ -1,56 +1,10 @@
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Optional, Sequence
-
-from eis_toolkit.utilities.checks.dataframe import check_dataframe_contains_only_positive_numbers
 
 
 @beartype
-def check_in_simplex_sample_space(df: pd.DataFrame, k: np.float64 = None) -> bool:
-    """
-    Check that the compositions represented by the data rows belong to a simplex sample space.
-
-    Checks that each compositional data point belongs to the set of positive real numbers.
-    Checks that each composition is normalized to the same value.
-
-    Args:
-        df: Dataframe to check.
-        k: The expected sum of each row. If None, simply checks that the sum of each row is equal.
-
-    Returns:
-        True if values are valid and the sum of each row is k.
-    """
-    if not check_dataframe_contains_only_positive_numbers(df):
-        return False
-
-    df_sum = np.sum(df, axis=1)
-    expected_sum = k if k is not None else df_sum.iloc[0]
-    if len(df_sum[df_sum.iloc[:] != expected_sum]) != 0:
-        return False
-
-    return True
-
-
-@beartype
-def check_in_unit_simplex_sample_space(df: pd.DataFrame) -> bool:
-    """
-    Check that the compositions represented by the data rows belong to the unit simplex sample space.
-
-    Checks that each compositional data point belongs to the set of positive real numbers.
-    Checks that each composition is normalized to 1.
-
-    Args:
-        df: Dataframe to check.
-
-    Returns:
-        True if values are valid and the sum of each row is 1.
-    """
-    return check_in_simplex_sample_space(df, np.float64(1))
-
-
-@beartype
-def _normalize(row: pd.Series, columns: Optional[Sequence[str]] = None, sum: np.float64 = 1.0) -> pd.Series:
+def _normalize(row: pd.Series, sum: np.float64 = 1.0) -> pd.Series:
     """
     Normalize the series to a given value.
 
@@ -60,19 +14,14 @@ def _normalize(row: pd.Series, columns: Optional[Sequence[str]] = None, sum: np.
         row: The series to normalize.
 
     Returns:
-        A tuple containing a new series with the normalized values and the scale factor used.
+        A series containing the normalized values.
     """
-    if columns is None:
-        scale = np.float64(np.sum(row)) / sum
-        row = np.divide(row, scale)
-    else:
-        scale = np.float64(np.sum(row[columns])) / sum
-        row[columns] = np.divide(row[columns], scale)
-    return row
+    scale = np.float64(np.sum(row)) / sum
+    return np.divide(row, scale)
 
 
 @beartype
-def _closure(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> pd.DataFrame:
+def _closure(df: pd.DataFrame) -> pd.DataFrame:
     """
     Perform the closure operation on the dataframe.
 
@@ -80,20 +29,15 @@ def _closure(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> pd.Da
 
     Args:
         df: A dataframe of shape (N, D) compositional data.
-        columns: Names of the columns to normalize.
 
     Returns:
         A new dataframe of shape (N, D), in which the specified columns have been normalized to 1,
-        and other columns retain the data they had.
-        A series containing the scale factor used to normalize each row. Uses the same indexing as the dataframe rows.
     """
-    columns = [col for col in df.columns] if columns is None else columns
 
-    dfc = df.copy()
+    dfc = df.copy().astype(np.float64)
 
     for idx, row in df.iterrows():
-        row = _normalize(row, columns)
-        dfc.iloc[idx] = row
+        dfc.iloc[idx] = _normalize(row)
 
     return dfc
 
