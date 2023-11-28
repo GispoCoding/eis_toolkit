@@ -4,7 +4,7 @@ from beartype import beartype
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
-from eis_toolkit.utilities.checks.coda import check_compositional
+from eis_toolkit.utilities.checks.compositional import check_compositional
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
 from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
 

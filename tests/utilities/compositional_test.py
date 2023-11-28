@@ -7,7 +7,7 @@ from eis_toolkit.transformations.coda.alr import alr_transform
 from eis_toolkit.transformations.coda.clr import clr_transform
 from eis_toolkit.transformations.coda.ilr import single_ilr_transform
 from eis_toolkit.transformations.coda.plr import plr_transform, single_plr_transform
-from eis_toolkit.utilities.checks.coda import check_in_simplex_sample_space
+from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
 
 
 def test_compositional_data_has_zeros():

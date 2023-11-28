@@ -4,7 +4,7 @@ from beartype import beartype
 from beartype.typing import Sequence
 
 from eis_toolkit.exceptions import InvalidColumnIndexException
-from eis_toolkit.utilities.checks.coda import check_compositional
+from eis_toolkit.utilities.checks.compositional import check_compositional
 from eis_toolkit.utilities.checks.dataframe import check_column_index_in_dataframe
 from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
 

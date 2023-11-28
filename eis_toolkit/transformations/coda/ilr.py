@@ -5,7 +5,7 @@ from beartype.typing import Sequence
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
-from eis_toolkit.utilities.checks.coda import check_compositional
+from eis_toolkit.utilities.checks.compositional import check_compositional
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
 

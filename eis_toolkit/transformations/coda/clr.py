@@ -5,7 +5,7 @@ from beartype.typing import Optional, Sequence
 from scipy.stats import gmean
 
 from eis_toolkit.utilities.aitchison_geometry import _closure
-from eis_toolkit.utilities.checks.coda import check_compositional
+from eis_toolkit.utilities.checks.compositional import check_compositional
 from eis_toolkit.utilities.miscellaneous import rename_columns, rename_columns_by_pattern
 
 
