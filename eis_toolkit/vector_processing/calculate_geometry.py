@@ -21,17 +21,16 @@ def calculate_geometry(geodataframe: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         raise EmptyDataFrameException("Expected geodataframe to contain geometries.")
 
     calculated_gdf = geodataframe.copy()
+    calculated_gdf["calculated_value"] = calculated_gdf.apply(lambda row: calculate_value(row), axis=1)
 
-    calculated_gdf["calculated_value"] = None
+    return calculated_gdf
 
-    for index, row in calculated_gdf.iterrows():
+def calculate_value(row):
         geometry_type = row["geometry"].geom_type
 
         if geometry_type == "Point":
-            calculated_gdf.at[index, "calculated_value"] = 0
+            return 0
         elif geometry_type == "LineString":
-            calculated_gdf.at[index, "calculated_value"] = row["geometry"].length
+            return row["geometry"].length
         elif geometry_type == "Polygon":
-            calculated_gdf.at[index, "calculated_value"] = row["geometry"].area
-
-    return calculated_gdf
+            return row["geometry"].area
