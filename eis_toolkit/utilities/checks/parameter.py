@@ -69,3 +69,18 @@ def check_minmax_position(parameter: tuple) -> bool:  # type: ignore[no-untyped-
         Bool: True if minimum value < maxiumum value, else False.
     """
     return parameter[0] < parameter[1]
+
+
+@beartype
+def check_lists_overlap(param_1: Sequence[str], param_2: Sequence[str]) -> bool:
+    """
+    Check if the lists overlap.
+
+    Args:
+        param_1: A list-like parameter.
+        param_2: A list-like parameter.
+
+    Returns:
+        True if any value is found in both lists.
+    """
+    return not set(param_1).isdisjoint(param_2)

@@ -2,13 +2,13 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eis_toolkit.exceptions import InvalidColumnException
-from eis_toolkit.transformations.coda.ilr import _calculate_scaling_factor, single_ilr_transform
+from eis_toolkit.exceptions import InvalidColumnException, InvalidCompositionException, InvalidParameterValueException
+from eis_toolkit.transformations.coda.ilr import _calculate_ilr_scaling_factor, single_ilr_transform
 
 
 def test_calculate_scaling_factor():
     """Test the scaling factor calculation."""
-    result = _calculate_scaling_factor(2, 1)
+    result = _calculate_ilr_scaling_factor(2, 1)
     expected = np.sqrt(2 / 3.0)  # 0.816496580927726
     assert result == expected
 
@@ -43,3 +43,19 @@ def test_ilr_transform_with_unexpected_column_name():
         arr = np.array([[65, 12, 18, 5], [63, 16, 15, 6]])
         df = pd.DataFrame(arr, columns=["a", "b", "c", "d"])
         single_ilr_transform(df, ["a", "b"], ["comp3"])
+
+
+def test_ilr_transform_with_overlapping_subcompositions():
+    """Test that providing overlapping subcomposition columns raises the correct exception."""
+    with pytest.raises(InvalidCompositionException):
+        arr = np.array([[65, 12, 18, 5], [63, 16, 15, 6]])
+        df = pd.DataFrame(arr, columns=["a", "b", "c", "d"])
+        single_ilr_transform(df, ["a", "b"], ["b"])
+
+
+def test_ilr_transform_with_empty_subcomposition():
+    """Test that providing an empty subcomposition list raises the correct exception."""
+    with pytest.raises(InvalidParameterValueException):
+        arr = np.array([[65, 12, 18, 5], [63, 16, 15, 6]])
+        df = pd.DataFrame(arr, columns=["a", "b", "c", "d"])
+        single_ilr_transform(df, ["a", "b"], [])

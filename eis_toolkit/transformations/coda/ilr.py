@@ -4,14 +4,14 @@ from beartype import beartype
 from beartype.typing import Sequence
 from scipy.stats import gmean
 
-from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidColumnException, InvalidCompositionException, InvalidParameterValueException
 from eis_toolkit.utilities.checks.compositional import check_compositional
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid
-from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
+from eis_toolkit.utilities.checks.parameter import check_lists_overlap, check_numeric_value_sign
 
 
 @beartype
-def _calculate_scaling_factor(c1: int, c2: int) -> np.float64:
+def _calculate_ilr_scaling_factor(c1: int, c2: int) -> np.float64:
     """
     Calculate the scaling factor for the ILR transform.
 
@@ -57,7 +57,7 @@ def _single_ilr_transform(
     for idx, row in dfc.iterrows():
         ilr_values[idx] = _geometric_mean_logratio(row, subcomposition_1, subcomposition_2)
 
-    ilr_values = _calculate_scaling_factor(c1, c2) * ilr_values
+    ilr_values = _calculate_ilr_scaling_factor(c1, c2) * ilr_values
 
     return ilr_values
 
@@ -83,17 +83,23 @@ def single_ilr_transform(
 
     Raises:
         InvalidColumnException: One or more subcomposition columns are not found in the input dataframe.
+        InvalidCompositionException: One or more columns are found in both subcompositions.
+        InvalidParameterValueException: At least one subcomposition provided was empty.
         See check_compositional for other exceptions.
     """
-
-    # TODO: verify whether the subcompositions are allowed to have overlap
+    if not (subcomposition_1 and subcomposition_2):
+        raise InvalidParameterValueException("A subcomposition should contain at least one column.")
 
     if not (check_columns_valid(df, subcomposition_1) and check_columns_valid(df, subcomposition_2)):
         raise InvalidColumnException("Not all of the input columns were found in the input dataframe.")
+
+    if check_lists_overlap(subcomposition_1, subcomposition_2):
+        raise InvalidCompositionException("The subcompositions overlap.")
 
     return _single_ilr_transform(df, subcomposition_1, subcomposition_2)
 
 
 @beartype
-def _ilr_inverse():
+def inverse_ilr():
+    """Perform the inverse transformation for a set of ILR transformed data."""
     raise NotImplementedError()
