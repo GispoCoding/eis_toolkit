@@ -17,6 +17,31 @@ def test_alr_transform_simple():
     pd.testing.assert_frame_equal(result, zeros_df_4x4)
 
 
+def test_alr_transform():
+    """Test ALR transformation core functionality."""
+    arr = np.array([[1, 4, 1, 1], [2, 1, 2, 2]])
+    df = pd.DataFrame(arr, columns=["a", "b", "c", "d"], dtype=np.float64)
+
+    result = alr_transform(df, idx=1, keep_redundant_column=True)
+    expected = pd.DataFrame(
+        {
+            "V1": [np.log(0.25), np.log(2)],
+            "V2": [0, 0],
+            "V3": [np.log(0.25), np.log(2)],
+            "V4": [np.log(0.25), np.log(2)],
+        },
+        dtype=np.float64,
+    )
+    pd.testing.assert_frame_equal(result, expected)
+
+    result = alr_transform(df, idx=1)
+    expected = pd.DataFrame(
+        {"V1": [np.log(0.25), np.log(2)], "V2": [np.log(0.25), np.log(2)], "V3": [np.log(0.25), np.log(2)]},
+        dtype=np.float64,
+    )
+    pd.testing.assert_frame_equal(result, expected)
+
+
 def test_alr_transform_with_out_of_bounds_denominator_column():
     """Test that providing a column index that is out of bounds raises the correct exception."""
     with pytest.raises(InvalidColumnIndexException):
