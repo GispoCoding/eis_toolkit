@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from eis_toolkit.exceptions import InvalidColumnIndexException
-from eis_toolkit.transformations.coda.alr import alr_transform
+from eis_toolkit.transformations.coda.alr import alr_transform, inverse_alr
 
 sample_array = np.array([[65, 12, 18, 5], [63, 16, 15, 6]])
 SAMPLE_DATAFRAME = pd.DataFrame(sample_array, columns=["a", "b", "c", "d"])
@@ -37,3 +37,14 @@ def test_alr_transform_redundant_column():
 
     assert result.shape == SAMPLE_DATAFRAME.shape
     assert all([val == 0 for val in result.iloc[:, idx].values])
+
+
+def test_inverse_alr():
+    """Test inverse ALR core functionality."""
+    arr = np.array([[np.log(0.25), np.log(0.25), np.log(0.25)], [np.log(2), np.log(2), np.log(2)]])
+    df = pd.DataFrame(arr, columns=["V1", "V2", "V3"], dtype=np.float64)
+    column_name = "d"
+    result = inverse_alr(df, column_name, 7)
+    expected_arr = np.array([[1, 1, 1, 4], [2, 2, 2, 1]])
+    expected = pd.DataFrame(expected_arr, columns=["V1", "V2", "V3", "d"], dtype=np.float64)
+    pd.testing.assert_frame_equal(result, expected, atol=1e-2)

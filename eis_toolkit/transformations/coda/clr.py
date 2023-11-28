@@ -48,7 +48,7 @@ def inverse_clr(df: pd.DataFrame, colnames: Optional[Sequence[str]] = None, scal
     Perform the inverse transformation for a set of CLR transformed data.
 
     Args:
-        df: CLR transformed compositional data.
+        df: A dataframe of CLR transformed compositional data.
         colnames: List of column names to rename the columns to.
         scale: The value to which each composition should be normalized. Eg., if the composition is expressed
             as percentages, scale=100.

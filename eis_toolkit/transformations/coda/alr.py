@@ -4,6 +4,7 @@ from beartype import beartype
 from beartype.typing import Sequence
 
 from eis_toolkit.exceptions import InvalidColumnIndexException
+from eis_toolkit.utilities.aitchison_geometry import _closure
 from eis_toolkit.utilities.checks.compositional import check_compositional
 from eis_toolkit.utilities.checks.dataframe import check_column_index_in_dataframe
 from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
@@ -49,6 +50,25 @@ def alr_transform(df: pd.DataFrame, idx: int = -1, keep_redundant_column: bool =
     return rename_columns_by_pattern(_alr_transform(df, columns, denominator_column))
 
 
-def inverse_alr():
-    """Perform the inverse transformation for a set of ALR transformed data."""
-    raise NotImplementedError()
+def inverse_alr(df: pd.DataFrame, column: str, scale: float = 1.0) -> pd.DataFrame:
+    """
+    Perform the inverse transformation for a set of ALR transformed data.
+
+    Args:
+        df: A dataframe of ALR transformed compositional data.
+        column: The name of the redundant column.
+        scale: The value to which each composition should be normalized. Eg., if the composition is expressed
+            as percentages, scale=100.
+
+    Returns:
+        A dataframe containing the inverse transformed data.
+    """
+    dfc = df.copy()
+
+    if column not in df:
+        # Add the denominator column
+        dfc[column] = 0.0
+
+    dfc = _closure(np.exp(dfc)) * scale
+
+    return dfc
