@@ -3,6 +3,7 @@ import pandas as pd
 from beartype import beartype
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
+from eis_toolkit.utilities.checks.dataframe import check_dataframe_contains_zeros
 
 
 @beartype
@@ -58,8 +59,12 @@ def pairwise_logratio(df: pd.DataFrame, c1: str, c2: str) -> pd.Series:
 
     Raises:
         InvalidColumnException: One or both of the input columns are not found in the dataframe.
+        InvalidParameterValueException: The input columns contain at least one zero value.
     """
     if c1 not in df.columns or c2 not in df.columns:
-        raise InvalidColumnException()
+        raise InvalidColumnException("At least one input column is not found in the dataframe.")
+
+    if check_dataframe_contains_zeros(df[[c1, c2]]):
+        raise InvalidParameterValueException("The input columns contain at least one zero value.")
 
     return _pairwise_logratio(df, c1, c2)
