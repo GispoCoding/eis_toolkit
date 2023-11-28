@@ -69,7 +69,22 @@ def test_inverse_alr():
     arr = np.array([[np.log(0.25), np.log(0.25), np.log(0.25)], [np.log(2), np.log(2), np.log(2)]])
     df = pd.DataFrame(arr, columns=["V1", "V2", "V3"], dtype=np.float64)
     column_name = "d"
-    result = inverse_alr(df, column_name, 7)
+    result = inverse_alr(df, column_name, scale=7, idx=-1)
     expected_arr = np.array([[1, 1, 1, 4], [2, 2, 2, 1]])
     expected = pd.DataFrame(expected_arr, columns=["V1", "V2", "V3", "d"], dtype=np.float64)
+    pd.testing.assert_frame_equal(result, expected, atol=1e-2)
+
+
+def test_inverse_alr_column_placement():
+    """Test inverse ALR core functionality with nonstandard column placement."""
+    arr = np.array([[np.log(0.25), np.log(0.25), np.log(0.25)], [np.log(2), np.log(2), np.log(2)]])
+    df = pd.DataFrame(arr, columns=["V1", "V2", "V3"], dtype=np.float64)
+    column_name = "d"
+    expected_arr = np.array([[1, 1, 4, 1], [2, 2, 1, 2]])
+    expected = pd.DataFrame(expected_arr, columns=["V1", "V2", "d", "V3"], dtype=np.float64)
+
+    result = inverse_alr(df, column_name, scale=7, idx=2)
+    pd.testing.assert_frame_equal(result, expected, atol=1e-2)
+
+    result = inverse_alr(df, column_name, scale=7, idx=-6)
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
