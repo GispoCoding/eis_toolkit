@@ -69,6 +69,6 @@ def inverse_alr(df: pd.DataFrame, column: str, scale: float = 1.0) -> pd.DataFra
         # Add the denominator column
         dfc[column] = 0.0
 
-    dfc = _closure(np.exp(dfc)) * scale
+    dfc = _closure(np.exp(dfc), np.float64(scale))
 
     return dfc

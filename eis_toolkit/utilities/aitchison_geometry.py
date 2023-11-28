@@ -4,7 +4,7 @@ from beartype import beartype
 
 
 @beartype
-def _normalize(row: pd.Series, sum: np.float64 = 1.0) -> pd.Series:
+def _normalize(row: pd.Series, sum_value: np.float64 = 1.0) -> pd.Series:
     """
     Normalize the series to a given value.
 
@@ -16,12 +16,12 @@ def _normalize(row: pd.Series, sum: np.float64 = 1.0) -> pd.Series:
     Returns:
         A series containing the normalized values.
     """
-    scale = np.float64(np.sum(row)) / sum
+    scale = np.float64(np.sum(row)) / sum_value
     return np.divide(row, scale)
 
 
 @beartype
-def _closure(df: pd.DataFrame) -> pd.DataFrame:
+def _closure(df: pd.DataFrame, scale: np.float64 = None) -> pd.DataFrame:
     """
     Perform the closure operation on the dataframe.
 
@@ -37,7 +37,7 @@ def _closure(df: pd.DataFrame) -> pd.DataFrame:
     dfc = df.copy().astype(np.float64)
 
     for idx, row in df.iterrows():
-        dfc.iloc[idx] = _normalize(row)
+        dfc.iloc[idx] = _normalize(row, scale) if scale is not None else _normalize(row)
 
     return dfc
 

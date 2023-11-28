@@ -72,5 +72,10 @@ def check_dataframe_contains_zeros(df: pd.DataFrame) -> bool:
 
 @beartype
 def check_dataframe_contains_only_positive_numbers(df: pd.DataFrame) -> np.bool_:
-    """Check that the dataframe only contains positive, nonzero values."""
+    """
+    Check that the dataframe only contains positive, nonzero values.
+
+    Args:
+        df: Dataframe to be checked.
+    """
     return np.all([val > 0 for val in df.values])

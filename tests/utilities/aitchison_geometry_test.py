@@ -6,7 +6,7 @@ from eis_toolkit.utilities.aitchison_geometry import _closure, _normalize
 
 def test_normalizing():
     """Test normalizing a series to a given value."""
-    output = _normalize(pd.Series([1, 2, 3, 4]), sum=np.float64(20))
+    output = _normalize(pd.Series([1, 2, 3, 4]), np.float64(20))
     expected_output = pd.Series([2, 4, 6, 8], dtype=np.float64)
     assert np.sum(output) == 20
     pd.testing.assert_series_equal(output, expected_output)

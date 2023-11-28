@@ -57,7 +57,7 @@ def inverse_clr(df: pd.DataFrame, colnames: Optional[Sequence[str]] = None, scal
         A dataframe containing the inverse transformed data.
     """
 
-    inverse = _closure(np.exp(df)) * scale
+    inverse = _closure(np.exp(df), np.float64(scale))
 
     if colnames is not None:
         return rename_columns(inverse, colnames)
