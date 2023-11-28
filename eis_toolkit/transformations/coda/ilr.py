@@ -70,8 +70,7 @@ def single_ilr_transform(
     """
     Perform a single isometric logratio transformation on the provided subcompositions.
 
-    Returns ILR balances.
-    Column order matters.
+    Returns ILR balances. Column order matters.
 
     Args:
         df: A dataframe of shape [N, D] of compositional data.

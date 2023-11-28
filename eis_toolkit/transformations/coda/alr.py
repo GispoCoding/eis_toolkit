@@ -26,8 +26,8 @@ def alr_transform(df: pd.DataFrame, idx: int = -1, keep_redundant_column: bool =
         df: A dataframe of compositional data.
         idx: The integer position based index of the column of the dataframe to be used as denominator.
             If not provided, the last column will be used.
-        keep_redundant_column: Whether to include the denominator column in the result. If True, it is
-            included in the output dataframe regardless of whether it was in the list of given input columns.
+        keep_redundant_column: Whether to include the denominator column in the result. If True, the returned
+            dataframe retains its original shape.
 
     Returns:
         A new dataframe containing the ALR transformed data.
@@ -37,17 +37,11 @@ def alr_transform(df: pd.DataFrame, idx: int = -1, keep_redundant_column: bool =
         See check_compositional for other exceptions.
     """
 
-    columns = [col for col in df.columns]
-
     if not check_column_index_in_dataframe(df, idx):
         raise InvalidColumnIndexException("Denominator column index out of bounds.")
 
     denominator_column = df.columns[idx]
-
-    # TODO: decide: should redundant column maintain its relative
-    # position to the other columns in the resulting dataframe?
-    if denominator_column not in columns:
-        columns.append(denominator_column)
+    columns = [col for col in df.columns]
 
     if not keep_redundant_column and denominator_column in columns:
         columns.remove(denominator_column)

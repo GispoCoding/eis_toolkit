@@ -30,7 +30,7 @@ def _calculate_plr_scaling_factor(c: int) -> np.float64:
 
 
 @beartype
-def _single_plr_transform_index(df: pd.DataFrame, column_ind: int) -> pd.Series:
+def _single_plr_transform_by_index(df: pd.DataFrame, column_ind: int) -> pd.Series:
 
     dfc = df.copy()
     # The denominator is a subcomposition of all the parts "to the right" of the column:
@@ -51,23 +51,9 @@ def _single_plr_transform_index(df: pd.DataFrame, column_ind: int) -> pd.Series:
 @beartype
 def _single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
 
-    dfc = df.copy()
-    idx = dfc.columns.get_loc(column)
+    idx = df.columns.get_loc(column)
 
-    # The denominator is a subcomposition of all the parts "to the right" of the column:
-    columns = [col for col in df.columns]
-    subcomposition = [columns[i] for i in range(len(columns)) if i > idx]
-    c = len(subcomposition)
-    scaling_factor = _calculate_plr_scaling_factor(c)
-
-    # A series to hold the transformed rows
-    plr_values = pd.Series([0.0] * df.shape[0])
-
-    for idx, row in dfc.iterrows():
-        plr_values[idx] = scaling_factor * np.log(row[column] / gmean(row[subcomposition]))
-
-    plr_values = plr_values.T
-    return plr_values
+    return _single_plr_transform_by_index(df, idx)
 
 
 @beartype
@@ -113,7 +99,7 @@ def _plr_transform(df: pd.DataFrame) -> pd.DataFrame:
     plr_values = pd.DataFrame(0.0, index=dfc.index, columns=dfc.columns[:-1])
 
     for i in range(len(df.columns) - 1):
-        plr_values.iloc[:, i] = _single_plr_transform_index(dfc, i)
+        plr_values.iloc[:, i] = _single_plr_transform_by_index(dfc, i)
 
     return plr_values
 

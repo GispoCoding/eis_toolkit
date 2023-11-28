@@ -27,10 +27,10 @@ def test_alr_transform_with_out_of_bounds_denominator_column():
 
 def test_alr_transform_redundant_column():
     """
-    Test alr transformation with the keep_redundant_column option set to True.
+    Test ALR transformation with the keep_redundant_column option set to True.
 
     Test that the redundant column is found in the result, and that it contains the expected
-    values when requesting to keep the redundant column in the alr transformed data.
+    values when requesting to keep the redundant column in the ALR transformed data.
     """
     idx = -1
     result = alr_transform(SAMPLE_DATAFRAME, idx, keep_redundant_column=True)

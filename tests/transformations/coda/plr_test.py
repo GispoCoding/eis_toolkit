@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from eis_toolkit.exceptions import InvalidColumnException
-from eis_toolkit.transformations.coda.plr import _single_plr_transform_index, plr_transform, single_plr_transform
+from eis_toolkit.transformations.coda.plr import _single_plr_transform_by_index, plr_transform, single_plr_transform
 
 
 def test_single_plr_transform_with_single_composition():
@@ -14,13 +14,13 @@ def test_single_plr_transform_with_single_composition():
     result = single_plr_transform(df, "a")
     assert result[0] == pytest.approx(1.82, abs=1e-2)
 
-    result = _single_plr_transform_index(df, 0)
+    result = _single_plr_transform_by_index(df, 0)
     assert result[0] == pytest.approx(1.82, abs=1e-2)
 
     result = single_plr_transform(df, "b")
     assert result[0] == pytest.approx(0.78, abs=1e-2)
 
-    result = _single_plr_transform_index(df, 1)
+    result = _single_plr_transform_by_index(df, 1)
     assert result[0] == pytest.approx(0.78, abs=1e-2)
 
 
