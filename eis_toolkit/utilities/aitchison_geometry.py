@@ -31,7 +31,7 @@ def _closure(df: pd.DataFrame) -> pd.DataFrame:
         df: A dataframe of shape (N, D) compositional data.
 
     Returns:
-        A new dataframe of shape (N, D), in which the specified columns have been normalized to 1,
+        A new dataframe of shape (N, D) where each row has been normalized to 1.
     """
 
     dfc = df.copy().astype(np.float64)

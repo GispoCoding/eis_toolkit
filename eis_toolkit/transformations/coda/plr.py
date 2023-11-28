@@ -10,7 +10,7 @@ from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
 
 
 @beartype
-def _calculate_scaling_factor(c: int) -> np.float64:
+def _calculate_plr_scaling_factor(c: int) -> np.float64:
     """
     Calculate the scaling factor for the PLR transform.
 
@@ -37,7 +37,7 @@ def _single_plr_transform_index(df: pd.DataFrame, column_ind: int) -> pd.Series:
     columns = [col for col in df.columns]
     subcomposition = [columns[i] for i in range(len(columns)) if i > column_ind]
     c = len(subcomposition)
-    scaling_factor = _calculate_scaling_factor(c)
+    scaling_factor = _calculate_plr_scaling_factor(c)
 
     # A series to hold the transformed rows
     plr_values = pd.Series([0.0] * df.shape[0])
@@ -58,7 +58,7 @@ def _single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
     columns = [col for col in df.columns]
     subcomposition = [columns[i] for i in range(len(columns)) if i > idx]
     c = len(subcomposition)
-    scaling_factor = _calculate_scaling_factor(c)
+    scaling_factor = _calculate_plr_scaling_factor(c)
 
     # A series to hold the transformed rows
     plr_values = pd.Series([0.0] * df.shape[0])
@@ -135,8 +135,3 @@ def plr_transform(df: pd.DataFrame) -> pd.DataFrame:
         See check_compositional for other exceptions.
     """
     return rename_columns_by_pattern(_plr_transform(df))
-
-
-@beartype
-def _inverse_plr():
-    raise NotImplementedError()
