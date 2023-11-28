@@ -40,12 +40,3 @@ def _closure(df: pd.DataFrame, scale: np.float64 = None) -> pd.DataFrame:
         dfc.iloc[idx] = _normalize(row, scale) if scale is not None else _normalize(row)
 
     return dfc
-
-
-# TODO (below): operations in the Aitchison geometry/simplex
-
-# (TODO: perturbation operation function)
-
-# (TODO: powering operation function)
-
-# (TODO: inner product operation)
