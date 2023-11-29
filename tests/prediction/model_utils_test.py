@@ -7,7 +7,7 @@ from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
 
 from eis_toolkit import exceptions
-from eis_toolkit.prediction.model_utils import _train_and_evaluate_sklearn_model, load_model, save_model
+from eis_toolkit.prediction.model_utils import _train_and_validate_sklearn_model, load_model, save_model
 
 TEST_DIR = Path(__file__).parent.parent
 
@@ -23,23 +23,23 @@ REGR_METRICS = ["mse", "rmse", "mae", "r2"]
 
 def test_train_and_evaluate_with_no_validation():
     """Test that training a model without evaluation works as expected."""
-    model, out_metrics = _train_and_evaluate_sklearn_model(
-        X_IRIS, Y_IRIS, model=RF_MODEL, test_method="none", metrics=CLF_METRICS, random_state=42
+    model, out_metrics = _train_and_validate_sklearn_model(
+        X_IRIS, Y_IRIS, model=RF_MODEL, validation_method="none", metrics=CLF_METRICS, random_state=42
     )
 
     assert isinstance(model, RandomForestClassifier)
     assert not out_metrics
 
 
-def test_train_and_evaluate_with_simple_split():
-    """Test that training a model with simple split testing works as expected."""
-    model, out_metrics = _train_and_evaluate_sklearn_model(
+def test_train_and_evaluate_with_split():
+    """Test that training a model with split validation works as expected."""
+    model, out_metrics = _train_and_validate_sklearn_model(
         X_IRIS,
         Y_IRIS,
         model=RF_MODEL,
-        test_method="simple_split",
+        validation_method="split",
         metrics=CLF_METRICS,
-        simple_split_size=0.25,
+        split_size=0.25,
         random_state=42,
     )
 
@@ -49,8 +49,8 @@ def test_train_and_evaluate_with_simple_split():
 
 def test_train_and_evaluate_with_kfold_cv():
     """Test that training a model with k-fold cross-validation works as expected."""
-    model, out_metrics = _train_and_evaluate_sklearn_model(
-        X_IRIS, Y_IRIS, model=RF_MODEL, test_method="kfold_cv", metrics=CLF_METRICS, cv_folds=3, random_state=42
+    model, out_metrics = _train_and_validate_sklearn_model(
+        X_IRIS, Y_IRIS, model=RF_MODEL, validation_method="kfold_cv", metrics=CLF_METRICS, cv_folds=3, random_state=42
     )
 
     assert isinstance(model, RandomForestClassifier)
@@ -59,8 +59,8 @@ def test_train_and_evaluate_with_kfold_cv():
 
 def test_train_and_evaluate_with_skfold_cv():
     """Test that training a model with stratified k-fold cross-validation works as expected."""
-    model, out_metrics = _train_and_evaluate_sklearn_model(
-        X_IRIS, Y_IRIS, model=RF_MODEL, test_method="skfold_cv", metrics=CLF_METRICS, cv_folds=3, random_state=42
+    model, out_metrics = _train_and_validate_sklearn_model(
+        X_IRIS, Y_IRIS, model=RF_MODEL, validation_method="skfold_cv", metrics=CLF_METRICS, cv_folds=3, random_state=42
     )
 
     assert isinstance(model, RandomForestClassifier)
@@ -80,8 +80,14 @@ def test_binary_classification():
     )
     y_binary = np.array([1, 0, 1, 1, 0])
 
-    model, out_metrics = _train_and_evaluate_sklearn_model(
-        X_binary, y_binary, model=RF_MODEL, test_method="kfold_cv", metrics=CLF_METRICS, cv_folds=3, random_state=42
+    model, out_metrics = _train_and_validate_sklearn_model(
+        X_binary,
+        y_binary,
+        model=RF_MODEL,
+        validation_method="kfold_cv",
+        metrics=CLF_METRICS,
+        cv_folds=3,
+        random_state=42,
     )
 
     assert isinstance(model, RandomForestClassifier)
@@ -101,26 +107,28 @@ def test_save_and_load_model():
 def test_mismatching_X_and_y():
     """Test that invalid lengths for X and y raises the correct exception."""
     with pytest.raises(exceptions.NonMatchingParameterLengthsException):
-        _train_and_evaluate_sklearn_model(X_IRIS, Y_IRIS[:-1], model=RF_MODEL, test_method="none", metrics=CLF_METRICS)
+        _train_and_validate_sklearn_model(
+            X_IRIS, Y_IRIS[:-1], model=RF_MODEL, validation_method="none", metrics=CLF_METRICS
+        )
 
 
 def test_invalid_metrics():
     """Test that invalid metric selection raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        _train_and_evaluate_sklearn_model(X_IRIS, Y_IRIS, model=RF_MODEL, test_method="simple_split", metrics=[])
+        _train_and_validate_sklearn_model(X_IRIS, Y_IRIS, model=RF_MODEL, validation_method="split", metrics=[])
 
 
 def test_invalid_cv_folds():
     """Test that invalid metric selection raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        _train_and_evaluate_sklearn_model(
-            X_IRIS, Y_IRIS, model=RF_MODEL, test_method="kfold_cv", metrics=CLF_METRICS, cv_folds=1
+        _train_and_validate_sklearn_model(
+            X_IRIS, Y_IRIS, model=RF_MODEL, validation_method="kfold_cv", metrics=CLF_METRICS, cv_folds=1
         )
 
 
-def test_invalid_simple_split_size():
+def test_invalid_split_size():
     """Test that invalid metric selection raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        _train_and_evaluate_sklearn_model(
-            X_IRIS, Y_IRIS, model=RF_MODEL, test_method="simple_split", metrics=CLF_METRICS, simple_split_size=0.0
+        _train_and_validate_sklearn_model(
+            X_IRIS, Y_IRIS, model=RF_MODEL, validation_method="split", metrics=CLF_METRICS, split_size=0.0
         )

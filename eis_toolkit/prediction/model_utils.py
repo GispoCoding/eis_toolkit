@@ -19,7 +19,7 @@ from sklearn.model_selection import KFold, LeaveOneOut, StratifiedKFold, train_t
 
 from eis_toolkit import exceptions
 
-SIMPLE_SPLIT = "simple_split"
+SPLIT = "split"
 KFOLD_CV = "kfold_cv"
 SKFOLD_CV = "skfold_cv"
 LOO_CV = "loo_cv"
@@ -53,18 +53,18 @@ def load_model(path: Path) -> BaseEstimator:
 
 
 @beartype
-def _train_and_evaluate_sklearn_model(
+def _train_and_validate_sklearn_model(
     X: Union[np.ndarray, pd.DataFrame],
     y: Union[np.ndarray, pd.Series],
     model: BaseEstimator,
-    test_method: Literal["simple_split", "kfold_cv", "skfold_cv", "loo_cv", "none"],
+    validation_method: Literal["split", "kfold_cv", "skfold_cv", "loo_cv", "none"],
     metrics: Sequence[Literal["mse", "rmse", "mae", "r2", "accuracy", "precision", "recall", "f1"]],
-    simple_split_size: float = 0.2,
+    split_size: float = 0.2,
     cv_folds: int = 5,
     random_state: Optional[int] = 42,
 ) -> Tuple[BaseEstimator, dict]:
     """
-    Train and evaluate Sklearn model.
+    Train and validate Sklearn model.
 
     Serves as a common private/inner function for Random Forest, Logistic Regression and Gradient Boosting
     public functions.
@@ -74,38 +74,38 @@ def _train_and_evaluate_sklearn_model(
     x_size = X.index.size if isinstance(X, pd.DataFrame) else X.shape[0]
     if x_size != y.size:
         raise exceptions.NonMatchingParameterLengthsException(f"X and y must have the length {x_size} != {y.size}.")
-    if len(metrics) == 0 and test_method != NO_VALIDATION:
+    if len(metrics) == 0 and validation_method != NO_VALIDATION:
         raise exceptions.InvalidParameterValueException(
             "Metrics must have at least one chosen metric to validate model."
         )
     if cv_folds < 2:
         raise exceptions.InvalidParameterValueException("Number of cross-validation folds must be at least 2.")
-    if not (0 < simple_split_size < 1):
-        raise exceptions.InvalidParameterValueException("Test split must be more than 0 and less than 1.")
+    if not (0 < split_size < 1):
+        raise exceptions.InvalidParameterValueException("Split size must be more than 0 and less than 1.")
 
     # Approach 1: No validation
-    if test_method == NO_VALIDATION:
+    if validation_method == NO_VALIDATION:
         model.fit(X, y)
         metrics = {}
 
         return model, metrics
 
-    # Approach 2: Simple split
-    elif test_method == SIMPLE_SPLIT:
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=simple_split_size, random_state=random_state, shuffle=True
+    # Approach 2: Validation with splitting data once
+    elif validation_method == SPLIT:
+        X_train, X_valid, y_train, y_valid = train_test_split(
+            X, y, test_size=split_size, random_state=random_state, shuffle=True
         )
         model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
+        y_pred = model.predict(X_valid)
 
         out_metrics = {}
         for metric in metrics:
-            score = _score_model(model, y_test, y_pred, metric)
+            score = _score_model(model, y_valid, y_pred, metric)
             out_metrics[metric] = score
 
     # Approach 3: Cross-validation
-    elif test_method in [KFOLD_CV, SKFOLD_CV, LOO_CV]:
-        cv = _get_cross_validator(test_method, cv_folds, random_state)
+    elif validation_method in [KFOLD_CV, SKFOLD_CV, LOO_CV]:
+        cv = _get_cross_validator(validation_method, cv_folds, random_state)
 
         # Initialize output metrics dictionary
         out_metrics = {}
@@ -114,12 +114,12 @@ def _train_and_evaluate_sklearn_model(
             out_metrics[metric][f"{metric}_all"] = []
 
         # Loop over cross-validation folds and save metric scores
-        for train_index, test_index in cv.split(X, y):
+        for train_index, valid_index in cv.split(X, y):
             model.fit(X[train_index], y[train_index])
-            y_pred = model.predict(X[test_index])
+            y_pred = model.predict(X[valid_index])
 
             for metric in metrics:
-                score = _score_model(model, y[test_index], y_pred, metric)
+                score = _score_model(model, y[valid_index], y_pred, metric)
                 all_scores = out_metrics[metric][f"{metric}_all"]
                 all_scores.append(score)
 
@@ -137,7 +137,7 @@ def _train_and_evaluate_sklearn_model(
             out_metrics = out_metrics[metrics[0]]
 
     else:
-        raise Exception(f"Unrecognized test method: {test_method}")
+        raise Exception(f"Unrecognized validation method: {validation_method}")
 
     return model, out_metrics
 
