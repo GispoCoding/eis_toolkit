@@ -1,10 +1,12 @@
+from numbers import Number
 from pathlib import Path
 
 import joblib
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Literal, Optional, Sequence, Tuple, Union
+from beartype.typing import List, Literal, Optional, Sequence, Tuple, Union
+from scipy import sparse
 from sklearn.base import BaseEstimator, is_classifier, is_regressor
 from sklearn.metrics import (
     accuracy_score,
@@ -16,6 +18,7 @@ from sklearn.metrics import (
     recall_score,
 )
 from sklearn.model_selection import KFold, LeaveOneOut, StratifiedKFold, train_test_split
+from tensorflow import keras
 
 from eis_toolkit import exceptions
 
@@ -53,6 +56,58 @@ def load_model(path: Path) -> BaseEstimator:
 
 
 @beartype
+def split_data(
+    *data: Union[np.ndarray, pd.DataFrame, sparse._csr.csr_matrix, List[Number]],
+    split_size: float = 0.2,
+    random_state: Optional[int] = 42,
+    shuffle: bool = True,
+) -> List[Union[np.ndarray, pd.DataFrame, sparse._csr.csr_matrix, List[Number]]]:
+    """
+    Split data into two parts.
+
+    For more guidance, read documentation of sklearn.model_selection.train_test_split:
+    (https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html).
+
+    Args:
+        *data: Data to be split. Multiple datasets can be given as input (for example X and y),
+            but they need to have the same length. All datasets are split into two and the parts returned
+            (for example X_train, X_test, y_train, y_test).
+        split_size: The proportion of the second part of the split. Typically this is the size of test/validation
+            part. The first part will be complemental proportion. For example, if split_size = 0.2, the first part
+            will have 80% of the data and the second part 20% of the data. Defaults to 0.2.
+        random_state: Seed for random number generation. Defaults to 42.
+        shuffle: If data is shuffled before splitting. Defaults to True.
+
+    Returns:
+        List containing splits of inputs (two outputs per input).
+    """
+
+    if not (0 < split_size < 1):
+        raise exceptions.InvalidParameterValueException("Split size must be more than 0 and less than 1.")
+
+    split_data = train_test_split(*data, test_size=split_size, random_state=random_state, shuffle=shuffle)
+
+    return split_data
+
+
+@beartype
+def predict(model: Union[BaseEstimator, keras.Model], data: np.ndarray) -> np.ndarray:
+    """
+    Predict with a trained model.
+
+    Args:
+        model: Trained classifier or regressor. Can be any machine learning model trained with
+            EIS Toolkit (Sklearn and Keras models).
+        data: Data used to make predictions.
+
+    Returns:
+        Predictions.
+    """
+    result = model.predict(data)
+    return result
+
+
+@beartype
 def _train_and_validate_sklearn_model(
     X: Union[np.ndarray, pd.DataFrame],
     y: Union[np.ndarray, pd.Series],
@@ -80,8 +135,6 @@ def _train_and_validate_sklearn_model(
         )
     if cv_folds < 2:
         raise exceptions.InvalidParameterValueException("Number of cross-validation folds must be at least 2.")
-    if not (0 < split_size < 1):
-        raise exceptions.InvalidParameterValueException("Split size must be more than 0 and less than 1.")
 
     # Approach 1: No validation
     if validation_method == NO_VALIDATION:
@@ -92,8 +145,8 @@ def _train_and_validate_sklearn_model(
 
     # Approach 2: Validation with splitting data once
     elif validation_method == SPLIT:
-        X_train, X_valid, y_train, y_valid = train_test_split(
-            X, y, test_size=split_size, random_state=random_state, shuffle=True
+        X_train, X_valid, y_train, y_valid = split_data(
+            X, y, split_size=split_size, random_state=random_state, shuffle=True
         )
         model.fit(X_train, y_train)
         y_pred = model.predict(X_valid)

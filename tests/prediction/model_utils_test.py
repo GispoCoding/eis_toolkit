@@ -7,7 +7,13 @@ from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
 
 from eis_toolkit import exceptions
-from eis_toolkit.prediction.model_utils import _train_and_validate_sklearn_model, load_model, save_model
+from eis_toolkit.prediction.model_utils import (
+    _train_and_validate_sklearn_model,
+    load_model,
+    predict,
+    save_model,
+    split_data,
+)
 
 TEST_DIR = Path(__file__).parent.parent
 
@@ -92,6 +98,27 @@ def test_binary_classification():
 
     assert isinstance(model, RandomForestClassifier)
     assert len(out_metrics) == 4
+
+
+def test_splitting():
+    """Test that split data works as expected."""
+    X_train, X_test, y_train, y_test = split_data(X_IRIS, Y_IRIS, split_size=0.2)
+    np.testing.assert_equal(len(X_train), len(X_IRIS) * 0.8)
+    np.testing.assert_equal(len(y_train), len(Y_IRIS) * 0.8)
+    np.testing.assert_equal(len(X_test), len(X_IRIS) * 0.2)
+    np.testing.assert_equal(len(y_test), len(Y_IRIS) * 0.2)
+
+
+def test_predict_sklearn():
+    """Test that predict works as expected with a Sklearn model."""
+    X_train, X_test, y_train, y_test = split_data(X_IRIS, Y_IRIS, split_size=0.2)
+
+    model, _ = _train_and_validate_sklearn_model(
+        X_train, y_train, model=RF_MODEL, validation_method="none", metrics=CLF_METRICS, random_state=42
+    )
+
+    predicted_labels = predict(model, X_test)
+    assert len(predicted_labels) == len(y_test)
 
 
 def test_save_and_load_model():
