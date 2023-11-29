@@ -63,7 +63,7 @@ def split_data(
     shuffle: bool = True,
 ) -> List[Union[np.ndarray, pd.DataFrame, sparse._csr.csr_matrix, List[Number]]]:
     """
-    Split data into two parts.
+    Split data into two parts. Can be used for train-test or train-validation splits.
 
     For more guidance, read documentation of sklearn.model_selection.train_test_split:
     (https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html).
