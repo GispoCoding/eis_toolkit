@@ -14,6 +14,7 @@ from eis_toolkit.prediction.model_utils import (
     save_model,
     split_data,
 )
+from eis_toolkit.prediction.model_utils import test_model as model_test
 
 TEST_DIR = Path(__file__).parent.parent
 
@@ -50,7 +51,7 @@ def test_train_and_evaluate_with_split():
     )
 
     assert isinstance(model, RandomForestClassifier)
-    assert len(out_metrics) == 4
+    np.testing.assert_equal(len(out_metrics), 4)
 
 
 def test_train_and_evaluate_with_kfold_cv():
@@ -60,7 +61,7 @@ def test_train_and_evaluate_with_kfold_cv():
     )
 
     assert isinstance(model, RandomForestClassifier)
-    assert len(out_metrics) == 4
+    np.testing.assert_equal(len(out_metrics), 4)
 
 
 def test_train_and_evaluate_with_skfold_cv():
@@ -70,7 +71,7 @@ def test_train_and_evaluate_with_skfold_cv():
     )
 
     assert isinstance(model, RandomForestClassifier)
-    assert len(out_metrics) == 4
+    np.testing.assert_equal(len(out_metrics), 4)
 
 
 def test_binary_classification():
@@ -97,7 +98,7 @@ def test_binary_classification():
     )
 
     assert isinstance(model, RandomForestClassifier)
-    assert len(out_metrics) == 4
+    np.testing.assert_equal(len(out_metrics), 4)
 
 
 def test_splitting():
@@ -109,6 +110,18 @@ def test_splitting():
     np.testing.assert_equal(len(y_test), len(Y_IRIS) * 0.2)
 
 
+def test_test_model_sklearn():
+    """Test that test model works as expected with a Sklearn model."""
+    X_train, X_test, y_train, y_test = split_data(X_IRIS, Y_IRIS, split_size=0.2)
+
+    model, _ = _train_and_validate_sklearn_model(
+        X_train, y_train, model=RF_MODEL, validation_method="none", metrics=CLF_METRICS, random_state=42
+    )
+
+    out_metrics = model_test(X_test, y_test, model)
+    np.testing.assert_equal(out_metrics["accuracy"], 1.0)
+
+
 def test_predict_sklearn():
     """Test that predict works as expected with a Sklearn model."""
     X_train, X_test, y_train, y_test = split_data(X_IRIS, Y_IRIS, split_size=0.2)
@@ -117,8 +130,8 @@ def test_predict_sklearn():
         X_train, y_train, model=RF_MODEL, validation_method="none", metrics=CLF_METRICS, random_state=42
     )
 
-    predicted_labels = predict(model, X_test)
-    assert len(predicted_labels) == len(y_test)
+    predicted_labels = predict(X_test, model)
+    np.testing.assert_equal(len(predicted_labels), len(y_test))
 
 
 def test_save_and_load_model():

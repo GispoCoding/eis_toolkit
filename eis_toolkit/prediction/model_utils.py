@@ -5,7 +5,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import List, Literal, Optional, Sequence, Tuple, Union
+from beartype.typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
 from scipy import sparse
 from sklearn.base import BaseEstimator, is_classifier, is_regressor
 from sklearn.metrics import (
@@ -91,14 +91,55 @@ def split_data(
 
 
 @beartype
-def predict(model: Union[BaseEstimator, keras.Model], data: np.ndarray) -> np.ndarray:
+def test_model(
+    X_test: Union[np.ndarray, pd.DataFrame],
+    y_test: Union[np.ndarray, pd.Series],
+    model: Union[BaseEstimator, keras.Model],
+    metrics: Optional[Sequence[Literal["mse", "rmse", "mae", "r2", "accuracy", "precision", "recall", "f1"]]] = None,
+) -> Dict[str, Number]:
+    """
+    Test and score a trained model.
+
+    TODO: Implement for Keras models.
+
+    Args:
+        X_test: Test data.
+        y_test: Target labels for test data.
+        model: Trained Sklearn classifier or regressor.
+        metrics: Metrics to use for scoring the model. Defaults to "accuracy" for a classifier
+            and to "mse" for a regressor.
+
+    Returns:
+        Test metric scores as a dictionary.
+    """
+    x_size = X_test.index.size if isinstance(X_test, pd.DataFrame) else X_test.shape[0]
+    if x_size != y_test.size:
+        raise exceptions.NonMatchingParameterLengthsException(
+            f"X and y must have the length {x_size} != {y_test.size}."
+        )
+
+    if metrics is None:
+        metrics = ["accuracy"] if is_classifier(model) else ["mse"]
+
+    y_pred = model.predict(X_test)
+
+    out_metrics = {}
+    for metric in metrics:
+        score = _score_model(model, y_test, y_pred, metric)
+        out_metrics[metric] = score
+
+    return out_metrics
+
+
+@beartype
+def predict(data: Union[np.ndarray, pd.DataFrame], model: Union[BaseEstimator, keras.Model]) -> np.ndarray:
     """
     Predict with a trained model.
 
     Args:
+        data: Data used to make predictions.
         model: Trained classifier or regressor. Can be any machine learning model trained with
             EIS Toolkit (Sklearn and Keras models).
-        data: Data used to make predictions.
 
     Returns:
         Predictions.
