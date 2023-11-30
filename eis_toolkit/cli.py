@@ -307,6 +307,7 @@ def feature_importance_cli(
     number_of_repetition: int = 50,
     random_state: int = 0
 ):
+    "Evaluate the feature importance of a sklearn classifier or linear model."
     from eis_toolkit.exploratory_analyses.feature_importance import evaluate_feature_importance
     import joblib
 
@@ -337,6 +338,58 @@ def feature_importance_cli(
     typer.echo("Progress: 100%")
 
     typer.echo(f"Evaluate feature importance completed, writing to {output}.")
+
+
+# CHI-SQUARE TEST
+@app.command()
+def chi_square_test_cli(
+    input_file: Annotated[Path, INPUT_FILE_OPTION],
+    target_column: str,
+    columns: List[str],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    "Compute Chi-square test for independence on the input data."
+    from eis_toolkit.exploratory_analyses.statistical_tests import chi_square_test
+
+    typer.echo("Progress: 25%")
+    gdf = gpd.read_file(input_file)
+    typer.echo("Progress: 50%")
+    results_dict = chi_square_test(gdf, target_column, columns)
+    typer.echo("Progress: 75%")
+
+    json_str = json.dumps(results_dict)
+
+    with open(output_file, 'w') as file:
+        file.write(json_str)
+
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results saved to file: {output_file}")
+    typer.echo("Chi-square test completed")
+
+
+# NORMALITY TEST
+@app.command()
+def normality_test_cli(
+    input_file: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    "Compute Shapiro-Wilk test for normality on the input data."
+    from eis_toolkit.exploratory_analyses.statistical_tests import normality_test
+
+    typer.echo("Progress: 25%")
+    gdf = gpd.read_file(input_file)
+    typer.echo("Progress: 50%")
+    results_dict = normality_test(gdf)
+    typer.echo("Progress: 75%")
+
+    json_str = json.dumps(results_dict)
+
+    with open(output_file, 'w') as file:
+        file.write(json_str)
+
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results saved to file: {output_file}")
+    typer.echo("Normality test completed")
 
 
 # --- RASTER PROCESSING ---
