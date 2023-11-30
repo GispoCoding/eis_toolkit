@@ -9,7 +9,7 @@ from eis_toolkit.vector_processing.calculate_geometry import calculate_geometry
 
 @pytest.fixture
 def example_geometries():
-    """Test data, Point, LineString and Polygon"""
+    """Test data, Point, LineString and Polygon."""
     point = Point(10, 10)
     line = LineString([(0, 0), (0, 150)])
     polygon = Polygon([(0, 0), (10, 0), (10, 25), (0, 25)])
