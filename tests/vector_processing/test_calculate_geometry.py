@@ -32,10 +32,11 @@ def test_validated_calculate_geometries(example_geometries):
 @pytest.fixture
 def empty_gdf():
     """Test data empty gdf."""
-    return gpd.GeoDataFrame()
+    gdf = gpd.GeoDataFrame()
+    return gdf
 
 
-def test_empty_geodataframe():
+def test_empty_geodataframe(empty_gdf):
     """Test empty gdf raises an exception."""
     with pytest.raises(EmptyDataFrameException):
         calculate_geometry(empty_gdf)
