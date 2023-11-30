@@ -21,7 +21,7 @@ def calculate_geometry(geodataframe: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         raise EmptyDataFrameException("Expected geodataframe to contain geometries.")
 
     calculated_gdf = geodataframe.copy()
-    calculated_gdf["calculated_value"] = calculated_gdf.apply(lambda row: _calculate_value(row), axis=1)
+    calculated_gdf["value"] = calculated_gdf.apply(lambda row: _calculate_value(row), axis=1)
 
     return calculated_gdf
 
