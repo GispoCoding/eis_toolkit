@@ -289,10 +289,54 @@ def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPT
     typer.echo("Progress: 75%")
 
     json_str = json.dumps(results_dict)
-    typer.echo("Progress: 10%")
+    typer.echo("Progress: 100%")
 
     typer.echo(f"Results: {json_str}")
     typer.echo("Descriptive statistics (vector) completed")
+
+
+# FEATURE IMPORTANCE
+# TODO! This is a work in progress.
+@app.command()
+def feature_importance_cli(
+    classifier: Annotated[Path, INPUT_FILE_OPTION],
+    test_x: Annotated[Path, INPUT_FILE_OPTION],
+    test_y: Annotated[Path, INPUT_FILE_OPTION],
+    output: Annotated[Path, OUTPUT_FILE_OPTION],
+    feature_names: List[str],
+    number_of_repetition: int = 50,
+    random_state: int = 0
+):
+    from eis_toolkit.exploratory_analyses.feature_importance import evaluate_feature_importance
+    import joblib
+
+    typer.echo("Progress: 10%")
+
+    # TODO! read the classifier. Expects .joblib
+    loaded_classifier = joblib.load(classifier)
+
+    typer.echo("Progress: 25%")
+
+    with rasterio.open(test_x) as x_raster:
+        typer.echo("Progress: 50%")
+
+    with rasterio.open(test_y) as y_raster:
+        typer.echo("Progress: 75%")
+
+    result_df, result_dict = evaluate_feature_importance(
+        loaded_classifier,
+        x_raster,
+        y_raster,
+        feature_names,
+        number_of_repetition,
+        random_state
+        )
+    typer.echo("Progress: 90%")
+
+    result_df.to_csv(output)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Evaluate feature importance completed, writing to {output}.")
 
 
 # --- RASTER PROCESSING ---
