@@ -64,6 +64,7 @@ def descriptive_statistics_raster(input_data: rasterio.io.DatasetReader) -> dict
     """Generate descriptive statistics from raster data.
 
     Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.
+    Nodata values are removed from the data before the statistics are computed.
 
     Args:
         input_data: Data to generate descriptive statistics from.
@@ -72,5 +73,7 @@ def descriptive_statistics_raster(input_data: rasterio.io.DatasetReader) -> dict
         The descriptive statistics in previously described order.
     """
     data = input_data.read().flatten()
+    nodata_value = input_data.nodata
+    data = data[data != nodata_value]
     statistics = _descriptive_statistics(data)
     return statistics
