@@ -1445,7 +1445,52 @@ def winsorize_transform_cli(
 
 
 # ---VALIDATION ---
-# TODO
+
+
+# CALCULATE AUC
+@app.command()
+def calculate_auc_cli(
+    x_values: Annotated[Path, INPUT_FILE_OPTION],
+    y_values: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Calculate area under curve (AUC)."""
+    from eis_toolkit.validation.calculate_auc import calculate_auc
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(x_values) as x_src:
+        x_array = x_src.read(1)
+        typer.echo("Progress: 25%")
+
+    with rasterio.open(y_values) as y_src:
+        y_array = y_src.read(1)
+        typer.echo("Progress: 50%")
+
+    auc_value = calculate_auc(x_array, y_array)
+    typer.echo(f"AUC Value: {auc_value}")
+    typer.echo("Progress: 75%")
+
+    # Save the AUC value to the output file
+    with open(output_file, 'w') as output:
+        output.write(f"AUC Value: {auc_value}")
+    typer.echo("Progress: 100%")
+    typer.echo(f"Calculate area under curve complete, writing raster to {output_file}.")
+
+
+# CALCULATE BASE METRICS
+
+
+# PLOT CORRELATION MATRIX
+
+
+# PLOT PREDICTION AREA CURVE
+
+
+# PLOT RATE CURVE
+
+
+#
 
 
 # if __name__ == "__main__":
