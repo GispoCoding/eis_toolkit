@@ -1479,6 +1479,38 @@ def calculate_auc_cli(
 
 
 # CALCULATE BASE METRICS
+@app.command()
+def calculate_base_metrics_cli(
+   input_raster: Annotated[Path, INPUT_FILE_OPTION],
+   input_deposits: Annotated[Path, INPUT_FILE_OPTION],
+   input_negatives: Annotated[Path, INPUT_FILE_OPTION],
+   out_metrics: Annotated[Path, OUTPUT_FILE_OPTION],
+   band: int = 1,
+):
+    """Calculate true positive rate, proportion of area and false positive rate values for different thresholds."""
+    from eis_toolkit.validation.calculate_base_metrics import calculate_base_metrics
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as src:
+        raster = src.read()
+        typer.echo("Progress: 20%")
+
+    deposits = gpd.read_file(input_deposits)
+    typer.echo("Progress: 30%")
+
+    negatives = gpd.read_file(input_negatives)
+    typer.echo("Progress: 40%")
+
+    metrics = calculate_base_metrics(
+        raster=raster,
+        deposits=deposits,
+        band=band,
+        negatives=negatives,
+    )
+
+
+    # call calculate_base_metrics()
 
 
 # PLOT CORRELATION MATRIX
