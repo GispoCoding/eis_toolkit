@@ -307,7 +307,7 @@ def feature_importance_cli(
     number_of_repetition: int = 50,
     random_state: int = 0
 ):
-    "Evaluate the feature importance of a sklearn classifier or linear model."
+    """Evaluate the feature importance of a sklearn classifier or linear model."""
     from eis_toolkit.exploratory_analyses.feature_importance import evaluate_feature_importance
     import joblib
 
@@ -348,7 +348,7 @@ def chi_square_test_cli(
     columns: List[str],
     output_file: Annotated[Path, OUTPUT_FILE_OPTION]
 ):
-    "Compute Chi-square test for independence on the input data."
+    """Compute Chi-square test for independence on the input data."""
     from eis_toolkit.exploratory_analyses.statistical_tests import chi_square_test
 
     typer.echo("Progress: 25%")
@@ -373,7 +373,7 @@ def normality_test_cli(
     input_file: Annotated[Path, INPUT_FILE_OPTION],
     output_file: Annotated[Path, OUTPUT_FILE_OPTION]
 ):
-    "Compute Shapiro-Wilk test for normality on the input data."
+    """Compute Shapiro-Wilk test for normality on the input data."""
     from eis_toolkit.exploratory_analyses.statistical_tests import normality_test
 
     typer.echo("Progress: 25%")
@@ -563,6 +563,39 @@ def reproject_raster_cli(
     typer.echo("Progress: 100%")
 
     typer.echo(f"Reprojecting completed, writing raster to {output_raster}.")
+
+
+# RESAMPLE RASTER
+@app.command()
+def resample_raster_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    upscale_factor: float,
+    resampling_method: ResamplingMethods = typer.Option(help="resample help", default=ResamplingMethods.nearest),
+):
+    """Resamples raster according to given upscale factor."""
+    from eis_toolkit.raster_processing.resampling import resample
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+
+        # Calculate the new resolution based on the original raster and upscale factor
+        original_resolution = (raster.res[0], raster.res[1])
+        new_resolution = (original_resolution[0] / upscale_factor, original_resolution[1] / upscale_factor)
+        typer.echo("Progress: 50%")
+        method = RESAMPLING_MAPPING[resampling_method]
+        out_image, out_meta = resample(raster=raster, resolution=new_resolution, resampling_method=method)
+
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Resample completed, writing raster to {output_raster}.")
 
 
 # SNAP RASTER
@@ -1056,7 +1089,7 @@ def weights_of_evidence_calculate_responses_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION]
 ):
-    "Calculate the posterior probabilities for the given generalized weight arrays."
+    """Calculate the posterior probabilities for the given generalized weight arrays."""
     from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_responses
 
     typer.echo("Progress: 10%")
@@ -1111,7 +1144,7 @@ def weights_of_evidence_calculate_weights_cli(
     studentisized_contrast_threshold: float = 2.0,
     raster_to_generate: Sequence[str] = ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"],
 ):
-    "Calculate weights of spatial associations."
+    """Calculate weights of spatial associations."""
     from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_weights
 
     typer.echo("Progress: 10%")
