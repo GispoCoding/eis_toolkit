@@ -1,6 +1,5 @@
 import os
 from numbers import Number
-
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -8,9 +7,12 @@ import rasterio
 from beartype import beartype
 from beartype.typing import List, Optional, Tuple, Union
 from shapely import wkt
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, Point
 
 from eis_toolkit import exceptions
+
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 os.environ["USE_PYGEOS"] = "0"
 
@@ -527,7 +529,7 @@ def _to_csv(cba: gpd.GeoDataFrame, output_path: str) -> None:
 
 
 @beartype
-def _to_raster(cba: gpd.GeoDataFrame, output_path: str) -> None:
+def _to_raster(cba: gpd.GeoDataFrame, output_path: str, nan_val: int = -9999) -> None:
     """Intermediate utility.
 
     Saves the object as a raster TIFF file.
@@ -535,31 +537,45 @@ def _to_raster(cba: gpd.GeoDataFrame, output_path: str) -> None:
     Args:
         cba: CBA matrix to save.
         output_path: Name of the saved file.
+        nan_val: values taken by cells with no values in them (outside the study
+        area).
 
     Returns:
         None
     """
 
+    cba = cba.copy(deep = True)
+
     crs_txt = f"EPSG:{cba.crs.to_epsg()}"
     count = len(cba.columns.drop("geometry"))
-
+    
     geometries = cba["geometry"].values
     x = np.unique(geometries.centroid.x)
     y = np.unique(geometries.centroid.y)
-    X, Y = np.meshgrid(x, y)
-    x_resolution = X[0][1] - X[0][0]
-    y_resolution = Y[1][0] - Y[0][0]
+    y = np.flip(y)
+    x_resolution = x[1] - x[0]
+    y_resolution = y[0] - y[1]
     min_x, min_y, max_x, max_y = cba.total_bounds
-    width = (max_x - min_x) / x_resolution
-    height = (max_y - min_y) / y_resolution
+    width = round((max_x - min_x) / x_resolution)
+    height = round((max_y - min_y) / y_resolution)
 
-    values = []
-    col_name = []
-    for col in cba.select_dtypes(include=["int32", "int64"]).columns:
-        col_name.append(col)
-        val = cba[col].values
-        val = val.reshape(X.shape)
-        values.append(val)
+    x_values = [x[0]]
+    for i in range(0,(width-1),1):
+        new_val = x_values[i] + x_resolution
+        x_values = np.append(x_values, new_val)
+    y_values = [y[0]]
+    for i in  range(0,(height-1),1):
+        new_val = y_values[i] - y_resolution
+        y_values = np.append(y_values, new_val)
+    X, Y = np.meshgrid(x_values, y_values)
+
+    points= pd.DataFrame({'X':np.ravel(X), 'Y':np.ravel(Y)})
+    points['coords'] = list(zip(points['X'], points['Y']))
+    points['coords'] = points['coords'].apply(Point)
+    points_grid = gpd.GeoDataFrame(points, geometry='coords', crs = cba.crs)
+    points_grid = points_grid.sjoin(cba, how = "left")
+    points_grid = points_grid.fillna(nan_val)
+    col_name = list(points_grid.drop(["X","Y","coords","index_right"], axis = 1).columns)
 
     transform = rasterio.transform.from_bounds(min_x, min_y, max_x, max_y, width=width, height=height)
 
@@ -573,10 +589,11 @@ def _to_raster(cba: gpd.GeoDataFrame, output_path: str) -> None:
         dtype="int32",
         crs=crs_txt,
         transform=transform,
-        nodata=-9999,
+        nodata=nan_val,
     ) as new_dataset:
-        for i in range(0, len(col_name)):
-            z = i + 1
-            new_dataset.write(values[i], z)
-            new_dataset.set_band_description(z, col_name[i])
+        z = 1
+        for i in col_name:
+            new_dataset.write(points_grid.pivot(index = "Y", columns = "X", values = i).sort_index(ascending=False).values, z)
+            new_dataset.set_band_description(z, i)
+            z = z + 1
     new_dataset.close()
