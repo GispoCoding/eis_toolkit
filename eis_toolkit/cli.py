@@ -313,7 +313,6 @@ def feature_importance_cli(
 
     typer.echo("Progress: 10%")
 
-    # TODO! read the classifier. Expects .joblib
     loaded_classifier = joblib.load(classifier)
 
     typer.echo("Progress: 25%")
@@ -680,6 +679,30 @@ def extract_window_cli(
     typer.echo("Progress: 100%")
 
     typer.echo(f"Windowing completed, writing raster to {output_raster}")
+
+
+# UNIQUE COMBINATIONS
+@app.command()
+def unique_combinations_cli(
+    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Get combinations of raster values between rasters."""
+    from eis_toolkit.raster_processing.unique_combinations import unique_combinations
+
+    typer.echo("Progress: 10%")
+
+    rasters = [rasterio.open(raster) for raster in input_rasters]
+    typer.echo("Progress: 33%")
+    out_image, out_meta = unique_combinations(raster_list=rasters)
+    typer.echo("Progress: 66%")
+
+    with rasterio.open(output_raster, 'w', **out_meta) as dst:
+        dst.write(out_image)
+
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Unique combinations completed, writing raster to {output_raster}")
 
 
 # --- VECTOR PROCESSING ---
