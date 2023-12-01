@@ -7,7 +7,7 @@
 import json
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Sequence
 
 import geopandas as gpd
 import pandas as pd
@@ -1051,7 +1051,7 @@ def gamme_overlay_cli(
 # WOFE CALCULATE RESPONSES
 # TODO! This likely will need a rethink.
 @app.command()
-def weights_of_evidence_calculate_responses(
+def weights_of_evidence_calculate_responses_cli(
     input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION]
@@ -1097,6 +1097,72 @@ def weights_of_evidence_calculate_responses(
         typer.echo("Progress: 100%")
 
     typer.echo(f"Weights of evidence calculate responses complete, writing raster to {output_raster}.")
+
+
+@app.command()
+def weights_of_evidence_calculate_weights_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    output_gdf: Annotated[Path, OUTPUT_FILE_OPTION],
+    output_csv: Annotated[Path, OUTPUT_FILE_OPTION],
+    raster_nodata: Optional[float] = None,
+    weights_type: str = "Categorical weights",
+    studentisized_contrast_threshold: float = 2.0,
+    raster_to_generate: Sequence[str] = ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"],
+):
+    "Calculate weights of spatial associations."
+    from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_weights
+
+    typer.echo("Progress: 10%")
+
+    raster = rasterio.open(input_raster)
+    typer.echo("Progress: 20%")
+
+    gdf = gpd.read_file(input_vector)
+    typer.echo("Progress: 30%")
+
+    out_gdf, out_tables, raster_metadata, nr_of_deposit_pixels, nr_of_evidence_pixels = (
+        weights_of_evidence_calculate_weights(
+            raster,
+            gdf,
+            raster_nodata,
+            weights_type,
+            studentisized_contrast_threshold,
+            raster_to_generate,
+        )
+    )
+    typer.echo("Progress: 70%")
+
+    out_gdf.to_file(output_gdf, driver='GeoJSON')
+    typer.echo("Progress: 80%")
+
+    transform = raster_metadata.transform
+    height, width = raster.shape
+
+    with rasterio.open(
+        output_raster,
+        'w',
+        driver='GTiff',
+        height=height,
+        width=width,
+        count=len(out_tables),
+        dtype=out_tables['Class'].dtype,
+        crs=raster_metadata.crs,
+        transform=transform
+    ) as dst:
+        dst.write(out_tables['Class'], 1)
+
+        for idx, array_name in enumerate(raster_to_generate[1:], start=2):
+            dst.write(out_tables[array_name], idx)
+    typer.echo("Progress: 90%")
+
+    data = {'nr_of_deposit_pixels': [nr_of_deposit_pixels], 'nr_of_evidence_pixels': [nr_of_evidence_pixels]}
+    df = pd.DataFrame(data)
+
+    df.to_csv(output_csv)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Weights of evidence calculate weights complete, writing raster to {output_raster}.")
 
 
 # --- TRANSFORMATIONS ---
