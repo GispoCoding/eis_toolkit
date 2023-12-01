@@ -1,5 +1,7 @@
 import os
+import warnings
 from numbers import Number
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -7,12 +9,11 @@ import rasterio
 from beartype import beartype
 from beartype.typing import List, Optional, Tuple, Union
 from shapely import wkt
-from shapely.geometry import Polygon, Point
+from shapely.geometry import Point, Polygon
 
 from eis_toolkit import exceptions
 
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 os.environ["USE_PYGEOS"] = "0"
 
@@ -544,11 +545,11 @@ def _to_raster(cba: gpd.GeoDataFrame, output_path: str, nan_val: int = -9999) ->
         None
     """
 
-    cba = cba.copy(deep = True)
+    cba = cba.copy(deep=True)
 
     crs_txt = f"EPSG:{cba.crs.to_epsg()}"
     count = len(cba.columns.drop("geometry"))
-    
+
     geometries = cba["geometry"].values
     x = np.unique(geometries.centroid.x)
     y = np.unique(geometries.centroid.y)
@@ -560,22 +561,22 @@ def _to_raster(cba: gpd.GeoDataFrame, output_path: str, nan_val: int = -9999) ->
     height = round((max_y - min_y) / y_resolution)
 
     x_values = [x[0]]
-    for i in range(0,(width-1),1):
+    for i in range(0, (width - 1), 1):
         new_val = x_values[i] + x_resolution
         x_values = np.append(x_values, new_val)
     y_values = [y[0]]
-    for i in  range(0,(height-1),1):
+    for i in range(0, (height - 1), 1):
         new_val = y_values[i] - y_resolution
         y_values = np.append(y_values, new_val)
     X, Y = np.meshgrid(x_values, y_values)
 
-    points= pd.DataFrame({'X':np.ravel(X), 'Y':np.ravel(Y)})
-    points['coords'] = list(zip(points['X'], points['Y']))
-    points['coords'] = points['coords'].apply(Point)
-    points_grid = gpd.GeoDataFrame(points, geometry='coords', crs = cba.crs)
-    points_grid = points_grid.sjoin(cba, how = "left")
+    points = pd.DataFrame({"X": np.ravel(X), "Y": np.ravel(Y)})
+    points["coords"] = list(zip(points["X"], points["Y"]))
+    points["coords"] = points["coords"].apply(Point)
+    points_grid = gpd.GeoDataFrame(points, geometry="coords", crs=cba.crs)
+    points_grid = points_grid.sjoin(cba, how="left")
     points_grid = points_grid.fillna(nan_val)
-    col_name = list(points_grid.drop(["X","Y","coords","index_right"], axis = 1).columns)
+    col_name = list(points_grid.drop(["X", "Y", "coords", "index_right"], axis=1).columns)
 
     transform = rasterio.transform.from_bounds(min_x, min_y, max_x, max_y, width=width, height=height)
 
@@ -593,7 +594,7 @@ def _to_raster(cba: gpd.GeoDataFrame, output_path: str, nan_val: int = -9999) ->
     ) as new_dataset:
         z = 1
         for i in col_name:
-            new_dataset.write(points_grid.pivot(index = "Y", columns = "X", values = i).sort_index(ascending=False).values, z)
+            new_dataset.write(points_grid.pivot(index="Y", columns="X", values=i).sort_index(ascending=False).values, z)
             new_dataset.set_band_description(z, i)
             z = z + 1
     new_dataset.close()
