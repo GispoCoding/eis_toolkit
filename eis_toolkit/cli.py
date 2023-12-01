@@ -1048,8 +1048,55 @@ def gamme_overlay_cli(
     typer.echo(f"'Gamma' overlay completed, writing raster to {output_raster}.")
 
 
-# WOFE
-# TODO
+# WOFE CALCULATE RESPONSES
+# TODO! This likely will need a rethink.
+@app.command()
+def weights_of_evidence_calculate_responses(
+    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    "Calculate the posterior probabilities for the given generalized weight arrays."
+    from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_responses
+
+    typer.echo("Progress: 10%")
+
+    open_rasters = [rasterio.open(raster) for raster in input_rasters]
+    typer.echo("Progress: 25%")
+
+    gdf = gpd.read_file(input_vector)
+    nr_of_deposits = len(gdf)
+    nr_of_pixels = gdf.geometry.area.sum()
+    typer.echo("Progress: 50%")
+
+    response, posterior_prob, evidence = weights_of_evidence_calculate_responses(
+        open_rasters,
+        nr_of_deposits,
+        nr_of_pixels
+    )
+    typer.echo("Progress: 75%")
+
+    template_raster = open_rasters[0]
+    transform = template_raster.transform
+    height, width = response.shape
+
+    with rasterio.open(
+        output_raster,
+        'w',
+        driver='GTiff',
+        height=height,
+        width=width,
+        count=3,
+        dtype=response.dtype,
+        crs=template_raster.crs,
+        transform=transform
+    ) as dst:
+        dst.write(response, 1)
+        dst.write(posterior_prob, 2)
+        dst.write(evidence, 3)
+        typer.echo("Progress: 100%")
+
+    typer.echo(f"Weights of evidence calculate responses complete, writing raster to {output_raster}.")
 
 
 # --- TRANSFORMATIONS ---
