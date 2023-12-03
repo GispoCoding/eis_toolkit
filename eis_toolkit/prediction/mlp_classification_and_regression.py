@@ -253,6 +253,7 @@ def train_and_predict_for_regression(
          X: This is the dataset,
          y: labels,
          batch_size: how much we want the batch size,
+         threshold: number that determine bound between positive or negative,
          epochs: how many epochs we want to run the model,
          cross_validation: Type of cross validation
          input_shape_for_mlp: shape of the inputs windows -> tuple[int, int, int] just a point -> tuple[int, int],
