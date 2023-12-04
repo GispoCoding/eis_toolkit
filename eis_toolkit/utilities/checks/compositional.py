@@ -7,7 +7,7 @@ from eis_toolkit.utilities.checks.dataframe import check_dataframe_contains_only
 
 
 @beartype
-def check_in_simplex_sample_space(df: pd.DataFrame, k: np.float64 = None) -> None:
+def check_in_simplex_sample_space(df: pd.DataFrame, expected_sum: np.float64 = None) -> None:
     """
     Check that the compositions represented by the data rows belong to a simplex sample space.
 
@@ -16,10 +16,10 @@ def check_in_simplex_sample_space(df: pd.DataFrame, k: np.float64 = None) -> Non
 
     Args:
         df: The dataframe to check.
-        k: The expected sum of each row. If None, simply checks that the sum of each row is equal.
+        expected_sum: The expected sum of each row. If None, simply checks that the sum of each row is equal.
 
     Returns:
-        True if values are valid and the sum of each row is k.
+        True if values are valid and the sum of each row is the expected_sum.
 
     Raises:
         InvalidCompositionException: Data is not normalized to the expected value.
@@ -32,7 +32,7 @@ def check_in_simplex_sample_space(df: pd.DataFrame, k: np.float64 = None) -> Non
         raise NumericValueSignException("Data contains zeros or negative values.")
 
     df_sum = np.sum(df, axis=1)
-    expected_sum = k if k is not None else df_sum.iloc[0]
+    expected_sum = expected_sum if expected_sum is not None else df_sum.iloc[0]
     if len(df_sum[df_sum.iloc[:] != expected_sum]) != 0:
         raise InvalidCompositionException("Not each composition is normalized to the same value.")
 
