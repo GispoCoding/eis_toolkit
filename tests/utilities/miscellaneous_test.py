@@ -62,3 +62,12 @@ def test_rename_columns():
     target_df = pd.DataFrame({"a": [1, 2], "b": [3, 4], "c": [5, 6]})
     renamed_df = rename_columns(df, colnames=colnames)
     pd.testing.assert_frame_equal(renamed_df, target_df)
+
+
+def test_rename_columns_with_too_few_columns():
+    """Test that renaming columns with fewer column names than columns in the dataframe doesn't raise an exception."""
+    df = pd.DataFrame({"col1": [1, 2], "col2": [3, 4], "col3": [5, 6]})
+    colnames = ["a", "b"]
+    target_df = pd.DataFrame({"a": [1, 2], "b": [3, 4], "col3": [5, 6]})
+    renamed_df = rename_columns(df, colnames=colnames)
+    pd.testing.assert_frame_equal(renamed_df, target_df)

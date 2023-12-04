@@ -307,7 +307,7 @@ def rename_columns(df: pd.DataFrame, colnames=Sequence[str]) -> pd.DataFrame:
     columns = [col for col in df.columns]
     names = dict()
 
-    for i in range(len(columns)):
+    for i in range(len(colnames)):
         names[columns[i]] = colnames[i]
 
     return df.rename(columns=names)
