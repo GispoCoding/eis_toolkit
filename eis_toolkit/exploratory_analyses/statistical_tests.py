@@ -8,7 +8,7 @@ from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_em
 
 
 @beartype
-def chi_square_test(data: pd.DataFrame, target_column: str, columns: Sequence[str] = None) -> dict:
+def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Sequence[str]] = None) -> dict:
     """Compute Chi-square test for independence on the input data.
 
     It is assumed that the variables in the input data are independent and that they are categorical, i.e. strings,
@@ -29,7 +29,7 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Sequence[st
     if check_empty_dataframe(data):
         raise exceptions.EmptyDataFrameException("The input Dataframe is empty.")
 
-    if not check_columns_valid(data, target_column):
+    if not check_columns_valid(data, [target_column]):
         raise exceptions.InvalidParameterValueException("Target column not found in the Dataframe.")
 
     if columns is not None:
