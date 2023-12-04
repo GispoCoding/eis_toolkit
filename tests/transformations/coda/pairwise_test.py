@@ -15,13 +15,13 @@ def test_single_pairwise_logratio():
 def test_single_pairwise_logratio_with_zeros():
     """Test that calling the function with a zero value as either value raises the correct exception."""
     with pytest.raises(InvalidParameterValueException):
-        single_pairwise_logratio(0.0, 1.0)
+        single_pairwise_logratio(0, 1)
 
     with pytest.raises(InvalidParameterValueException):
-        single_pairwise_logratio(1.0, 0.0)
+        single_pairwise_logratio(1, 0)
 
     with pytest.raises(InvalidParameterValueException):
-        single_pairwise_logratio(0.0, 0.0)
+        single_pairwise_logratio(0, 0)
 
 
 def test_pairwise_logratio():
