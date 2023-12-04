@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eis_toolkit.exceptions import InvalidColumnIndexException
+from eis_toolkit.exceptions import InvalidColumnIndexException, NumericValueSignException
 from eis_toolkit.transformations.coda.alr import alr_transform, inverse_alr
 
 sample_array = np.array([[65, 12, 18, 5], [63, 16, 15, 6]])
@@ -69,19 +69,29 @@ def test_inverse_alr():
     arr = np.array([[np.log(0.25), np.log(0.25), np.log(0.25)], [np.log(2), np.log(2), np.log(2)]])
     df = pd.DataFrame(arr, columns=["V1", "V2", "V3"], dtype=np.float64)
     column_name = "d"
-    result = inverse_alr(df, column_name, 7)
+    result = inverse_alr(df, column_name, 7.0)
     expected_arr = np.array([[1, 1, 1, 4], [2, 2, 2, 1]])
     expected = pd.DataFrame(expected_arr, columns=["V1", "V2", "V3", "d"], dtype=np.float64)
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
 
 
 def test_inverse_alr_with_existing_denominator_column():
-    """Test inverse ALR core functionality with the denominator column already existing."""
+    """Test inverse ALR with data where the denominator column already exists."""
     arr = np.array([[np.log(0.25), np.log(0.25), 0.0, np.log(0.25)], [np.log(2), np.log(2), 0.0, np.log(2)]])
     df = pd.DataFrame(arr, columns=["V1", "V2", "d", "V3"], dtype=np.float64)
     column_name = "d"
     expected_arr = np.array([[1, 1, 4, 1], [2, 2, 1, 2]])
     expected = pd.DataFrame(expected_arr, columns=["V1", "V2", "d", "V3"], dtype=np.float64)
 
-    result = inverse_alr(df, column_name, 7)
+    result = inverse_alr(df, column_name, 7.0)
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
+
+
+def test_inverse_alr_with_invalid_scale_value():
+    """Test that inverse ALR with an invalid input scale raises the correct exception."""
+    arr = np.array([[np.log(0.25), np.log(0.25), np.log(0.25)], [np.log(2), np.log(2), np.log(2)]])
+    df = pd.DataFrame(arr, columns=["V1", "V2", "V3"], dtype=np.float64)
+    with pytest.raises(NumericValueSignException):
+        inverse_alr(df, "d", 0.0)
+    with pytest.raises(NumericValueSignException):
+        inverse_alr(df, "d", -7.0)

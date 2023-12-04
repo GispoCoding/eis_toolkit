@@ -3,7 +3,7 @@ import pandas as pd
 from beartype import beartype
 from beartype.typing import Sequence
 
-from eis_toolkit.exceptions import InvalidColumnIndexException
+from eis_toolkit.exceptions import InvalidColumnIndexException, NumericValueSignException
 from eis_toolkit.utilities.aitchison_geometry import _closure
 from eis_toolkit.utilities.checks.compositional import check_compositional
 from eis_toolkit.utilities.checks.dataframe import check_column_index_in_dataframe
@@ -50,6 +50,7 @@ def alr_transform(df: pd.DataFrame, column: int = -1, keep_denominator_column: b
     return rename_columns_by_pattern(_alr_transform(df, columns, denominator_column))
 
 
+@beartype
 def inverse_alr(df: pd.DataFrame, denominator_column: str, scale: float = 1.0) -> pd.DataFrame:
     """
     Perform the inverse transformation for a set of ALR transformed data.
@@ -62,7 +63,13 @@ def inverse_alr(df: pd.DataFrame, denominator_column: str, scale: float = 1.0) -
 
     Returns:
         A dataframe containing the inverse transformed data.
+
+    Raises:
+        NumericValueSignException: The input scale value is zero or less.
     """
+    if scale <= 0:
+        raise NumericValueSignException("The scale value should be positive.")
+
     dfc = df.copy()
 
     if denominator_column not in dfc.columns.values:
