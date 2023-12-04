@@ -1,3 +1,5 @@
+from numbers import Number
+
 import numpy as np
 import pandas as pd
 from beartype import beartype
@@ -51,7 +53,7 @@ def alr_transform(df: pd.DataFrame, column: int = -1, keep_denominator_column: b
 
 
 @beartype
-def inverse_alr(df: pd.DataFrame, denominator_column: str, scale: float = 1.0) -> pd.DataFrame:
+def inverse_alr(df: pd.DataFrame, denominator_column: str, scale: Number = 1.0) -> pd.DataFrame:
     """
     Perform the inverse transformation for a set of ALR transformed data.
 

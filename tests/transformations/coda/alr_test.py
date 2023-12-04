@@ -69,7 +69,7 @@ def test_inverse_alr():
     arr = np.array([[np.log(0.25), np.log(0.25), np.log(0.25)], [np.log(2), np.log(2), np.log(2)]])
     df = pd.DataFrame(arr, columns=["V1", "V2", "V3"], dtype=np.float64)
     column_name = "d"
-    result = inverse_alr(df, column_name, 7.0)
+    result = inverse_alr(df, column_name, 7)
     expected_arr = np.array([[1, 1, 1, 4], [2, 2, 2, 1]])
     expected = pd.DataFrame(expected_arr, columns=["V1", "V2", "V3", "d"], dtype=np.float64)
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
@@ -83,7 +83,7 @@ def test_inverse_alr_with_existing_denominator_column():
     expected_arr = np.array([[1, 1, 4, 1], [2, 2, 1, 2]])
     expected = pd.DataFrame(expected_arr, columns=["V1", "V2", "d", "V3"], dtype=np.float64)
 
-    result = inverse_alr(df, column_name, 7.0)
+    result = inverse_alr(df, column_name, 7)
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
 
 
@@ -92,6 +92,6 @@ def test_inverse_alr_with_invalid_scale_value():
     arr = np.array([[np.log(0.25), np.log(0.25), np.log(0.25)], [np.log(2), np.log(2), np.log(2)]])
     df = pd.DataFrame(arr, columns=["V1", "V2", "V3"], dtype=np.float64)
     with pytest.raises(NumericValueSignException):
-        inverse_alr(df, "d", 0.0)
+        inverse_alr(df, "d", 0)
     with pytest.raises(NumericValueSignException):
-        inverse_alr(df, "d", -7.0)
+        inverse_alr(df, "d", -7)
