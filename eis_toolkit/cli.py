@@ -1484,7 +1484,7 @@ def calculate_base_metrics_cli(
    input_raster: Annotated[Path, INPUT_FILE_OPTION],
    input_deposits: Annotated[Path, INPUT_FILE_OPTION],
    input_negatives: Annotated[Path, INPUT_FILE_OPTION],
-   out_metrics: Annotated[Path, OUTPUT_FILE_OPTION],
+   output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
    band: int = 1,
 ):
     """Calculate true positive rate, proportion of area and false positive rate values for different thresholds."""
@@ -1497,10 +1497,10 @@ def calculate_base_metrics_cli(
         typer.echo("Progress: 20%")
 
     deposits = gpd.read_file(input_deposits)
-    typer.echo("Progress: 30%")
+    typer.echo("Progress: 40%")
 
     negatives = gpd.read_file(input_negatives)
-    typer.echo("Progress: 40%")
+    typer.echo("Progress: 60%")
 
     metrics = calculate_base_metrics(
         raster=raster,
@@ -1508,9 +1508,11 @@ def calculate_base_metrics_cli(
         band=band,
         negatives=negatives,
     )
+    typer.echo("Progress: 80%")
 
-
-    # call calculate_base_metrics()
+    metrics.to_csv(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Calculate base metrics complete, writing vector to {output_vector}.")
 
 
 # PLOT CORRELATION MATRIX
