@@ -53,6 +53,17 @@ def alr_transform(df: pd.DataFrame, column: int = -1, keep_denominator_column: b
 
 
 @beartype
+def _inverse_alr(df: pd.DataFrame, denominator_column: str, scale: Number = 1.0) -> pd.DataFrame:
+    dfc = df.copy()
+
+    if denominator_column not in dfc.columns.values:
+        # Add the denominator column
+        dfc[denominator_column] = 0.0
+
+    return _closure(np.exp(dfc), scale)
+
+
+@beartype
 def inverse_alr(df: pd.DataFrame, denominator_column: str, scale: Number = 1.0) -> pd.DataFrame:
     """
     Perform the inverse transformation for a set of ALR transformed data.
@@ -72,12 +83,4 @@ def inverse_alr(df: pd.DataFrame, denominator_column: str, scale: Number = 1.0) 
     if scale <= 0:
         raise NumericValueSignException("The scale value should be positive.")
 
-    dfc = df.copy()
-
-    if denominator_column not in dfc.columns.values:
-        # Add the denominator column
-        dfc[denominator_column] = 0.0
-
-    dfc = _closure(np.exp(dfc), scale)
-
-    return dfc
+    return _inverse_alr(df, denominator_column, scale)

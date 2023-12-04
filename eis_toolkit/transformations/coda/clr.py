@@ -46,6 +46,16 @@ def clr_transform(df: pd.DataFrame) -> pd.DataFrame:
 
 
 @beartype
+def _inverse_clr(df: pd.DataFrame, colnames: Optional[Sequence[str]] = None, scale: Number = 1.0) -> pd.DataFrame:
+    inverse = _closure(np.exp(df), scale)
+
+    if colnames is not None:
+        return rename_columns(inverse, colnames)
+
+    return inverse
+
+
+@beartype
 def inverse_clr(df: pd.DataFrame, colnames: Optional[Sequence[str]] = None, scale: Number = 1.0) -> pd.DataFrame:
     """
     Perform the inverse transformation for a set of CLR transformed data.
@@ -65,9 +75,4 @@ def inverse_clr(df: pd.DataFrame, colnames: Optional[Sequence[str]] = None, scal
     if scale <= 0:
         raise NumericValueSignException("The scale value should be positive.")
 
-    inverse = _closure(np.exp(df), scale)
-
-    if colnames is not None:
-        return rename_columns(inverse, colnames)
-
-    return inverse
+    return _inverse_clr(df, colnames, scale)
