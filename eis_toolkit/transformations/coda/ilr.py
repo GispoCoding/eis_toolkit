@@ -96,9 +96,3 @@ def single_ilr_transform(
         raise InvalidCompositionException("The subcompositions overlap.")
 
     return _single_ilr_transform(df, subcomposition_1, subcomposition_2)
-
-
-@beartype
-def inverse_ilr():
-    """Perform the inverse transformation for a set of ILR transformed data."""
-    raise NotImplementedError()
