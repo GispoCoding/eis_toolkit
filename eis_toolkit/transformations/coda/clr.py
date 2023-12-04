@@ -1,9 +1,12 @@
+from numbers import Number
+
 import numpy as np
 import pandas as pd
 from beartype import beartype
 from beartype.typing import Optional, Sequence
 from scipy.stats import gmean
 
+from eis_toolkit.exceptions import NumericValueSignException
 from eis_toolkit.utilities.aitchison_geometry import _closure
 from eis_toolkit.utilities.checks.compositional import check_compositional
 from eis_toolkit.utilities.miscellaneous import rename_columns, rename_columns_by_pattern
@@ -43,7 +46,7 @@ def clr_transform(df: pd.DataFrame) -> pd.DataFrame:
 
 
 @beartype
-def inverse_clr(df: pd.DataFrame, colnames: Optional[Sequence[str]] = None, scale: float = 1.0) -> pd.DataFrame:
+def inverse_clr(df: pd.DataFrame, colnames: Optional[Sequence[str]] = None, scale: Number = 1.0) -> pd.DataFrame:
     """
     Perform the inverse transformation for a set of CLR transformed data.
 
@@ -55,9 +58,14 @@ def inverse_clr(df: pd.DataFrame, colnames: Optional[Sequence[str]] = None, scal
 
     Returns:
         A dataframe containing the inverse transformed data.
-    """
 
-    inverse = _closure(np.exp(df), np.float64(scale))
+    Raises:
+        NumericValueSignException: The input scale value is zero or less.
+    """
+    if scale <= 0:
+        raise NumericValueSignException("The scale value should be positive.")
+
+    inverse = _closure(np.exp(df), scale)
 
     if colnames is not None:
         return rename_columns(inverse, colnames)

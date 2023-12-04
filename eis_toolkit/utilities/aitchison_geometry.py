@@ -1,10 +1,12 @@
+from numbers import Number
+
 import numpy as np
 import pandas as pd
 from beartype import beartype
 
 
 @beartype
-def _normalize(row: pd.Series, sum_value: np.float64 = 1.0) -> pd.Series:
+def _normalize(row: pd.Series, sum_value: Number = 1.0) -> pd.Series:
     """
     Normalize the series to a given value.
 
@@ -21,7 +23,7 @@ def _normalize(row: pd.Series, sum_value: np.float64 = 1.0) -> pd.Series:
 
 
 @beartype
-def _closure(df: pd.DataFrame, scale: np.float64 = None) -> pd.DataFrame:
+def _closure(df: pd.DataFrame, scale: Number = None) -> pd.DataFrame:
     """
     Perform the closure operation on the dataframe.
 
@@ -34,7 +36,7 @@ def _closure(df: pd.DataFrame, scale: np.float64 = None) -> pd.DataFrame:
         A new dataframe of shape (N, D) where each row has been normalized to 1.
     """
 
-    dfc = df.copy().astype(np.float64)
+    dfc = df.copy()
 
     for idx, row in df.iterrows():
         dfc.iloc[idx] = _normalize(row, scale) if scale is not None else _normalize(row)
