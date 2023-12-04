@@ -1523,7 +1523,7 @@ def plot_correlation_matrix_cli(
     annotate: bool,
     cmap: str,
     plot_title: str,
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION]
+    output_png: Annotated[Path, OUTPUT_FILE_OPTION]
 ):
     """Create a Seaborn heatmap to visualize correlation matrix."""
     from eis_toolkit.validation.plot_correlation_matrix import plot_correlation_matrix
@@ -1542,11 +1542,9 @@ def plot_correlation_matrix_cli(
         kwargs=None)
     typer.echo("Progress: 70%")
 
-    # Raster or png? The output is set to raster in plugin.
-    result_ax.figure.savefig(output_raster, format='png', bbox_inches='tight')
+    result_ax.figure.savefig(output_png, format='png', bbox_inches='tight')
     typer.echo("Progress: 100%")
-
-    typer.echo(f"Plot correlation matrix complete, writing image to {output_raster}.")
+    typer.echo(f"Plot correlation matrix complete, writing image to {output_png}.")
 
 
 # PLOT PREDICTION AREA CURVE
