@@ -22,7 +22,7 @@ def test_alr_transform():
     arr = np.array([[1, 4, 1, 1], [2, 1, 2, 2]])
     df = pd.DataFrame(arr, columns=["a", "b", "c", "d"], dtype=np.float64)
 
-    result = alr_transform(df, idx=1, keep_redundant_column=True)
+    result = alr_transform(df, column=1, keep_denominator_column=True)
     expected = pd.DataFrame(
         {
             "V1": [np.log(0.25), np.log(2)],
@@ -34,7 +34,7 @@ def test_alr_transform():
     )
     pd.testing.assert_frame_equal(result, expected)
 
-    result = alr_transform(df, idx=1)
+    result = alr_transform(df, column=1)
     expected = pd.DataFrame(
         {"V1": [np.log(0.25), np.log(2)], "V2": [np.log(0.25), np.log(2)], "V3": [np.log(0.25), np.log(2)]},
         dtype=np.float64,
@@ -50,15 +50,15 @@ def test_alr_transform_with_out_of_bounds_denominator_column():
         alr_transform(SAMPLE_DATAFRAME, -5)
 
 
-def test_alr_transform_redundant_column():
+def test_alr_transform_denominator_column():
     """
-    Test ALR transformation with the keep_redundant_column option set to True.
+    Test ALR transformation with the keep_denominator_column option set to True.
 
-    Test that the redundant column is found in the result, and that it contains the expected
-    values when requesting to keep the redundant column in the ALR transformed data.
+    Test that the denominator column is found in the result, and that it contains the expected
+    values when requesting to keep the denominator column in the ALR transformed data.
     """
     idx = -1
-    result = alr_transform(SAMPLE_DATAFRAME, idx, keep_redundant_column=True)
+    result = alr_transform(SAMPLE_DATAFRAME, idx, keep_denominator_column=True)
 
     assert result.shape == SAMPLE_DATAFRAME.shape
     assert all([val == 0 for val in result.iloc[:, idx].values])
@@ -69,22 +69,19 @@ def test_inverse_alr():
     arr = np.array([[np.log(0.25), np.log(0.25), np.log(0.25)], [np.log(2), np.log(2), np.log(2)]])
     df = pd.DataFrame(arr, columns=["V1", "V2", "V3"], dtype=np.float64)
     column_name = "d"
-    result = inverse_alr(df, column_name, scale=7, idx=-1)
+    result = inverse_alr(df, column_name, 7)
     expected_arr = np.array([[1, 1, 1, 4], [2, 2, 2, 1]])
     expected = pd.DataFrame(expected_arr, columns=["V1", "V2", "V3", "d"], dtype=np.float64)
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
 
 
-def test_inverse_alr_column_placement():
-    """Test inverse ALR core functionality with nonstandard column placement."""
-    arr = np.array([[np.log(0.25), np.log(0.25), np.log(0.25)], [np.log(2), np.log(2), np.log(2)]])
-    df = pd.DataFrame(arr, columns=["V1", "V2", "V3"], dtype=np.float64)
+def test_inverse_alr_with_existing_denominator_column():
+    """Test inverse ALR core functionality with the denominator column already existing."""
+    arr = np.array([[np.log(0.25), np.log(0.25), 0.0, np.log(0.25)], [np.log(2), np.log(2), 0.0, np.log(2)]])
+    df = pd.DataFrame(arr, columns=["V1", "V2", "d", "V3"], dtype=np.float64)
     column_name = "d"
     expected_arr = np.array([[1, 1, 4, 1], [2, 2, 1, 2]])
     expected = pd.DataFrame(expected_arr, columns=["V1", "V2", "d", "V3"], dtype=np.float64)
 
-    result = inverse_alr(df, column_name, scale=7, idx=2)
-    pd.testing.assert_frame_equal(result, expected, atol=1e-2)
-
-    result = inverse_alr(df, column_name, scale=7, idx=-6)
+    result = inverse_alr(df, column_name, 7)
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
