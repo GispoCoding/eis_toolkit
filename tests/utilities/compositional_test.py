@@ -19,11 +19,11 @@ def test_compositional_data_has_zeros():
     with pytest.raises(NumericValueSignException):
         clr_transform(df)
     with pytest.raises(NumericValueSignException):
-        single_ilr_transform(df)
+        single_ilr_transform(df, ["a"], ["b"])
     with pytest.raises(NumericValueSignException):
         plr_transform(df)
     with pytest.raises(NumericValueSignException):
-        single_plr_transform(df)
+        single_plr_transform(df, "b")
 
 
 def test_compositional_data_has_negatives():
@@ -35,11 +35,11 @@ def test_compositional_data_has_negatives():
     with pytest.raises(NumericValueSignException):
         clr_transform(df)
     with pytest.raises(NumericValueSignException):
-        single_ilr_transform(df)
+        single_ilr_transform(df, ["a"], ["b"])
     with pytest.raises(NumericValueSignException):
         plr_transform(df)
     with pytest.raises(NumericValueSignException):
-        single_plr_transform(df)
+        single_plr_transform(df, "b")
 
 
 def test_compositional_data_has_nans():
@@ -51,11 +51,11 @@ def test_compositional_data_has_nans():
     with pytest.raises(InvalidCompositionException):
         clr_transform(df)
     with pytest.raises(InvalidCompositionException):
-        single_ilr_transform(df)
+        single_ilr_transform(df, ["a"], ["b"])
     with pytest.raises(InvalidCompositionException):
         plr_transform(df)
     with pytest.raises(InvalidCompositionException):
-        single_plr_transform(df)
+        single_plr_transform(df, "b")
 
 
 def test_compositional_data_invalid():
@@ -67,11 +67,11 @@ def test_compositional_data_invalid():
     with pytest.raises(InvalidCompositionException):
         clr_transform(df)
     with pytest.raises(InvalidCompositionException):
-        single_ilr_transform(df)
+        single_ilr_transform(df, ["a"], ["b"])
     with pytest.raises(InvalidCompositionException):
         plr_transform(df)
     with pytest.raises(InvalidCompositionException):
-        single_plr_transform(df)
+        single_plr_transform(df, "b")
 
 
 def test_check_for_simplex_sample_space():
@@ -83,7 +83,11 @@ def test_check_for_simplex_sample_space():
 
     with pytest.raises(InvalidCompositionException):
         check_in_simplex_sample_space(non_simplex_positive_df)
+
+    with pytest.raises(NumericValueSignException):
         check_in_simplex_sample_space(non_positive_df)
+
+    with pytest.raises(InvalidCompositionException):
         check_in_simplex_sample_space(simplex_df, np.float64(100))
 
     # Valid cases - assert no exception is raised

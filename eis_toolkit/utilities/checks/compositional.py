@@ -1,39 +1,9 @@
-import functools
-from typing import Callable
-
 import numpy as np
 import pandas as pd
 from beartype import beartype
 
 from eis_toolkit.exceptions import InvalidCompositionException, NumericValueSignException
 from eis_toolkit.utilities.checks.dataframe import check_dataframe_contains_only_positive_numbers
-
-
-def check_compositional(func: Callable) -> Callable:
-    """
-    Check if the dataframe argument in the callable is a valid composition.
-
-    A wrapper function that can be used as a decorator.
-
-    Args:
-        func: The function to wrap.
-
-    Raises:
-        InvalidCompositionException: Data is not normalized to the expected value.
-        NumericValueSignException: Data contains zeros or negative values.
-    """
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        for arg in args:
-            if type(arg) is pd.DataFrame:
-                check_in_simplex_sample_space(arg)
-        for kwarg in kwargs.values():
-            if kwarg == "df":
-                check_in_simplex_sample_space(arg)
-        return func(*args, **kwargs)
-
-    return wrapper
 
 
 @beartype

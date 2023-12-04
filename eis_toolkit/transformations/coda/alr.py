@@ -7,7 +7,7 @@ from beartype.typing import Sequence
 
 from eis_toolkit.exceptions import InvalidColumnIndexException, NumericValueSignException
 from eis_toolkit.utilities.aitchison_geometry import _closure
-from eis_toolkit.utilities.checks.compositional import check_compositional
+from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
 from eis_toolkit.utilities.checks.dataframe import check_column_index_in_dataframe
 from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
 
@@ -20,7 +20,6 @@ def _alr_transform(df: pd.DataFrame, columns: Sequence[str], denominator_column:
 
 
 @beartype
-@check_compositional
 def alr_transform(df: pd.DataFrame, column: int = -1, keep_denominator_column: bool = False) -> pd.DataFrame:
     """
     Perform an additive logratio transformation on the data.
@@ -37,8 +36,10 @@ def alr_transform(df: pd.DataFrame, column: int = -1, keep_denominator_column: b
 
     Raises:
         InvalidColumnIndexException: The input index for the denominator column is out of bounds.
-        See check_compositional for other exceptions.
+        InvalidCompositionException: Data is not normalized to the expected value.
+        NumericValueSignException: Data contains zeros or negative values.
     """
+    check_in_simplex_sample_space(df)
 
     if not check_column_index_in_dataframe(df, column):
         raise InvalidColumnIndexException("Denominator column index out of bounds.")

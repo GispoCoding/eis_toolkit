@@ -8,7 +8,7 @@ from scipy.stats import gmean
 
 from eis_toolkit.exceptions import NumericValueSignException
 from eis_toolkit.utilities.aitchison_geometry import _closure
-from eis_toolkit.utilities.checks.compositional import check_compositional
+from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
 from eis_toolkit.utilities.miscellaneous import rename_columns, rename_columns_by_pattern
 
 
@@ -28,7 +28,6 @@ def _clr_transform(df: pd.DataFrame) -> pd.DataFrame:
 
 
 @beartype
-@check_compositional
 def clr_transform(df: pd.DataFrame) -> pd.DataFrame:
     """
     Perform a centered logratio transformation on the data.
@@ -40,8 +39,10 @@ def clr_transform(df: pd.DataFrame) -> pd.DataFrame:
         A new dataframe containing the CLR transformed data.
 
     Raises:
-        See check_compositional.
+        InvalidCompositionException: Data is not normalized to the expected value.
+        NumericValueSignException: Data contains zeros or negative values.
     """
+    check_in_simplex_sample_space(df)
     return rename_columns_by_pattern(_clr_transform(df))
 
 

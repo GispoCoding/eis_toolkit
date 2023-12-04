@@ -4,7 +4,7 @@ from beartype import beartype
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
-from eis_toolkit.utilities.checks.compositional import check_compositional
+from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
 from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
 
@@ -57,7 +57,6 @@ def _single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
 
 
 @beartype
-@check_compositional
 def single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
     """
     Perform a pivot logratio transformation on the selected column.
@@ -77,8 +76,10 @@ def single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
     Raises:
         InvalidColumnException: The input column isn't found in the dataframe, or there are no columns
             to the right of the given column.
-        See check_compositional for other exceptions.
+        InvalidCompositionException: Data is not normalized to the expected value.
+        NumericValueSignException: Data contains zeros or negative values.
     """
+    check_in_simplex_sample_space(df)
 
     if column not in df.columns:
         raise InvalidColumnException()
@@ -105,7 +106,6 @@ def _plr_transform(df: pd.DataFrame) -> pd.DataFrame:
 
 
 @beartype
-@check_compositional
 def plr_transform(df: pd.DataFrame) -> pd.DataFrame:
     """
     Perform a pivot logratio transformation on the dataframe, returning the full set of transforms.
@@ -118,6 +118,9 @@ def plr_transform(df: pd.DataFrame) -> pd.DataFrame:
 
     Raises:
         InvalidColumnException: The data contains one or more zeros.
-        See check_compositional for other exceptions.
+        InvalidCompositionException: Data is not normalized to the expected value.
+        NumericValueSignException: Data contains zeros or negative values.
     """
+    check_in_simplex_sample_space(df)
+
     return rename_columns_by_pattern(_plr_transform(df))
