@@ -1516,6 +1516,37 @@ def calculate_base_metrics_cli(
 
 
 # PLOT CORRELATION MATRIX
+# TODO! This will need some work.
+@app.command()
+def plot_correlation_matrix_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    annotate: bool,
+    cmap: str,
+    plot_title: str,
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Create a Seaborn heatmap to visualize correlation matrix."""
+    from eis_toolkit.validation.plot_correlation_matrix import plot_correlation_matrix
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
+    typer.echo("Progress: 35%")
+
+    result_ax = plot_correlation_matrix(
+        matrix=dataframe,
+        annotate=annotate,
+        cmap=cmap,
+        plot_title=plot_title,
+        kwargs=None)
+    typer.echo("Progress: 70%")
+
+    # Raster or png? The output is set to raster in plugin.
+    result_ax.figure.savefig(output_raster, format='png', bbox_inches='tight')
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Plot correlation matrix complete, writing image to {output_raster}.")
 
 
 # PLOT PREDICTION AREA CURVE
