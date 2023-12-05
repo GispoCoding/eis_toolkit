@@ -1548,6 +1548,31 @@ def plot_correlation_matrix_cli(
 
 
 # PLOT PREDICTION AREA CURVE
+@app.command()
+def plot_prediction_area_curve(
+    input_positives: Annotated[Path, INPUT_FILE_OPTION],
+    proportion_of_area_values: Annotated[Path, INPUT_FILE_OPTION],
+    threshold_values: Annotated[Path, INPUT_FILE_OPTION],
+    out_img: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Plot prediction-area (P-A) plot."""
+    from eis_toolkit.validation.plot_prediction_area_curves import plot_prediction_area_curves
+    typer.echo("Progress: 10%")
+
+    # READ inputs to pd.series. Should this also try to read them into numpy arrays?
+    positives = pd.read_csv(input_positives)
+    typer.echo("Progress: 20%")
+    proportion_of_area = pd.read_csv(proportion_of_area_values)
+    typer.echo("Progress: 40%")
+    thresholds = pd.read_csv(threshold_values)
+    typer.echo("Progress: 60%")
+
+    plot = plot_prediction_area_curves(positives, proportion_of_area, thresholds)
+    typer.echo("Progress: 80")
+
+    plot.figure.savefig(out_img, format='png', bbox_inches='tight')
+    typer.echo("Progress: 100%")
+    typer.echo(f"Plot prediction area curve complete, writing image to {out_img}.")
 
 
 # PLOT RATE CURVE
