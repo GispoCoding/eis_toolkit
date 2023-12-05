@@ -965,7 +965,7 @@ def distance_computation_cli(
 
 
 # CBA
-# TODO
+# TODO! Only a draft exists in plugin.
 
 
 # --- PREDICTION ---
@@ -1573,12 +1573,6 @@ def plot_prediction_area_curve(
     plot.figure.savefig(out_img, format='png', bbox_inches='tight')
     typer.echo("Progress: 100%")
     typer.echo(f"Plot prediction area curve complete, writing image to {out_img}.")
-
-
-# PLOT RATE CURVE
-
-
-#
 
 
 # if __name__ == "__main__":
