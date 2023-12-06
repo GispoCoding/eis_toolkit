@@ -8,6 +8,7 @@ from eis_toolkit.prediction.cnn_classification_and_regression import (
 )
 
 PATH = "../data/remote/Windows_test"
+print(os.getcwd())
 
 dataset = list()
 labels = list()
