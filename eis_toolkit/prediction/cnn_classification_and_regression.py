@@ -182,7 +182,7 @@ def train_and_predict_for_classification(
     optimizer: str = "Adam",
     loss=tf.keras.losses.CategoricalCrossentropy(),
     output_units=2,
-) -> tuple[Model | None, DataFrame]:
+) -> tuple[Model, DataFrame]:
     """
     Do training and evaluation of the model with cross validation.
 
@@ -307,7 +307,7 @@ def train_and_predict_for_regression(
     optimizer: str = "Adam",
     loss=tf.keras.losses.BinaryCrossentropy(),
     output_units=1,
-) -> tuple[Model | None, DataFrame]:
+) -> tuple[Model, DataFrame]:
     """
     Do training and evaluation of the model with cross validation.
 
