@@ -7,7 +7,7 @@ from eis_toolkit.prediction.cnn_classification_and_regression import (
     train_and_predict_for_regression,
 )
 
-PATH = "Windows_test"
+PATH = "../data/remote/Windows_test"
 
 dataset = list()
 labels = list()
