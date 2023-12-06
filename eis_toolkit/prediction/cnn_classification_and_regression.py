@@ -2,6 +2,7 @@ from typing import Literal, Union
 
 import numpy as np
 import pandas as pd
+import sklearn.preprocessing
 import tensorflow as tf
 from beartype import beartype
 from keras import Model
@@ -14,7 +15,25 @@ from eis_toolkit.exceptions import CNNException, CNNRunningParameterException, I
 from eis_toolkit.prediction.model_performance_estimation import performance_model_estimation
 
 
-def make_one_hot_encoding(labels):
+def normalize_the_data(scaler_agent: sklearn.preprocessing, data: np.ndarray):
+    """
+    Do Data normalization.
+
+    Parameters:
+       scaler_agent: this is the scaler agent used for data normalization is like an handler.
+       data: data to normalize
+
+    Return:
+        return normalized data.
+    """
+    number_of_sample, h, w, c = data.shape
+    temp = scaler_agent.transform(data.reshape(-1, data.shape[-1]))
+    normalized_data = temp.reshape(number_of_sample, h, w, c)
+    return normalized_data
+
+
+@beartype
+def make_one_hot_encoding(labels: np.ndarray):
     """
      Do the OneHotEncoding.
 
@@ -38,6 +57,7 @@ def make_one_hot_encoding(labels):
     return label_encoded
 
 
+@beartype
 def do_the_cnn(
     input_shape_for_cnn: Union[tuple[int, int, int], tuple[int, int]],
     convolution_kernel_size: tuple[int, int],
@@ -142,8 +162,6 @@ def do_the_cnn(
 
 
 # now let's prepare two mega function one for classification and one for regression
-
-
 @beartype
 def train_and_predict_for_classification(
     X: np.ndarray,
@@ -162,7 +180,7 @@ def train_and_predict_for_classification(
     regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2, None] = None,
     data_augmentation: bool = False,
     optimizer: str = "Adam",
-    loss=Union[tf.keras.losses.BinaryCrossentropy, tf.keras.losses.CategoricalCrossentropy],
+    loss=tf.keras.losses.CategoricalCrossentropy(),
     output_units=2,
 ) -> tuple[Model | None, DataFrame]:
     """
@@ -223,9 +241,6 @@ def train_and_predict_for_classification(
     )
 
     # prepare the scaler
-    scaler_agent = StandardScaler()
-    scaler_agent.fit(X.reshape(-1, X.shape[-1]))
-
     # get cross validation methods
     selected_cs = performance_model_estimation(cross_validation_type=cross_validation, number_of_split=1)
 
@@ -233,13 +248,16 @@ def train_and_predict_for_classification(
     best_score = 0
     model_to_return = None
 
+    scaler_agent = StandardScaler()
+    scaler_agent.fit(X.reshape(-1, X.shape[-1]))
+
     for i, (train_index, test_index) in enumerate(selected_cs.split(y)):
         # train test
-        X_train = scaler_agent.transform(X[train_index])
+        X_train = normalize_the_data(scaler_agent=scaler_agent, data=X[train_index])
         y_train = y_encoded[train_index]
 
         # valid test
-        X_validation = scaler_agent.transform(X[test_index])
+        X_validation = normalize_the_data(scaler_agent=scaler_agent, data=X[test_index])
         y_validation = y_encoded[test_index]
 
         _ = cnn_model.fit(
@@ -283,12 +301,12 @@ def train_and_predict_for_regression(
     neuron_list: list[int] = [16],
     pool_size: int = 2,
     dropout_rate: Union[None, float] = None,
-    last_activation: Literal["softmax", "sigmoid"] = "softmax",
+    last_activation: Literal["softmax", "sigmoid"] = "sigmoid",
     regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2, None] = None,
     data_augmentation: bool = False,
     optimizer: str = "Adam",
-    loss=Union[tf.keras.losses.BinaryCrossentropy, tf.keras.losses.CategoricalCrossentropy],
-    output_units=2,
+    loss=tf.keras.losses.BinaryCrossentropy(),
+    output_units=1,
 ) -> tuple[Model | None, DataFrame]:
     """
     Do training and evaluation of the model with cross validation.
@@ -357,11 +375,11 @@ def train_and_predict_for_regression(
 
     for i, (train_index, test_index) in enumerate(selected_cs.split(y)):
         # train test
-        X_train = scaler_agent.transform(X[train_index])
+        X_train = normalize_the_data(scaler_agent=scaler_agent, data=X[train_index])
         y_train = y[train_index]
 
         # valid test
-        X_validation = scaler_agent.transform(X[test_index])
+        X_validation = normalize_the_data(scaler_agent=scaler_agent, data=X[test_index])
         y_validation = y[test_index]
 
         _ = cnn_model.fit(
