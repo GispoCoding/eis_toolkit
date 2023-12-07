@@ -1,18 +1,26 @@
+from numbers import Number
 from typing import Literal, Optional, Sequence, Tuple
 
 import numpy as np
 from beartype import beartype
-from keras.optimizers import get as get_optimizer
+from keras.optimizers import Adam
 from tensorflow import keras
 
 from eis_toolkit import exceptions
+
+
+def _keras_optimizer(optimizer: str, **kwargs):
+    if optimizer == "adam":
+        return Adam(**kwargs)
+    else:
+        raise exceptions.InvalidParameterValueException(f"Unidentified optimizer: {optimizer}")
 
 
 def _check_MLP_inputs(
     neurons: Sequence[int],
     validation_split: Optional[float],
     learning_rate: float,
-    dropout_rate: Optional[float],
+    dropout_rate: Optional[Number],
     es_patience: int,
     batch_size: int,
     epochs: int,
@@ -23,13 +31,16 @@ def _check_MLP_inputs(
     if len(neurons) == 0:
         raise exceptions.InvalidParameterValueException("Neurons parameter must be a non-empty list.")
 
-    if not (0 < validation_split < 1):
+    if any(neuron < 1 for neuron in neurons):
+        raise exceptions.InvalidParameterValueException("Each neuron in neurons list must be at least 1.")
+
+    if validation_split and not (0 < validation_split < 1):
         raise exceptions.InvalidParameterValueException("Validation split must be a value between 0 and 1, exclusive.")
 
     if learning_rate <= 0:
         raise exceptions.InvalidParameterValueException("Learning rate must be greater than 0.")
 
-    if not (0 <= dropout_rate <= 1):
+    if dropout_rate and not (0 <= dropout_rate <= 1):
         raise exceptions.InvalidParameterValueException("Dropout rate must be between 0 and 1, inclusive.")
 
     if es_patience <= 0:
@@ -62,9 +73,9 @@ def train_MLP_classifier(
     epochs: int = 50,
     batch_size: int = 32,
     optimizer: Literal["adam"] = "adam",
-    learning_rate: float = 0.001,
+    learning_rate: Number = 0.001,
     loss_function: Literal["categorical_crossentropy", "binary_crossentropy"] = "categorical_crossentropy",
-    dropout_rate: Optional[float] = None,
+    dropout_rate: Optional[Number] = None,
     early_stopping: bool = True,
     es_patience: int = 5,
     metrics: Optional[Sequence[Literal["accuracy", "precision", "recall"]]] = ["accuracy"],
@@ -91,7 +102,7 @@ def train_MLP_classifier(
         optimizer: Optimizer to be used. Defaults to 'adam'.
         learning_rate: Learning rate to be used in training. Value must be > 0. Defalts to 0.001.
         loss_function: Loss function to be used. Defaults to 'categorical_crossentropy'.
-        dropout_rate: Fraction of the input units to drop. Value must be > 0 and < 1. Defaults to None.
+        dropout_rate: Fraction of the input units to drop. Value must be >= 0 and <= 1. Defaults to None.
         early_stopping: Whether or not to use early stopping in training. Defaults to True.
         es_patience: Number of epochs with no improvement after which training will be stopped. Defaults to 5.
         metrics: Metrics to be evaluated by the model during training and testing. Defaults to ['accuracy'].
@@ -128,7 +139,9 @@ def train_MLP_classifier(
 
     model.add(keras.layers.Dense(units=output_neurons, activation=last_activation))
 
-    model.compile(optimizer=get_optimizer(optimizer)(learning_rate=learning_rate), loss=loss_function, metrics=metrics)
+    model.compile(
+        optimizer=_keras_optimizer(optimizer, learning_rate=learning_rate), loss=loss_function, metrics=metrics
+    )
 
     # 3. Train the model
     # Early stopping callback
@@ -154,13 +167,13 @@ def train_MLP_regressor(
     validation_split: Optional[float] = 0.2,
     activation: Literal["relu"] = "relu",
     output_neurons: int = 1,
-    last_activation: Literal["softmax", "sigmoid"] = "softmax",
+    last_activation: Literal["linear"] = "linear",
     epochs: int = 50,
     batch_size: int = 32,
     optimizer: Literal["adam"] = "adam",
-    learning_rate: float = 0.001,
+    learning_rate: Number = 0.001,
     loss_function: Literal["mse"] = "mse",
-    dropout_rate: Optional[float] = None,
+    dropout_rate: Optional[Number] = None,
     early_stopping: bool = True,
     es_patience: int = 5,
     metrics: Optional[Sequence[Literal["mse", "rmse", "mae"]]] = ["mse"],
@@ -181,13 +194,13 @@ def train_MLP_regressor(
             Defaults to 0.2.
         activation: Activation function used in each hidden layer. Defaults to 'relu'.
         output_neurons: Number of neurons in the output layer. Defaults to 1.
-        last_activation: Activation function used in the output layer. Defaults to 'softmax'.
+        last_activation: Activation function used in the output layer. Defaults to 'linear'.
         epochs: Number of epochs to train the model. Defaults to 50.
         batch_size: Number of samples per gradient update. Defaults to 32.
         optimizer: Optimizer to be used. Defaults to 'adam'.
         learning_rate: Learning rate to be used in training. Value must be > 0. Defalts to 0.001.
         loss_function: Loss function to be used. Defaults to 'mse'.
-        dropout_rate: Fraction of the input units to drop. Value must be > 0 and < 1. Defaults to None.
+        dropout_rate: Fraction of the input units to drop. Value must be >= 0 and <= 1. Defaults to None.
         early_stopping: Whether or not to use early stopping in training. Defaults to True.
         es_patience: Number of epochs with no improvement after which training will be stopped. Defaults to 5.
         metrics: Metrics to be evaluated by the model during training and testing. Defaults to ['mse'].
@@ -224,7 +237,9 @@ def train_MLP_regressor(
 
     model.add(keras.layers.Dense(units=output_neurons, activation=last_activation))
 
-    model.compile(optimizer=get_optimizer(optimizer)(learning_rate=learning_rate), loss=loss_function, metrics=metrics)
+    model.compile(
+        optimizer=_keras_optimizer(optimizer, learning_rate=learning_rate), loss=loss_function, metrics=metrics
+    )
 
     # 3. Train the model
     # Early stopping callback
