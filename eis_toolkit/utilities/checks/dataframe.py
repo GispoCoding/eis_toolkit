@@ -48,18 +48,6 @@ def check_empty_dataframe(df: pd.DataFrame) -> bool:
 
 
 @beartype
-def check_column_index_in_dataframe(df: pd.DataFrame, idx: int) -> bool:
-    """
-    Check if the column's integer position based index is within the dataframe.
-
-    Args:
-        df: Dataframe to be checked.
-        idx: Column index to check.
-    """
-    return -len(df.columns) <= idx < len(df.columns)
-
-
-@beartype
 def check_dataframe_contains_zeros(df: pd.DataFrame) -> bool:
     """
     Check if the dataframe contains any zeros.

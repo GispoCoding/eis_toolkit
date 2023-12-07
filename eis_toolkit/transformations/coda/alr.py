@@ -5,10 +5,9 @@ import pandas as pd
 from beartype import beartype
 from beartype.typing import Sequence
 
-from eis_toolkit.exceptions import InvalidColumnIndexException, NumericValueSignException
+from eis_toolkit.exceptions import InvalidColumnException, NumericValueSignException
 from eis_toolkit.utilities.aitchison_geometry import _closure
 from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
-from eis_toolkit.utilities.checks.dataframe import check_column_index_in_dataframe
 from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
 
 
@@ -20,14 +19,13 @@ def _alr_transform(df: pd.DataFrame, columns: Sequence[str], denominator_column:
 
 
 @beartype
-def alr_transform(df: pd.DataFrame, column: int = -1, keep_denominator_column: bool = False) -> pd.DataFrame:
+def alr_transform(df: pd.DataFrame, column: str = None, keep_denominator_column: bool = False) -> pd.DataFrame:
     """
     Perform an additive logratio transformation on the data.
 
     Args:
         df: A dataframe of compositional data.
-        column: The integer position based index of the column of the dataframe to be used as denominator.
-            If not provided, the last column will be used.
+        column: The name of the column to be used as the denominator column.
         keep_denominator_column: Whether to include the denominator column in the result. If True, the returned
             dataframe retains its original shape.
 
@@ -35,22 +33,23 @@ def alr_transform(df: pd.DataFrame, column: int = -1, keep_denominator_column: b
         A new dataframe containing the ALR transformed data.
 
     Raises:
-        InvalidColumnIndexException: The input index for the denominator column is out of bounds.
+        InvalidColumnException: The input column isn't found in the dataframe.
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
     check_in_simplex_sample_space(df)
 
-    if not check_column_index_in_dataframe(df, column):
-        raise InvalidColumnIndexException("Denominator column index out of bounds.")
+    if column is not None and column not in df.columns:
+        raise InvalidColumnException(f"The column {column} was not found in the dataframe.")
 
-    denominator_column = df.columns[column]
+    column = column if column is not None else df.columns[-1]
+
     columns = [col for col in df.columns]
 
-    if not keep_denominator_column and denominator_column in columns:
-        columns.remove(denominator_column)
+    if not keep_denominator_column and column in columns:
+        columns.remove(column)
 
-    return rename_columns_by_pattern(_alr_transform(df, columns, denominator_column))
+    return rename_columns_by_pattern(_alr_transform(df, columns, column))
 
 
 @beartype

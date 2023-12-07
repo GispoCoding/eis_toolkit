@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eis_toolkit.exceptions import InvalidColumnIndexException, NumericValueSignException
+from eis_toolkit.exceptions import InvalidColumnException, NumericValueSignException
 from eis_toolkit.transformations.coda.alr import alr_transform, inverse_alr
 
 sample_array = np.array([[65, 12, 18, 5], [63, 16, 15, 6]])
@@ -22,7 +22,7 @@ def test_alr_transform():
     arr = np.array([[1, 4, 1, 1], [2, 1, 2, 2]])
     df = pd.DataFrame(arr, columns=["a", "b", "c", "d"], dtype=np.float64)
 
-    result = alr_transform(df, column=1, keep_denominator_column=True)
+    result = alr_transform(df, column="b", keep_denominator_column=True)
     expected = pd.DataFrame(
         {
             "V1": [np.log(0.25), np.log(2)],
@@ -34,7 +34,7 @@ def test_alr_transform():
     )
     pd.testing.assert_frame_equal(result, expected)
 
-    result = alr_transform(df, column=1)
+    result = alr_transform(df, column="b")
     expected = pd.DataFrame(
         {"V1": [np.log(0.25), np.log(2)], "V2": [np.log(0.25), np.log(2)], "V3": [np.log(0.25), np.log(2)]},
         dtype=np.float64,
@@ -42,12 +42,10 @@ def test_alr_transform():
     pd.testing.assert_frame_equal(result, expected)
 
 
-def test_alr_transform_with_out_of_bounds_denominator_column():
-    """Test that providing a column index that is out of bounds raises the correct exception."""
-    with pytest.raises(InvalidColumnIndexException):
-        alr_transform(SAMPLE_DATAFRAME, 4)
-    with pytest.raises(InvalidColumnIndexException):
-        alr_transform(SAMPLE_DATAFRAME, -5)
+def test_alr_transform_with_invalid_column():
+    """Test that providing a column doesn't exist raises the correct exception."""
+    with pytest.raises(InvalidColumnException):
+        alr_transform(SAMPLE_DATAFRAME, "e")
 
 
 def test_alr_transform_denominator_column():
@@ -57,11 +55,10 @@ def test_alr_transform_denominator_column():
     Test that the denominator column is found in the result, and that it contains the expected
     values when requesting to keep the denominator column in the ALR transformed data.
     """
-    idx = -1
-    result = alr_transform(SAMPLE_DATAFRAME, idx, keep_denominator_column=True)
+    result = alr_transform(SAMPLE_DATAFRAME, keep_denominator_column=True)
 
     assert result.shape == SAMPLE_DATAFRAME.shape
-    assert all([val == 0 for val in result.iloc[:, idx].values])
+    assert all([val == 0 for val in result.iloc[:, -1].values])
 
 
 def test_inverse_alr():

@@ -82,7 +82,7 @@ def single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
     check_in_simplex_sample_space(df)
 
     if column not in df.columns:
-        raise InvalidColumnException()
+        raise InvalidColumnException(f"The column {column} was not found in the dataframe.")
 
     idx = df.columns.get_loc(column)
 
