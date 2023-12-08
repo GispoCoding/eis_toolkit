@@ -14,9 +14,7 @@ def example_geometries():
     line = LineString([(0, 0), (0, 150)])
     polygon = Polygon([(0, 0), (10, 0), (10, 25), (0, 25)])
 
-    data = {"geometry": [point, line, polygon]}
-
-    return gpd.GeoDataFrame(data, geometry="geometry")
+    return gpd.GeoDataFrame({"geometry": [point, line, polygon]})
 
 
 def test_validated_calculate_geometries(example_geometries):
