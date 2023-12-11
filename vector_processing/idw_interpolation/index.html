@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="../distance_computation/">
+        <link rel="prev" href="../extract_shared_lines/">
       
       
         <link rel="next" href="../kriging_interpolation/">
@@ -801,6 +801,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../raster_processing/unique_combinations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unique combinations in rasters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../raster_processing/windowing/" class="md-nav__link">
         
   
@@ -992,6 +1012,26 @@
   
   <span class="md-ellipsis">
     Logarithmic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../transformations/one_hot_encoding/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    One-hot encoding
   </span>
   
 
@@ -1280,6 +1320,26 @@
   
   <span class="md-ellipsis">
     Distance computation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../extract_shared_lines/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Extract shared lines
   </span>
   
 
@@ -1695,7 +1755,18 @@ Defaults to 2.</p>
 
           <details class="quote">
             <summary>Source code in <code>eis_toolkit/vector_processing/idw_interpolation.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 79</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
 <span class="normal"> 80</span>
 <span class="normal"> 81</span>
 <span class="normal"> 82</span>
@@ -1725,18 +1796,7 @@ Defaults to 2.</p>
 <span class="normal">106</span>
 <span class="normal">107</span>
 <span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="normal">109</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">idw</span><span class="p">(</span>
     <span class="n">geodataframe</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
     <span class="n">target_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>

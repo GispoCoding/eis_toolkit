@@ -864,6 +864,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../raster_processing/unique_combinations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unique combinations in rasters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../raster_processing/windowing/" class="md-nav__link">
         
   
@@ -1055,6 +1075,26 @@
   
   <span class="md-ellipsis">
     Logarithmic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../transformations/one_hot_encoding/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    One-hot encoding
   </span>
   
 
@@ -1341,6 +1381,26 @@
   
   <span class="md-ellipsis">
     Distance computation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../vector_processing/extract_shared_lines/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Extract shared lines
   </span>
   
 
@@ -1687,7 +1747,8 @@
   <div class="doc doc-contents ">
   
       <p>Generate descriptive statistics from raster data.</p>
-<p>Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.</p>
+<p>Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.
+Nodata values are removed from the data before the statistics are computed.</p>
 
 
 
@@ -1759,11 +1820,15 @@
 <span class="normal">73</span>
 <span class="normal">74</span>
 <span class="normal">75</span>
-<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">descriptive_statistics_raster</span><span class="p">(</span><span class="n">input_data</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate descriptive statistics from raster data.</span>
 
 <span class="sd">    Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.</span>
+<span class="sd">    Nodata values are removed from the data before the statistics are computed.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        input_data: Data to generate descriptive statistics from.</span>
@@ -1772,6 +1837,8 @@
 <span class="sd">        The descriptive statistics in previously described order.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">nodata_value</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">nodata</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span> <span class="o">!=</span> <span class="n">nodata_value</span><span class="p">]</span>
     <span class="n">statistics</span> <span class="o">=</span> <span class="n">_descriptive_statistics</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">statistics</span>
 </code></pre></div></td></tr></table></div>

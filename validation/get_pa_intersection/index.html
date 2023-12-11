@@ -801,6 +801,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../raster_processing/unique_combinations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unique combinations in rasters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../raster_processing/windowing/" class="md-nav__link">
         
   
@@ -992,6 +1012,26 @@
   
   <span class="md-ellipsis">
     Logarithmic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../transformations/one_hot_encoding/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    One-hot encoding
   </span>
   
 
@@ -1349,6 +1389,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../vector_processing/extract_shared_lines/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Extract shared lines
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../vector_processing/idw_interpolation/" class="md-nav__link">
         
   
@@ -1564,7 +1624,7 @@ Area curve uses inverted proportion of area as y-axis.</p>
         <tr>
           <td><code>true_positive_rate_values</code></td>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code><span title="typing.Union">Union</span>[<span title="numpy.ndarray">ndarray</span>, <span title="pandas.Series">Series</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1578,7 +1638,7 @@ Area curve uses inverted proportion of area as y-axis.</p>
         <tr>
           <td><code>proportion_of_area_values</code></td>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code><span title="typing.Union">Union</span>[<span title="numpy.ndarray">ndarray</span>, <span title="pandas.Series">Series</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1592,7 +1652,7 @@ Area curve uses inverted proportion of area as y-axis.</p>
         <tr>
           <td><code>threshold_values</code></td>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code><span title="typing.Union">Union</span>[<span title="numpy.ndarray">ndarray</span>, <span title="pandas.Series">Series</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1656,12 +1716,7 @@ Area curve uses inverted proportion of area as y-axis.</p>
 
           <details class="quote">
             <summary>Source code in <code>eis_toolkit/validation/get_pa_intersection.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
@@ -1688,9 +1743,18 @@ Area curve uses inverted proportion of area as y-axis.</p>
 <span class="normal">49</span>
 <span class="normal">50</span>
 <span class="normal">51</span>
-<span class="normal">52</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">get_pa_intersection</span><span class="p">(</span>
-    <span class="n">true_positive_rate_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">proportion_of_area_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">threshold_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">true_positive_rate_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+    <span class="n">proportion_of_area_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+    <span class="n">threshold_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the intersection point for prediction rate and area curves in (P-A plot).</span>
 

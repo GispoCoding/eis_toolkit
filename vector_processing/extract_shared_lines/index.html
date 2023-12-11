@@ -9,10 +9,10 @@
       
       
       
-        <link rel="prev" href="../clipping/">
+        <link rel="prev" href="../distance_computation/">
       
       
-        <link rel="next" href="../extract_values_from_raster/">
+        <link rel="next" href="../idw_interpolation/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -20,7 +20,7 @@
     
     
       
-        <title>Create constant raster - EIS Toolkit</title>
+        <title>Extract shared lines - EIS Toolkit</title>
       
     
     
@@ -69,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#create-constant-raster" class="md-skip">
+        <a href="#extract-shared-lines" class="md-skip">
           Skip to content
         </a>
       
@@ -105,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Create constant raster
+              Extract shared lines
             
           </span>
         </div>
@@ -603,20 +603,18 @@
       
   
   
-    
-  
   
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
@@ -630,7 +628,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Raster processing
@@ -643,7 +641,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../check_raster_grids/" class="md-nav__link">
+      <a href="../../raster_processing/check_raster_grids/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -663,7 +661,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../clipping/" class="md-nav__link">
+      <a href="../../raster_processing/clipping/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -681,29 +679,9 @@
                 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Create constant raster
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../raster_processing/create_constant_raster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -712,40 +690,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.create_constant_raster" class="md-nav__link">
-    create_constant_raster
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.create_constant_raster.create_constant_raster" class="md-nav__link">
-    create_constant_raster()
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -757,7 +701,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../extract_values_from_raster/" class="md-nav__link">
+      <a href="../../raster_processing/extract_values_from_raster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -777,7 +721,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reprojecting/" class="md-nav__link">
+      <a href="../../raster_processing/reprojecting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -797,7 +741,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../resampling/" class="md-nav__link">
+      <a href="../../raster_processing/resampling/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -817,7 +761,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../snapping/" class="md-nav__link">
+      <a href="../../raster_processing/snapping/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -837,7 +781,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../unifying/" class="md-nav__link">
+      <a href="../../raster_processing/unifying/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -857,7 +801,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../unique_combinations/" class="md-nav__link">
+      <a href="../../raster_processing/unique_combinations/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -877,7 +821,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../windowing/" class="md-nav__link">
+      <a href="../../raster_processing/windowing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1311,18 +1255,20 @@
       
   
   
+    
+  
   
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
         
           
           <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
@@ -1336,7 +1282,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             Vector processing
@@ -1349,7 +1295,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../vector_processing/cell_based_association/" class="md-nav__link">
+      <a href="../cell_based_association/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1369,7 +1315,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../vector_processing/distance_computation/" class="md-nav__link">
+      <a href="../distance_computation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1387,9 +1333,29 @@
                 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../vector_processing/extract_shared_lines/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Extract shared lines
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1398,6 +1364,40 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.vector_processing.extract_shared_lines" class="md-nav__link">
+    extract_shared_lines
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.vector_processing.extract_shared_lines.extract_shared_lines" class="md-nav__link">
+    extract_shared_lines()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1409,7 +1409,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../vector_processing/idw_interpolation/" class="md-nav__link">
+      <a href="../idw_interpolation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1429,7 +1429,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../vector_processing/kriging_interpolation/" class="md-nav__link">
+      <a href="../kriging_interpolation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1449,7 +1449,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../vector_processing/rasterize_vector/" class="md-nav__link">
+      <a href="../rasterize_vector/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1469,7 +1469,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../vector_processing/reproject_vector/" class="md-nav__link">
+      <a href="../reproject_vector/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1489,7 +1489,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../vector_processing/vector_density/" class="md-nav__link">
+      <a href="../vector_density/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1537,15 +1537,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.create_constant_raster" class="md-nav__link">
-    create_constant_raster
+  <a href="#eis_toolkit.vector_processing.extract_shared_lines" class="md-nav__link">
+    extract_shared_lines
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.create_constant_raster.create_constant_raster" class="md-nav__link">
-    create_constant_raster()
+  <a href="#eis_toolkit.vector_processing.extract_shared_lines.extract_shared_lines" class="md-nav__link">
+    extract_shared_lines()
   </a>
   
 </li>
@@ -1568,14 +1568,14 @@
   
 
 
-<h1 id="create-constant-raster">Create constant raster</h1>
+<h1 id="extract-shared-lines">Extract shared lines</h1>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<a id="eis_toolkit.raster_processing.create_constant_raster"></a>
+<a id="eis_toolkit.vector_processing.extract_shared_lines"></a>
   <div class="doc doc-contents first">
 
   
@@ -1596,21 +1596,15 @@
 
 
 
-<h3 id="eis_toolkit.raster_processing.create_constant_raster.create_constant_raster" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">create_constant_raster</span><span class="p">(</span><span class="n">constant_value</span><span class="p">,</span> <span class="n">template_raster</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coord_west</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coord_north</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coord_east</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coord_south</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_epsg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_pixel_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">raster_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">raster_height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nodata_value</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.vector_processing.extract_shared_lines.extract_shared_lines" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">extract_shared_lines</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span></code>
 
 </h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Create a constant raster based on a user-defined value.</p>
-<p>Provide 3 methods for raster creation:
-1. Set extent and coordinate system based on a template raster.
-2. Set extent from origin, based on the western and northern coordinates and the pixel size.
-3. Set extent from bounds, based on western, northern, eastern and southern points.</p>
-<p>Always provide values for height and width for the last two options, which correspond to
-the desired number of pixels for rows and columns.</p>
+      <p>Extract shared lines/borders/edges between polygons.</p>
 
 
 
@@ -1626,157 +1620,18 @@ the desired number of pixels for rows and columns.</p>
     </thead>
     <tbody>
         <tr>
-          <td><code>constant_value</code></td>
+          <td><code>polygons</code></td>
           <td>
-                <code><span title="numbers.Number">Number</span></code>
+                <code><span title="geopandas.GeoDataFrame">GeoDataFrame</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The constant value to use in the raster.</p>
+              <p>The geodataframe that contains the polygon geometries to be examined
+for shared lines.</p>
             </div>
           </td>
           <td>
               <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>template_raster</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="rasterio.io.DatasetReader">DatasetReader</span>]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>An optional raster to use as a template for the output.</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>coord_west</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="numbers.Number">Number</span>]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The western coordinate of the output raster in [m].</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>coord_east</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="numbers.Number">Number</span>]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The eastern coordinate of the output raster in [m].</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>coord_south</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="numbers.Number">Number</span>]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The southern coordinate of the output raster in [m].</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>coord_north</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="numbers.Number">Number</span>]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The northern coordinate of the output raster in [m].</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>target_epsg</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[int]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The EPSG code for the output raster.</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>target_pixel_size</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[int]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The pixel size of the output raster.</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>raster_width</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[int]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The width of the output raster.</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>raster_height</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[int]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The height of the output raster.</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>nodata_value</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="numbers.Number">Number</span>]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The nodata value of the output raster.</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
           </td>
         </tr>
     </tbody>
@@ -1795,35 +1650,11 @@ the desired number of pixels for rows and columns.</p>
     <tbody>
         <tr>
           <td>
-                <code><span title="beartype.typing.Tuple">Tuple</span>[<span title="numpy.ndarray">ndarray</span>, dict]</code>
+                <code><span title="geopandas.GeoDataFrame">GeoDataFrame</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>A tuple containing the output raster as a NumPy array and updated metadata.</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-  <p><strong>Raises:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><span title="eis_toolkit.exceptions.InvalidParameterValueException">InvalidParameterValueException</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Provide invalid input parameter.</p>
+              <p>Geodataframe containing the shared lines that were found between the polygons.</p>
             </div>
           </td>
         </tr>
@@ -1831,210 +1662,54 @@ the desired number of pixels for rows and columns.</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/raster_processing/create_constant_raster.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">create_constant_raster</span><span class="p">(</span>  <span class="c1"># type: ignore[no-any-unimported]</span>
-    <span class="n">constant_value</span><span class="p">:</span> <span class="n">Number</span><span class="p">,</span>
-    <span class="n">template_raster</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">coord_west</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">coord_north</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">coord_east</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">coord_south</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">target_epsg</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">target_pixel_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">raster_width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">raster_height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">nodata_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a constant raster based on a user-defined value.</span>
-
-<span class="sd">    Provide 3 methods for raster creation:</span>
-<span class="sd">    1. Set extent and coordinate system based on a template raster.</span>
-<span class="sd">    2. Set extent from origin, based on the western and northern coordinates and the pixel size.</span>
-<span class="sd">    3. Set extent from bounds, based on western, northern, eastern and southern points.</span>
-
-<span class="sd">    Always provide values for height and width for the last two options, which correspond to</span>
-<span class="sd">    the desired number of pixels for rows and columns.</span>
+            <summary>Source code in <code>eis_toolkit/vector_processing/extract_shared_lines.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">extract_shared_lines</span><span class="p">(</span><span class="n">polygons</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract shared lines/borders/edges between polygons.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        constant_value: The constant value to use in the raster.</span>
-<span class="sd">        template_raster: An optional raster to use as a template for the output.</span>
-<span class="sd">        coord_west: The western coordinate of the output raster in [m].</span>
-<span class="sd">        coord_east: The eastern coordinate of the output raster in [m].</span>
-<span class="sd">        coord_south: The southern coordinate of the output raster in [m].</span>
-<span class="sd">        coord_north: The northern coordinate of the output raster in [m].</span>
-<span class="sd">        target_epsg: The EPSG code for the output raster.</span>
-<span class="sd">        target_pixel_size: The pixel size of the output raster.</span>
-<span class="sd">        raster_width: The width of the output raster.</span>
-<span class="sd">        raster_height: The height of the output raster.</span>
-<span class="sd">        nodata_value: The nodata value of the output raster.</span>
+<span class="sd">        polygons: The geodataframe that contains the polygon geometries to be examined</span>
+<span class="sd">            for shared lines.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A tuple containing the output raster as a NumPy array and updated metadata.</span>
+<span class="sd">        Geodataframe containing the shared lines that were found between the polygons.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        InvalidParameterValueException: Provide invalid input parameter.</span>
+<span class="sd">        EmptyDataFrameException if input geodataframe is empty.</span>
+<span class="sd">        InvalidParameterValueException if input geodataframe doesn&#39;t contain at least 2 polygons.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">polygons</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;Geodataframe is empty.&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">template_raster</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_create_constant_raster_from_template</span><span class="p">(</span><span class="n">constant_value</span><span class="p">,</span> <span class="n">template_raster</span><span class="p">,</span> <span class="n">nodata_value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">polygons</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Expected GeoDataFrame to have at least 2 polygons.&quot;</span><span class="p">)</span>
 
-    <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">coords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">coords</span> <span class="ow">in</span> <span class="p">[</span><span class="n">coord_west</span><span class="p">,</span> <span class="n">coord_east</span><span class="p">,</span> <span class="n">coord_south</span><span class="p">,</span> <span class="n">coord_north</span><span class="p">]):</span>
-        <span class="k">if</span> <span class="n">raster_height</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">raster_width</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Invalid raster extent provided.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">check_minmax_position</span><span class="p">((</span><span class="n">coord_west</span><span class="p">,</span> <span class="n">coord_east</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">check_minmax_position</span><span class="p">((</span><span class="n">coord_south</span><span class="p">,</span> <span class="n">coord_north</span><span class="p">))):</span>
-            <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Invalid coordinate values provided.&quot;</span><span class="p">)</span>
+    <span class="n">shared_lines</span> <span class="o">=</span> <span class="n">_extract_shared_lines</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span>
 
-        <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_create_constant_raster_from_bounds</span><span class="p">(</span>
-            <span class="n">constant_value</span><span class="p">,</span>
-            <span class="n">coord_west</span><span class="p">,</span>
-            <span class="n">coord_north</span><span class="p">,</span>
-            <span class="n">coord_east</span><span class="p">,</span>
-            <span class="n">coord_south</span><span class="p">,</span>
-            <span class="n">target_epsg</span><span class="p">,</span>
-            <span class="n">raster_width</span><span class="p">,</span>
-            <span class="n">raster_height</span><span class="p">,</span>
-            <span class="n">nodata_value</span><span class="p">,</span>
-        <span class="p">)</span>
-
-    <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">coords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">coords</span> <span class="ow">in</span> <span class="p">[</span><span class="n">coord_west</span><span class="p">,</span> <span class="n">coord_north</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
-        <span class="n">coords</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">coords</span> <span class="ow">in</span> <span class="p">[</span><span class="n">coord_east</span><span class="p">,</span> <span class="n">coord_south</span><span class="p">]</span>
-    <span class="p">):</span>
-        <span class="k">if</span> <span class="n">raster_height</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">raster_width</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Invalid raster extent provided.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">target_pixel_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Invalid pixel size.&quot;</span><span class="p">)</span>
-
-        <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_create_constant_raster_from_origin</span><span class="p">(</span>
-            <span class="n">constant_value</span><span class="p">,</span>
-            <span class="n">coord_west</span><span class="p">,</span>
-            <span class="n">coord_north</span><span class="p">,</span>
-            <span class="n">target_epsg</span><span class="p">,</span>
-            <span class="n">target_pixel_size</span><span class="p">,</span>
-            <span class="n">raster_width</span><span class="p">,</span>
-            <span class="n">raster_height</span><span class="p">,</span>
-            <span class="n">nodata_value</span><span class="p">,</span>
-        <span class="p">)</span>
-
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Suitable parameter values were not provided for any of the 3 methods.&quot;</span><span class="p">)</span>
-
-    <span class="n">constant_value</span> <span class="o">=</span> <span class="n">cast_scalar_to_int</span><span class="p">(</span><span class="n">constant_value</span><span class="p">)</span>
-    <span class="n">nodata_value</span> <span class="o">=</span> <span class="n">cast_scalar_to_int</span><span class="p">(</span><span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;nodata&quot;</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constant_value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodata_value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="n">target_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">result_type</span><span class="p">(</span><span class="n">get_min_int_type</span><span class="p">(</span><span class="n">constant_value</span><span class="p">),</span> <span class="n">get_min_int_type</span><span class="p">(</span><span class="n">nodata_value</span><span class="p">))</span>
-        <span class="n">out_array</span> <span class="o">=</span> <span class="n">out_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">target_dtype</span><span class="p">)</span>
-        <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_array</span><span class="o">.</span><span class="n">dtype</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constant_value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodata_value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="n">out_array</span> <span class="o">=</span> <span class="n">out_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">get_min_int_type</span><span class="p">(</span><span class="n">constant_value</span><span class="p">))</span>
-        <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="o">.</span><span class="vm">__name__</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constant_value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="n">out_array</span> <span class="o">=</span> <span class="n">out_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_array</span><span class="o">.</span><span class="n">dtype</span>
-
-    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span>
+    <span class="k">return</span> <span class="n">shared_lines</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>

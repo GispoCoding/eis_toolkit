@@ -12,7 +12,7 @@
         <link rel="prev" href="../cell_based_association/">
       
       
-        <link rel="next" href="../idw_interpolation/">
+        <link rel="next" href="../extract_shared_lines/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -801,6 +801,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../raster_processing/unique_combinations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unique combinations in rasters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../raster_processing/windowing/" class="md-nav__link">
         
   
@@ -992,6 +1012,26 @@
   
   <span class="md-ellipsis">
     Logarithmic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../transformations/one_hot_encoding/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    One-hot encoding
   </span>
   
 
@@ -1349,6 +1389,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../extract_shared_lines/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Extract shared lines
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../idw_interpolation/" class="md-nav__link">
         
   
@@ -1562,7 +1622,7 @@
         <tr>
           <td><code>raster_profile</code></td>
           <td>
-                <code><span title="typing.Union">Union</span>[<span title="rasterio.profiles.Profile">Profile</span>, dict]</code>
+                <code><span title="beartype.typing.Union">Union</span>[<span title="rasterio.profiles.Profile">Profile</span>, dict]</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1617,7 +1677,16 @@ to the nearest geometry are determined.</p>
 
           <details class="quote">
             <summary>Source code in <code>eis_toolkit/vector_processing/distance_computation.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">21</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span>
 <span class="normal">24</span>
@@ -1643,16 +1712,7 @@ to the nearest geometry are determined.</p>
 <span class="normal">44</span>
 <span class="normal">45</span>
 <span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">distance_computation</span><span class="p">(</span><span class="n">raster_profile</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">profiles</span><span class="o">.</span><span class="n">Profile</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">geometries</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate distance from raster cell to nearest geometry.</span>
 

@@ -801,6 +801,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../raster_processing/unique_combinations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Unique combinations in rasters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../raster_processing/windowing/" class="md-nav__link">
         
   
@@ -992,6 +1012,26 @@
   
   <span class="md-ellipsis">
     Logarithmic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../transformations/one_hot_encoding/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    One-hot encoding
   </span>
   
 
@@ -1349,6 +1389,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../vector_processing/extract_shared_lines/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Extract shared lines
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../vector_processing/idw_interpolation/" class="md-nav__link">
         
   
@@ -1564,7 +1624,7 @@ Yousefi and Carranza (2015).</p>
         <tr>
           <td><code>true_positive_rate_values</code></td>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code><span title="typing.Union">Union</span>[<span title="numpy.ndarray">ndarray</span>, <span title="pandas.Series">Series</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1578,7 +1638,7 @@ Yousefi and Carranza (2015).</p>
         <tr>
           <td><code>proportion_of_area_values</code></td>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code><span title="typing.Union">Union</span>[<span title="numpy.ndarray">ndarray</span>, <span title="pandas.Series">Series</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1592,7 +1652,7 @@ Yousefi and Carranza (2015).</p>
         <tr>
           <td><code>threshold_values</code></td>
           <td>
-                <code><span title="numpy.ndarray">ndarray</span></code>
+                <code><span title="typing.Union">Union</span>[<span title="numpy.ndarray">ndarray</span>, <span title="pandas.Series">Series</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -1661,12 +1721,7 @@ prospectivity mapping." Computers &amp; Geosciences 74 (2015): 97-109.</p>
 </details>
           <details class="quote">
             <summary>Source code in <code>eis_toolkit/validation/plot_prediction_area_curves.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">46</span>
 <span class="normal">47</span>
 <span class="normal">48</span>
 <span class="normal">49</span>
@@ -1696,9 +1751,18 @@ prospectivity mapping." Computers &amp; Geosciences 74 (2015): 97-109.</p>
 <span class="normal">73</span>
 <span class="normal">74</span>
 <span class="normal">75</span>
-<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">plot_prediction_area_curves</span><span class="p">(</span>
-    <span class="n">true_positive_rate_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">proportion_of_area_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">threshold_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">true_positive_rate_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+    <span class="n">proportion_of_area_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+    <span class="n">threshold_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot prediction-area (P-A) plot.</span>
 
