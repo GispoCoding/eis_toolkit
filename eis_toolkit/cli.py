@@ -236,15 +236,41 @@ def compute_pca_cli(
     """Compute principal components for the input data."""
     from eis_toolkit.exploratory_analyses.pca import compute_pca
 
-    typer.echo("Progress: 10%")
+    success = False  # Variable to track whether either attempt was successful
 
-    geodataframe = gpd.read_file(input_vector)  # TODO: Check if gdf to df handling in tool itself
-    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
-    typer.echo("Progress: 25%")
+    try:
+        # Try reading the input as GeoDataFrame
+        geodataframe = gpd.read_file(input_vector)
+        dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
 
-    pca_df, variance_ratios = compute_pca(data=dataframe, number_of_components=number_of_components)
+        output, variance_ratios = compute_pca(data=dataframe, number_of_components=number_of_components)
+        success = True  # Set success to True if this attempt is successful
 
-    pca_df.to_csv(output_file)
+    except gpd.errors.GeoPandasError:
+        print("Error reading GeoDataFrame")
+
+    if success:
+        pca_df.to_csv(output_file, index=False)
+
+    if not success:
+        try:
+            with rasterio.open(input_vector) as raster:
+                output, variance_ratios = compute_pca(data=raster, number_of_components=number_of_components)
+                success = True
+
+        except rasterio.errors.RasterioError:
+            # Handle the case where opening as raster data or computing PCA fails
+            print("Error with raster data or PCA computation")
+
+    typer.echo("Progress: 75%")
+
+    if isinstance(output, pd.DataFrame):
+        output.to_csv(output_file, index=False)
+    elif isinstance(output, gpd.GeoDataFrame):
+        output.to_file(output_file, driver="GPKG")
+    elif isinstance(output, tuple) and len(output) == 2 and isinstance(output[0], np.ndarray):
+        with rasterio.open(output_file, 'w', **output[1]) as dst:
+            dst.write(output[0])
 
 
 # DESCRIPTIVE STATISTICS (RASTER)
@@ -253,10 +279,10 @@ def descriptive_statistics_raster_cli(input_file: Annotated[Path, INPUT_FILE_OPT
     """Generate descriptive statistics from raster data."""
     from eis_toolkit.exploratory_analyses.descriptive_statistics import descriptive_statistics_raster
 
-    typer.echo("Progress: 10%")
+    typer.echo("Progress: 25%")
 
     with rasterio.open(input_file) as raster:
-        typer.echo("Progress: 25%")
+        typer.echo("Progress: 50%")
         results_dict = descriptive_statistics_raster(raster)
     typer.echo("Progress: 75%")
 
@@ -268,7 +294,7 @@ def descriptive_statistics_raster_cli(input_file: Annotated[Path, INPUT_FILE_OPT
 
 # DESCRIPTIVE STATISTICS (VECTOR)
 @app.command()
-def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPTION], column: str = None):
+def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPTION], column: str):
     """Generate descriptive statistics from vector or tabular data."""
     from eis_toolkit.exploratory_analyses.descriptive_statistics import descriptive_statistics_dataframe
 
@@ -343,9 +369,9 @@ def feature_importance_cli(
 @app.command()
 def chi_square_test_cli(
     input_file: Annotated[Path, INPUT_FILE_OPTION],
-    target_column: str,
-    columns: List[str],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION]
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    target_column: str = typer.Option(None),
+    columns: List[str] = typer.Option(None),
 ):
     """Compute Chi-square test for independence on the input data."""
     from eis_toolkit.exploratory_analyses.statistical_tests import chi_square_test
@@ -378,6 +404,10 @@ def normality_test_cli(
     typer.echo("Progress: 25%")
     gdf = gpd.read_file(input_file)
     typer.echo("Progress: 50%")
+
+    # Can we expect that the input doesnt have geometry?
+    if 'geometry' in gdf.columns:
+        gdf = gdf.drop(columns=['geometry'])
     results_dict = normality_test(gdf)
     typer.echo("Progress: 75%")
 
@@ -1155,7 +1185,7 @@ def weights_of_evidence_calculate_responses_cli(
     typer.echo(f"Weights of evidence calculate responses complete, writing raster to {output_raster}.")
 
 
-@app.command()
+""" @app.command()
 def weights_of_evidence_calculate_weights_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
@@ -1167,7 +1197,7 @@ def weights_of_evidence_calculate_weights_cli(
     studentisized_contrast_threshold: float = 2.0,
     raster_to_generate: Sequence[str] = ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"],
 ):
-    """Calculate weights of spatial associations."""
+    Calculate weights of spatial associations.
     from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_weights
 
     typer.echo("Progress: 10%")
@@ -1218,7 +1248,7 @@ def weights_of_evidence_calculate_weights_cli(
 
     df.to_csv(output_csv)
     typer.echo("Progress: 100%")
-    typer.echo(f"Weights of evidence calculate weights complete, writing raster to {output_raster}.")
+    typer.echo(f"Weights of evidence calculate weights complete, writing raster to {output_raster}.") """
 
 
 # --- TRANSFORMATIONS ---
@@ -1518,7 +1548,7 @@ def calculate_base_metrics_cli(
 # PLOT CORRELATION MATRIX
 # TODO! This will need some work.
 @app.command()
-def plot_correlation_matrix_cli(
+def correlation_matrix_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
     annotate: bool,
     cmap: str,
@@ -1545,6 +1575,9 @@ def plot_correlation_matrix_cli(
     result_ax.figure.savefig(output_png, format='png', bbox_inches='tight')
     typer.echo("Progress: 100%")
     typer.echo(f"Plot correlation matrix complete, writing image to {output_png}.")
+
+
+# TODO Covariance matrix.
 
 
 # PLOT PREDICTION AREA CURVE
