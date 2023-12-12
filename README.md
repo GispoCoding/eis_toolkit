@@ -34,6 +34,12 @@ We recommend installing EIS Toolkit in a dedicated virtual environment as the li
 
 Note that EIS Toolkit is not yet released in PyPi or Conda, but will be at a later stage.
 
+Windows users should first install pre-compliled 3.4.3 GDAL, for example from [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal). Download and install the wheel that matches your architecture and python version.
+The downloaded GDAL wheel can be installed with pip
+
+```console
+pip install <name_of_the_downloaded_GDAL.whl>
+```
 
 ## Using EIS Toolkit
 EIS Toolkit can be used in Python scripts, Jupyter notebooks or via the CLI. At the moment, almost all tools have their own module and can be imported like this:
