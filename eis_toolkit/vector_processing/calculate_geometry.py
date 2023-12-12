@@ -12,7 +12,7 @@ def calculate_geometry(geodataframe: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         geodataframe: Geometries to be calculated.
 
     Returns:
-        calculated_gdf: Geometries and calculated values-
+        calculated_gdf: Geometries and calculated values.
 
     Raises:
         EmptyDataFrameException if input geodataframe is empty.
