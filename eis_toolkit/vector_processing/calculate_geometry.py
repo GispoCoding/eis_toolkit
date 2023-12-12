@@ -29,9 +29,9 @@ def calculate_geometry(geodataframe: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def _calculate_value(row):
     geometry_type = row["geometry"].geom_type
 
-    if geometry_type == "Point":
+    if geometry_type in ["Point", "MultiPoint"]:
         return 0
-    elif geometry_type == "LineString":
+    elif geometry_type in ["LineString", "MultiLineString"]:
         return row["geometry"].length
-    elif geometry_type == "Polygon":
+    elif geometry_type in ["Polygon", "MultiPolygon"]:
         return row["geometry"].area
