@@ -19,7 +19,7 @@ def random_forest_classifier_train(
     n_estimators: int = 100,
     max_depth: Optional[int] = None,
     verbose: int = 0,
-    random_state: Optional[int] = 42,
+    random_state: Optional[int] = None,
     **kwargs,
 ) -> Tuple[RandomForestClassifier, dict]:
     """
@@ -49,7 +49,7 @@ def random_forest_classifier_train(
             Defaults to None.
         verbose: Specifies if modeling progress and performance should be printed. 0 doesn't print,
             values 1 or above will produce prints.
-        random_state: Seed for random number generation. Defaults to 42.
+        random_state: Seed for random number generation. Defaults to None.
         **kwargs: Additional parameters for Sklearn's RandomForestClassifier.
 
     Returns:
@@ -94,7 +94,7 @@ def random_forest_regressor_train(
     n_estimators: int = 100,
     max_depth: Optional[int] = None,
     verbose: int = 0,
-    random_state: Optional[int] = 42,
+    random_state: Optional[int] = None,
     **kwargs,
 ) -> Tuple[RandomForestRegressor, dict]:
     """
@@ -124,7 +124,7 @@ def random_forest_regressor_train(
             Defaults to None.
         verbose: Specifies if modeling progress and performance should be printed. 0 doesn't print,
             values 1 or above will produce prints.
-        random_state: Seed for random number generation. Defaults to 42.
+        random_state: Seed for random number generation. Defaults to None.
         **kwargs: Additional parameters for Sklearn's RandomForestRegressor.
 
     Returns:

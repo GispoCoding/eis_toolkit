@@ -24,7 +24,7 @@ def gradient_boosting_classifier_train(
     max_depth: Optional[int] = 3,
     subsample: Number = 1.0,
     verbose: int = 0,
-    random_state: Optional[int] = 42,
+    random_state: Optional[int] = None,
     **kwargs,
 ) -> Tuple[GradientBoostingClassifier, dict]:
     """
@@ -61,7 +61,7 @@ def gradient_boosting_classifier_train(
             Values must be in the range 0.0 < x <= 1.0. Defaults to 1.0.
         verbose: Specifies if modeling progress and performance should be printed. 0 doesn't print,
             1 prints once in a while depending on the number of tress, 2 or above will print for every tree.
-        random_state: Seed for random number generation. Defaults to 42.
+        random_state: Seed for random number generation. Defaults to None.
         **kwargs: Additional parameters for Sklearn's GradientBoostingClassifier.
 
     Returns:
@@ -120,7 +120,7 @@ def gradient_boosting_regressor_train(
     max_depth: Optional[int] = 3,
     subsample: Number = 1.0,
     verbose: int = 0,
-    random_state: Optional[int] = 42,
+    random_state: Optional[int] = None,
     **kwargs,
 ) -> Tuple[GradientBoostingRegressor, dict]:
     """
@@ -157,7 +157,7 @@ def gradient_boosting_regressor_train(
             Values must be in the range 0.0 < x <= 1.0. Defaults to 1.
         verbose: Specifies if modeling progress and performance should be printed. 0 doesn't print,
             1 prints once in a while depending on the number of tress, 2 or above will print for every tree.
-        random_state: Seed for random number generation. Defaults to 42.
+        random_state: Seed for random number generation. Defaults to None.
         **kwargs: Additional parameters for Sklearn's GradientBoostingRegressor.
 
     Returns:

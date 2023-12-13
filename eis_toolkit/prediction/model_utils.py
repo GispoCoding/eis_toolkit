@@ -59,7 +59,7 @@ def load_model(path: Path) -> BaseEstimator:
 def split_data(
     *data: Union[np.ndarray, pd.DataFrame, sparse._csr.csr_matrix, List[Number]],
     split_size: float = 0.2,
-    random_state: Optional[int] = 42,
+    random_state: Optional[int] = None,
     shuffle: bool = True,
 ) -> List[Union[np.ndarray, pd.DataFrame, sparse._csr.csr_matrix, List[Number]]]:
     """
@@ -75,7 +75,7 @@ def split_data(
         split_size: The proportion of the second part of the split. Typically this is the size of test/validation
             part. The first part will be complemental proportion. For example, if split_size = 0.2, the first part
             will have 80% of the data and the second part 20% of the data. Defaults to 0.2.
-        random_state: Seed for random number generation. Defaults to 42.
+        random_state: Seed for random number generation. Defaults to None.
         shuffle: If data is shuffled before splitting. Defaults to True.
 
     Returns:
@@ -99,8 +99,6 @@ def test_model(
 ) -> Dict[str, Number]:
     """
     Test and score a trained model.
-
-    TODO: Implement for Keras models.
 
     Args:
         X_test: Test data.
@@ -157,7 +155,8 @@ def _train_and_validate_sklearn_model(
     metrics: Sequence[Literal["mse", "rmse", "mae", "r2", "accuracy", "precision", "recall", "f1"]],
     split_size: float = 0.2,
     cv_folds: int = 5,
-    random_state: Optional[int] = 42,
+    shuffle: bool = True,
+    random_state: Optional[int] = None,
 ) -> Tuple[BaseEstimator, dict]:
     """
     Train and validate Sklearn model.
@@ -187,7 +186,7 @@ def _train_and_validate_sklearn_model(
     # Approach 2: Validation with splitting data once
     elif validation_method == SPLIT:
         X_train, X_valid, y_train, y_valid = split_data(
-            X, y, split_size=split_size, random_state=random_state, shuffle=True
+            X, y, split_size=split_size, random_state=random_state, shuffle=shuffle
         )
         model.fit(X_train, y_train)
         y_pred = model.predict(X_valid)
@@ -199,7 +198,7 @@ def _train_and_validate_sklearn_model(
 
     # Approach 3: Cross-validation
     elif validation_method in [KFOLD_CV, SKFOLD_CV, LOO_CV]:
-        cv = _get_cross_validator(validation_method, cv_folds, random_state)
+        cv = _get_cross_validator(validation_method, cv_folds, shuffle, random_state)
 
         # Initialize output metrics dictionary
         out_metrics = {}
@@ -284,13 +283,13 @@ def _score_model(
 
 @beartype
 def _get_cross_validator(
-    cv: str, folds: int, random_state: Optional[int]
+    cv: str, folds: int, shuffle: bool, random_state: Optional[int]
 ) -> Union[KFold, StratifiedKFold, LeaveOneOut]:
     """Create and return a Sklearn cross-validator based on given parameter values."""
     if cv == KFOLD_CV:
-        cross_validator = KFold(n_splits=folds, shuffle=True, random_state=random_state)
+        cross_validator = KFold(n_splits=folds, shuffle=shuffle, random_state=random_state)
     elif cv == SKFOLD_CV:
-        cross_validator = StratifiedKFold(n_splits=folds, shuffle=True, random_state=random_state)
+        cross_validator = StratifiedKFold(n_splits=folds, shuffle=shuffle, random_state=random_state)
     elif cv == LOO_CV:
         cross_validator = LeaveOneOut()
     else:

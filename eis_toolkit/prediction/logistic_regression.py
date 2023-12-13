@@ -20,7 +20,7 @@ def logistic_regression_train(
     max_iter: int = 100,
     solver: Literal["lbfgs", "liblinear", "newton-cg", "newton-cholesky", "sag", "saga"] = "lbfgs",
     verbose: int = 0,
-    random_state: Optional[int] = 42,
+    random_state: Optional[int] = None,
     **kwargs
 ) -> Tuple[LogisticRegression, dict]:
     """
@@ -57,7 +57,7 @@ def logistic_regression_train(
         solver: Algorithm to use in the optimization problem. Defaults to 'lbfgs'.
         verbose: Specifies if modeling progress and performance should be printed. 0 doesn't print,
             values 1 or above will produce prints.
-        random_state: Seed for random number generation. Defaults to 42.
+        random_state: Seed for random number generation. Defaults to None.
         **kwargs: Additional parameters for Sklearn's LogisticRegression.
 
     Returns:

@@ -103,7 +103,7 @@ def test_binary_classification():
 
 def test_splitting():
     """Test that split data works as expected."""
-    X_train, X_test, y_train, y_test = split_data(X_IRIS, Y_IRIS, split_size=0.2)
+    X_train, X_test, y_train, y_test = split_data(X_IRIS, Y_IRIS, split_size=0.2, random_state=42)
     np.testing.assert_equal(len(X_train), len(X_IRIS) * 0.8)
     np.testing.assert_equal(len(y_train), len(Y_IRIS) * 0.8)
     np.testing.assert_equal(len(X_test), len(X_IRIS) * 0.2)
@@ -112,7 +112,7 @@ def test_splitting():
 
 def test_test_model_sklearn():
     """Test that test model works as expected with a Sklearn model."""
-    X_train, X_test, y_train, y_test = split_data(X_IRIS, Y_IRIS, split_size=0.2)
+    X_train, X_test, y_train, y_test = split_data(X_IRIS, Y_IRIS, split_size=0.2, random_state=42)
 
     model, _ = _train_and_validate_sklearn_model(
         X_train, y_train, model=RF_MODEL, validation_method="none", metrics=CLF_METRICS, random_state=42
@@ -124,7 +124,7 @@ def test_test_model_sklearn():
 
 def test_predict_sklearn():
     """Test that predict works as expected with a Sklearn model."""
-    X_train, X_test, y_train, y_test = split_data(X_IRIS, Y_IRIS, split_size=0.2)
+    X_train, X_test, y_train, y_test = split_data(X_IRIS, Y_IRIS, split_size=0.2, random_state=42)
 
     model, _ = _train_and_validate_sklearn_model(
         X_train, y_train, model=RF_MODEL, validation_method="none", metrics=CLF_METRICS, random_state=42
