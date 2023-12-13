@@ -162,7 +162,7 @@ def k_means_clustering_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
     output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
     number_of_clusters: Optional[int] = None,
-    random_state: int = None,  # NOTE: Check typing
+    random_state: Optional[int] = None,  # NOTE: Check typing
 ):
     """Perform k-means clustering on the input data."""
     from eis_toolkit.exploratory_analyses.k_means_cluster import k_means_clustering
@@ -250,7 +250,7 @@ def compute_pca_cli(
         print("Error reading GeoDataFrame")
 
     if success:
-        pca_df.to_csv(output_file, index=False)
+        output.to_csv(output_file, index=False)
 
     if not success:
         try:
@@ -294,7 +294,10 @@ def descriptive_statistics_raster_cli(input_file: Annotated[Path, INPUT_FILE_OPT
 
 # DESCRIPTIVE STATISTICS (VECTOR)
 @app.command()
-def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPTION], column: str):
+def descriptive_statistics_vector_cli(
+    input_file: Annotated[Path, INPUT_FILE_OPTION],
+    column: str = typer.Option(),
+):
     """Generate descriptive statistics from vector or tabular data."""
     from eis_toolkit.exploratory_analyses.descriptive_statistics import descriptive_statistics_dataframe
 
@@ -402,13 +405,10 @@ def normality_test_cli(
     from eis_toolkit.exploratory_analyses.statistical_tests import normality_test
 
     typer.echo("Progress: 25%")
-    gdf = gpd.read_file(input_file)
+    df = pd.read_csv(input_file)
     typer.echo("Progress: 50%")
 
-    # Can we expect that the input doesnt have geometry?
-    if 'geometry' in gdf.columns:
-        gdf = gdf.drop(columns=['geometry'])
-    results_dict = normality_test(gdf)
+    results_dict = normality_test(df)
     typer.echo("Progress: 75%")
 
     json_str = json.dumps(results_dict)
