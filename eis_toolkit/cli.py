@@ -11,6 +11,7 @@ from typing import List, Optional, Tuple, Sequence
 
 import geopandas as gpd
 import pandas as pd
+import numpy as np
 import rasterio
 import typer
 from rasterio import warp
@@ -236,31 +237,19 @@ def compute_pca_cli(
     """Compute principal components for the input data."""
     from eis_toolkit.exploratory_analyses.pca import compute_pca
 
-    success = False  # Variable to track whether either attempt was successful
-
     try:
-        # Try reading the input as GeoDataFrame
         geodataframe = gpd.read_file(input_vector)
         dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
 
         output, variance_ratios = compute_pca(data=dataframe, number_of_components=number_of_components)
-        success = True  # Set success to True if this attempt is successful
 
-    except gpd.errors.GeoPandasError:
-        print("Error reading GeoDataFrame")
-
-    if success:
-        output.to_csv(output_file, index=False)
-
-    if not success:
+    except:  # noqa: E722
         try:
             with rasterio.open(input_vector) as raster:
                 output, variance_ratios = compute_pca(data=raster, number_of_components=number_of_components)
-                success = True
 
-        except rasterio.errors.RasterioError:
-            # Handle the case where opening as raster data or computing PCA fails
-            print("Error with raster data or PCA computation")
+        except:  # noqa: E722
+            raise Exception("Could not read input file as raster or dataframe")
 
     typer.echo("Progress: 75%")
 
