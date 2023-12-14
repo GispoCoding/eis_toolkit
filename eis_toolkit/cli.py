@@ -588,7 +588,7 @@ def reproject_raster_cli(
 def resample_raster_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    upscale_factor: float,
+    target_resolution: float = typer.Option(),
     resampling_method: ResamplingMethods = typer.Option(help="resample help", default=ResamplingMethods.nearest),
 ):
     """Resamples raster according to given upscale factor."""
@@ -597,16 +597,12 @@ def resample_raster_cli(
     typer.echo("Progress: 10%")
 
     with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+        typer.echo("Progress: 40%")
 
-        # Calculate the new resolution based on the original raster and upscale factor
-        original_resolution = (raster.res[0], raster.res[1])
-        new_resolution = (original_resolution[0] / upscale_factor, original_resolution[1] / upscale_factor)
-        typer.echo("Progress: 50%")
         method = RESAMPLING_MAPPING[resampling_method]
-        out_image, out_meta = resample(raster=raster, resolution=new_resolution, resampling_method=method)
+        out_image, out_meta = resample(raster=raster, resolution=target_resolution, resampling_method=method)
 
-    typer.echo("Progress: 75%")
+    typer.echo("Progress: 70%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
         dest.write(out_image)
