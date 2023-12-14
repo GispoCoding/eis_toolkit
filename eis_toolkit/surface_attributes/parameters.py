@@ -1,18 +1,19 @@
+from numbers import Number
+
 import numpy as np
 import rasterio
-from numbers import Number
 from beartype import beartype
 from beartype.typing import Literal, Optional, Sequence
 
 from eis_toolkit.checks.raster import check_quadratic_pixels
 from eis_toolkit.exceptions import (
+    InvalidParameterValueException,
     InvalidRasterBandException,
     NonSquarePixelSizeException,
-    InvalidParameterValueException,
 )
 from eis_toolkit.surface_attributes.partial_derivatives import coefficients
-from eis_toolkit.surface_attributes.utilities import set_flat_pixels, scale_raster, reduce_ndim
-from eis_toolkit.utilities.conversions import convert_rad_to_rise, convert_rad_to_deg
+from eis_toolkit.surface_attributes.utilities import reduce_ndim, scale_raster, set_flat_pixels
+from eis_toolkit.utilities.conversions import convert_rad_to_deg, convert_rad_to_rise
 from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
 

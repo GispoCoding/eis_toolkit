@@ -1,7 +1,7 @@
 import numpy as np
 
 from eis_toolkit.utilities.conversions import (
-    _convert_rad_to_rise,
+    convert_rad_to_rise,
     convert_deg_to_rad,
     convert_deg_to_rise,
     convert_rad_to_deg,
@@ -23,7 +23,7 @@ def test_rad_to_precent_rise():
     """Test that converting radians to percent rise works as expected."""
     rad = np.arange(0, np.pi / 2, np.pi / 8)
 
-    conversion = np.round(_convert_rad_to_rise(rad), 3)
+    conversion = np.round(convert_rad_to_rise(rad), 3)
     expected = np.array([0, 41.421, 100, 241.421])
 
     assert np.array_equal(conversion, expected)

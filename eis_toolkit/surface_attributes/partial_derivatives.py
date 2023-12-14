@@ -1,11 +1,8 @@
-import numpy as np
-import rasterio
-import scipy
 from numbers import Number
+import numpy as np
+import scipy
 from beartype import beartype
-from beartype.typing import Literal, Optional, Union, Sequence
-
-from eis_toolkit.utilities.nodata import nodata_to_nan
+from beartype.typing import Literal, Union
 
 
 @beartype
@@ -95,7 +92,7 @@ def _coefficients_young(
         coefficients: coefficients to calculate.
 
     Returns:
-        The calculated coefficientss p, q, r, s, t.
+        The calculated coefficients p, q, r, s, t.
     """
 
     kernal_p = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]])
