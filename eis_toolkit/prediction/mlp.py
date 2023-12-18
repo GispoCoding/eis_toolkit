@@ -116,7 +116,8 @@ def train_MLP_classifier(
         early_stopping: Whether or not to use early stopping in training. Defaults to True.
         es_patience: Number of epochs with no improvement after which training will be stopped. Defaults to 5.
         metrics: Metrics to be evaluated by the model during training and testing. Defaults to ['accuracy'].
-        random_state:
+        random_state: Seed for random number generation. Sets Python, Numpy and Tensorflow seeds to make
+            program deterministic. Defaults to None (random state / seed).
 
     Returns:
         Trained MLP model and training history.
@@ -221,7 +222,8 @@ def train_MLP_regressor(
         early_stopping: Whether or not to use early stopping in training. Defaults to True.
         es_patience: Number of epochs with no improvement after which training will be stopped. Defaults to 5.
         metrics: Metrics to be evaluated by the model during training and testing. Defaults to ['mse'].
-        random_state:
+        random_state: Seed for random number generation. Sets Python, Numpy and Tensorflow seeds to make
+            program deterministic. Defaults to None (random state / seed).
 
     Returns:
         Trained MLP model and training history.
