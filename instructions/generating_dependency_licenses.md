@@ -11,34 +11,27 @@ changes.
 
 Start by cleaning your local `poetry` environment:
 
-``` shell
+``` bash
 poetry env remove python
 ```
 
-Then install only the main dependencies in pyproject.toml (not dev
-dependencies):
+Add `pip-licenses` to `pyproject.toml` and `poetry.lock`:
 
-``` shell
+``` bash
+poetry add pip-licenses --lock
+```
+
+Then install only the main dependencies (now including `pip-licenses`) in
+pyproject.toml (not dev dependencies):
+
+``` bash
 poetry install --with main
 # Old poetry version: poetry install --no-dev
 ```
 
-Use either i.) poetry to add pip-licenses package (which updates pyproject.toml and
-poetry.lock but these changes should not be committed)
-
-``` shell
-poetry add pip-licenses
-```
-
-ii.) or the pip within the poetry environment:
-
-``` shell
-poetry run pip install pip-licenses
-```
-
 `pip-licenses` is now available in the poetry environment:
 
-``` shell
+``` bash
 poetry run pip-licenses --order=license --format=markdown > docs/dependency_licenses.md
 ```
 
@@ -48,7 +41,7 @@ poetry.lock` -command.
 
 To clean your local `poetry` environment:
 
-``` shell
+``` bash
 # Remove poetry environment from the current project
 poetry env remove python
 # Install main and dev packages from pyproject.toml again

@@ -8,12 +8,12 @@ The tests in this repository can also serve as a starting point.
 All tests should be under the `tests/` directory under a correct subfolder for the module, e.g. `raster_processing/`. Put test of one module into one file, for example, `clip_test.py` to test clipping functions.
 
 running tests is as simple as executing
-```console
+```bash
 pytest
 ```
 
 or if you are not inside Poetry shell
-```console
+```bash
 poetry run pytest
 ```
 in the container's command line.
