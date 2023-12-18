@@ -115,8 +115,9 @@ def do_the_cnn(
 
     # we do dynamically the conv2d
     for conv_layer_number, neuron in enumerate(conv_list):
+        print(conv_layer_number)
         if conv_layer_number == 0:
-            x = tf.keras.layers.Conv2D(
+            body = tf.keras.layers.Conv2D(
                 filters=neuron,
                 activation="relu",
                 padding="same",
@@ -124,25 +125,22 @@ def do_the_cnn(
                 kernel_size=convolution_kernel_size,
             )(input_layer)
         else:
-            x = tf.keras.layers.Conv2D(
+            body = tf.keras.layers.Conv2D(
                 filters=neuron,
                 activation="relu",
                 padding="same",
                 kernel_regularizer=regularization,
                 kernel_size=convolution_kernel_size,
-            )(x)
+            )(body)
 
         if dropout_rate is not None:
-            x = tf.keras.layers.Dropout(dropout_rate)(x)
+            body = tf.keras.layers.Dropout(dropout_rate)(body)
 
-        x = tf.keras.layers.BatchNormalization()(x)
-        x = tf.keras.layers.MaxPool2D(pool_size=pool_size)(x)
+        body = tf.keras.layers.BatchNormalization()(body)
+        body = tf.keras.layers.MaxPool2D(pool_size=pool_size)(body)
 
     for layer_number, neuron in enumerate(neuron_list):
-        if layer_number == 0:
-            body = tf.keras.layers.Dense(neuron, activation="relu", kernel_regularizer=regularization)(input_layer)
-        else:
-            body = tf.keras.layers.Dense(neuron, kernel_regularizer=regularization, activation="relu")(body)
+        body = tf.keras.layers.Dense(neuron, kernel_regularizer=regularization, activation="relu")(body)
 
         if dropout_rate is not None:
             body = tf.keras.layers.Dropout(dropout_rate)(body)
@@ -239,7 +237,7 @@ def train_and_predict_for_classification(
         loss=loss,
         output_units=output_units,
     )
-
+    print(cnn_model.summary())
     # prepare the scaler
     # get cross validation methods
     selected_cs = performance_model_estimation(cross_validation_type=cross_validation, number_of_split=1)
