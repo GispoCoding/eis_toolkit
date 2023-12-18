@@ -3,7 +3,7 @@ from typing import Literal, Optional, Sequence, Tuple
 
 import numpy as np
 from beartype import beartype
-from keras.optimizers import Adam
+from keras.optimizers import SGD, Adagrad, Adam, RMSprop
 from tensorflow import keras
 
 from eis_toolkit import exceptions
@@ -12,6 +12,12 @@ from eis_toolkit import exceptions
 def _keras_optimizer(optimizer: str, **kwargs):
     if optimizer == "adam":
         return Adam(**kwargs)
+    elif optimizer == "adagrad":
+        return Adagrad(**kwargs)
+    elif optimizer == "rmsprop":
+        return RMSprop(**kwargs)
+    elif optimizer == "sdg":
+        return SGD(**kwargs)
     else:
         raise exceptions.InvalidParameterValueException(f"Unidentified optimizer: {optimizer}")
 
@@ -67,18 +73,20 @@ def train_MLP_classifier(
     y: np.ndarray,
     neurons: Sequence[int] = [16],
     validation_split: Optional[float] = 0.2,
-    activation: Literal["relu"] = "relu",
+    validation_data: Optional[Tuple[np.ndarray, np.ndarray]] = None,
+    activation: Literal["relu", "linear", "sigmoid", "tanh"] = "relu",
     output_neurons: int = 1,
     last_activation: Literal["softmax", "sigmoid"] = "softmax",
     epochs: int = 50,
     batch_size: int = 32,
-    optimizer: Literal["adam"] = "adam",
+    optimizer: Literal["adam", "adagrad", "rmsprop", "sdg"] = "adam",
     learning_rate: Number = 0.001,
     loss_function: Literal["categorical_crossentropy", "binary_crossentropy"] = "categorical_crossentropy",
     dropout_rate: Optional[Number] = None,
     early_stopping: bool = True,
     es_patience: int = 5,
     metrics: Optional[Sequence[Literal["accuracy", "precision", "recall"]]] = ["accuracy"],
+    random_state: Optional[int] = None,
 ) -> Tuple[keras.Model, dict]:
     """
     Train MLP (Multilayer Perceptron) using Keras.
@@ -94,6 +102,8 @@ def train_MLP_classifier(
         neurons: Number of neurons in each hidden layer. Defaults to one layer with 16 neurons.
         validation_split: Fraction of data used for validation during training. Value must be > 0 and < 1 or None.
             Defaults to 0.2.
+        validation_data: Separate dataset used for validation during training. Overrides validation_split if
+            provided. Expected data form is (X_valid, y_valid). Defaults to None.
         activation: Activation function used in each hidden layer. Defaults to 'relu'.
         output_neurons: Number of neurons in the output layer. Defaults to 1.
         last_activation: Activation function used in the output layer. Defaults to 'softmax'.
@@ -106,6 +116,7 @@ def train_MLP_classifier(
         early_stopping: Whether or not to use early stopping in training. Defaults to True.
         es_patience: Number of epochs with no improvement after which training will be stopped. Defaults to 5.
         metrics: Metrics to be evaluated by the model during training and testing. Defaults to ['accuracy'].
+        random_state:
 
     Returns:
         Trained MLP model and training history.
@@ -126,6 +137,9 @@ def train_MLP_classifier(
         loss_function=loss_function,
     )
 
+    if random_state is not None:
+        keras.utils.set_random_seed(random_state)
+
     # 2. Create and compile a sequential model
     model = keras.Sequential()
 
@@ -134,8 +148,6 @@ def train_MLP_classifier(
 
         if dropout_rate is not None:
             model.add(keras.layers.Dropout(dropout_rate))
-
-    model.add(keras.layers.Flatten())
 
     model.add(keras.layers.Dense(units=output_neurons, activation=last_activation))
 
@@ -152,6 +164,7 @@ def train_MLP_classifier(
         y,
         epochs=epochs,
         validation_split=validation_split if validation_split else 0,
+        validation_data=validation_data,
         batch_size=batch_size,
         callbacks=callbacks,
     )
@@ -165,18 +178,20 @@ def train_MLP_regressor(
     y: np.ndarray,
     neurons: Sequence[int] = [16],
     validation_split: Optional[float] = 0.2,
-    activation: Literal["relu"] = "relu",
+    validation_data: Optional[Tuple[np.ndarray, np.ndarray]] = None,
+    activation: Literal["relu", "linear", "sigmoid", "tanh"] = "relu",
     output_neurons: int = 1,
     last_activation: Literal["linear"] = "linear",
     epochs: int = 50,
     batch_size: int = 32,
-    optimizer: Literal["adam"] = "adam",
+    optimizer: Literal["adam", "adagrad", "rmsprop", "sdg"] = "adam",
     learning_rate: Number = 0.001,
-    loss_function: Literal["mse"] = "mse",
+    loss_function: Literal["mse", "mae", "hinge", "huber"] = "mse",
     dropout_rate: Optional[Number] = None,
     early_stopping: bool = True,
     es_patience: int = 5,
     metrics: Optional[Sequence[Literal["mse", "rmse", "mae"]]] = ["mse"],
+    random_state: Optional[int] = None,
 ) -> Tuple[keras.Model, dict]:
     """
     Train MLP (Multilayer Perceptron) using Keras.
@@ -192,6 +207,8 @@ def train_MLP_regressor(
         neurons: Number of neurons in each hidden layer. Defaults to one layer with 16 neurons.
         validation_split: Fraction of data used for validation during training. Value must be > 0 and < 1 or None.
             Defaults to 0.2.
+        validation_data: Separate dataset used for validation during training. Overrides validation_split if
+            provided. Expected data form is (X_valid, y_valid). Defaults to None.
         activation: Activation function used in each hidden layer. Defaults to 'relu'.
         output_neurons: Number of neurons in the output layer. Defaults to 1.
         last_activation: Activation function used in the output layer. Defaults to 'linear'.
@@ -204,6 +221,7 @@ def train_MLP_regressor(
         early_stopping: Whether or not to use early stopping in training. Defaults to True.
         es_patience: Number of epochs with no improvement after which training will be stopped. Defaults to 5.
         metrics: Metrics to be evaluated by the model during training and testing. Defaults to ['mse'].
+        random_state:
 
     Returns:
         Trained MLP model and training history.
@@ -224,6 +242,9 @@ def train_MLP_regressor(
         loss_function=loss_function,
     )
 
+    if random_state is not None:
+        keras.utils.set_random_seed(random_state)
+
     # 2. Create and compile a sequential model
     model = keras.Sequential()
 
@@ -232,8 +253,6 @@ def train_MLP_regressor(
 
         if dropout_rate is not None:
             model.add(keras.layers.Dropout(dropout_rate))
-
-    model.add(keras.layers.Flatten())
 
     model.add(keras.layers.Dense(units=output_neurons, activation=last_activation))
 
@@ -250,6 +269,7 @@ def train_MLP_regressor(
         y,
         epochs=epochs,
         validation_split=validation_split if validation_split else 0,
+        validation_data=validation_data,
         batch_size=batch_size,
         callbacks=callbacks,
     )
