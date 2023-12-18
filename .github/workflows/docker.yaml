@@ -11,6 +11,6 @@ jobs:
       - name: Build Docker image
         run: docker build -t eis_toolkit -f ./Dockerfile .
       - name: Run mkdocs in Docker container
-        run: docker run eis_toolkit poetry run mkdocs
+        run: docker run eis_toolkit poetry run mkdocs build
       - name: Run pytest in Docker container
         run: docker run eis_toolkit poetry run pytest -v
