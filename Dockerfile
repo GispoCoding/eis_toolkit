@@ -18,8 +18,8 @@ RUN pip install poetry pre-commit
 COPY poetry.lock pyproject.toml mkdocs.yml /eis_toolkit/
 COPY docs /eis_toolkit/docs/
 COPY docs_assets /eis_toolkit/docs_assets/
-COPY eis_toolkit /eis_toolkit/eis_toolkit
-COPY tests /eis_toolkit/tests
+COPY eis_toolkit /eis_toolkit/eis_toolkit/
+COPY tests /eis_toolkit/tests/
 
 RUN poetry install
 
