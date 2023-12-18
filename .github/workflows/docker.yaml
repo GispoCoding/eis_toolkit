@@ -11,6 +11,8 @@ jobs:
       - name: Build Docker image
         run: docker build -t eis_toolkit -f ./Dockerfile .
       - name: Run mkdocs in Docker container
-        run: docker run eis_toolkit poetry run mkdocs build
+        run: |
+          docker run -v ./pdf/:/eis_toolkit/pdf/ --env ENABLE_PDF_EXPORT=1 eis_toolkit poetry run mkdocs build
+          file ./pdf/document.pdf
       - name: Run pytest in Docker container
         run: docker run eis_toolkit poetry run pytest -v
