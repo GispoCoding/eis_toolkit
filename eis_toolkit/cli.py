@@ -77,6 +77,71 @@ class ResamplingMethods(str, Enum):
     min = "min"
 
 
+class ValidationMethods(str, Enum):
+    """Validation methods available."""
+
+    split_once = "split"  # Note that split_once might be the new name
+    kfold_cv = "kfold_cv"
+    skfold_cv = "skfold_cv"
+    loo_cv = "loo_cv"
+    none = "none"
+
+
+class RegressorMetrics(str, Enum):
+    """Regressor metrics available."""
+
+    mse = "mse"
+    rmse = "rmse"
+    mae = "mae"
+    r2 = "r2"
+
+
+class ClassifierMetrics(str, Enum):
+    """Classifier metrics available."""
+
+    accuracy = "accuracy"
+    precision = "precision"
+    recall = "recall"
+    f1 = "f1"
+    auc = "auc"
+
+
+class LogisticRegressionPenalties(str, Enum):
+    """Logistic regression penalties available."""
+
+    l1 = "l1"
+    l2 = "l2"
+    elasicnet = "elasicnet"
+    none = "None"
+
+
+class LogisticRegressionSolvers(str, Enum):
+    """Logistic regression solvers available."""
+
+    lbfgs = "lbfgs"
+    liblinear = "liblinear"
+    newton_cg = "newton-cg"  # '-' converted to '_' for enum syntax
+    newton_cholesky = "newton-cholesky"  # '-' converted to '_' for enum syntax
+    sag = "sag"
+    saga = "saga"
+
+
+class GradientBoostingClassifierLosses(str, Enum):
+    """Gradient boosting classifier losses available."""
+
+    log_loss = "log_loss"
+    exponential = "exponential"
+
+
+class GradientBoostingRegressorLosses(str, Enum):
+    """Gradient boosting regressor losses available."""
+
+    squared_error = "squared_error"
+    absolute_error = "absolute_error"
+    huber = "huber"
+    quantile = "quantile"
+
+
 RESAMPLING_MAPPING = {
     "nearest": warp.Resampling.nearest,
     "bilinear": warp.Resampling.bilinear,
@@ -816,6 +881,275 @@ def distance_computation_cli(
 
 
 # --- PREDICTION ---
+
+
+# LOGISTIC REGRESSION
+@app.command()
+def logistic_regression_train_cli(
+    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
+    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy),
+    split_size: float = 0.2,
+    cv_folds: int = 5,
+    penalty: LogisticRegressionPenalties = typer.Option(default=LogisticRegressionPenalties.l2),
+    max_iter: int = 100,
+    solver: LogisticRegressionSolvers = typer.Option(default=LogisticRegressionSolvers.lbfgs),
+    verbose: int = 0,
+    random_state: Optional[int] = None,
+):
+    """Train and optionally validate a Logistic Regression classifier model using Sklearn."""
+    from eis_toolkit.prediction.logistic_regression import logistic_regression_train
+    from eis_toolkit.prediction.model_utils import save_model
+    from eis_toolkit.utilities.modeling import prepare_data_for_ml
+
+    X, y = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = logistic_regression_train(
+        X=X,
+        y=y,
+        validation_method=validation_method,
+        metrics=[validation_metric],
+        split_size=split_size,
+        cv_folds=cv_folds,
+        penalty=penalty,
+        max_iter=max_iter,
+        solver=solver,
+        verbose=verbose,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("Logistic regression training completed")
+
+
+# RANDOM FOREST CLASSIFIER
+@app.command()
+def random_forest_classifier_train_cli(
+    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
+    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy),
+    split_size: float = 0.2,
+    cv_folds: int = 5,
+    n_estimators: int = 100,
+    max_depth: Optional[int] = None,
+    verbose: int = 0,
+    random_state: Optional[int] = None,
+):
+    """Train and optionally validate a Random Forest classifier model using Sklearn."""
+    from eis_toolkit.prediction.model_utils import save_model
+    from eis_toolkit.prediction.random_forests import random_forest_classifier_train
+    from eis_toolkit.utilities.modeling import prepare_data_for_ml
+
+    X, y = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = random_forest_classifier_train(
+        X=X,
+        y=y,
+        validation_method=validation_method,
+        metrics=[validation_metric],
+        split_size=split_size,
+        cv_folds=cv_folds,
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        verbose=verbose,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("Random forest classifier training completed")
+
+
+# RANDOM FOREST REGRESSOR
+@app.command()
+def random_forest_regressor_train_cli(
+    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
+    validation_metric: RegressorMetrics = typer.Option(default=RegressorMetrics.mse),
+    split_size: float = 0.2,
+    cv_folds: int = 5,
+    n_estimators: int = 100,
+    max_depth: Optional[int] = None,
+    verbose: int = 0,
+    random_state: Optional[int] = None,
+):
+    """Train and optionally validate a Random Forest regressor model using Sklearn."""
+    from eis_toolkit.prediction.model_utils import save_model
+    from eis_toolkit.prediction.random_forests import random_forest_regressor_train
+    from eis_toolkit.utilities.modeling import prepare_data_for_ml
+
+    X, y = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = random_forest_regressor_train(
+        X=X,
+        y=y,
+        validation_method=validation_method,
+        metrics=[validation_metric],
+        split_size=split_size,
+        cv_folds=cv_folds,
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        verbose=verbose,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("Random forest regressor training completed")
+
+
+# GRADIENT BOOSTING CLASSIFIER
+@app.command()
+def gradient_boosting_classifier_train_cli(
+    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
+    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy),
+    split_size: float = 0.2,
+    cv_folds: int = 5,
+    loss: GradientBoostingClassifierLosses = typer.Option(default=GradientBoostingClassifierLosses.log_loss),
+    learning_rate: float = 0.1,
+    n_estimators: int = 100,
+    max_depth: Optional[int] = 3,
+    subsample: float = 1.0,
+    verbose: int = 0,
+    random_state: Optional[int] = None,
+):
+    """Train and optionally validate a Random Forest regressor model using Sklearn."""
+    from eis_toolkit.prediction.gradient_boosting import gradient_boosting_classifier_train
+    from eis_toolkit.prediction.model_utils import save_model
+    from eis_toolkit.utilities.modeling import prepare_data_for_ml
+
+    X, y = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = gradient_boosting_classifier_train(
+        X=X,
+        y=y,
+        validation_method=validation_method,
+        metrics=[validation_metric],
+        split_size=split_size,
+        cv_folds=cv_folds,
+        loss=loss,
+        learning_rate=learning_rate,
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        subsample=subsample,
+        verbose=verbose,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("Gradient boosting classifier training completed")
+
+
+# GRADIENT BOOSTING REGRESSOR
+@app.command()
+def gradient_boosting_regressor_train_cli(
+    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
+    validation_metric: RegressorMetrics = typer.Option(default=RegressorMetrics.mse),
+    split_size: float = 0.2,
+    cv_folds: int = 5,
+    loss: GradientBoostingRegressorLosses = typer.Option(default=GradientBoostingRegressorLosses.squared_error),
+    learning_rate: float = 0.1,
+    n_estimators: int = 100,
+    max_depth: Optional[int] = 3,
+    subsample: float = 1.0,
+    verbose: int = 0,
+    random_state: Optional[int] = None,
+):
+    """Train and optionally validate a Random Forest regressor model using Sklearn."""
+    from eis_toolkit.prediction.gradient_boosting import gradient_boosting_regressor_train
+    from eis_toolkit.prediction.model_utils import save_model
+    from eis_toolkit.utilities.modeling import prepare_data_for_ml
+
+    X, y = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = gradient_boosting_regressor_train(
+        X=X,
+        y=y,
+        validation_method=validation_method,
+        metrics=[validation_metric],
+        split_size=split_size,
+        cv_folds=cv_folds,
+        loss=loss,
+        learning_rate=learning_rate,
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        subsample=subsample,
+        verbose=verbose,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("Gradient boosting regressor training completed")
 
 
 # FUZZY OVERLAYS
