@@ -201,7 +201,7 @@ def train_and_predict_for_classification(
          regularization: regularization of each MLP layers, None if you do not want it.
          data_augmentation: bool in case you use windows you can have random rotation,
          optimizer: loss optimization function,
-         loss: loss functyion I suggest this -> tf.keras.losses.CategoricalCrossentropy,
+         loss: loss function I suggest this -> tf.keras.losses.CategoricalCrossentropy,
          output_units: how many class you have to predicts
 
     Return:
@@ -237,7 +237,7 @@ def train_and_predict_for_classification(
         loss=loss,
         output_units=output_units,
     )
-    print(cnn_model.summary())
+
     # prepare the scaler
     # get cross validation methods
     selected_cs = performance_model_estimation(cross_validation_type=cross_validation, number_of_split=1)
