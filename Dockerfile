@@ -15,7 +15,9 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip install poetry pre-commit
 
-COPY poetry.lock pyproject.toml /eis_toolkit/ /docs/
+COPY poetry.lock pyproject.toml mkdocs.yml /eis_toolkit/
+COPY docs /eis_toolkit/docs/
+COPY docs_assets /eis_toolkit/docs_assets/
 
 RUN poetry install
 
