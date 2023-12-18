@@ -21,4 +21,4 @@ COPY docs_assets /eis_toolkit/docs_assets/
 
 RUN poetry install
 
-COPY . .
+# COPY . .
