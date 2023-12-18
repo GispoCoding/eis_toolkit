@@ -14,5 +14,9 @@ jobs:
         run: |
           docker run -v ./site/pdf/:/eis_toolkit/site/pdf/ --env ENABLE_PDF_EXPORT=1 eis_toolkit poetry run mkdocs build
           file ./site/pdf/document.pdf
+      - uses: actions/upload-artifact@v4
+        with:
+          name: document.pdf
+          path: ./site/pdf/document.pdf
       - name: Run pytest in Docker container
         run: docker run eis_toolkit poetry run pytest -v
