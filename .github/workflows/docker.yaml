@@ -1,0 +1,16 @@
+on:
+  pull_request:
+  push:
+    branches: [master, main]
+jobs:
+  docker-test:
+    name: Docker install and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker image
+        run: docker build -t eis_toolkit -f ./Dockerfile .
+      - name: Run mkdocs in Docker container
+        run: docker run eis_toolkit mkdocs
+      - name: Run pytest in Docker container
+        run: docker run eis_toolkit pytest -v
