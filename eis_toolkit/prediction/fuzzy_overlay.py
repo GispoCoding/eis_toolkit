@@ -94,8 +94,8 @@ def gamma_overlay(data: np.ndarray, gamma: float) -> np.ndarray:
     Args:
         data: The input data as a 3D Numpy array. Each 2D array represents a raster band.
             Data points should be in the range [0, 1].
-        gamma: The gamma parameter. With gamma value 0, result will be same as 'product'overlay.
-            When gamma is closer to 1, the weight of 'sum' overlay is increased.
+        gamma: The gamma parameter. With gamma value of 0, the result will be the same as 'product' overlay.
+            When gamma is closer to 1, the weight of the 'sum' overlay is increased.
             Value must be in the range [0, 1].
 
     Returns:
