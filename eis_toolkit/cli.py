@@ -176,6 +176,20 @@ INPUT_FILE_OPTION = typer.Option(
     resolve_path=True,
 )
 
+INPUT_FILES_ARGUMENT = Annotated[
+    List[Path],
+    typer.Argument(
+        ...,
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        writable=False,
+        readable=True,
+        resolve_path=True,
+        help="Paths to input files.",
+    ),
+]
+
 OUTPUT_FILE_OPTION = typer.Option(
     file_okay=True,
     dir_okay=False,
@@ -365,7 +379,7 @@ def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPT
 
 # CHECK RASTER GRIDS
 @app.command()
-def check_raster_grids_cli(input_rasters: Annotated[List[Path], INPUT_FILE_OPTION], same_extent: bool = False):
+def check_raster_grids_cli(input_rasters: INPUT_FILES_ARGUMENT, same_extent: bool = False):
     """Check all input rasters for matching gridding and optionally matching bounds."""
     from eis_toolkit.utilities.checks.raster import check_raster_grids
 
@@ -886,7 +900,7 @@ def distance_computation_cli(
 # LOGISTIC REGRESSION
 @app.command()
 def logistic_regression_train_cli(
-    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: Annotated[Path, INPUT_FILE_OPTION],
     output_file: Annotated[Path, OUTPUT_FILE_OPTION],
     validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
@@ -939,7 +953,7 @@ def logistic_regression_train_cli(
 # RANDOM FOREST CLASSIFIER
 @app.command()
 def random_forest_classifier_train_cli(
-    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: Annotated[Path, INPUT_FILE_OPTION],
     output_file: Annotated[Path, OUTPUT_FILE_OPTION],
     validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
@@ -990,7 +1004,7 @@ def random_forest_classifier_train_cli(
 # RANDOM FOREST REGRESSOR
 @app.command()
 def random_forest_regressor_train_cli(
-    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: Annotated[Path, INPUT_FILE_OPTION],
     output_file: Annotated[Path, OUTPUT_FILE_OPTION],
     validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
@@ -1041,7 +1055,7 @@ def random_forest_regressor_train_cli(
 # GRADIENT BOOSTING CLASSIFIER
 @app.command()
 def gradient_boosting_classifier_train_cli(
-    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: Annotated[Path, INPUT_FILE_OPTION],
     output_file: Annotated[Path, OUTPUT_FILE_OPTION],
     validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
@@ -1056,7 +1070,7 @@ def gradient_boosting_classifier_train_cli(
     verbose: int = 0,
     random_state: Optional[int] = None,
 ):
-    """Train and optionally validate a Random Forest regressor model using Sklearn."""
+    """Train and optionally validate a Gradient boosting classifier model using Sklearn."""
     from eis_toolkit.prediction.gradient_boosting import gradient_boosting_classifier_train
     from eis_toolkit.prediction.model_utils import save_model
     from eis_toolkit.utilities.modeling import prepare_data_for_ml
@@ -1098,7 +1112,7 @@ def gradient_boosting_classifier_train_cli(
 # GRADIENT BOOSTING REGRESSOR
 @app.command()
 def gradient_boosting_regressor_train_cli(
-    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: Annotated[Path, INPUT_FILE_OPTION],
     output_file: Annotated[Path, OUTPUT_FILE_OPTION],
     validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
@@ -1113,7 +1127,7 @@ def gradient_boosting_regressor_train_cli(
     verbose: int = 0,
     random_state: Optional[int] = None,
 ):
-    """Train and optionally validate a Random Forest regressor model using Sklearn."""
+    """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
     from eis_toolkit.prediction.gradient_boosting import gradient_boosting_regressor_train
     from eis_toolkit.prediction.model_utils import save_model
     from eis_toolkit.utilities.modeling import prepare_data_for_ml
