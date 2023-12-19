@@ -19,6 +19,21 @@ raster_path_nonsquared = parent_dir.joinpath("../data/remote/nonsquared_pixelsiz
 @pytest.mark.parametrize("method", ["Evans", "Young", "Zevenbergen"])
 def test_second_order_basic_set(method: str):
     with rasterio.open(raster_path_single) as raster:
+        result_dict = {
+            "Evans": {
+                "planc": 0.017252,
+                "profc": 0.000793,
+            },
+            "Young": {
+                "planc": 0.018364,
+                "profc": 0.001461,
+            },
+            "Zevenbergen": {
+                "planc": 0.012064,
+                "profc": 0.000763,
+            },
+        }
+
         # There may be some parameters resulting in zero-pixels,
         # which may influence the test for the slope_tolerance, resulting in an assertion error.
         # Thus, keep it with these derivates for testing.
@@ -37,6 +52,9 @@ def test_second_order_basic_set(method: str):
             assert isinstance(deriv_array, np.ndarray)
             assert isinstance(deriv_meta, dict)
             assert deriv_array.shape == (raster.height, raster.width)
+
+            # Check calculated means
+            np.testing.assert_almost_equal(np.mean(deriv_array), result_dict[method][parameter], decimal=6)
 
             # Nodata
             test_array = raster.read(1)
