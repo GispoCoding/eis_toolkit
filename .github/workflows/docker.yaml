@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build Docker image
-        run: docker build -t eis_toolkit -f ./Dockerfile .
+        run: docker build -t eis_toolkit -f ./Dockerfile-docs .
       - name: Run mkdocs in Docker container
         run: |
           docker run -v ./site/pdf/:/eis_toolkit/site/pdf/ --env ENABLE_PDF_EXPORT=1 eis_toolkit poetry run mkdocs build
