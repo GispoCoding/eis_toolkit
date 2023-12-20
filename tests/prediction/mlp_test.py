@@ -17,7 +17,15 @@ def test_train_MLP_classifier():
     y = one_hot_encode(Y_IRIS).toarray()
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    model, history = train_MLP_classifier(X_train, y_train, output_neurons=3, metrics=["accuracy"])
+    model, history = train_MLP_classifier(
+        X_train,
+        y_train,
+        neurons=[16],
+        output_neurons=3,
+        last_activation="softmax",
+        loss_function="categorical_crossentropy",
+        metrics=["accuracy"],
+    )
 
     assert model is not None, "Model should not be None"
     assert "loss" in history, "History should contain loss"
@@ -38,7 +46,7 @@ def test_train_MLP_regressor():
     y = one_hot_encode(Y_DIABETES).toarray()
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    model, history = train_MLP_regressor(X_train, y_train, output_neurons=1, metrics=["mse"])
+    model, history = train_MLP_regressor(X_train, y_train, neurons=[16], output_neurons=1, metrics=["mse"])
 
     assert model is not None, "Model should not be None"
     assert "loss" in history, "History should contain loss"
@@ -64,60 +72,60 @@ def test_invalid_neurons():
 def test_invalid_validation_split():
     """Test that invalid value for validation_split raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, validation_split=-1.0)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], validation_split=-1.0)
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_regressor(X_IRIS, Y_IRIS, validation_split=-1.0)
+        train_MLP_regressor(X_IRIS, Y_IRIS, neurons=[16], validation_split=-1.0)
 
 
 def test_invalid_learning_rate():
     """Test that invalid value for learning_rate raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, learning_rate=0)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], learning_rate=0)
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, learning_rate=0)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], learning_rate=0)
 
 
 def test_invalid_dropout_rate():
     """Test that invalid value for dropout_rate raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, dropout_rate=2)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], dropout_rate=2)
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, dropout_rate=2)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], dropout_rate=2)
 
 
 def test_invalid_es_patience():
     """Test that invalid value for es_patience raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, es_patience=0)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], es_patience=0)
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, es_patience=0)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], es_patience=0)
 
 
 def test_invalid_batch_size():
     """Test that invalid value for batch_size raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, batch_size=0)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], batch_size=0)
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, batch_size=0)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], batch_size=0)
 
 
 def test_invalid_epochs():
     """Test that invalid value for epochs raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, epochs=0)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], epochs=0)
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, epochs=0)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], epochs=0)
 
 
 def test_invalid_output_neurons():
     """Test that invalid value for output_neurons raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, output_neurons=0)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], output_neurons=0)
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, output_neurons=0)
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], output_neurons=0)
 
 
 def test_invalid_output_neurons_for_binary_crossentropy():
     """Test that invalid value for output_neurons for binary crossentropy raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
-        train_MLP_classifier(X_IRIS, Y_IRIS, output_neurons=2, loss_function="binary_crossentropy")
+        train_MLP_classifier(X_IRIS, Y_IRIS, neurons=[16], output_neurons=2, loss_function="binary_crossentropy")

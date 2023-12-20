@@ -75,11 +75,6 @@ def _check_ML_model_data_input(X: np.ndarray, y: np.ndarray):
             f"X must be a 2-dimensional array, but is an array with shape {X.shape}."
         )
 
-    if y.ndim != 1:
-        raise exceptions.InvalidDataShapeException(
-            f"y must be a 1-dimensional array, but is an array with shape {y.shape}."
-        )
-
     n_samples_X = X.shape[0]
     n_samples_y = y.shape[0]
 
