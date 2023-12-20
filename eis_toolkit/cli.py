@@ -1166,6 +1166,43 @@ def gradient_boosting_regressor_train_cli(
     typer.echo("Gradient boosting regressor training completed")
 
 
+# EVALUATE ML MODEL
+@app.command()
+def evaluate_trained_model_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],
+    model_file: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    validation_metric: str,
+):
+    """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
+    from eis_toolkit.prediction.model_utils import evaluate_model, load_model
+    from eis_toolkit.utilities.modeling import prepare_data_for_ml
+
+    X, y = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    model = load_model(model_file)
+    predictions, metrics_dict = evaluate_model(X, y, model, [validation_metric])
+
+    typer.echo("Progress: 80%")
+
+    print(predictions.shape)
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+
+    # with rasterio.open(output_raster, "w", **out_meta) as dst:
+    #     dst.write(predictions, out_meta["count"])
+
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("Evaluating trained model completed")
+
+
 # FUZZY OVERLAYS
 
 # AND OVERLAY
