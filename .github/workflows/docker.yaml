@@ -13,7 +13,6 @@ jobs:
       - name: Run mkdocs in Docker container
         run: |
           docker run -v ./site/pdf/:/eis_toolkit/site/pdf/ --env ENABLE_PDF_EXPORT=1 eis_toolkit poetry run mkdocs build
-          file ./site/pdf/document.pdf
       - uses: actions/upload-artifact@v4
         with:
           name: document.pdf
