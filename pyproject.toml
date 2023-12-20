@@ -35,6 +35,7 @@ pykrige = "^1.7.0"
 rtree = "^1.0.1"
 typer = {extras = ["all"], version = "^0.9.0"}
 imbalanced-learn = "^0.11.0"
+findpeaks = "^2.6.1"
 
 [tool.poetry.dev-dependencies]
 jupyterlab = "^3.4.5"

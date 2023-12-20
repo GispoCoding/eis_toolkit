@@ -467,6 +467,24 @@ files = [
 ]
 
 [[package]]
+name = "caerus"
+version = "0.1.9"
+description = "Python package caerus"
+optional = false
+python-versions = ">=3"
+files = [
+    {file = "caerus-0.1.9-py3-none-any.whl", hash = "sha256:8c7442390839787cc084508fd8004cee169dc2a62e43b06b2c287b550a43f400"},
+    {file = "caerus-0.1.9.tar.gz", hash = "sha256:06b793c4537b663438270ea740c65eafe72d987ad18e942c85bab1bfc6a3a216"},
+]
+
+[package.dependencies]
+matplotlib = "*"
+numpy = "*"
+pandas = "*"
+tqdm = "*"
+wget = "*"
+
+[[package]]
 name = "certifi"
 version = "2023.7.22"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -924,6 +942,29 @@ files = [
 
 [package.extras]
 devel = ["colorama", "json-spec", "jsonschema", "pylint", "pytest", "pytest-benchmark", "pytest-cache", "validictory"]
+
+[[package]]
+name = "findpeaks"
+version = "2.6.1"
+description = "findpeaks is for the detection of peaks and valleys in a 1D vector and 2D array (image)."
+optional = false
+python-versions = ">=3"
+files = [
+    {file = "findpeaks-2.6.1-py3-none-any.whl", hash = "sha256:07ce0e8d59276dabf66612a8156a4c5c1f8585240d0de2fddd596681817b92de"},
+    {file = "findpeaks-2.6.1.tar.gz", hash = "sha256:e47cc0f1d05b4f15bc575d307e1dfb34e23264e1bad7ddee79fb3fb1e24956e0"},
+]
+
+[package.dependencies]
+caerus = ">=0.1.9"
+joblib = "*"
+matplotlib = "*"
+numpy = "*"
+pandas = "*"
+peakdetect = "1.1"
+requests = "*"
+scipy = "*"
+tqdm = "*"
+xarray = "*"
 
 [[package]]
 name = "fiona"
@@ -2934,6 +2975,21 @@ six = "*"
 test = ["pytest", "pytest-cov", "scipy"]
 
 [[package]]
+name = "peakdetect"
+version = "1.1"
+description = "Analytic peak finder"
+optional = false
+python-versions = "*"
+files = [
+    {file = "peakdetect-1.1-py2.py3-none-any.whl", hash = "sha256:4a2d43eee6c8eeb2092275b5967a25379090c111abc16127c47d06420892ec62"},
+    {file = "peakdetect-1.1.tar.gz", hash = "sha256:427fcef2774b72fa28e38138856cc0f776adc2d3e0b653b1f1756a1a6b6112c2"},
+]
+
+[package.dependencies]
+numpy = "*"
+scipy = "*"
+
+[[package]]
 name = "pexpect"
 version = "4.8.0"
 description = "Pexpect allows easy control of interactive console applications."
@@ -4640,6 +4696,26 @@ files = [
 ]
 
 [[package]]
+name = "tqdm"
+version = "4.66.1"
+description = "Fast, Extensible Progress Meter"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "tqdm-4.66.1-py3-none-any.whl", hash = "sha256:d302b3c5b53d47bce91fea46679d9c3c6508cf6332229aa1e7d8653723793386"},
+    {file = "tqdm-4.66.1.tar.gz", hash = "sha256:d88e651f9db8d8551a62556d3cff9e3034274ca5d66e93197cf2490e2dcb69c7"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["pytest (>=6)", "pytest-cov", "pytest-timeout", "pytest-xdist"]
+notebook = ["ipywidgets (>=6)"]
+slack = ["slack-sdk"]
+telegram = ["requests"]
+
+[[package]]
 name = "traitlets"
 version = "5.11.2"
 description = "Traitlets Python configuration system"
@@ -4877,6 +4953,16 @@ MarkupSafe = ">=2.1.1"
 watchdog = ["watchdog (>=2.3)"]
 
 [[package]]
+name = "wget"
+version = "3.2"
+description = "pure python download utility"
+optional = false
+python-versions = "*"
+files = [
+    {file = "wget-3.2.zip", hash = "sha256:35e630eca2aa50ce998b9b1a127bb26b30dfee573702782aa982f875e3f16061"},
+]
+
+[[package]]
 name = "wheel"
 version = "0.41.2"
 description = "A built-package format for Python"
@@ -4962,6 +5048,29 @@ files = [
     {file = "wrapt-1.14.1-cp39-cp39-win_amd64.whl", hash = "sha256:dee60e1de1898bde3b238f18340eec6148986da0455d8ba7848d50470a7a32fb"},
     {file = "wrapt-1.14.1.tar.gz", hash = "sha256:380a85cf89e0e69b7cfbe2ea9f765f004ff419f34194018a6827ac0e3edfed4d"},
 ]
+
+[[package]]
+name = "xarray"
+version = "2023.12.0"
+description = "N-D labeled arrays and datasets in Python"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "xarray-2023.12.0-py3-none-any.whl", hash = "sha256:3c22b6824681762b6c3fcad86dfd18960a617bccbc7f456ce21b43a20e455fb9"},
+    {file = "xarray-2023.12.0.tar.gz", hash = "sha256:4565dbc890de47e278346c44d6b33bb07d3427383e077a7ca8ab6606196fd433"},
+]
+
+[package.dependencies]
+numpy = ">=1.22"
+packaging = ">=21.3"
+pandas = ">=1.4"
+
+[package.extras]
+accel = ["bottleneck", "flox", "numbagg", "opt-einsum", "scipy"]
+complete = ["xarray[accel,io,parallel,viz]"]
+io = ["cftime", "fsspec", "h5netcdf", "netCDF4", "pooch", "pydap", "scipy", "zarr"]
+parallel = ["dask[complete]"]
+viz = ["matplotlib", "nc-time-axis", "seaborn"]
 
 [[package]]
 name = "y-py"
@@ -5156,4 +5265,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "b2991f61f8e8465c31687c74cf3033e8159dfba197cdc4c53d137a35319a413f"
+content-hash = "80cd1c6246e3bcd56ba173aeda464e834de556b8b45c2b600a0b90d4dcd2825e"
