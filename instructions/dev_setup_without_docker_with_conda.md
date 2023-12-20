@@ -18,7 +18,7 @@ the `libmamba` solver instead of the default. **If you encounter installation
 issues following this guide further**, especially on Windows, you can enable the
 `libmamba` solver globally(!) as follows:
 
-``` shell
+```bash
 conda install -n base conda-libmamba-solver
 conda config --set solver libmamba
 ```
@@ -34,7 +34,7 @@ further info.
     provided `environment.yml` file. The environment name is defined in
     `environment.yml` (eis_toolkit).
 
-``` shell
+```bash
 conda env create -f environment.yml
 # You can overwrite an existing environment named eis_toolkit with the --force flag
 conda env create -f environment.yml --force
@@ -42,7 +42,7 @@ conda env create -f environment.yml --force
 
 2.  Activate the environment.
 
-``` shell
+```bash
 conda activate eis_toolkit
 ```
 
@@ -58,7 +58,7 @@ conda activate eis_toolkit
 You can add your own packages to the environment as needed. E.g.
 `jupyterlab`:
 
-``` shell
+```bash
 # -c conda-forge specifies the conda-forge channel, which is recommended
 conda install -n eis_toolkit -c conda-forge jupyterlab 
 ```
