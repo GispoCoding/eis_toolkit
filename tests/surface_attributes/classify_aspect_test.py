@@ -15,40 +15,40 @@ raster_path_single = parent_dir.joinpath("../data/remote/small_raster.tif")
 raster_path_multi = parent_dir.joinpath("../data/remote/small_raster_multiband.tif")
 raster_path_nonsquared = parent_dir.joinpath("../data/remote/nonsquared_pixelsize_raster.tif")
 
+ASPECT_CLASSIFICATION_RESULTS = {
+    8: {
+        1: 179,
+        2: 423,
+        3: 206,
+        4: 182,
+        5: 215,
+        6: 483,
+        7: 325,
+        8: 563,
+    },
+    16: {
+        1: 74,
+        2: 83,
+        3: 193,
+        4: 289,
+        5: 71,
+        6: 54,
+        7: 90,
+        8: 137,
+        9: 101,
+        10: 93,
+        11: 236,
+        12: 293,
+        13: 144,
+        14: 193,
+        15: 344,
+        16: 181,
+    },
+}
+
 
 @pytest.mark.parametrize("num_classes", [8, 16])
 def test_aspect_classification(num_classes: int):
-    results_dict = {
-        8: {
-            1: 179,
-            2: 423,
-            3: 206,
-            4: 182,
-            5: 215,
-            6: 483,
-            7: 325,
-            8: 563,
-        },
-        16: {
-            1: 74,
-            2: 83,
-            3: 193,
-            4: 289,
-            5: 71,
-            6: 54,
-            7: 90,
-            8: 137,
-            9: 101,
-            10: 93,
-            11: 236,
-            12: 293,
-            13: 144,
-            14: 193,
-            15: 344,
-            16: 181,
-        },
-    }
-
     with rasterio.open(raster_path_single) as raster:
         parameter = "A"
 
@@ -114,7 +114,7 @@ def test_aspect_classification(num_classes: int):
         # Check if the number of pixels in each class is correct
         unique_values, counts = np.unique(classification_array, return_counts=True)
         test_dict = dict(zip(unique_values, counts))
-        assert test_dict == results_dict[num_classes]
+        assert test_dict == ASPECT_CLASSIFICATION_RESULTS[num_classes]
 
 
 def test_number_bands():

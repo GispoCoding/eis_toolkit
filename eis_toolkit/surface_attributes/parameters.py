@@ -104,7 +104,7 @@ def first_order(
     raster_array = scale_raster(raster_array, scaling_factor)
 
     cellsize = raster.res[0]
-    p, q, *NoneValues = coefficients(raster_array, cellsize, method)
+    p, q, *_ = coefficients(raster_array, cellsize, method)
     q = -q if method == "Horn" else q
 
     slope_gradient = _first_order("G", (p, q)) if slope_tolerance > 0 else (p, q)

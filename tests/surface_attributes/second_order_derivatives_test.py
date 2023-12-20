@@ -15,25 +15,25 @@ raster_path_single = parent_dir.joinpath("../data/remote/small_raster.tif")
 raster_path_multi = parent_dir.joinpath("../data/remote/small_raster_multiband.tif")
 raster_path_nonsquared = parent_dir.joinpath("../data/remote/nonsquared_pixelsize_raster.tif")
 
+SECOND_ORDER_BASIC_SET_RESULTS = {
+    "Evans": {
+        "planc": 0.017252,
+        "profc": 0.000793,
+    },
+    "Young": {
+        "planc": 0.018364,
+        "profc": 0.001461,
+    },
+    "Zevenbergen": {
+        "planc": 0.012064,
+        "profc": 0.000763,
+    },
+}
+
 
 @pytest.mark.parametrize("method", ["Evans", "Young", "Zevenbergen"])
 def test_second_order_basic_set(method: str):
     with rasterio.open(raster_path_single) as raster:
-        result_dict = {
-            "Evans": {
-                "planc": 0.017252,
-                "profc": 0.000793,
-            },
-            "Young": {
-                "planc": 0.018364,
-                "profc": 0.001461,
-            },
-            "Zevenbergen": {
-                "planc": 0.012064,
-                "profc": 0.000763,
-            },
-        }
-
         # There may be some parameters resulting in zero-pixels,
         # which may influence the test for the slope_tolerance, resulting in an assertion error.
         # Thus, keep it with these derivates for testing.
@@ -54,7 +54,9 @@ def test_second_order_basic_set(method: str):
             assert deriv_array.shape == (raster.height, raster.width)
 
             # Check calculated means
-            np.testing.assert_almost_equal(np.mean(deriv_array), result_dict[method][parameter], decimal=6)
+            np.testing.assert_almost_equal(
+                np.mean(deriv_array), SECOND_ORDER_BASIC_SET_RESULTS[method][parameter], decimal=6
+            )
 
             # Nodata
             test_array = raster.read(1)

@@ -15,18 +15,18 @@ raster_path_single = parent_dir.joinpath("../data/remote/small_raster.tif")
 raster_path_multi = parent_dir.joinpath("../data/remote/small_raster_multiband.tif")
 raster_path_nonsquared = parent_dir.joinpath("../data/remote/nonsquared_pixelsize_raster.tif")
 
+FIRST_ORDER_RESULTS = {
+    "Horn": {"A": 200.727, "G": 7.074},
+    "Evans": {"A": 200.961, "G": 7.017},
+    "Young": {"A": 200.961, "G": 7.017},
+    "Zevenbergen": {"A": 200.929, "G": 7.282},
+}
+
+FIRST_ORDER_RESULTS_MIN_SLOPE = {"Evans": {"A": 0.396}}
+
 
 @pytest.mark.parametrize("method", ["Horn", "Evans", "Young", "Zevenbergen"])
 def test_first_order(method: str):
-    result_dict = {
-        "Horn": {"A": 200.727, "G": 7.074},
-        "Evans": {"A": 200.961, "G": 7.017},
-        "Young": {"A": 200.961, "G": 7.017},
-        "Zevenbergen": {"A": 200.929, "G": 7.282},
-    }
-
-    result_dict_min_slope = {"Evans": {"A": 0.396}}
-
     with rasterio.open(raster_path_single) as raster:
         parameters = ["A", "G"]
 
@@ -61,7 +61,7 @@ def test_first_order(method: str):
             )
 
             # Check calculated means
-            np.testing.assert_almost_equal(np.mean(deriv_array), result_dict[method][parameter], decimal=3)
+            np.testing.assert_almost_equal(np.mean(deriv_array), FIRST_ORDER_RESULTS[method][parameter], decimal=3)
 
             # Run with minimum slope applied for aspect
             if parameter == "A":
@@ -73,7 +73,7 @@ def test_first_order(method: str):
                 # Check calculated mean (only for one method)
                 if method == "Evans":
                     np.testing.assert_almost_equal(
-                        np.mean(aspect_array), result_dict_min_slope[method][parameter], decimal=3
+                        np.mean(aspect_array), FIRST_ORDER_RESULTS_MIN_SLOPE[method][parameter], decimal=3
                     )
 
                 slope = first_order(raster, parameters=["G"], slope_gradient_unit="degrees", method=method)
