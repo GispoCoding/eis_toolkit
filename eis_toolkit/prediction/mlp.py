@@ -3,7 +3,7 @@ from typing import Literal, Optional, Sequence, Tuple
 
 import numpy as np
 from beartype import beartype
-from keras.optimizers import SGD, Adagrad, Adam, RMSprop
+from keras.optimizers.legacy import SGD, Adagrad, Adam, RMSprop
 from tensorflow import keras
 
 from eis_toolkit import exceptions
@@ -17,7 +17,7 @@ def _keras_optimizer(optimizer: str, **kwargs):
         return Adagrad(**kwargs)
     elif optimizer == "rmsprop":
         return RMSprop(**kwargs)
-    elif optimizer == "sdg":
+    elif optimizer == "sgd":
         return SGD(**kwargs)
     else:
         raise exceptions.InvalidParameterValueException(f"Unidentified optimizer: {optimizer}")
@@ -67,10 +67,10 @@ def _check_MLP_inputs(
             "Number of output neurons must be 1 when used loss function is binary crossentropy."
         )
 
-    if output_neurons == 1 and (
-        loss_function == "categorical_crossentropy" or loss_function == "sparse_categorical_crossentropy"
-    ):
-        raise exceptions.InvalidParameterValueException("Number of output neurons must be greater than 2.")
+    if output_neurons <= 2 and loss_function == "categorical_crossentropy":
+        raise exceptions.InvalidParameterValueException(
+            "Number of output neurons must be greater than 2 when used loss function is categorical crossentropy."
+        )
 
 
 def _check_ML_model_data_input(X: np.ndarray, y: np.ndarray):
@@ -103,9 +103,7 @@ def train_MLP_classifier(
     batch_size: int = 32,
     optimizer: Literal["adam", "adagrad", "rmsprop", "sdg"] = "adam",
     learning_rate: Number = 0.001,
-    loss_function: Literal[
-        "binary_crossentropy", "categorical_crossentropy", "sparse_categorical_crossentropy"
-    ] = "binary_crossentropy",
+    loss_function: Literal["binary_crossentropy", "categorical_crossentropy"] = "binary_crossentropy",
     dropout_rate: Optional[Number] = None,
     early_stopping: bool = True,
     es_patience: int = 5,
@@ -123,8 +121,11 @@ def train_MLP_classifier(
     function and 1 output neuron/unit.
 
     Args:
-        X: Input data.
-        y: Target labels.
+        X: Input data. Should be a 2-dimensional array where each row represents a sample and each column a
+            feature. Features should ideally be normalized or standardized.
+        y: Target labels. For binary classification, y should be a 1-dimensional array of binary labels (0 or 1).
+            For multi-class classification, y should be a 2D array with one-hot encoded labels. The number of columns
+            should match the number of classes.
         neurons: Number of neurons in each hidden layer.
         validation_split: Fraction of data used for validation during training. Value must be > 0 and < 1 or None.
             Defaults to 0.2.
@@ -232,8 +233,10 @@ def train_MLP_regressor(
     specified, a Dropout layer is added after each Dense layer.
 
     Args:
-        X: Input data.
-        y: Target labels.
+        X: Input data. Should be a 2-dimensional array where each row represents a sample and each column a
+            feature. Features should ideally be normalized or standardized.
+        y: Target labels. Should be a 1-dimensional array where each entry corresponds to the continuous
+            target value for the respective sample in X.
         neurons: Number of neurons in each hidden layer.
         validation_split: Fraction of data used for validation during training. Value must be > 0 and < 1 or None.
             Defaults to 0.2.
