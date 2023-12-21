@@ -318,38 +318,20 @@ def descriptive_statistics_vector_cli(
 
 
 # CHI-SQUARE TEST
-@app.command()
-def chi_square_test_cli(
-    input_file: Annotated[Path, INPUT_FILE_OPTION],
-    target_column: str = typer.Option(None),
-    columns: List[str] = typer.Option(None),
-):
-    """Compute Chi-square test for independence on the input data."""
-    from eis_toolkit.exploratory_analyses.statistical_tests import chi_square_test
-
-    typer.echo("Progress: 25%")
-    gdf = gpd.read_file(input_file)
-    typer.echo("Progress: 50%")
-    results_dict = chi_square_test(gdf, target_column, columns)
-    typer.echo("Progress: 75%")
-
-    json_str = json.dumps(results_dict)
-
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
-    typer.echo("Chi-square test completed")
+# TODO
 
 
 # NORMALITY TEST
 @app.command()
 def normality_test_cli(
-    input_file: Annotated[Path, INPUT_FILE_OPTION],
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
 ):
     """Compute Shapiro-Wilk test for normality on the input data."""
     from eis_toolkit.exploratory_analyses.statistical_tests import normality_test
 
     typer.echo("Progress: 25%")
-    df = pd.read_csv(input_file)
+    gdf = gpd.read_file(input_vector)
+    df = gdf.drop(columns='geometry')
     typer.echo("Progress: 50%")
 
     results_dict = normality_test(df)
