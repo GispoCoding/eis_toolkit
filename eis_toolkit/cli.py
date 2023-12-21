@@ -7,7 +7,7 @@
 import json
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Tuple, Sequence
+from typing import List, Optional, Tuple
 
 import geopandas as gpd
 import pandas as pd
@@ -314,54 +314,13 @@ def descriptive_statistics_vector_cli(
 
 
 # FEATURE IMPORTANCE
-# TODO! This is a work in progress.
-@app.command()
-def feature_importance_cli(
-    classifier: Annotated[Path, INPUT_FILE_OPTION],
-    test_x: Annotated[Path, INPUT_FILE_OPTION],
-    test_y: Annotated[Path, INPUT_FILE_OPTION],
-    output: Annotated[Path, OUTPUT_FILE_OPTION],
-    feature_names: List[str],
-    number_of_repetition: int = 50,
-    random_state: int = 0
-):
-    """Evaluate the feature importance of a sklearn classifier or linear model."""
-    from eis_toolkit.exploratory_analyses.feature_importance import evaluate_feature_importance
-    import joblib
-
-    typer.echo("Progress: 10%")
-
-    loaded_classifier = joblib.load(classifier)
-
-    typer.echo("Progress: 25%")
-
-    with rasterio.open(test_x) as x_raster:
-        typer.echo("Progress: 50%")
-
-    with rasterio.open(test_y) as y_raster:
-        typer.echo("Progress: 75%")
-
-    result_df, result_dict = evaluate_feature_importance(
-        loaded_classifier,
-        x_raster,
-        y_raster,
-        feature_names,
-        number_of_repetition,
-        random_state
-        )
-    typer.echo("Progress: 90%")
-
-    result_df.to_csv(output)
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Evaluate feature importance completed, writing to {output}.")
+# TODO
 
 
 # CHI-SQUARE TEST
 @app.command()
 def chi_square_test_cli(
     input_file: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
     target_column: str = typer.Option(None),
     columns: List[str] = typer.Option(None),
 ):
@@ -376,11 +335,8 @@ def chi_square_test_cli(
 
     json_str = json.dumps(results_dict)
 
-    with open(output_file, 'w') as file:
-        file.write(json_str)
-
     typer.echo("Progress: 100%")
-    typer.echo(f"Results saved to file: {output_file}")
+    typer.echo(f"Results: {json_str}")
     typer.echo("Chi-square test completed")
 
 
@@ -388,7 +344,6 @@ def chi_square_test_cli(
 @app.command()
 def normality_test_cli(
     input_file: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION]
 ):
     """Compute Shapiro-Wilk test for normality on the input data."""
     from eis_toolkit.exploratory_analyses.statistical_tests import normality_test
@@ -402,11 +357,8 @@ def normality_test_cli(
 
     json_str = json.dumps(results_dict)
 
-    with open(output_file, 'w') as file:
-        file.write(json_str)
-
     typer.echo("Progress: 100%")
-    typer.echo(f"Results saved to file: {output_file}")
+    typer.echo(f"Results saved to file: {json_str}")
     typer.echo("Normality test completed")
 
 
@@ -697,27 +649,7 @@ def extract_window_cli(
 
 
 # UNIQUE COMBINATIONS
-@app.command()
-def unique_combinations_cli(
-    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION]
-):
-    """Get combinations of raster values between rasters."""
-    from eis_toolkit.raster_processing.unique_combinations import unique_combinations
-
-    typer.echo("Progress: 10%")
-
-    rasters = [rasterio.open(raster) for raster in input_rasters]
-    typer.echo("Progress: 33%")
-    out_image, out_meta = unique_combinations(raster_list=rasters)
-    typer.echo("Progress: 66%")
-
-    with rasterio.open(output_raster, 'w', **out_meta) as dst:
-        dst.write(out_image)
-
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Unique combinations completed, writing raster to {output_raster}")
+# TODO
 
 
 # --- VECTOR PROCESSING ---
@@ -980,7 +912,7 @@ def distance_computation_cli(
 
 
 # CBA
-# TODO! Only a draft exists in plugin.
+# TODO Only a draft exists in plugin.
 
 
 # --- PREDICTION ---
@@ -1120,120 +1052,11 @@ def gamme_overlay_cli(
 
 
 # WOFE CALCULATE RESPONSES
-# TODO! This likely will need a rethink.
-@app.command()
-def weights_of_evidence_calculate_responses_cli(
-    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION]
-):
-    """Calculate the posterior probabilities for the given generalized weight arrays."""
-    from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_responses
-
-    typer.echo("Progress: 10%")
-
-    open_rasters = [rasterio.open(raster) for raster in input_rasters]
-    typer.echo("Progress: 25%")
-
-    gdf = gpd.read_file(input_vector)
-    nr_of_deposits = len(gdf)
-    nr_of_pixels = gdf.geometry.area.sum()
-    typer.echo("Progress: 50%")
-
-    response, posterior_prob, evidence = weights_of_evidence_calculate_responses(
-        open_rasters,
-        nr_of_deposits,
-        nr_of_pixels
-    )
-    typer.echo("Progress: 75%")
-
-    template_raster = open_rasters[0]
-    transform = template_raster.transform
-    height, width = response.shape
-
-    with rasterio.open(
-        output_raster,
-        'w',
-        driver='GTiff',
-        height=height,
-        width=width,
-        count=3,
-        dtype=response.dtype,
-        crs=template_raster.crs,
-        transform=transform
-    ) as dst:
-        dst.write(response, 1)
-        dst.write(posterior_prob, 2)
-        dst.write(evidence, 3)
-        typer.echo("Progress: 100%")
-
-    typer.echo(f"Weights of evidence calculate responses complete, writing raster to {output_raster}.")
+# TODO
 
 
-""" @app.command()
-def weights_of_evidence_calculate_weights_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    output_gdf: Annotated[Path, OUTPUT_FILE_OPTION],
-    output_csv: Annotated[Path, OUTPUT_FILE_OPTION],
-    raster_nodata: Optional[float] = None,
-    weights_type: str = "Categorical weights",
-    studentisized_contrast_threshold: float = 2.0,
-    raster_to_generate: Sequence[str] = ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"],
-):
-    Calculate weights of spatial associations.
-    from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_weights
-
-    typer.echo("Progress: 10%")
-
-    raster = rasterio.open(input_raster)
-    typer.echo("Progress: 20%")
-
-    gdf = gpd.read_file(input_vector)
-    typer.echo("Progress: 30%")
-
-    out_gdf, out_tables, raster_metadata, nr_of_deposit_pixels, nr_of_evidence_pixels = (
-        weights_of_evidence_calculate_weights(
-            raster,
-            gdf,
-            raster_nodata,
-            weights_type,
-            studentisized_contrast_threshold,
-            raster_to_generate,
-        )
-    )
-    typer.echo("Progress: 70%")
-
-    out_gdf.to_file(output_gdf, driver='GeoJSON')
-    typer.echo("Progress: 80%")
-
-    transform = raster_metadata.transform
-    height, width = raster.shape
-
-    with rasterio.open(
-        output_raster,
-        'w',
-        driver='GTiff',
-        height=height,
-        width=width,
-        count=len(out_tables),
-        dtype=out_tables['Class'].dtype,
-        crs=raster_metadata.crs,
-        transform=transform
-    ) as dst:
-        dst.write(out_tables['Class'], 1)
-
-        for idx, array_name in enumerate(raster_to_generate[1:], start=2):
-            dst.write(out_tables[array_name], idx)
-    typer.echo("Progress: 90%")
-
-    data = {'nr_of_deposit_pixels': [nr_of_deposit_pixels], 'nr_of_evidence_pixels': [nr_of_evidence_pixels]}
-    df = pd.DataFrame(data)
-
-    df.to_csv(output_csv)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Weights of evidence calculate weights complete, writing raster to {output_raster}.") """
+# WOFE CALCULATE WEIGHTS
+# TODO
 
 
 # --- TRANSFORMATIONS ---
@@ -1463,134 +1286,22 @@ def winsorize_transform_cli(
 
 
 # CALCULATE AUC
-@app.command()
-def calculate_auc_cli(
-    x_values: Annotated[Path, INPUT_FILE_OPTION],
-    y_values: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION]
-):
-    """Calculate area under curve (AUC)."""
-    from eis_toolkit.validation.calculate_auc import calculate_auc
-
-    typer.echo("Progress: 10%")
-
-    with rasterio.open(x_values) as x_src:
-        x_array = x_src.read(1)
-        typer.echo("Progress: 25%")
-
-    with rasterio.open(y_values) as y_src:
-        y_array = y_src.read(1)
-        typer.echo("Progress: 50%")
-
-    auc_value = calculate_auc(x_array, y_array)
-    typer.echo(f"AUC Value: {auc_value}")
-    typer.echo("Progress: 75%")
-
-    # Save the AUC value to the output file
-    with open(output_file, 'w') as output:
-        output.write(f"AUC Value: {auc_value}")
-    typer.echo("Progress: 100%")
-    typer.echo(f"Calculate area under curve complete, writing raster to {output_file}.")
+# TODO
 
 
 # CALCULATE BASE METRICS
-@app.command()
-def calculate_base_metrics_cli(
-   input_raster: Annotated[Path, INPUT_FILE_OPTION],
-   input_deposits: Annotated[Path, INPUT_FILE_OPTION],
-   input_negatives: Annotated[Path, INPUT_FILE_OPTION],
-   output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
-   band: int = 1,
-):
-    """Calculate true positive rate, proportion of area and false positive rate values for different thresholds."""
-    from eis_toolkit.validation.calculate_base_metrics import calculate_base_metrics
-
-    typer.echo("Progress: 10%")
-
-    with rasterio.open(input_raster) as src:
-        raster = src.read()
-        typer.echo("Progress: 20%")
-
-    deposits = gpd.read_file(input_deposits)
-    typer.echo("Progress: 40%")
-
-    negatives = gpd.read_file(input_negatives)
-    typer.echo("Progress: 60%")
-
-    metrics = calculate_base_metrics(
-        raster=raster,
-        deposits=deposits,
-        band=band,
-        negatives=negatives,
-    )
-    typer.echo("Progress: 80%")
-
-    metrics.to_csv(output_vector)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Calculate base metrics complete, writing vector to {output_vector}.")
+# TODO
 
 
 # PLOT CORRELATION MATRIX
-# TODO! This will need some work.
-@app.command()
-def correlation_matrix_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    annotate: bool,
-    cmap: str,
-    plot_title: str,
-    output_png: Annotated[Path, OUTPUT_FILE_OPTION]
-):
-    """Create a Seaborn heatmap to visualize correlation matrix."""
-    from eis_toolkit.validation.plot_correlation_matrix import plot_correlation_matrix
-
-    typer.echo("Progress: 10%")
-
-    geodataframe = gpd.read_file(input_vector)
-    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
-    typer.echo("Progress: 35%")
-
-    result_ax = plot_correlation_matrix(
-        matrix=dataframe,
-        annotate=annotate,
-        cmap=cmap,
-        plot_title=plot_title,
-        kwargs=None)
-    typer.echo("Progress: 70%")
-
-    result_ax.figure.savefig(output_png, format='png', bbox_inches='tight')
-    typer.echo("Progress: 100%")
-    typer.echo(f"Plot correlation matrix complete, writing image to {output_png}.")
+# TODO
 
 
 # TODO Covariance matrix.
 
 
 # PLOT PREDICTION AREA CURVE
-@app.command()
-def plot_prediction_area_curve(
-    input_positives: Annotated[Path, INPUT_FILE_OPTION],
-    proportion_of_area_values: Annotated[Path, INPUT_FILE_OPTION],
-    threshold_values: Annotated[Path, INPUT_FILE_OPTION],
-    out_img: Annotated[Path, OUTPUT_FILE_OPTION]
-):
-    """Plot prediction-area (P-A) plot."""
-    from eis_toolkit.validation.plot_prediction_area_curves import plot_prediction_area_curves
-    typer.echo("Progress: 10%")
-
-    # READ inputs to pd.series. Should this also try to read them into numpy arrays?
-    positives = pd.read_csv(input_positives)
-    typer.echo("Progress: 20%")
-    proportion_of_area = pd.read_csv(proportion_of_area_values)
-    typer.echo("Progress: 40%")
-    thresholds = pd.read_csv(threshold_values)
-    typer.echo("Progress: 60%")
-
-    plot = plot_prediction_area_curves(positives, proportion_of_area, thresholds)
-    typer.echo("Progress: 80")
-
-    plot.figure.savefig(out_img, format='png', bbox_inches='tight')
-    typer.echo("Progress: 100%")
-    typer.echo(f"Plot prediction area curve complete, writing image to {out_img}.")
+# TODO
 
 
 # if __name__ == "__main__":
