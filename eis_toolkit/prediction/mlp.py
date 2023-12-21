@@ -41,13 +41,13 @@ def _check_MLP_inputs(
     if any(neuron < 1 for neuron in neurons):
         raise exceptions.InvalidParameterValueException("Each neuron in neurons list must be at least 1.")
 
-    if validation_split and not (0 < validation_split < 1):
+    if validation_split and not (0.0 < validation_split < 1.0):
         raise exceptions.InvalidParameterValueException("Validation split must be a value between 0 and 1, exclusive.")
 
-    if learning_rate <= 0:
+    if learning_rate <= 0.0:
         raise exceptions.InvalidParameterValueException("Learning rate must be greater than 0.")
 
-    if dropout_rate and not (0 <= dropout_rate <= 1):
+    if dropout_rate and not (0.0 <= dropout_rate <= 1.0):
         raise exceptions.InvalidParameterValueException("Dropout rate must be between 0 and 1, inclusive.")
 
     if es_patience <= 0:
@@ -66,6 +66,11 @@ def _check_MLP_inputs(
         raise exceptions.InvalidParameterValueException(
             "Number of output neurons must be 1 when used loss function is binary crossentropy."
         )
+
+    if output_neurons == 1 and (
+        loss_function == "categorical_crossentropy" or loss_function == "sparse_categorical_crossentropy"
+    ):
+        raise exceptions.InvalidParameterValueException("Number of output neurons must be greater than 2.")
 
 
 def _check_ML_model_data_input(X: np.ndarray, y: np.ndarray):
@@ -98,7 +103,9 @@ def train_MLP_classifier(
     batch_size: int = 32,
     optimizer: Literal["adam", "adagrad", "rmsprop", "sdg"] = "adam",
     learning_rate: Number = 0.001,
-    loss_function: Literal["binary_crossentropy", "categorical_crossentropy"] = "binary_crossentropy",
+    loss_function: Literal[
+        "binary_crossentropy", "categorical_crossentropy", "sparse_categorical_crossentropy"
+    ] = "binary_crossentropy",
     dropout_rate: Optional[Number] = None,
     early_stopping: bool = True,
     es_patience: int = 5,
@@ -165,6 +172,8 @@ def train_MLP_classifier(
     # 2. Create and compile a sequential model
     model = keras.Sequential()
 
+    model.add(keras.layers.Input(shape=(X.shape[1],)))
+
     for neuron in neurons:
         model.add(keras.layers.Dense(units=neuron, activation=activation))
 
@@ -185,7 +194,7 @@ def train_MLP_classifier(
         X,
         y,
         epochs=epochs,
-        validation_split=validation_split if validation_split else 0,
+        validation_split=validation_split if validation_split else 0.0,
         validation_data=validation_data,
         batch_size=batch_size,
         callbacks=callbacks,
@@ -272,6 +281,8 @@ def train_MLP_regressor(
     # 2. Create and compile a sequential model
     model = keras.Sequential()
 
+    model.add(keras.layers.Input(shape=(X.shape[1],)))
+
     for neuron in neurons:
         model.add(keras.layers.Dense(units=neuron, activation=activation))
 
@@ -292,7 +303,7 @@ def train_MLP_regressor(
         X,
         y,
         epochs=epochs,
-        validation_split=validation_split if validation_split else 0,
+        validation_split=validation_split if validation_split else 0.0,
         validation_data=validation_data,
         batch_size=batch_size,
         callbacks=callbacks,
