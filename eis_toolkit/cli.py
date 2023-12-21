@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import rasterio
 import typer
@@ -918,7 +919,7 @@ def logistic_regression_train_cli(
     from eis_toolkit.prediction.model_utils import save_model
     from eis_toolkit.utilities.modeling import prepare_data_for_ml
 
-    X, y = prepare_data_for_ml(input_rasters, target_labels)
+    X, y, _ = prepare_data_for_ml(input_rasters, target_labels)
 
     typer.echo("Progress: 30%")
 
@@ -970,7 +971,7 @@ def random_forest_classifier_train_cli(
     from eis_toolkit.prediction.random_forests import random_forest_classifier_train
     from eis_toolkit.utilities.modeling import prepare_data_for_ml
 
-    X, y = prepare_data_for_ml(input_rasters, target_labels)
+    X, y, _ = prepare_data_for_ml(input_rasters, target_labels)
 
     typer.echo("Progress: 30%")
 
@@ -1021,7 +1022,7 @@ def random_forest_regressor_train_cli(
     from eis_toolkit.prediction.random_forests import random_forest_regressor_train
     from eis_toolkit.utilities.modeling import prepare_data_for_ml
 
-    X, y = prepare_data_for_ml(input_rasters, target_labels)
+    X, y, _ = prepare_data_for_ml(input_rasters, target_labels)
 
     typer.echo("Progress: 30%")
 
@@ -1075,7 +1076,7 @@ def gradient_boosting_classifier_train_cli(
     from eis_toolkit.prediction.model_utils import save_model
     from eis_toolkit.utilities.modeling import prepare_data_for_ml
 
-    X, y = prepare_data_for_ml(input_rasters, target_labels)
+    X, y, _ = prepare_data_for_ml(input_rasters, target_labels)
 
     typer.echo("Progress: 30%")
 
@@ -1132,7 +1133,7 @@ def gradient_boosting_regressor_train_cli(
     from eis_toolkit.prediction.model_utils import save_model
     from eis_toolkit.utilities.modeling import prepare_data_for_ml
 
-    X, y = prepare_data_for_ml(input_rasters, target_labels)
+    X, y, _ = prepare_data_for_ml(input_rasters, target_labels)
 
     typer.echo("Progress: 30%")
 
@@ -1173,33 +1174,70 @@ def evaluate_trained_model_cli(
     target_labels: Annotated[Path, INPUT_FILE_OPTION],
     model_file: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    validation_metric: str,
+    validation_metric: str = typer.Option(),
 ):
     """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
     from eis_toolkit.prediction.model_utils import evaluate_model, load_model
     from eis_toolkit.utilities.modeling import prepare_data_for_ml
 
-    X, y = prepare_data_for_ml(input_rasters, target_labels)
+    X, y, profile, nodata_mask = prepare_data_for_ml(input_rasters, target_labels)
 
     typer.echo("Progress: 30%")
 
     model = load_model(model_file)
     predictions, metrics_dict = evaluate_model(X, y, model, [validation_metric])
 
+    full_prediction_array = np.full(profile["width"] * profile["height"], profile["nodata"], dtype=predictions.dtype)
+    full_prediction_array[~nodata_mask.ravel()] = predictions
+    predictions_reshaped = full_prediction_array.reshape((profile["height"], profile["width"]))
+
     typer.echo("Progress: 80%")
-
-    print(predictions.shape)
-
-    typer.echo("Progress: 90%")
 
     json_str = json.dumps(metrics_dict)
 
-    # with rasterio.open(output_raster, "w", **out_meta) as dst:
-    #     dst.write(predictions, out_meta["count"])
+    out_meta = profile.copy()
+    out_meta.update({"count": 1, "dtype": predictions_reshaped.dtype})
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(predictions_reshaped, 1)
 
     typer.echo("Progress: 100%")
     typer.echo(f"Results: {json_str}")
 
+    typer.echo("Evaluating trained model completed")
+
+
+# PREDICT WITH TRAINED ML MODEL
+@app.command()
+def predict_with_trained_model_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    model_file: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+):
+    """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
+    from eis_toolkit.prediction.model_utils import load_model, predict
+    from eis_toolkit.utilities.modeling import prepare_data_for_ml
+
+    X, _, profile, nodata_mask = prepare_data_for_ml(input_rasters)
+
+    typer.echo("Progress: 30%")
+
+    model = load_model(model_file)
+    predictions = predict(X, model)
+
+    full_prediction_array = np.full(profile["width"] * profile["height"], profile["nodata"], dtype=predictions.dtype)
+    full_prediction_array[~nodata_mask.ravel()] = predictions
+    predictions_reshaped = full_prediction_array.reshape((profile["height"], profile["width"]))
+
+    typer.echo("Progress: 80%")
+
+    out_meta = profile.copy()
+    out_meta.update({"count": 1, "dtype": predictions_reshaped.dtype})
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(predictions_reshaped, 1)
+
+    typer.echo("Progress: 100%")
     typer.echo("Evaluating trained model completed")
 
 
