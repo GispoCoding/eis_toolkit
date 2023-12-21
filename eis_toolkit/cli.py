@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 import geopandas as gpd
-import pandas as pd
 import numpy as np
+import pandas as pd
 import rasterio
 import typer
 from rasterio import warp
@@ -258,7 +258,7 @@ def compute_pca_cli(
     elif isinstance(output, gpd.GeoDataFrame):
         output.to_file(output_file, driver="GPKG")
     elif isinstance(output, tuple) and len(output) == 2 and isinstance(output[0], np.ndarray):
-        with rasterio.open(output_file, 'w', **output[1]) as dst:
+        with rasterio.open(output_file, "w", **output[1]) as dst:
             dst.write(output[0])
 
 
@@ -331,7 +331,7 @@ def normality_test_cli(
 
     typer.echo("Progress: 25%")
     gdf = gpd.read_file(input_vector)
-    df = gdf.drop(columns='geometry')
+    df = gdf.drop(columns="geometry")
     typer.echo("Progress: 50%")
 
     results_dict = normality_test(df)
