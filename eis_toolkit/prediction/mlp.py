@@ -3,8 +3,8 @@ from typing import Literal, Optional, Sequence, Tuple
 
 import numpy as np
 from beartype import beartype
-from keras.optimizers.legacy import SGD, Adagrad, Adam, RMSprop
 from tensorflow import keras
+from tensorflow.keras.optimizers.legacy import SGD, Adagrad, Adam, RMSprop
 
 from eis_toolkit import exceptions
 
