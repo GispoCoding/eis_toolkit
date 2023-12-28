@@ -12,29 +12,28 @@ from eis_toolkit.exploratory_analyses.statistical_tests import (
 )
 
 data = np.array([[0, 1, 2, 1], [2, 0, 1, 2], [2, 1, 0, 2], [0, 1, 2, 1]])
-columns = ["a", "b", "c", "d"]
-numeric_data = pd.DataFrame(data, columns=columns)
+numeric_data = pd.DataFrame(data, columns=["a", "b", "c", "d"])
 categorical_data = pd.DataFrame({"e": [0, 0, 1, 1], "f": [True, False, True, True]})
 target_column = "e"
-ndarray_data = np.rec.fromarrays(data.T, names=columns)
 
 
 def test_chi_square_test():
     """Test that returned statistics for independence are correct."""
-    output_statistics = chi_square_test(data=categorical_data, target_column=target_column, columns=("f"))
+    output_statistics = chi_square_test(data=categorical_data, target_column=target_column, columns=["f"])
     np.testing.assert_array_equal((output_statistics["f"]), (0.0, 1.0, 1))
 
 
 def test_normality_test_dataframe():
     """Test that returned statistics for normality are correct with dataframe"""
-    output_statistics = normality_test(data=numeric_data, columns=("a"))
+    output_statistics = normality_test(data=numeric_data, columns=["a"])
     np.testing.assert_array_almost_equal(output_statistics["a"], (0.72863, 0.02386), decimal=5)
 
 
-def test_normality_test_ndarray():
+def test_normality_test_array():
     """Test that returned statistics for normality are correct with ndarray"""
-    output_statistics = normality_test(data=ndarray_data, columns=("a"))
-    np.testing.assert_array_almost_equal(output_statistics["a"], (0.72863, 0.02386), decimal=5)
+    output_statistics = normality_test(data=data)
+    print(output_statistics)
+    np.testing.assert_array_almost_equal(output_statistics, (0.8077, 0.00345), decimal=5)
 
 
 def test_correlation_matrix():
@@ -68,7 +67,7 @@ def test_covariance_matrix():
 def test_empty_df():
     """Test that empty DataFrame raises the correct exception."""
     empty_df = pd.DataFrame()
-    with pytest.raises(exceptions.EmptyDataFrameException):
+    with pytest.raises(exceptions.EmptyDataException):
         normality_test(data=empty_df)
 
 

@@ -1,12 +1,11 @@
 import pandas as pd
 import numpy as np
 from beartype import beartype
-from beartype.typing import Literal, Optional, Sequence, Union
+from beartype.typing import Literal, Optional, Sequence, Union, Tuple
 from scipy.stats import chi2_contingency, shapiro
 
 from eis_toolkit import exceptions
-from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_empty_dataframe
-from eis_toolkit.utilities.checks.ndarray import check_empty_ndarray
+from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_empty_dataframe, check_columns_numeric
 
 
 @beartype
@@ -54,48 +53,50 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Se
 
 
 @beartype
-def normality_test(data: Union[pd.DataFrame, np.ndarray], columns: Optional[Sequence[str]] = None) -> dict:
+def normality_test(data: Union[pd.DataFrame, np.ndarray], columns: Optional[Sequence[str]] = None) -> Union[dict, Tuple]:
     """Compute Shapiro-Wilk test for normality on the input data.
 
-    It is assumed that the input data is normally distributed and numeric, i.e. integers or floats.
-
     Args:
-        data: Dataframe containing the input data.
+        data: Dataframe or numpy array containing the input data.
+        columns: Optional Columns to be used for testing.
 
     Returns:
         Test statistics for each variable.
 
     Raises:
-        EmptyDataFrameException: The input Dataframe is empty.
+        EmptyDataException: The input data is empty.
+        NonNumericDataException: Selected data or columns contains non-numeric data.
+        InvalidParameterValueException: Input column(s) are not in the data.
     """
+    statistics = {}
     if isinstance(data, pd.DataFrame):
         if check_empty_dataframe(data):
-            raise exceptions.EmptyDataFrameException("The input Dataframe is empty.")
+            raise exceptions.EmptyDataException("The input Dataframe is empty.")
 
-    if isinstance(data, np.ndarray):
-        if check_empty_ndarray(data):
-            raise exceptions.EmptyDataException("The input NumPy array is empty.")
-
-    if columns is not None:
-        if isinstance(data, pd.DataFrame):
+        if columns is not None:
+            if not check_columns_numeric(data, columns):
+                raise exceptions.NonNumericDataException("The selected columns contain non-numeric data.")
             invalid_columns = [column for column in columns if column not in data.columns]
-        elif isinstance(data, np.ndarray):
-            invalid_columns = [column for column in columns if column not in data.dtype.names]
-
-        if any(invalid_columns):
-            raise exceptions.InvalidParameterValueException(
-                f"The following variables are not in the data: {invalid_columns}"
-            )
-    else:
-        if isinstance(data, pd.DataFrame):
+            if any(invalid_columns):
+                raise exceptions.InvalidParameterValueException(
+                    f"The following variables are not in the data: {invalid_columns}"
+                )
+        else:
+            if not check_columns_numeric(data, data.columns):
+                raise exceptions.NonNumericDataException("The input data contain non-numeric data.")
             columns = data.columns
-        elif isinstance(data, np.ndarray):
-            columns = data.dtype.names
 
-    statistics = {}
-    for column in columns:
-        statistic, p_value = shapiro(data[column])
-        statistics[column] = (statistic, p_value)
+        for column in columns:
+            statistic, p_value = shapiro(data[column])
+            statistics[column] = (statistic, p_value)
+
+    else:
+        if data.size == 0:
+            raise exceptions.EmptyDataException("The input numpy array is empty.")
+
+        flattened_data = data.flatten()
+        statistic, p_value = shapiro(flattened_data)
+        statistics = (statistic, p_value)
 
     return statistics
 
