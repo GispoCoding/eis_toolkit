@@ -1,10 +1,12 @@
 import pandas as pd
+import numpy as np
 from beartype import beartype
-from beartype.typing import Literal, Optional, Sequence
+from beartype.typing import Literal, Optional, Sequence, Union
 from scipy.stats import chi2_contingency, shapiro
 
 from eis_toolkit import exceptions
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_empty_dataframe
+from eis_toolkit.utilities.checks.ndarray import check_empty_ndarray
 
 
 @beartype
@@ -52,7 +54,7 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Se
 
 
 @beartype
-def normality_test(data: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> dict:
+def normality_test(data: Union[pd.DataFrame, np.ndarray], columns: Optional[Sequence[str]] = None) -> dict:
     """Compute Shapiro-Wilk test for normality on the input data.
 
     It is assumed that the input data is normally distributed and numeric, i.e. integers or floats.
@@ -66,17 +68,29 @@ def normality_test(data: pd.DataFrame, columns: Optional[Sequence[str]] = None) 
     Raises:
         EmptyDataFrameException: The input Dataframe is empty.
     """
-    if check_empty_dataframe(data):
-        raise exceptions.EmptyDataFrameException("The input Dataframe is empty.")
-    
+    if isinstance(data, pd.DataFrame):
+        if check_empty_dataframe(data):
+            raise exceptions.EmptyDataFrameException("The input Dataframe is empty.")
+
+    if isinstance(data, np.ndarray):
+        if check_empty_ndarray(data):
+            raise exceptions.EmptyDataException("The input NumPy array is empty.")
+
     if columns is not None:
-        invalid_columns = [column for column in columns if column not in data.columns]
+        if isinstance(data, pd.DataFrame):
+            invalid_columns = [column for column in columns if column not in data.columns]
+        elif isinstance(data, np.ndarray):
+            invalid_columns = [column for column in columns if column not in data.dtype.names]
+
         if any(invalid_columns):
             raise exceptions.InvalidParameterValueException(
-                f"The following variables are not in the dataframe: {invalid_columns}"
+                f"The following variables are not in the data: {invalid_columns}"
             )
     else:
-        columns = data.columns
+        if isinstance(data, pd.DataFrame):
+            columns = data.columns
+        elif isinstance(data, np.ndarray):
+            columns = data.dtype.names
 
     statistics = {}
     for column in columns:

@@ -12,9 +12,11 @@ from eis_toolkit.exploratory_analyses.statistical_tests import (
 )
 
 data = np.array([[0, 1, 2, 1], [2, 0, 1, 2], [2, 1, 0, 2], [0, 1, 2, 1]])
-numeric_data = pd.DataFrame(data, columns=["a", "b", "c", "d"])
+columns = ["a", "b", "c", "d"]
+numeric_data = pd.DataFrame(data, columns=columns)
 categorical_data = pd.DataFrame({"e": [0, 0, 1, 1], "f": [True, False, True, True]})
 target_column = "e"
+ndarray_data = np.rec.fromarrays(data.T, names=columns)
 
 
 def test_chi_square_test():
@@ -23,9 +25,15 @@ def test_chi_square_test():
     np.testing.assert_array_equal((output_statistics["f"]), (0.0, 1.0, 1))
 
 
-def test_normality_test():
-    """Test that returned statistics for normality are correct."""
+def test_normality_test_dataframe():
+    """Test that returned statistics for normality are correct with dataframe"""
     output_statistics = normality_test(data=numeric_data, columns=("a"))
+    np.testing.assert_array_almost_equal(output_statistics["a"], (0.72863, 0.02386), decimal=5)
+
+
+def test_normality_test_ndarray():
+    """Test that returned statistics for normality are correct with ndarray"""
+    output_statistics = normality_test(data=ndarray_data, columns=("a"))
     np.testing.assert_array_almost_equal(output_statistics["a"], (0.72863, 0.02386), decimal=5)
 
 
