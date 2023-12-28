@@ -52,7 +52,7 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Se
 
 
 @beartype
-def normality_test(data: pd.DataFrame) -> dict:
+def normality_test(data: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> dict:
     """Compute Shapiro-Wilk test for normality on the input data.
 
     It is assumed that the input data is normally distributed and numeric, i.e. integers or floats.
@@ -68,9 +68,18 @@ def normality_test(data: pd.DataFrame) -> dict:
     """
     if check_empty_dataframe(data):
         raise exceptions.EmptyDataFrameException("The input Dataframe is empty.")
+    
+    if columns is not None:
+        invalid_columns = [column for column in columns if column not in data.columns]
+        if any(invalid_columns):
+            raise exceptions.InvalidParameterValueException(
+                f"The following variables are not in the dataframe: {invalid_columns}"
+            )
+    else:
+        columns = data.columns
 
     statistics = {}
-    for column in data.columns:
+    for column in columns:
         statistic, p_value = shapiro(data[column])
         statistics[column] = (statistic, p_value)
 

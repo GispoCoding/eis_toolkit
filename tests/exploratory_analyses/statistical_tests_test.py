@@ -25,7 +25,7 @@ def test_chi_square_test():
 
 def test_normality_test():
     """Test that returned statistics for normality are correct."""
-    output_statistics = normality_test(data=numeric_data)
+    output_statistics = normality_test(data=numeric_data, columns=("a"))
     np.testing.assert_array_almost_equal(output_statistics["a"], (0.72863, 0.02386), decimal=5)
 
 
@@ -68,6 +68,7 @@ def test_invalid_columns():
     """Test that invalid column name in raises the correct exception."""
     with pytest.raises(exceptions.InvalidParameterValueException):
         chi_square_test(data=categorical_data, target_column=target_column, columns=["f", "x"])
+        normality_test(data=numeric_data, columns=["e", "f"])
 
 
 def test_invalid_target_column():
