@@ -75,13 +75,13 @@ def normality_test(data: Union[pd.DataFrame, np.ndarray], columns: Optional[Sequ
             raise exceptions.EmptyDataException("The input Dataframe is empty.")
 
         if columns is not None:
-            if not check_columns_numeric(data, columns):
-                raise exceptions.NonNumericDataException("The selected columns contain non-numeric data.")
             invalid_columns = [column for column in columns if column not in data.columns]
             if any(invalid_columns):
                 raise exceptions.InvalidParameterValueException(
                     f"The following variables are not in the data: {invalid_columns}"
                 )
+            if not check_columns_numeric(data, columns):
+                raise exceptions.NonNumericDataException("The selected columns contain non-numeric data.")
         else:
             if not check_columns_numeric(data, data.columns):
                 raise exceptions.NonNumericDataException("The input data contain non-numeric data.")

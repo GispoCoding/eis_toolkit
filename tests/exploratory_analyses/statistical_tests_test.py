@@ -34,6 +34,8 @@ def test_normality_test():
     np.testing.assert_array_almost_equal(output_statistics["a"], (0.72863, 0.02386), decimal=5)
     output_statistics = normality_test(data=data)
     np.testing.assert_array_almost_equal(output_statistics, (0.8077, 0.00345), decimal=5)
+    output_statistics = normality_test(data=np.array([0, 2, 2, 0]))
+    np.testing.assert_array_almost_equal(output_statistics, (0.72863, 0.02386), decimal=5)
 
 
 def test_correlation_matrix():
