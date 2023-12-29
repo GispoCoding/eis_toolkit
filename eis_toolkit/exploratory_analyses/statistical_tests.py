@@ -1,11 +1,11 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 from beartype import beartype
-from beartype.typing import Literal, Optional, Sequence, Union, Tuple
+from beartype.typing import Literal, Optional, Sequence, Tuple, Union
 from scipy.stats import chi2_contingency, shapiro
 
 from eis_toolkit import exceptions
-from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_empty_dataframe, check_columns_numeric
+from eis_toolkit.utilities.checks.dataframe import check_columns_numeric, check_columns_valid, check_empty_dataframe
 
 
 @beartype
@@ -53,7 +53,9 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Se
 
 
 @beartype
-def normality_test(data: Union[pd.DataFrame, np.ndarray], columns: Optional[Sequence[str]] = None) -> Union[dict, Tuple]:
+def normality_test(
+    data: Union[pd.DataFrame, np.ndarray], columns: Optional[Sequence[str]] = None
+) -> Union[dict, Tuple]:
     """Compute Shapiro-Wilk test for normality on the input data.
 
     Args:
