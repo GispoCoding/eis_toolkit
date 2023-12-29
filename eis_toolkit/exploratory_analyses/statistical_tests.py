@@ -93,6 +93,8 @@ def normality_test(data: Union[pd.DataFrame, np.ndarray], columns: Optional[Sequ
     else:
         if data.size == 0:
             raise exceptions.EmptyDataException("The input numpy array is empty.")
+        if not np.issubdtype(data.dtype, np.number):
+            raise exceptions.NonNumericDataException("The input data contain non-numeric data.")
 
         flattened_data = data.flatten()
         statistic, p_value = shapiro(flattened_data)

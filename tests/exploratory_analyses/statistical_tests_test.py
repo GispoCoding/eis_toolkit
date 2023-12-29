@@ -12,7 +12,9 @@ from eis_toolkit.exploratory_analyses.statistical_tests import (
 )
 
 data = np.array([[0, 1, 2, 1], [2, 0, 1, 2], [2, 1, 0, 2], [0, 1, 2, 1]])
+non_numeric_data = np.array([[0, 1, 2, 1], ['a', 'b', 'c', 'd'], [3, 2, 1, 0], ['c', 'd', 'b', 'a']])
 numeric_data = pd.DataFrame(data, columns=["a", "b", "c", "d"])
+non_numeric_df = pd.DataFrame(non_numeric_data, columns=["a", "b", "c", "d"])
 categorical_data = pd.DataFrame({"e": [0, 0, 1, 1], "f": [True, False, True, True]})
 target_column = "e"
 
@@ -24,16 +26,11 @@ def test_chi_square_test():
 
 
 def test_normality_test_dataframe():
-    """Test that returned statistics for normality are correct with dataframe"""
+    """Test that returned statistics for normality are correct."""
     output_statistics = normality_test(data=numeric_data, columns=["a"])
     np.testing.assert_array_almost_equal(output_statistics["a"], (0.72863, 0.02386), decimal=5)
-
-
-def test_normality_test_array():
-    """Test that returned statistics for normality are correct with ndarray"""
     output_statistics = normality_test(data=data)
-    print(output_statistics)
-    np.testing.assert_array_almost_equal(output_statistics, (0.8077, 0.00345), decimal=5)
+    np.testing.assert_array_almost_equal(output_statistics, (0.8077, 0.00345), decimal=5)  
 
 
 def test_correlation_matrix():
@@ -76,6 +73,13 @@ def test_invalid_columns():
     with pytest.raises(exceptions.InvalidParameterValueException):
         chi_square_test(data=categorical_data, target_column=target_column, columns=["f", "x"])
         normality_test(data=numeric_data, columns=["e", "f"])
+
+
+def test_non_numeric_data():
+    """Test that non-numeric data raises the correct exception."""
+    with pytest.raises(exceptions.NonNumericDataException):
+        normality_test(data=non_numeric_df, columns=["a"])
+        normality_test(non_numeric_data)
 
 
 def test_invalid_target_column():
