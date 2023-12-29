@@ -67,6 +67,7 @@ def normality_test(data: Union[pd.DataFrame, np.ndarray], columns: Optional[Sequ
         EmptyDataException: The input data is empty.
         NonNumericDataException: Selected data or columns contains non-numeric data.
         InvalidParameterValueException: Input column(s) are not in the data.
+        ExceedingSampleSizeException: Input data exceeds the maximum of 5000 samples.
     """
     statistics = {}
     if isinstance(data, pd.DataFrame):
@@ -87,6 +88,10 @@ def normality_test(data: Union[pd.DataFrame, np.ndarray], columns: Optional[Sequ
             columns = data.columns
 
         for column in columns:
+            if len(data[column]) > 5000:
+                raise exceptions.SampleSizeExceededException(
+                    f"Sample size for '{column}' exceeds the limit of 5000 samples."
+                )
             statistic, p_value = shapiro(data[column])
             statistics[column] = (statistic, p_value)
 
@@ -95,6 +100,8 @@ def normality_test(data: Union[pd.DataFrame, np.ndarray], columns: Optional[Sequ
             raise exceptions.EmptyDataException("The input numpy array is empty.")
         if not np.issubdtype(data.dtype, np.number):
             raise exceptions.NonNumericDataException("The input data contain non-numeric data.")
+        if len(data) > 5000:
+            raise exceptions.SampleSizeExceededException("Sample size exceeds the limit of 5000 samples.")
 
         flattened_data = data.flatten()
         statistic, p_value = shapiro(flattened_data)

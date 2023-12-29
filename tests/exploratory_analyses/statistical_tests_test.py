@@ -17,6 +17,9 @@ numeric_data = pd.DataFrame(data, columns=["a", "b", "c", "d"])
 non_numeric_df = pd.DataFrame(non_numeric_data, columns=["a", "b", "c", "d"])
 categorical_data = pd.DataFrame({"e": [0, 0, 1, 1], "f": [True, False, True, True]})
 target_column = "e"
+np.random.seed(42)
+large_data = np.random.normal(size=5001)
+large_df = pd.DataFrame(large_data, columns=["a"])
 
 
 def test_chi_square_test():
@@ -25,12 +28,12 @@ def test_chi_square_test():
     np.testing.assert_array_equal((output_statistics["f"]), (0.0, 1.0, 1))
 
 
-def test_normality_test_dataframe():
+def test_normality_test():
     """Test that returned statistics for normality are correct."""
     output_statistics = normality_test(data=numeric_data, columns=["a"])
     np.testing.assert_array_almost_equal(output_statistics["a"], (0.72863, 0.02386), decimal=5)
     output_statistics = normality_test(data=data)
-    np.testing.assert_array_almost_equal(output_statistics, (0.8077, 0.00345), decimal=5)  
+    np.testing.assert_array_almost_equal(output_statistics, (0.8077, 0.00345), decimal=5)
 
 
 def test_correlation_matrix():
@@ -66,6 +69,13 @@ def test_empty_df():
     empty_df = pd.DataFrame()
     with pytest.raises(exceptions.EmptyDataException):
         normality_test(data=empty_df)
+
+
+def test_max_samples():
+    """Test that sample count > 5000 raises the correct exception."""
+    with pytest.raises(exceptions.SampleSizeExceededException):
+        normality_test(data=large_data)
+        normality_test(data=large_df, columns=["a"])
 
 
 def test_invalid_columns():
