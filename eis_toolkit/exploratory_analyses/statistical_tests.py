@@ -67,9 +67,9 @@ def normality_test(
 
     Raises:
         EmptyDataException: The input data is empty.
+        InvalidColumnException: All selected columns were not found in the input data.
         NonNumericDataException: Selected data or columns contains non-numeric data.
-        InvalidParameterValueException: Input column(s) are not in the data.
-        ExceedingSampleSizeException: Input data exceeds the maximum of 5000 samples.
+        SampleSizeExceededException: Input data exceeds the maximum of 5000 samples.
     """
     statistics = {}
     if isinstance(data, pd.DataFrame):
@@ -77,11 +77,8 @@ def normality_test(
             raise exceptions.EmptyDataException("The input Dataframe is empty.")
 
         if columns is not None:
-            invalid_columns = [column for column in columns if column not in data.columns]
-            if any(invalid_columns):
-                raise exceptions.InvalidParameterValueException(
-                    f"The following variables are not in the data: {invalid_columns}"
-                )
+            if not check_columns_valid(data, columns):
+                raise exceptions.InvalidColumnException("All selected columns were not found in the input DataFrame.")
             if not check_columns_numeric(data, columns):
                 raise exceptions.NonNumericDataException("The selected columns contain non-numeric data.")
 

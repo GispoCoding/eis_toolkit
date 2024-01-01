@@ -12,7 +12,7 @@ from eis_toolkit.exploratory_analyses.statistical_tests import (
 )
 
 data = np.array([[0, 1, 2, 1], [2, 0, 1, 2], [2, 1, 0, 2], [0, 1, 2, 1]])
-missing_data = np.array([[0, 1, 2, 1, np.nan], [2, 0, 1, 2,  np.nan], [2, 1, 0, 2, np.nan], [0, 1, 2, 1, np.nan]])
+missing_data = np.array([[0, 1, 2, 1, np.nan], [2, 0, 1, 2, np.nan], [2, 1, 0, 2, np.nan], [0, 1, 2, 1, np.nan]])
 non_numeric_data = np.array([[0, 1, 2, 1], ["a", "b", "c", "d"], [3, 2, 1, 0], ["c", "d", "b", "a"]])
 numeric_data = pd.DataFrame(data, columns=["a", "b", "c", "d"])
 non_numeric_df = pd.DataFrame(non_numeric_data, columns=["a", "b", "c", "d"])
