@@ -84,6 +84,9 @@ def normality_test(
                 )
             if not check_columns_numeric(data, columns):
                 raise exceptions.NonNumericDataException("The selected columns contain non-numeric data.")
+
+            data = data[columns].dropna()
+
         else:
             if not check_columns_numeric(data, data.columns):
                 raise exceptions.NonNumericDataException("The input data contain non-numeric data.")
@@ -104,6 +107,8 @@ def normality_test(
             raise exceptions.NonNumericDataException("The input data contain non-numeric data.")
         if len(data) > 5000:
             raise exceptions.SampleSizeExceededException("Sample size exceeds the limit of 5000 samples.")
+
+        data = data[~np.isnan(data)]
 
         flattened_data = data.flatten()
         statistic, p_value = shapiro(flattened_data)
