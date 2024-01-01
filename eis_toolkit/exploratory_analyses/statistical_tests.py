@@ -108,7 +108,8 @@ def normality_test(
         if len(data) > 5000:
             raise exceptions.SampleSizeExceededException("Sample size exceeds the limit of 5000 samples.")
 
-        data = data[~np.isnan(data)]
+        nan_mask = np.isnan(data)
+        data = data[~nan_mask]
 
         flattened_data = data.flatten()
         statistic, p_value = shapiro(flattened_data)
