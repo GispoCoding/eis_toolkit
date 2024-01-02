@@ -5,7 +5,6 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import rasterio
 import seaborn as sns
 from beartype import beartype
 from beartype.typing import Tuple
@@ -61,20 +60,12 @@ def _compute_pca(
 
 @beartype
 def compute_pca(
-    data: Union[np.ndarray, pd.DataFrame, gpd.GeoDataFrame, rasterio.io.DatasetReader],
+    data: Union[np.ndarray, pd.DataFrame, gpd.GeoDataFrame],
     number_of_components: int,
     scaler_type: Literal["standard", "min_max", "robust"] = "standard",
     nodata: Optional[Number] = None,
     color_column_name: Optional[str] = None,
-) -> Tuple[
-    Union[
-        np.ndarray,
-        Tuple[pd.DataFrame, sns.PairGrid],
-        Tuple[gpd.GeoDataFrame, sns.PairGrid],
-        Tuple[np.ndarray, rasterio.profiles.Profile],
-    ],
-    np.ndarray,
-]:
+) -> Tuple[Union[np.ndarray, Tuple[pd.DataFrame, sns.PairGrid], Tuple[gpd.GeoDataFrame, sns.PairGrid]], np.ndarray]:
     """
     Compute given number of principal components for numeric input data.
 
@@ -85,17 +76,16 @@ def compute_pca(
     Args:
         data: Input data for PCA.
         number_of_components: The number of principal components to compute Should be >= 1 and at most
-            the number of numeric columns if input is (Geo)DataFrame or number of bands if input is raster.
+            the number of numeric columns if input is (Geo)DataFrame.
         scaler_type: Transform data according to a specified Sklearn scaler.
             Options are "standard", "min_max" and "robust". Defaults to "standard".
-        nodata: Define nodata value to be masked out. Optional parameter. If None and input is raster, looks
-            for nodata value from raster metadata. Defaults to None.
+        nodata: Define nodata value to be masked out. Defaults to None.
         color_column_name: If input data is a DataFrame or a GeoDataFrame, column name used for
             coloring data points in the produced pairplot can be defined. Defaults to None.
 
     Returns:
-        The computed principal components in corresponding format as the input data (for raster, output is
-        Numpy array containing the data and raster profile) and the explained variance ratios for each component.
+        The computed principal components in corresponding format as the input data and the
+        explained variance ratios for each component.
 
     Raises:
         EmptyDataException: The input is empty.
@@ -122,15 +112,6 @@ def compute_pca(
             )
         if feature_matrix.size == 0:
             raise exceptions.EmptyDataException("Input array is empty.")
-
-    elif isinstance(data, rasterio.io.DatasetReader):
-        feature_matrix = data.read()
-        if feature_matrix.ndim < 3:
-            raise exceptions.InvalidParameterValueException("Input raster should have multiple bands.")
-        rows, cols = feature_matrix.shape[1], feature_matrix.shape[2]
-        if nodata is None:
-            nodata = data.nodata
-        feature_matrix, nan_mask = _prepare_array_data(feature_matrix, nodata_value=nodata, reshape=True)
 
     elif isinstance(data, pd.DataFrame):
         df = data.copy()
@@ -171,13 +152,6 @@ def compute_pca(
             result_data = principal_components.reshape(rows, cols, -1).transpose(2, 0, 1)
         else:
             result_data = principal_components
-
-    elif isinstance(data, rasterio.io.DatasetReader):
-        principal_components = principal_components.reshape(rows, cols, -1).transpose(2, 0, 1)
-        out_profile = data.profile.copy()
-        out_profile["count"] = number_of_components
-        out_profile["dtype"] = "float32"
-        result_data = (principal_components, out_profile)
 
     elif isinstance(data, pd.DataFrame):
         component_names = [f"principal_component_{i+1}" for i in range(number_of_components)]
