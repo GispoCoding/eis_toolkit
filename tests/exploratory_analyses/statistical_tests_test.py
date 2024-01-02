@@ -12,11 +12,11 @@ from eis_toolkit.exploratory_analyses.statistical_tests import (
 )
 
 data = np.array([[0, 1, 2, 1], [2, 0, 1, 2], [2, 1, 0, 2], [0, 1, 2, 1]])
-missing_data = np.array([[0, 1, 2, 1, np.nan], [2, 0, 1, 2, np.nan], [2, 1, 0, 2, np.nan], [0, 1, 2, 1, np.nan]])
+missing_data = np.array([[0, 1, 2, 1], [2, 0, np.nan, 2], [2, 1, 0, 2], [0, 1, 2, 1]])
 non_numeric_data = np.array([[0, 1, 2, 1], ["a", "b", "c", "d"], [3, 2, 1, 0], ["c", "d", "b", "a"]])
 numeric_data = pd.DataFrame(data, columns=["a", "b", "c", "d"])
 non_numeric_df = pd.DataFrame(non_numeric_data, columns=["a", "b", "c", "d"])
-missing_values_df = pd.DataFrame(missing_data, columns=["a", "b", "c", "d", "na"])
+missing_values_df = pd.DataFrame(missing_data, columns=["a", "b", "c", "d"])
 categorical_data = pd.DataFrame({"e": [0, 0, 1, 1], "f": [True, False, True, True]})
 target_column = "e"
 np.random.seed(42)
@@ -43,7 +43,7 @@ def test_normality_test():
 def test_normality_test_missing_data():
     """Test that input with missing data returns statistics correctly."""
     output_statistics = normality_test(data=missing_data)
-    np.testing.assert_array_almost_equal(output_statistics, (0.8077, 0.00345), decimal=5)
+    np.testing.assert_array_almost_equal(output_statistics, (0.79921, 0.00359), decimal=5)
     output_statistics = normality_test(data=np.array([0, 2, 2, 0, np.nan]))
     np.testing.assert_array_almost_equal(output_statistics, (0.72863, 0.02386), decimal=5)
     output_statistics = normality_test(data=missing_values_df, columns=["a", "b"])
@@ -94,7 +94,7 @@ def test_covariance_matrix_nan():
             [0.666667, -0.166667, -0.666667, 0.333333],
         ]
     )
-    output_matrix = covariance_matrix(data=missing_data_df)
+    output_matrix = covariance_matrix(data=missing_values_df)
     np.testing.assert_array_almost_equal(output_matrix, expected_correlation_matrix)
 
 
