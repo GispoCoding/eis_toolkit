@@ -64,9 +64,9 @@ def normality_test(
 
     Returns:
         Test statistics for each variable, output differs based on input data type.
-        Numpy array input returns a Tuple of statistic and p_value.
-        Dataframe input returns a dictionary where keys are column names
-        and values are tuples containing the statistic and p-value.
+            Numpy array input returns a Tuple of statistic and p_value.
+            Dataframe input returns a dictionary where keys are column names
+            and values are tuples containing the statistic and p-value.
 
     Raises:
         EmptyDataException: The input data is empty.
