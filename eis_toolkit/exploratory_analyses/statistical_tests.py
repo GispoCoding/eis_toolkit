@@ -4,7 +4,7 @@ from beartype.typing import Literal, Optional, Sequence
 from scipy.stats import chi2_contingency, shapiro
 
 from eis_toolkit import exceptions
-from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_empty_dataframe, check_columns_numeric
+from eis_toolkit.utilities.checks.dataframe import check_columns_numeric, check_columns_valid, check_empty_dataframe
 
 
 @beartype
@@ -97,7 +97,8 @@ def correlation_matrix(
         InvalidParameterValueException: min_periods argument is used with method 'kendall'.
 
     Returns:
-        Dataframe containing the correlation matrix
+        Dataframe containing matrix representing the correlation coefficient \
+            between the corresponding pair of variables.
     """
     if check_empty_dataframe(data):
         raise exceptions.EmptyDataFrameException("The input Dataframe is empty.")
@@ -121,7 +122,7 @@ def covariance_matrix(
 ) -> pd.DataFrame:
     """Compute covariance matrix on the input data.
 
-    It is assumed that the data is numeric, i.e. integers or floats.
+    It is assumed that the data is numeric, i.e. integers or floats. NaN values are excluded from the calculations.
 
     Args:
         data: Dataframe containing the input data.
@@ -133,7 +134,7 @@ def covariance_matrix(
         InvalidParameterValueException: Provided value for delta_degrees_of_freedom or min_periods is negative.
 
     Returns:
-        Dataframe containing the covariance matrix
+        Dataframe containing matrix representing the covariance between the corresponding pair of variables.
     """
     if check_empty_dataframe(data):
         raise exceptions.EmptyDataFrameException("The input Dataframe is empty.")
