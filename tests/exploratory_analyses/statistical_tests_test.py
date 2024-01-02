@@ -12,7 +12,9 @@ from eis_toolkit.exploratory_analyses.statistical_tests import (
 )
 
 data = np.array([[0, 1, 2, 1], [2, 0, 1, 2], [2, 1, 0, 2], [0, 1, 2, 1]])
+non_numeric_data = np.array([[0, 1, 2, 1], ["a", "b", "c", "d"], [3, 2, 1, 0], ["c", "d", "b", "a"]])
 numeric_data = pd.DataFrame(data, columns=["a", "b", "c", "d"])
+non_numeric_df = pd.DataFrame(non_numeric_data, columns=["a", "b", "c", "d"])
 categorical_data = pd.DataFrame({"e": [0, 0, 1, 1], "f": [True, False, True, True]})
 target_column = "e"
 
@@ -41,6 +43,12 @@ def test_correlation_matrix():
     )
     output_matrix = correlation_matrix(data=numeric_data)
     np.testing.assert_array_almost_equal(output_matrix, expected_correlation_matrix)
+
+
+def test_correlation_matrix_non_numeric():
+    """Test that returned correlation matrix is correct."""
+    with pytest.raises(exceptions.NonNumericDataException):
+        correlation_matrix(data=non_numeric_df)
 
 
 def test_covariance_matrix():

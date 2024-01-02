@@ -1,10 +1,11 @@
 import pandas as pd
+import numpy as np
 from beartype import beartype
 from beartype.typing import Literal, Optional, Sequence
 from scipy.stats import chi2_contingency, shapiro
 
 from eis_toolkit import exceptions
-from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_empty_dataframe
+from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_empty_dataframe, check_columns_numeric
 
 
 @beartype
@@ -85,7 +86,7 @@ def correlation_matrix(
 ) -> pd.DataFrame:
     """Compute correlation matrix on the input data.
 
-    It is assumed that the data is numeric, i.e. integers or floats.
+    It is assumed that the data is numeric, i.e. integers or floats. NaN values are excluded from the calculations.
 
     Args:
         data: Dataframe containing the input data.
@@ -101,6 +102,9 @@ def correlation_matrix(
     """
     if check_empty_dataframe(data):
         raise exceptions.EmptyDataFrameException("The input Dataframe is empty.")
+
+    if not check_columns_numeric(data, data.columns.to_list()):
+        raise exceptions.NonNumericDataException("The input data contain non-numeric data.")
 
     if correlation_method == "kendall" and min_periods is not None:
         raise exceptions.InvalidParameterValueException(
@@ -134,6 +138,9 @@ def covariance_matrix(
     """
     if check_empty_dataframe(data):
         raise exceptions.EmptyDataFrameException("The input Dataframe is empty.")
+
+    if not check_columns_numeric(data, data.columns.to_list()):
+        raise exceptions.NonNumericDataException("The input data contain non-numeric data.")
 
     if delta_degrees_of_freedom < 0:
         raise exceptions.InvalidParameterValueException("Delta degrees of freedom must be non-negative.")
