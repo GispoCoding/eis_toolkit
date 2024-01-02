@@ -65,6 +65,11 @@ def test_covariance_matrix():
     np.testing.assert_array_almost_equal(output_matrix, expected_covariance_matrix)
 
 
+def test_covariance_matrix_negative_min_periods():
+    with pytest.raises(exceptions.InvalidParameterValueException):
+        covariance_matrix(data=numeric_data, min_periods=-1)
+
+
 def test_empty_df():
     """Test that empty DataFrame raises the correct exception."""
     empty_df = pd.DataFrame()

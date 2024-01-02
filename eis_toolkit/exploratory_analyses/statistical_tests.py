@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from beartype import beartype
 from beartype.typing import Literal, Optional, Sequence
 from scipy.stats import chi2_contingency, shapiro
@@ -131,7 +130,7 @@ def covariance_matrix(
 
     Raises:
         EmptyDataFrameException: The input Dataframe is empty.
-        InvalidParameterValueException: Provided value for delta_degrees_of_freedom is negative.
+        InvalidParameterValueException: Provided value for delta_degrees_of_freedom or min_periods is negative.
 
     Returns:
         Dataframe containing the covariance matrix
@@ -144,6 +143,9 @@ def covariance_matrix(
 
     if delta_degrees_of_freedom < 0:
         raise exceptions.InvalidParameterValueException("Delta degrees of freedom must be non-negative.")
+
+    if min_periods and min_periods < 0:
+        raise exceptions.InvalidParameterValueException("Min perioids must be non-negative.")
 
     matrix = data.cov(min_periods=min_periods, ddof=delta_degrees_of_freedom)
 
