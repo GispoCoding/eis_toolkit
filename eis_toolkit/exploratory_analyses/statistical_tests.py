@@ -124,7 +124,7 @@ def correlation_matrix(
 ) -> pd.DataFrame:
     """Compute correlation matrix on the input data.
 
-    It is assumed that the data is numeric, i.e. integers or floats.
+    It is assumed that the data is numeric, i.e. integers or floats. NaN values are excluded from the calculations.
 
     Args:
         data: Dataframe containing the input data.
@@ -136,10 +136,14 @@ def correlation_matrix(
         InvalidParameterValueException: min_periods argument is used with method 'kendall'.
 
     Returns:
-        Dataframe containing the correlation matrix
+        Dataframe containing matrix representing the correlation coefficient \
+            between the corresponding pair of variables.
     """
     if check_empty_dataframe(data):
         raise exceptions.EmptyDataFrameException("The input Dataframe is empty.")
+
+    if not check_columns_numeric(data, data.columns.to_list()):
+        raise exceptions.NonNumericDataException("The input data contain non-numeric data.")
 
     if correlation_method == "kendall" and min_periods is not None:
         raise exceptions.InvalidParameterValueException(
@@ -157,7 +161,7 @@ def covariance_matrix(
 ) -> pd.DataFrame:
     """Compute covariance matrix on the input data.
 
-    It is assumed that the data is numeric, i.e. integers or floats.
+    It is assumed that the data is numeric, i.e. integers or floats. NaN values are excluded from the calculations.
 
     Args:
         data: Dataframe containing the input data.
@@ -166,16 +170,22 @@ def covariance_matrix(
 
     Raises:
         EmptyDataFrameException: The input Dataframe is empty.
-        InvalidParameterValueException: Provided value for delta_degrees_of_freedom is negative.
+        InvalidParameterValueException: Provided value for delta_degrees_of_freedom or min_periods is negative.
 
     Returns:
-        Dataframe containing the covariance matrix
+        Dataframe containing matrix representing the covariance between the corresponding pair of variables.
     """
     if check_empty_dataframe(data):
         raise exceptions.EmptyDataFrameException("The input Dataframe is empty.")
 
+    if not check_columns_numeric(data, data.columns.to_list()):
+        raise exceptions.NonNumericDataException("The input data contain non-numeric data.")
+
     if delta_degrees_of_freedom < 0:
         raise exceptions.InvalidParameterValueException("Delta degrees of freedom must be non-negative.")
+
+    if min_periods and min_periods < 0:
+        raise exceptions.InvalidParameterValueException("Min perioids must be non-negative.")
 
     matrix = data.cov(min_periods=min_periods, ddof=delta_degrees_of_freedom)
 
