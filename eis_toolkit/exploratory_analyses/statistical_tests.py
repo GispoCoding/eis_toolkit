@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Literal, Optional, Sequence, Tuple, Union
+from beartype.typing import Dict, Literal, Optional, Sequence, Tuple, Union
 from scipy.stats import chi2_contingency, shapiro
 
 from eis_toolkit import exceptions
@@ -55,15 +55,18 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Se
 @beartype
 def normality_test(
     data: Union[pd.DataFrame, np.ndarray], columns: Optional[Sequence[str]] = None
-) -> Union[dict, Tuple]:
+) -> Union[Dict[str, Tuple[float, float]], Tuple[float, float]]:
     """Compute Shapiro-Wilk test for normality on the input data.
 
     Args:
-        data: Dataframe or numpy array containing the input data.
-        columns: Optional Columns to be used for testing.
+        data: Dataframe or Numpy array containing the input data.
+        columns: Optional columns to be used for testing.
 
     Returns:
-        Test statistics for each variable.
+        Test statistics for each variable, output differs based on input data type.
+        Numpy array input returns a Tuple of statistic and p_value.
+        Dataframe input returns a dictionary where keys are column names
+        and values are tuples containing the statistic and p-value.
 
     Raises:
         EmptyDataException: The input data is empty.
@@ -100,8 +103,6 @@ def normality_test(
     else:
         if data.size == 0:
             raise exceptions.EmptyDataException("The input numpy array is empty.")
-        if not np.issubdtype(data.dtype, np.number):
-            raise exceptions.NonNumericDataException("The input data contain non-numeric data.")
         if len(data) > 5000:
             raise exceptions.SampleSizeExceededException("Sample size exceeds the limit of 5000 samples.")
 

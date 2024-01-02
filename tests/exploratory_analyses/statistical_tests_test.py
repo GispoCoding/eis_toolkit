@@ -103,7 +103,6 @@ def test_non_numeric_data():
     """Test that non-numeric data raises the correct exception."""
     with pytest.raises(exceptions.NonNumericDataException):
         normality_test(data=non_numeric_df, columns=["a"])
-        normality_test(non_numeric_data)
 
 
 def test_invalid_target_column():
