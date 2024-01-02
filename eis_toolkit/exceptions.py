@@ -96,3 +96,7 @@ class NonNumericDataException(Exception):
 
 class InvalidCompositionException(Exception):
     """Exception error class for when the data is not in suitable form for compositional data transforms."""
+
+
+class SampleSizeExceededException(Exception):
+    """Exception error class for when the data exceeds maximum sample size."""

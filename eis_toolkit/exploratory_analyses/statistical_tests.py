@@ -1,10 +1,11 @@
+import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Literal, Optional, Sequence
+from beartype.typing import Dict, Literal, Optional, Sequence, Tuple, Union
 from scipy.stats import chi2_contingency, shapiro
 
 from eis_toolkit import exceptions
-from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_empty_dataframe
+from eis_toolkit.utilities.checks.dataframe import check_columns_numeric, check_columns_valid, check_empty_dataframe
 
 
 @beartype
@@ -52,27 +53,65 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Se
 
 
 @beartype
-def normality_test(data: pd.DataFrame) -> dict:
+def normality_test(
+    data: Union[pd.DataFrame, np.ndarray], columns: Optional[Sequence[str]] = None
+) -> Union[Dict[str, Tuple[float, float]], Tuple[float, float]]:
     """Compute Shapiro-Wilk test for normality on the input data.
 
-    It is assumed that the input data is normally distributed and numeric, i.e. integers or floats.
-
     Args:
-        data: Dataframe containing the input data.
+        data: Dataframe or Numpy array containing the input data.
+        columns: Optional columns to be used for testing.
 
     Returns:
-        Test statistics for each variable.
+        Test statistics for each variable, output differs based on input data type.
+            Numpy array input returns a Tuple of statistic and p_value.
+            Dataframe input returns a dictionary where keys are column names
+            and values are tuples containing the statistic and p-value.
 
     Raises:
-        EmptyDataFrameException: The input Dataframe is empty.
+        EmptyDataException: The input data is empty.
+        InvalidColumnException: All selected columns were not found in the input data.
+        NonNumericDataException: Selected data or columns contains non-numeric data.
+        SampleSizeExceededException: Input data exceeds the maximum of 5000 samples.
     """
-    if check_empty_dataframe(data):
-        raise exceptions.EmptyDataFrameException("The input Dataframe is empty.")
-
     statistics = {}
-    for column in data.columns:
-        statistic, p_value = shapiro(data[column])
-        statistics[column] = (statistic, p_value)
+    if isinstance(data, pd.DataFrame):
+        if check_empty_dataframe(data):
+            raise exceptions.EmptyDataException("The input Dataframe is empty.")
+
+        if columns is not None:
+            if not check_columns_valid(data, columns):
+                raise exceptions.InvalidColumnException("All selected columns were not found in the input DataFrame.")
+            if not check_columns_numeric(data, columns):
+                raise exceptions.NonNumericDataException("The selected columns contain non-numeric data.")
+
+            data = data[columns].dropna()
+
+        else:
+            if not check_columns_numeric(data, data.columns):
+                raise exceptions.NonNumericDataException("The input data contain non-numeric data.")
+            columns = data.columns
+
+        for column in columns:
+            if len(data[column]) > 5000:
+                raise exceptions.SampleSizeExceededException(
+                    f"Sample size for '{column}' exceeds the limit of 5000 samples."
+                )
+            statistic, p_value = shapiro(data[column])
+            statistics[column] = (statistic, p_value)
+
+    else:
+        if data.size == 0:
+            raise exceptions.EmptyDataException("The input numpy array is empty.")
+        if len(data) > 5000:
+            raise exceptions.SampleSizeExceededException("Sample size exceeds the limit of 5000 samples.")
+
+        nan_mask = np.isnan(data)
+        data = data[~nan_mask]
+
+        flattened_data = data.flatten()
+        statistic, p_value = shapiro(flattened_data)
+        statistics = (statistic, p_value)
 
     return statistics
 

@@ -31,7 +31,7 @@ def check_columns_numeric(df: pd.DataFrame, columns: Sequence[str]) -> bool:
     Returns:
         True if all columns are numeric, otherwise False.
     """
-    columns_numeric = df.columns.select_dtypes(include="number").columns.to_list()
+    columns_numeric = df[columns].select_dtypes(include="number").columns.to_list()
     return all(column in columns_numeric for column in columns)
 
 
