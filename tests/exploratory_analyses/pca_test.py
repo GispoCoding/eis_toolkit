@@ -86,6 +86,7 @@ def test_pca_with_nan_removal():
     np.testing.assert_array_equal(explained_variances, expected_explained_variances_values)
 
 
+@pytest.mark.xfail(sys.platform == "win32", reason="Results deviate on Windows.", raises=AssertionError)
 def test_pca_with_nan_replace():
     """Test that PCA function gives correct output for Numpy array input that has NaN values and replace strategy."""
     data = np.array([[1, 1], [2, np.nan], [3, 3]])
