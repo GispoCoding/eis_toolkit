@@ -1,5 +1,4 @@
 from numbers import Number
-from typing import Literal, Optional, Sequence, Union
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
@@ -7,7 +6,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from beartype import beartype
-from beartype.typing import Tuple
+from beartype.typing import Literal, Optional, Sequence, Tuple, Union
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler, RobustScaler, StandardScaler
 
@@ -20,7 +19,7 @@ SCALERS = {"standard": StandardScaler, "min_max": MinMaxScaler, "robust": Robust
 @beartype
 def _prepare_array_data(
     feature_matrix: np.ndarray, nodata_handling: str, nodata_value: Optional[Number] = None, reshape: bool = True
-) -> np.ndarray:
+) -> Tuple[np.ndarray, Optional[np.ndarray]]:
     if reshape:
         bands, rows, cols = feature_matrix.shape
         feature_matrix = feature_matrix.transpose(1, 2, 0).reshape(rows * cols, bands)
@@ -34,22 +33,27 @@ def _prepare_array_data(
 @beartype
 def _handle_missing_values(
     feature_matrix: np.ndarray, nodata_handling: str, nodata_value: Optional[Number] = None
-) -> np.ndarray:
+) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    nodata_mask = None
+
     if nodata_value is not None:
         nodata_mask = feature_matrix == nodata_value
         feature_matrix[nodata_mask] = np.nan
 
     if nodata_handling == "remove":
-        feature_matrix = feature_matrix[~np.isnan(feature_matrix).any(axis=1)]
+        nan_rows_mask = np.isnan(feature_matrix).any(axis=1)
+        feature_matrix = feature_matrix[~nan_rows_mask]
+        return feature_matrix, nan_rows_mask
+
     elif nodata_handling == "replace":
         for i in range(feature_matrix.shape[1]):
             column_mask = np.isnan(feature_matrix[:, i])
             column_mean = np.nanmean(feature_matrix[:, i])
             feature_matrix[column_mask, i] = column_mean
+        return feature_matrix, None
+
     else:
         raise exceptions.InvalidParameterValueException("Invalid nodata_handling value. Choose 'remove' or 'replace'.")
-
-    return feature_matrix
 
 
 @beartype
@@ -118,12 +122,12 @@ def compute_pca(
         feature_matrix = data
         feature_matrix = feature_matrix.astype(float)
         if feature_matrix.ndim == 2:  # Table-like data (assumme it is a DataFrame transformed to Numpy array)
-            feature_matrix = _prepare_array_data(
+            feature_matrix, nan_mask = _prepare_array_data(
                 feature_matrix, nodata_handling=nodata_handling, nodata_value=nodata, reshape=False
             )
         elif feature_matrix.ndim == 3:  # Assume data represents multiband raster data
             rows, cols = feature_matrix.shape[1], feature_matrix.shape[2]
-            feature_matrix = _prepare_array_data(
+            feature_matrix, nan_mask = _prepare_array_data(
                 feature_matrix, nodata_handling=nodata_handling, nodata_value=nodata, reshape=True
             )
         else:
@@ -150,7 +154,7 @@ def compute_pca(
         df = df.astype(dtype=np.number)
         feature_matrix = df.to_numpy()
         feature_matrix = feature_matrix.astype(float)
-        feature_matrix = _handle_missing_values(feature_matrix, nodata_handling, nodata)
+        feature_matrix, nan_mask = _handle_missing_values(feature_matrix, nodata_handling, nodata)
 
     if number_of_components > feature_matrix.shape[1]:
         raise exceptions.InvalidParameterValueException(
@@ -158,6 +162,11 @@ def compute_pca(
         )
     # Core PCA computation
     principal_components, explained_variances = _compute_pca(feature_matrix, number_of_components, scaler_type)
+
+    if nodata_handling == "remove" and nan_mask is not None:
+        principal_components_with_nans = np.full((nan_mask.size, principal_components.shape[1]), np.nan)
+        principal_components_with_nans[~nan_mask, :] = principal_components
+        principal_components = principal_components_with_nans
 
     # Convert PCA output to proper format
     if isinstance(data, np.ndarray):
@@ -186,7 +195,11 @@ def plot_pca(
     color_column_name: Optional[str] = None,
     save_path: Optional[str] = None,
 ) -> sns.PairGrid:
-    """Plot a scatter matrix of different principal component combinations.
+    """
+    Plot a scatter matrix of different principal component combinations.
+
+    Automatically filters columns that do not start with "principal_component" for plotting.
+    This tool is designed to work smoothly on `compute_pca` outputs.
 
     Args:
         pca_df: A DataFrame containing computed principal components.
@@ -207,7 +220,10 @@ def plot_pca(
     if color_column_name and color_column_name not in pca_df.columns:
         raise exceptions.InvalidColumnException("DataFrame does not contain the given color column.")
 
-    pair_grid = sns.pairplot(pca_df, hue=color_column_name)
+    filtered_df = pca_df.filter(regex="^principal_component")
+    filtered_df = pd.concat([filtered_df, pca_df[[color_column_name]]], axis=1)
+
+    pair_grid = sns.pairplot(filtered_df, hue=color_column_name)
 
     # Add explained variances to axis labels if provided
     if explained_variances is not None:

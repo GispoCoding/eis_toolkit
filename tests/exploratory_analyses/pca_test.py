@@ -77,11 +77,11 @@ def test_pca_with_nan_removal():
     data = np.array([[1, 1], [2, np.nan], [3, 3]])
     pca_array, explained_variances = compute_pca(data, 2, nodata_handling="remove")
 
-    expected_pca_values = np.array([[-1.41421, 0.0], [1.41421, 0.0]])
+    expected_pca_values = np.array([[-1.414, 0.0], [np.nan, np.nan], [1.414, 0.0]])
     expected_explained_variances_values = [1.0, 0.0]
 
     np.testing.assert_equal(explained_variances.size, 2)
-    np.testing.assert_equal(pca_array.shape, (2, 2))
+    np.testing.assert_equal(pca_array.shape, DATA.shape)
 
     np.testing.assert_array_almost_equal(pca_array, expected_pca_values, decimal=3)
     np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=3)
@@ -109,11 +109,11 @@ def test_pca_with_nodata_removal():
     data = np.array([[1, 1], [2, -9999], [3, 3]])
     pca_array, explained_variances = compute_pca(data, 2, nodata_handling="remove", nodata=-9999)
 
-    expected_pca_values = np.array([[-1.41421, 0.0], [1.41421, 0.0]])
+    expected_pca_values = np.array([[-1.414, 0.0], [np.nan, np.nan], [1.414, 0.0]])
     expected_explained_variances_values = [1.0, 0.0]
 
     np.testing.assert_equal(explained_variances.size, 2)
-    np.testing.assert_equal(pca_array.shape, (2, 2))
+    np.testing.assert_equal(pca_array.shape, DATA.shape)
 
     np.testing.assert_array_almost_equal(pca_array, expected_pca_values, decimal=3)
     np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=3)
