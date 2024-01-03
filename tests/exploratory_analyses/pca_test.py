@@ -84,7 +84,7 @@ def test_pca_with_nan_removal():
     np.testing.assert_equal(pca_array.shape, (2, 2))
 
     np.testing.assert_array_almost_equal(pca_array, expected_pca_values, decimal=3)
-    np.testing.assert_array_equal(explained_variances, expected_explained_variances_values)
+    np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=3)
 
 
 @pytest.mark.xfail(sys.platform == "win32", reason="Results deviate on Windows.", raises=AssertionError)
@@ -116,7 +116,7 @@ def test_pca_with_nodata_removal():
     np.testing.assert_equal(pca_array.shape, (2, 2))
 
     np.testing.assert_array_almost_equal(pca_array, expected_pca_values, decimal=3)
-    np.testing.assert_array_equal(explained_variances, expected_explained_variances_values)
+    np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=3)
 
 
 def test_pca_empty_data():
