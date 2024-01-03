@@ -71,14 +71,28 @@ def test_pca_gdf():
     np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=5)
 
 
-def test_pca_with_nan():
-    """Test that PCA function gives correct output for Numpy array input that has NaN values."""
+def test_pca_with_nan_removal():
+    """Test that PCA function gives correct output for Numpy array input that has NaN values and remove strategy."""
     data = np.array([[1, 1], [2, np.nan], [3, 3]])
-    pca_array, explained_variances = compute_pca(data, 2)
+    pca_array, explained_variances = compute_pca(data, 2, nodata_handling="remove")
 
-    expected_pca_values = np.array([[-1.05501, -0.67704], [-0.75593, np.nan], [1.81094, -0.07889]])
+    expected_pca_values = np.array([[-1.41421, 0.0], [1.41421, 0.0]])
+    expected_explained_variances_values = [1.0, 0.0]
 
-    expected_explained_variances_values = [0.82733, 0.17267]
+    np.testing.assert_equal(explained_variances.size, 2)
+    np.testing.assert_equal(pca_array.shape, (2, 2))
+
+    np.testing.assert_array_almost_equal(pca_array, expected_pca_values, decimal=5)
+    np.testing.assert_array_equal(explained_variances, expected_explained_variances_values)
+
+
+def test_pca_with_nan_replace():
+    """Test that PCA function gives correct output for Numpy array input that has NaN values and replace strategy."""
+    data = np.array([[1, 1], [2, np.nan], [3, 3]])
+    pca_array, explained_variances = compute_pca(data, 2, nodata_handling="replace")
+
+    expected_pca_values = np.array([[-1.73205, 1.11022e-16], [0, 0], [1.73205, 1.11022e-16]])
+    expected_explained_variances_values = [1.0, 4.10865e-33]
 
     np.testing.assert_equal(explained_variances.size, 2)
     np.testing.assert_equal(pca_array.shape, DATA.shape)
@@ -87,20 +101,19 @@ def test_pca_with_nan():
     np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=5)
 
 
-def test_pca_with_nodata():
-    """Test that PCA function gives correct output for Numpy array input that has specified nodata values."""
+def test_pca_with_nodata_removal():
+    """Test that PCA function gives correct output for input that has specified nodata values and removal strategy."""
     data = np.array([[1, 1], [2, -9999], [3, 3]])
-    pca_array, explained_variances = compute_pca(data, 2, nodata=-9999)
+    pca_array, explained_variances = compute_pca(data, 2, nodata_handling="remove", nodata=-9999)
 
-    expected_pca_values = np.array([[-1.05501, -0.67704], [-0.75593, -9999], [1.81094, -0.07889]])
-
-    expected_explained_variances_values = [0.82733, 0.17267]
+    expected_pca_values = np.array([[-1.41421, 0.0], [1.41421, 0.0]])
+    expected_explained_variances_values = [1.0, 0.0]
 
     np.testing.assert_equal(explained_variances.size, 2)
-    np.testing.assert_equal(pca_array.shape, DATA.shape)
+    np.testing.assert_equal(pca_array.shape, (2, 2))
 
     np.testing.assert_array_almost_equal(pca_array, expected_pca_values, decimal=5)
-    np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=5)
+    np.testing.assert_array_equal(explained_variances, expected_explained_variances_values)
 
 
 def test_pca_empty_data():

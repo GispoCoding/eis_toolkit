@@ -19,8 +19,8 @@ SCALERS = {"standard": StandardScaler, "min_max": MinMaxScaler, "robust": Robust
 
 @beartype
 def _prepare_array_data(
-    feature_matrix: np.ndarray, nodata_value: Optional[Number] = None, reshape: bool = True
-) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
+    feature_matrix: np.ndarray, nodata_handling: str, nodata_value: Optional[Number] = None, reshape: bool = True
+) -> np.ndarray:
     if reshape:
         bands, rows, cols = feature_matrix.shape
         feature_matrix = feature_matrix.transpose(1, 2, 0).reshape(rows * cols, bands)
@@ -28,21 +28,28 @@ def _prepare_array_data(
     if feature_matrix.size == 0:
         raise exceptions.EmptyDataException("Input data is empty.")
 
-    return _handle_missing_values(feature_matrix, nodata_value)
+    return _handle_missing_values(feature_matrix, nodata_handling, nodata_value)
 
 
 @beartype
 def _handle_missing_values(
-    feature_matrix: np.ndarray, nodata_value: Optional[Number] = None
-) -> Tuple[np.ndarray, np.ndarray, Optional[np.ndarray]]:
-    nodata_mask = None
+    feature_matrix: np.ndarray, nodata_handling: str, nodata_value: Optional[Number] = None
+) -> np.ndarray:
     if nodata_value is not None:
         nodata_mask = feature_matrix == nodata_value
-        feature_matrix[nodata_mask] = 0
-    nan_mask = np.isnan(feature_matrix)
-    feature_matrix[nan_mask] = 0
+        feature_matrix[nodata_mask] = np.nan
 
-    return feature_matrix, nan_mask, nodata_mask
+    if nodata_handling == "remove":
+        feature_matrix = feature_matrix[~np.isnan(feature_matrix).any(axis=1)]
+    elif nodata_handling == "replace":
+        for i in range(feature_matrix.shape[1]):
+            column_mask = np.isnan(feature_matrix[:, i])
+            column_mean = np.nanmean(feature_matrix[:, i])
+            feature_matrix[column_mask, i] = column_mean
+    else:
+        raise exceptions.InvalidParameterValueException("Invalid nodata_handling value. Choose 'remove' or 'replace'.")
+
+    return feature_matrix
 
 
 @beartype
@@ -65,13 +72,14 @@ def compute_pca(
     number_of_components: int,
     columns: Optional[Sequence[str]] = None,
     scaler_type: Literal["standard", "min_max", "robust"] = "standard",
+    nodata_handling: Literal["remove", "replace"] = "remove",
     nodata: Optional[Number] = None,
 ) -> Tuple[Union[np.ndarray, pd.DataFrame, gpd.GeoDataFrame], np.ndarray]:
     """
     Compute defined number of principal components for numeric input data.
 
-    Before computation, data is scaled according to specified scaler and NaN values removed. A nodata
-    value can be given to be removed additionally.
+    Before computation, data is scaled according to specified scaler and NaN values removed or replaced.
+    Optionally, a nodata value can be given to handle similarly as NaN values.
 
     If input data is a Numpy array, interpretation of the data depends on its dimensions.
     If array is 3D, it is interpreted as a multiband raster/stacked rasters format (bands, rows, columns).
@@ -86,6 +94,8 @@ def compute_pca(
             to the result Dataframe intact. Only relevant if input is (Geo)Dataframe. Defaults to None.
         scaler_type: Transform data according to a specified Sklearn scaler.
             Options are "standard", "min_max" and "robust". Defaults to "standard".
+        nodata_handling: If observations with nodata (NaN and given `nodata`) should be removed completely
+            or replaced with column/band mean. Defaults to "remove".
         nodata: Define a nodata value to remove. Defaults to None.
 
     Returns:
@@ -106,14 +116,15 @@ def compute_pca(
     # Get feature matrix (Numpy array) from various input types
     if isinstance(data, np.ndarray):
         feature_matrix = data
+        feature_matrix = feature_matrix.astype(float)
         if feature_matrix.ndim == 2:  # Table-like data (assumme it is a DataFrame transformed to Numpy array)
-            feature_matrix, nan_mask, nodata_mask = _prepare_array_data(
-                feature_matrix, nodata_value=nodata, reshape=False
+            feature_matrix = _prepare_array_data(
+                feature_matrix, nodata_handling=nodata_handling, nodata_value=nodata, reshape=False
             )
         elif feature_matrix.ndim == 3:  # Assume data represents multiband raster data
             rows, cols = feature_matrix.shape[1], feature_matrix.shape[2]
-            feature_matrix, nan_mask, nodata_mask = _prepare_array_data(
-                feature_matrix, nodata_value=nodata, reshape=True
+            feature_matrix = _prepare_array_data(
+                feature_matrix, nodata_handling=nodata_handling, nodata_value=nodata, reshape=True
             )
         else:
             raise exceptions.InvalidParameterValueException(
@@ -139,7 +150,7 @@ def compute_pca(
         df = df.astype(dtype=np.number)
         feature_matrix = df.to_numpy()
         feature_matrix = feature_matrix.astype(float)
-        feature_matrix, nan_mask, nodata_mask = _handle_missing_values(feature_matrix, nodata)
+        feature_matrix = _handle_missing_values(feature_matrix, nodata_handling, nodata)
 
     if number_of_components > feature_matrix.shape[1]:
         raise exceptions.InvalidParameterValueException(
@@ -147,11 +158,6 @@ def compute_pca(
         )
     # Core PCA computation
     principal_components, explained_variances = _compute_pca(feature_matrix, number_of_components, scaler_type)
-
-    # Put nodata back in and consider new dimension of data
-    if nodata_mask is not None:
-        principal_components[nodata_mask[:, number_of_components]] = nodata
-    principal_components[nan_mask[:, :number_of_components]] = np.nan
 
     # Convert PCA output to proper format
     if isinstance(data, np.ndarray):
