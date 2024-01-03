@@ -5,7 +5,12 @@ from beartype.typing import Dict, Literal, Optional, Sequence, Tuple, Union
 from scipy.stats import chi2_contingency, shapiro
 
 from eis_toolkit import exceptions
-from eis_toolkit.utilities.checks.dataframe import check_columns_numeric, check_columns_valid, check_empty_dataframe
+from eis_toolkit.utilities.checks.dataframe import (
+    check_columns_categorical,
+    check_columns_numeric,
+    check_columns_valid,
+    check_empty_dataframe,
+)
 
 
 @beartype
@@ -39,7 +44,11 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Se
             raise exceptions.InvalidParameterValueException(
                 f"The following variables are not in the dataframe: {invalid_columns}"
             )
+        if not check_columns_categorical(data, columns):
+            raise exceptions.NonCategoricalDataException("The selected columns contain non-categorical values.")
     else:
+        if not check_columns_categorical(data, data.columns.to_list()):
+            raise exceptions.NonCategoricalDataException("The input data contain non-categorical values.")
         columns = data.columns
 
     statistics = {}

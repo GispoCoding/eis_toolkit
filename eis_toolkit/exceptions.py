@@ -100,3 +100,7 @@ class InvalidCompositionException(Exception):
 
 class SampleSizeExceededException(Exception):
     """Exception error class for when the data exceeds maximum sample size."""
+
+
+class NonCategoricalDataException(Exception):
+    """Exception error class for when the given data includes non-categorical values."""
