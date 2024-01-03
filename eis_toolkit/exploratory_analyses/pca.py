@@ -87,12 +87,12 @@ def compute_pca(
 
     If input data is a Numpy array, interpretation of the data depends on its dimensions.
     If array is 3D, it is interpreted as a multiband raster/stacked rasters format (bands, rows, columns).
-    If array is 2D, it is interpreted as table-like data, where each each column represents a variable/raster band
+    If array is 2D, it is interpreted as table-like data, where each column represents a variable/raster band
     and each row a data point (similar to a Dataframe).
 
     Args:
         data: Input data for PCA.
-        number_of_components: The number of principal components to compute Should be >= 1 and at most
+        number_of_components: The number of principal components to compute. Should be >= 1 and at most
             the number of numeric columns if input is (Geo)Dataframe.
         columns: Select columns used for the PCA. Other columns are excluded from PCA, but added back
             to the result Dataframe intact. Only relevant if input is (Geo)Dataframe. Defaults to None.
@@ -108,8 +108,10 @@ def compute_pca(
 
     Raises:
         EmptyDataException: The input is empty.
+        InvalidColumnException: Selected columns are not found in the input Dataframe.
         InvalidNumberOfPrincipalComponents: The number of principal components is less than 1 or more than
             number of columns if input was (Geo)DataFrame.
+        InvalidParameterValueException: If value for `number_of_components` is invalid.
     """
     if scaler_type not in SCALERS:
         raise exceptions.InvalidParameterValueException(f"Invalid scaler. Choose from: {list(SCALERS.keys())}")
