@@ -34,6 +34,10 @@ class InvalidColumnIndexException(Exception):
     """Exception error for invalid column index."""
 
 
+class InvalidDataShapeException(Exception):
+    """Exception error for datasets with invalid shapes."""
+
+
 class InvalidParameterValueException(Exception):
     """Exception error class for invalid parameter values."""
 
