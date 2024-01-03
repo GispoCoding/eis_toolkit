@@ -98,8 +98,8 @@ def compute_pca(
             to the result Dataframe intact. Only relevant if input is (Geo)Dataframe. Defaults to None.
         scaler_type: Transform data according to a specified Sklearn scaler.
             Options are "standard", "min_max" and "robust". Defaults to "standard".
-        nodata_handling: If observations with nodata (NaN and given `nodata`) should be removed completely
-            or replaced with column/band mean. Defaults to "remove".
+        nodata_handling: If observations with nodata (NaN and given `nodata`) should be removed for the time
+            of PCA computation or replaced with column/band mean. Defaults to "remove".
         nodata: Define a nodata value to remove. Defaults to None.
 
     Returns:
