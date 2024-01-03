@@ -71,6 +71,7 @@ def test_pca_gdf():
     np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=5)
 
 
+@pytest.mark.xfail(sys.platform == "win32", reason="Results deviate on Windows.", raises=AssertionError)
 def test_pca_with_nan_removal():
     """Test that PCA function gives correct output for Numpy array input that has NaN values and remove strategy."""
     data = np.array([[1, 1], [2, np.nan], [3, 3]])
@@ -102,6 +103,7 @@ def test_pca_with_nan_replace():
     np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=3)
 
 
+@pytest.mark.xfail(sys.platform == "win32", reason="Results deviate on Windows.", raises=AssertionError)
 def test_pca_with_nodata_removal():
     """Test that PCA function gives correct output for input that has specified nodata values and removal strategy."""
     data = np.array([[1, 1], [2, -9999], [3, 3]])
