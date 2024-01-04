@@ -91,14 +91,14 @@ def split_data(
 
 
 @beartype
-def test_model(
+def evaluate_model(
     X_test: Union[np.ndarray, pd.DataFrame],
     y_test: Union[np.ndarray, pd.Series],
     model: Union[BaseEstimator, keras.Model],
     metrics: Optional[Sequence[Literal["mse", "rmse", "mae", "r2", "accuracy", "precision", "recall", "f1"]]] = None,
-) -> Dict[str, Number]:
+) -> Tuple[np.ndarray, Dict[str, Number]]:
     """
-    Test and score a trained model.
+    Evaluate/score a trained model with test data.
 
     Args:
         X_test: Test data.
@@ -126,7 +126,7 @@ def test_model(
         score = _score_model(model, y_test, y_pred, metric)
         out_metrics[metric] = score
 
-    return out_metrics
+    return y_pred, out_metrics
 
 
 @beartype
