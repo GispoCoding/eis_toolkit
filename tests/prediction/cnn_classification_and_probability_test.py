@@ -1,8 +1,8 @@
 import numpy as np
 
-from eis_toolkit.prediction.cnn_classification_and_regression import (
+from eis_toolkit.prediction.cnn_classification_and_probability import (
     train_and_predict_for_classification,
-    train_and_predict_for_regression,
+    train_and_predict_for_probability,
 )
 
 
@@ -32,7 +32,7 @@ def test_do_regression():
     """Test for regression."""
     X = np.load("data/data.npy")
     y = np.load("data/labels.npy")
-    best_model, cm = train_and_predict_for_regression(
+    best_model, cm, array_of_probability = train_and_predict_for_probability(
         X=X,
         y=y,
         batch_size=32,

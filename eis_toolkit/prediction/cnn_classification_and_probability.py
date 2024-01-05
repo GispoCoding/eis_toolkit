@@ -279,13 +279,13 @@ def train_and_predict_for_classification(
             model_to_return = cnn_model
 
     # create a cm
-    cm = confusion_matrix(np.array(stacked_true), np.array(stacked_prediction), normalize="all")
+    cm = confusion_matrix(np.array(stacked_true), np.array(stacked_prediction))
     df = pd.DataFrame(cm, columns=["Non deposit", "deposit"], index=["Non deposit", "deposit"])
     return model_to_return, df
 
 
 @beartype
-def train_and_predict_for_regression(
+def train_and_predict_for_probability(
     X: np.ndarray,
     y: np.ndarray,
     batch_size: int,
@@ -305,7 +305,7 @@ def train_and_predict_for_regression(
     optimizer: str = "Adam",
     loss=tf.keras.losses.BinaryCrossentropy(),
     output_units=1,
-) -> tuple[Model, DataFrame]:
+) -> tuple[Model, DataFrame, np.ndarray]:
     """
     Do training and evaluation of the model with cross validation.
 
@@ -367,7 +367,7 @@ def train_and_predict_for_regression(
     # get cross validation methods
     selected_cs = performance_model_estimation(cross_validation_type=cross_validation, number_of_split=1)
 
-    stacked_true, stacked_prediction = list(), list()
+    stacked_true, stacked_prediction, stacked_probability = list(), list(), list()
     best_score = 0
     model_to_return = None
 
@@ -393,6 +393,7 @@ def train_and_predict_for_regression(
         score = cnn_model.evaluate(X_validation, y_validation)[0]
         prediction = cnn_model.predict(X_validation)
 
+        stacked_probability.append(prediction[0])
         stacked_true.append(y_validation)
 
         if prediction[0] <= threshold:
@@ -405,6 +406,6 @@ def train_and_predict_for_regression(
             model_to_return = cnn_model
 
     # create a cm
-    cm = confusion_matrix(np.array(stacked_true), np.array(stacked_prediction), normalize="all")
+    cm = confusion_matrix(np.array(stacked_true), np.array(stacked_prediction))
     df = pd.DataFrame(cm, columns=["Non deposit", "deposit"], index=["Non deposit", "deposit"])
-    return model_to_return, df
+    return model_to_return, df, np.array(stacked_probability)
