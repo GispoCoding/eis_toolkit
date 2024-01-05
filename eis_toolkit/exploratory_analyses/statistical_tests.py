@@ -14,7 +14,12 @@ from eis_toolkit.utilities.checks.dataframe import (
 
 
 @beartype
-def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Sequence[str]] = None) -> dict:
+def chi_square_test(
+    data: pd.DataFrame,
+    target_column: str,
+    columns: Optional[Sequence[str]] = None,
+    max_unique_values: Optional[int] = 40,
+) -> dict:
     """Compute Chi-square test for independence on the input data.
 
     It is assumed that the variables in the input data are independent and that they are categorical, i.e. strings,
@@ -24,10 +29,13 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Se
         data: Dataframe containing the input data
         target_column: Variable against which independence of other variables is tested.
         columns: Variables that are tested against the variable in target_column. If None, every column is used.
+        max_unique_values: Adjusts the maximum number of unique numerical values before the column
+            is considered non-categorical. Defaults to 40. Optional.
 
     Raises:
         EmptyDataFrameException: The input Dataframe is empty.
         InvalidParameterValueException: The target_column is not in input Dataframe or invalid column is provided.
+        NonCategoricalDataException: The dataframe or selected columns contains non-categorical values.
 
     Returns:
         Test statistics for each variable (except target_column).
@@ -44,10 +52,10 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Se
             raise exceptions.InvalidParameterValueException(
                 f"The following variables are not in the dataframe: {invalid_columns}"
             )
-        if not check_columns_categorical(data, columns):
+        if not check_columns_categorical(data, columns, max_unique_values):
             raise exceptions.NonCategoricalDataException("The selected columns contain non-categorical values.")
     else:
-        if not check_columns_categorical(data, data.columns.to_list()):
+        if not check_columns_categorical(data, data.columns.to_list(), max_unique_values):
             raise exceptions.NonCategoricalDataException("The input data contain non-categorical values.")
         columns = data.columns
 

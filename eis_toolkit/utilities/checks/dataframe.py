@@ -36,7 +36,7 @@ def check_columns_numeric(df: pd.DataFrame, columns: Sequence[str]) -> bool:
 
 
 @beartype
-def check_columns_categorical(df: pd.DataFrame, columns: Sequence[str], max_unique_values: int = 10) -> bool:
+def check_columns_categorical(df: pd.DataFrame, columns: Sequence[str], max_unique_values: int = 20) -> bool:
     """
     Check that all specified columns are categorical.
 
@@ -44,6 +44,7 @@ def check_columns_categorical(df: pd.DataFrame, columns: Sequence[str], max_uniq
         df: Dataframe to be checked.
         columns: Column names.
         max_unique_values: Maximum number of unique values for numeric columns to be considered categorical.
+            Defaults to 20.
 
     Returns
         True if all columns are categorical, otherwise False.

@@ -41,6 +41,12 @@ def test_non_categorical_data():
         chi_square_test(data=large_df, target_column="a")
 
 
+def test_too_many_uniques():
+    """Test that too many unique numerical values raises the correct exception."""
+    with pytest.raises(exceptions.NonCategoricalDataException):
+        chi_square_test(data=categorical_data, target_column=target_column, columns=["e"], max_unique_values=1)
+
+
 def test_normality_test():
     """Test that returned statistics for normality are correct."""
     output_statistics = normality_test(data=numeric_data, columns=["a"])

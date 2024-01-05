@@ -1,14 +1,10 @@
 import pandas as pd
-import numpy as np
 
 from eis_toolkit.utilities.checks.dataframe import check_columns_categorical
 
 ints_and_bools = pd.DataFrame({"e": [0, 0, 1, 1], "f": [True, False, True, True]})
 floats = pd.DataFrame({"c": [0.1, 0.5, 0.3, 0.2], "d": [1.0, 2.5, 3.0, 4.0]})
-too_many_uniques = pd.DataFrame({
-    "a": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    "b": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-})
+too_many_uniques = pd.DataFrame({"a": list(range(1, 22)), "b": [i / 10.0 for i in range(1, 22)]})
 
 
 def test_ints_and_bools():
