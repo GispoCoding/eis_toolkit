@@ -36,21 +36,28 @@ def check_columns_numeric(df: pd.DataFrame, columns: Sequence[str]) -> bool:
 
 
 @beartype
-def check_columns_categorical(df: pd.DataFrame, columns: Sequence[str]) -> bool:
+def check_columns_categorical(df: pd.DataFrame, columns: Sequence[str], max_unique_values: int = 10) -> bool:
     """
     Check that all specified columns are categorical.
 
     Args:
         df: Dataframe to be checked.
         columns: Column names.
+        max_unique_values: Maximum number of unique values for numeric columns to be considered categorical.
 
     Returns
         True if all columns are categorical, otherwise False.
     """
-    # return all(
-    #    pd.api.types.is_categorical_dtype(df[column]) or pd.api.types.is_bool_dtype(df[column]) for column in columns
-    # )
-    return all(isinstance(df[column].dtype, pd.CategoricalDtype) or pd.api.types.is_bool_dtype(df[column]) for column in columns)
+    numeric_dtypes = ["int64", "float64"]  # Expand this list?
+
+    return all(
+        (
+            isinstance(df[column].dtype, pd.CategoricalDtype)
+            or (df[column].dtype == bool)
+            or (df[column].dtype.name in numeric_dtypes and df[column].nunique() <= max_unique_values)
+        )
+        for column in columns
+    )
 
 
 def check_empty_dataframe(df: pd.DataFrame) -> bool:

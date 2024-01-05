@@ -13,8 +13,10 @@ from eis_toolkit.exploratory_analyses.statistical_tests import (
 
 data = np.array([[0, 1, 2, 1], [2, 0, 1, 2], [2, 1, 0, 2], [0, 1, 2, 1]])
 missing_data = np.array([[0, 1, 2, 1], [2, 0, np.nan, 2], [2, 1, 0, 2], [0, 1, 2, 1]])
-non_categorical_array = np.array([[0.5, 1.2, 2, 1.1], [2.1, 0, 2.5, 2], [2.5, 1, 0, 2.5], [0.1, 1.5, 2, 1.2]])
-non_categorical_data = pd.DataFrame(non_categorical_array, columns=["a", "b", "c", "d"])
+non_categorical_array = np.array(
+    [[0.5, 1.2, 2, 1.1, "a"], [2.1, 0, 2.5, 2, True], [2.5, 1, 0, 2.5, "Test"], [0.1, 1.5, 2, 1.2, False]]
+)
+non_categorical_data = pd.DataFrame(non_categorical_array, columns=["a", "b", "c", "d", "e"])
 non_numeric_data = np.array([[0, 1, 2, 1], ["a", "b", "c", "d"], [3, 2, 1, 0], ["c", "d", "b", "a"]])
 numeric_data = pd.DataFrame(data, columns=["a", "b", "c", "d"])
 non_numeric_df = pd.DataFrame(non_numeric_data, columns=["a", "b", "c", "d"])
@@ -36,6 +38,7 @@ def test_non_categorical_data():
     """Test that non-categorical data raises the correct exception."""
     with pytest.raises(exceptions.NonCategoricalDataException):
         chi_square_test(data=non_categorical_data, target_column="a")
+        chi_square_test(data=large_df, target_column="a")
 
 
 def test_normality_test():
