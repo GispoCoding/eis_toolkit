@@ -581,7 +581,7 @@ def extract_shared_lines_cli(
 
     out_vector.to_file(output_vector)
     typer.echo("Progress: 100%")
-    typer.echo(f"Windowing completed, writing raster to {out_vector}")
+    typer.echo(f"Extracting shared lines completed, writing vector to {out_vector}")
 
 
 # IDW INTERPOLATION
