@@ -1,12 +1,10 @@
-import numpy as np
-import rasterio
-import pytest
 from pathlib import Path
 
-from eis_toolkit.exceptions import (
-    InvalidRasterBandException,
-    InvalidParameterValueException,
-)
+import numpy as np
+import pytest
+import rasterio
+
+from eis_toolkit.exceptions import InvalidParameterValueException, InvalidRasterBandException
 from eis_toolkit.raster_processing.derivatives.classification import classify_aspect
 from eis_toolkit.raster_processing.derivatives.parameters import first_order
 
@@ -49,6 +47,7 @@ ASPECT_CLASSIFICATION_RESULTS = {
 
 @pytest.mark.parametrize("num_classes", [8, 16])
 def test_aspect_classification(num_classes: int):
+    """Test the aspect classification function."""
     with rasterio.open(raster_path_single) as raster:
         parameter = "A"
 
@@ -118,12 +117,14 @@ def test_aspect_classification(num_classes: int):
 
 
 def test_number_bands():
+    """Test if the number of bands is correct."""
     with rasterio.open(raster_path_multi) as raster:
         with pytest.raises(InvalidRasterBandException):
             classify_aspect(raster)
 
 
 def test_number_classes():
+    """Test if the number of classes is correct."""
     with rasterio.open(raster_path_single) as raster:
         with pytest.raises(InvalidParameterValueException):
             classify_aspect(raster, num_classes=7)

@@ -1,4 +1,5 @@
 from numbers import Number
+
 import numpy as np
 from beartype import beartype
 from beartype.typing import Union

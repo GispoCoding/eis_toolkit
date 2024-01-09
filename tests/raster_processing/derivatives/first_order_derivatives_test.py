@@ -1,12 +1,13 @@
-import numpy as np
-import rasterio
-import pytest
 from pathlib import Path
 
+import numpy as np
+import pytest
+import rasterio
+
 from eis_toolkit.exceptions import (
+    InvalidParameterValueException,
     InvalidRasterBandException,
     NonSquarePixelSizeException,
-    InvalidParameterValueException,
 )
 from eis_toolkit.raster_processing.derivatives.parameters import first_order
 
@@ -27,6 +28,7 @@ FIRST_ORDER_RESULTS_MIN_SLOPE = {"Evans": {"A": 0.396}}
 
 @pytest.mark.parametrize("method", ["Horn", "Evans", "Young", "Zevenbergen"])
 def test_first_order(method: str):
+    """Test the first order derivative functions."""
     with rasterio.open(raster_path_single) as raster:
         parameters = ["A", "G"]
 
@@ -86,6 +88,7 @@ def test_first_order(method: str):
 
 
 def test_number_bands():
+    """Test if the number of bands is correct."""
     with rasterio.open(raster_path_multi) as raster:
         parameters = ["A", "G"]
         with pytest.raises(InvalidRasterBandException):
@@ -93,6 +96,7 @@ def test_number_bands():
 
 
 def test_nonsquared_pixelsize():
+    """Test if pixels are squared."""
     with rasterio.open(raster_path_nonsquared) as raster:
         parameters = ["A", "G"]
         with pytest.raises(NonSquarePixelSizeException):
@@ -100,6 +104,7 @@ def test_nonsquared_pixelsize():
 
 
 def test_scaling():
+    """Test if scaling factor is correct.""" ""
     with rasterio.open(raster_path_single) as raster:
         parameters = ["A", "G"]
         with pytest.raises(InvalidParameterValueException):

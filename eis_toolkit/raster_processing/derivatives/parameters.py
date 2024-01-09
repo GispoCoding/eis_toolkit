@@ -5,7 +5,6 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Literal, Optional, Sequence
 
-from eis_toolkit.utilities.checks.raster import check_quadratic_pixels
 from eis_toolkit.exceptions import (
     InvalidParameterValueException,
     InvalidRasterBandException,
@@ -13,6 +12,7 @@ from eis_toolkit.exceptions import (
 )
 from eis_toolkit.raster_processing.derivatives.partial_derivatives import coefficients
 from eis_toolkit.raster_processing.derivatives.utilities import reduce_ndim, scale_raster, set_flat_pixels
+from eis_toolkit.utilities.checks.raster import check_quadratic_pixels
 from eis_toolkit.utilities.conversions import convert_rad_to_deg, convert_rad_to_rise
 from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
@@ -77,7 +77,7 @@ def first_order(
     slope_direction_unit: Literal["degrees", "radians"] = "radians",
     method: Literal["Horn", "Evans", "Young", "Zevenbergen"] = "Horn",
 ) -> dict:
-    """Calculates the first order surface attributes.
+    """Calculate the first order surface attributes.
 
     For compatibility for slope and aspect calculations with ArcGIS or QGIS, choose Method Horn (1981).
 
@@ -158,7 +158,7 @@ def second_order_basic_set(
     slope_tolerance: Optional[Number] = 0,
     method: Literal["Evans", "Young", "Zevenbergen"] = "Young",
 ) -> dict:
-    """Calculates the second order surface attributes.
+    """Calculate the second order surface attributes.
 
     References:
     Young, M., 1978: Terrain analysis program documentation. Report 5 on Grant DA-ERO-591-73-G0040,
