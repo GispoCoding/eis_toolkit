@@ -5,7 +5,7 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Literal, Optional, Sequence
 
-from eis_toolkit.checks.raster import check_quadratic_pixels
+from eis_toolkit.utilities.checks.raster import check_quadratic_pixels
 from eis_toolkit.exceptions import (
     InvalidParameterValueException,
     InvalidRasterBandException,
