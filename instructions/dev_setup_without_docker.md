@@ -1,12 +1,15 @@
-# Development without docker
-If you do not have docker, you can setup your local development environment as a python virtual environment.
+# Development with Poetry
+
+If you do not have docker, you can setup your local development environment as a python virtual environment using Poetry.
 
 ## Prerequisites
 
 0. Make sure that GDAL's dependencies
 
-- libgdal (3.5.1 or greater)
-- header files (gdal-devel)
+-   libgdal (3.5.1 or greater)
+-   header files (gdal-devel)
+-   See `.github/workflows/tests.yml` to see how these dependencies are
+    installed in CI
 
 are satisfied. If not, install them.
 
@@ -19,21 +22,21 @@ are satisfied. If not, install them.
 
 1. Install dependencies and create a virtual environment
 
-```shell
+```bash
 poetry install
 ```
 
 2. To use the virtual environment you can either enter it with
 
-```shell
+```bash
 poetry shell
 ```
 
 or prefix your normal shell commands with
 
-```shell
+```bash
 poetry run
 ```
 
-If you want to use jpyterlab see the [instructions](./using_jupyterlab.md)
+If you want to use jupyterlab see the [instructions](./using_jupyterlab.md)
 

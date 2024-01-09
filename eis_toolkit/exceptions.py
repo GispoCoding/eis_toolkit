@@ -2,6 +2,14 @@ class CoordinatesOutOfBoundsException(Exception):
     """Exception error class for out of bound coordinates."""
 
 
+class ClassificationFailedException(Exception):
+    """Exception error class for classification failures."""
+
+
+class EmptyDataException(Exception):
+    """Exception error class raised if input data is empty."""
+
+
 class EmptyDataFrameException(Exception):
     """Exception error class raised if the dataframe is empty."""
 
@@ -24,6 +32,10 @@ class InvalidColumnException(Exception):
 
 class InvalidColumnIndexException(Exception):
     """Exception error for invalid column index."""
+
+
+class InvalidDataShapeException(Exception):
+    """Exception error for datasets with invalid shapes."""
 
 
 class InvalidParameterValueException(Exception):
@@ -72,3 +84,23 @@ class NonSquarePixelSizeException(Exception):
 
 class NumericValueSignException(Exception):
     """Exception error class for numeric value sign exception."""
+
+
+class InvalidModelException(Exception):
+    """Exception error class when model is invalid or null."""
+
+
+class InvalidDatasetException(Exception):
+    """Exception error class when the dataset is null."""
+
+
+class NonNumericDataException(Exception):
+    """Exception error class for when the given data includes non-numeric values."""
+
+
+class InvalidCompositionException(Exception):
+    """Exception error class for when the data is not in suitable form for compositional data transforms."""
+
+
+class SampleSizeExceededException(Exception):
+    """Exception error class for when the data exceeds maximum sample size."""

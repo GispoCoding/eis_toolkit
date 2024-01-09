@@ -5,9 +5,9 @@ import pandas as pd
 from beartype import beartype
 from beartype.typing import Any, List, Optional, Sequence, Tuple, Union
 
-from eis_toolkit.checks.dataframe import check_columns_valid
-from eis_toolkit.checks.parameter import check_dtype_for_int
-from eis_toolkit.exceptions import InvalidColumnException
+from eis_toolkit.exceptions import InvalidColumnException, InvalidColumnIndexException
+from eis_toolkit.utilities.checks.dataframe import check_columns_valid
+from eis_toolkit.utilities.checks.parameter import check_dtype_for_int
 
 
 @beartype
@@ -271,3 +271,43 @@ def set_max_precision(data: Optional[np.ndarray] = None) -> int:
             return 0
     else:
         return np.finfo(np.float32).precision
+
+
+@beartype
+def rename_columns_by_pattern(df: pd.DataFrame, pattern: str = None) -> pd.DataFrame:
+    """Rename DataFrame columns with a pattern and a running number."""
+    columns = [col for col in df.columns]
+    pattern = pattern if pattern is not None else "V"
+    names = dict()
+
+    for i in range(len(columns)):
+        names[columns[i]] = f"{pattern}{i + 1}"
+
+    return df.rename(columns=names)
+
+
+@beartype
+def rename_columns(df: pd.DataFrame, colnames=Sequence[str]) -> pd.DataFrame:
+    """
+    Replace DataFrame column names with the provided column names.
+
+    Args:
+        df: Input DataFrame.
+        colnames: A list of column names in order.
+
+    Returns:
+        A DataFrame with the column names renamed to the names provided, up to as many are available.
+
+    Raises:
+        InvalidColumnIndexException: The amount of provided column names exceeds the amount of columns.
+    """
+    if len(colnames) > df.shape[1]:
+        raise InvalidColumnIndexException()
+
+    columns = [col for col in df.columns]
+    names = dict()
+
+    for i in range(len(colnames)):
+        names[columns[i]] = colnames[i]
+
+    return df.rename(columns=names)

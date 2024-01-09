@@ -10,15 +10,56 @@ EIS Toolkit will be a comprehensive Python library for mineral prospectivity map
 
 
 ## Repository status
-This repository is still in development. First release is planned for autumn 2023.
+The first beta release of EIS Toolkit is now out, but this repository is still in development. 
 
-Current contents include
-- implementations for most of basic preprocessing tools
+Current repository contents include
+- implementations of basic tools to conduct MPM
 - Jupyter notebooks showing usage and functionality of some of the implemented tools
 - basic tests for implemented features
 - instructions on how to contribute to the repository
 
-This repository contains source code related to eis_toolkit python package, not source code of EIS QGIS Plugin.
+To check the implementation status of the toolkit and planned tools, visit the [wiki page of EIS Toolkit](https://github.com/GispoCoding/eis_toolkit/wiki).
+
+This repository contains source code related to eis_toolkit Python package, not source code of EIS QGIS Plugin.
+
+
+## Installing
+You can find the latest release of EIS Toolkit in the [releases page](https://github.com/GispoCoding/eis_toolkit/releases) as Python wheel. To install EIS Toolkit, simply download the wheel and install with pip
+
+```console
+pip install eis_toolkit-0.1.0-py3-none-any.whl
+```
+
+We recommend installing EIS Toolkit in a dedicated virtual environment as the library has a lot of dependencies.
+
+Note that EIS Toolkit is not yet released in PyPi or Conda, but will be at a later stage.
+
+
+## Using EIS Toolkit
+EIS Toolkit can be used in Python scripts, Jupyter notebooks or via the CLI. At the moment, almost all tools have their own module and can be imported like this:
+```python
+# In general
+from eis_toolkit.category.module import module_function
+
+# Some examples
+from eis_toolkit.raster_processing.reprojecting import reproject_raster
+from eis_toolkit.exploratory_analyses.pca import compute_pca, plot_pca
+```
+
+To use the CLI, simply use the command
+```console
+eis
+```
+
+or
+
+```console
+eis --help
+```
+
+to get started. However, please note that the CLI has been primarily designed to communicate with other programs, such as QGIS.
+
+Documentation of EIS Toolkit can be read [here](https://gispocoding.github.io/eis_toolkit/) (generated from docstrings).
 
 
 ## Contributing
@@ -29,8 +70,6 @@ If you are contributing by implementing new functionalities, read the **For deve
 
 ## For developers
 
-### Prerequisites
-
 All contributing developers need git, and a copy of the repository.
 
 ```console
@@ -38,68 +77,10 @@ git clone https://github.com/GispoCoding/eis_toolkit.git
 ```
 
 After this you have three options for setting up your local development environment.
-1. Docker
-2. Python venv
-3. Conda
+1. Docker - [instructions](./instructions/dev_setup_with_docker.md)
+2. Poetry - [instructions](./instructions/dev_setup_without_docker.md)
+3. Conda - [instructions](./instructions/dev_setup_without_docker_with_conda.md)
 
-Docker is recommended as it containerizes the whole development environment, making sure it stays identical across different developers and operating systems. Using a container also keeps your own computer clean of all dependencies.
-
-### Setting up a local development environment with docker (recommended)
-Build and run the eis_toolkit container. Run this and every other command in the repository root unless otherwise directed.
-
-```console
-docker compose up -d
-```
-
-If you need to rebuild already existing container (e.g. dependencies have been updated), run
-
-```console
-docker compose up -d --build
-```
-
-### Working with the container
-
-Attach to the running container
-
-```console
-docker attach eis_toolkit
-```
-
-You are now in your local development container, and all your commands in the current terminal window interact with the container.
-
-**Note** that your local repository gets automatically mounted into the container. This means that:
-- The repository in your computer's filesystem and in the container are exactly the same
-- Changes from either one carry over to the other instantly, without any need for restarting the container
-
-For your workflow this means that:
-- You can edit all files like you normally would (on your own computer, with your favourite text editor etc.)
-- You must do all testing and running the code inside the container
-
-### Python inside the container
-
-Whether or not using docker we manage the python dependencies with poetry. This means that a python venv is found in the container too. Inside the container, you can get into the venv like you normally would
-
-```console
-poetry shell
-```
-
-and run your code and tests from the command line. For example:
-
-```console
-python <path/to/your/file.py>
-```
-
-or
-
-```console
-pytest
-```
-
-You can also run commands from outside the venv, just prefix them with poetry run. For example:
-
-```console
-poetry run pytest
-```
 
 ### Additonal instructions
 
@@ -107,11 +88,6 @@ Here are some additional instructions related to the development of EIS toolkit:
 - [Testing your changes](./instructions/testing.md)
 - [Generating documentation](./instructions/generating_documentation.md)
 - [Using jupyterlab](./instructions/using_jupyterlab.md)
-
-If you want to set up the development environment without docker, see:
-- [Setup without docker with poetry](./instructions/dev_setup_without_docker.md)
-- [Setup without docker with conda](./instructions/dev_setup_without_docker_with_conda.md)
-
 
 ## License
 

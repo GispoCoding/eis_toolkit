@@ -17,8 +17,8 @@ from eis_toolkit import exceptions
 
 
 def _normalize_data(data: np.ndarray) -> Tuple[np.ndarray, float, float]:
-    y_min = data.min(axis=0)
-    y_max = data.max(axis=0)
+    y_min = np.nanmin(data, axis=0)
+    y_max = np.nanmax(data, axis=0)
     dy = y_max - y_min
     y_min -= dy * 0.05
     y_max += dy * 0.05
@@ -108,8 +108,8 @@ def _plot_parallel_coordinates(
         # Create the colorbar for numerical data
         colorbar_mappable = ScalarMappable(cmap=cmap, norm=norm)
         colorbar_mappable.set_array([])
-        colorbar = plt.colorbar(colorbar_mappable)
-        colorbar.set_label(color_column_name, fontsize=14)
+        # colorbar = plt.colorbar(colorbar_mappable)
+        # colorbar.set_label(color_column_name, fontsize=14)
 
     # Draw lines
     for i in range(data.shape[0]):
@@ -141,6 +141,10 @@ def plot_parallel_coordinates(
 ) -> matplotlib.figure.Figure:
     """Plot a parallel coordinates plot.
 
+    Automatically removes all rows containing null/nan values. Tries to convert columns to numeric
+    to be able to plot them. If more than 8 columns are present (after numeric filtering), keeps only
+    the first 8 to plot.
+
     Args:
         df: The DataFrame to plot.
         color_column_name: The name of the column in df to use for color encoding.
@@ -165,21 +169,30 @@ def plot_parallel_coordinates(
             f"The provided color column {color_column_name} is not found in the DataFrame."
         )
 
+    df = df.convert_dtypes()
+    df = df.apply(pd.to_numeric, errors="ignore")
+
     color_data = df[color_column_name].to_numpy()
     if len(set([type(elem) for elem in color_data])) != 1:
         raise exceptions.InconsistentDataTypesException(
             "The color column should have a consistent datatype. Multiple data types detected in the color column."
         )
 
+    df = df.select_dtypes(include=np.number)
+
     # Drop non-numeric columns and the column used for coloring
     columns_to_drop = [color_column_name]
     for column in df.columns.values:
-        if not np.issubdtype(df[column].dtype, np.number):
+        if df[column].isnull().all():
             columns_to_drop.append(column)
-    filtered_df = df.loc[:, ~df.columns.isin(columns_to_drop)]
+    df = df.loc[:, ~df.columns.isin(columns_to_drop)]
 
-    data_labels = filtered_df.columns.values
-    data = filtered_df.to_numpy()
+    # Keep only first 8 columns if more are still present
+    if len(df.columns.values) > 8:
+        df = df.iloc[:, :8]
+
+    data_labels = df.columns.values
+    data = df.to_numpy()
 
     fig = _plot_parallel_coordinates(
         data=data,
