@@ -8,9 +8,9 @@ from eis_toolkit.exceptions import (
     NonSquarePixelSizeException,
     InvalidParameterValueException,
 )
-from eis_toolkit.surface_attributes.parameters import first_order
+from eis_toolkit.raster_processing.derivatives.parameters import first_order
 
-parent_dir = Path(__file__).parent
+parent_dir = Path(__file__).parent.parent
 raster_path_single = parent_dir.joinpath("../data/remote/small_raster.tif")
 raster_path_multi = parent_dir.joinpath("../data/remote/small_raster_multiband.tif")
 raster_path_nonsquared = parent_dir.joinpath("../data/remote/nonsquared_pixelsize_raster.tif")

@@ -11,8 +11,8 @@ from eis_toolkit.exceptions import (
     InvalidRasterBandException,
     NonSquarePixelSizeException,
 )
-from eis_toolkit.surface_attributes.partial_derivatives import coefficients
-from eis_toolkit.surface_attributes.utilities import reduce_ndim, scale_raster, set_flat_pixels
+from eis_toolkit.raster_processing.derivatives.partial_derivatives import coefficients
+from eis_toolkit.raster_processing.derivatives.utilities import reduce_ndim, scale_raster, set_flat_pixels
 from eis_toolkit.utilities.conversions import convert_rad_to_deg, convert_rad_to_rise
 from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
