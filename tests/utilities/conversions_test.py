@@ -1,10 +1,10 @@
 import numpy as np
 
 from eis_toolkit.utilities.conversions import (
-    convert_rad_to_rise,
     convert_deg_to_rad,
     convert_deg_to_rise,
     convert_rad_to_deg,
+    convert_rad_to_rise,
     convert_rise_to_deg,
 )
 
