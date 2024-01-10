@@ -958,6 +958,192 @@ def gamme_overlay_cli(
 # --- TRANSFORMATIONS ---
 
 
+# CODA - ALR TRANSFORM
+@app.command()
+def alr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    column: str = None,
+    keep_denominator_column: bool = False,
+):
+    """Perform an additive logratio transformation on the data."""
+    from eis_toolkit.transformations.coda.alr import alr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = alr_transform(df=df, column=column, keep_denominator_column=keep_denominator_column)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"ALR transform completed, output saved to {output_vector}")
+
+
+# CODA - INVERSE ALR TRANSFORM
+@app.command()
+def inverse_alr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    denominator_column: str = None,
+    scale: float = 1.0,
+):
+    """Perform the inverse transformation for a set of ALR transformed data."""
+    from eis_toolkit.transformations.coda.alr import inverse_alr
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = inverse_alr(df=df, denominator_column=denominator_column, scale=scale)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Inverse ALR transform completed, output saved to {output_vector}")
+
+
+# CODA - CLR TRANSFORM
+@app.command()
+def clr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Perform a centered logratio transformation on the data."""
+    from eis_toolkit.transformations.coda.clr import clr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = clr_transform(df=df)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"CLR transform completed, output saved to {output_vector}")
+
+
+# CODA - INVERSE CLR TRANSFORM
+@app.command()
+def inverse_clr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    # colnames: List, # NOTE: Colnames left out for now, as list arguments are tricky in Typer
+    scale: float = 1.0,
+):
+    """Perform the inverse transformation for a set of CLR transformed data."""
+    from eis_toolkit.transformations.coda.clr import inverse_clr
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = inverse_clr(df=df, scale=scale)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Inverse CLR transform completed, output saved to {output_vector}")
+
+
+# CODA - SINGLE ILR TRANSFORM
+# TODO: The subcompositions are difficult to implement in CLI
+# @app.command()
+# def single_ilr_transform_cli(
+#     input_vector: Annotated[Path, INPUT_FILE_OPTION],
+#     output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+#     subcomposition_1: List,
+#     subcomposition_2: List
+# ):
+#     """Perform a single isometric logratio transformation on the provided subcompositions."""
+#     from eis_toolkit.transformations.coda.ilr import single_ilr_transform
+#     typer.echo("Progress: 10%")
+
+#     gdf = gpd.read_file(input_vector)
+#     geometries = gdf["geometry"]
+#     df = pd.DataFrame(gdf.drop(columns="geometry"))
+#     typer.echo("Progress: 25%")
+
+#     out_series = single_ilr_transform(df=df, subcomposition_1=subcomposition_1, subcomposition_2=subcomposition_2)
+#     # Is the series one row or one column of the df, or something else?
+#     typer.echo("Progess 75%")
+
+#     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+#     out_gdf.to_file(output_vector)
+#     typer.echo("Progress: 100%")
+#     typer.echo(f"Inverse CLR transform completed, output saved to {output_vector}")
+
+
+# CODA - PAIRWISE LOGRATIO TRANSFORM
+@app.command()
+def pairwise_logratio_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    numerator_column: str = typer.Option(),
+    denominator_column: str = typer.Option(),
+):
+    """Perform a pairwise logratio transformation on the given columns."""
+    from eis_toolkit.transformations.coda.pairwise import pairwise_logratio
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_series = pairwise_logratio(df=df, numerator_column=numerator_column, denominator_column=denominator_column)
+    typer.echo("Progess 75%")
+
+    # NOTE: Output of pairwise_logratio might be changed to DF in the future, to automatically do the following
+    df["pairwise_logratio"] = out_series
+    out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Pairwise logratio transform completed, output saved to {output_vector}")
+
+
+# CODA - PLR TRANSFORM
+@app.command()
+def plr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Perform a pivot logratio transformation on the dataframe, returning the full set of transforms."""
+    from eis_toolkit.transformations.coda.plr import plr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = plr_transform(df=df)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"PLR transform completed, output saved to {output_vector}")
+
+
 # BINARIZE
 @app.command()
 def binarize_cli(
