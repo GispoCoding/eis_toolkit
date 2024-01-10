@@ -107,3 +107,20 @@ def check_raster_bands(raster: rasterio.io.DatasetReader, bands: Sequence[int]) 
         True if all bands exist, False if not.
     """
     return all(band in range(1, raster.count + 1) for band in bands)
+
+
+@beartype
+def check_quadratic_pixels(raster: rasterio.io.DatasetReader) -> bool:
+    """
+    Check if raster pixels are quadratic.
+
+    Args:
+        raster: Raster to be checked.
+
+    Returns:
+        True if pixels are quadratic, False if not.
+    """
+    if raster.res[0] == raster.res[1]:
+        return True
+    else:
+        return False
