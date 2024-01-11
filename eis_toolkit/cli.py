@@ -142,6 +142,53 @@ class GradientBoostingRegressorLosses(str, Enum):
     quantile = "quantile"
 
 
+class MLPActivationFunctions(str, Enum):
+    """MLP activation functions."""
+
+    relu = "relu"
+    linear = "linear"
+    sigmoid = "sigmoid"
+    tanh = "tanh"
+
+
+class MLPClassifierLastActivations(str, Enum):
+    """MLP classifier last activation functions."""
+
+    sigmoid = "sigmoid"
+    softmax = "softmax"
+
+
+class MLPRegressorLastActivations(str, Enum):
+    """MLP regressor last activation functions."""
+
+    linear = "linear"
+
+
+class MLPOptimizers(str, Enum):
+    """MLP optimizers."""
+
+    adam = "adam"
+    adagrad = "adagrad"
+    rmsprop = "rmsprop"
+    sdg = "sdg"
+
+
+class MLPClassifierLossFunctions(str, Enum):
+    """MLP classifier loss functions."""
+
+    binary_crossentropy = "binary_crossentropy"
+    categorical_crossentropy = "categorical_crossentropy"
+
+
+class MLPRegressorLossFunctions(str, Enum):
+    """MLP regressor loss functions."""
+
+    mse = "mse"
+    mae = "mae"
+    hinge = "hinge"
+    huber = "huber"
+
+
 RESAMPLING_MAPPING = {
     "nearest": warp.Resampling.nearest,
     "bilinear": warp.Resampling.bilinear,
@@ -1239,6 +1286,144 @@ def predict_with_trained_model_cli(
 
     typer.echo("Progress: 100%")
     typer.echo("Predicting completed")
+
+
+# MLP FUNCTIONS
+
+# MLP CLASSIFIER
+@app.command()
+def mlp_classifier_train_cli(  # NOTE: Different name than the toolkit function. Should change toolkit func name
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],  # Change target_labels to target? Or deposits?
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    neurons: Annotated[List[int], typer.Option()],
+    validation_split: float = 0.2,
+    validation_data: Tuple[INPUT_FILES_ARGUMENT, INPUT_FILES_ARGUMENT] = None,
+    activation: MLPActivationFunctions = MLPActivationFunctions.relu,
+    output_neurons: int = 1,
+    last_activation: MLPClassifierLastActivations = MLPClassifierLastActivations.sigmoid,
+    epochs: int = 50,
+    batch_size: int = 32,
+    optimizer: MLPOptimizers = MLPOptimizers.adam,
+    learning_rate: float = 0.001,
+    loss_function: MLPClassifierLossFunctions = MLPClassifierLossFunctions.binary_crossentropy,
+    dropout_rate: float = None,
+    early_stopping: bool = True,
+    es_patience: int = 5,
+    metrics: Annotated[List[ClassifierMetrics], typer.Option()] = [ClassifierMetrics.accuracy],
+    random_state: Optional[int] = None,
+):
+    """Train MLP (Multilayer Perceptron) classifier using Keras."""
+    from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
+    from eis_toolkit.prediction.mlp import train_MLP_classifier
+
+    typer.echo("Progress: 10%")
+
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, training_history = train_MLP_classifier(
+        X=X,
+        y=y,
+        neurons=neurons,
+        validation_split=validation_split,
+        validation_data=validation_data,
+        activation=activation,
+        output_neurons=output_neurons,
+        last_activation=last_activation,
+        epochs=epochs,
+        batch_size=batch_size,
+        optimizer=optimizer,
+        learning_rate=learning_rate,
+        loss_function=loss_function,
+        dropout_rate=dropout_rate,
+        early_stopping=early_stopping,
+        es_patience=es_patience,
+        metrics=metrics,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(training_history)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("MLP classifier training completed")
+
+
+# MLP REGRESSOR
+@app.command()
+def mlp_regressor_train_cli(  # NOTE: Different name than the toolkit function. Should change toolkit func name
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],  # Change target_labels to target? Or deposits?
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    neurons: Annotated[List[int], typer.Option()],
+    validation_split: float = 0.2,
+    validation_data: Tuple[INPUT_FILES_ARGUMENT, INPUT_FILES_ARGUMENT] = None,
+    activation: MLPActivationFunctions = MLPActivationFunctions.relu,
+    output_neurons: int = 1,
+    last_activation: MLPRegressorLastActivations = MLPRegressorLastActivations.linear,
+    epochs: int = 50,
+    batch_size: int = 32,
+    optimizer: MLPOptimizers = MLPOptimizers.adam,
+    learning_rate: float = 0.001,
+    loss_function: MLPRegressorLossFunctions = MLPRegressorLossFunctions.mse,
+    dropout_rate: float = None,
+    early_stopping: bool = True,
+    es_patience: int = 5,
+    metrics: Annotated[List[RegressorMetrics], typer.Option()] = [RegressorMetrics.mse],
+    random_state: Optional[int] = None,
+):
+    """Train MLP (Multilayer Perceptron) regressor using Keras."""
+    from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
+    from eis_toolkit.prediction.mlp import train_MLP_regressor
+
+    typer.echo("Progress: 10%")
+
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, training_history = train_MLP_regressor(
+        X=X,
+        y=y,
+        neurons=neurons,
+        validation_split=validation_split,
+        validation_data=validation_data,
+        activation=activation,
+        output_neurons=output_neurons,
+        last_activation=last_activation,
+        epochs=epochs,
+        batch_size=batch_size,
+        optimizer=optimizer,
+        learning_rate=learning_rate,
+        loss_function=loss_function,
+        dropout_rate=dropout_rate,
+        early_stopping=early_stopping,
+        es_patience=es_patience,
+        metrics=metrics,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(training_history)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("MLP regressor training completed")
 
 
 # FUZZY OVERLAYS

@@ -111,7 +111,7 @@ def train_MLP_classifier(
     random_state: Optional[int] = None,
 ) -> Tuple[keras.Model, dict]:
     """
-    Train MLP (Multilayer Perceptron) using Keras.
+    Train MLP (Multilayer Perceptron) classifier using Keras.
 
     Creates a Sequential model with Dense NN layers. For each element in `neurons`, Dense layer with corresponding
     dimensionality/neurons is created with the specified activation function (`activation`). If `dropout_rate` is
@@ -226,7 +226,7 @@ def train_MLP_regressor(
     random_state: Optional[int] = None,
 ) -> Tuple[keras.Model, dict]:
     """
-    Train MLP (Multilayer Perceptron) using Keras.
+    Train MLP (Multilayer Perceptron) regressor using Keras.
 
     Creates a Sequential model with Dense NN layers. For each element in `neurons`, Dense layer with corresponding
     dimensionality/neurons is created with the specified activation function (`activation`). If `dropout_rate` is
