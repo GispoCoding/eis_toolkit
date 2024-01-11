@@ -1,5 +1,6 @@
 from beartype import beartype
 from beartype.typing import Iterable
+from rasterio.profiles import Profile
 
 
 @beartype
@@ -15,10 +16,13 @@ def check_matching_crs(objects: Iterable) -> bool:
     epsg_list = []
 
     for object in objects:
-        if not object.crs:
-            return False
-        epsg = object.crs.to_epsg()
-        epsg_list.append(epsg)
+        if not type(object) == Profile:
+            if not object.crs:
+                return False
+            epsg = object.crs.to_epsg()
+            epsg_list.append(epsg)
+        else:
+            epsg_list.append(object["crs"])
 
     if len(set(epsg_list)) != 1:
         return False

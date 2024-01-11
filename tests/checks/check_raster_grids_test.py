@@ -6,11 +6,13 @@ from eis_toolkit.utilities.checks.raster import check_raster_grids
 
 # Test rasters.
 test_dir = Path(__file__).parent.parent
-snap_raster = rasterio.open(test_dir.joinpath("data/remote/snapping/snap_raster.tif"))
-small_raster = rasterio.open(test_dir.joinpath("data/remote/small_raster.tif"))
-small_raster_epsg4326 = rasterio.open(test_dir.joinpath("data/remote/small_raster_EPSG4326.tif"))
-snap_raster_smaller_cells = rasterio.open(test_dir.joinpath("data/remote/snapping/snap_test_raster_smaller_cells.tif"))
-clipped_snap_raster = rasterio.open(test_dir.joinpath("data/remote/snapping/clipped_snap_raster.tif"))
+snap_raster = rasterio.open(test_dir.joinpath("data/remote/snapping/snap_raster.tif")).profile
+small_raster = rasterio.open(test_dir.joinpath("data/remote/small_raster.tif")).profile
+small_raster_epsg4326 = rasterio.open(test_dir.joinpath("data/remote/small_raster_EPSG4326.tif")).profile
+snap_raster_smaller_cells = rasterio.open(
+    test_dir.joinpath("data/remote/snapping/snap_test_raster_smaller_cells.tif")
+).profile
+clipped_snap_raster = rasterio.open(test_dir.joinpath("data/remote/snapping/clipped_snap_raster.tif")).profile
 
 
 def test_identical_rasters_same_extent() -> None:

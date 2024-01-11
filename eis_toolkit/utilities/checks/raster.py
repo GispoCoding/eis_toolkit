@@ -1,50 +1,50 @@
 import rasterio
 from beartype import beartype
-from beartype.typing import Sequence, Union
+from beartype.typing import Sequence
 
 from eis_toolkit.utilities.checks.crs import check_matching_crs
 
 
 @beartype
 def check_matching_cell_size(
-    rasters: Sequence[rasterio.io.DatasetReader],
+    raster_profiles: Sequence[rasterio.profiles.Profile],
 ) -> bool:
-    """Check if all input rasters have matching cell size.
+    """Check from profiles of rasters if all have matching cell size.
 
     Args:
-        rasters: List of rasters to check.
+        rasters: List of profiles of rasters to check.
 
     Returns:
         True if cell size of each raster matches, False if not.
     """
 
-    pixel_size = [rasters[0].transform.a, rasters[0].transform.e]
-    for raster in rasters:
-        if [raster.transform.a, raster.transform.e] != pixel_size:
+    pixel_size = [raster_profiles[0]["transform"][0], raster_profiles[0]["transform"][4]]
+    for raster_profile in raster_profiles:
+        if [raster_profile["transform"][0], raster_profile["transform"][4]] != pixel_size:
             return False
     return True
 
 
 @beartype
 def check_matching_pixel_alignment(
-    rasters: Sequence[rasterio.io.DatasetReader],
+    raster_profiles: Sequence[rasterio.profiles.Profile],
 ) -> bool:
-    """Check if all input rasters have matching cell size and matching pixel alignment.
+    """Check from profiles of rasters if all have matching cell size and matching pixel alignment.
 
     Args:
-        rasters: List of rasters to check.
+        rasters: List of profiles of rasters to check.
 
     Returns:
         True if cell size and pixel alignment matches, False if not.
     """
 
-    if check_matching_cell_size(rasters):
-        pixel_size_x, pixel_size_y = rasters[0].transform.a, abs(rasters[0].transform.e)
-        left_pixel, top_pixel = rasters[0].bounds.left, rasters[0].bounds.top
-        for raster in rasters:
+    if check_matching_cell_size(raster_profiles):
+        pixel_size_x, pixel_size_y = raster_profiles[0]["transform"][0], abs(raster_profiles[0]["transform"][4])
+        left_pixel, top_pixel = raster_profiles[0]["transform"][2], raster_profiles[0]["transform"][5]
+        for raster_profile in raster_profiles:
             if (
-                abs(left_pixel - raster.bounds.left) % pixel_size_x != 0
-                or abs(top_pixel - raster.bounds.top) % pixel_size_y != 0
+                abs(left_pixel - raster_profile["transform"][2]) % pixel_size_x != 0
+                or abs(top_pixel - raster_profile["transform"][5]) % pixel_size_y != 0
             ):
                 return False
         return True
@@ -54,44 +54,42 @@ def check_matching_pixel_alignment(
 
 @beartype
 def check_matching_bounds(
-    rasters: Sequence[rasterio.io.DatasetReader],
+    raster_profiles: Sequence[rasterio.profiles.Profile],
 ) -> bool:
-    """Check if all input rasters have matching bounds.
+    """Check from profiles if all rasters have matching bounds.
 
     Args:
-        rasters: List of rasters to check.
+        rasters: List of profiles of rasters to check.
 
     Returns:
         True if bounds of each raster matches, False if not.
     """
 
-    bounds = rasters[0].bounds
-    for raster in rasters:
-        if raster.bounds != bounds:
+    bounds = (raster_profiles[0]["transform"][2], raster_profiles[0]["transform"][5])
+    for raster_profile in raster_profiles:
+        if (raster_profile["transform"][2], raster_profile["transform"][5]) != bounds:
             return False
     return True
 
 
 @beartype
-def check_raster_grids(
-    rasters: Sequence[Union[rasterio.io.DatasetReader, rasterio.io.DatasetWriter]], same_extent: bool = False
-) -> bool:
+def check_raster_grids(raster_profiles: Sequence[rasterio.profiles.Profile], same_extent: bool = False) -> bool:
     """
-    Check all input rasters for matching gridding and optionally matching bounds.
+    Check from profiles of rasters for matching gridding and optionally matching bounds.
 
     Args:
-        rasters: List of rasters to test for matching gridding.
+        rasters: List of profiles of rasters to test for matching gridding.
         same_extent: Optional boolean argument that determines if rasters are tested for matching bounds.
             Default set to False.
 
     Returns:
         True if gridding and optionally bounds matches, False if not.
     """
-    if not check_matching_crs(rasters):
+    if not check_matching_crs(raster_profiles):
         return False
-    if not check_matching_pixel_alignment(rasters):
+    if not check_matching_pixel_alignment(raster_profiles):
         return False
-    if same_extent and not check_matching_bounds(rasters):
+    if same_extent and not check_matching_bounds(raster_profiles):
         return False
     return True
 
