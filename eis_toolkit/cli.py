@@ -556,7 +556,7 @@ def extract_window_cli(
 
 
 # CALCULATE GEOMETRY
-@app.command
+@app.command()
 def calculate_geometry_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
 ):
