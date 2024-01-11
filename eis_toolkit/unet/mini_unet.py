@@ -1,5 +1,6 @@
 import glob
 import os
+from typing import Union
 
 import numpy as np
 import numpy.ma as ma
@@ -146,7 +147,7 @@ def label_loader(label_dir: str) -> (np.ndarray, int):
 
 
 @beartype
-def build_autoencoder_multichannel_with_ski_connection(
+def build_autoencoder_multichannel_with_skip_connection(
     input_shape: tuple,
     kernel_shape: tuple,
     list_of_convolutional_layers: list,
@@ -156,10 +157,10 @@ def build_autoencoder_multichannel_with_ski_connection(
     output_filters: int,
     output_kernel: tuple,
     last_activation: str,
-    data_augmentation: False,
+    data_augmentation: bool,
     data_augmentation_params_crop: int,
     data_augmentation_params_rotation: tuple = (-0.3, 0.3),
-    regularization: tf.keras.regularizers = None,
+    regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2, None] = None,
 ) -> tf.keras.Model:
     """
 
@@ -225,6 +226,7 @@ def build_autoencoder_multichannel_with_ski_connection(
         x = concatenate([x, skip_connections[-(layer_counter + 1)]], axis=-1)
 
         if layer_counter == len(list_of_convolutional_layers):
+
             # Output Layer
             x = Conv2D(layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization)(x)
             x = BatchNormalization()(x)
@@ -243,7 +245,6 @@ def build_autoencoder_multichannel_with_ski_connection(
     return autoencoder_multi_channel
 
 
-@beartype()
 def dice_coeff_uncertain(
     y_true: np.ndarray, y_pred: np.ndarray, uncertainmask: np.ndarray, smooth: float = 1e-6
 ) -> (float, np.ndarray):
@@ -263,6 +264,10 @@ def dice_coeff_uncertain(
     Return:
         the dice loss value and the mask.
     """
+
+    y_true = tf.cast(y_true, dtype=tf.float32)
+    y_pred = tf.cast(y_pred, dtype=tf.float32)
+
     if uncertainmask is not None:
         # interpolate the value using the predicted uncertainty
         y_pred = (K.ones_like(uncertainmask) - uncertainmask) * y_true + uncertainmask * y_pred
@@ -275,8 +280,7 @@ def dice_coeff_uncertain(
     return dice, mask
 
 
-@beartype
-def regularization_loss(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+def regularization_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> float:
     """
 
     Do compute the dice loss.
@@ -294,7 +298,7 @@ def regularization_loss(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return reg_loss
 
 
-def keras_dice_coefficient(prediction: np.ndarray, true_label: np.ndarray) -> tf.Tensor:
+def dice_coefficient(prediction: tf.Tensor, true_label: tf.Tensor) -> tf.Tensor:
     """
 
     Do calculate the dice loss coefficient.
@@ -306,12 +310,14 @@ def keras_dice_coefficient(prediction: np.ndarray, true_label: np.ndarray) -> tf
     Return:
         a floating poit representing the loss.
     """
+    prediction = tf.cast(prediction, tf.float32)
+    true_label = tf.cast(true_label, tf.float32)
     numerator = 2 * tf.reduce_sum(prediction * true_label)
     divisor = tf.reduce_sum(prediction**2) + tf.reduce_sum(true_label**2)
     return numerator / divisor
 
 
-def dice_loss(prediction: np.ndarray, true_label: np.ndarray) -> tf.Tensor:
+def dice_loss(prediction: tf.Tensor, true_label: tf.Tensor) -> tf.Tensor:
     """
 
     Do calculate the dice loss.
@@ -322,17 +328,17 @@ def dice_loss(prediction: np.ndarray, true_label: np.ndarray) -> tf.Tensor:
 
     Return:
         a floating poit representing the loss.
+
     """
-    DC = keras_dice_coefficient(prediction, true_label)
+
+    DC = dice_coefficient(prediction, true_label)
     dice_loss = 1 - DC
     return dice_loss
 
 
-@beartype
 def dice_loss_uncertain(
-    y_true: np.ndarray,
-    y_pred: np.ndarray,
-    num_classes: int or np.ndarray = 1,
+    y_true: tf.Tensor,
+    y_pred: tf.Tensor,
     smooth: float = 1e-6,
     uncert_coef: float = 0.2,
 ) -> float or None:
@@ -355,16 +361,11 @@ def dice_loss_uncertain(
     """
     dice = []
 
-    if y_true is not None:
-        if num_classes != np.shape(y_true)[-1]:
-            return None
-
     y_true = y_true[:, :, :, 0]
-
     y_pred_labels = y_pred[:, :, :, 0]
     y_pred_uncertain = y_pred[:, :, :, 1]
 
-    d, m = dice_loss_uncertain(y_true, y_pred_labels, y_pred_uncertain)
+    d, m = dice_coeff_uncertain(y_true, y_pred_labels, y_pred_uncertain)
     if m != 0:
         dice.append(d)
 
@@ -374,7 +375,6 @@ def dice_loss_uncertain(
     return loss
 
 
-@beartype
 def train_and_predict_the_model(
     x_train: np.ndarray,
     y_train: np.ndarray,
@@ -390,10 +390,10 @@ def train_and_predict_the_model(
     output_filters: int = 2,
     output_kernel: tuple = (1, 1),
     last_activation: str = "sigmoid",
-    data_augmentation: True = True,
+    data_augmentation: bool = True,
     data_augmentation_params_crop: int = 28,
     data_augmentation_params_rotation: tuple = (-0.3, 0.3),
-    regularization: tf.keras.regularizers = None,
+    regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2, None] = None,
     uncertainty_coefficient: float = 0.2,
 ) -> np.ndarray:
     """
@@ -441,7 +441,7 @@ def train_and_predict_the_model(
 
     callback = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=3)
 
-    model = build_autoencoder_multichannel_with_ski_connection(
+    model = build_autoencoder_multichannel_with_skip_connection(
         input_shape=x_train.shape[1:],
         kernel_shape=(x_train.shape[-1], x_train.shape[-1]),
         list_of_convolutional_layers=list_of_convolutional_layers,
@@ -458,15 +458,13 @@ def train_and_predict_the_model(
     )
 
     model.compile(
-        optimizer=SGD(learning_rate=0.008, decay=1e-6, momentum=0.9),
-        loss=dice_loss_uncertain(uncert_coef=uncertainty_coefficient) if is_uncertainty else dice_loss,
+        optimizer=SGD(learning_rate=0.008, momentum=0.9),
+        loss=dice_loss_uncertain if is_uncertainty else dice_loss,
     )
 
     model.fit(
         x_train, y_train, validation_data=(x_test, y_test), batch_size=batch_size, epochs=epochs, callbacks=[callback]
     )
 
-    score = model.evaluate(x_test, y_test, verbose=1)
-    print(f"[SCORE] The score of the model is {score[0] * 100}")
     prediction = model.predict(x_test, verbose=1)
     return prediction
