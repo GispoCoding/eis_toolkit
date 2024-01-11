@@ -1041,7 +1041,7 @@ def clr_transform_cli(
 def inverse_clr_transform_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
     output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
-    # colnames: List, # NOTE: Colnames left out for now, as list arguments are tricky in Typer
+    colnames: Annotated[List[str], typer.Option()] = None,
     scale: float = 1.0,
 ):
     """Perform the inverse transformation for a set of CLR transformed data."""
@@ -1054,7 +1054,7 @@ def inverse_clr_transform_cli(
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_df = inverse_clr(df=df, scale=scale)
+    out_df = inverse_clr(df=df, colnames=colnames, scale=scale)
     typer.echo("Progess 75%")
 
     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
@@ -1064,31 +1064,32 @@ def inverse_clr_transform_cli(
 
 
 # CODA - SINGLE ILR TRANSFORM
-# TODO: The subcompositions are difficult to implement in CLI
-# @app.command()
-# def single_ilr_transform_cli(
-#     input_vector: Annotated[Path, INPUT_FILE_OPTION],
-#     output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
-#     subcomposition_1: List,
-#     subcomposition_2: List
-# ):
-#     """Perform a single isometric logratio transformation on the provided subcompositions."""
-#     from eis_toolkit.transformations.coda.ilr import single_ilr_transform
-#     typer.echo("Progress: 10%")
+@app.command()
+def single_ilr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    subcomposition_1: Annotated[List[str], typer.Option()],
+    subcomposition_2: Annotated[List[str], typer.Option()],
+):
+    """Perform a single isometric logratio transformation on the provided subcompositions."""
+    from eis_toolkit.transformations.coda.ilr import single_ilr_transform
 
-#     gdf = gpd.read_file(input_vector)
-#     geometries = gdf["geometry"]
-#     df = pd.DataFrame(gdf.drop(columns="geometry"))
-#     typer.echo("Progress: 25%")
+    typer.echo("Progress: 10%")
 
-#     out_series = single_ilr_transform(df=df, subcomposition_1=subcomposition_1, subcomposition_2=subcomposition_2)
-#     # Is the series one row or one column of the df, or something else?
-#     typer.echo("Progess 75%")
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
 
-#     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
-#     out_gdf.to_file(output_vector)
-#     typer.echo("Progress: 100%")
-#     typer.echo(f"Inverse CLR transform completed, output saved to {output_vector}")
+    out_series = single_ilr_transform(df=df, subcomposition_1=subcomposition_1, subcomposition_2=subcomposition_2)
+    typer.echo("Progess 75%")
+
+    # NOTE: Output of pairwise_logratio might be changed to DF in the future, to automatically do the following
+    df["single_ilr"] = out_series
+    out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Single ILR transform completed, output saved to {output_vector}")
 
 
 # CODA - PAIRWISE LOGRATIO TRANSFORM
