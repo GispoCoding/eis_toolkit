@@ -128,14 +128,6 @@ OUTPUT_DIR_OPTION = typer.Option(
 )
 
 
-def _driver_from_extension(filepath: Path):
-    file_extension = Path(filepath).suffix
-    if file_extension == ".gpkg":
-        return "GPKG"
-    elif file_extension == ".shp":
-        return ""
-
-
 # --- EXPLORATORY ANALYSES ---
 
 
