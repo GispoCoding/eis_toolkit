@@ -23,7 +23,7 @@ from tensorflow.keras.layers import (
 )
 from tensorflow.keras.models import Model
 
-from eis_toolkit.exceptions import InvalidInputException, InvalidNumberOfConv2DLayer
+from eis_toolkit.exceptions import InvalidNumberOfConv2DLayer, NumericValueSignException
 
 
 @beartype
@@ -425,16 +425,16 @@ def train_and_predict_the_model(
     """
 
     if x_train.shape[0] == 0 or x_train is None:
-        raise InvalidInputException
+        raise NumericValueSignException
 
     if x_test.shape[0] == 0 or x_test is None:
-        raise InvalidInputException
+        raise NumericValueSignException
 
     if y_train.shape[0] == 0 or y_train is None:
-        raise InvalidInputException
+        raise NumericValueSignException
 
     if y_test.shape[0] == 0 or y_test is None:
-        raise InvalidInputException
+        raise NumericValueSignException
 
     if len(list_of_convolutional_layers) <= 0:
         raise InvalidNumberOfConv2DLayer

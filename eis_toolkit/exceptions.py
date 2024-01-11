@@ -74,9 +74,5 @@ class NumericValueSignException(Exception):
     """Exception error class for numeric value sign exception."""
 
 
-class InvalidInputException(Exception):
-    """Exception throws when one input of CNN / autoencoders is null or None."""
-
-
 class InvalidNumberOfConv2DLayer(Exception):
     """Exception throws when when the list of conv layers is <= 0."""
