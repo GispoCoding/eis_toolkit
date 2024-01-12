@@ -634,6 +634,27 @@ def extract_window_cli(
 # --- VECTOR PROCESSING ---
 
 
+# EXTRACT SHARED LINES
+@app.command()
+def extract_shared_lines_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Extract shared lines/borders/edges between polygons."""
+    from eis_toolkit.vector_processing.extract_shared_lines import extract_shared_lines
+
+    typer.echo("Progress: 10%")
+
+    polygons = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    out_vector = extract_shared_lines(polygons=polygons)
+    typer.echo("Progress: 75%")
+
+    out_vector.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Extracting shared lines completed, writing vector to {out_vector}")
+
+
 # IDW INTERPOLATION
 @app.command()
 def idw_interpolation_cli(
