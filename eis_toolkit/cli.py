@@ -385,14 +385,14 @@ def check_raster_grids_cli(input_rasters: INPUT_FILES_ARGUMENT, same_extent: boo
 
     typer.echo("Progress: 10%")
 
-    open_rasters = [rasterio.open(raster) for raster in input_rasters]
-    raster_profiles = [raster.profile for raster in open_rasters]
-    typer.echo("Progress: 25%")
-
+    raster_profiles = []
+    for input_raster in input_rasters:
+        with rasterio.open(input_raster) as raster:
+            raster_profiles.append(raster.profile)
+            raster.close()
+    typer.echo("Progress: 50%")
     result = check_raster_grids(raster_profiles=raster_profiles, same_extent=same_extent)
-    typer.echo("Progress: 75%")
 
-    [raster.close() for raster in open_rasters]
     typer.echo("Progress: 100%")
 
     typer.echo(f"Result: {str(result)}")
