@@ -605,6 +605,31 @@ def unify_rasters_cli(
     typer.echo(f"Unifying completed, writing rasters to {output_directory}.")
 
 
+# GET UNIQUE COMBINATIONS
+@app.command()
+def unique_combinations_cli(
+    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    output_directory: Annotated[Path, OUTPUT_DIR_OPTION],
+):
+    """Get combinations of raster values between rasters."""
+    from eis_toolkit.raster_processing.unique_combinations import unique_combinations
+
+    typer.echo("Progress: 10%")
+    rasters = [rasterio.open(rstr) for rstr in input_rasters]
+
+    typer.echo("Progress: 25%")
+    out_image, out_meta = unique_combinations(rasters)
+    [rstr.close() for rstr in rasters]
+
+    typer.echo("Progress: 75%")
+    output_raster = output_directory.joinpath("unique_combinations.tif")
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image, 1)
+
+    typer.echo(f"Writing results to {output_directory}.")
+    typer.echo("Getting unique combinations completed.")
+
+
 # EXTRACT WINDOW
 @app.command()
 def extract_window_cli(
