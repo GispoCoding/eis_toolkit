@@ -6,8 +6,8 @@ from beartype.typing import Sequence, Tuple
 from rasterio.mask import mask
 
 from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
-from eis_toolkit.utilities.checks.crs import check_matching_crs
 from eis_toolkit.utilities.checks.geometry import check_geometry_types
+from eis_toolkit.utilities.checks.raster import check_matching_crs
 
 
 # The core clipping functionality. Used internally by clip.

@@ -6,7 +6,7 @@ from beartype import beartype
 from beartype.typing import Tuple
 
 from eis_toolkit.exceptions import MatchingRasterGridException, NonMatchingCrsException
-from eis_toolkit.utilities.checks.crs import check_matching_crs
+from eis_toolkit.utilities.checks.raster import check_matching_crs
 
 
 # The core snapping functionality. Used internally by snap.

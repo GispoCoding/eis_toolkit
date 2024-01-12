@@ -7,8 +7,8 @@ import rasterio
 from beartype import beartype
 
 from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
-from eis_toolkit.utilities.checks.crs import check_matching_crs
 from eis_toolkit.utilities.checks.geometry import check_geometry_types
+from eis_toolkit.utilities.checks.raster import check_matching_crs
 
 
 def _calculate_base_metrics(
