@@ -990,7 +990,7 @@ def alr_transform_cli(
 def inverse_alr_transform_cli(
     input_vector: Annotated[Path, INPUT_FILE_OPTION],
     output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
-    denominator_column: str = None,
+    denominator_column: str = typer.Option(),
     scale: float = 1.0,
 ):
     """Perform the inverse transformation for a set of ALR transformed data."""
@@ -1119,6 +1119,34 @@ def pairwise_logratio_cli(
     out_gdf.to_file(output_vector)
     typer.echo("Progress: 100%")
     typer.echo(f"Pairwise logratio transform completed, output saved to {output_vector}")
+
+
+# CODA - SINGLE PLR TRANSFORM
+@app.command()
+def single_plr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    column: str = typer.Option(),
+):
+    """Perform a pivot logratio transformation on the selected column."""
+    from eis_toolkit.transformations.coda.plr import single_plr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_series = single_plr_transform(df=df, column=column)
+    typer.echo("Progess 75%")
+
+    # NOTE: Output of single_plr_transform might be changed to DF in the future, to automatically do the following
+    df["single_plr"] = out_series
+    out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Single PLR transform completed, output saved to {output_vector}")
 
 
 # CODA - PLR TRANSFORM
