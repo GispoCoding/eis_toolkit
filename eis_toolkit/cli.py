@@ -634,6 +634,27 @@ def extract_window_cli(
 # --- VECTOR PROCESSING ---
 
 
+# CALCULATE GEOMETRY
+@app.command()
+def calculate_geometry_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Calculate the length or area of the given geometries."""
+    from eis_toolkit.vector_processing.calculate_geometry import calculate_geometry
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    out_vector = calculate_geometry(geodataframe=geodataframe)
+    typer.echo("Progress: 75%")
+
+    out_vector.to_file(output_vector)
+    typer.echo("Progress 100%")
+    typer.echo(f"Calculate geometry completed, writing vector to {output_vector}")
+
+
 # EXTRACT SHARED LINES
 @app.command()
 def extract_shared_lines_cli(
