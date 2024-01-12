@@ -34,6 +34,10 @@ class InvalidColumnIndexException(Exception):
     """Exception error for invalid column index."""
 
 
+class InvalidDataShapeException(Exception):
+    """Exception error for datasets with invalid shapes."""
+
+
 class InvalidParameterValueException(Exception):
     """Exception error class for invalid parameter values."""
 
@@ -96,3 +100,7 @@ class NonNumericDataException(Exception):
 
 class InvalidCompositionException(Exception):
     """Exception error class for when the data is not in suitable form for compositional data transforms."""
+
+
+class SampleSizeExceededException(Exception):
+    """Exception error class for when the data exceeds maximum sample size."""

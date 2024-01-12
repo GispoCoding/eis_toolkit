@@ -8,13 +8,11 @@ license = "EUPL-1.2"
 readme = "README.md"
 homepage = "https://eis-he.eu"
 repository = "https://github.com/GispoCoding/eis_toolkit"
-# documentation = ""
+# See https://pypi.org/classifiers/
 keywords = [
-    "Exploration",
-    "Mineral prospectivity",
-    "Horizon Europe",
-    "Geology",
-    "Packages"
+    "Development Status :: 4 - Beta",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Programming Language :: Python :: 3 :: Only",
 ]
 
 [tool.poetry.scripts]
