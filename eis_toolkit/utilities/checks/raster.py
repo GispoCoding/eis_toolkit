@@ -1,18 +1,16 @@
 import rasterio
 from beartype import beartype
-from beartype.typing import Sequence
-
-from eis_toolkit.utilities.checks.crs import check_matching_crs
+from beartype.typing import Iterable, Sequence, Union
 
 
 @beartype
 def check_matching_cell_size(
-    raster_profiles: Sequence[rasterio.profiles.Profile],
+    raster_profiles: Sequence[Union[rasterio.profiles.Profile, dict]],
 ) -> bool:
-    """Check from profiles of rasters if all have matching cell size.
+    """Check from profiles/metadata of rasters if all have matching cell size.
 
     Args:
-        rasters: List of profiles of rasters to check.
+        rasters: List of profiles/metadata of rasters to check.
 
     Returns:
         True if cell size of each raster matches, False if not.
@@ -26,13 +24,43 @@ def check_matching_cell_size(
 
 
 @beartype
-def check_matching_pixel_alignment(
-    raster_profiles: Sequence[rasterio.profiles.Profile],
-) -> bool:
-    """Check from profiles of rasters if all have matching cell size and matching pixel alignment.
+def check_matching_crs(objects: Iterable) -> bool:
+    """Check if every object in a list has a CRS, and that they match.
 
     Args:
-        rasters: List of profiles of rasters to check.
+        objects: A list of objects to check.
+
+    Returns:
+        True if everything matches, False if not.
+    """
+    epsg_list = []
+
+    for object in objects:
+        if not isinstance(object, (rasterio.profiles.Profile, dict)):
+            if not object.crs:
+                return False
+            epsg = object.crs.to_epsg()
+            epsg_list.append(epsg)
+        else:
+            if "crs" in object:
+                epsg_list.append(object["crs"])
+            else:
+                return False
+
+    if len(set(epsg_list)) != 1:
+        return False
+
+    return True
+
+
+@beartype
+def check_matching_pixel_alignment(
+    raster_profiles: Sequence[Union[rasterio.profiles.Profile, dict]],
+) -> bool:
+    """Check from profiles/metadata of rasters if all have matching cell size and matching pixel alignment.
+
+    Args:
+        rasters: List of profiles/metadata of rasters to check.
 
     Returns:
         True if cell size and pixel alignment matches, False if not.
@@ -54,12 +82,12 @@ def check_matching_pixel_alignment(
 
 @beartype
 def check_matching_bounds(
-    raster_profiles: Sequence[rasterio.profiles.Profile],
+    raster_profiles: Sequence[Union[rasterio.profiles.Profile, dict]],
 ) -> bool:
-    """Check from profiles if all rasters have matching bounds.
+    """Check from profiles/metadata if all rasters have matching bounds.
 
     Args:
-        rasters: List of profiles of rasters to check.
+        rasters: List of profiles/metadata of rasters to check.
 
     Returns:
         True if bounds of each raster matches, False if not.
@@ -73,12 +101,14 @@ def check_matching_bounds(
 
 
 @beartype
-def check_raster_grids(raster_profiles: Sequence[rasterio.profiles.Profile], same_extent: bool = False) -> bool:
+def check_raster_grids(
+    raster_profiles: Sequence[Union[rasterio.profiles.Profile, dict]], same_extent: bool = False
+) -> bool:
     """
-    Check from profiles of rasters for matching gridding and optionally matching bounds.
+    Check from profiles/metadata of rasters for matching gridding and optionally matching bounds.
 
     Args:
-        rasters: List of profiles of rasters to test for matching gridding.
+        rasters: List of profiles/metadata of rasters to test for matching gridding.
         same_extent: Optional boolean argument that determines if rasters are tested for matching bounds.
             Default set to False.
 
