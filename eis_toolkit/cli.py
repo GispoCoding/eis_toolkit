@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import rasterio
 import typer
@@ -140,6 +141,13 @@ class GradientBoostingRegressorLosses(str, Enum):
     absolute_error = "absolute_error"
     huber = "huber"
     quantile = "quantile"
+
+
+class NodataHandling(str, Enum):
+    """Nodata handling choices."""
+
+    replace = "replace"
+    remove = "remove"
 
 
 RESAMPLING_MAPPING = {
@@ -305,25 +313,86 @@ def parallel_coordinates_cli(
     typer.echo("Parallel coordinates plot completed" + echo_str_end)
 
 
-# PCA
+# PCA FOR RASTER DATA
 @app.command()
-def compute_pca_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+def compute_pca_raster_cli(
+    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     number_of_components: int = typer.Option(),
+    # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
+    nodata_handling: NodataHandling = NodataHandling.remove,
+    # NOTE: Omitted nodata parameter. Should use raster nodata.
 ):
-    """Compute principal components for the input data."""
+    """Compute defined number of principal components for raster data."""
+    from eis_toolkit.exploratory_analyses.pca import compute_pca
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
+
+    typer.echo("Progress: 10%")
+
+    stacked_array, profiles = read_and_stack_rasters(input_rasters, nodata_handling="convert_to_nan")
+    typer.echo("Progress: 25%")
+
+    pca_array, variance_ratios = compute_pca(
+        data=stacked_array, number_of_components=number_of_components, nodata_handling=nodata_handling
+    )
+
+    # Fill np.nan with nodata before writing data to raster
+    pca_array[pca_array == np.nan] = -9999
+    out_profile = profiles[0]
+    out_profile["nodata"] = -9999
+
+    # Create dictionary from the variance ratios array
+    variances_ratios_dict = {}
+    for i, variance_ratio in enumerate(variance_ratios):
+        name = "PC " + str(i) + " explained variance"
+        variances_ratios_dict[name] = variance_ratio
+    json_str = json.dumps(variances_ratios_dict)
+
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(pca_array)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo(f"PCA computation (raster) completed, output raster saved to {output_raster}.")
+
+
+# PCA FOR VECTOR DATA
+@app.command()
+def compute_pca_vector_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_components: int = typer.Option(),
+    columns: Annotated[List[str], typer.Option()] = None,
+    # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
+    nodata_handling: NodataHandling = NodataHandling.remove,
+    nodata: float = None,
+):
+    """Compute defined number of principal components for vector data."""
     from eis_toolkit.exploratory_analyses.pca import compute_pca
 
     typer.echo("Progress: 10%")
 
-    geodataframe = gpd.read_file(input_vector)  # TODO: Check if gdf to df handling in tool itself
-    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
+    gdf = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    pca_df, variance_ratios = compute_pca(data=dataframe, number_of_components=number_of_components)
+    pca_gdf, variance_ratios = compute_pca(
+        data=gdf,
+        number_of_components=number_of_components,
+        columns=columns,
+        nodata_handling=nodata_handling,
+        nodata=nodata,
+    )
 
-    pca_df.to_csv(output_file)
+    # Create dictionary from the variance ratios array
+    variances_ratios_dict = {}
+    for i, variance_ratio in enumerate(variance_ratios):
+        name = "PC " + str(i) + " explained variance"
+        variances_ratios_dict[name] = variance_ratio
+    json_str = json.dumps(variances_ratios_dict)
+
+    pca_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo(f"PCA computation (vector) completed, output vector saved to {output_vector}.")
 
 
 # DESCRIPTIVE STATISTICS (RASTER)
