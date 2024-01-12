@@ -7,14 +7,14 @@ from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
 
 from eis_toolkit import exceptions
-from eis_toolkit.prediction.model_utils import (
+from eis_toolkit.prediction.machine_learning_general import (
     _train_and_validate_sklearn_model,
+    evaluate_model,
     load_model,
     predict,
     save_model,
     split_data,
 )
-from eis_toolkit.prediction.model_utils import test_model as model_test
 
 TEST_DIR = Path(__file__).parent.parent
 
@@ -110,15 +110,15 @@ def test_splitting():
     np.testing.assert_equal(len(y_test), len(Y_IRIS) * 0.2)
 
 
-def test_test_model_sklearn():
-    """Test that test model works as expected with a Sklearn model."""
+def test_evaluate_model_sklearn():
+    """Test that evaluating model works as expected with a Sklearn model."""
     X_train, X_test, y_train, y_test = split_data(X_IRIS, Y_IRIS, split_size=0.2, random_state=42)
 
     model, _ = _train_and_validate_sklearn_model(
         X_train, y_train, model=RF_MODEL, validation_method="none", metrics=CLF_METRICS, random_state=42
     )
 
-    out_metrics = model_test(X_test, y_test, model)
+    _, out_metrics = evaluate_model(X_test, y_test, model)
     np.testing.assert_equal(out_metrics["accuracy"], 1.0)
 
 

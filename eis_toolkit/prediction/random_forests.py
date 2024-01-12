@@ -5,7 +5,7 @@ from beartype.typing import Literal, Optional, Sequence, Tuple, Union
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from eis_toolkit import exceptions
-from eis_toolkit.prediction.model_utils import _train_and_validate_sklearn_model
+from eis_toolkit.prediction.machine_learning_general import _train_and_validate_sklearn_model
 
 
 @beartype
