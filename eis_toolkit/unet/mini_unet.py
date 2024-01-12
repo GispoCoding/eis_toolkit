@@ -8,21 +8,6 @@ import rasterio
 import tensorflow as tf
 from beartype import beartype
 from keras.optimizers import SGD
-from tensorflow.keras import backend as K
-from tensorflow.keras.layers import (
-    Activation,
-    BatchNormalization,
-    Conv2D,
-    Dropout,
-    Input,
-    MaxPooling2D,
-    RandomCrop,
-    RandomFlip,
-    RandomRotation,
-    UpSampling2D,
-    concatenate,
-)
-from tensorflow.keras.models import Model
 
 from eis_toolkit.exceptions import InvalidNumberOfConv2DLayer, NumericValueSignException
 
@@ -186,61 +171,77 @@ def build_autoencoder_multichannel_with_skip_connection(
         the built Unet.
     """
     # List to hold all input layers
-    input_img = Input(shape=input_shape)
+    input_img = tf.keras.Input(shape=input_shape)
 
     if data_augmentation:
-        x = RandomFlip()(input_img)
-        x = RandomCrop(data_augmentation_params_crop, data_augmentation_params_crop)(x)
-        x = RandomRotation(data_augmentation_params_rotation)(x)
+        x = tf.keras.layers.RandomFlip()(input_img)
+        x = tf.keras.layers.RandomCrop(data_augmentation_params_crop, data_augmentation_params_crop)(x)
+        x = tf.keras.layers.RandomRotation(data_augmentation_params_rotation)(x)
 
     skip_connections = []
 
     # build the encoder
     for layer_counter, layer in enumerate(list_of_convolutional_layers):
         if layer_counter == 0 and data_augmentation is False:
-            x = Conv2D(layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization)(input_img)
+            x = tf.keras.layers.Conv2D(
+                layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization
+            )(input_img)
         else:
-            x = Conv2D(layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization)(x)
+            x = tf.keras.layers.Conv2D(
+                layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization
+            )(x)
 
-        x = BatchNormalization()(x)
-        x = Activation("relu")(x)
-        x = Conv2D(layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization)(x)
-        x = BatchNormalization()(x)
-        x = Activation("relu")(x)
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.Activation("relu")(x)
+        x = tf.keras.layers.Conv2D(layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization)(
+            x
+        )
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.Activation("relu")(x)
 
         skip_connections.append(x)
-        x = MaxPooling2D(pool_size=(pool_size, pool_size), padding="same")(x)
+        x = tf.keras.layers.MaxPooling2D(pool_size=(pool_size, pool_size), padding="same")(x)
 
     for layer_counter, layer in enumerate(reversed(list_of_convolutional_layers)):
         # Decoder block 1
         # skip_1 = skip_connections[-1]  # Corresponding output from the encoder
-        x = Dropout(dropout)(x)
-        x = Conv2D(layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization)(x)
-        x = BatchNormalization()(x)
-        x = Activation("relu")(x)
-        x = Conv2D(int(layer / 2), kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization)(x)
-        x = BatchNormalization()(x)
-        x = Activation("relu")(x)
+        x = tf.keras.layers.Dropout(dropout)(x)
+        x = tf.keras.layers.Conv2D(layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization)(
+            x
+        )
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.Activation("relu")(x)
+        x = tf.keras.layers.Conv2D(
+            int(layer / 2), kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization
+        )(x)
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.Activation("relu")(x)
 
-        x = UpSampling2D((up_sampling_factor, up_sampling_factor))(x)
-        x = concatenate([x, skip_connections[-(layer_counter + 1)]], axis=-1)
+        x = tf.keras.layers.UpSampling2D((up_sampling_factor, up_sampling_factor))(x)
+        x = tf.keras.layers.concatenate([x, skip_connections[-(layer_counter + 1)]], axis=-1)
 
         if layer_counter == len(list_of_convolutional_layers):
 
             # Output Layer
-            x = Conv2D(layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization)(x)
-            x = BatchNormalization()(x)
-            x = Activation("relu")(x)
-            x = Dropout(dropout)(x)
-            x = Conv2D(layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization)(x)
-            x = BatchNormalization()(x)
-            x = Activation("relu")(x)
+            x = tf.keras.layers.Conv2D(
+                layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization
+            )(x)
+            x = tf.keras.layers.BatchNormalization()(x)
+            x = tf.keras.layers.Activation("relu")(x)
+            x = tf.keras.layers.Dropout(dropout)(x)
+            x = tf.keras.layers.Conv2D(
+                layer, kernel_size=kernel_shape, padding="same", kernel_regularizer=regularization
+            )(x)
+            x = tf.keras.layers.BatchNormalization()(x)
+            x = tf.keras.layers.Activation("relu")(x)
 
     # activation with normalized tanh should be considered because it has steeper gradients
-    decoded = Conv2D(output_filters, kernel_size=output_kernel, activation=last_activation, padding="same")(x)
+    decoded = tf.keras.layers.Conv2D(
+        output_filters, kernel_size=output_kernel, activation=last_activation, padding="same"
+    )(x)
 
     # Create the model
-    autoencoder_multi_channel = Model(input_img, decoded)
+    autoencoder_multi_channel = tf.keras.Model(input_img, decoded)
 
     return autoencoder_multi_channel
 
@@ -270,12 +271,15 @@ def dice_coeff_uncertain(
 
     if uncertainmask is not None:
         # interpolate the value using the predicted uncertainty
-        y_pred = (K.ones_like(uncertainmask) - uncertainmask) * y_true + uncertainmask * y_pred
+        y_pred = (tf.keras.backend.ones_like(uncertainmask) - uncertainmask) * y_true + uncertainmask * y_pred
 
     # want the dice coefficient should always be in 0 and 1
-    intersection = K.sum(y_true * y_pred)
-    dice = (2.0 * intersection) / (K.sum(y_true) + K.sum(y_pred) + smooth)
-    mask = K.cast(K.not_equal(K.sum(y_true) + K.sum(y_pred) - intersection, 0), "float32")
+    intersection = tf.keras.backend.sum(y_true * y_pred)
+    dice = (2.0 * intersection) / (tf.keras.backend.sum(y_true) + tf.keras.backend.sum(y_pred) + smooth)
+    mask = tf.keras.backend.cast(
+        tf.keras.backend.not_equal(tf.keras.backend.sum(y_true) + tf.keras.backend.sum(y_pred) - intersection, 0),
+        "float32",
+    )
 
     return dice, mask
 
@@ -294,7 +298,7 @@ def regularization_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> float:
     """
 
     y_pred_uncertain = y_pred[:, :, :, 1]
-    reg_loss = K.mean(-K.log(y_pred_uncertain[:, :, :]))
+    reg_loss = tf.keras.backend.mean(-tf.keras.backend.log(y_pred_uncertain[:, :, :]))
     return reg_loss
 
 
@@ -369,7 +373,7 @@ def dice_loss_uncertain(
     if m != 0:
         dice.append(d)
 
-    dice_mutilabel = K.sum(dice) / (len(dice) + smooth)
+    dice_mutilabel = tf.keras.backend.sum(dice) / (len(dice) + smooth)
     uncertain_reg = regularization_loss(y_true, y_pred)
     loss = 1 - dice_mutilabel + uncert_coef * uncertain_reg
     return loss
