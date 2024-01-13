@@ -11,6 +11,22 @@ from eis_toolkit.utilities.checks.parameter import check_dtype_for_int
 
 
 @beartype
+def reduce_ndim(
+    data: np.ndarray,
+) -> np.ndarray:
+    """
+    Reduce the number of dimensions of a numpy array.
+
+    Args:
+        data: The input raster data as a numpy array.
+
+    Returns:
+        The reduced array.
+    """
+    return np.squeeze(data) if data.ndim >= 3 else data
+
+
+@beartype
 def replace_values(
     data: np.ndarray, values_to_replace: Union[Number, Sequence[Number]], replace_value: Number
 ) -> np.ndarray:
