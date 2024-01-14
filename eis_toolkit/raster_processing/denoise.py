@@ -175,7 +175,7 @@ def _lee_enhanced(array: np.ndarray, n_looks: int, damping_factor: Number) -> Nu
     local_sd = np.nanstd(array)
     local_mean = np.nanmean(array)
     
-    c_u = 1 / np.sqrt(n_looks)
+    c_u = np.sqrt(1 / n_looks)
     c_max = np.sqrt(1 + 2 / n_looks)
     c_i = local_sd / local_mean if (local_sd != 0 and local_mean != 0) else 0
     
@@ -196,6 +196,8 @@ def _lee_enhanced(array: np.ndarray, n_looks: int, damping_factor: Number) -> Nu
 
 @beartype
 def _lee_sigma() -> Number:
+  # GAMMA ?
+  # https://catalyst.earth/catalyst-system-files/help/concepts/orthoengine_c/Chapter_822.html
   pass
 
 
@@ -228,15 +230,11 @@ def _kuan(array: np.ndarray, n_looks: int) -> Number:
     local_sd = np.nanstd(array)
     local_mean = np.nanmean(array)
     
-    c_u = 1 / np.sqrt(n_looks)
+    c_u = np.sqrt(1 / n_looks)
     c_i = local_sd / local_mean if (local_sd != 0 and local_mean != 0) else 0
       
     weight = (1 - (c_u**2 / c_i**2)) / (1 + c_u**2) if c_i != 0 else 0
-    
-
     weighted_value = (p_center * weight) + local_mean * (1 - weight)                                  
-    
-    weighted_value = (p_center * weight) + (local_mean * (1.0 - weight))
     # weighted_value = p_center / (1 + (local_sd**2 - 1) / local_mean**2) if local_mean != 0 else 0   # Notion
   else:
     weighted_value = np.nan
