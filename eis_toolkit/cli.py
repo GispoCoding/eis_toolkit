@@ -316,7 +316,7 @@ def parallel_coordinates_cli(
 # PCA FOR RASTER DATA
 @app.command()
 def compute_pca_raster_cli(
-    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     number_of_components: int = typer.Option(),
     # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
@@ -341,6 +341,9 @@ def compute_pca_raster_cli(
     out_profile = profiles[0]
     out_profile["nodata"] = -9999
 
+    # Update nr of bands
+    out_profile["count"] = number_of_components
+
     # Create dictionary from the variance ratios array
     variances_ratios_dict = {}
     for i, variance_ratio in enumerate(variance_ratios):
@@ -350,6 +353,7 @@ def compute_pca_raster_cli(
 
     with rasterio.open(output_raster, "w", **out_profile) as dst:
         dst.write(pca_array)
+
     typer.echo("Progress: 100%")
     typer.echo(f"Results: {json_str}")
     typer.echo(f"PCA computation (raster) completed, output raster saved to {output_raster}.")
