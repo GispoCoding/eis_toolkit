@@ -44,6 +44,12 @@ def rasterize_vector(
 
     Returns:
         Rasterized vector data and metadata.
+
+    Raises:
+        EmptyDataFrameException: TODO docstring
+        InvalidParameterValueException: TODO docstring
+        NumericValueSignException: TODO docstring
+        ValueError: TODO docstring
     """
 
     if geodataframe.shape[0] == 0:

@@ -89,6 +89,10 @@ def classify_aspect(
 
     Returns:
         The classified aspect raster, a class mapping dictionary and the updated metadata.
+
+    Raises:
+        InvalidParameterValueException: TODO docstring
+        InvalidRasterBandException: TODO docstring
     """
 
     if raster.count > 1:

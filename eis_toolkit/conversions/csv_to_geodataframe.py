@@ -95,6 +95,11 @@ def csv_to_geodataframe(
 
     Returns:
         CSV file read to a GeoDataFrame.
+
+    Raises:
+        InvalidColumnIndexException: TODO docstring
+        InvalidParameterValueException: TODO docstring
+        InvalidWktFormatException: TODO docstring
     """
 
     data_frame = _csv_to_geodataframe(

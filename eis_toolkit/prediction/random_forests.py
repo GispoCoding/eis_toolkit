@@ -57,6 +57,7 @@ def random_forest_classifier_train(
 
     Raises:
         InvalidParameterValueException: If some of the numeric parameters are given invalid input values.
+        NonMatchingParameterLengthsException: TODO docstring
     """
     if not n_estimators >= 1:
         raise InvalidParameterValueException("N-estimators must be at least 1.")
@@ -132,6 +133,7 @@ def random_forest_regressor_train(
 
     Raises:
         InvalidParameterValueException: If some of the numeric parameters are given invalid input values.
+        NonMatchingParameterLengthsException: TODO docstring
     """
     if not n_estimators >= 1:
         raise InvalidParameterValueException("N-estimators must be at least 1.")

@@ -289,6 +289,11 @@ def weights_of_evidence_calculate_weights(
         Raster metadata.
         Number of deposit pixels.
         Number of all evidence pixels.
+
+    Raises:
+        ClassificationFailedException: TODO docstring
+        InvalidColumnException: TODO docstring
+        InvalidParameterValueException: TODO docstring
     """
 
     if arrays_to_generate is None:

@@ -39,6 +39,9 @@ def unique_combinations(  # type: ignore[no-any-unimported]
     Returns:
         out_image: Combinations of rasters.
         out_meta: The metadata of the first raster in raster_list.
+
+    Raises:
+        InvalidParameterValueException: TODO docstring
     """
     bands = []
     out_meta = raster_list[0].meta

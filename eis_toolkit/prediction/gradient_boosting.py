@@ -69,6 +69,7 @@ def gradient_boosting_classifier_train(
 
     Raises:
         InvalidParameterValueException: If some of the numeric parameters are given invalid input values.
+        NonMatchingParameterLengthsException: TODO docstring
     """
     if not learning_rate >= 0:
         raise InvalidParameterValueException("Learning rate must be non-negative.")
@@ -165,6 +166,7 @@ def gradient_boosting_regressor_train(
 
     Raises:
         InvalidParameterValueException: If some of the numeric parameters are given invalid input values.
+        NonMatchingParameterLengthsException: TODO docstring
     """
     if not learning_rate >= 0:
         raise InvalidParameterValueException("Learning rate must be non-negative.")

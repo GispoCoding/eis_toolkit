@@ -134,13 +134,14 @@ def correlation_matrix(
         correlation_method: 'pearson', 'kendall', or 'spearman'. Defaults to 'pearson'.
         min_periods: Minimum number of observations required per pair of columns to have valid result. Optional.
 
-    Raises:
-        EmptyDataFrameException: The input Dataframe is empty.
-        InvalidParameterValueException: min_periods argument is used with method 'kendall'.
-
     Returns:
         Dataframe containing matrix representing the correlation coefficient \
             between the corresponding pair of variables.
+
+    Raises:
+        EmptyDataFrameException: The input Dataframe is empty.
+        InvalidParameterValueException: min_periods argument is used with method 'kendall'.
+        NonNumericDataException: TODO docstring
     """
     if check_empty_dataframe(data):
         raise EmptyDataFrameException("The input Dataframe is empty.")
@@ -171,12 +172,13 @@ def covariance_matrix(
         min_periods: Minimum number of observations required per pair of columns to have valid result. Optional.
         delta_degrees_of_freedom: Delta degrees of freedom used for computing covariance matrix. Defaults to 1.
 
+    Returns:
+        Dataframe containing matrix representing the covariance between the corresponding pair of variables.
+
     Raises:
         EmptyDataFrameException: The input Dataframe is empty.
         InvalidParameterValueException: Provided value for delta_degrees_of_freedom or min_periods is negative.
-
-    Returns:
-        Dataframe containing matrix representing the covariance between the corresponding pair of variables.
+        NonNumericDataException: TODO docstring
     """
     if check_empty_dataframe(data):
         raise EmptyDataFrameException("The input Dataframe is empty.")
