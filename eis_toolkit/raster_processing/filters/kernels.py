@@ -38,7 +38,7 @@ def create_grid(radius, size):
     Returns:
         Tuple with x and y coordinates of the grid.
     """
-    y, x = np.ogrid[-radius : (size - radius), -radius : (size - radius)]
+    y, x = np.ogrid[-radius : (size - radius), -radius : (size - radius)]  # noqa: E203
     return x, y
 
 
