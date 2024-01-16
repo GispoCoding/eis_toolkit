@@ -47,7 +47,6 @@ def rasterize_vector(
     """
 
     if geodataframe.shape[0] == 0:
-        # Empty GeoDataFrame
         raise EmptyDataFrameException("Expected geodataframe to contain geometries.")
 
     if resolution is None and base_raster_profile is None:
