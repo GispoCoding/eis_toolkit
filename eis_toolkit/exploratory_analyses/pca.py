@@ -10,7 +10,7 @@ from beartype.typing import Literal, Optional, Sequence, Tuple, Union
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler, RobustScaler, StandardScaler
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataException, InvalidColumnException, InvalidParameterValueException
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid
 
 SCALERS = {"standard": StandardScaler, "min_max": MinMaxScaler, "robust": RobustScaler}
@@ -25,7 +25,7 @@ def _prepare_array_data(
         feature_matrix = feature_matrix.transpose(1, 2, 0).reshape(rows * cols, bands)
 
     if feature_matrix.size == 0:
-        raise exceptions.EmptyDataException("Input data is empty.")
+        raise EmptyDataException("Input data is empty.")
 
     return _handle_missing_values(feature_matrix, nodata_handling, nodata_value)
 
@@ -53,7 +53,7 @@ def _handle_missing_values(
         return feature_matrix, None
 
     else:
-        raise exceptions.InvalidParameterValueException("Invalid nodata_handling value. Choose 'remove' or 'replace'.")
+        raise InvalidParameterValueException("Invalid nodata_handling value. Choose 'remove' or 'replace'.")
 
 
 @beartype
@@ -114,10 +114,10 @@ def compute_pca(
         InvalidParameterValueException: If value for `number_of_components` is invalid.
     """
     if scaler_type not in SCALERS:
-        raise exceptions.InvalidParameterValueException(f"Invalid scaler. Choose from: {list(SCALERS.keys())}")
+        raise InvalidParameterValueException(f"Invalid scaler. Choose from: {list(SCALERS.keys())}")
 
     if number_of_components < 1:
-        raise exceptions.InvalidParameterValueException("The number of principal components should be >= 1.")
+        raise InvalidParameterValueException("The number of principal components should be >= 1.")
 
     # Get feature matrix (Numpy array) from various input types
     if isinstance(data, np.ndarray):
@@ -133,21 +133,21 @@ def compute_pca(
                 feature_matrix, nodata_handling=nodata_handling, nodata_value=nodata, reshape=True
             )
         else:
-            raise exceptions.InvalidParameterValueException(
+            raise InvalidParameterValueException(
                 f"Unsupported input data format. {feature_matrix.ndim} dimensions detected for given array."
             )
 
     elif isinstance(data, pd.DataFrame):
         df = data.copy()
         if df.empty:
-            raise exceptions.EmptyDataException("Input DataFrame is empty.")
+            raise EmptyDataException("Input DataFrame is empty.")
         if isinstance(data, gpd.GeoDataFrame):
             geometries = data.geometry
             crs = data.crs
             df = df.drop(columns=["geometry"])
         if columns is not None:
             if not check_columns_valid(df, columns):
-                raise exceptions.InvalidColumnException("All selected columns were not found in the input DataFrame.")
+                raise InvalidColumnException("All selected columns were not found in the input DataFrame.")
             df = df[columns]
 
         df = df.convert_dtypes()
@@ -159,9 +159,7 @@ def compute_pca(
         feature_matrix, nan_mask = _handle_missing_values(feature_matrix, nodata_handling, nodata)
 
     if number_of_components > feature_matrix.shape[1]:
-        raise exceptions.InvalidParameterValueException(
-            "The number of principal components is too high for the given input data."
-        )
+        raise InvalidParameterValueException("The number of principal components is too high for the given input data.")
     # Core PCA computation
     principal_components, explained_variances = _compute_pca(feature_matrix, number_of_components, scaler_type)
 
@@ -220,7 +218,7 @@ def plot_pca(
     """
 
     if color_column_name and color_column_name not in pca_df.columns:
-        raise exceptions.InvalidColumnException("DataFrame does not contain the given color column.")
+        raise InvalidColumnException("DataFrame does not contain the given color column.")
 
     filtered_df = pca_df.filter(regex="^principal_component")
     filtered_df = pd.concat([filtered_df, pca_df[[color_column_name]]], axis=1)

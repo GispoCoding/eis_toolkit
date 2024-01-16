@@ -11,7 +11,7 @@ from beartype.typing import List, Optional, Tuple, Union
 from shapely import wkt
 from shapely.geometry import Point, Polygon
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidColumnException, InvalidParameterValueException
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
@@ -71,29 +71,27 @@ def cell_based_association(
     # Consistency checks on input data
     for frame in geodata:
         if frame.empty:
-            raise exceptions.EmptyDataFrameException("The input GeoDataFrame is empty.")
+            raise EmptyDataFrameException("The input GeoDataFrame is empty.")
 
     if cell_size <= 0:
-        raise exceptions.InvalidParameterValueException("Expected cell size to be positive and non-zero.")
+        raise InvalidParameterValueException("Expected cell size to be positive and non-zero.")
 
     add_buffer = [False if x == 0 else x for x in add_buffer]
     if any(num < 0 for num in add_buffer):
-        raise exceptions.InvalidParameterValueException("Expected buffer value to be positive, null or False.")
+        raise InvalidParameterValueException("Expected buffer value to be positive, null or False.")
 
     for i, name in enumerate(column):
         if column[i] == "":
             if subset_target_attribute_values[i] is not None:
-                raise exceptions.InvalidParameterValueException("Can't use subset of values if no column is targeted.")
+                raise InvalidParameterValueException("Can't use subset of values if no column is targeted.")
         elif column[i] not in geodata[i]:
-            raise exceptions.InvalidColumnException("Targeted column not found in the GeoDataFrame.")
+            raise InvalidColumnException("Targeted column not found in the GeoDataFrame.")
 
     for i, subset in enumerate(subset_target_attribute_values):
         if subset is not None:
             for value in subset:
                 if value not in geodata[i][column[i]].unique():
-                    raise exceptions.InvalidParameterValueException(
-                        "Subset of value(s) not found in the targeted column."
-                    )
+                    raise InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
 
     # Computation
     for i, data in enumerate(geodata):
@@ -356,11 +354,11 @@ def _check_and_prepare_param(
             subset_target_attribute_values = geodata[column].unique()
     identified_values = pd.Series(subset_target_attribute_values)
     if column not in geodata.columns:
-        raise exceptions.InvalidColumnException("Targeted column not found in the GeoData.")
+        raise InvalidColumnException("Targeted column not found in the GeoData.")
     if identified_values.isin(geodata[column]).all() is False:
-        raise exceptions.InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
+        raise InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
     if len(subset_target_attribute_values) == 0:
-        raise exceptions.InvalidParameterValueException("Subset of value(s) is empty.")
+        raise InvalidParameterValueException("Subset of value(s) is empty.")
 
     return dummification, column, list(identified_values)
 

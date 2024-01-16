@@ -5,7 +5,7 @@ from beartype.typing import Literal, Optional, Tuple, Union
 from rasterio import features, profiles, transform
 from rasterio.enums import MergeAlg
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException, NumericValueSignException
 
 
 @beartype
@@ -48,27 +48,21 @@ def rasterize_vector(
 
     if geodataframe.shape[0] == 0:
         # Empty GeoDataFrame
-        raise exceptions.EmptyDataFrameException("Expected geodataframe to contain geometries.")
+        raise EmptyDataFrameException("Expected geodataframe to contain geometries.")
 
     if resolution is None and base_raster_profile is None:
-        raise exceptions.InvalidParameterValueException(
-            "Expected either resolution or base_raster_profile to be given."
-        )
+        raise InvalidParameterValueException("Expected either resolution or base_raster_profile to be given.")
     if resolution is not None and resolution <= 0:
-        raise exceptions.NumericValueSignException(
-            f"Expected a positive value resolution ({dict(resolution=resolution)})"
-        )
+        raise NumericValueSignException(f"Expected a positive value resolution ({dict(resolution=resolution)})")
     if value_column is not None and value_column not in geodataframe.columns:
-        raise exceptions.InvalidParameterValueException(
+        raise InvalidParameterValueException(
             f"Expected value_column ({value_column}) to be contained in geodataframe columns."
         )
     if buffer_value is not None and buffer_value < 0:
-        raise exceptions.NumericValueSignException(
-            f"Expected a positive buffer_value ({dict(buffer_value=buffer_value)})"
-        )
+        raise NumericValueSignException(f"Expected a positive buffer_value ({dict(buffer_value=buffer_value)})")
 
     if base_raster_profile is not None and not isinstance(base_raster_profile, (profiles.Profile, dict)):
-        raise exceptions.InvalidParameterValueException(
+        raise InvalidParameterValueException(
             f"Expected base_raster_profile ({type(base_raster_profile)}) to be dict or rasterio.profiles.Profile."
         )
 

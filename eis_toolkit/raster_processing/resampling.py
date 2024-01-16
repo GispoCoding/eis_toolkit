@@ -7,7 +7,7 @@ from beartype.typing import Tuple
 from rasterio import warp
 from rasterio.enums import Resampling
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import NumericValueSignException
 
 
 def _resample(
@@ -72,7 +72,7 @@ def resample(
         NumericValueSignException: Resolution is not a positive value.
     """
     if resolution <= 0:
-        raise exceptions.NumericValueSignException(f"Expected a positive value for resolution: {resolution})")
+        raise NumericValueSignException(f"Expected a positive value for resolution: {resolution})")
 
     out_image, out_meta = _resample(raster, resolution, resampling_method)
     return out_image, out_meta

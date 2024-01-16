@@ -4,7 +4,7 @@ from beartype import beartype
 from beartype.typing import Literal, Optional, Sequence, Tuple, Union
 from sklearn.linear_model import LogisticRegression
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.prediction.machine_learning_general import _train_and_validate_sklearn_model
 
 
@@ -67,9 +67,9 @@ def logistic_regression_train(
         InvalidParameterValueException: If some of the numeric parameters are given invalid input values.
     """
     if max_iter < 1:
-        raise exceptions.InvalidParameterValueException("Max iter must be > 0.")
+        raise InvalidParameterValueException("Max iter must be > 0.")
     if verbose < 0:
-        raise exceptions.InvalidParameterValueException("Verbose must be a non-negative number.")
+        raise InvalidParameterValueException("Verbose must be a non-negative number.")
 
     model = LogisticRegression(
         penalty=penalty, max_iter=max_iter, random_state=random_state, solver=solver, verbose=verbose, **kwargs

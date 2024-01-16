@@ -5,7 +5,7 @@ import pandas as pd
 from beartype import beartype
 from imblearn.combine import SMOTETomek
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import NonMatchingParameterLengthsException
 
 
 @beartype
@@ -36,9 +36,7 @@ def balance_SMOTETomek(
     """
 
     if len(X) != len(y):
-        raise exceptions.NonMatchingParameterLengthsException(
-            "Feature matrix X and target labels y must have the same length."
-        )
+        raise NonMatchingParameterLengthsException("Feature matrix X and target labels y must have the same length.")
 
     x_res, y_res = SMOTETomek(sampling_strategy=sampling_strategy, random_state=random_state).fit_resample(X, y)
     return x_res, y_res

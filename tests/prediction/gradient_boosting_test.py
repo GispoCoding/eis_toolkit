@@ -3,7 +3,7 @@ import pytest
 from sklearn.datasets import load_iris
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.prediction.gradient_boosting import (
     gradient_boosting_classifier_train,
     gradient_boosting_regressor_train,
@@ -48,31 +48,31 @@ def test_gradient_boosting_regressor():
 
 def test_invalid_learning_rate():
     """Test that invalid value for learning rate raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         gradient_boosting_classifier_train(X_IRIS, Y_IRIS, learning_rate=-1)
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         gradient_boosting_regressor_train(X_IRIS, Y_IRIS, learning_rate=-1)
 
 
 def test_invalid_n_estimators():
     """Test that invalid value for n estimators raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         gradient_boosting_classifier_train(X_IRIS, Y_IRIS, n_estimators=0)
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         gradient_boosting_regressor_train(X_IRIS, Y_IRIS, n_estimators=0)
 
 
 def test_invalid_max_depth():
     """Test that invalid value for max depth raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         gradient_boosting_classifier_train(X_IRIS, Y_IRIS, max_depth=0)
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         gradient_boosting_regressor_train(X_IRIS, Y_IRIS, max_depth=0)
 
 
 def test_invalid_subsample():
     """Test that invalid value for subsample raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         gradient_boosting_classifier_train(X_IRIS, Y_IRIS, subsample=0)
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         gradient_boosting_regressor_train(X_IRIS, Y_IRIS, subsample=0)

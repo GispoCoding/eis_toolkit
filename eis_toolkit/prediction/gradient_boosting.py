@@ -6,7 +6,7 @@ from beartype import beartype
 from beartype.typing import Literal, Optional, Sequence, Tuple, Union
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.prediction.machine_learning_general import _train_and_validate_sklearn_model
 
 
@@ -71,15 +71,15 @@ def gradient_boosting_classifier_train(
         InvalidParameterValueException: If some of the numeric parameters are given invalid input values.
     """
     if not learning_rate >= 0:
-        raise exceptions.InvalidParameterValueException("Learning rate must be non-negative.")
+        raise InvalidParameterValueException("Learning rate must be non-negative.")
     if not n_estimators >= 1:
-        raise exceptions.InvalidParameterValueException("N-estimators must be at least 1.")
+        raise InvalidParameterValueException("N-estimators must be at least 1.")
     if max_depth is not None and not max_depth >= 1:
-        raise exceptions.InvalidParameterValueException("Max depth must be at least 1 or None.")
+        raise InvalidParameterValueException("Max depth must be at least 1 or None.")
     if not (0 < subsample <= 1):
-        raise exceptions.InvalidParameterValueException("Subsample must be more than 0 and at most 1.")
+        raise InvalidParameterValueException("Subsample must be more than 0 and at most 1.")
     if verbose < 0:
-        raise exceptions.InvalidParameterValueException("Verbose must be a non-negative number.")
+        raise InvalidParameterValueException("Verbose must be a non-negative number.")
 
     model = GradientBoostingClassifier(
         loss=loss,
@@ -167,15 +167,15 @@ def gradient_boosting_regressor_train(
         InvalidParameterValueException: If some of the numeric parameters are given invalid input values.
     """
     if not learning_rate >= 0:
-        raise exceptions.InvalidParameterValueException("Learning rate must be non-negative.")
+        raise InvalidParameterValueException("Learning rate must be non-negative.")
     if not n_estimators >= 1:
-        raise exceptions.InvalidParameterValueException("N-estimators must be at least 1.")
+        raise InvalidParameterValueException("N-estimators must be at least 1.")
     if max_depth is not None and not max_depth >= 1:
-        raise exceptions.InvalidParameterValueException("Max depth must be at least 1 or None.")
+        raise InvalidParameterValueException("Max depth must be at least 1 or None.")
     if not (0 < subsample <= 1):
-        raise exceptions.InvalidParameterValueException("Subsample must be more than 0 and at most 1.")
+        raise InvalidParameterValueException("Subsample must be more than 0 and at most 1.")
     if verbose < 0:
-        raise exceptions.InvalidParameterValueException("Verbose must be a non-negative number.")
+        raise InvalidParameterValueException("Verbose must be a non-negative number.")
 
     model = GradientBoostingRegressor(
         loss=loss,
