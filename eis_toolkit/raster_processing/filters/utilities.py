@@ -1,12 +1,13 @@
 from numbers import Number
 
 import numpy as np
+import rasterio
 from beartype import beartype
 from beartype.typing import Callable, Optional
 from scipy.ndimage import correlate, generic_filter
 
 from eis_toolkit.exceptions import InvalidParameterValueException, InvalidRasterBandException
-from eis_toolkit.raster_processing.filters.kernels import get_kernel_size
+from eis_toolkit.raster_processing.filters.kernels import _get_kernel_size
 from eis_toolkit.utilities.checks.raster import check_single_band
 
 
@@ -54,10 +55,10 @@ def check_filter_size(sigma: Optional[Number], truncate: Optional[Number], size:
 
     Raises:
         InvalidParameterValueException: If the resulting filter radius is too small.
-                                        If the filter size is not allowed.
+            If the filter size is not allowed.
     """
     if size is None:
-        _, radius = get_kernel_size(sigma, truncate, size)
+        _, radius = _get_kernel_size(sigma, truncate, size)
 
         if radius < 1:
             raise InvalidParameterValueException(
@@ -71,7 +72,7 @@ def check_filter_size(sigma: Optional[Number], truncate: Optional[Number], size:
 
 
 @beartype
-def check_inputs(raster, size, sigma=None, truncate=None, **kwargs):
+def check_inputs(raster: rasterio.io.DatasetReader, size: Optional[int], sigma: Optional[Number] = None, truncate: Optional[Number] = None, **kwargs):
     """
     Check the inputs.
 
@@ -85,7 +86,7 @@ def check_inputs(raster, size, sigma=None, truncate=None, **kwargs):
     Raises:
         InvalidRasterBandException: If the raster has more than one band.
         InvalidParameterValueException: If the value of n_looks is less than 1.
-                                        If the value of damping_factor is negative.
+            If the value of damping_factor is negative.
     """
     if check_single_band(raster) is False:
         raise InvalidRasterBandException("Only one-band raster supported.")

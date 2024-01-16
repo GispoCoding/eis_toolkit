@@ -1,11 +1,12 @@
 import numpy as np
+from numbers import Number
 from beartype import beartype
-from beartype.typing import Literal
+from beartype.typing import Literal, Optional
 from scipy.signal import ricker
 
 
 @beartype
-def get_kernel_size(sigma, truncate, size):
+def _get_kernel_size(sigma: Number, truncate: Number, size: int) -> tuple[int, int]:
     """
     Calculate the kernel size and radius based on the given parameters.
 
@@ -27,7 +28,7 @@ def get_kernel_size(sigma, truncate, size):
 
 
 @beartype
-def create_grid(radius, size):
+def _create_grid(radius: int, size: int) -> tuple[np.ndarray, np.ndarray]:
     """
     Create a grid of coordinates.
 
@@ -36,7 +37,7 @@ def create_grid(radius, size):
         size: The size of the grid.
 
     Returns:
-        Tuple with x and y coordinates of the grid.
+        A tuple with x and y coordinates of the grid.
     """
     y, x = np.ogrid[-radius : (size - radius), -radius : (size - radius)]  # noqa: E203
     return x, y
@@ -52,13 +53,13 @@ def basic_kernel(size: int, shape: Literal["square", "circle"]) -> np.ndarray:
         shape: The shape of the kernel. Can be either "square" or "circle".
 
     Returns:
-        np.ndarray: The generated kernel.
+        The generated kernel.
     """
     if shape == "square":
         kernel = np.ones((size, size))
     elif shape == "circle":
         radius = int(size // 2)
-        x, y = create_grid(radius, size)
+        x, y = _create_grid(radius, size)
         mask = x**2 + y**2 <= radius**2
         kernel = np.zeros((size, size))
         kernel[mask] = 1
@@ -67,7 +68,7 @@ def basic_kernel(size: int, shape: Literal["square", "circle"]) -> np.ndarray:
 
 
 @beartype
-def gaussian_kernel(sigma, truncate, size):
+def gaussian_kernel(sigma: Number, truncate: Number, size: Optional[int]) -> np.ndarray:
     """
     Generate a Gaussian kernel for image denoising.
 
@@ -79,9 +80,9 @@ def gaussian_kernel(sigma, truncate, size):
     Returns:
         The Gaussian kernel.
     """
-    size, radius = get_kernel_size(sigma, truncate, size)
+    size, radius = _get_kernel_size(sigma, truncate, size)
 
-    x, y = create_grid(radius, size)
+    x, y = _create_grid(radius, size)
     kernel = 1 / (2 * np.pi * sigma**2) * np.exp((x**2 + y**2) / (2 * sigma**2) * -1)
     kernel /= np.max(kernel)
 
@@ -89,7 +90,7 @@ def gaussian_kernel(sigma, truncate, size):
 
 
 @beartype
-def mexican_hat_kernel(sigma, truncate, size, direction):
+def mexican_hat_kernel(sigma: Number, truncate: Number, size: Optional[int], direction: Literal["rectangular", "circular"]) -> np.ndarray:
     """
     Generate a Mexican Hat kernel for denoising (circular) or edge detection (rectangular).
 
@@ -97,18 +98,18 @@ def mexican_hat_kernel(sigma, truncate, size, direction):
         sigma: The standard deviation of the Gaussian function.
         truncate: The truncation factor for the Gaussian function.
         size: The size of the kernel.
-        direction: The direction of the kernel, either "rectangular" or "circular".
+        direction: Shape of the value distribution, either "rectangular" or "circular".
 
     Returns:
         The Mexican Hat kernel.
     """
-    size, radius = get_kernel_size(sigma, truncate, size)
+    size, radius = _get_kernel_size(sigma, truncate, size)
 
     if direction == "rectangular":
         ricker_wavelet = ricker(size, sigma)
         kernel = np.outer(ricker_wavelet, ricker_wavelet)
     elif direction == "circular":
-        x, y = create_grid(radius, size)
+        x, y = _create_grid(radius, size)
         kernel = (
             2
             / np.sqrt(3 * sigma)

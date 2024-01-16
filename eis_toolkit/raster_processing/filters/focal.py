@@ -23,24 +23,24 @@ def focal_filter(
     method: Literal["mean", "median"] = "mean",
     size: int = 3,
     shape: Literal["square", "circle"] = "circle",
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict]:
     """
     Apply a basic focal filter to the input raster.
 
-    Parameters:
-      raster: The input raster dataset.
-      method: The method to use for filtering. Can be either "mean" or "median". Default to "mean".
-      size: The size of the filter window. E.g., 3 means a 3x3 window. Default to 3.
-      shape: The shape of the filter window. Can be either "square" or "circle". Default to "circle".
+    Args:
+        raster: The input raster dataset.
+        method: The method to use for filtering. Can be either "mean" or "median". Default to "mean".
+        size: The size of the filter window. E.g., 3 means a 3x3 window. Default to 3.
+        shape: The shape of the filter window. Can be either "square" or "circle". Default to "circle".
 
     Returns:
-      np.ndarray: The filtered raster array.
+        The filtered raster array.
 
     Raises:
-      InvalidRasterBandException: If the input raster has more than one band.
-      InvalidParameterValueException: If the filter size is smaller than 3.
-                                      If the filter size is not an odd number.
-                                      If the shape is not "square" or "circle".
+        InvalidRasterBandException: If the input raster has more than one band.
+        InvalidParameterValueException: If the filter size is smaller than 3.
+            If the filter size is not an odd number.
+            If the shape is not "square" or "circle".
     """
     check_inputs(raster, size)
 
@@ -56,7 +56,10 @@ def focal_filter(
         out_array = apply_generic_filter(raster_array, _focal_median, kernel)
 
     out_array = nan_to_nodata(out_array, raster.nodata)
-    return cast_array_to_float(out_array, cast_float=True)
+    out_array = cast_array_to_float(out_array, cast_float=True)
+    out_meta = raster.meta.copy()
+    
+    return out_array, out_meta
 
 
 @beartype
@@ -69,24 +72,24 @@ def gaussian_filter(
     """
     Apply a gaussian filter to the input raster.
 
-    Parameters:
-      raster: The input raster dataset.
-      sigma: The standard deviation of the gaussian kernel.
-      truncate: The truncation factor for the gaussian kernel based on the sigma value.
-                Only if size is not given. Default to 4.0.
-                E.g., for sigma = 1 and truncate = 4.0, the kernel size is 9x9.
-      size: The size of the filter window. E.g., 3 means a 3x3 window.
+    Args:
+        raster: The input raster dataset.
+        sigma: The standard deviation of the gaussian kernel.
+        truncate: The truncation factor for the gaussian kernel based on the sigma value.
+            Only if size is not given. Default to 4.0.
+            E.g., for sigma = 1 and truncate = 4.0, the kernel size is 9x9.
+        size: The size of the filter window. E.g., 3 means a 3x3 window.
             If size is not None, it overrides the dynamic size calculation based on sigma and truncate.
             Default to None.
 
     Returns:
-      np.ndarray: The filtered raster array.
+        The filtered raster array.
 
     Raises:
-      InvalidRasterBandException: If the input raster has more than one band.
-      InvalidParameterValueException: If the filter size is smaller than 3.
-                                      If the filter size is not an odd number.
-                                      If the resulting radius is smaller than 1.
+        InvalidRasterBandException: If the input raster has more than one band.
+        InvalidParameterValueException: If the filter size is smaller than 3.
+            If the filter size is not an odd number.
+            If the resulting radius is smaller than 1.
     """
     check_inputs(raster, size, sigma, truncate)
 
@@ -99,7 +102,10 @@ def gaussian_filter(
     out_array = apply_correlated_filter(raster_array, kernel)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
-    return cast_array_to_float(out_array, cast_float=True)
+    out_array = cast_array_to_float(out_array, cast_float=True)
+    out_meta = raster.meta.copy()
+    
+    return out_array, out_meta
 
 
 @beartype
@@ -116,24 +122,24 @@ def mexican_hat_filter(
     Circular: Lowpass filter for smoothing.
     Rectangular: Highpass filter for edge detection. Results may need further normalization.
 
-    Parameters:
-      raster: The input raster dataset.
-      sigma: The standard deviation.
-      truncate: The truncation factor.
-                E.g., for sigma = 1 and truncate = 4.0, the kernel size is 9x9.
-                Default to 4.0.
-      size: The size of the filter window. E.g., 3 means a 3x3 window. Default to None.
-      direction: The direction of calculating the kernel values.
-                 Can be either "rectangular" or "circular". Default to "circular".
+    Args:
+        raster: The input raster dataset.
+        sigma: The standard deviation.
+        truncate: The truncation factor.
+            E.g., for sigma = 1 and truncate = 4.0, the kernel size is 9x9.
+            Default to 4.0.
+        size: The size of the filter window. E.g., 3 means a 3x3 window. Default to None.
+        direction: The direction of calculating the kernel values.
+            Can be either "rectangular" or "circular". Default to "circular".
 
     Returns:
-      np.ndarray: The filtered raster array.
+       The filtered raster array.
 
     Raises:
-      InvalidRasterBandException: If the input raster has more than one band.
-      InvalidParameterValueException: If the filter size is smaller than 3.
-                                      If the filter size is not an odd number.
-                                      If the resulting radius is smaller than 1.
+        InvalidRasterBandException: If the input raster has more than one band.
+        InvalidParameterValueException: If the filter size is smaller than 3.
+            If the filter size is not an odd number.
+            If the resulting radius is smaller than 1.
     """
     check_inputs(raster, size, sigma, truncate)
 
@@ -146,4 +152,7 @@ def mexican_hat_filter(
     out_array = apply_correlated_filter(raster_array, kernel)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
-    return cast_array_to_float(out_array, cast_float=True)
+    out_array = cast_array_to_float(out_array, cast_float=True)
+    out_meta = raster.meta.copy()
+    
+    return out_array, out_meta

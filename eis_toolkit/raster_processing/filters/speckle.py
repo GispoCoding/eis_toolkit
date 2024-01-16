@@ -11,6 +11,16 @@ from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
 @beartype
 def _lee_additive_noise(window: np.ndarray, add_noise_var: Number) -> Number:
+    """
+    Calculate the weighted value for a Lee filter (additive noise) from a window of pixels.
+
+    Args:
+        window: The moving window of pixels.
+        add_noise_var: The variance of the additive noise.
+
+    Returns:
+        The filtered value.
+    """
     p_center = window[window.shape[0] // 2]
 
     if not np.isnan(p_center):
@@ -26,12 +36,23 @@ def _lee_additive_noise(window: np.ndarray, add_noise_var: Number) -> Number:
 
 
 @beartype
-def _lee_multiplicative_noise(array: np.ndarray, mult_noise_mean: Number, n_looks: int) -> Number:
-    p_center = array[array.shape[0] // 2]
+def _lee_multiplicative_noise(window: np.ndarray, mult_noise_mean: Number, n_looks: int) -> Number:
+    """
+    Calculate the weighted value for a Lee filter (multiplicative noise) from a window of pixels.
+
+    Args:
+        window: The moving window of pixels.
+        mult_noise_mean: The mean of the multiplicative noise.
+        n_looks: Number of looks to estimate the noise variation.
+
+    Returns:
+        The filtered value.
+    """
+    p_center = window[window.shape[0] // 2]
 
     if not np.isnan(p_center):
-        local_var = np.nanvar(array)
-        local_mean = np.nanmean(array)
+        local_var = np.nanvar(window)
+        local_mean = np.nanmean(window)
 
         mult_noise_var = 1 / n_looks
 
@@ -48,14 +69,26 @@ def _lee_multiplicative_noise(array: np.ndarray, mult_noise_mean: Number, n_look
 
 @beartype
 def _lee_additive_multiplicative_noise(
-    array: np.ndarray, add_noise_var: Number, add_noise_mean: Number, mult_noise_mean: Number
+    window: np.ndarray, add_noise_var: Number, add_noise_mean: Number, mult_noise_mean: Number
 ) -> Number:
-    p_center = array[array.shape[0] // 2]
+    """
+    Calculate the weighted value for a Lee filter (additive and multiplicative noise) from a window of pixels.
+
+    Args:
+        window: The moving window of pixels.
+        add_noise_var: The variance of the additive noise.
+        add_noise_mean: The mean of the additive noise.
+        mult_noise_mean: The mean of the multiplicative noise.
+
+    Returns:
+        The filtered value.
+    """
+    p_center = window[window.shape[0] // 2]
 
     if not np.isnan(p_center):
-        local_var = np.nanvar(array)
-        local_sd = np.nanstd(array)
-        local_mean = np.nanmean(array)
+        local_var = np.nanvar(window)
+        local_sd = np.nanstd(window)
+        local_mean = np.nanmean(window)
 
         mult_noise_var = np.power((local_sd / local_mean), 2) if (local_sd != 0 and local_mean != 0) else 0
         weight = (mult_noise_mean * local_var) / (
@@ -69,12 +102,23 @@ def _lee_additive_multiplicative_noise(
 
 
 @beartype
-def _lee_enhanced(array: np.ndarray, n_looks: int, damping_factor: Number) -> Number:
-    p_center = array[array.shape[0] // 2]
+def _lee_enhanced(window: np.ndarray, n_looks: int, damping_factor: Number) -> Number:
+    """
+    Calculate the weighted value for a Lee enhanced filter from a window of pixels.
+
+    Args:
+        window: The moving window of pixels.
+        n_looks: Number of looks to estimate the noise variation.
+        damping_factor: Damping effect on filtering.
+
+    Returns:
+        The filtered value.
+    """
+    p_center = window[window.shape[0] // 2]
 
     if not np.isnan(p_center):
-        local_sd = np.nanstd(array)
-        local_mean = np.nanmean(array)
+        local_sd = np.nanstd(window)
+        local_mean = np.nanmean(window)
 
         noise_sd = np.sqrt(1 / n_looks)
         variation = local_sd / local_mean if (local_sd != 0 and local_mean != 0) else 0
@@ -97,12 +141,22 @@ def _lee_enhanced(array: np.ndarray, n_looks: int, damping_factor: Number) -> Nu
     return weighted_value
 
 
-def _gamma(array: np.ndarray, n_looks: int) -> np.ndarray:
-    p_center = array[array.shape[0] // 2]
+def _gamma(window: np.ndarray, n_looks: int) -> np.ndarray:
+    """
+    Calculate the weighted value for a Gamma filter from a window of pixels.
+
+    Args:
+        window: The moving window of pixels.
+        n_looks: Number of looks to estimate the noise variation.
+
+    Returns:
+        The filtered value.
+    """
+    p_center = window[window.shape[0] // 2]
 
     if not np.isnan(p_center):
-        local_sd = np.nanstd(array)
-        local_mean = np.nanmean(array)
+        local_sd = np.nanstd(window)
+        local_mean = np.nanmean(window)
 
         noise_sd = np.sqrt(1 / n_looks)
         variation = local_sd / local_mean if (local_sd != 0 and local_mean != 0) else 0
@@ -125,19 +179,29 @@ def _gamma(array: np.ndarray, n_looks: int) -> np.ndarray:
 
 
 @beartype
-def _frost(array: np.ndarray, damping_factor: int) -> Number:
-    p_center = array[array.shape[0] // 2]
+def _frost(window: np.ndarray, damping_factor: int) -> Number:
+    """
+    Calculate the weighted value for a Frost filter from a window of pixels.
+
+    Args:
+        window: The moving window of pixels.
+        damping_factor: Damping effect on filtering.
+
+    Returns:
+        The filtered value.
+    """
+    p_center = window[window.shape[0] // 2]
 
     if not np.isnan(p_center):
-        s_dist = np.abs(array - p_center)
-        local_var = np.nanvar(array)
-        local_mean = np.nanmean(array)
+        s_dist = np.abs(window - p_center)
+        local_var = np.nanvar(window)
+        local_mean = np.nanmean(window)
 
         scaled_var = local_var / local_mean**2 if (local_var != 0 and local_mean != 0) else 0
         factor_b = damping_factor * scaled_var
         array_weights = np.exp(-factor_b * s_dist)
 
-        weighted_array = array * array_weights
+        weighted_array = window * array_weights
         weighted_value = np.nansum(weighted_array) / np.nansum(array_weights)
     else:
         weighted_value = np.nan
@@ -146,12 +210,22 @@ def _frost(array: np.ndarray, damping_factor: int) -> Number:
 
 
 @beartype
-def _kuan(array: np.ndarray, n_looks: int) -> Number:
-    p_center = array[array.shape[0] // 2]
+def _kuan(window: np.ndarray, n_looks: int) -> Number:
+    """
+    Calculate the weighted value for a Kuan filter from a window of pixels.
+
+    Args:
+        window: The moving window of pixels.
+        n_looks: Number of looks to estimate the noise variation.
+
+    Returns:
+        The filtered value.
+    """
+    p_center = window[window.shape[0] // 2]
 
     if not np.isnan(p_center):
-        local_sd = np.nanstd(array)
-        local_mean = np.nanmean(array)
+        local_sd = np.nanstd(window)
+        local_mean = np.nanmean(window)
 
         noise_sd = np.sqrt(1 / n_looks)
         variation = local_sd / local_mean if (local_sd != 0 and local_mean != 0) else 0
@@ -179,18 +253,19 @@ def lee_additive_noise_filter(
 
     Lower noise values result in better edge preservation.
 
-    Parameters:
-      raster: The input raster dataset.
-      size = The size of the filter window. E.g., 3 means a 3x3 window. Default to 3.
-      add_noise_var: The additive noise variation. Default to 0.25.
+    Args:
+        raster: The input raster dataset.
+        size: The size of the filter window. 
+            E.g., 3 means a 3x3 window. Default to 3.
+        add_noise_var: The additive noise variation. Default to 0.25.
 
     Returns:
-      np.ndarray: The filtered raster array.
+        The filtered raster array.
 
     Raises:
-      InvalidRasterBandException: If the input raster has more than one band.
-      InvalidParameterValueException: If the filter size is smaller than 3.
-                                      If the filter size is not an odd number.
+        InvalidRasterBandException: If the input raster has more than one band.
+        InvalidParameterValueException: If the filter size is smaller than 3.
+            If the filter size is not an odd number.
     """
     check_inputs(raster, size)
 
@@ -203,7 +278,10 @@ def lee_additive_noise_filter(
     out_array = apply_generic_filter(raster_array, _lee_additive_noise, kernel, add_noise_var)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
-    return cast_array_to_float(out_array, cast_float=True)
+    out_array = cast_array_to_float(out_array, cast_float=True)
+    out_meta = raster.meta.copy()
+    
+    return out_array, out_meta
 
 
 @beartype
@@ -218,20 +296,21 @@ def lee_multiplicative_noise_filter(
 
     Higher number of looks result in better edge preservation.
 
-
-    Parameters:
-      raster: The input raster dataset.
-      size = The size of the filter window. E.g., 3 means a 3x3 window. Default to 3.
-      mult_noise_mean: The multiplative noise mean. Default to 1.
-      n_looks: Number of looks to estimate the noise variation. Higher values result in higher smoothing. Default to 1.
+    Args:
+        raster: The input raster dataset.
+        size: The size of the filter window. 
+            E.g., 3 means a 3x3 window. Default to 3.
+        mult_noise_mean: The multiplative noise mean. Default to 1.
+        n_looks: Number of looks to estimate the noise variation. 
+            Higher values result in higher smoothing. Default to 1.
 
     Returns:
-      np.ndarray: The filtered raster array.
+        The filtered raster array.
 
     Raises:
-      InvalidRasterBandException: If the input raster has more than one band.
-      InvalidParameterValueException: If the filter size is smaller than 3.
-                                      If the filter size is not an odd number.
+        InvalidRasterBandException: If the input raster has more than one band.
+        InvalidParameterValueException: If the filter size is smaller than 3.
+            If the filter size is not an odd number.
     """
     check_inputs(raster, size, n_looks=n_looks)
 
@@ -244,7 +323,10 @@ def lee_multiplicative_noise_filter(
     out_array = apply_generic_filter(raster_array, _lee_multiplicative_noise, kernel, mult_noise_mean, n_looks)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
-    return cast_array_to_float(out_array, cast_float=True)
+    out_array = cast_array_to_float(out_array, cast_float=True)
+    out_meta = raster.meta.copy()
+    
+    return out_array, out_meta
 
 
 @beartype
@@ -260,20 +342,21 @@ def lee_additive_multiplicative_noise_filter(
 
     Lower noise values result in better edge preservation.
 
-    Parameters:
-      raster: The input raster dataset.
-      size = The size of the filter window. E.g., 3 means a 3x3 window. Default to 3.
-      add_noise_var: The additive noise variation. Default to 0.25.
-      add_noise_mean: The additive noise mean. Default to 0.
-      mult_noise_mean: The multiplative noise mean. Default to 1.
+    Args:
+        raster: The input raster dataset.
+        size: The size of the filter window. 
+            E.g., 3 means a 3x3 window. Default to 3.
+        add_noise_var: The additive noise variation. Default to 0.25.
+        add_noise_mean: The additive noise mean. Default to 0.
+        mult_noise_mean: The multiplative noise mean. Default to 1.
 
     Returns:
-      np.ndarray: The filtered raster array.
+        The filtered raster array.
 
     Raises:
-      InvalidRasterBandException: If the input raster has more than one band.
-      InvalidParameterValueException: If the filter size is smaller than 3.
-                                      If the filter size is not an odd number.
+        InvalidRasterBandException: If the input raster has more than one band.
+        InvalidParameterValueException: If the filter size is smaller than 3.
+            If the filter size is not an odd number.
     """
     check_inputs(raster, size)
 
@@ -288,7 +371,10 @@ def lee_additive_multiplicative_noise_filter(
     )
 
     out_array = nan_to_nodata(out_array, raster.nodata)
-    return cast_array_to_float(out_array, cast_float=True)
+    out_array = cast_array_to_float(out_array, cast_float=True)
+    out_meta = raster.meta.copy()
+    
+    return out_array, out_meta
 
 
 @beartype
@@ -303,25 +389,26 @@ def lee_enhanced_filter(
 
     Higher number of looks and damping factor result in better edge preservation.
 
-    Parameters:
-      raster: The input raster dataset.
-      size = The size of the filter window. E.g., 3 means a 3x3 window. Default to 3.
-      n_looks: Number of looks to estimate the noise variation.
-               Higher values result in higher smoothing.
-               Low values may result in focal mean filtering.
-               Default to 1.
-      damping_factor: Extent of exponential damping effect on filtering.
-                      Larger damping values preserve edges better but smooths less.
-                      Smaller values produce more smoothing.
-                      Default to 1.
+    Args:
+        raster: The input raster dataset.
+        size: The size of the filter window. 
+            E.g., 3 means a 3x3 window. Default to 3.
+        n_looks: Number of looks to estimate the noise variation.
+            Higher values result in higher smoothing.
+            Low values may result in focal mean filtering.
+            Default to 1.
+        damping_factor: Extent of exponential damping effect on filtering.
+            Larger damping values preserve edges better but smooths less.
+            Smaller values produce more smoothing.
+            Default to 1.
 
     Returns:
-      np.ndarray: The filtered raster array.
+        The filtered raster array.
 
     Raises:
-      InvalidRasterBandException: If the input raster has more than one band.
-      InvalidParameterValueException: If the filter size is smaller than 3.
-                                      If the filter size is not an odd number.
+        InvalidRasterBandException: If the input raster has more than one band.
+        InvalidParameterValueException: If the filter size is smaller than 3.
+            If the filter size is not an odd number.
     """
     check_inputs(raster, size, n_looks=n_looks, damping_factor=damping_factor)
 
@@ -334,7 +421,10 @@ def lee_enhanced_filter(
     out_array = apply_generic_filter(raster_array, _lee_enhanced, kernel, n_looks, damping_factor)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
-    return cast_array_to_float(out_array, cast_float=True)
+    out_array = cast_array_to_float(out_array, cast_float=True)
+    out_meta = raster.meta.copy()
+    
+    return out_array, out_meta
 
 
 @beartype
@@ -348,21 +438,22 @@ def gamma_filter(
 
     Higher number of looks result in better edge preservation.
 
-    Parameters:
-      raster: The input raster dataset.
-      size = The size of the filter window. E.g., 3 means a 3x3 window. Default to 3.
-      n_looks: Number of looks to estimate the noise variation.
-               Higher values result in higher smoothing.
-               Low values may result in focal mean filtering.
-               Default to 1.
+    Args:
+        raster: The input raster dataset.
+        size: The size of the filter window. 
+            E.g., 3 means a 3x3 window. Default to 3.
+        n_looks: Number of looks to estimate the noise variation.
+            Higher values result in higher smoothing.
+            Low values may result in focal mean filtering.
+            Default to 1.
 
     Returns:
-      np.ndarray: The filtered raster array.
+        The filtered raster array.
 
     Raises:
-      InvalidRasterBandException: If the input raster has more than one band.
-      InvalidParameterValueException: If the filter size is smaller than 3.
-                                      If the filter size is not an odd number.
+        InvalidRasterBandException: If the input raster has more than one band.
+        InvalidParameterValueException: If the filter size is smaller than 3.
+            If the filter size is not an odd number.
     """
     check_inputs(raster, size, n_looks=n_looks)
 
@@ -375,7 +466,10 @@ def gamma_filter(
     out_array = apply_generic_filter(raster_array, _gamma, kernel, n_looks)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
-    return cast_array_to_float(out_array, cast_float=True)
+    out_array = cast_array_to_float(out_array, cast_float=True)
+    out_meta = raster.meta.copy()
+    
+    return out_array, out_meta
 
 
 @beartype
@@ -389,22 +483,24 @@ def frost_filter(
 
     Higher damping factor result in better edge preservation.
 
-    Parameters:
-      raster: The input raster dataset.
-      size = The size of the filter window. E.g., 3 means a 3x3 window. Default to 3.
-      n_looks: Number of looks to estimate the noise variation. Higher values result in higher smoothing. Default to 1.
-      damping_factor: Extent of exponential damping effect on filtering.
-                      Larger damping values preserve edges better but smooths less.
-                      Smaller values produce more smoothing.
-                      Default to 1.
+    Args:
+        raster: The input raster dataset.
+        size: The size of the filter window. 
+            E.g., 3 means a 3x3 window. Default to 3.
+        n_looks: Number of looks to estimate the noise variation. 
+            Higher values result in higher smoothing. Default to 1.
+        damping_factor: Extent of exponential damping effect on filtering.
+            Larger damping values preserve edges better but smooths less.
+            Smaller values produce more smoothing.
+            Default to 1.
 
     Returns:
-      np.ndarray: The filtered raster array.
+        The filtered raster array.
 
     Raises:
-      InvalidRasterBandException: If the input raster has more than one band.
-      InvalidParameterValueException: If the filter size is smaller than 3.
-                                      If the filter size is not an odd number.
+        InvalidRasterBandException: If the input raster has more than one band.
+        InvalidParameterValueException: If the filter size is smaller than 3.
+            If the filter size is not an odd number.
     """
     check_inputs(raster, size, damping_factor=damping_factor)
 
@@ -417,7 +513,10 @@ def frost_filter(
     out_array = apply_generic_filter(raster_array, _frost, kernel, damping_factor)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
-    return cast_array_to_float(out_array, cast_float=True)
+    out_array = cast_array_to_float(out_array, cast_float=True)
+    out_meta = raster.meta.copy()
+    
+    return out_array, out_meta
 
 
 @beartype
@@ -431,21 +530,22 @@ def kuan_filter(
 
     Higher number of looks result in better edge preservation.
 
-    Parameters:
-      raster: The input raster dataset.
-      size = The size of the filter window. E.g., 3 means a 3x3 window. Default to 3.
-      n_looks: Number of looks to estimate the noise variation.
-               Higher values result in higher smoothing.
-               Low values may result in focal mean filtering.
-               Default to 1.
+    Args:
+        raster: The input raster dataset.
+        size: The size of the filter window. 
+            E.g., 3 means a 3x3 window. Default to 3.
+        n_looks: Number of looks to estimate the noise variation.
+            Higher values result in higher smoothing.
+            Low values may result in focal mean filtering.
+            Default to 1.
 
     Returns:
-      np.ndarray: The filtered raster array.
+        The filtered raster array.
 
     Raises:
-      InvalidRasterBandException: If the input raster has more than one band.
-      InvalidParameterValueException: If the filter size is smaller than 3.
-                                      If the filter size is not an odd number.
+        InvalidRasterBandException: If the input raster has more than one band.
+        InvalidParameterValueException: If the filter size is smaller than 3.
+            If the filter size is not an odd number.
     """
     check_inputs(raster, size, n_looks=n_looks)
 
@@ -458,4 +558,7 @@ def kuan_filter(
     out_array = apply_generic_filter(raster_array, _kuan, kernel, n_looks)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
-    return cast_array_to_float(out_array, cast_float=True)
+    out_array = cast_array_to_float(out_array, cast_float=True)
+    out_meta = raster.meta.copy()
+    
+    return out_array, out_meta
