@@ -12,9 +12,9 @@ from eis_toolkit.exceptions import (
 )
 from eis_toolkit.raster_processing.derivatives.partial_derivatives import coefficients
 from eis_toolkit.raster_processing.derivatives.utilities import scale_raster, set_flat_pixels
-from eis_toolkit.utilities.miscellaneous import reduce_ndim
 from eis_toolkit.utilities.checks.raster import check_quadratic_pixels
 from eis_toolkit.utilities.conversions import convert_rad_to_deg, convert_rad_to_rise
+from eis_toolkit.utilities.miscellaneous import reduce_ndim
 from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
 
