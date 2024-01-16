@@ -27,12 +27,12 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Se
         target_column: Variable against which independence of other variables is tested.
         columns: Variables that are tested against the variable in target_column. If None, every column is used.
 
+    Returns:
+        Test statistics for each variable (except target_column).
+
     Raises:
         EmptyDataFrameException: The input Dataframe is empty.
         InvalidParameterValueException: The target_column is not in input Dataframe or invalid column is provided.
-
-    Returns:
-        Test statistics for each variable (except target_column).
     """
     if check_empty_dataframe(data):
         raise EmptyDataFrameException("The input Dataframe is empty.")
@@ -141,7 +141,7 @@ def correlation_matrix(
     Raises:
         EmptyDataFrameException: The input Dataframe is empty.
         InvalidParameterValueException: min_periods argument is used with method 'kendall'.
-        NonNumericDataException: TODO docstring
+        NonNumericDataException: The input data contain non-numeric data.
     """
     if check_empty_dataframe(data):
         raise EmptyDataFrameException("The input Dataframe is empty.")
@@ -178,7 +178,7 @@ def covariance_matrix(
     Raises:
         EmptyDataFrameException: The input Dataframe is empty.
         InvalidParameterValueException: Provided value for delta_degrees_of_freedom or min_periods is negative.
-        NonNumericDataException: TODO docstring
+        NonNumericDataException: The input data contain non-numeric data.
     """
     if check_empty_dataframe(data):
         raise EmptyDataFrameException("The input Dataframe is empty.")

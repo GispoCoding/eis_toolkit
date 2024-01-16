@@ -91,8 +91,8 @@ def classify_aspect(
         The classified aspect raster, a class mapping dictionary and the updated metadata.
 
     Raises:
-        InvalidParameterValueException: TODO docstring
-        InvalidRasterBandException: TODO docstring
+        InvalidParameterValueException: Invalid number of classes requested.
+        InvalidRasterBandException: Input raster has more than one band.
     """
 
     if raster.count > 1:

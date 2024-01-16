@@ -46,10 +46,12 @@ def rasterize_vector(
         Rasterized vector data and metadata.
 
     Raises:
-        EmptyDataFrameException: TODO docstring
-        InvalidParameterValueException: TODO docstring
-        NumericValueSignException: TODO docstring
-        ValueError: TODO docstring
+        EmptyDataFrameException: The geodataframe does not contain geometries.
+        InvalidParameterValueException: No resolution or base_raster_profile is given,
+            value_column is not in the input geodataframe, or base_raster_profile has
+            the wrong type.
+        NumericValueSignException: Input resolution value is zero or negative, or input
+            buffer_value is negative.
     """
 
     if geodataframe.shape[0] == 0:
@@ -57,12 +59,15 @@ def rasterize_vector(
 
     if resolution is None and base_raster_profile is None:
         raise InvalidParameterValueException("Expected either resolution or base_raster_profile to be given.")
+
     if resolution is not None and resolution <= 0:
-        raise NumericValueSignException(f"Expected a positive value resolution ({dict(resolution=resolution)})")
+        raise NumericValueSignException(f"Expected a positive resolution value ({dict(resolution=resolution)})")
+
     if value_column is not None and value_column not in geodataframe.columns:
         raise InvalidParameterValueException(
             f"Expected value_column ({value_column}) to be contained in geodataframe columns."
         )
+
     if buffer_value is not None and buffer_value < 0:
         raise NumericValueSignException(f"Expected a positive buffer_value ({dict(buffer_value=buffer_value)})")
 
@@ -129,7 +134,7 @@ def _rasterize_vector(
             base_raster_profile["transform"],
         )
     else:
-        raise ValueError("Expected resolution or base_raster_profile to be given.")
+        raise InvalidParameterValueException("Expected resolution or base_raster_profile to be given.")
 
     out_raster_array = features.rasterize(
         shapes=geometry_value_pairs,

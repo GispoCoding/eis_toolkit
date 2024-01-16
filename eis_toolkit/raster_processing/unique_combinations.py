@@ -41,7 +41,8 @@ def unique_combinations(  # type: ignore[no-any-unimported]
         out_meta: The metadata of the first raster in raster_list.
 
     Raises:
-        InvalidParameterValueException: TODO docstring
+        InvalidParameterValueException: Input rasters don't have enough bands to perform
+            the operation or input rasters are of different shape.
     """
     bands = []
     out_meta = raster_list[0].meta

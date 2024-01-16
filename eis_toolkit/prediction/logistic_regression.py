@@ -65,7 +65,7 @@ def logistic_regression_train(
 
     Raises:
         InvalidParameterValueException: If some of the numeric parameters are given invalid input values.
-        NonMatchingParameterLengthsException: TODO docstring
+        NonMatchingParameterLengthsException: X and y have mismatching sizes.
     """
     if max_iter < 1:
         raise InvalidParameterValueException("Max iter must be > 0.")
