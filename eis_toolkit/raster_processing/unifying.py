@@ -71,7 +71,7 @@ def _unify_raster_grids(
             source=src_array,
             src_crs=raster.crs,
             src_transform=raster.transform,
-            src_nodata=base_raster.meta["nodata"],
+            src_nodata=raster.meta["nodata"],
             destination=dst_array,
             dst_crs=dst_crs,
             dst_transform=dst_transform,

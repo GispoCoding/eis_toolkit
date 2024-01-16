@@ -78,6 +78,71 @@ class ResamplingMethods(str, Enum):
     min = "min"
 
 
+class ValidationMethods(str, Enum):
+    """Validation methods available."""
+
+    split_once = "split"  # Note that split_once might be the new name
+    kfold_cv = "kfold_cv"
+    skfold_cv = "skfold_cv"
+    loo_cv = "loo_cv"
+    none = "none"
+
+
+class RegressorMetrics(str, Enum):
+    """Regressor metrics available."""
+
+    mse = "mse"
+    rmse = "rmse"
+    mae = "mae"
+    r2 = "r2"
+
+
+class ClassifierMetrics(str, Enum):
+    """Classifier metrics available."""
+
+    accuracy = "accuracy"
+    precision = "precision"
+    recall = "recall"
+    f1 = "f1"
+    auc = "auc"
+
+
+class LogisticRegressionPenalties(str, Enum):
+    """Logistic regression penalties available."""
+
+    l1 = "l1"
+    l2 = "l2"
+    elasicnet = "elasicnet"
+    none = "None"
+
+
+class LogisticRegressionSolvers(str, Enum):
+    """Logistic regression solvers available."""
+
+    lbfgs = "lbfgs"
+    liblinear = "liblinear"
+    newton_cg = "newton-cg"  # '-' converted to '_' for enum syntax
+    newton_cholesky = "newton-cholesky"  # '-' converted to '_' for enum syntax
+    sag = "sag"
+    saga = "saga"
+
+
+class GradientBoostingClassifierLosses(str, Enum):
+    """Gradient boosting classifier losses available."""
+
+    log_loss = "log_loss"
+    exponential = "exponential"
+
+
+class GradientBoostingRegressorLosses(str, Enum):
+    """Gradient boosting regressor losses available."""
+
+    squared_error = "squared_error"
+    absolute_error = "absolute_error"
+    huber = "huber"
+    quantile = "quantile"
+
+
 RESAMPLING_MAPPING = {
     "nearest": warp.Resampling.nearest,
     "bilinear": warp.Resampling.bilinear,
@@ -111,6 +176,20 @@ INPUT_FILE_OPTION = typer.Option(
     readable=True,
     resolve_path=True,
 )
+
+INPUT_FILES_ARGUMENT = Annotated[
+    List[Path],
+    typer.Argument(
+        ...,
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        writable=False,
+        readable=True,
+        resolve_path=True,
+        help="Paths to input files.",
+    ),
+]
 
 OUTPUT_FILE_OPTION = typer.Option(
     file_okay=True,
@@ -349,19 +428,19 @@ def normality_test_cli(
 
 # CHECK RASTER GRIDS
 @app.command()
-def check_raster_grids_cli(input_rasters: Annotated[List[Path], INPUT_FILE_OPTION], same_extent: bool = False):
+def check_raster_grids_cli(input_rasters: INPUT_FILES_ARGUMENT, same_extent: bool = False):
     """Check all input rasters for matching gridding and optionally matching bounds."""
     from eis_toolkit.utilities.checks.raster import check_raster_grids
 
     typer.echo("Progress: 10%")
 
-    open_rasters = [rasterio.open(raster) for raster in input_rasters]
-    typer.echo("Progress: 25%")
+    raster_profiles = []
+    for input_raster in input_rasters:
+        with rasterio.open(input_raster) as raster:
+            raster_profiles.append(raster.profile)
+    typer.echo("Progress: 50%")
+    result = check_raster_grids(raster_profiles=raster_profiles, same_extent=same_extent)
 
-    result = check_raster_grids(input_rasters=open_rasters, same_extent=same_extent)
-    typer.echo("Progress: 75%")
-
-    [raster.close() for raster in open_rasters]
     typer.echo("Progress: 100%")
 
     typer.echo(f"Result: {str(result)}")
@@ -637,6 +716,48 @@ def extract_window_cli(
 # --- VECTOR PROCESSING ---
 
 
+# CALCULATE GEOMETRY
+@app.command()
+def calculate_geometry_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Calculate the length or area of the given geometries."""
+    from eis_toolkit.vector_processing.calculate_geometry import calculate_geometry
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    out_vector = calculate_geometry(geodataframe=geodataframe)
+    typer.echo("Progress: 75%")
+
+    out_vector.to_file(output_vector)
+    typer.echo("Progress 100%")
+    typer.echo(f"Calculate geometry completed, writing vector to {output_vector}")
+
+
+# EXTRACT SHARED LINES
+@app.command()
+def extract_shared_lines_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Extract shared lines/borders/edges between polygons."""
+    from eis_toolkit.vector_processing.extract_shared_lines import extract_shared_lines
+
+    typer.echo("Progress: 10%")
+
+    polygons = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    out_vector = extract_shared_lines(polygons=polygons)
+    typer.echo("Progress: 75%")
+
+    out_vector.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Extracting shared lines completed, writing vector to {out_vector}")
+
+
 # IDW INTERPOLATION
 @app.command()
 def idw_interpolation_cli(
@@ -900,6 +1021,350 @@ def distance_computation_cli(
 # --- PREDICTION ---
 
 
+# LOGISTIC REGRESSION
+@app.command()
+def logistic_regression_train_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
+    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy),
+    split_size: float = 0.2,
+    cv_folds: int = 5,
+    penalty: LogisticRegressionPenalties = typer.Option(default=LogisticRegressionPenalties.l2),
+    max_iter: int = 100,
+    solver: LogisticRegressionSolvers = typer.Option(default=LogisticRegressionSolvers.lbfgs),
+    verbose: int = 0,
+    random_state: Optional[int] = None,
+):
+    """Train and optionally validate a Logistic Regression classifier model using Sklearn."""
+    from eis_toolkit.prediction.logistic_regression import logistic_regression_train
+    from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
+
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = logistic_regression_train(
+        X=X,
+        y=y,
+        validation_method=validation_method,
+        metrics=[validation_metric],
+        split_size=split_size,
+        cv_folds=cv_folds,
+        penalty=penalty,
+        max_iter=max_iter,
+        solver=solver,
+        verbose=verbose,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("Logistic regression training completed")
+
+
+# RANDOM FOREST CLASSIFIER
+@app.command()
+def random_forest_classifier_train_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
+    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy),
+    split_size: float = 0.2,
+    cv_folds: int = 5,
+    n_estimators: int = 100,
+    max_depth: Optional[int] = None,
+    verbose: int = 0,
+    random_state: Optional[int] = None,
+):
+    """Train and optionally validate a Random Forest classifier model using Sklearn."""
+    from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
+    from eis_toolkit.prediction.random_forests import random_forest_classifier_train
+
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = random_forest_classifier_train(
+        X=X,
+        y=y,
+        validation_method=validation_method,
+        metrics=[validation_metric],
+        split_size=split_size,
+        cv_folds=cv_folds,
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        verbose=verbose,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("Random forest classifier training completed")
+
+
+# RANDOM FOREST REGRESSOR
+@app.command()
+def random_forest_regressor_train_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
+    validation_metric: RegressorMetrics = typer.Option(default=RegressorMetrics.mse),
+    split_size: float = 0.2,
+    cv_folds: int = 5,
+    n_estimators: int = 100,
+    max_depth: Optional[int] = None,
+    verbose: int = 0,
+    random_state: Optional[int] = None,
+):
+    """Train and optionally validate a Random Forest regressor model using Sklearn."""
+    from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
+    from eis_toolkit.prediction.random_forests import random_forest_regressor_train
+
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = random_forest_regressor_train(
+        X=X,
+        y=y,
+        validation_method=validation_method,
+        metrics=[validation_metric],
+        split_size=split_size,
+        cv_folds=cv_folds,
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        verbose=verbose,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("Random forest regressor training completed")
+
+
+# GRADIENT BOOSTING CLASSIFIER
+@app.command()
+def gradient_boosting_classifier_train_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
+    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy),
+    split_size: float = 0.2,
+    cv_folds: int = 5,
+    loss: GradientBoostingClassifierLosses = typer.Option(default=GradientBoostingClassifierLosses.log_loss),
+    learning_rate: float = 0.1,
+    n_estimators: int = 100,
+    max_depth: Optional[int] = 3,
+    subsample: float = 1.0,
+    verbose: int = 0,
+    random_state: Optional[int] = None,
+):
+    """Train and optionally validate a Gradient boosting classifier model using Sklearn."""
+    from eis_toolkit.prediction.gradient_boosting import gradient_boosting_classifier_train
+    from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
+
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = gradient_boosting_classifier_train(
+        X=X,
+        y=y,
+        validation_method=validation_method,
+        metrics=[validation_metric],
+        split_size=split_size,
+        cv_folds=cv_folds,
+        loss=loss,
+        learning_rate=learning_rate,
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        subsample=subsample,
+        verbose=verbose,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("Gradient boosting classifier training completed")
+
+
+# GRADIENT BOOSTING REGRESSOR
+@app.command()
+def gradient_boosting_regressor_train_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
+    validation_metric: RegressorMetrics = typer.Option(default=RegressorMetrics.mse),
+    split_size: float = 0.2,
+    cv_folds: int = 5,
+    loss: GradientBoostingRegressorLosses = typer.Option(default=GradientBoostingRegressorLosses.squared_error),
+    learning_rate: float = 0.1,
+    n_estimators: int = 100,
+    max_depth: Optional[int] = 3,
+    subsample: float = 1.0,
+    verbose: int = 0,
+    random_state: Optional[int] = None,
+):
+    """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
+    from eis_toolkit.prediction.gradient_boosting import gradient_boosting_regressor_train
+    from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
+
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = gradient_boosting_regressor_train(
+        X=X,
+        y=y,
+        validation_method=validation_method,
+        metrics=[validation_metric],
+        split_size=split_size,
+        cv_folds=cv_folds,
+        loss=loss,
+        learning_rate=learning_rate,
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        subsample=subsample,
+        verbose=verbose,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("Gradient boosting regressor training completed")
+
+
+# EVALUATE ML MODEL
+@app.command()
+def evaluate_trained_model_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: Annotated[Path, INPUT_FILE_OPTION],
+    model_file: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    validation_metric: str = typer.Option(),
+):
+    """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
+    from eis_toolkit.prediction.machine_learning_general import (
+        evaluate_model,
+        load_model,
+        prepare_data_for_ml,
+        reshape_predictions,
+    )
+
+    X, y, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    model = load_model(model_file)
+    predictions, metrics_dict = evaluate_model(X, y, model, [validation_metric])
+    predictions_reshaped = reshape_predictions(
+        predictions, reference_profile["height"], reference_profile["width"], nodata_mask
+    )
+
+    typer.echo("Progress: 80%")
+
+    json_str = json.dumps(metrics_dict)
+
+    out_profile = reference_profile.copy()
+    out_profile.update({"count": 1, "dtype": predictions_reshaped.dtype})
+
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(predictions_reshaped, 1)
+
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("Evaluating trained model completed")
+
+
+# PREDICT WITH TRAINED ML MODEL
+@app.command()
+def predict_with_trained_model_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    model_file: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+):
+    """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
+    from eis_toolkit.prediction.machine_learning_general import (
+        load_model,
+        predict,
+        prepare_data_for_ml,
+        reshape_predictions,
+    )
+
+    X, _, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters)
+
+    typer.echo("Progress: 30%")
+
+    model = load_model(model_file)
+    predictions = predict(X, model)
+    predictions_reshaped = reshape_predictions(
+        predictions, reference_profile["height"], reference_profile["width"], nodata_mask
+    )
+
+    typer.echo("Progress: 80%")
+
+    out_profile = reference_profile.copy()
+    out_profile.update({"count": 1, "dtype": predictions_reshaped.dtype})
+
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(predictions_reshaped, 1)
+
+    typer.echo("Progress: 100%")
+    typer.echo("Predicting completed")
+
+
 # FUZZY OVERLAYS
 
 # AND OVERLAY
@@ -1042,6 +1507,221 @@ def gamme_overlay_cli(
 
 
 # --- TRANSFORMATIONS ---
+
+
+# CODA - ALR TRANSFORM
+@app.command()
+def alr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    column: str = None,
+    keep_denominator_column: bool = False,
+):
+    """Perform an additive logratio transformation on the data."""
+    from eis_toolkit.transformations.coda.alr import alr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = alr_transform(df=df, column=column, keep_denominator_column=keep_denominator_column)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"ALR transform completed, output saved to {output_vector}")
+
+
+# CODA - INVERSE ALR TRANSFORM
+@app.command()
+def inverse_alr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    denominator_column: str = typer.Option(),
+    scale: float = 1.0,
+):
+    """Perform the inverse transformation for a set of ALR transformed data."""
+    from eis_toolkit.transformations.coda.alr import inverse_alr
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = inverse_alr(df=df, denominator_column=denominator_column, scale=scale)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Inverse ALR transform completed, output saved to {output_vector}")
+
+
+# CODA - CLR TRANSFORM
+@app.command()
+def clr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Perform a centered logratio transformation on the data."""
+    from eis_toolkit.transformations.coda.clr import clr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = clr_transform(df=df)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"CLR transform completed, output saved to {output_vector}")
+
+
+# CODA - INVERSE CLR TRANSFORM
+@app.command()
+def inverse_clr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    colnames: Annotated[List[str], typer.Option()] = None,
+    scale: float = 1.0,
+):
+    """Perform the inverse transformation for a set of CLR transformed data."""
+    from eis_toolkit.transformations.coda.clr import inverse_clr
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = inverse_clr(df=df, colnames=colnames, scale=scale)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Inverse CLR transform completed, output saved to {output_vector}")
+
+
+# CODA - SINGLE ILR TRANSFORM
+@app.command()
+def single_ilr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    subcomposition_1: Annotated[List[str], typer.Option()],
+    subcomposition_2: Annotated[List[str], typer.Option()],
+):
+    """Perform a single isometric logratio transformation on the provided subcompositions."""
+    from eis_toolkit.transformations.coda.ilr import single_ilr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_series = single_ilr_transform(df=df, subcomposition_1=subcomposition_1, subcomposition_2=subcomposition_2)
+    typer.echo("Progess 75%")
+
+    # NOTE: Output of pairwise_logratio might be changed to DF in the future, to automatically do the following
+    df["single_ilr"] = out_series
+    out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Single ILR transform completed, output saved to {output_vector}")
+
+
+# CODA - PAIRWISE LOGRATIO TRANSFORM
+@app.command()
+def pairwise_logratio_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    numerator_column: str = typer.Option(),
+    denominator_column: str = typer.Option(),
+):
+    """Perform a pairwise logratio transformation on the given columns."""
+    from eis_toolkit.transformations.coda.pairwise import pairwise_logratio
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_series = pairwise_logratio(df=df, numerator_column=numerator_column, denominator_column=denominator_column)
+    typer.echo("Progess 75%")
+
+    # NOTE: Output of pairwise_logratio might be changed to DF in the future, to automatically do the following
+    df["pairwise_logratio"] = out_series
+    out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Pairwise logratio transform completed, output saved to {output_vector}")
+
+
+# CODA - SINGLE PLR TRANSFORM
+@app.command()
+def single_plr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    column: str = typer.Option(),
+):
+    """Perform a pivot logratio transformation on the selected column."""
+    from eis_toolkit.transformations.coda.plr import single_plr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_series = single_plr_transform(df=df, column=column)
+    typer.echo("Progess 75%")
+
+    # NOTE: Output of single_plr_transform might be changed to DF in the future, to automatically do the following
+    df["single_plr"] = out_series
+    out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Single PLR transform completed, output saved to {output_vector}")
+
+
+# CODA - PLR TRANSFORM
+@app.command()
+def plr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Perform a pivot logratio transformation on the dataframe, returning the full set of transforms."""
+    from eis_toolkit.transformations.coda.plr import plr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = plr_transform(df=df)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"PLR transform completed, output saved to {output_vector}")
 
 
 # BINARIZE

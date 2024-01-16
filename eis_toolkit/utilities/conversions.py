@@ -18,7 +18,7 @@ def convert_rad_to_deg(data: np.ndarray) -> np.ndarray:
 
 
 @beartype
-def _convert_rad_to_rise(data: np.ndarray) -> np.ndarray:
+def convert_rad_to_rise(data: np.ndarray) -> np.ndarray:
     """
     Convert radians to percent rise.
 
