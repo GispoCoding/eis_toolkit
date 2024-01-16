@@ -40,5 +40,5 @@ def balance_SMOTETomek(
             "Feature matrix X and target labels y must have the same length."
         )
 
-    X_res, y_res = SMOTETomek(sampling_strategy=sampling_strategy, random_state=random_state).fit_resample(X, y)
-    return X_res, y_res
+    x_res, y_res = SMOTETomek(sampling_strategy=sampling_strategy, random_state=random_state).fit_resample(X, y)
+    return x_res, y_res
