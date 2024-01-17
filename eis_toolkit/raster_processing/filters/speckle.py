@@ -487,8 +487,6 @@ def frost_filter(
         raster: The input raster dataset.
         size: The size of the filter window.
             E.g., 3 means a 3x3 window. Default to 3.
-        n_looks: Number of looks to estimate the noise variation.
-            Higher values result in higher smoothing. Default to 1.
         damping_factor: Extent of exponential damping effect on filtering.
             Larger damping values preserve edges better but smooths less.
             Smaller values produce more smoothing.

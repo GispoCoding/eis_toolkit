@@ -33,9 +33,9 @@ def set_flat_pixels(
     """Treating values below a certain gradient as flat surface.
 
     Args:
-        data (np.ndarray): Input surface attribute.
-        slope_slope (np.ndarray): Input slope array in degrees.
-        slope_tolerance (Number): Value below a surface will be treated as flat surface (degrees).
+        in_array: Input array.
+        slope_gradient: Input slope array in degrees or tuple of partial derivatives p and q.
+        slope_tolerance: Value below a surface will be treated as flat surface (degrees).
         parameter: The surface attribute to modify.
 
     Returns:

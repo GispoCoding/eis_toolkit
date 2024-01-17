@@ -166,10 +166,9 @@ def coefficients(
     """Calculate the partial derivatives of a given surface.
 
     Args:
-        raster: Input raster.
+        in_array: Input array.
+        cellsize: Cellsize of the input raster.
         method: Method to calculate the partial derivatives.
-        coefficients: Coefficients to calculate from least squares equation.
-        scaling_factor: Factor to modify input raster values, e.g. for unit conversion.
 
     Returns:
         Tuple of the partial derivatives p, q, r, s, t.
