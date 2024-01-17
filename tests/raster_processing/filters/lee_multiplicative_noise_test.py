@@ -20,7 +20,7 @@ expected_results = {
 def test_lee_multiplicative_noise_filter():
     """Test the focal filter function."""
     with rasterio.open(raster_path_single) as raster:
-        result = lee_multiplicative_noise_filter(raster, size=5, mult_noise_mean=1, n_looks=1)
+        result, _ = lee_multiplicative_noise_filter(raster, size=5, mult_noise_mean=1, n_looks=1)
 
         # Shapes and types
         assert isinstance(result, np.ndarray)

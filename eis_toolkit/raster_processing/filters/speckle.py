@@ -247,7 +247,7 @@ def lee_additive_noise_filter(
     raster: rasterio.io.DatasetReader,
     size: int = 3,
     add_noise_var: Number = 0.25,
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict]:
     """
     Apply a Lee filter considering additive noise components in the input raster.
 
@@ -255,7 +255,7 @@ def lee_additive_noise_filter(
 
     Args:
         raster: The input raster dataset.
-        size: The size of the filter window. 
+        size: The size of the filter window.
             E.g., 3 means a 3x3 window. Default to 3.
         add_noise_var: The additive noise variation. Default to 0.25.
 
@@ -280,7 +280,7 @@ def lee_additive_noise_filter(
 
     out_array = cast_array_to_float(out_array, cast_float=True)
     out_meta = raster.meta.copy()
-    
+
     return out_array, out_meta
 
 
@@ -290,7 +290,7 @@ def lee_multiplicative_noise_filter(
     size: int = 3,
     mult_noise_mean: Number = 1,
     n_looks: int = 1,
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict]:
     """
     Apply a Lee filter considering multiplicative noise components in the input raster.
 
@@ -298,10 +298,10 @@ def lee_multiplicative_noise_filter(
 
     Args:
         raster: The input raster dataset.
-        size: The size of the filter window. 
+        size: The size of the filter window.
             E.g., 3 means a 3x3 window. Default to 3.
         mult_noise_mean: The multiplative noise mean. Default to 1.
-        n_looks: Number of looks to estimate the noise variation. 
+        n_looks: Number of looks to estimate the noise variation.
             Higher values result in higher smoothing. Default to 1.
 
     Returns:
@@ -325,7 +325,7 @@ def lee_multiplicative_noise_filter(
 
     out_array = cast_array_to_float(out_array, cast_float=True)
     out_meta = raster.meta.copy()
-    
+
     return out_array, out_meta
 
 
@@ -336,7 +336,7 @@ def lee_additive_multiplicative_noise_filter(
     add_noise_var: Number = 0.25,
     add_noise_mean: Number = 0,
     mult_noise_mean: Number = 1,
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict]:
     """
     Apply a Lee filter considering both additive and multiplicative noise components in the input raster.
 
@@ -344,7 +344,7 @@ def lee_additive_multiplicative_noise_filter(
 
     Args:
         raster: The input raster dataset.
-        size: The size of the filter window. 
+        size: The size of the filter window.
             E.g., 3 means a 3x3 window. Default to 3.
         add_noise_var: The additive noise variation. Default to 0.25.
         add_noise_mean: The additive noise mean. Default to 0.
@@ -373,7 +373,7 @@ def lee_additive_multiplicative_noise_filter(
     out_array = nan_to_nodata(out_array, raster.nodata)
     out_array = cast_array_to_float(out_array, cast_float=True)
     out_meta = raster.meta.copy()
-    
+
     return out_array, out_meta
 
 
@@ -383,7 +383,7 @@ def lee_enhanced_filter(
     size: int = 3,
     n_looks: Number = 1,
     damping_factor: Number = 1,
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict]:
     """
     Apply an enhanced Lee filter to the input raster.
 
@@ -391,7 +391,7 @@ def lee_enhanced_filter(
 
     Args:
         raster: The input raster dataset.
-        size: The size of the filter window. 
+        size: The size of the filter window.
             E.g., 3 means a 3x3 window. Default to 3.
         n_looks: Number of looks to estimate the noise variation.
             Higher values result in higher smoothing.
@@ -423,7 +423,7 @@ def lee_enhanced_filter(
 
     out_array = cast_array_to_float(out_array, cast_float=True)
     out_meta = raster.meta.copy()
-    
+
     return out_array, out_meta
 
 
@@ -432,7 +432,7 @@ def gamma_filter(
     raster: rasterio.io.DatasetReader,
     size: int = 3,
     n_looks: Number = 1,
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict]:
     """
     Apply a Gamma filter to the input raster.
 
@@ -440,7 +440,7 @@ def gamma_filter(
 
     Args:
         raster: The input raster dataset.
-        size: The size of the filter window. 
+        size: The size of the filter window.
             E.g., 3 means a 3x3 window. Default to 3.
         n_looks: Number of looks to estimate the noise variation.
             Higher values result in higher smoothing.
@@ -468,7 +468,7 @@ def gamma_filter(
 
     out_array = cast_array_to_float(out_array, cast_float=True)
     out_meta = raster.meta.copy()
-    
+
     return out_array, out_meta
 
 
@@ -477,7 +477,7 @@ def frost_filter(
     raster: rasterio.io.DatasetReader,
     size: int = 3,
     damping_factor: Number = 1,
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict]:
     """
     Apply a Frost filter to the input raster.
 
@@ -485,9 +485,9 @@ def frost_filter(
 
     Args:
         raster: The input raster dataset.
-        size: The size of the filter window. 
+        size: The size of the filter window.
             E.g., 3 means a 3x3 window. Default to 3.
-        n_looks: Number of looks to estimate the noise variation. 
+        n_looks: Number of looks to estimate the noise variation.
             Higher values result in higher smoothing. Default to 1.
         damping_factor: Extent of exponential damping effect on filtering.
             Larger damping values preserve edges better but smooths less.
@@ -515,7 +515,7 @@ def frost_filter(
 
     out_array = cast_array_to_float(out_array, cast_float=True)
     out_meta = raster.meta.copy()
-    
+
     return out_array, out_meta
 
 
@@ -524,7 +524,7 @@ def kuan_filter(
     raster: rasterio.io.DatasetReader,
     size: int = 3,
     n_looks: Number = 1,
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict]:
     """
     Apply a Kuan filter to the input raster.
 
@@ -532,7 +532,7 @@ def kuan_filter(
 
     Args:
         raster: The input raster dataset.
-        size: The size of the filter window. 
+        size: The size of the filter window.
             E.g., 3 means a 3x3 window. Default to 3.
         n_looks: Number of looks to estimate the noise variation.
             Higher values result in higher smoothing.
@@ -560,5 +560,5 @@ def kuan_filter(
 
     out_array = cast_array_to_float(out_array, cast_float=True)
     out_meta = raster.meta.copy()
-    
+
     return out_array, out_meta

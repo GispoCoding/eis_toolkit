@@ -72,7 +72,13 @@ def check_filter_size(sigma: Optional[Number], truncate: Optional[Number], size:
 
 
 @beartype
-def check_inputs(raster: rasterio.io.DatasetReader, size: Optional[int], sigma: Optional[Number] = None, truncate: Optional[Number] = None, **kwargs):
+def check_inputs(
+    raster: rasterio.io.DatasetReader,
+    size: Optional[int],
+    sigma: Optional[Number] = None,
+    truncate: Optional[Number] = None,
+    **kwargs
+):
     """
     Check the inputs.
 

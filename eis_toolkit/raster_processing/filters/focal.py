@@ -58,7 +58,7 @@ def focal_filter(
     out_array = nan_to_nodata(out_array, raster.nodata)
     out_array = cast_array_to_float(out_array, cast_float=True)
     out_meta = raster.meta.copy()
-    
+
     return out_array, out_meta
 
 
@@ -68,7 +68,7 @@ def gaussian_filter(
     sigma: Number = 1,
     truncate: Number = 4,
     size: Optional[int] = None,
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict]:
     """
     Apply a gaussian filter to the input raster.
 
@@ -104,7 +104,7 @@ def gaussian_filter(
 
     out_array = cast_array_to_float(out_array, cast_float=True)
     out_meta = raster.meta.copy()
-    
+
     return out_array, out_meta
 
 
@@ -115,7 +115,7 @@ def mexican_hat_filter(
     truncate: Number = 4,
     size: Optional[int] = None,
     direction: Literal["rectangular", "circular"] = "circular",
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict]:
     """
     Apply a mexican hat filter to the input raster.
 
@@ -154,5 +154,5 @@ def mexican_hat_filter(
 
     out_array = cast_array_to_float(out_array, cast_float=True)
     out_meta = raster.meta.copy()
-    
+
     return out_array, out_meta

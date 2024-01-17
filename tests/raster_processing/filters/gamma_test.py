@@ -21,7 +21,7 @@ def test_gamma_filter():
     """Test the focal filter function."""
     with rasterio.open(raster_path_single) as raster:
         # Choose large number of looks to get small noise variance
-        result = gamma_filter(raster, size=5, n_looks=50)
+        result, _ = gamma_filter(raster, size=5, n_looks=50)
 
         # Shapes and types
         assert isinstance(result, np.ndarray)

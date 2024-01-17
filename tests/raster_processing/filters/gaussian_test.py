@@ -21,8 +21,8 @@ expected_results = {
 def test_gaussian_filter():
     """Test the focal filter function."""
     with rasterio.open(raster_path_single) as raster:
-        result_1 = gaussian_filter(raster, sigma=1, truncate=4)
-        result_2 = gaussian_filter(raster, sigma=2, truncate=4, size=5)
+        result_1, _ = gaussian_filter(raster, sigma=1, truncate=4)
+        result_2, _ = gaussian_filter(raster, sigma=2, truncate=4, size=5)
 
         # # Shapes and types
         assert isinstance(result_1, np.ndarray)

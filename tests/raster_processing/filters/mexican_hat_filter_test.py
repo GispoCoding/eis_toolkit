@@ -21,8 +21,8 @@ expected_results = {
 def test_mexican_hat_filter():
     """Test the focal filter function."""
     with rasterio.open(raster_path_single) as raster:
-        result_1 = mexican_hat_filter(raster, sigma=1, truncate=1, direction="circular")
-        result_2 = mexican_hat_filter(raster, sigma=2, truncate=4, size=5, direction="rectangular")
+        result_1, _ = mexican_hat_filter(raster, sigma=1, truncate=1, direction="circular")
+        result_2, _ = mexican_hat_filter(raster, sigma=2, truncate=4, size=5, direction="rectangular")
 
         # # Shapes and types
         assert isinstance(result_1, np.ndarray)

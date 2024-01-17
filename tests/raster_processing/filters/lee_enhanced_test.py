@@ -21,7 +21,7 @@ def test_lee_enhanced_filter():
     """Test the focal filter function."""
     with rasterio.open(raster_path_single) as raster:
         # Choose very high number of looks to get small noise variance
-        result = lee_enhanced_filter(raster, size=5, n_looks=500, damping_factor=1)
+        result, _ = lee_enhanced_filter(raster, size=5, n_looks=500, damping_factor=1)
 
         # Shapes and types
         assert isinstance(result, np.ndarray)

@@ -19,7 +19,7 @@ def test_frost_filter():
     """Test the focal filter function."""
     with rasterio.open(raster_path_single) as raster:
         # Choose large number of looks to get small noise variance
-        result = frost_filter(raster, size=5, damping_factor=1)
+        result, _ = frost_filter(raster, size=5, damping_factor=1)
 
         # Shapes and types
         assert isinstance(result, np.ndarray)

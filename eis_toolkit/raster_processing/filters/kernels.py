@@ -1,12 +1,13 @@
-import numpy as np
 from numbers import Number
+
+import numpy as np
 from beartype import beartype
 from beartype.typing import Literal, Optional
 from scipy.signal import ricker
 
 
 @beartype
-def _get_kernel_size(sigma: Number, truncate: Number, size: int) -> tuple[int, int]:
+def _get_kernel_size(sigma: Number, truncate: Number, size: Optional[int]) -> tuple[int, int]:
     """
     Calculate the kernel size and radius based on the given parameters.
 
@@ -90,7 +91,9 @@ def gaussian_kernel(sigma: Number, truncate: Number, size: Optional[int]) -> np.
 
 
 @beartype
-def mexican_hat_kernel(sigma: Number, truncate: Number, size: Optional[int], direction: Literal["rectangular", "circular"]) -> np.ndarray:
+def mexican_hat_kernel(
+    sigma: Number, truncate: Number, size: Optional[int], direction: Literal["rectangular", "circular"]
+) -> np.ndarray:
     """
     Generate a Mexican Hat kernel for denoising (circular) or edge detection (rectangular).
 

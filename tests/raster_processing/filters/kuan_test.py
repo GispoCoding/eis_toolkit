@@ -19,7 +19,7 @@ def test_kuan_filter():
     """Test the focal filter function."""
     with rasterio.open(raster_path_single) as raster:
         # Choose large number of looks to get small noise variance
-        result = kuan_filter(raster, size=5, n_looks=500)
+        result, _ = kuan_filter(raster, size=5, n_looks=500)
 
         # Shapes and types
         assert isinstance(result, np.ndarray)

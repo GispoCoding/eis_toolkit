@@ -21,8 +21,8 @@ expected_results = {
 def test_focal_filter():
     """Test the focal filter function."""
     with rasterio.open(raster_path_single) as raster:
-        result_mean = focal_filter(raster, size=5, method="mean", shape="circle")
-        result_median = focal_filter(raster, size=5, method="median", shape="square")
+        result_mean, _ = focal_filter(raster, size=5, method="mean", shape="circle")
+        result_median, _ = focal_filter(raster, size=5, method="median", shape="square")
 
         # # Shapes and types
         assert isinstance(result_mean, np.ndarray)
