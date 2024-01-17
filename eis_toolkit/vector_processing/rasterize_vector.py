@@ -5,7 +5,12 @@ from beartype.typing import Literal, Optional, Tuple, Union
 from rasterio import features, profiles, transform
 from rasterio.enums import MergeAlg
 
-from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException, NumericValueSignException
+from eis_toolkit.exceptions import (
+    EmptyDataFrameException,
+    InvalidColumnException,
+    InvalidParameterValueException,
+    NumericValueSignException,
+)
 
 
 @beartype
@@ -47,9 +52,9 @@ def rasterize_vector(
 
     Raises:
         EmptyDataFrameException: The geodataframe does not contain geometries.
+        InvalidColumnException: Given value_column is not in the input geodataframe.
         InvalidParameterValueException: No resolution or base_raster_profile is given,
-            value_column is not in the input geodataframe, or base_raster_profile has
-            the wrong type.
+            or base_raster_profile has the wrong type.
         NumericValueSignException: Input resolution value is zero or negative, or input
             buffer_value is negative.
     """
@@ -64,9 +69,7 @@ def rasterize_vector(
         raise NumericValueSignException(f"Expected a positive resolution value ({dict(resolution=resolution)})")
 
     if value_column is not None and value_column not in geodataframe.columns:
-        raise InvalidParameterValueException(
-            f"Expected value_column ({value_column}) to be contained in geodataframe columns."
-        )
+        raise InvalidColumnException(f"Expected value_column ({value_column}) to be contained in geodataframe columns.")
 
     if buffer_value is not None and buffer_value < 0:
         raise NumericValueSignException(f"Expected a positive buffer_value ({dict(buffer_value=buffer_value)})")
