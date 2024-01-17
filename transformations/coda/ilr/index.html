@@ -9,22 +9,22 @@
       
       
       
-        <link rel="prev" href="../../prediction/weights_of_evidence/">
+        <link rel="prev" href="../clr/">
       
       
-        <link rel="next" href="../clipping/">
+        <link rel="next" href="../pairwise/">
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.4">
     
     
       
-        <title>Check raster grids - EIS Toolkit</title>
+        <title>Isometric logratio transform - EIS Toolkit</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.4b4a2bd9.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.50c56a3b.min.css">
       
       
 
@@ -43,11 +43,11 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -60,16 +60,13 @@
     <body dir="ltr">
   
     
-    
-      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
-    
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
         
-        <a href="#check-raster-grids" class="md-skip">
+        <a href="#isometric-logratio-transform" class="md-skip">
           Skip to content
         </a>
       
@@ -85,7 +82,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="EIS Toolkit" class="md-header__button md-logo" aria-label="EIS Toolkit" data-md-component="logo">
+    <a href="../../.." title="EIS Toolkit" class="md-header__button md-logo" aria-label="EIS Toolkit" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -105,12 +102,15 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Check raster grids
+              Isometric logratio transform
             
           </span>
         </div>
       </div>
     </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
     
@@ -156,7 +156,7 @@
         <a href="https://github.com/GispoCoding/eis_toolkit" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     eis_toolkit
@@ -189,7 +189,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="EIS Toolkit" class="md-nav__button md-logo" aria-label="EIS Toolkit" data-md-component="logo">
+    <a href="../../.." title="EIS Toolkit" class="md-nav__button md-logo" aria-label="EIS Toolkit" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -202,7 +202,7 @@
       <a href="https://github.com/GispoCoding/eis_toolkit" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     eis_toolkit
@@ -217,8 +217,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -236,8 +237,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../dependency_licenses/" class="md-nav__link">
+      <a href="../../../dependency_licenses/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -252,6 +254,7 @@
     
       
       
+  
   
   
   
@@ -291,8 +294,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../conversions/csv_to_geodataframe/" class="md-nav__link">
+      <a href="../../../conversions/csv_to_geodataframe/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -311,8 +315,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../conversions/raster_to_dataframe/" class="md-nav__link">
+      <a href="../../../conversions/raster_to_dataframe/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -335,6 +340,7 @@
     
       
       
+  
   
   
   
@@ -374,8 +380,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/dbscan/" class="md-nav__link">
+      <a href="../../../exploratory_analyses/dbscan/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -394,8 +401,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/descriptive_statistics/" class="md-nav__link">
+      <a href="../../../exploratory_analyses/descriptive_statistics/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -414,8 +422,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/feature_importance/" class="md-nav__link">
+      <a href="../../../exploratory_analyses/feature_importance/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -434,8 +443,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/k_means_cluster/" class="md-nav__link">
+      <a href="../../../exploratory_analyses/k_means_cluster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -454,8 +464,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/parallel_coordinates/" class="md-nav__link">
+      <a href="../../../exploratory_analyses/parallel_coordinates/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -474,8 +485,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/pca/" class="md-nav__link">
+      <a href="../../../exploratory_analyses/pca/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -494,8 +506,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/statistical_testing/" class="md-nav__link">
+      <a href="../../../exploratory_analyses/statistical_testing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -518,6 +531,7 @@
     
       
       
+  
   
   
   
@@ -557,8 +571,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../prediction/fuzzy_overlay/" class="md-nav__link">
+      <a href="../../../prediction/fuzzy_overlay/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -577,8 +592,114 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../prediction/weights_of_evidence/" class="md-nav__link">
+      <a href="../../../prediction/gradient_boosting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Gradient boosting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../prediction/logistic_regression/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Logistic regression
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../prediction/machine_learning_general/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Logistic regression
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../prediction/mlp/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    MLP
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../prediction/random_forests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Random forests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../prediction/weights_of_evidence/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -603,7 +724,6 @@
       
   
   
-    
   
   
     
@@ -611,12 +731,12 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
@@ -630,7 +750,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Raster processing
@@ -641,83 +761,10 @@
                 
   
   
-    
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Check raster grids
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  <span class="md-ellipsis">
-    Check raster grids
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.check_raster_grids" class="md-nav__link">
-    check_raster_grids
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.check_raster_grids.check_raster_grids" class="md-nav__link">
-    check_raster_grids()
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
   
   
     <li class="md-nav__item">
-      <a href="../clipping/" class="md-nav__link">
+      <a href="../../../raster_processing/clipping/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -736,8 +783,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../create_constant_raster/" class="md-nav__link">
+      <a href="../../../raster_processing/create_constant_raster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -756,8 +804,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../extract_values_from_raster/" class="md-nav__link">
+      <a href="../../../raster_processing/extract_values_from_raster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -776,8 +825,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../reprojecting/" class="md-nav__link">
+      <a href="../../../raster_processing/reprojecting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -796,8 +846,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../resampling/" class="md-nav__link">
+      <a href="../../../raster_processing/resampling/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -816,8 +867,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../snapping/" class="md-nav__link">
+      <a href="../../../raster_processing/snapping/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -836,8 +888,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../unifying/" class="md-nav__link">
+      <a href="../../../raster_processing/unifying/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -856,8 +909,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../unique_combinations/" class="md-nav__link">
+      <a href="../../../raster_processing/unique_combinations/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -876,8 +930,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../windowing/" class="md-nav__link">
+      <a href="../../../raster_processing/windowing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -900,6 +955,7 @@
     
       
       
+  
   
   
   
@@ -939,8 +995,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../training_data_tools/class_balancing/" class="md-nav__link">
+      <a href="../../../training_data_tools/class_balancing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -965,18 +1022,21 @@
       
   
   
+    
+  
+  
   
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
@@ -990,7 +1050,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             Transformations
@@ -1002,8 +1062,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../transformations/binarize/" class="md-nav__link">
+      <a href="../../binarize/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1022,8 +1083,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../transformations/clip/" class="md-nav__link">
+      <a href="../../clip/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1042,8 +1104,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../transformations/linear/" class="md-nav__link">
+      <a href="../../linear/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1062,8 +1125,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../transformations/logarithmic/" class="md-nav__link">
+      <a href="../../logarithmic/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1082,8 +1146,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../transformations/one_hot_encoding/" class="md-nav__link">
+      <a href="../../one_hot_encoding/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1102,8 +1167,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../transformations/sigmoid/" class="md-nav__link">
+      <a href="../../sigmoid/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1122,12 +1188,215 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../transformations/winsorize/" class="md-nav__link">
+      <a href="../../winsorize/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     Winsorize
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8_8" id="__nav_8_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Coda
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8_8">
+            <span class="md-nav__icon md-icon"></span>
+            Coda
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../alr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Additive logratio transform
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Centered logratio transform
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Isometric logratio transform
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Isometric logratio transform
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.transformations.coda.ilr" class="md-nav__link">
+    <span class="md-ellipsis">
+      ilr
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.transformations.coda.ilr.single_ilr_transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      single_ilr_transform
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pairwise/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pairwise logratio transform
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pivot logratio transform
   </span>
   
 
@@ -1143,9 +1412,18 @@
     </li>
   
 
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
   
   
   
@@ -1185,8 +1463,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../validation/calculate_auc/" class="md-nav__link">
+      <a href="../../../validation/calculate_auc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1205,8 +1484,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../validation/calculate_base_metrics/" class="md-nav__link">
+      <a href="../../../validation/calculate_base_metrics/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1225,8 +1505,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../validation/get_pa_intersection/" class="md-nav__link">
+      <a href="../../../validation/get_pa_intersection/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1245,8 +1526,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../validation/plot_correlation_matrix/" class="md-nav__link">
+      <a href="../../../validation/plot_correlation_matrix/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1265,8 +1547,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../validation/plot_prediction_area_curves/" class="md-nav__link">
+      <a href="../../../validation/plot_prediction_area_curves/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1285,8 +1568,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../validation/plot_rate_curve/" class="md-nav__link">
+      <a href="../../../validation/plot_rate_curve/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1309,6 +1593,7 @@
     
       
       
+  
   
   
   
@@ -1348,8 +1633,30 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../vector_processing/cell_based_association/" class="md-nav__link">
+      <a href="../../../vector_processing/calculate_geometry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Calculate geometry
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../vector_processing/cell_based_association/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1368,8 +1675,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../vector_processing/distance_computation/" class="md-nav__link">
+      <a href="../../../vector_processing/distance_computation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1388,8 +1696,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../vector_processing/extract_shared_lines/" class="md-nav__link">
+      <a href="../../../vector_processing/extract_shared_lines/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1408,8 +1717,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../vector_processing/idw_interpolation/" class="md-nav__link">
+      <a href="../../../vector_processing/idw_interpolation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1428,8 +1738,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../vector_processing/kriging_interpolation/" class="md-nav__link">
+      <a href="../../../vector_processing/kriging_interpolation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1448,8 +1759,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../vector_processing/rasterize_vector/" class="md-nav__link">
+      <a href="../../../vector_processing/rasterize_vector/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1468,8 +1780,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../vector_processing/reproject_vector/" class="md-nav__link">
+      <a href="../../../vector_processing/reproject_vector/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1488,8 +1801,9 @@
   
   
   
+  
     <li class="md-nav__item">
-      <a href="../../vector_processing/vector_density/" class="md-nav__link">
+      <a href="../../../vector_processing/vector_density/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1537,15 +1851,19 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.check_raster_grids" class="md-nav__link">
-    check_raster_grids
+  <a href="#eis_toolkit.transformations.coda.ilr" class="md-nav__link">
+    <span class="md-ellipsis">
+      ilr
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.raster_processing.check_raster_grids.check_raster_grids" class="md-nav__link">
-    check_raster_grids()
+  <a href="#eis_toolkit.transformations.coda.ilr.single_ilr_transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      single_ilr_transform
+    </span>
   </a>
   
 </li>
@@ -1568,14 +1886,14 @@
   
 
 
-<h1 id="check-raster-grids">Check raster grids</h1>
+<h1 id="isometric-logratio-transform">Isometric logratio transform</h1>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<a id="eis_toolkit.raster_processing.check_raster_grids"></a>
+<a id="eis_toolkit.transformations.coda.ilr"></a>
   <div class="doc doc-contents first">
 
   
@@ -1595,16 +1913,16 @@
 
 
 
-
-<h3 id="eis_toolkit.raster_processing.check_raster_grids.check_raster_grids" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">check_raster_grids</span><span class="p">(</span><span class="n">rasters</span><span class="p">,</span> <span class="n">same_extent</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.transformations.coda.ilr.single_ilr_transform" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">single_ilr_transform</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">subcomposition_1</span><span class="p">,</span> <span class="n">subcomposition_2</span><span class="p">)</span></code>
 
 </h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Check the set of input rasters for matching gridding and optionally matching bounds.</p>
+      <p>Perform a single isometric logratio transformation on the provided subcompositions.</p>
+<p>Returns ILR balances. Column order matters.</p>
 
 
 
@@ -1620,13 +1938,13 @@
     </thead>
     <tbody>
         <tr>
-          <td><code>rasters</code></td>
+          <td><code>df</code></td>
           <td>
-                <code><span title="typing.List">List</span>[<span title="rasterio.io.DatasetReader">DatasetReader</span>]</code>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>List of rasters to test for matching gridding.</p>
+              <p>A dataframe of shape [N, D] of compositional data.</p>
             </div>
           </td>
           <td>
@@ -1634,18 +1952,31 @@
           </td>
         </tr>
         <tr>
-          <td><code>same_extent</code></td>
+          <td><code>subcomposition_1</code></td>
           <td>
-                <code>bool</code>
+                <code><span title="beartype.typing.Sequence">Sequence</span>[str]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>optional boolean argument that determines if rasters are tested for matching bounds.
-Default set to False.</p>
+              <p>Names of the columns in the numerator part of the ratio.</p>
             </div>
           </td>
           <td>
-                <code>False</code>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>subcomposition_2</code></td>
+          <td>
+                <code><span title="beartype.typing.Sequence">Sequence</span>[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Names of the columns in the denominator part of the ratio.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
           </td>
         </tr>
     </tbody>
@@ -1664,11 +1995,66 @@ Default set to False.</p>
     <tbody>
         <tr>
           <td>
-                <code>bool</code>
+                <code><span title="pandas.Series">Series</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>True if gridding and optionally bounds matches, False if not.</p>
+              <p>A series of length N containing the transforms.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.InvalidColumnException">InvalidColumnException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>One or more subcomposition columns are not found in the input dataframe.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.InvalidCompositionException">InvalidCompositionException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Data is not normalized to the expected value or
+one or more columns are found in both subcompositions.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.InvalidParameterValueException">InvalidParameterValueException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>At least one subcomposition provided was empty.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>NumericValueSignException</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Data contains zeros or negative values.</p>
             </div>
           </td>
         </tr>
@@ -1676,38 +2062,78 @@ Default set to False.</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/raster_processing/check_raster_grids.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">check_raster_grids</span><span class="p">(</span>  <span class="c1"># type: ignore[no-any-unimported]</span>
-    <span class="n">rasters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">],</span> <span class="n">same_extent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+            <summary>Source code in <code>eis_toolkit/transformations/coda/ilr.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">single_ilr_transform</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">subcomposition_1</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">subcomposition_2</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check the set of input rasters for matching gridding and optionally matching bounds.</span>
+<span class="sd">    Perform a single isometric logratio transformation on the provided subcompositions.</span>
+
+<span class="sd">    Returns ILR balances. Column order matters.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        rasters: List of rasters to test for matching gridding.</span>
-<span class="sd">        same_extent: optional boolean argument that determines if rasters are tested for matching bounds.</span>
-<span class="sd">            Default set to False.</span>
+<span class="sd">        df: A dataframe of shape [N, D] of compositional data.</span>
+<span class="sd">        subcomposition_1: Names of the columns in the numerator part of the ratio.</span>
+<span class="sd">        subcomposition_2: Names of the columns in the denominator part of the ratio.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        True if gridding and optionally bounds matches, False if not.</span>
+<span class="sd">        A series of length N containing the transforms.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        InvalidColumnException: One or more subcomposition columns are not found in the input dataframe.</span>
+<span class="sd">        InvalidCompositionException: Data is not normalized to the expected value or</span>
+<span class="sd">            one or more columns are found in both subcompositions.</span>
+<span class="sd">        InvalidParameterValueException: At least one subcomposition provided was empty.</span>
+<span class="sd">        NumericValueSignException: Data contains zeros or negative values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">check</span> <span class="o">=</span> <span class="n">_check_raster_grids</span><span class="p">(</span><span class="n">rasters</span><span class="o">=</span><span class="n">rasters</span><span class="p">,</span> <span class="n">same_extent</span><span class="o">=</span><span class="n">same_extent</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">check</span>
+    <span class="n">check_in_simplex_sample_space</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">subcomposition_1</span> <span class="ow">and</span> <span class="n">subcomposition_2</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;A subcomposition should contain at least one column.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">check_columns_valid</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">subcomposition_1</span><span class="p">)</span> <span class="ow">and</span> <span class="n">check_columns_valid</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">subcomposition_2</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">InvalidColumnException</span><span class="p">(</span><span class="s2">&quot;Not all of the input columns were found in the input dataframe.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">check_lists_overlap</span><span class="p">(</span><span class="n">subcomposition_1</span><span class="p">,</span> <span class="n">subcomposition_2</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InvalidCompositionException</span><span class="p">(</span><span class="s2">&quot;The subcompositions overlap.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_single_ilr_transform</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">subcomposition_1</span><span class="p">,</span> <span class="n">subcomposition_2</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1726,11 +2152,19 @@ Default set to False.</p>
 
 
 
+
+
+
+
+
+
+
                 
               </article>
             </div>
           
           
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
       </main>
@@ -1763,10 +2197,10 @@ Default set to False.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.c011b7c0.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.7389ff0e.min.js"></script>
       
     
   </body>
