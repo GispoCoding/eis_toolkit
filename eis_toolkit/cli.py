@@ -5,6 +5,7 @@
 # --- ! ---
 
 import json
+import os
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -574,19 +575,21 @@ def snap_raster_cli(
 # UNIFY RASTERS
 @app.command()
 def unify_rasters_cli(
+    rasters_to_unify: INPUT_FILES_ARGUMENT,
     base_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_directory: Annotated[Path, OUTPUT_DIR_OPTION],  # Directory path?
-    rasters_to_unify: Annotated[List[Path], INPUT_FILE_OPTION],
-    resampling_method: ResamplingMethods = typer.Option(help="resample help", default=ResamplingMethods.nearest),
+    output_directory: Annotated[Path, OUTPUT_DIR_OPTION],
+    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest),
     same_extent: bool = False,
 ):
-    """Unify given rasters relative to base raster. WIP."""
+    """Unify rasters to match the base raster."""
     from eis_toolkit.raster_processing.unifying import unify_raster_grids
 
     typer.echo("Progress: 10%")
 
     with rasterio.open(base_raster) as raster:
-        to_unify = [rasterio.open(rstr) for rstr in rasters_to_unify]  # Open all rasters to be unfiied
+        to_unify = [rasterio.open(rstr) for rstr in rasters_to_unify]  # Open all rasters to be unified
+        typer.echo("Progress: 25%")
+
         unified = unify_raster_grids(
             base_raster=raster,
             rasters_to_unify=to_unify,
@@ -596,13 +599,19 @@ def unify_rasters_cli(
         [rstr.close() for rstr in to_unify]  # Close all rasters
     typer.echo("Progress: 75%")
 
+    out_rasters_dict = {}
     for i, (out_image, out_meta) in enumerate(unified[1:]):  # Skip writing base raster
-        output_raster = output_directory.joinpath(f"unified_raster {i+1}.tif")
-        with rasterio.open(output_raster, "w", **out_meta) as dst:
+        in_raster_name = os.path.splitext(os.path.split(rasters_to_unify[i - 1])[1])[0]
+        output_raster_name = f"{in_raster_name}_unified"
+        output_raster_path = output_directory.joinpath(output_raster_name + ".tif")
+        with rasterio.open(output_raster_path, "w", **out_meta) as dst:
             dst.write(out_image)
+        out_rasters_dict[output_raster_name] = str(output_raster_path)
     typer.echo("Progress: 100%")
 
-    typer.echo(f"Unifying completed, writing rasters to {output_directory}.")
+    json_str = json.dumps(out_rasters_dict)
+    typer.echo(f"Output rasters: {json_str}")
+    typer.echo(f"Unifying completed, rasters saved to {output_directory}.")
 
 
 # EXTRACT WINDOW
