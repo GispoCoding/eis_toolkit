@@ -291,9 +291,10 @@ def weights_of_evidence_calculate_weights(
         Number of all evidence pixels.
 
     Raises:
-        ClassificationFailedException: TODO docstring
-        InvalidColumnException: TODO docstring
-        InvalidParameterValueException: TODO docstring
+        ClassificationFailedException: Unable to create generalized classes with the given
+            studentized_contrast_threshold.
+        InvalidColumnException: Arrays to generate contains invalid column name(s).
+        InvalidParameterValueException: Input weights_type is not one of the accepted values.
     """
 
     if arrays_to_generate is None:
