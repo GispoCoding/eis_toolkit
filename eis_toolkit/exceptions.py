@@ -74,6 +74,10 @@ class NonMatchingCrsException(Exception):
     """Exception error class for CRS mismatches."""
 
 
+class NonMatchingRasterMetadataException(Exception):
+    """Exception error class for raster metadata mismatches."""
+
+
 class NonMatchingParameterLengthsException(Exception):
     """Exception error class for parameters with different lenghts."""
 

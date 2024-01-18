@@ -3,7 +3,7 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Sequence, Tuple
 
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException, NonMatchingRasterMetadataException
 from eis_toolkit.utilities.checks.raster import check_raster_grids
 
 
@@ -37,8 +37,12 @@ def unique_combinations(  # type: ignore[no-any-unimported]
         raster_list: Rasters to be used for finding combinations.
 
     Returns:
-        out_image: Combinations of rasters.
-        out_meta: The metadata of the first raster in raster_list.
+        Combinations of rasters.
+        The metadata of the first raster in raster_list.
+
+    Raises:
+        InvalidParameterValueException: Total number of raster bands is 1.
+        NonMatchingRasterMetadataException: Input raster grids do not have the grid properties.
     """
     bands = []
     out_meta = raster_list[0].meta
@@ -54,7 +58,7 @@ def unique_combinations(  # type: ignore[no-any-unimported]
         raise InvalidParameterValueException("Expected to have more bands than 1")
 
     if check_raster_grids(raster_profiles) is not True:
-        raise InvalidParameterValueException("Expected raster grids to be of same shape")
+        raise NonMatchingRasterMetadataException("Expected raster grids to be have the same grid properties.")
 
     out_image = _unique_combinations(bands)
     return out_image, out_meta

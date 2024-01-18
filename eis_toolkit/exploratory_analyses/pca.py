@@ -145,7 +145,7 @@ def compute_pca(
             geometries = data.geometry
             crs = data.crs
             df = df.drop(columns=["geometry"])
-        if columns is not None:
+        if columns is not None and columns != []:
             if not check_columns_valid(df, columns):
                 raise exceptions.InvalidColumnException("All selected columns were not found in the input DataFrame.")
             df = df[columns]
