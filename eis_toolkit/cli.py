@@ -621,6 +621,32 @@ def reproject_raster_cli(
     typer.echo(f"Reprojecting completed, writing raster to {output_raster}.")
 
 
+# RESAMPLE RASTER
+@app.command()
+def resample_raster_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    resolution: float = typer.Option(),
+    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.bilinear),
+):
+    """Resamples raster according to given resolution."""
+    from eis_toolkit.raster_processing.resampling import resample
+
+    typer.echo("Progress: 10%")
+
+    method = RESAMPLING_MAPPING[resampling_method]
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = resample(raster=raster, resolution=resolution, resampling_method=method)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image)
+    typer.echo("Progress 100%")
+
+    typer.echo(f"Resampling completed, writing raster to {output_raster}.")
+
+
 # SNAP RASTER
 @app.command()
 def snap_raster_cli(
