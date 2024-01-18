@@ -608,7 +608,7 @@ def unify_rasters_cli(
 # GET UNIQUE COMBINATIONS
 @app.command()
 def unique_combinations_cli(
-    input_rasters: Annotated[List[Path], INPUT_FILE_OPTION],
+    input_rasters: Annotated[Path, INPUT_FILES_ARGUMENT],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
     """Get combinations of raster values between rasters."""
