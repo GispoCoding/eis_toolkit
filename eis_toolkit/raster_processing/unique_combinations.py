@@ -37,8 +37,8 @@ def unique_combinations(  # type: ignore[no-any-unimported]
         raster_list: Rasters to be used for finding combinations.
 
     Returns:
-        out_image: Combinations of rasters.
-        out_meta: The metadata of the first raster in raster_list.
+        Combinations of rasters.
+        The metadata of the first raster in raster_list.
 
     Raises:
         InvalidParameterValueException: Input rasters don't have enough bands to perform
