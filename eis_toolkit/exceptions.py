@@ -54,7 +54,7 @@ class MatchingRasterGridException(Exception):
     """Exception error class for raster grid matches."""
 
 
-class NotApplicableGeometryTypeException(Exception):
+class GeometryTypeException(Exception):
     """Exception error class for not suitable geometry types."""
 
 
