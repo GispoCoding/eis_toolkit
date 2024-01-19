@@ -7,7 +7,7 @@ from beartype.typing import Literal, NamedTuple, Optional, Union
 from rasterio import features, profiles, transform
 from shapely.geometry import LineString, Point, box
 
-from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException, NumericValueSignException
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidColumnException, NumericValueSignException
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
 SAMPLE_LINE_GEODATAFRAME = gpd.GeoDataFrame(
@@ -158,7 +158,7 @@ class RasterizeVectorTestArgs(NamedTuple):
                 geodataframe=SAMPLE_LINE_GEODATAFRAME,
                 value_column="not-in-columns",
             ),
-            pytest.raises(InvalidParameterValueException),
+            pytest.raises(InvalidColumnException),
             id="Invalid_value_column",
         ),
     ],
