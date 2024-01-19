@@ -38,5 +38,5 @@ def balance_SMOTETomek(
     if len(X) != len(y):
         raise NonMatchingParameterLengthsException("Feature matrix X and target labels y must have the same length.")
 
-    x_res, y_res = SMOTETomek(sampling_strategy=sampling_strategy, random_state=random_state).fit_resample(X, y)
-    return x_res, y_res
+    X_res, y_res = SMOTETomek(sampling_strategy=sampling_strategy, random_state=random_state).fit_resample(X, y)
+    return X_res, y_res
