@@ -1,7 +1,7 @@
 import geopandas as gpd
 from beartype import beartype
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
 
 
 def _extract_shared_lines(polygons: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -43,10 +43,10 @@ def extract_shared_lines(polygons: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         InvalidParameterValueException if input geodataframe doesn't contain at least 2 polygons.
     """
     if polygons.shape[0] == 0:
-        raise exceptions.EmptyDataFrameException("Geodataframe is empty.")
+        raise EmptyDataFrameException("Geodataframe is empty.")
 
     if polygons.shape[0] < 2:
-        raise exceptions.InvalidParameterValueException("Expected GeoDataFrame to have at least 2 polygons.")
+        raise InvalidParameterValueException("Expected GeoDataFrame to have at least 2 polygons.")
 
     shared_lines = _extract_shared_lines(polygons)
 

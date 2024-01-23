@@ -3,7 +3,7 @@ import pytest
 from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.prediction.random_forests import random_forest_classifier_train, random_forest_regressor_train
 
 X_IRIS, Y_IRIS = load_iris(return_X_y=True)
@@ -45,7 +45,7 @@ def test_random_forest_regressor():
 
 def test_random_forest_invalid_n_estimators():
     """Test that invalid value for n estimators raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         random_forest_classifier_train(X_IRIS, Y_IRIS, n_estimators=0)
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         random_forest_regressor_train(X_IRIS, Y_IRIS, n_estimators=0)

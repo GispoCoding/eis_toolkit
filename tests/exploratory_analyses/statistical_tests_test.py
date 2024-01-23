@@ -3,7 +3,12 @@ import pandas as pd
 import pytest
 from beartype.roar import BeartypeCallHintParamViolation
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import (
+    EmptyDataException,
+    InvalidParameterValueException,
+    NonNumericDataException,
+    SampleSizeExceededException,
+)
 from eis_toolkit.exploratory_analyses.statistical_tests import (
     chi_square_test,
     correlation_matrix,
@@ -80,7 +85,7 @@ def test_correlation_matrix():
 
 def test_correlation_matrix_non_numeric():
     """Test that returned correlation matrix is correct."""
-    with pytest.raises(exceptions.NonNumericDataException):
+    with pytest.raises(NonNumericDataException):
         correlation_matrix(data=non_numeric_df)
 
 
@@ -114,40 +119,40 @@ def test_covariance_matrix():
 
 def test_covariance_matrix_negative_min_periods():
     """Test that negative min_periods value raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         covariance_matrix(data=numeric_data, min_periods=-1)
 
 
 def test_empty_df():
     """Test that empty DataFrame raises the correct exception."""
     empty_df = pd.DataFrame()
-    with pytest.raises(exceptions.EmptyDataException):
+    with pytest.raises(EmptyDataException):
         normality_test(data=empty_df)
 
 
 def test_max_samples():
     """Test that sample count > 5000 raises the correct exception."""
-    with pytest.raises(exceptions.SampleSizeExceededException):
+    with pytest.raises(SampleSizeExceededException):
         normality_test(data=large_data)
         normality_test(data=large_df, columns=["a"])
 
 
 def test_invalid_columns():
     """Test that invalid column name in raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         chi_square_test(data=categorical_data, target_column=target_column, columns=["f", "x"])
         normality_test(data=numeric_data, columns=["e", "f"])
 
 
 def test_non_numeric_data():
     """Test that non-numeric data raises the correct exception."""
-    with pytest.raises(exceptions.NonNumericDataException):
+    with pytest.raises(NonNumericDataException):
         normality_test(data=non_numeric_df, columns=["a"])
 
 
 def test_invalid_target_column():
     """Test that invalid target column raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         chi_square_test(data=categorical_data, target_column="invalid_column")
 
 
@@ -159,11 +164,11 @@ def test_invalid_correlation_method():
 
 def test_min_periods_with_kendall():
     """Test that min_periods with correlation_method 'kendall' raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         correlation_matrix(data=numeric_data, correlation_method="kendall", min_periods=1)
 
 
 def test_invalid_ddof():
     """Test that invalid delta degrees of freedom raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         covariance_matrix(data=numeric_data, delta_degrees_of_freedom=-1)

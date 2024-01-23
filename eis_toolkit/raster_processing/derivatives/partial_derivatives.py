@@ -22,7 +22,7 @@ def _coefficients_horn(
         coefficients: coefficients to calculate.
 
     Returns:
-        The calculated coefficientss p, q.
+        The calculated coefficients p, q.
     """
 
     kernal_p = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
@@ -52,7 +52,7 @@ def _coefficients_zevenbergen(
         coefficients: coefficients to calculate.
 
     Returns:
-        The calculated coefficientss p, q, r, s, t.
+        The calculated coefficients p, q, r, s, t.
     """
 
     kernal_p = np.array([[0, 0, 0], [-1, 0, 1], [0, 0, 0]])
@@ -130,7 +130,7 @@ def _coefficients_evans(
         coefficients: coefficients to calculate.
 
     Returns:
-        The calculated coefficientss p, q, r, s, t.
+        The calculated coefficients p, q, r, s, t.
     """
 
     kernal_p = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]])

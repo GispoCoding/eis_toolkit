@@ -41,8 +41,8 @@ def unique_combinations(  # type: ignore[no-any-unimported]
         The metadata of the first raster in raster_list.
 
     Raises:
-        InvalidParameterValueException: Total number of raster bands is 1.
-        NonMatchingRasterMetadataException: Input raster grids do not have the grid properties.
+        InvalidParameterValueException: Input rasters don't have enough bands to perform
+            the operation or input rasters are of different shape.
     """
     bands = []
     out_meta = raster_list[0].meta

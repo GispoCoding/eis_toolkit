@@ -11,7 +11,6 @@ from statsmodels.stats.weightstats import DescrStatsW
 from eis_toolkit.exceptions import InvalidColumnException
 
 
-# The core descriptive statistics functionality. Used internally by descriptive_statistics.
 def _descriptive_statistics(data: Union[rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame]) -> dict:
     statistics = DescrStatsW(data)
     min = np.min(data)

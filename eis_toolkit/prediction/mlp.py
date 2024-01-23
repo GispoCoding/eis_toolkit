@@ -6,7 +6,7 @@ from beartype import beartype
 from tensorflow import keras
 from tensorflow.keras.optimizers.legacy import SGD, Adagrad, Adam, RMSprop
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import InvalidDataShapeException, InvalidParameterValueException
 
 
 def _keras_optimizer(optimizer: str, **kwargs):
@@ -20,7 +20,7 @@ def _keras_optimizer(optimizer: str, **kwargs):
     elif optimizer == "sgd":
         return SGD(**kwargs)
     else:
-        raise exceptions.InvalidParameterValueException(f"Unidentified optimizer: {optimizer}")
+        raise InvalidParameterValueException(f"Unidentified optimizer: {optimizer}")
 
 
 def _check_MLP_inputs(
@@ -36,39 +36,39 @@ def _check_MLP_inputs(
 ) -> None:
     """Check parameters for Keras MLP training."""
     if len(neurons) == 0:
-        raise exceptions.InvalidParameterValueException("Neurons parameter must be a non-empty list.")
+        raise InvalidParameterValueException("Neurons parameter must be a non-empty list.")
 
     if any(neuron < 1 for neuron in neurons):
-        raise exceptions.InvalidParameterValueException("Each neuron in neurons list must be at least 1.")
+        raise InvalidParameterValueException("Each neuron in neurons list must be at least 1.")
 
     if validation_split and not (0.0 < validation_split < 1.0):
-        raise exceptions.InvalidParameterValueException("Validation split must be a value between 0 and 1, exclusive.")
+        raise InvalidParameterValueException("Validation split must be a value between 0 and 1, exclusive.")
 
     if learning_rate <= 0.0:
-        raise exceptions.InvalidParameterValueException("Learning rate must be greater than 0.")
+        raise InvalidParameterValueException("Learning rate must be greater than 0.")
 
     if dropout_rate and not (0.0 <= dropout_rate <= 1.0):
-        raise exceptions.InvalidParameterValueException("Dropout rate must be between 0 and 1, inclusive.")
+        raise InvalidParameterValueException("Dropout rate must be between 0 and 1, inclusive.")
 
     if es_patience <= 0:
-        raise exceptions.InvalidParameterValueException("Early stopping patience must be greater than 0.")
+        raise InvalidParameterValueException("Early stopping patience must be greater than 0.")
 
     if batch_size <= 0:
-        raise exceptions.InvalidParameterValueException("Batch size must be greater than 0.")
+        raise InvalidParameterValueException("Batch size must be greater than 0.")
 
     if epochs <= 0:
-        raise exceptions.InvalidParameterValueException("Number of epochs must be greater than 0.")
+        raise InvalidParameterValueException("Number of epochs must be greater than 0.")
 
     if output_neurons <= 0:
-        raise exceptions.InvalidParameterValueException("Number of output neurons must be greater than 0.")
+        raise InvalidParameterValueException("Number of output neurons must be greater than 0.")
 
     if output_neurons > 1 and loss_function == "binary_crossentropy":
-        raise exceptions.InvalidParameterValueException(
+        raise InvalidParameterValueException(
             "Number of output neurons must be 1 when used loss function is binary crossentropy."
         )
 
     if output_neurons <= 2 and loss_function == "categorical_crossentropy":
-        raise exceptions.InvalidParameterValueException(
+        raise InvalidParameterValueException(
             "Number of output neurons must be greater than 2 when used loss function is categorical crossentropy."
         )
 
@@ -76,15 +76,13 @@ def _check_MLP_inputs(
 def _check_ML_model_data_input(X: np.ndarray, y: np.ndarray):
     """Check if the input data for the ML model is in the correct shape."""
     if X.ndim != 2:
-        raise exceptions.InvalidDataShapeException(
-            f"X must be a 2-dimensional array, but is an array with shape {X.shape}."
-        )
+        raise InvalidDataShapeException(f"X must be a 2-dimensional array, but is an array with shape {X.shape}.")
 
     n_samples_X = X.shape[0]
     n_samples_y = y.shape[0]
 
     if n_samples_X != n_samples_y:
-        raise exceptions.InvalidDataShapeException(
+        raise InvalidDataShapeException(
             f"The number of samples in X and y must be equal, but got {n_samples_X} in X and {n_samples_y} in y."
         )
 

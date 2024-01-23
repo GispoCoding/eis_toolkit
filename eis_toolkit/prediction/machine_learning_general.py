@@ -23,7 +23,7 @@ from sklearn.metrics import (
 from sklearn.model_selection import KFold, LeaveOneOut, StratifiedKFold, train_test_split
 from tensorflow import keras
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import InvalidParameterValueException, NonMatchingParameterLengthsException
 
 # from eis_toolkit.utilities.checks.raster import check_raster_grids
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
@@ -89,7 +89,7 @@ def split_data(
     """
 
     if not (0 < split_size < 1):
-        raise exceptions.InvalidParameterValueException("Split size must be more than 0 and less than 1.")
+        raise InvalidParameterValueException("Split size must be more than 0 and less than 1.")
 
     split_data = train_test_split(*data, test_size=split_size, random_state=random_state, shuffle=shuffle)
 
@@ -120,9 +120,7 @@ def evaluate_model(
     """
     x_size = X_test.index.size if isinstance(X_test, pd.DataFrame) else X_test.shape[0]
     if x_size != y_test.size:
-        raise exceptions.NonMatchingParameterLengthsException(
-            f"X and y must have the length {x_size} != {y_test.size}."
-        )
+        raise NonMatchingParameterLengthsException(f"X and y must have the length {x_size} != {y_test.size}.")
 
     if metrics is None:
         metrics = ["accuracy"] if is_classifier(model) else ["mse"]
@@ -219,7 +217,7 @@ def prepare_data_for_ml(
     training_data, profiles = zip(*[_read_and_stack_training_raster(file) for file in training_raster_files])
     # # TODO. Waiting for check_raster_grids input modification to profiles
     # if not check_raster_grids(profiles, same_extent=True):
-    #     raise exceptions.NonMatchingRasterGridException
+    #     raise NonMatchingRasterGridException
     reference_profile = profiles[0]
     nodata_values = [profile["nodata"] for profile in profiles]
 
@@ -306,13 +304,11 @@ def _train_and_validate_sklearn_model(
     # Perform checks
     x_size = X.index.size if isinstance(X, pd.DataFrame) else X.shape[0]
     if x_size != y.size:
-        raise exceptions.NonMatchingParameterLengthsException(f"X and y must have the length {x_size} != {y.size}.")
+        raise NonMatchingParameterLengthsException(f"X and y must have the length {x_size} != {y.size}.")
     if len(metrics) == 0 and validation_method != NO_VALIDATION:
-        raise exceptions.InvalidParameterValueException(
-            "Metrics must have at least one chosen metric to validate model."
-        )
+        raise InvalidParameterValueException("Metrics must have at least one chosen metric to validate model.")
     if cv_folds < 2:
-        raise exceptions.InvalidParameterValueException("Number of cross-validation folds must be at least 2.")
+        raise InvalidParameterValueException("Number of cross-validation folds must be at least 2.")
 
     # Validation approach 1: No validation
     if validation_method == NO_VALIDATION:
@@ -368,7 +364,7 @@ def _train_and_validate_sklearn_model(
             out_metrics = out_metrics[metrics[0]]
 
     else:
-        raise exceptions.InvalidParameterValueException(f"Unrecognized validation method: {validation_method}")
+        raise InvalidParameterValueException(f"Unrecognized validation method: {validation_method}")
 
     return model, out_metrics
 
@@ -397,11 +393,11 @@ def _score_model(
         InvalidParameterValueException: If model type is invalid for the given metric or metric was not recognized.
     """
     if metric in ["mae", "mse", "rmse", "r2"] and not is_regressor(model):
-        raise exceptions.InvalidParameterValueException(
+        raise InvalidParameterValueException(
             f"Chosen metric ({metric}) is not applicable for given model type (classifier)."
         )
     if metric in ["accuracy", "precision", "recall", "f1"] and not is_classifier(model):
-        raise exceptions.InvalidParameterValueException(
+        raise InvalidParameterValueException(
             f"Chosen metric ({metric}) is not applicable for given model type (regressor)."
         )
 
@@ -430,7 +426,7 @@ def _score_model(
     elif metric == "f1":
         score = f1_score(y_true, y_pred, average=average_method)
     else:
-        raise exceptions.InvalidParameterValueException(f"Unrecognized metric: {metric}")
+        raise InvalidParameterValueException(f"Unrecognized metric: {metric}")
 
     return score
 
@@ -461,6 +457,6 @@ def _get_cross_validator(
     elif cv == LOO_CV:
         cross_validator = LeaveOneOut()
     else:
-        raise exceptions.InvalidParameterValueException(f"CV method was not recognized: {cv}")
+        raise InvalidParameterValueException(f"CV method was not recognized: {cv}")
 
     return cross_validator
