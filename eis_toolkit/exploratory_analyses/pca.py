@@ -1,48 +1,59 @@
 from numbers import Number
-from typing import Literal, Optional, Union
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import rasterio
 import seaborn as sns
 from beartype import beartype
-from beartype.typing import Tuple
+from beartype.typing import Literal, Optional, Sequence, Tuple, Union
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler, RobustScaler, StandardScaler
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataException, InvalidColumnException, InvalidParameterValueException
+from eis_toolkit.utilities.checks.dataframe import check_columns_valid
 
 SCALERS = {"standard": StandardScaler, "min_max": MinMaxScaler, "robust": RobustScaler}
 
 
 @beartype
 def _prepare_array_data(
-    feature_matrix: np.ndarray, nodata_value: Optional[Number] = None, reshape: bool = True
-) -> Tuple[np.ndarray, np.ndarray]:
+    feature_matrix: np.ndarray, nodata_handling: str, nodata_value: Optional[Number] = None, reshape: bool = True
+) -> Tuple[np.ndarray, Optional[np.ndarray]]:
     if reshape:
         bands, rows, cols = feature_matrix.shape
         feature_matrix = feature_matrix.transpose(1, 2, 0).reshape(rows * cols, bands)
 
     if feature_matrix.size == 0:
-        raise exceptions.EmptyDataException("Input data is empty.")
+        raise EmptyDataException("Input data is empty.")
 
-    feature_matrix, missing_values_mask = _handle_missing_values(feature_matrix, nodata_value)
-
-    return feature_matrix, missing_values_mask
+    return _handle_missing_values(feature_matrix, nodata_handling, nodata_value)
 
 
 @beartype
 def _handle_missing_values(
-    feature_matrix: np.ndarray, nodata_value: Optional[Number] = None
-) -> Tuple[np.ndarray, np.ndarray]:
-    if nodata_value is not None:
-        feature_matrix[feature_matrix == nodata_value] = np.nan
-    missing_values_mask = np.isnan(feature_matrix)
-    feature_matrix[missing_values_mask] = 0  # Mask nan to 0 for processing
+    feature_matrix: np.ndarray, nodata_handling: str, nodata_value: Optional[Number] = None
+) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    nodata_mask = None
 
-    return feature_matrix, missing_values_mask
+    if nodata_value is not None:
+        nodata_mask = feature_matrix == nodata_value
+        feature_matrix[nodata_mask] = np.nan
+
+    if nodata_handling == "remove":
+        nan_rows_mask = np.isnan(feature_matrix).any(axis=1)
+        feature_matrix = feature_matrix[~nan_rows_mask]
+        return feature_matrix, nan_rows_mask
+
+    elif nodata_handling == "replace":
+        for i in range(feature_matrix.shape[1]):
+            column_mask = np.isnan(feature_matrix[:, i])
+            column_mean = np.nanmean(feature_matrix[:, i])
+            feature_matrix[column_mask, i] = column_mean
+        return feature_matrix, None
+
+    else:
+        raise InvalidParameterValueException("Invalid nodata_handling value. Choose 'remove' or 'replace'.")
 
 
 @beartype
@@ -61,92 +72,83 @@ def _compute_pca(
 
 @beartype
 def compute_pca(
-    data: Union[np.ndarray, pd.DataFrame, gpd.GeoDataFrame, rasterio.io.DatasetReader],
+    data: Union[np.ndarray, pd.DataFrame, gpd.GeoDataFrame],
     number_of_components: int,
+    columns: Optional[Sequence[str]] = None,
     scaler_type: Literal["standard", "min_max", "robust"] = "standard",
+    nodata_handling: Literal["remove", "replace"] = "remove",
     nodata: Optional[Number] = None,
-    color_column_name: Optional[str] = None,
-) -> Tuple[
-    Union[
-        np.ndarray,
-        Tuple[pd.DataFrame, sns.PairGrid],
-        Tuple[gpd.GeoDataFrame, sns.PairGrid],
-        Tuple[np.ndarray, rasterio.profiles.Profile],
-    ],
-    np.ndarray,
-]:
+) -> Tuple[Union[np.ndarray, pd.DataFrame, gpd.GeoDataFrame], np.ndarray]:
     """
-    Compute given number of principal components for numeric input data.
+    Compute defined number of principal components for numeric input data.
 
-    Various input data formats are accepted and the output format depends on the input format. If
-    input is (Geo)DataFrame, a pairplot is produced additionally. A column name used for coloring can
-    be specified in this case.
+    Before computation, data is scaled according to specified scaler and NaN values removed or replaced.
+    Optionally, a nodata value can be given to handle similarly as NaN values.
+
+    If input data is a Numpy array, interpretation of the data depends on its dimensions.
+    If array is 3D, it is interpreted as a multiband raster/stacked rasters format (bands, rows, columns).
+    If array is 2D, it is interpreted as table-like data, where each column represents a variable/raster band
+    and each row a data point (similar to a Dataframe).
 
     Args:
         data: Input data for PCA.
-        number_of_components: The number of principal components to compute Should be >= 1 and at most
-            the number of numeric columns if input is (Geo)DataFrame or number of bands if input is raster.
+        number_of_components: The number of principal components to compute. Should be >= 1 and at most
+            the number of numeric columns if input is (Geo)Dataframe.
+        columns: Select columns used for the PCA. Other columns are excluded from PCA, but added back
+            to the result Dataframe intact. Only relevant if input is (Geo)Dataframe. Defaults to None.
         scaler_type: Transform data according to a specified Sklearn scaler.
             Options are "standard", "min_max" and "robust". Defaults to "standard".
-        nodata: Define nodata value to be masked out. Optional parameter. If None and input is raster, looks
-            for nodata value from raster metadata. Defaults to None.
-        color_column_name: If input data is a DataFrame or a GeoDataFrame, column name used for
-            coloring data points in the produced pairplot can be defined. Defaults to None.
+        nodata_handling: If observations with nodata (NaN and given `nodata`) should be removed for the time
+            of PCA computation or replaced with column/band mean. Defaults to "remove".
+        nodata: Define a nodata value to remove. Defaults to None.
 
     Returns:
-        The computed principal components in corresponding format as the input data (for raster, output is
-        Numpy array containing the data and raster profile) and the explained variance ratios for each component.
+        The computed principal components in corresponding format as the input data and the
+        explained variance ratios for each component.
 
     Raises:
         EmptyDataException: The input is empty.
+        InvalidColumnException: Selected columns are not found in the input Dataframe.
         InvalidNumberOfPrincipalComponents: The number of principal components is less than 1 or more than
             number of columns if input was (Geo)DataFrame.
+        InvalidParameterValueException: If value for `number_of_components` is invalid.
     """
     if scaler_type not in SCALERS:
-        raise exceptions.InvalidParameterValueException(f"Invalid scaler. Choose from: {list(SCALERS.keys())}")
+        raise InvalidParameterValueException(f"Invalid scaler. Choose from: {list(SCALERS.keys())}")
 
     if number_of_components < 1:
-        raise exceptions.InvalidParameterValueException("The number of principal components should be >= 1.")
+        raise InvalidParameterValueException("The number of principal components should be >= 1.")
 
     # Get feature matrix (Numpy array) from various input types
     if isinstance(data, np.ndarray):
         feature_matrix = data
+        feature_matrix = feature_matrix.astype(float)
         if feature_matrix.ndim == 2:  # Table-like data (assumme it is a DataFrame transformed to Numpy array)
-            feature_matrix, nan_mask = _prepare_array_data(feature_matrix, nodata_value=nodata, reshape=False)
+            feature_matrix, nan_mask = _prepare_array_data(
+                feature_matrix, nodata_handling=nodata_handling, nodata_value=nodata, reshape=False
+            )
         elif feature_matrix.ndim == 3:  # Assume data represents multiband raster data
             rows, cols = feature_matrix.shape[1], feature_matrix.shape[2]
-            feature_matrix, nan_mask = _prepare_array_data(feature_matrix, nodata_value=nodata, reshape=True)
-        else:
-            raise exceptions.InvalidParameterValueException(
-                f"Unsupported input data format. {feature_matrix.ndim} dimensions detected."
+            feature_matrix, nan_mask = _prepare_array_data(
+                feature_matrix, nodata_handling=nodata_handling, nodata_value=nodata, reshape=True
             )
-        if feature_matrix.size == 0:
-            raise exceptions.EmptyDataException("Input array is empty.")
-
-    elif isinstance(data, rasterio.io.DatasetReader):
-        feature_matrix = data.read()
-        if feature_matrix.ndim < 3:
-            raise exceptions.InvalidParameterValueException("Input raster should have multiple bands.")
-        rows, cols = feature_matrix.shape[1], feature_matrix.shape[2]
-        if nodata is None:
-            nodata = data.nodata
-        feature_matrix, nan_mask = _prepare_array_data(feature_matrix, nodata_value=nodata, reshape=True)
+        else:
+            raise InvalidParameterValueException(
+                f"Unsupported input data format. {feature_matrix.ndim} dimensions detected for given array."
+            )
 
     elif isinstance(data, pd.DataFrame):
         df = data.copy()
         if df.empty:
-            raise exceptions.EmptyDataException("Input DataFrame is empty.")
-        if number_of_components > len(df.columns):
-            raise exceptions.InvalidParameterValueException(
-                "The number of principal should be at most the number of numeric columns in the input DataFrame."
-            )
-        if color_column_name is not None:
-            color_column_data = df[color_column_name]
-
+            raise EmptyDataException("Input DataFrame is empty.")
         if isinstance(data, gpd.GeoDataFrame):
             geometries = data.geometry
             crs = data.crs
             df = df.drop(columns=["geometry"])
+        if columns is not None and columns != []:
+            if not check_columns_valid(df, columns):
+                raise InvalidColumnException("All selected columns were not found in the input DataFrame.")
+            df = df[columns]
 
         df = df.convert_dtypes()
         df = df.apply(pd.to_numeric, errors="ignore")
@@ -154,16 +156,17 @@ def compute_pca(
         df = df.astype(dtype=np.number)
         feature_matrix = df.to_numpy()
         feature_matrix = feature_matrix.astype(float)
-        feature_matrix, nan_mask = _handle_missing_values(feature_matrix, nodata)
+        feature_matrix, nan_mask = _handle_missing_values(feature_matrix, nodata_handling, nodata)
 
+    if number_of_components > feature_matrix.shape[1]:
+        raise InvalidParameterValueException("The number of principal components is too high for the given input data.")
     # Core PCA computation
     principal_components, explained_variances = _compute_pca(feature_matrix, number_of_components, scaler_type)
 
-    # Put nodata back in and consider new dimension of data
-    if nodata is not None:
-        principal_components[nan_mask[:, number_of_components]] = nodata
-    else:
-        principal_components[nan_mask[:, :number_of_components]] = np.nan
+    if nodata_handling == "remove" and nan_mask is not None:
+        principal_components_with_nans = np.full((nan_mask.size, principal_components.shape[1]), np.nan)
+        principal_components_with_nans[~nan_mask, :] = principal_components
+        principal_components = principal_components_with_nans
 
     # Convert PCA output to proper format
     if isinstance(data, np.ndarray):
@@ -172,22 +175,15 @@ def compute_pca(
         else:
             result_data = principal_components
 
-    elif isinstance(data, rasterio.io.DatasetReader):
-        principal_components = principal_components.reshape(rows, cols, -1).transpose(2, 0, 1)
-        out_profile = data.profile.copy()
-        out_profile["count"] = number_of_components
-        out_profile["dtype"] = "float32"
-        result_data = (principal_components, out_profile)
-
     elif isinstance(data, pd.DataFrame):
         component_names = [f"principal_component_{i+1}" for i in range(number_of_components)]
-        pca_df = pd.DataFrame(data=principal_components, columns=component_names)
-        if color_column_name is not None:
-            pca_df[color_column_name] = color_column_data
-        sns_pair_grid = plot_pca(pca_df, explained_variances, color_column_name)
+        result_data = pd.DataFrame(data=principal_components, columns=component_names)
+        if columns is not None:
+            old_columns = [column for column in data.columns if column not in columns]
+            for column in old_columns:
+                result_data[column] = data[column]
         if isinstance(data, gpd.GeoDataFrame):
-            pca_df = gpd.GeoDataFrame(pca_df, geometry=geometries, crs=crs)
-        result_data = (pca_df, sns_pair_grid)
+            result_data = gpd.GeoDataFrame(result_data, geometry=geometries, crs=crs)
 
     return result_data, explained_variances
 
@@ -199,7 +195,11 @@ def plot_pca(
     color_column_name: Optional[str] = None,
     save_path: Optional[str] = None,
 ) -> sns.PairGrid:
-    """Plot a scatter matrix of different principal component combinations.
+    """
+    Plot a scatter matrix of different principal component combinations.
+
+    Automatically filters columns that do not start with "principal_component" for plotting.
+    This tool is designed to work smoothly on `compute_pca` outputs.
 
     Args:
         pca_df: A DataFrame containing computed principal components.
@@ -218,9 +218,12 @@ def plot_pca(
     """
 
     if color_column_name and color_column_name not in pca_df.columns:
-        raise exceptions.InvalidColumnException("DataFrame does not contain the given color column.")
+        raise InvalidColumnException("DataFrame does not contain the given color column.")
 
-    pair_grid = sns.pairplot(pca_df, hue=color_column_name)
+    filtered_df = pca_df.filter(regex="^principal_component")
+    filtered_df = pd.concat([filtered_df, pca_df[[color_column_name]]], axis=1)
+
+    pair_grid = sns.pairplot(filtered_df, hue=color_column_name)
 
     # Add explained variances to axis labels if provided
     if explained_variances is not None:

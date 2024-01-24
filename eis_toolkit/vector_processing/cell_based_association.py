@@ -1,4 +1,5 @@
 import os
+import warnings
 from numbers import Number
 
 import geopandas as gpd
@@ -8,9 +9,11 @@ import rasterio
 from beartype import beartype
 from beartype.typing import List, Optional, Tuple, Union
 from shapely import wkt
-from shapely.geometry import Polygon
+from shapely.geometry import Point, Polygon
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidColumnException, InvalidParameterValueException
+
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 os.environ["USE_PYGEOS"] = "0"
 
@@ -68,29 +71,27 @@ def cell_based_association(
     # Consistency checks on input data
     for frame in geodata:
         if frame.empty:
-            raise exceptions.EmptyDataFrameException("The input GeoDataFrame is empty.")
+            raise EmptyDataFrameException("The input GeoDataFrame is empty.")
 
     if cell_size <= 0:
-        raise exceptions.InvalidParameterValueException("Expected cell size to be positive and non-zero.")
+        raise InvalidParameterValueException("Expected cell size to be positive and non-zero.")
 
     add_buffer = [False if x == 0 else x for x in add_buffer]
     if any(num < 0 for num in add_buffer):
-        raise exceptions.InvalidParameterValueException("Expected buffer value to be positive, null or False.")
+        raise InvalidParameterValueException("Expected buffer value to be positive, null or False.")
 
     for i, name in enumerate(column):
         if column[i] == "":
             if subset_target_attribute_values[i] is not None:
-                raise exceptions.InvalidParameterValueException("Can't use subset of values if no column is targeted.")
+                raise InvalidParameterValueException("Can't use subset of values if no column is targeted.")
         elif column[i] not in geodata[i]:
-            raise exceptions.InvalidColumnException("Targeted column not found in the GeoDataFrame.")
+            raise InvalidColumnException("Targeted column not found in the GeoDataFrame.")
 
     for i, subset in enumerate(subset_target_attribute_values):
         if subset is not None:
             for value in subset:
                 if value not in geodata[i][column[i]].unique():
-                    raise exceptions.InvalidParameterValueException(
-                        "Subset of value(s) not found in the targeted column."
-                    )
+                    raise InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
 
     # Computation
     for i, data in enumerate(geodata):
@@ -353,11 +354,11 @@ def _check_and_prepare_param(
             subset_target_attribute_values = geodata[column].unique()
     identified_values = pd.Series(subset_target_attribute_values)
     if column not in geodata.columns:
-        raise exceptions.InvalidColumnException("Targeted column not found in the GeoData.")
+        raise InvalidColumnException("Targeted column not found in the GeoData.")
     if identified_values.isin(geodata[column]).all() is False:
-        raise exceptions.InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
+        raise InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
     if len(subset_target_attribute_values) == 0:
-        raise exceptions.InvalidParameterValueException("Subset of value(s) is empty.")
+        raise InvalidParameterValueException("Subset of value(s) is empty.")
 
     return dummification, column, list(identified_values)
 
@@ -527,7 +528,7 @@ def _to_csv(cba: gpd.GeoDataFrame, output_path: str) -> None:
 
 
 @beartype
-def _to_raster(cba: gpd.GeoDataFrame, output_path: str) -> None:
+def _to_raster(cba: gpd.GeoDataFrame, output_path: str, nan_val: int = -9999) -> None:
     """Intermediate utility.
 
     Saves the object as a raster TIFF file.
@@ -535,10 +536,14 @@ def _to_raster(cba: gpd.GeoDataFrame, output_path: str) -> None:
     Args:
         cba: CBA matrix to save.
         output_path: Name of the saved file.
+        nan_val: values taken by cells with no values in them (outside the study
+        area).
 
     Returns:
         None
     """
+
+    cba = cba.copy(deep=True)
 
     crs_txt = f"EPSG:{cba.crs.to_epsg()}"
     count = len(cba.columns.drop("geometry"))
@@ -546,20 +551,30 @@ def _to_raster(cba: gpd.GeoDataFrame, output_path: str) -> None:
     geometries = cba["geometry"].values
     x = np.unique(geometries.centroid.x)
     y = np.unique(geometries.centroid.y)
-    X, Y = np.meshgrid(x, y)
-    x_resolution = X[0][1] - X[0][0]
-    y_resolution = Y[1][0] - Y[0][0]
+    y = np.flip(y)
+    x_resolution = x[1] - x[0]
+    y_resolution = y[0] - y[1]
     min_x, min_y, max_x, max_y = cba.total_bounds
-    width = (max_x - min_x) / x_resolution
-    height = (max_y - min_y) / y_resolution
+    width = round((max_x - min_x) / x_resolution)
+    height = round((max_y - min_y) / y_resolution)
 
-    values = []
-    col_name = []
-    for col in cba.select_dtypes(include=["int32", "int64"]).columns:
-        col_name.append(col)
-        val = cba[col].values
-        val = val.reshape(X.shape)
-        values.append(val)
+    x_values = [x[0]]
+    for i in range(0, (width - 1), 1):
+        new_val = x_values[i] + x_resolution
+        x_values = np.append(x_values, new_val)
+    y_values = [y[0]]
+    for i in range(0, (height - 1), 1):
+        new_val = y_values[i] - y_resolution
+        y_values = np.append(y_values, new_val)
+    X, Y = np.meshgrid(x_values, y_values)
+
+    points = pd.DataFrame({"X": np.ravel(X), "Y": np.ravel(Y)})
+    points["coords"] = list(zip(points["X"], points["Y"]))
+    points["coords"] = points["coords"].apply(Point)
+    points_grid = gpd.GeoDataFrame(points, geometry="coords", crs=cba.crs)
+    points_grid = points_grid.sjoin(cba, how="left")
+    points_grid = points_grid.fillna(nan_val)
+    col_name = list(points_grid.drop(["X", "Y", "coords", "index_right"], axis=1).columns)
 
     transform = rasterio.transform.from_bounds(min_x, min_y, max_x, max_y, width=width, height=height)
 
@@ -573,10 +588,11 @@ def _to_raster(cba: gpd.GeoDataFrame, output_path: str) -> None:
         dtype="int32",
         crs=crs_txt,
         transform=transform,
-        nodata=-9999,
+        nodata=nan_val,
     ) as new_dataset:
-        for i in range(0, len(col_name)):
-            z = i + 1
-            new_dataset.write(values[i], z)
-            new_dataset.set_band_description(z, col_name[i])
+        z = 1
+        for i in col_name:
+            new_dataset.write(points_grid.pivot(index="Y", columns="X", values=i).sort_index(ascending=False).values, z)
+            new_dataset.set_band_description(z, i)
+            z = z + 1
     new_dataset.close()

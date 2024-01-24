@@ -7,7 +7,7 @@ from beartype.typing import Literal, Optional, Sequence, Union
 from scipy import sparse
 from sklearn.preprocessing import OneHotEncoder
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidColumnException, InvalidDatasetException
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid
 
 
@@ -68,18 +68,18 @@ def one_hot_encode(
 
     if is_dataframe:
         if data.empty:
-            raise exceptions.EmptyDataFrameException("Input DataFrame is empty.")
+            raise EmptyDataFrameException("Input DataFrame is empty.")
         df = data.copy()
 
         if columns is not None:
             if not check_columns_valid(df, columns):
-                raise exceptions.InvalidColumnException("All selected columns were not found in the input DataFrame.")
+                raise InvalidColumnException("All selected columns were not found in the input DataFrame.")
             transform_df = df[columns]
         else:
             transform_df = df
     else:
         if data.size == 0:
-            raise exceptions.InvalidDatasetException("Input array is empty.")
+            raise InvalidDatasetException("Input array is empty.")
         transform_df = pd.DataFrame(data)
 
     encoder = OneHotEncoder(

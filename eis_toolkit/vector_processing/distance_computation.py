@@ -6,7 +6,7 @@ from rasterio import profiles, transform
 from shapely.geometry import Point
 from shapely.geometry.base import BaseGeometry, BaseMultipartGeometry
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException, NonMatchingCrsException
 
 
 @beartype
@@ -23,22 +23,22 @@ def distance_computation(raster_profile: Union[profiles.Profile, dict], geometri
 
     """
     if raster_profile.get("crs") != geometries.crs:
-        raise exceptions.NonMatchingCrsException("Expected coordinate systems to match between raster and geometries. ")
+        raise NonMatchingCrsException("Expected coordinate systems to match between raster and geometries. ")
     if geometries.shape[0] == 0:
-        raise exceptions.EmptyDataFrameException("Expected GeoDataFrame to not be empty.")
+        raise EmptyDataFrameException("Expected GeoDataFrame to not be empty.")
 
     raster_width = raster_profile.get("width")
     raster_height = raster_profile.get("height")
 
     if not isinstance(raster_width, int) or not isinstance(raster_height, int):
-        raise exceptions.InvalidParameterValueException(
+        raise InvalidParameterValueException(
             f"Expected raster_profile to contain integer width and height. {raster_profile}"
         )
 
     raster_transform = raster_profile.get("transform")
 
     if not isinstance(raster_transform, transform.Affine):
-        raise exceptions.InvalidParameterValueException(
+        raise InvalidParameterValueException(
             f"Expected raster_profile to contain an affine transformation. {raster_profile}"
         )
 

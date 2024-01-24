@@ -5,9 +5,9 @@ from beartype import beartype
 from beartype.typing import Sequence, Tuple
 from rasterio.mask import mask
 
-from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
-from eis_toolkit.utilities.checks.crs import check_matching_crs
+from eis_toolkit.exceptions import GeometryTypeException, NonMatchingCrsException
 from eis_toolkit.utilities.checks.geometry import check_geometry_types
+from eis_toolkit.utilities.checks.raster import check_matching_crs
 
 
 # The core clipping functionality. Used internally by clip.
@@ -36,7 +36,7 @@ def clip_raster(raster: rasterio.io.DatasetReader, geodataframe: geopandas.GeoDa
 
     Raises:
         NonMatchingCrsException: The raster and geodataframe are not in the same CRS.
-        NotApplicableGeometryTypeException: The input geometries contain non-polygon features.
+        GeometryTypeException: The input geometries contain non-polygon features.
     """
     geometries = geodataframe["geometry"]
 
@@ -49,7 +49,7 @@ def clip_raster(raster: rasterio.io.DatasetReader, geodataframe: geopandas.GeoDa
         geometries=geometries,
         allowed_types=["Polygon", "MultiPolygon"],
     ):
-        raise NotApplicableGeometryTypeException("The input geometries contain non-polygon features.")
+        raise GeometryTypeException("The input geometries contain non-polygon features.")
 
     out_image, out_meta = _clip_raster(
         raster=raster,

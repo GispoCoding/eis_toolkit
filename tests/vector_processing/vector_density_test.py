@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from eis_toolkit.vector_processing.vector_density import vector_density
-from tests.vector_processing.test_rasterize_vector import SAMPLE_OVERLAPPING_POINT_GEODATAFRAME
+from tests.vector_processing.rasterize_vector_test import SAMPLE_OVERLAPPING_POINT_GEODATAFRAME
 
 
 @pytest.mark.parametrize(

@@ -13,7 +13,7 @@ from matplotlib.cm import ScalarMappable
 from matplotlib.path import Path
 from sklearn.preprocessing import LabelEncoder
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataFrameException, InconsistentDataTypesException, InvalidColumnException
 
 
 def _normalize_data(data: np.ndarray) -> Tuple[np.ndarray, float, float]:
@@ -162,19 +162,17 @@ def plot_parallel_coordinates(
     """
 
     if df.empty:
-        raise exceptions.EmptyDataFrameException("The input DataFrame is empty.")
+        raise EmptyDataFrameException("The input DataFrame is empty.")
 
     if color_column_name not in df.columns:
-        raise exceptions.InvalidColumnException(
-            f"The provided color column {color_column_name} is not found in the DataFrame."
-        )
+        raise InvalidColumnException(f"The provided color column {color_column_name} is not found in the DataFrame.")
 
     df = df.convert_dtypes()
     df = df.apply(pd.to_numeric, errors="ignore")
 
     color_data = df[color_column_name].to_numpy()
     if len(set([type(elem) for elem in color_data])) != 1:
-        raise exceptions.InconsistentDataTypesException(
+        raise InconsistentDataTypesException(
             "The color column should have a consistent datatype. Multiple data types detected in the color column."
         )
 

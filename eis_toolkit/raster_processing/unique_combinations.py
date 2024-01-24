@@ -3,8 +3,8 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Sequence, Tuple
 
-from eis_toolkit.exceptions import InvalidParameterValueException
-from eis_toolkit.raster_processing.check_raster_grids import check_raster_grids
+from eis_toolkit.exceptions import InvalidParameterValueException, NonMatchingRasterMetadataException
+from eis_toolkit.utilities.checks.raster import check_raster_grids
 
 
 def _unique_combinations(
@@ -37,22 +37,28 @@ def unique_combinations(  # type: ignore[no-any-unimported]
         raster_list: Rasters to be used for finding combinations.
 
     Returns:
-        out_image: Combinations of rasters.
-        out_meta: The metadata of the first raster in raster_list.
+        Combinations of rasters.
+        The metadata of the first raster in raster_list.
+
+    Raises:
+        InvalidParameterValueException: Input rasters don't have enough bands to perform
+            the operation or input rasters are of different shape.
     """
     bands = []
     out_meta = raster_list[0].meta
     out_meta["count"] = 1
 
+    raster_profiles = []
     for raster in raster_list:
         for band in range(1, raster.count + 1):
             bands.append(raster.read(band))
+        raster_profiles.append(raster.profile)
 
     if len(bands) == 1:
         raise InvalidParameterValueException("Expected to have more bands than 1")
 
-    if check_raster_grids(raster_list) is not True:
-        raise InvalidParameterValueException("Expected raster grids to be of same shape")
+    if check_raster_grids(raster_profiles) is not True:
+        raise NonMatchingRasterMetadataException("Expected raster grids to be have the same grid properties.")
 
     out_image = _unique_combinations(bands)
     return out_image, out_meta

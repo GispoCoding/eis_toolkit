@@ -6,9 +6,9 @@ import pandas as pd
 import rasterio
 from beartype import beartype
 
-from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
-from eis_toolkit.utilities.checks.crs import check_matching_crs
+from eis_toolkit.exceptions import GeometryTypeException, NonMatchingCrsException
 from eis_toolkit.utilities.checks.geometry import check_geometry_types
+from eis_toolkit.utilities.checks.raster import check_matching_crs
 
 
 def _calculate_base_metrics(
@@ -95,7 +95,7 @@ def calculate_base_metrics(
 
     Raises:
         NonMatchingCrsException: The raster and point data are not in the same CRS.
-        NotApplicableGeometryTypeException: The input geometries contain non-point features.
+        GeometryTypeException: The input geometries contain non-point features.
     """
     if negatives is not None:
         geometries = pd.concat([deposits, negatives]).geometry
@@ -111,7 +111,7 @@ def calculate_base_metrics(
         geometries=geometries,
         allowed_types=["Point"],
     ):
-        raise NotApplicableGeometryTypeException("The input geometries contain non-point features.")
+        raise GeometryTypeException("The input geometries contain non-point features.")
 
     base_metrics = _calculate_base_metrics(raster=raster, deposits=deposits, band=band, negatives=negatives)
 
