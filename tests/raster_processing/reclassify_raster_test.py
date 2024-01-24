@@ -1,11 +1,7 @@
 import numpy as np
-import pytest
-import rasterio
 from beartype.typing import Sequence
 
-from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.raster_processing import reclassify_raster
-from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
 test_array = np.array([[0, 10, 20, 30], [40, 50, 50, 60], [80, 80, 90, 90], [100, 100, 100, 100]])
 
