@@ -2,43 +2,45 @@ import mapclassify as mc
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import Optional, Sequence, Tuple
+from beartype.typing import Sequence, Tuple, Union
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
-def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader,
-    breaks: Sequence[int],
-    bands: Optional[Sequence[int]],
-) -> Tuple[Sequence[np.ndarray], dict]:
+def _band_exceptions(band: np.ndarray):
 
-    array_of_bands = []
+    if band is not None:
+        if not isinstance(band, Sequence):
+            raise InvalidParameterValueException("Expected bands parameter to be a list")
+        elif not (isinstance(band, int)):
+            raise InvalidParameterValueException("Expected band to be an integer")
+
+
+def _breaks_exception(breaks: Sequence[int]):
+
+    if not all(isinstance(_break, int) for _break in breaks):
+        raise InvalidParameterValueException("Expected breaks to contain only integers")
+
+
+def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
+    band: np.ndarray,
+    breaks: Sequence[int],
+) -> Sequence[np.ndarray]:
+
     out_image = []
 
-    out_meta = raster.meta.copy()
+    data = np.digitize(band, breaks)
 
-    if bands is not None:
-        for band in raster.read(bands):
-            array_of_bands.append(band)
-    else:
-        array_of_bands = raster.read()
-        bands = np.arange(1, len(array_of_bands) + 1, 1).tolist()
+    out_image.append(data)
 
-    for i in range(len(bands)):
-
-        data_array = array_of_bands[i]
-
-        data = np.digitize(data_array, breaks)
-
-        out_image.append(data)
-
-    return out_image, out_meta
+    return out_image
 
 
 @beartype
 def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, breaks: Sequence[int], bands: Optional[Sequence[int]]
+    raster: rasterio.io.DatasetReader,
+    breaks: Sequence[int],
+    bands: Sequence[int],
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with manual breaks.
 
@@ -53,56 +55,48 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
         Raster classified with manual breaks and metadata.
 
     Raises:
-        InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
+        InvalidParameterValueException: Bands is not a list, band is not an integers,
         bands exceeds the number of bands in the raster, breaks is not a list of integers.
     """
-    if bands is not None:
-        if not isinstance(bands, Sequence):
-            raise InvalidParameterValueException("Expected bands parameter to be a list")
-        elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException("Expected bands to be a list of integers")
-        elif len(bands) > raster.count:
-            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
-    if not all(isinstance(_break, int) for _break in breaks):
-        raise InvalidParameterValueException("Expected breaks to contain only integers")
 
-    out_image, out_meta = _raster_with_manual_breaks(raster, breaks, bands)
+    out_image = []
+    out_meta = raster.meta.copy()
+
+    _breaks_exception(breaks)
+
+    bands_to_read = bands if bands is not None else raster.indexes
+    for band in raster.read(bands_to_read):
+
+        _band_exceptions(band)
+
+        manual_breaks_band = _raster_with_manual_breaks(raster, breaks, bands)
+
+        out_image.append(manual_breaks_band)
 
     return out_image, out_meta
 
 
 def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader,
+    band: np.ndarray,
     interval_size: int,
-    bands: Optional[Sequence[int]],
-) -> Tuple[Sequence[np.ndarray], dict]:
+) -> Sequence[np.ndarray]:
 
-    array_of_bands = []
     out_image = []
-    out_meta = raster.meta.copy()
 
-    if bands is not None:
-        for band in raster.read(bands):
-            array_of_bands.append(band)
-    else:
-        array_of_bands = raster.read()
-        bands = np.arange(1, len(array_of_bands) + 1, 1).tolist()
+    _, edges = np.histogram(band, bins=interval_size)
 
-    for i in range(len(bands)):
-        data_array = array_of_bands[i]
+    data = np.digitize(band, edges)
 
-        _, edges = np.histogram(data_array, bins=interval_size)
+    out_image.append(data)
 
-        data = np.digitize(data_array, edges)
-
-        out_image.append(data)
-
-    return out_image, out_meta
+    return out_image
 
 
 @beartype
 def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, interval_size: int, bands: Optional[Sequence[int]]
+    raster: rasterio.io.DatasetReader,
+    interval_size: int,
+    bands: Sequence[int],
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with defined intervals.
 
@@ -120,51 +114,42 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
         bands exceeds the number of bands in the raster.
     """
-    if bands is not None:
-        if not isinstance(bands, list):
-            raise InvalidParameterValueException("Expected bands parameter to be a list")
-        elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException("Expected bands to be a list of integers")
-        elif len(bands) > raster.count:
-            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
-    out_image, out_meta = _raster_with_defined_intervals(raster, interval_size, bands)
+    out_image = []
+    out_meta = raster.meta.copy()
+
+    bands_to_read = bands if bands is not None else raster.indexes
+    for band in raster.read(bands_to_read):
+
+        _band_exceptions(band)
+
+        defined_intervals_band = _raster_with_defined_intervals(raster, interval_size)
+
+        out_image.append(defined_intervals_band)
 
     return out_image, out_meta
 
 
 def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader,
+    band: np.ndarray,
     number_of_intervals: int,
-    bands: Optional[Sequence[int]],
-) -> Tuple[Sequence[np.ndarray], dict]:
+) -> Sequence[np.ndarray]:
 
-    array_of_bands = []
     out_image = []
-    out_meta = raster.meta.copy()
 
-    if bands is not None:
-        for band in raster.read(bands):
-            array_of_bands.append(band)
-    else:
-        array_of_bands = raster.read()
-        bands = np.arange(1, len(array_of_bands) + 1, 1).tolist()
+    percentiles = np.linspace(0, 100, number_of_intervals)
+    intervals = np.percentile(band, percentiles)
+    data = np.digitize(band, intervals)
+    out_image.append(data)
 
-    for i in range(len(bands)):
-        data_array = array_of_bands[i]
-        percentiles = np.linspace(0, 100, number_of_intervals)
-        intervals = np.percentile(data_array, percentiles)
-        data = np.digitize(data_array, intervals)
-        out_image.append(data)
-
-    return out_image, out_meta
+    return out_image
 
 
 @beartype
 def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
-    bands: Optional[Sequence[int]],
+    bands: Sequence[int],
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with equal intervals.
 
@@ -182,51 +167,42 @@ def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
         bands exceeds the number of bands in the raster.
     """
-    if bands is not None:
-        if not isinstance(bands, list):
-            raise InvalidParameterValueException("Expected bands parameter to be a list")
-        elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException("Expected bands to be a list of integers")
-        elif len(bands) > raster.count:
-            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
-    out_image, out_meta = _raster_with_equal_intervals(raster, number_of_intervals, bands)
+    out_image = []
+    out_meta = raster.meta.copy()
+
+    bands_to_read = bands if bands is not None else raster.indexes
+    for band in raster.read(bands_to_read):
+
+        _band_exceptions(band)
+
+        equal_intervals_band = _raster_with_equal_intervals(raster, number_of_intervals)
+
+        out_image.append(equal_intervals_band)
 
     return out_image, out_meta
 
 
 def _raster_with_quantiles(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader,
+    band: np.ndarray,
     number_of_quantiles: int,
-    bands: Optional[Sequence[int]],
-) -> Tuple[Sequence[np.ndarray], dict]:
+) -> Sequence[np.ndarray]:
 
-    array_of_bands = []
     out_image = []
-    out_meta = raster.meta.copy()
 
-    if bands is not None:
-        for band in raster.read(bands):
-            array_of_bands.append(band)
-    else:
-        array_of_bands = raster.read()
-        bands = np.arange(1, len(array_of_bands) + 1, 1).tolist()
+    intervals = [np.percentile(band, i * 100 / number_of_quantiles) for i in range(number_of_quantiles)]
+    data = np.digitize(band, intervals)
 
-    for i in range(len(bands)):
-        data_array = array_of_bands[i]
-        intervals = [np.percentile(data_array, i * 100 / number_of_quantiles) for i in range(number_of_quantiles)]
-        data = np.digitize(data_array, intervals)
+    out_image.append(data)
 
-        out_image.append(data)
-
-    return out_image, out_meta
+    return out_image
 
 
 @beartype
 def raster_with_quantiles(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_quantiles: int,
-    bands: Optional[Sequence[int]],
+    bands: Sequence[int],
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with quantiles.
 
@@ -244,49 +220,42 @@ def raster_with_quantiles(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
         bands exceeds the number of bands in the raster.
     """
-    if bands is not None:
-        if not isinstance(bands, list):
-            raise InvalidParameterValueException("Expected bands parameter to be a list")
-        elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException("Expected bands to be a list of integers")
-        elif len(bands) > raster.count:
-            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
-    out_image, out_meta = _raster_with_quantiles(raster, number_of_quantiles, bands)
+    out_image = []
+    out_meta = raster.meta.copy()
+
+    bands_to_read = bands if bands is not None else raster.indexes
+    for band in raster.read(bands_to_read):
+
+        _band_exceptions(band)
+
+        numbered_quantiles_band = _raster_with_quantiles(raster, number_of_quantiles)
+
+        out_image.append(numbered_quantiles_band)
 
     return out_image, out_meta
 
 
 def _raster_with_natural_breaks(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader,
+    band: np.ndarray,
     number_of_classes: int,
-    bands: Optional[Sequence[int]],
-) -> Tuple[Sequence[np.ndarray], dict]:
+) -> Sequence[np.ndarray]:
 
-    array_of_bands = []
     out_image = []
-    out_meta = raster.meta.copy()
 
-    if bands is not None:
-        for band in raster.read(bands):
-            array_of_bands.append(band)
-    else:
-        array_of_bands = raster.read()
-        bands = np.arange(1, len(array_of_bands) + 1, 1).tolist()
+    breaks = mc.JenksCaspall(band, number_of_classes)
+    data = np.digitize(band, np.sort(breaks.bins))
 
-    for i in range(len(bands)):
-        data_array = array_of_bands[i]
-        breaks = mc.JenksCaspall(data_array, number_of_classes)
-        data = np.digitize(data_array, np.sort(breaks.bins))
+    out_image.append(data)
 
-        out_image.append(data)
-
-    return out_image, out_meta
+    return out_image
 
 
 @beartype
 def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_classes: int, bands: Optional[Sequence[int]]
+    raster: rasterio.io.DatasetReader,
+    number_of_classes: int,
+    bands: Sequence[int],
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with natural breaks (Jenks Caspall).
 
@@ -304,103 +273,93 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
         bands exceeds the number of bands in the raster.
     """
-    if bands is not None:
-        if not isinstance(bands, list):
-            raise InvalidParameterValueException("Expected bands parameter to be a list")
-        elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException("Expected bands to be a list of integers")
-        elif len(bands) > raster.count:
-            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
-    out_image, out_meta = _raster_with_natural_breaks(raster, number_of_classes, bands)
+    out_image = []
+    out_meta = raster.meta.copy()
+
+    bands_to_read = bands if bands is not None else raster.indexes
+    for band in raster.read(bands_to_read):
+
+        _band_exceptions(band)
+
+        natural_breaks_band = _raster_with_natural_breaks(raster, number_of_classes)
+
+        out_image.append(natural_breaks_band)
 
     return out_image, out_meta
 
 
 def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_classes: int, bands: Optional[Sequence[int]]
-) -> Tuple[Sequence[np.ndarray], dict]:
+    band: np.ndarray, number_of_classes: int, nan_value: Union[int, float]
+) -> Sequence[np.ndarray]:
 
-    array_of_bands = []
     out_image = []
-    out_meta = raster.meta.copy()
 
-    if bands is not None:
-        for band in raster.read(bands):
-            array_of_bands.append(band)
-    else:
-        array_of_bands = raster.read()
+    band[band == nan_value] = np.nan
 
-    for i in range(len(array_of_bands)):
+    median_value = np.nanmedian(band)
+    max_value = np.nanmax(band)
+    min_value = np.nanmin(band)
 
-        data_array = array_of_bands[i]
-        # Masking missing values with np.nan
-        data_array[data_array == -1.0e32] = np.nan
+    values_out = np.zeros_like(band)  # The same shape as the original raster value array
 
-        median_value = np.nanmedian(data_array)
-        max_value = np.nanmax(data_array)
-        min_value = np.nanmin(data_array)
+    # Determine the tail with larger length
+    if (median_value - min_value) < (max_value - median_value):  # Large end tail longer
+        tail_values = band[np.where((band > median_value) & (band != np.nan))]
+        range_tail = max_value - median_value
+        tail_values = tail_values - median_value + range_tail / 1000.0
+    else:  # Small end tail longer
+        tail_values = band[np.where(band < median_value) & (band != np.nan)]
+        range_tail = median_value - min_value
+        tail_values = tail_values - min_value + range_tail / 1000.0
 
-        data_array = np.ma.masked_where(np.isnan(data_array), data_array)
-        values_out = np.zeros_like(data_array)  # The same shape as the original raster value array
+    min_tail = np.nanmin(tail_values)
+    max_tail = np.nanmax(tail_values)
 
-        # Determine the tail with larger length
-        if (median_value - min_value) < (max_value - median_value):  # Large end tail longer
-            tail_values = data_array[np.where((data_array > median_value) & (data_array != np.nan))]
-            range_tail = max_value - median_value
-            tail_values = tail_values - median_value + range_tail / 1000.0
-        else:  # Small end tail longer
-            tail_values = data_array[np.where(data_array < median_value) & (data_array != np.nan)]
-            range_tail = median_value - min_value
-            tail_values = tail_values - min_value + range_tail / 1000.0
+    # number of classes
+    factor = (max_tail / min_tail) ** (1 / number_of_classes)
 
-        min_tail = np.nanmin(tail_values)
-        max_tail = np.nanmax(tail_values)
+    interval_index = 1
+    break_points_tail = [min_tail]
+    break_points = [min_tail]
+    width = [0]
 
-        # number of classes
-        factor = (max_tail / min_tail) ** (1 / number_of_classes)
+    while break_points[-1] < max_tail:
+        interval_index += 1
+        break_points.append(min_tail * factor ** (interval_index - 1))
+        break_points_tail.append(break_points[-1])
+        width.append(break_points_tail[-1] - break_points_tail[0])
+    k = 0
 
-        interval_index = 1
-        break_points_tail = [min_tail]
-        break_points = [min_tail]
-        width = [0]
+    for j in range(1, len(width) - 2):
+        values_out[
+            np.where(
+                ((median_value + width[j]) < band)
+                & (band <= (median_value + width[j + 1]))
+                & (band != np.nan)
+            )
+        ] = (j + 1)
+        values_out[
+            np.where(
+                ((median_value - width[j]) > band)
+                & (band >= (median_value - width[j + 1]))
+                & (band != np.nan)
+            )
+        ] = (-j - 1)
+        k = j
 
-        while break_points[-1] < max_tail:
-            interval_index += 1
-            break_points.append(min_tail * factor ** (interval_index - 1))
-            break_points_tail.append(break_points[-1])
-            width.append(break_points_tail[-1] - break_points_tail[0])
-        k = 0
+    values_out[np.where(((median_value + width[k + 1]) < band) & (band != np.nan))] = k + 1
+    values_out[np.where(((median_value - width[k + 1]) > band) & (band != np.nan))] = -k - 1
+    values_out[np.where(median_value == band)] = 0
 
-        for j in range(1, len(width) - 2):
-            values_out[
-                np.where(
-                    ((median_value + width[j]) < data_array)
-                    & (data_array <= (median_value + width[j + 1]))
-                    & (data_array != np.nan)
-                )
-            ] = (j + 1)
-            values_out[
-                np.where(
-                    ((median_value - width[j]) > data_array)
-                    & (data_array >= (median_value - width[j + 1]))
-                    & (data_array != np.nan)
-                )
-            ] = (-j - 1)
-            k = j
+    out_image.append(values_out)
 
-        values_out[np.where(((median_value + width[k + 1]) < data_array) & (data_array != np.nan))] = k + 1
-        values_out[np.where(((median_value - width[k + 1]) > data_array) & (data_array != np.nan))] = -k - 1
-        values_out[np.where(median_value == data_array)] = 0
-
-        out_image.append(values_out)
-
-    return out_image, out_meta
+    return out_image
 
 
 @beartype
 def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_classes: int, bands: Optional[Sequence[int]]
+    raster: rasterio.io.DatasetReader, number_of_classes: int, bands: Sequence[int]
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with geometrical intervals (Torppa, 2023).
 
@@ -419,68 +378,58 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
         bands exceeds the number of bands in the raster.
     """
-    if bands is not None:
-        if not isinstance(bands, list):
-            raise InvalidParameterValueException("Expected bands parameter to be a list")
-        elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException("Expected bands to be a list of integers")
-        elif len(bands) > raster.count:
-            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
-    if number_of_classes <= 0:
-        raise InvalidParameterValueException("The number of classes must be at least one")
 
-    out_image, out_meta = _raster_with_geometrical_intervals(raster, number_of_classes, bands)
+    out_image = []
+    out_meta = raster.meta.copy()
+
+    bands_to_read = bands if bands is not None else raster.indexes
+    for band in raster.read(bands_to_read):
+
+        _band_exceptions(band)
+
+        geometrical_intervals_band = _raster_with_geometrical_intervals(raster, number_of_classes)
+
+        out_image.append(geometrical_intervals_band)
 
     return out_image, out_meta
 
 
 def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader,
+    band: np.ndarray,
     number_of_intervals: int,
-    bands: Optional[Sequence[int]],
-) -> Tuple[Sequence[np.ndarray], dict]:
+) -> Sequence[np.ndarray]:
 
     out_image = []
-    out_meta = raster.meta.copy()
 
     band_statistics = []
-    if bands is not None:
-        for band in bands:
-            stddev = np.nanstd(band)
-            mean = np.nanmean(band)
-            band_statistics.append((mean, stddev))
-    else:
-        for band in range(1, raster.count + 1):
-            stddev = np.nanstd(band)
-            mean = np.nanmean(band)
-            band_statistics.append((mean, stddev))
 
-    for band, (mean, std) in enumerate(band_statistics):
-        data_array = raster.read(band + 1)
-        interval_size = 2 * std / number_of_intervals
+    stddev = np.nanstd(band)
+    mean = np.nanmean(band)
+    band_statistics.append((mean, stddev))
+    interval_size = 2 * stddev / number_of_intervals
 
-        classified = np.empty_like(data_array)
+    classified = np.empty_like(band)
 
-        below_mean = data_array < (mean - std)
-        above_mean = data_array > (mean + std)
+    below_mean = band < (mean - stddev)
+    above_mean = band > (mean + stddev)
 
-        classified[below_mean] = -number_of_intervals
-        classified[above_mean] = number_of_intervals
+    classified[below_mean] = -number_of_intervals
+    classified[above_mean] = number_of_intervals
 
-        in_between = ~below_mean & ~above_mean
-        interval = ((data_array - (mean - std)) / interval_size).astype(int)
-        classified[in_between] = interval[in_between] - number_of_intervals // 2
+    in_between = ~below_mean & ~above_mean
+    interval = ((band - (mean - stddev)) / interval_size).astype(int)
+    classified[in_between] = interval[in_between] - number_of_intervals // 2
 
-        out_image.append(classified)
+    out_image.append(classified)
 
-    return out_image, out_meta
+    return out_image
 
 
 @beartype
 def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
-    bands: Optional[Sequence[int]],
+    bands: Sequence[int],
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with standard deviation.
 
@@ -498,14 +447,17 @@ def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
         bands exceeds the number of bands in the raster.
     """
-    if bands is not None:
-        if not isinstance(bands, list):
-            raise InvalidParameterValueException("Expected bands parameter to be a list")
-        elif not all(isinstance(band, int) for band in bands):
-            raise InvalidParameterValueException("Expected bands to be a list of integers")
-        elif len(bands) > raster.count:
-            raise InvalidParameterValueException("The number of bands given exceeds the number of raster's bands")
 
-    out_image, out_meta = _raster_with_standard_deviation(raster, number_of_intervals, bands)
+    out_image = []
+    out_meta = raster.meta.copy()
+
+    bands_to_read = bands if bands is not None else raster.indexes
+    for band in raster.read(bands_to_read):
+
+        _band_exceptions(band)
+
+        standard_deviation_band = _raster_with_standard_deviation(raster, number_of_intervals)
+
+        out_image.append(standard_deviation_band)
 
     return out_image, out_meta
