@@ -341,25 +341,15 @@ def _raster_with_geometrical_intervals(
 
     for j in range(1, len(width) - 2):
         values_out[
-            np.where(
-                ((median_value + width[j]) < band) &
-                ((band <= (median_value + width[j + 1])) & nan_condition)
-            )
+            np.where(((median_value + width[j]) < band) & ((band <= (median_value + width[j + 1])) & nan_condition))
         ] = (j + 1)
         values_out[
-            np.where(
-                ((median_value - width[j]) > band) &
-                ((band >= (median_value - width[j + 1])) & nan_condition)
-            )
+            np.where(((median_value - width[j]) > band) & ((band >= (median_value - width[j + 1])) & nan_condition))
         ] = (-j - 1)
         k = j
 
-    values_out[
-        np.where(((median_value + width[k + 1]) < band) & nan_condition)
-    ] = k + 1
-    values_out[
-        np.where(((median_value - width[k + 1]) > band) & nan_condition)
-    ] = -k - 1
+    values_out[np.where(((median_value + width[k + 1]) < band) & nan_condition)] = k + 1
+    values_out[np.where(((median_value - width[k + 1]) > band) & nan_condition)] = -k - 1
     values_out[np.where(median_value == band)] = 0
 
     out_image.append(values_out)
