@@ -289,27 +289,35 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
     return out_image, out_meta
 
 
-def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
+def _raster_with_geometrical_intervals(
     band: np.ndarray, number_of_classes: int, nan_value: Union[int, float]
 ) -> Sequence[np.ndarray]:
 
     out_image = []
+    is_integer = np.issubdtype(band.dtype, np.integer)
+    is_float = np.issubdtype(band.dtype, np.float)
 
-    band[band == nan_value] = np.nan
+    if is_integer:
+        mask = band == nan_value
+        band[mask] = nan_value
+    elif is_float:
+        band[band == nan_value] = np.nan
 
     median_value = np.nanmedian(band)
     max_value = np.nanmax(band)
     min_value = np.nanmin(band)
 
-    values_out = np.zeros_like(band)  # The same shape as the original raster value array
+    values_out = np.zeros_like(band)
+
+    nan_condition = ~np.isnan(band)
 
     # Determine the tail with larger length
     if (median_value - min_value) < (max_value - median_value):  # Large end tail longer
-        tail_values = band[np.where((band > median_value) & (band != np.nan))]
+        tail_values = band[np.where((band > median_value) & nan_condition)]
         range_tail = max_value - median_value
         tail_values = tail_values - median_value + range_tail / 1000.0
     else:  # Small end tail longer
-        tail_values = band[np.where(band < median_value) & (band != np.nan)]
+        tail_values = band[np.where((band < median_value) & nan_condition)]
         range_tail = median_value - min_value
         tail_values = tail_values - min_value + range_tail / 1000.0
 
@@ -334,22 +342,24 @@ def _raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
     for j in range(1, len(width) - 2):
         values_out[
             np.where(
-                ((median_value + width[j]) < band)
-                & (band <= (median_value + width[j + 1]))
-                & (band != np.nan)
+                ((median_value + width[j]) < band) &
+                ((band <= (median_value + width[j + 1])) & nan_condition)
             )
         ] = (j + 1)
         values_out[
             np.where(
-                ((median_value - width[j]) > band)
-                & (band >= (median_value - width[j + 1]))
-                & (band != np.nan)
+                ((median_value - width[j]) > band) &
+                ((band >= (median_value - width[j + 1])) & nan_condition)
             )
         ] = (-j - 1)
         k = j
 
-    values_out[np.where(((median_value + width[k + 1]) < band) & (band != np.nan))] = k + 1
-    values_out[np.where(((median_value - width[k + 1]) > band) & (band != np.nan))] = -k - 1
+    values_out[
+        np.where(((median_value + width[k + 1]) < band) & nan_condition)
+    ] = k + 1
+    values_out[
+        np.where(((median_value - width[k + 1]) > band) & nan_condition)
+    ] = -k - 1
     values_out[np.where(median_value == band)] = 0
 
     out_image.append(values_out)
