@@ -294,8 +294,8 @@ def _raster_with_geometrical_intervals(
 ) -> Sequence[np.ndarray]:
 
     out_image = []
-    is_integer = np.issubdtype(band.dtype, np.integer)
-    is_float = np.issubdtype(band.dtype, np.float)
+    is_integer = np.issubdtype(band.dtype, int)
+    is_float = np.issubdtype(band.dtype, float)
 
     if is_integer:
         mask = band == nan_value
