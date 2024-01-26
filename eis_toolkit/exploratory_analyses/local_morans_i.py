@@ -2,7 +2,7 @@ import geopandas as gpd
 import libpysal
 import numpy as np
 from beartype import beartype
-from beartype.typing import Literal
+from beartype.typing import Literal, Union
 from esda.moran import Moran_Local
 
 from eis_toolkit import exceptions
@@ -10,11 +10,8 @@ from eis_toolkit import exceptions
 
 @beartype
 def _local_morans_i(
-    gdf: gpd.GeoDataFrame, column: str, weight_type: Literal["queen", "knn"], k: int, permutations: int
+    gdf: gpd.GeoDataFrame, column: str, weight_type: Literal["queen", "knn"], k: Union[int, None], permutations: int
 ) -> gpd.GeoDataFrame:
-
-    gdf["lon"] = gdf["geometry"].x
-    gdf["lat"] = gdf["geometry"].y
 
     if weight_type == "queen":
         w = libpysal.weights.Queen.from_dataframe(gdf)
@@ -41,13 +38,17 @@ def local_morans_i(
     gdf: gpd.GeoDataFrame,
     column: str,
     weight_type: Literal["queen", "knn"] = "queen",
-    k: int = 2,
+    k: Union[int, None] = 2,
     permutations: int = 999,
 ) -> gpd.GeoDataFrame:
-    """Do a local morans I calculation for the area.
+    """Execute Local Moran's I calculation for the area.
 
     Args:
-        area: The geodataframe that contains the area to be examined with local morans I.
+        gdf: The geodataframe that contains the area to be examined with local morans I.
+        column: The column to be used in the analysis.
+        weight_type: The type of spatial weights matrix to be used. Defaults to "queen".
+        k: Number of nearest neighbors for the KNN weights matrix. Defaults to 2.
+        permutations: Number of permutations for significance testing. Defaults to 999.
 
     Returns:
         Geodataframe containing the calculations.
