@@ -45,7 +45,7 @@ def _create_grid(radius: int, size: int) -> tuple[np.ndarray, np.ndarray]:
 
 
 @beartype
-def basic_kernel(size: int, shape: Literal["square", "circle"]) -> np.ndarray:
+def _basic_kernel(size: int, shape: Literal["square", "circle"]) -> np.ndarray:
     """
     Generate a basic kernel of a specified size and shape.
 
@@ -69,7 +69,7 @@ def basic_kernel(size: int, shape: Literal["square", "circle"]) -> np.ndarray:
 
 
 @beartype
-def gaussian_kernel(sigma: Number, truncate: Number, size: Optional[int]) -> np.ndarray:
+def _gaussian_kernel(sigma: Number, truncate: Number, size: Optional[int]) -> np.ndarray:
     """
     Generate a Gaussian kernel for image denoising.
 
@@ -91,7 +91,7 @@ def gaussian_kernel(sigma: Number, truncate: Number, size: Optional[int]) -> np.
 
 
 @beartype
-def mexican_hat_kernel(
+def _mexican_hat_kernel(
     sigma: Number, truncate: Number, size: Optional[int], direction: Literal["rectangular", "circular"]
 ) -> np.ndarray:
     """
