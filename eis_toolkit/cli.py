@@ -151,6 +151,27 @@ class NodataHandling(str, Enum):
     remove = "remove"
 
 
+class FocalFilterMethod(str, Enum):
+    """Focal filter methods."""
+
+    mean = "mean"
+    median = "median"
+
+
+class FocalFilterShape(str, Enum):
+    """Shape of the filter window."""
+
+    square = "square"
+    circle = "circle"
+
+
+class MexicanHatFilterDirection(str, Enum):
+    """Direction of calculating kernel values."""
+
+    rectangular = "rectangular"
+    circular = "circular"
+
+
 RESAMPLING_MAPPING = {
     "nearest": warp.Resampling.nearest,
     "bilinear": warp.Resampling.bilinear,
@@ -449,6 +470,87 @@ def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPT
 
 
 # --- RASTER PROCESSING ---
+
+
+# FOCAL FILTER
+@app.command()
+def focal_filter_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    method: FocalFilterMethod = FocalFilterMethod.mean,
+    size: int = 3,
+    shape: FocalFilterShape = FocalFilterShape.circle,
+):
+    """Apply a basic focal filter to the input raster."""
+    from eis_toolkit.raster_processing.filters.focal import focal_filter
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = focal_filter(raster=raster, method=method, size=size, shape=shape)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Focal filtering completed, output raster written to {output_raster}.")
+
+
+# GAUSSIAN FILTER
+@app.command()
+def gaussian_filter_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    sigma: float = 1.0,
+    truncate: float = 4.0,
+    size: int = None,
+):
+    """Apply a gaussian filter to the input raster."""
+    from eis_toolkit.raster_processing.filters.focal import gaussian_filter
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = gaussian_filter(raster=raster, sigma=sigma, truncate=truncate, size=size)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Gaussial filtering completed, output raster written to {output_raster}.")
+
+
+# MEXICAN HAT FILTER
+@app.command()
+def mexican_hat_filter_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    sigma: float = 1.0,
+    truncate: float = 4.0,
+    size: float = None,
+    direction: MexicanHatFilterDirection = MexicanHatFilterDirection.circular,
+):
+    """Apply a mexican hat filter to the input raster."""
+    from eis_toolkit.raster_processing.filters.focal import mexican_hat_filter
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = mexican_hat_filter(
+            raster=raster, sigma=sigma, truncate=truncate, size=size, direction=direction
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Mexican hat filtering completed, output raster written to {output_raster}.")
 
 
 # CHECK RASTER GRIDS
