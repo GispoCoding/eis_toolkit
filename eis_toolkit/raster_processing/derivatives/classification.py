@@ -14,6 +14,17 @@ def _classify_aspect(
     unit: Literal["degrees", "radians"],
     num_classes: Number,
 ) -> tuple[np.ndarray, dict, dict]:
+    """
+    Classify an aspect raster data set into directional classes.
+
+    Args:
+        raster: Input raster.
+        unit: The unit of the input raster. Either "degrees" or "radians".
+        num_classes: The number of classes for discretization. Either 8 or 16 classes allowed.
+
+    Returns:
+        The classified aspect raster, a class mapping dictionary and the updated metadata.
+    """
     aspect = raster.read()
     aspect = np.squeeze(aspect) if aspect.ndim >= 3 else aspect
     out_nodata = -9999
