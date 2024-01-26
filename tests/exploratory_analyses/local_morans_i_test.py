@@ -37,7 +37,7 @@ def test_local_morans_i_knn_correctness():
     data = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
     gdf = gpd.GeoDataFrame(data)
 
-    w = libpysal.weights.KNN.from_dataframe(gdf, k=3)
+    w = libpysal.weights.KNN.from_dataframe(gdf, k=k)
     moran_loc = Moran_Local(gdf[column], w, permutations=permutations)
 
     result = local_morans_i(gdf, column, "knn", k=k, permutations=permutations)
