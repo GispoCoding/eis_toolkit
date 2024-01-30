@@ -3,10 +3,10 @@ import numpy as np
 from beartype import beartype
 from beartype.typing import Union
 from rasterio import profiles, transform
-from shapely.geometry import Point
 from shapely.geometry.base import BaseGeometry, BaseMultipartGeometry
 
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException, NonMatchingCrsException
+from eis_toolkit.utilities.miscellaneous import row_points
 
 
 @beartype
@@ -53,12 +53,12 @@ def _calculate_row_distances(
     raster_transform: transform.Affine,
     geometries_unary_union: Union[BaseGeometry, BaseMultipartGeometry],
 ) -> np.ndarray:
-    # transform.xy accepts either cols or rows as an array. The other then has
-    # to be an integer. The resulting x and y point coordinates are therefore
-    # in a 1D array
-    point_xs, point_ys = transform.xy(transform=raster_transform, cols=cols, rows=row)
-    row_points = [Point(x, y) for x, y in zip(point_xs, point_ys)]
-    row_distances = np.array([point.distance(geometries_unary_union) for point in row_points])
+    row_distances = np.array(
+        [
+            point.distance(geometries_unary_union)
+            for point in row_points(row=row, cols=cols, raster_transform=raster_transform)
+        ]
+    )
     return row_distances
 
 

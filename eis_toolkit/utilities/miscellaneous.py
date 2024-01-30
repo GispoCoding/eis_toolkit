@@ -1,9 +1,13 @@
+from contextlib import contextmanager
 from numbers import Number
 
 import numpy as np
 import pandas as pd
 from beartype import beartype
 from beartype.typing import Any, List, Optional, Sequence, Tuple, Union
+from osgeo import gdal
+from rasterio import transform
+from shapely.geometry import Point
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidColumnIndexException, InvalidDataShapeException
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid
@@ -362,3 +366,49 @@ def rename_columns(df: pd.DataFrame, colnames=Sequence[str]) -> pd.DataFrame:
         names[columns[i]] = colnames[i]
 
     return df.rename(columns=names)
+
+
+def row_points(
+    row: int,
+    cols: np.ndarray,
+    raster_transform: transform.Affine,
+) -> List[Point]:
+    """Transform raster row cells to shapely Points.
+
+    Args:
+        row: Row index of cells to transfer
+        cols: Array of column indexes to transfer
+        raster_transform: Affine transformation matrix of the raster
+
+    Returns:
+        List of shapely Points
+    """
+    # transform.xy accepts either cols or rows as an array. The other then has
+    # to be an integer. The resulting x and y point coordinates are therefore
+    # in a 1D array
+
+    if len(cols) == 0:
+        return []
+
+    point_xs, point_ys = zip(*[raster_transform * (col + 0.5, row + 0.5) for col in cols])
+    # point_xs, point_ys = transform.xy(transform=raster_transform, cols=cols, rows=row)
+    return [Point(x, y) for x, y in zip(point_xs, point_ys)]
+
+
+@contextmanager
+def toggle_gdal_exceptions():
+    """Toggle GDAL exceptions using a context manager.
+
+    If the exceptions are already enabled, this function will do nothing.
+    """
+    already_has_exceptions_enabled = False
+    try:
+
+        gdal.UseExceptions()
+        if gdal.GetUseExceptions() != 0:
+            already_has_exceptions_enabled = True
+        yield
+
+    finally:
+        if not already_has_exceptions_enabled:
+            gdal.DontUseExceptions()
