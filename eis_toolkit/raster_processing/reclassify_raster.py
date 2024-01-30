@@ -7,25 +7,10 @@ from beartype.typing import Sequence, Tuple, Union
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
-def _band_exceptions(band: np.ndarray):
-
-    if band is not None:
-        if not isinstance(band, Sequence):
-            raise InvalidParameterValueException("Expected bands parameter to be a list")
-        elif not (isinstance(band, int)):
-            raise InvalidParameterValueException("Expected band to be an integer")
-
-
-def _breaks_exception(breaks: Sequence[int]):
-
-    if not all(isinstance(_break, int) for _break in breaks):
-        raise InvalidParameterValueException("Expected breaks to contain only integers")
-
-
 def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     band: np.ndarray,
     breaks: Sequence[int],
-) -> Sequence[np.ndarray]:
+) -> np.ndarray:
 
     out_image = []
 
@@ -62,14 +47,10 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     out_image = []
     out_meta = raster.meta.copy()
 
-    _breaks_exception(breaks)
-
     bands_to_read = bands if bands is not None else raster.indexes
     for band in raster.read(bands_to_read):
 
-        _band_exceptions(band)
-
-        manual_breaks_band = _raster_with_manual_breaks(raster, breaks, bands)
+        manual_breaks_band = _raster_with_manual_breaks(breaks, band)
 
         out_image.append(manual_breaks_band)
 
@@ -79,7 +60,7 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
 def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
     band: np.ndarray,
     interval_size: int,
-) -> Sequence[np.ndarray]:
+) -> np.ndarray:
 
     out_image = []
 
@@ -121,9 +102,7 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
     bands_to_read = bands if bands is not None else raster.indexes
     for band in raster.read(bands_to_read):
 
-        _band_exceptions(band)
-
-        defined_intervals_band = _raster_with_defined_intervals(raster, interval_size)
+        defined_intervals_band = _raster_with_defined_intervals(band, interval_size)
 
         out_image.append(defined_intervals_band)
 
@@ -133,7 +112,7 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
 def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     band: np.ndarray,
     number_of_intervals: int,
-) -> Sequence[np.ndarray]:
+) -> np.ndarray:
 
     out_image = []
 
@@ -174,9 +153,7 @@ def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     bands_to_read = bands if bands is not None else raster.indexes
     for band in raster.read(bands_to_read):
 
-        _band_exceptions(band)
-
-        equal_intervals_band = _raster_with_equal_intervals(raster, number_of_intervals)
+        equal_intervals_band = _raster_with_equal_intervals(band, number_of_intervals)
 
         out_image.append(equal_intervals_band)
 
@@ -186,7 +163,7 @@ def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
 def _raster_with_quantiles(  # type: ignore[no-any-unimported]
     band: np.ndarray,
     number_of_quantiles: int,
-) -> Sequence[np.ndarray]:
+) -> np.ndarray:
 
     out_image = []
 
@@ -227,9 +204,7 @@ def raster_with_quantiles(  # type: ignore[no-any-unimported]
     bands_to_read = bands if bands is not None else raster.indexes
     for band in raster.read(bands_to_read):
 
-        _band_exceptions(band)
-
-        numbered_quantiles_band = _raster_with_quantiles(raster, number_of_quantiles)
+        numbered_quantiles_band = _raster_with_quantiles(band, number_of_quantiles)
 
         out_image.append(numbered_quantiles_band)
 
@@ -239,7 +214,7 @@ def raster_with_quantiles(  # type: ignore[no-any-unimported]
 def _raster_with_natural_breaks(  # type: ignore[no-any-unimported]
     band: np.ndarray,
     number_of_classes: int,
-) -> Sequence[np.ndarray]:
+) -> np.ndarray:
 
     out_image = []
 
@@ -280,9 +255,7 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
     bands_to_read = bands if bands is not None else raster.indexes
     for band in raster.read(bands_to_read):
 
-        _band_exceptions(band)
-
-        natural_breaks_band = _raster_with_natural_breaks(raster, number_of_classes)
+        natural_breaks_band = _raster_with_natural_breaks(band, number_of_classes)
 
         out_image.append(natural_breaks_band)
 
@@ -291,7 +264,7 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
 
 def _raster_with_geometrical_intervals(
     band: np.ndarray, number_of_classes: int, nan_value: Union[int, float]
-) -> Sequence[np.ndarray]:
+) -> np.ndarray:
 
     out_image = []
     is_integer = np.issubdtype(band.dtype, int)
@@ -359,7 +332,7 @@ def _raster_with_geometrical_intervals(
 
 @beartype
 def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_classes: int, bands: Sequence[int]
+    raster: rasterio.io.DatasetReader, number_of_classes: int, nan_value: Union[int, float], bands: Sequence[int]
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with geometrical intervals (Torppa, 2023).
 
@@ -385,9 +358,7 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
     bands_to_read = bands if bands is not None else raster.indexes
     for band in raster.read(bands_to_read):
 
-        _band_exceptions(band)
-
-        geometrical_intervals_band = _raster_with_geometrical_intervals(raster, number_of_classes)
+        geometrical_intervals_band = _raster_with_geometrical_intervals(band, number_of_classes, nan_value)
 
         out_image.append(geometrical_intervals_band)
 
@@ -397,7 +368,7 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
 def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
     band: np.ndarray,
     number_of_intervals: int,
-) -> Sequence[np.ndarray]:
+) -> np.ndarray:
 
     out_image = []
 
@@ -454,9 +425,7 @@ def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
     bands_to_read = bands if bands is not None else raster.indexes
     for band in raster.read(bands_to_read):
 
-        _band_exceptions(band)
-
-        standard_deviation_band = _raster_with_standard_deviation(raster, number_of_intervals)
+        standard_deviation_band = _raster_with_standard_deviation(band, number_of_intervals)
 
         out_image.append(standard_deviation_band)
 
