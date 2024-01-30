@@ -9,7 +9,7 @@ from eis_toolkit.exploratory_analyses.local_morans_i import local_morans_i
 
 
 def test_local_morans_i_queen_correctness():
-    """Test Local Moran's I Queen correctness"""
+    """Test Local Moran's I Queen correctness."""
 
     permutations = 999
 
@@ -28,7 +28,7 @@ def test_local_morans_i_queen_correctness():
 
 
 def test_local_morans_i_knn_correctness():
-    """Test Local Moran's I KNN correctness"""
+    """Test Local Moran's I KNN correctness."""
 
     k = 3
     permutations = 999
@@ -47,7 +47,7 @@ def test_local_morans_i_knn_correctness():
 
 
 def test_empty_geodataframe():
-    """Test Local Moran's I raises EmptyDataFrameException"""
+    """Test Local Moran's I raises EmptyDataFrameException."""
 
     empty_gdf = gpd.GeoDataFrame()
 
