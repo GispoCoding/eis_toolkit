@@ -5,14 +5,27 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Literal, Optional
 
-from eis_toolkit.raster_processing.filters.kernels import basic_kernel, gaussian_kernel, mexican_hat_kernel
-from eis_toolkit.raster_processing.filters.utilities import apply_correlated_filter, apply_generic_filter, check_inputs
+from eis_toolkit.raster_processing.filters.kernels import _basic_kernel, _gaussian_kernel, _mexican_hat_kernel
+from eis_toolkit.raster_processing.filters.utilities import (
+    _apply_correlated_filter,
+    _apply_generic_filter,
+    _check_inputs,
+)
 from eis_toolkit.utilities.miscellaneous import cast_array_to_float, reduce_ndim
 from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
 
 @beartype
 def _focal_median(window: np.ndarray) -> Number:
+    """
+    Calculate the median value of a window.
+
+    Args:
+        window: The filter window.
+
+    Returns:
+        The median value of the window.
+    """
     weighted_value = np.nanmedian(window) if sum(np.isnan(window)) != len(window) else np.nan
     return weighted_value
 
@@ -42,18 +55,18 @@ def focal_filter(
             If the filter size is not an odd number.
             If the shape is not "square" or "circle".
     """
-    check_inputs(raster, size)
+    _check_inputs(raster, size)
 
-    kernel = basic_kernel(size, shape)
+    kernel = _basic_kernel(size, shape)
 
     raster_array = raster.read()
     raster_array = reduce_ndim(raster_array)
     raster_array = nodata_to_nan(raster_array, raster.nodata)
 
     if method == "mean":
-        out_array = apply_correlated_filter(raster_array, kernel)
+        out_array = _apply_correlated_filter(raster_array, kernel)
     elif method == "median":
-        out_array = apply_generic_filter(raster_array, _focal_median, kernel)
+        out_array = _apply_generic_filter(raster_array, _focal_median, kernel)
 
     out_array = nan_to_nodata(out_array, raster.nodata)
     out_array = cast_array_to_float(out_array, cast_float=True)
@@ -91,15 +104,15 @@ def gaussian_filter(
             If the filter size is not an odd number.
             If the resulting radius is smaller than 1.
     """
-    check_inputs(raster, size, sigma, truncate)
+    _check_inputs(raster, size, sigma, truncate)
 
-    kernel = gaussian_kernel(sigma, truncate, size)
+    kernel = _gaussian_kernel(sigma, truncate, size)
 
     raster_array = raster.read()
     raster_array = reduce_ndim(raster_array)
     raster_array = nodata_to_nan(raster_array, raster.nodata)
 
-    out_array = apply_correlated_filter(raster_array, kernel)
+    out_array = _apply_correlated_filter(raster_array, kernel)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
     out_array = cast_array_to_float(out_array, cast_float=True)
@@ -141,15 +154,15 @@ def mexican_hat_filter(
             If the filter size is not an odd number.
             If the resulting radius is smaller than 1.
     """
-    check_inputs(raster, size, sigma, truncate)
+    _check_inputs(raster, size, sigma, truncate)
 
-    kernel = mexican_hat_kernel(sigma, truncate, size, direction)
+    kernel = _mexican_hat_kernel(sigma, truncate, size, direction)
 
     raster_array = raster.read()
     raster_array = reduce_ndim(raster_array)
     raster_array = nodata_to_nan(raster_array, raster.nodata)
 
-    out_array = apply_correlated_filter(raster_array, kernel)
+    out_array = _apply_correlated_filter(raster_array, kernel)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
     out_array = cast_array_to_float(out_array, cast_float=True)
