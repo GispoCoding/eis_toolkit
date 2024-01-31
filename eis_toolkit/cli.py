@@ -492,10 +492,10 @@ def focal_filter_cli(
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
+        dest.write(out_image, 1)
     typer.echo("Progress: 100%")
 
-    typer.echo(f"Focal filtering completed, output raster written to {output_raster}.")
+    typer.echo(f"Focal filter applied, output raster written to {output_raster}.")
 
 
 # GAUSSIAN FILTER
@@ -518,10 +518,10 @@ def gaussian_filter_cli(
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
+        dest.write(out_image, 1)
     typer.echo("Progress: 100%")
 
-    typer.echo(f"Gaussial filtering completed, output raster written to {output_raster}.")
+    typer.echo(f"Gaussial filter applied, output raster written to {output_raster}.")
 
 
 # MEXICAN HAT FILTER
@@ -531,7 +531,7 @@ def mexican_hat_filter_cli(
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     sigma: float = 1.0,
     truncate: float = 4.0,
-    size: float = None,
+    size: int = None,
     direction: MexicanHatFilterDirection = MexicanHatFilterDirection.circular,
 ):
     """Apply a mexican hat filter to the input raster."""
@@ -547,10 +547,211 @@ def mexican_hat_filter_cli(
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
+        dest.write(out_image, 1)
     typer.echo("Progress: 100%")
 
-    typer.echo(f"Mexican hat filtering completed, output raster written to {output_raster}.")
+    typer.echo(f"Mexican hat filter applied, output raster written to {output_raster}.")
+
+
+# LEE ADDITIVE NOISE FILTER
+@app.command()
+def lee_additive_noise_filter_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    size: int = 3,
+    add_noise_var: float = 0.25,
+):
+    """Apply a Lee filter considering additive noise components in the input raster."""
+    from eis_toolkit.raster_processing.filters.speckle import lee_additive_noise_filter
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = lee_additive_noise_filter(raster=raster, size=size, add_noise_var=add_noise_var)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Additive Lee noise filter applied, output raster written to {output_raster}.")
+
+
+# LEE MULTIPLICATIVE NOISE FILTER
+@app.command()
+def lee_multiplicative_noise_filter_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    size: int = 3,
+    multi_noise_mean: float = 1.0,
+    n_looks: int = 1,
+):
+    """Apply a Lee filter considering multiplicative noise components in the input raster."""
+    from eis_toolkit.raster_processing.filters.speckle import lee_multiplicative_noise_filter
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = lee_multiplicative_noise_filter(
+            raster=raster, size=size, mult_noise_mean=multi_noise_mean, n_looks=n_looks
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Multiplicative Lee noise filter applied, output raster written to {output_raster}.")
+
+
+# LEE ADDITIVE MULTIPLICATIVE NOISE FILTER
+@app.command()
+def lee_additive_multiplicative_noise_filter_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    size: int = 3,
+    add_noise_var: float = 0.25,
+    add_noise_mean: float = 0,
+    multi_noise_mean: float = 1.0,
+):
+    """Apply a Lee filter considering both additive and multiplicative noise components in the input raster."""
+    from eis_toolkit.raster_processing.filters.speckle import lee_additive_multiplicative_noise_filter
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = lee_additive_multiplicative_noise_filter(
+            raster=raster,
+            size=size,
+            add_noise_var=add_noise_var,
+            add_noise_mean=add_noise_mean,
+            mult_noise_mean=multi_noise_mean,
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Additive multiplicative Lee noise filter applied, output raster written to {output_raster}.")
+
+
+# LEE ENHANCED FILTER
+# TODO: SystemError: <built-in function len> returned a result with an exception set
+@app.command()
+def lee_enhanced_filter_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    size: int = 3,
+    n_looks: float = 1.0,
+    damping_factor: float = 1.0,
+):
+    """Apply an enhanced Lee filter to the input raster."""
+    from eis_toolkit.raster_processing.filters.speckle import lee_enhanced_filter
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = lee_enhanced_filter(
+            raster=raster, size=size, n_looks=n_looks, damping_factor=damping_factor
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Enhanced Lee filter applied, output raster written to {output_raster}.")
+
+
+# GAMMA FILTER
+@app.command()
+def gamma_filter_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    size: int = 3,
+    n_looks: float = 1.0,
+):
+    """Apply a Gamma filter to the input raster."""
+    from eis_toolkit.raster_processing.filters.speckle import gamma_filter
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        print(f"input_raster: {type(raster)}")
+        print(f"size: {type(size)}")
+        print(f"n_looks: {type(n_looks)}")
+        out_image, out_meta = gamma_filter(raster=raster, size=size, n_looks=n_looks)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Gamma filter applied, output raster written to {output_raster}.")
+
+
+# FROST FILTER
+# TODO: SystemError: <built-in function len> returned a result with an exception set
+@app.command()
+def frost_filter_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    size: int = 3,
+    damping_factor: float = 1.0,
+):
+    """Apply a Frost filter to the input raster."""
+    from eis_toolkit.raster_processing.filters.speckle import frost_filter
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        print(f"input_raster: {type(raster)}")
+        print(f"size: {type(size)}")
+        print(f"damping_factor: {type(damping_factor)}")
+        out_image, out_meta = frost_filter(raster=raster, size=size, damping_factor=damping_factor)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Frost filter applied, output raster written to {output_raster}.")
+
+
+# KUAN FILTER
+# TODO: SystemError: <built-in function len> returned a result with an exception set
+@app.command()
+def kuan_filter_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    size: int = 3,
+    n_looks: float = 1.0,
+):
+    """Apply a Kuan filter to the input raster."""
+    from eis_toolkit.raster_processing.filters.speckle import kuan_filter
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("progress: 25%")
+        print(f"input_raster: {type(raster)}")
+        print(f"size: {type(size)}")
+        print(f"n_looks: {type(n_looks)}")
+        out_image, out_meta = kuan_filter(raster=raster, size=size, n_looks=n_looks)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Kuan filter applied, output raster written to {output_raster}.")
 
 
 # CHECK RASTER GRIDS
@@ -1625,7 +1826,7 @@ def sum_overlay_cli(
 
 # GAMMA OVERLAY
 @app.command()
-def gamme_overlay_cli(
+def gamma_overlay_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     gamma: float = typer.Option(),
