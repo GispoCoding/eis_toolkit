@@ -4,7 +4,7 @@ import numpy as np
 import rasterio
 from beartype import beartype
 
-from eis_toolkit.raster_processing.filters.utilities import apply_generic_filter, check_inputs
+from eis_toolkit.raster_processing.filters.utilities import _apply_generic_filter, _check_inputs
 from eis_toolkit.utilities.miscellaneous import cast_array_to_float, reduce_ndim
 from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
@@ -267,7 +267,7 @@ def lee_additive_noise_filter(
         InvalidParameterValueException: If the filter size is smaller than 3.
             If the filter size is not an odd number.
     """
-    check_inputs(raster, size)
+    _check_inputs(raster, size)
 
     kernel = np.ones((size, size))
 
@@ -275,7 +275,7 @@ def lee_additive_noise_filter(
     raster_array = reduce_ndim(raster_array)
 
     raster_array = nodata_to_nan(raster_array, raster.nodata)
-    out_array = apply_generic_filter(raster_array, _lee_additive_noise, kernel, add_noise_var)
+    out_array = _apply_generic_filter(raster_array, _lee_additive_noise, kernel, add_noise_var)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
     out_array = cast_array_to_float(out_array, cast_float=True)
@@ -312,7 +312,7 @@ def lee_multiplicative_noise_filter(
         InvalidParameterValueException: If the filter size is smaller than 3.
             If the filter size is not an odd number.
     """
-    check_inputs(raster, size, n_looks=n_looks)
+    _check_inputs(raster, size, n_looks=n_looks)
 
     kernel = np.ones((size, size))
 
@@ -320,7 +320,7 @@ def lee_multiplicative_noise_filter(
     raster_array = reduce_ndim(raster_array)
     raster_array = nodata_to_nan(raster_array, raster.nodata)
 
-    out_array = apply_generic_filter(raster_array, _lee_multiplicative_noise, kernel, mult_noise_mean, n_looks)
+    out_array = _apply_generic_filter(raster_array, _lee_multiplicative_noise, kernel, mult_noise_mean, n_looks)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
     out_array = cast_array_to_float(out_array, cast_float=True)
@@ -358,7 +358,7 @@ def lee_additive_multiplicative_noise_filter(
         InvalidParameterValueException: If the filter size is smaller than 3.
             If the filter size is not an odd number.
     """
-    check_inputs(raster, size)
+    _check_inputs(raster, size)
 
     kernel = np.ones((size, size))
 
@@ -366,7 +366,7 @@ def lee_additive_multiplicative_noise_filter(
     raster_array = reduce_ndim(raster_array)
     raster_array = nodata_to_nan(raster_array, raster.nodata)
 
-    out_array = apply_generic_filter(
+    out_array = _apply_generic_filter(
         raster_array, _lee_additive_multiplicative_noise, kernel, add_noise_var, add_noise_mean, mult_noise_mean
     )
 
@@ -410,7 +410,7 @@ def lee_enhanced_filter(
         InvalidParameterValueException: If the filter size is smaller than 3.
             If the filter size is not an odd number.
     """
-    check_inputs(raster, size, n_looks=n_looks, damping_factor=damping_factor)
+    _check_inputs(raster, size, n_looks=n_looks, damping_factor=damping_factor)
 
     kernel = np.ones((size, size))
 
@@ -418,7 +418,7 @@ def lee_enhanced_filter(
     raster_array = reduce_ndim(raster_array)
     raster_array = nodata_to_nan(raster_array, raster.nodata)
 
-    out_array = apply_generic_filter(raster_array, _lee_enhanced, kernel, n_looks, damping_factor)
+    out_array = _apply_generic_filter(raster_array, _lee_enhanced, kernel, n_looks, damping_factor)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
     out_array = cast_array_to_float(out_array, cast_float=True)
@@ -455,7 +455,7 @@ def gamma_filter(
         InvalidParameterValueException: If the filter size is smaller than 3.
             If the filter size is not an odd number.
     """
-    check_inputs(raster, size, n_looks=n_looks)
+    _check_inputs(raster, size, n_looks=n_looks)
 
     kernel = np.ones((size, size))
 
@@ -463,7 +463,7 @@ def gamma_filter(
     raster_array = reduce_ndim(raster_array)
     raster_array = nodata_to_nan(raster_array, raster.nodata)
 
-    out_array = apply_generic_filter(raster_array, _gamma, kernel, n_looks)
+    out_array = _apply_generic_filter(raster_array, _gamma, kernel, n_looks)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
     out_array = cast_array_to_float(out_array, cast_float=True)
@@ -500,7 +500,7 @@ def frost_filter(
         InvalidParameterValueException: If the filter size is smaller than 3.
             If the filter size is not an odd number.
     """
-    check_inputs(raster, size, damping_factor=damping_factor)
+    _check_inputs(raster, size, damping_factor=damping_factor)
 
     kernel = np.ones((size, size))
 
@@ -508,7 +508,7 @@ def frost_filter(
     raster_array = reduce_ndim(raster_array)
     raster_array = nodata_to_nan(raster_array, raster.nodata)
 
-    out_array = apply_generic_filter(raster_array, _frost, kernel, damping_factor)
+    out_array = _apply_generic_filter(raster_array, _frost, kernel, damping_factor)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
     out_array = cast_array_to_float(out_array, cast_float=True)
@@ -545,7 +545,7 @@ def kuan_filter(
         InvalidParameterValueException: If the filter size is smaller than 3.
             If the filter size is not an odd number.
     """
-    check_inputs(raster, size, n_looks=n_looks)
+    _check_inputs(raster, size, n_looks=n_looks)
 
     kernel = np.ones((size, size))
 
@@ -553,7 +553,7 @@ def kuan_filter(
     raster_array = reduce_ndim(raster_array)
     raster_array = nodata_to_nan(raster_array, raster.nodata)
 
-    out_array = apply_generic_filter(raster_array, _kuan, kernel, n_looks)
+    out_array = _apply_generic_filter(raster_array, _kuan, kernel, n_looks)
     out_array = nan_to_nodata(out_array, raster.nodata)
 
     out_array = cast_array_to_float(out_array, cast_float=True)

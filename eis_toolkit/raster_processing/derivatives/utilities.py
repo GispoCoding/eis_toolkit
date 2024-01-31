@@ -6,7 +6,7 @@ from beartype.typing import Union
 
 
 @beartype
-def scale_raster(
+def _scale_raster(
     data: np.ndarray,
     scaling_factor: Number,
 ) -> np.ndarray:
@@ -24,7 +24,7 @@ def scale_raster(
 
 
 @beartype
-def set_flat_pixels(
+def _set_flat_pixels(
     in_array: np.ndarray,
     slope_gradient: Union[np.ndarray, tuple[np.ndarray, np.ndarray]],
     slope_tolerance: Number,

@@ -12,7 +12,7 @@ from eis_toolkit.utilities.checks.raster import check_single_band
 
 
 @beartype
-def apply_generic_filter(array: np.ndarray, filter_fn: Callable, kernel: np.ndarray, *args) -> np.ndarray:
+def _apply_generic_filter(array: np.ndarray, filter_fn: Callable, kernel: np.ndarray, *args) -> np.ndarray:
     """
     Apply a generic filter to the input array.
 
@@ -29,7 +29,7 @@ def apply_generic_filter(array: np.ndarray, filter_fn: Callable, kernel: np.ndar
 
 
 @beartype
-def apply_correlated_filter(array: np.ndarray, kernel: np.ndarray) -> np.ndarray:
+def _apply_correlated_filter(array: np.ndarray, kernel: np.ndarray) -> np.ndarray:
     """
     Apply a correlated filter to the input array.
 
@@ -44,7 +44,7 @@ def apply_correlated_filter(array: np.ndarray, kernel: np.ndarray) -> np.ndarray
 
 
 @beartype
-def check_filter_size(sigma: Optional[Number], truncate: Optional[Number], size: Optional[int]):
+def _check_filter_size(sigma: Optional[Number], truncate: Optional[Number], size: Optional[int]):
     """
     Check the filter size and raise exceptions if it does not meet the requirements.
 
@@ -72,7 +72,7 @@ def check_filter_size(sigma: Optional[Number], truncate: Optional[Number], size:
 
 
 @beartype
-def check_inputs(
+def _check_inputs(
     raster: rasterio.io.DatasetReader,
     size: Optional[int],
     sigma: Optional[Number] = None,
@@ -97,7 +97,7 @@ def check_inputs(
     if check_single_band(raster) is False:
         raise InvalidRasterBandException("Only one-band raster supported.")
 
-    check_filter_size(sigma, truncate, size)
+    _check_filter_size(sigma, truncate, size)
 
     if len(kwargs) > 0:
         for key, value in kwargs.items():
