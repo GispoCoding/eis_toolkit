@@ -17,14 +17,17 @@ from eis_toolkit.prediction.model_performance_estimation import performance_mode
 
 def normalize_the_data(scaler_agent: sklearn.preprocessing, data: np.ndarray):
     """
-    Do Data normalization.
+    Normalize multi-dimensional data using a specified scaler.
+    
+    This function applies a scaling technique to each feature in the data, transforming the data to a specified range or distribution. It is particularly useful for normalizing image data or similarly structured multi-dimensional data.
 
     Parameters:
-       scaler_agent: this is the scaler agent used for data normalization is like an handler.
-       data: data to normalize
+        - scaler_agent: An instance of a preprocessing scaler from sklearn.preprocessing (e.g., MinMaxScaler, StandardScaler) that will be used to apply normalization.
+        - data: A NumPy ndarray containing the data to be normalized. The data is expected to be in a multi-dimensional format, typically including dimensions for sample size, height, width, and channels (e.g., for image data).
 
-    Return:
-        return normalized data.
+    Returns:
+        - normalized_data: The input data normalized according to the scaler_agent. The output data maintains the original shape of the input data.
+        
     """
     number_of_sample, h, w, c = data.shape
     temp = scaler_agent.transform(data.reshape(-1, data.shape[-1]))
@@ -34,17 +37,20 @@ def normalize_the_data(scaler_agent: sklearn.preprocessing, data: np.ndarray):
 
 @beartype
 def make_one_hot_encoding(labels: np.ndarray):
-    """
-     Do the OneHotEncoding.
+     """
+    Convert categorical labels to a one-hot encoded format.
+
+    This function transforms a list of numerical or categorical labels into a one-hot encoded matrix, which is a binary matrix representing the categorization of each label. One-hot encoding is commonly used in machine learning to handle categorical features.
 
     Parameters:
-       labels: labels to encode.
+        - labels: A NumPy ndarray containing the labels to be encoded. Each label corresponds to a category or class.
 
-    Return:
-        return encoded labels.
+    Returns:
+        - label_encoded: A matrix where each row corresponds to a one-hot encoded representation of the input labels.
 
     Raises:
-        InvalidArgumentTypeException: labels are None.
+        - InvalidArgumentTypeException: Raised if the input 'labels' is None, indicating that no labels were provided for encoding.
+
     """
     if labels is None:
         raise InvalidArgumentTypeException
