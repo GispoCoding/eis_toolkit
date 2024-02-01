@@ -4,6 +4,13 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Sequence, Tuple, Union
 
+from eis_toolkit.exceptions import InvalidParameterValueException
+
+
+def _bands_non_negative(band: list):
+    if any(n < 0 for n in band):
+        raise InvalidParameterValueException("The list bands contains negative values.")
+
 
 def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     band: np.ndarray,
@@ -38,14 +45,16 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
         Raster classified with manual breaks and metadata.
 
     Raises:
-        InvalidParameterValueException: Bands is not a list, band is not an integers,
-        bands exceeds the number of bands in the raster, breaks is not a list of integers.
+        InvalidParameterValueException: Bands contain negative values.
     """
 
     out_image = []
     out_meta = raster.meta.copy()
 
     bands_to_read = bands if bands is not None else raster.indexes
+
+    _bands_non_negative(bands_to_read)
+
     for band in raster.read(bands_to_read):
 
         manual_breaks_band = _raster_with_manual_breaks(breaks, band)
@@ -90,14 +99,16 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
         Raster classified with defined intervals and metadata.
 
     Raises:
-        InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
-        bands exceeds the number of bands in the raster.
+        InvalidParameterValueException: Bands contain negative values.
     """
 
     out_image = []
     out_meta = raster.meta.copy()
 
     bands_to_read = bands if bands is not None else raster.indexes
+
+    _bands_non_negative(bands_to_read)
+
     for band in raster.read(bands_to_read):
 
         defined_intervals_band = _raster_with_defined_intervals(band, interval_size)
@@ -141,14 +152,16 @@ def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
         Raster classified with equal intervals.
 
     Raises:
-        InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
-        bands exceeds the number of bands in the raster.
+        InvalidParameterValueException: Bands contain negative values.
     """
 
     out_image = []
     out_meta = raster.meta.copy()
 
     bands_to_read = bands if bands is not None else raster.indexes
+
+    _bands_non_negative(bands_to_read)
+
     for band in raster.read(bands_to_read):
 
         equal_intervals_band = _raster_with_equal_intervals(band, number_of_intervals)
@@ -192,14 +205,16 @@ def raster_with_quantiles(  # type: ignore[no-any-unimported]
         Raster classified with quantiles and metadata.
 
     Raises:
-        InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
-        bands exceeds the number of bands in the raster.
+        InvalidParameterValueException: Bands contain negative values.
     """
 
     out_image = []
     out_meta = raster.meta.copy()
 
     bands_to_read = bands if bands is not None else raster.indexes
+
+    _bands_non_negative(bands_to_read)
+
     for band in raster.read(bands_to_read):
 
         numbered_quantiles_band = _raster_with_quantiles(band, number_of_quantiles)
@@ -243,14 +258,16 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
         Raster classified with natural breaks (Jenks Caspall) and metadata.
 
     Raises:
-        InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
-        bands exceeds the number of bands in the raster.
+        InvalidParameterValueException: Bands contain negative values.
     """
 
     out_image = []
     out_meta = raster.meta.copy()
 
     bands_to_read = bands if bands is not None else raster.indexes
+
+    _bands_non_negative(bands_to_read)
+
     for band in raster.read(bands_to_read):
 
         natural_breaks_band = _raster_with_natural_breaks(band, number_of_classes)
@@ -346,14 +363,16 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
         Raster classified with geometrical intervals (Torppa, 2023) and metadata.
 
     Raises:
-        InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
-        bands exceeds the number of bands in the raster.
+        InvalidParameterValueException: Bands contain negative values.
     """
 
     out_image = []
     out_meta = raster.meta.copy()
 
     bands_to_read = bands if bands is not None else raster.indexes
+
+    _bands_non_negative(bands_to_read)
+
     for band in raster.read(bands_to_read):
 
         geometrical_intervals_band = _raster_with_geometrical_intervals(band, number_of_classes, nan_value)
@@ -413,14 +432,16 @@ def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
         Raster classified with standard deviation and metadata.
 
     Raises:
-        InvalidParameterValueException: Bands is not a list, bands is not a list of integers,
-        bands exceeds the number of bands in the raster.
+        InvalidParameterValueException: Bands contain negative values.
     """
 
     out_image = []
     out_meta = raster.meta.copy()
 
     bands_to_read = bands if bands is not None else raster.indexes
+
+    _bands_non_negative(bands_to_read)
+
     for band in raster.read(bands_to_read):
 
         standard_deviation_band = _raster_with_standard_deviation(band, number_of_intervals)
