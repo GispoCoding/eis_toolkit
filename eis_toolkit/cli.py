@@ -5,11 +5,13 @@
 # --- ! ---
 
 import json
+import os
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import rasterio
 import typer
@@ -196,6 +198,13 @@ class GradientBoostingRegressorLosses(str, Enum):
     quantile = "quantile"
 
 
+class NodataHandling(str, Enum):
+    """Nodata handling choices."""
+
+    replace = "replace"
+    remove = "remove"
+
+
 RESAMPLING_MAPPING = {
     "nearest": warp.Resampling.nearest,
     "bilinear": warp.Resampling.bilinear,
@@ -359,25 +368,90 @@ def parallel_coordinates_cli(
     typer.echo("Parallel coordinates plot completed" + echo_str_end)
 
 
-# PCA
+# PCA FOR RASTER DATA
 @app.command()
-def compute_pca_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+def compute_pca_raster_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     number_of_components: int = typer.Option(),
+    # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
+    nodata_handling: NodataHandling = NodataHandling.remove,
+    # NOTE: Omitted nodata parameter. Should use raster nodata.
 ):
-    """Compute principal components for the input data."""
+    """Compute defined number of principal components for raster data."""
+    from eis_toolkit.exploratory_analyses.pca import compute_pca
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
+
+    typer.echo("Progress: 10%")
+
+    stacked_array, profiles = read_and_stack_rasters(input_rasters, nodata_handling="convert_to_nan")
+    typer.echo("Progress: 25%")
+
+    pca_array, variance_ratios = compute_pca(
+        data=stacked_array, number_of_components=number_of_components, nodata_handling=nodata_handling
+    )
+
+    # Fill np.nan with nodata before writing data to raster
+    pca_array[pca_array == np.nan] = -9999
+    out_profile = profiles[0]
+    out_profile["nodata"] = -9999
+
+    # Update nr of bands
+    out_profile["count"] = number_of_components
+
+    # Create dictionary from the variance ratios array
+    variances_ratios_dict = {}
+    for i, variance_ratio in enumerate(variance_ratios):
+        name = "PC " + str(i) + " explained variance"
+        variances_ratios_dict[name] = variance_ratio
+    json_str = json.dumps(variances_ratios_dict)
+
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(pca_array)
+
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo(f"PCA computation (raster) completed, output raster saved to {output_raster}.")
+
+
+# PCA FOR VECTOR DATA
+@app.command()
+def compute_pca_vector_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_components: int = typer.Option(),
+    columns: Annotated[List[str], typer.Option()] = None,
+    # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
+    nodata_handling: NodataHandling = NodataHandling.remove,
+    nodata: float = None,
+):
+    """Compute defined number of principal components for vector data."""
     from eis_toolkit.exploratory_analyses.pca import compute_pca
 
     typer.echo("Progress: 10%")
 
-    geodataframe = gpd.read_file(input_vector)  # TODO: Check if gdf to df handling in tool itself
-    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
+    gdf = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    pca_df, variance_ratios = compute_pca(data=dataframe, number_of_components=number_of_components)
+    pca_gdf, variance_ratios = compute_pca(
+        data=gdf,
+        number_of_components=number_of_components,
+        columns=columns,
+        nodata_handling=nodata_handling,
+        nodata=nodata,
+    )
 
-    pca_df.to_csv(output_file)
+    # Create dictionary from the variance ratios array
+    variances_ratios_dict = {}
+    for i, variance_ratio in enumerate(variance_ratios):
+        name = "PC " + str(i) + " explained variance"
+        variances_ratios_dict[name] = variance_ratio
+    json_str = json.dumps(variances_ratios_dict)
+
+    pca_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo(f"PCA computation (vector) completed, output vector saved to {output_vector}.")
 
 
 # DESCRIPTIVE STATISTICS (RASTER)
@@ -439,13 +513,13 @@ def check_raster_grids_cli(input_rasters: INPUT_FILES_ARGUMENT, same_extent: boo
 
     typer.echo("Progress: 10%")
 
-    open_rasters = [rasterio.open(raster) for raster in input_rasters]
-    typer.echo("Progress: 25%")
+    raster_profiles = []
+    for input_raster in input_rasters:
+        with rasterio.open(input_raster) as raster:
+            raster_profiles.append(raster.profile)
+    typer.echo("Progress: 50%")
+    result = check_raster_grids(raster_profiles=raster_profiles, same_extent=same_extent)
 
-    result = check_raster_grids(input_rasters=open_rasters, same_extent=same_extent)
-    typer.echo("Progress: 75%")
-
-    [raster.close() for raster in open_rasters]
     typer.echo("Progress: 100%")
 
     typer.echo(f"Result: {str(result)}")
@@ -601,6 +675,32 @@ def reproject_raster_cli(
     typer.echo(f"Reprojecting completed, writing raster to {output_raster}.")
 
 
+# RESAMPLE RASTER
+@app.command()
+def resample_raster_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    resolution: float = typer.Option(),
+    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.bilinear),
+):
+    """Resamples raster according to given resolution."""
+    from eis_toolkit.raster_processing.resampling import resample
+
+    typer.echo("Progress: 10%")
+
+    method = RESAMPLING_MAPPING[resampling_method]
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = resample(raster=raster, resolution=resolution, resampling_method=method)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image)
+    typer.echo("Progress 100%")
+
+    typer.echo(f"Resampling completed, writing raster to {output_raster}.")
+
+
 # SNAP RASTER
 @app.command()
 def snap_raster_cli(
@@ -628,19 +728,21 @@ def snap_raster_cli(
 # UNIFY RASTERS
 @app.command()
 def unify_rasters_cli(
+    rasters_to_unify: INPUT_FILES_ARGUMENT,
     base_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_directory: Annotated[Path, OUTPUT_DIR_OPTION],  # Directory path?
-    rasters_to_unify: Annotated[List[Path], INPUT_FILE_OPTION],
+    output_directory: Annotated[Path, OUTPUT_DIR_OPTION],
     resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest),
     same_extent: bool = False,
 ):
-    """Unify given rasters relative to base raster. WIP."""
+    """Unify rasters to match the base raster."""
     from eis_toolkit.raster_processing.unifying import unify_raster_grids
 
     typer.echo("Progress: 10%")
 
     with rasterio.open(base_raster) as raster:
-        to_unify = [rasterio.open(rstr) for rstr in rasters_to_unify]  # Open all rasters to be unfiied
+        to_unify = [rasterio.open(rstr) for rstr in rasters_to_unify]  # Open all rasters to be unified
+        typer.echo("Progress: 25%")
+
         unified = unify_raster_grids(
             base_raster=raster,
             rasters_to_unify=to_unify,
@@ -650,13 +752,43 @@ def unify_rasters_cli(
         [rstr.close() for rstr in to_unify]  # Close all rasters
     typer.echo("Progress: 75%")
 
+    out_rasters_dict = {}
     for i, (out_image, out_meta) in enumerate(unified[1:]):  # Skip writing base raster
-        output_raster = output_directory.joinpath(f"unified_raster {i+1}.tif")
-        with rasterio.open(output_raster, "w", **out_meta) as dst:
+        in_raster_name = os.path.splitext(os.path.split(rasters_to_unify[i - 1])[1])[0]
+        output_raster_name = f"{in_raster_name}_unified"
+        output_raster_path = output_directory.joinpath(output_raster_name + ".tif")
+        with rasterio.open(output_raster_path, "w", **out_meta) as dst:
             dst.write(out_image)
+        out_rasters_dict[output_raster_name] = str(output_raster_path)
     typer.echo("Progress: 100%")
 
-    typer.echo(f"Unifying completed, writing rasters to {output_directory}.")
+    json_str = json.dumps(out_rasters_dict)
+    typer.echo(f"Output rasters: {json_str}")
+    typer.echo(f"Unifying completed, rasters saved to {output_directory}.")
+
+
+# GET UNIQUE COMBINATIONS
+@app.command()
+def unique_combinations_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+):
+    """Get combinations of raster values between rasters."""
+    from eis_toolkit.raster_processing.unique_combinations import unique_combinations
+
+    typer.echo("Progress: 10%")
+    rasters = [rasterio.open(rstr) for rstr in input_rasters]
+
+    typer.echo("Progress: 25%")
+    out_image, out_meta = unique_combinations(rasters)
+    [rstr.close() for rstr in rasters]
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image, 1)
+
+    typer.echo(f"Writing results to {output_raster}.")
+    typer.echo("Getting unique combinations completed.")
 
 
 # EXTRACT WINDOW
@@ -787,6 +919,48 @@ def second_order_basic_set_cli(
 
 
 # --- VECTOR PROCESSING ---
+
+
+# CALCULATE GEOMETRY
+@app.command()
+def calculate_geometry_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Calculate the length or area of the given geometries."""
+    from eis_toolkit.vector_processing.calculate_geometry import calculate_geometry
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    out_vector = calculate_geometry(geodataframe=geodataframe)
+    typer.echo("Progress: 75%")
+
+    out_vector.to_file(output_vector)
+    typer.echo("Progress 100%")
+    typer.echo(f"Calculate geometry completed, writing vector to {output_vector}")
+
+
+# EXTRACT SHARED LINES
+@app.command()
+def extract_shared_lines_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Extract shared lines/borders/edges between polygons."""
+    from eis_toolkit.vector_processing.extract_shared_lines import extract_shared_lines
+
+    typer.echo("Progress: 10%")
+
+    polygons = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    out_vector = extract_shared_lines(polygons=polygons)
+    typer.echo("Progress: 75%")
+
+    out_vector.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Extracting shared lines completed, writing vector to {out_vector}")
 
 
 # IDW INTERPOLATION
@@ -1534,6 +1708,221 @@ def gamme_overlay_cli(
 
 
 # --- TRANSFORMATIONS ---
+
+
+# CODA - ALR TRANSFORM
+@app.command()
+def alr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    column: str = None,
+    keep_denominator_column: bool = False,
+):
+    """Perform an additive logratio transformation on the data."""
+    from eis_toolkit.transformations.coda.alr import alr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = alr_transform(df=df, column=column, keep_denominator_column=keep_denominator_column)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"ALR transform completed, output saved to {output_vector}")
+
+
+# CODA - INVERSE ALR TRANSFORM
+@app.command()
+def inverse_alr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    denominator_column: str = typer.Option(),
+    scale: float = 1.0,
+):
+    """Perform the inverse transformation for a set of ALR transformed data."""
+    from eis_toolkit.transformations.coda.alr import inverse_alr
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = inverse_alr(df=df, denominator_column=denominator_column, scale=scale)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Inverse ALR transform completed, output saved to {output_vector}")
+
+
+# CODA - CLR TRANSFORM
+@app.command()
+def clr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Perform a centered logratio transformation on the data."""
+    from eis_toolkit.transformations.coda.clr import clr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = clr_transform(df=df)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"CLR transform completed, output saved to {output_vector}")
+
+
+# CODA - INVERSE CLR TRANSFORM
+@app.command()
+def inverse_clr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    colnames: Annotated[List[str], typer.Option()] = None,
+    scale: float = 1.0,
+):
+    """Perform the inverse transformation for a set of CLR transformed data."""
+    from eis_toolkit.transformations.coda.clr import inverse_clr
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = inverse_clr(df=df, colnames=colnames, scale=scale)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Inverse CLR transform completed, output saved to {output_vector}")
+
+
+# CODA - SINGLE ILR TRANSFORM
+@app.command()
+def single_ilr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    subcomposition_1: Annotated[List[str], typer.Option()],
+    subcomposition_2: Annotated[List[str], typer.Option()],
+):
+    """Perform a single isometric logratio transformation on the provided subcompositions."""
+    from eis_toolkit.transformations.coda.ilr import single_ilr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_series = single_ilr_transform(df=df, subcomposition_1=subcomposition_1, subcomposition_2=subcomposition_2)
+    typer.echo("Progess 75%")
+
+    # NOTE: Output of pairwise_logratio might be changed to DF in the future, to automatically do the following
+    df["single_ilr"] = out_series
+    out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Single ILR transform completed, output saved to {output_vector}")
+
+
+# CODA - PAIRWISE LOGRATIO TRANSFORM
+@app.command()
+def pairwise_logratio_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    numerator_column: str = typer.Option(),
+    denominator_column: str = typer.Option(),
+):
+    """Perform a pairwise logratio transformation on the given columns."""
+    from eis_toolkit.transformations.coda.pairwise import pairwise_logratio
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_series = pairwise_logratio(df=df, numerator_column=numerator_column, denominator_column=denominator_column)
+    typer.echo("Progess 75%")
+
+    # NOTE: Output of pairwise_logratio might be changed to DF in the future, to automatically do the following
+    df["pairwise_logratio"] = out_series
+    out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Pairwise logratio transform completed, output saved to {output_vector}")
+
+
+# CODA - SINGLE PLR TRANSFORM
+@app.command()
+def single_plr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    column: str = typer.Option(),
+):
+    """Perform a pivot logratio transformation on the selected column."""
+    from eis_toolkit.transformations.coda.plr import single_plr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_series = single_plr_transform(df=df, column=column)
+    typer.echo("Progess 75%")
+
+    # NOTE: Output of single_plr_transform might be changed to DF in the future, to automatically do the following
+    df["single_plr"] = out_series
+    out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Single PLR transform completed, output saved to {output_vector}")
+
+
+# CODA - PLR TRANSFORM
+@app.command()
+def plr_transform_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Perform a pivot logratio transformation on the dataframe, returning the full set of transforms."""
+    from eis_toolkit.transformations.coda.plr import plr_transform
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    geometries = gdf["geometry"]
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    out_df = plr_transform(df=df)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"PLR transform completed, output saved to {output_vector}")
 
 
 # BINARIZE

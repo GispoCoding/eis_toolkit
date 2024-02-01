@@ -6,7 +6,7 @@ import pytest
 from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import InvalidParameterValueException, NonMatchingParameterLengthsException
 from eis_toolkit.prediction.machine_learning_general import (
     _train_and_validate_sklearn_model,
     evaluate_model,
@@ -146,7 +146,7 @@ def test_save_and_load_model():
 
 def test_mismatching_X_and_y():
     """Test that invalid lengths for X and y raises the correct exception."""
-    with pytest.raises(exceptions.NonMatchingParameterLengthsException):
+    with pytest.raises(NonMatchingParameterLengthsException):
         _train_and_validate_sklearn_model(
             X_IRIS, Y_IRIS[:-1], model=RF_MODEL, validation_method="none", metrics=CLF_METRICS
         )
@@ -154,13 +154,13 @@ def test_mismatching_X_and_y():
 
 def test_invalid_metrics():
     """Test that invalid metric selection raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         _train_and_validate_sklearn_model(X_IRIS, Y_IRIS, model=RF_MODEL, validation_method="split", metrics=[])
 
 
 def test_invalid_cv_folds():
     """Test that invalid metric selection raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         _train_and_validate_sklearn_model(
             X_IRIS, Y_IRIS, model=RF_MODEL, validation_method="kfold_cv", metrics=CLF_METRICS, cv_folds=1
         )
@@ -168,7 +168,7 @@ def test_invalid_cv_folds():
 
 def test_invalid_split_size():
     """Test that invalid metric selection raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         _train_and_validate_sklearn_model(
             X_IRIS, Y_IRIS, model=RF_MODEL, validation_method="split", metrics=CLF_METRICS, split_size=0.0
         )

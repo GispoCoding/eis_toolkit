@@ -3,7 +3,7 @@ from numbers import Number
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Sequence
+from beartype.typing import Optional, Sequence
 
 from eis_toolkit.exceptions import InvalidColumnException, NumericValueSignException
 from eis_toolkit.utilities.aitchison_geometry import _closure
@@ -19,7 +19,9 @@ def _alr_transform(df: pd.DataFrame, columns: Sequence[str], denominator_column:
 
 
 @beartype
-def alr_transform(df: pd.DataFrame, column: str = None, keep_denominator_column: bool = False) -> pd.DataFrame:
+def alr_transform(
+    df: pd.DataFrame, column: Optional[str] = None, keep_denominator_column: bool = False
+) -> pd.DataFrame:
     """
     Perform an additive logratio transformation on the data.
 

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataFrameException
 
 
 def plot_correlation_matrix(
@@ -33,7 +33,7 @@ def plot_correlation_matrix(
         EmptyDataFrameException: Input matrix is empty.
     """
     if matrix.empty:
-        raise exceptions.EmptyDataFrameException("Input matrix DataFrame is empty.")
+        raise EmptyDataFrameException("Input matrix DataFrame is empty.")
 
     # Mask for the upper triangle of the heatmap
     mask = np.triu(np.ones_like(matrix, dtype=bool))

@@ -7,7 +7,7 @@ import pytest
 import rasterio
 from shapely.geometry import LineString, Point, box
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.vector_processing.distance_computation import distance_computation
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
@@ -92,22 +92,22 @@ def test_distance_computation_with_expected_results(
         (
             {**SMALL_RASTER_PROFILE, "height": None},
             POINT_GEOMETRIES_WITHIN_SMALL_RASTER,
-            pytest.raises(exceptions.InvalidParameterValueException),
+            pytest.raises(InvalidParameterValueException),
         ),
         (
             {**SMALL_RASTER_PROFILE, "height": 0.123},
             POINT_GEOMETRIES_WITHIN_SMALL_RASTER,
-            pytest.raises(exceptions.InvalidParameterValueException),
+            pytest.raises(InvalidParameterValueException),
         ),
         (
             {**SMALL_RASTER_PROFILE, "width": 0.123},
             POINT_GEOMETRIES_WITHIN_SMALL_RASTER,
-            pytest.raises(exceptions.InvalidParameterValueException),
+            pytest.raises(InvalidParameterValueException),
         ),
         (
             {**SMALL_RASTER_PROFILE, "transform": None},
             POINT_GEOMETRIES_WITHIN_SMALL_RASTER,
-            pytest.raises(exceptions.InvalidParameterValueException),
+            pytest.raises(InvalidParameterValueException),
         ),
     ],
 )

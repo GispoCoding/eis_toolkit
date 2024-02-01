@@ -6,23 +6,7 @@ from beartype.typing import Union
 
 
 @beartype
-def reduce_ndim(
-    data: np.ndarray,
-) -> np.ndarray:
-    """
-    Reduce the number of dimensions of a numpy array.
-
-    Args:
-        data: The input raster data as a numpy array.
-
-    Returns:
-        The reduced array.
-    """
-    return np.squeeze(data) if data.ndim >= 3 else data
-
-
-@beartype
-def scale_raster(
+def _scale_raster(
     data: np.ndarray,
     scaling_factor: Number,
 ) -> np.ndarray:
@@ -40,7 +24,7 @@ def scale_raster(
 
 
 @beartype
-def set_flat_pixels(
+def _set_flat_pixels(
     in_array: np.ndarray,
     slope_gradient: Union[np.ndarray, tuple[np.ndarray, np.ndarray]],
     slope_tolerance: Number,
@@ -49,9 +33,9 @@ def set_flat_pixels(
     """Treating values below a certain gradient as flat surface.
 
     Args:
-        data (np.ndarray): Input surface attribute.
-        slope_slope (np.ndarray): Input slope array in degrees.
-        slope_tolerance (Number): Value below a surface will be treated as flat surface (degrees).
+        in_array: Input array.
+        slope_gradient: Input slope array in degrees or tuple of partial derivatives p and q.
+        slope_tolerance: Value below a surface will be treated as flat surface (degrees).
         parameter: The surface attribute to modify.
 
     Returns:

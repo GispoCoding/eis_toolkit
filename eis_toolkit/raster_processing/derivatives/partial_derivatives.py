@@ -15,16 +15,15 @@ def _coefficients_horn(
     Calculate the partial derivatives of a surface after after Horn (1981).
 
     Reference:
-    Horn, B.K., 1981: Hill shading and the reflectance map, Proceedings of the IEEE, 69/1: 14-47.
+        Horn, B.K., 1981: Hill shading and the reflectance map, Proceedings of the IEEE, 69/1: 14-47.
 
     Args:
         data: The input raster data as a numpy array.
         coefficients: coefficients to calculate.
 
     Returns:
-        The calculated coefficientss p, q.
+        The calculated coefficients p, q.
     """
-
     kernal_p = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
     kernal_q = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
 
@@ -43,8 +42,8 @@ def _coefficients_zevenbergen(
     Calculate the partial derivatives of a surface after Zevenbergen & Thorne (1987).
 
     Reference:
-    Zevenbergen, L.W. and Thorne, C.R., 1987: Quantitative analysis of land surface topography,
-    Earth Surface Processes and Landforms, 12: 47-56.
+        Zevenbergen, L.W. and Thorne, C.R., 1987: Quantitative analysis of land surface topography,
+        Earth Surface Processes and Landforms, 12: 47-56.
 
     Args:
         data: The input raster data as a numpy array.
@@ -52,7 +51,7 @@ def _coefficients_zevenbergen(
         coefficients: coefficients to calculate.
 
     Returns:
-        The calculated coefficientss p, q, r, s, t.
+        The calculated coefficients p, q, r, s, t.
     """
 
     kernal_p = np.array([[0, 0, 0], [-1, 0, 1], [0, 0, 0]])
@@ -130,7 +129,7 @@ def _coefficients_evans(
         coefficients: coefficients to calculate.
 
     Returns:
-        The calculated coefficientss p, q, r, s, t.
+        The calculated coefficients p, q, r, s, t.
     """
 
     kernal_p = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]])
@@ -158,7 +157,7 @@ def _coefficients_evans(
 
 
 @beartype
-def coefficients(
+def _coefficients(
     in_array: np.ndarray,
     cellsize: Number,
     method: Literal["Horn", "Evans", "Young", "Zevenbergen"],
@@ -166,15 +165,13 @@ def coefficients(
     """Calculate the partial derivatives of a given surface.
 
     Args:
-        raster: Input raster.
+        in_array: Input array.
+        cellsize: Cellsize of the input raster.
         method: Method to calculate the partial derivatives.
-        coefficients: Coefficients to calculate from least squares equation.
-        scaling_factor: Factor to modify input raster values, e.g. for unit conversion.
 
     Returns:
         Tuple of the partial derivatives p, q, r, s, t.
     """
-
     if method == "Horn":
         p, q = _coefficients_horn(in_array, cellsize)
         return p, q, None, None, None

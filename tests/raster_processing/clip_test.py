@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import rasterio
 
-from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
+from eis_toolkit.exceptions import GeometryTypeException, NonMatchingCrsException
 from eis_toolkit.raster_processing.clipping import clip_raster
 
 test_dir = Path(__file__).parent.parent
@@ -42,7 +42,7 @@ def test_clip_raster():
 
 def test_clip_raster_wrong_geometry_type():
     """Tests that non-polygon geometry raises the correct exception."""
-    with pytest.raises(NotApplicableGeometryTypeException):
+    with pytest.raises(GeometryTypeException):
         point = geopandas.read_file(point_path)
         with rasterio.open(raster_path) as raster:
             clip_raster(

@@ -22,10 +22,6 @@ class InconsistentDataTypesException(Exception):
     """Exception error class for inconsistent data types."""
 
 
-class InvalidArgumentTypeException(Exception):
-    """Exception error for invalid argument type."""
-
-
 class InvalidColumnException(Exception):
     """Exception error for invalid column."""
 
@@ -42,16 +38,8 @@ class InvalidParameterValueException(Exception):
     """Exception error class for invalid parameter values."""
 
 
-class InvalidPixelSizeException(Exception):
-    """Exception error class for invalid pixel size."""
-
-
 class InvalidRasterBandException(Exception):
     """Expection error class for invalid raster band selection."""
-
-
-class InvalidWindowSizeException(Exception):
-    """Exception error class for invalid window size values."""
 
 
 class InvalidWktFormatException(Exception):
@@ -66,12 +54,16 @@ class MatchingRasterGridException(Exception):
     """Exception error class for raster grid matches."""
 
 
-class NotApplicableGeometryTypeException(Exception):
+class GeometryTypeException(Exception):
     """Exception error class for not suitable geometry types."""
 
 
 class NonMatchingCrsException(Exception):
     """Exception error class for CRS mismatches."""
+
+
+class NonMatchingRasterMetadataException(Exception):
+    """Exception error class for raster metadata mismatches."""
 
 
 class NonMatchingParameterLengthsException(Exception):
@@ -84,10 +76,6 @@ class NonSquarePixelSizeException(Exception):
 
 class NumericValueSignException(Exception):
     """Exception error class for numeric value sign exception."""
-
-
-class InvalidModelException(Exception):
-    """Exception error class when model is invalid or null."""
 
 
 class InvalidDatasetException(Exception):

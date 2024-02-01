@@ -28,9 +28,11 @@ def evaluate_feature_importance(
         feature_names: Names of the feature columns.
         number_of_repetition: Number of iteration used when calculate feature importance (default 50).
         random_state: random state for repeatability of results (Default 0).
+
     Return:
         A dataframe composed by features name and Importance value
         The resulted object with importance mean, importance std, and overall importance
+
     Raises:
         InvalidDatasetException: When the dataset is None.
     """
