@@ -40,7 +40,7 @@ def test_check_label_and_data_dimension():
 
 def test_instance_model():
     """Here I check if I can have an instance of the model."""
-    classifier = MLPClassifier(solver="adam", alpha=0.001, hidden_layer_sizes=(16, 8), random_state=0)
+    classifier = MLPClassifier(solver="adam", alpha=0.001, hidden_layer_sizes=(16, 8), random_state=0, max_iter=500)
     classifier.fit(X, labels.ravel())
     feature_importance, dict_of_results = evaluate_feature_importance(
         classifier=classifier, x_test=X, y_test=labels, feature_names=feature_names
@@ -49,7 +49,7 @@ def test_instance_model():
 
 def test_model_results():
     """Test the model and check if there is results as output."""
-    classifier = MLPClassifier(solver="adam", alpha=0.001, hidden_layer_sizes=(16, 8), random_state=0)
+    classifier = MLPClassifier(solver="adam", alpha=0.001, hidden_layer_sizes=(16, 8), random_state=0, max_iter=500)
     classifier.fit(X, labels.ravel())
     feature_importance, dict_of_results = evaluate_feature_importance(
         classifier=classifier, x_test=X, y_test=labels, feature_names=feature_names
