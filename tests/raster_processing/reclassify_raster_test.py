@@ -23,17 +23,18 @@ def test_raster_with_defined_intervals():
 
 
 def test_raster_with_defined_intervals_main():
+    """Test raster with defined intervals parameters."""
     with rasterio.open(SMALL_RASTER_PATH) as raster:
         result = reclassify_raster.raster_with_defined_intervals(
-                raster=raster,
-                interval_size=3,
-                bands=[1],
-                )
+            raster=raster,
+            interval_size=3,
+            bands=[1],
+        )
     assert isinstance(result, Sequence)
     assert isinstance(result[0], np.ndarray)
 
 
-def raster_with_equal_intervals():
+def test_raster_with_equal_intervals():
     """Test raster with equal intervals."""
     number_of_intervals = 10
 
@@ -48,12 +49,13 @@ def raster_with_equal_intervals():
 
 
 def test_raster_with_equal_intervals_main():
+    """Test raster with equal intervals parameters."""
     with rasterio.open(SMALL_RASTER_PATH) as raster:
         result = reclassify_raster.raster_with_defined_intervals(
-                raster=raster,
-                interval_size=10,
-                bands=[1],
-                )
+            raster=raster,
+            interval_size=10,
+            bands=[1],
+        )
     assert isinstance(result, Sequence)
     assert isinstance(result[0], np.ndarray)
 
@@ -74,13 +76,14 @@ def test_raster_with_geometrical_intervals():
 
 
 def test_raster_with_geometrical_intervals_main():
+    """Test raster with geometrical intervals parameters."""
     with rasterio.open(SMALL_RASTER_PATH) as raster:
         result = reclassify_raster.raster_with_geometrical_intervals(
-                raster=raster,
-                number_of_classes=10,
-                nan_value = -1.0e32,
-                bands=[1],
-                )
+            raster=raster,
+            number_of_classes=10,
+            nan_value=-1.0e32,
+            bands=[1],
+        )
     assert isinstance(result, Sequence)
     assert isinstance(result[0], np.ndarray)
 
@@ -100,13 +103,14 @@ def test_raster_with_manual_breaks():
 
 
 def test_raster_with_manual_breaks_main():
+    """Test raster with manual break intervals parameters."""
     with rasterio.open(SMALL_RASTER_PATH) as raster:
         print(raster.statistics(1))
         result = reclassify_raster.raster_with_manual_breaks(
-                raster=raster,
-                breaks=[2, 5, 9],
-                bands=[1],
-                )
+            raster=raster,
+            breaks=[2, 5, 9],
+            bands=[1],
+        )
     assert isinstance(result, Sequence)
     assert isinstance(result[0], np.ndarray)
 
@@ -126,12 +130,13 @@ def test_raster_with_natural_breaks():
 
 
 def test_raster_with_natural_breaks_main():
+    """Test raster with natural break intervals parameters."""
     with rasterio.open(SMALL_RASTER_PATH) as raster:
         result = reclassify_raster.raster_with_natural_breaks(
-                raster=raster,
-                number_of_classes=10,
-                bands=[1],
-                )
+            raster=raster,
+            number_of_classes=10,
+            bands=[1],
+        )
     assert isinstance(result, Sequence)
     assert isinstance(result[0], np.ndarray)
 
@@ -150,13 +155,14 @@ def test_raster_with_standard_deviation():
     np.testing.assert_allclose(result[0], expected_output)
 
 
-def test_raster_with_natural_breaks_main():
+def test_raster_with_standard_deviation_main():
+    """Test raster with standard_deviation intervals parameters."""
     with rasterio.open(SMALL_RASTER_PATH) as raster:
         result = reclassify_raster.raster_with_standard_deviation(
-                raster=raster,
-                number_of_intervals=75,
-                bands=[1],
-                )
+            raster=raster,
+            number_of_intervals=75,
+            bands=[1],
+        )
     assert isinstance(result, Sequence)
     assert isinstance(result[0], np.ndarray)
 
@@ -176,11 +182,12 @@ def test_raster_with_quantiles():
 
 
 def test_raster_with_quantiles_main():
+    """Test raster with quantiles parameters."""
     with rasterio.open(SMALL_RASTER_PATH) as raster:
         result = reclassify_raster.raster_with_quantiles(
-                raster=raster,
-                number_of_quantiles=4,
-                bands=[1],
-                )
+            raster=raster,
+            number_of_quantiles=4,
+            bands=[1],
+        )
     assert isinstance(result, Sequence)
     assert isinstance(result[0], np.ndarray)
