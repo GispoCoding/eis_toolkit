@@ -1,9 +1,8 @@
-from typing import Sequence
-
 import numpy as np
 import pandas as pd
 import sklearn.neural_network
 from beartype import beartype
+from beartype.typing import Sequence
 from sklearn.inspection import permutation_importance
 
 from eis_toolkit.exceptions import InvalidDatasetException

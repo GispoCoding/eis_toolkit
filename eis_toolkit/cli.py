@@ -8,13 +8,13 @@ import json
 import os
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio
 import typer
+from beartype.typing import List, Optional, Tuple
 from rasterio import warp
 from typing_extensions import Annotated
 
