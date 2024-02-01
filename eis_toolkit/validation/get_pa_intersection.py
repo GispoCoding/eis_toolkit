@@ -1,9 +1,7 @@
-from typing import Union
-
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Tuple
+from beartype.typing import Tuple, Union
 from shapely.geometry import LineString
 from shapely.geometry.point import Point
 
