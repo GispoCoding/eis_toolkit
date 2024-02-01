@@ -7,7 +7,7 @@ from beartype.typing import Sequence, Tuple, Union
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
-def _bands_non_negative(band: list):
+def _bands_non_negative(band: Sequence):
     if any(n < 0 for n in band):
         raise InvalidParameterValueException("The list bands contains negative values.")
 
