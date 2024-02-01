@@ -54,3 +54,16 @@ def test_empty_geodataframe():
     # Use pytest.raises to check the expected exception
     with pytest.raises(exceptions.EmptyDataFrameException):
         local_morans_i(empty_gdf, column="value", weight_type="queen", k=2, permutations=999)
+
+
+#Test no column raises error, test k under 1 raises error, test permutations under 100 causes an error
+def test_empty_geodataframe():
+    """Test Local Moran's I raises InvalidParameterValueException for missing column."""
+
+    gdf = gpd.GeoDataFrame()
+    test_col = "test_col"
+    test_col_values = [1,2,3]
+
+    gdf[test_col] = test_col_values
+    with pytest.raises(exceptions.InvalidParameterValueException):
+        local_morans_i(gdf, column="value", weight_type="queen", k=2, permutations=999)
