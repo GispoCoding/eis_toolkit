@@ -831,7 +831,7 @@ def classify_aspect_cli(
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
+        dst.write(out_image, 1)
     json_str = json.dumps(class_mapping)
     typer.echo("Progress: 100%")
     typer.echo(f"Results: {json_str}")
