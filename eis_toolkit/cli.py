@@ -53,13 +53,6 @@ class SlopeGradientUnit(str, Enum):
     rise = "rise"
 
 
-class FirstOrderParameter(str, Enum):
-    """Parameter choice for first order surface derivatives."""
-
-    G = "G"
-    A = "A"
-
-
 class FirstOrderMethod(str, Enum):
     """Method for first order surface derivatives."""
 
@@ -69,9 +62,11 @@ class FirstOrderMethod(str, Enum):
     Zevenbergen = "Zevenbergen"
 
 
-class SecondOrderParameter(str, Enum):
-    """Parameter choice for second order surface derivatives."""
+class SurfaceParameter(str, Enum):
+    """Parameter choice for surface derivatives."""
 
+    G = "G"
+    A = "A"
     planc = "planc"
     profc = "profc"
     profc_min = "profc_min"
@@ -844,78 +839,71 @@ def classify_aspect_cli(
     typer.echo(f"Classifying aspect completed, writing raster to {output_raster}")
 
 
-# SURFACE DERIVATIVES - FIRST ORDER
+# SURFACE DERIVATIVES
 @app.command()
-def first_order_cli(
+def surface_derivatives_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    parameters: Annotated[List[FirstOrderParameter], typer.Option()],
+    parameters: Annotated[List[SurfaceParameter], typer.Option()],
     scaling_factor: Optional[float] = 1.0,
     slope_tolerance: Optional[float] = 0.0,
     slope_gradient_unit: SlopeGradientUnit = SlopeGradientUnit.radians,
     slope_direction_unit: AngleUnits = AngleUnits.radians,
-    method: FirstOrderMethod = FirstOrderMethod.Horn,
+    first_order_method: FirstOrderMethod = FirstOrderMethod.Horn,
+    second_order_method: SecondOrderMethod = SecondOrderMethod.Young,
 ):
-    """Calculate the first order surface attributes."""
-    from eis_toolkit.raster_processing.derivatives.parameters import first_order
+    """Calculate the first and/or second order surface attributes."""
+    from eis_toolkit.raster_processing.derivatives.parameters import first_order, second_order_basic_set
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
-        results = first_order(
-            raster=raster,
-            parameters=parameters,
-            scaling_factor=scaling_factor,
-            slope_tolerance=slope_tolerance,
-            slope_gradient_unit=slope_gradient_unit,
-            slope_direction_unit=slope_direction_unit,
-            method=method,
-        )
-    typer.echo("Progress: 75%")
-
-    for parameter, (out_image, out_meta) in results.items():
-        out_raster_name = output_raster[:-3] + parameter + output_raster[-3:]
-        with rasterio.open(out_raster_name, "w", **out_meta) as dst:
-            dst.write(out_image)
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Calculating first order surface attributes completed, writing raster to {output_raster}")
-
-
-# SURFACE DERIVATIVES - SECOND ORDER BASIC SET
-@app.command()
-def second_order_basic_set_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    parameters: Annotated[List[SecondOrderParameter], typer.Option()],
-    scaling_factor: Optional[float] = 1.0,
-    slope_tolerance: Optional[float] = 0.0,
-    method: SecondOrderMethod = SecondOrderMethod.Young,
-):
-    """Calculate the second order surface attributes."""
-    from eis_toolkit.raster_processing.derivatives.parameters import second_order_basic_set
-
-    typer.echo("Progress: 10%")
+    first_order_parameters = []
+    second_order_parameters = []
+    for parameter in parameters:
+        if parameter in ("G", "A"):
+            first_order_parameters.append(parameter)
+        else:
+            second_order_parameters.append(parameter)
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        results = second_order_basic_set(
-            raster=raster,
-            parameters=parameters,
-            scaling_factor=scaling_factor,
-            slope_tolerance=slope_tolerance,
-            method=method,
-        )
-    typer.echo("Progress: 75%")
+        if first_order_parameters:
+            first_order_results = first_order(
+                raster=raster,
+                parameters=first_order_parameters,
+                scaling_factor=scaling_factor,
+                slope_tolerance=slope_tolerance,
+                slope_gradient_unit=slope_gradient_unit,
+                slope_direction_unit=slope_direction_unit,
+                method=first_order_method,
+            )
 
-    for parameter, (out_image, out_meta) in results.items():
-        out_raster_name = output_raster[:-3] + parameter + output_raster[-3:]
-        with rasterio.open(out_raster_name, "w", **out_meta) as dst:
-            dst.write(out_image)
+        typer.echo("Progress: 50%")
+        if second_order_parameters:
+            second_order_results = second_order_basic_set(
+                raster=raster,
+                parameters=second_order_parameters,
+                scaling_factor=scaling_factor,
+                slope_tolerance=slope_tolerance,
+                method=second_order_method,
+            )
+    typer.echo("Progres: 75%")
+
+    if first_order_parameters:
+        for parameter, (out_image, out_meta) in first_order_results.items():
+            out_raster_name = str(output_raster)[:-4] + "_" + parameter + str(output_raster)[-4:]
+            with rasterio.open(out_raster_name, "w", **out_meta) as dest:
+                dest.write(out_image, 1)
+        typer.echo("Progress: 90%")
+
+    if second_order_parameters:
+        for parameter, (out_image, out_meta) in second_order_results.items():
+            out_raster_name = str(output_raster)[:-4] + "_" + parameter + str(output_raster)[-4:]
+            with rasterio.open(out_raster_name, "w", **out_meta) as dest:
+                dest.write(out_image, 1)
     typer.echo("Progress: 100%")
 
-    typer.echo(f"Calculating second order surface attributes completed, writing raster to {output_raster}")
+    typer.echo(f"Calculating first and/or second order surface attributes completed, writing raster to {output_raster}")
 
 
 # --- VECTOR PROCESSING ---
