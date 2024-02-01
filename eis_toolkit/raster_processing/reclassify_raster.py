@@ -4,8 +4,6 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Sequence, Tuple, Union
 
-from eis_toolkit.exceptions import InvalidParameterValueException
-
 
 def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     band: np.ndarray,
