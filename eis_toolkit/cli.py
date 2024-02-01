@@ -5,11 +5,13 @@
 # --- ! ---
 
 import json
+import os
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import rasterio
 import typer
@@ -140,6 +142,13 @@ class GradientBoostingRegressorLosses(str, Enum):
     absolute_error = "absolute_error"
     huber = "huber"
     quantile = "quantile"
+
+
+class NodataHandling(str, Enum):
+    """Nodata handling choices."""
+
+    replace = "replace"
+    remove = "remove"
 
 
 RESAMPLING_MAPPING = {
@@ -305,25 +314,90 @@ def parallel_coordinates_cli(
     typer.echo("Parallel coordinates plot completed" + echo_str_end)
 
 
-# PCA
+# PCA FOR RASTER DATA
 @app.command()
-def compute_pca_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+def compute_pca_raster_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     number_of_components: int = typer.Option(),
+    # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
+    nodata_handling: NodataHandling = NodataHandling.remove,
+    # NOTE: Omitted nodata parameter. Should use raster nodata.
 ):
-    """Compute principal components for the input data."""
+    """Compute defined number of principal components for raster data."""
+    from eis_toolkit.exploratory_analyses.pca import compute_pca
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
+
+    typer.echo("Progress: 10%")
+
+    stacked_array, profiles = read_and_stack_rasters(input_rasters, nodata_handling="convert_to_nan")
+    typer.echo("Progress: 25%")
+
+    pca_array, variance_ratios = compute_pca(
+        data=stacked_array, number_of_components=number_of_components, nodata_handling=nodata_handling
+    )
+
+    # Fill np.nan with nodata before writing data to raster
+    pca_array[pca_array == np.nan] = -9999
+    out_profile = profiles[0]
+    out_profile["nodata"] = -9999
+
+    # Update nr of bands
+    out_profile["count"] = number_of_components
+
+    # Create dictionary from the variance ratios array
+    variances_ratios_dict = {}
+    for i, variance_ratio in enumerate(variance_ratios):
+        name = "PC " + str(i) + " explained variance"
+        variances_ratios_dict[name] = variance_ratio
+    json_str = json.dumps(variances_ratios_dict)
+
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(pca_array)
+
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo(f"PCA computation (raster) completed, output raster saved to {output_raster}.")
+
+
+# PCA FOR VECTOR DATA
+@app.command()
+def compute_pca_vector_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_components: int = typer.Option(),
+    columns: Annotated[List[str], typer.Option()] = None,
+    # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
+    nodata_handling: NodataHandling = NodataHandling.remove,
+    nodata: float = None,
+):
+    """Compute defined number of principal components for vector data."""
     from eis_toolkit.exploratory_analyses.pca import compute_pca
 
     typer.echo("Progress: 10%")
 
-    geodataframe = gpd.read_file(input_vector)  # TODO: Check if gdf to df handling in tool itself
-    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
+    gdf = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    pca_df, variance_ratios = compute_pca(data=dataframe, number_of_components=number_of_components)
+    pca_gdf, variance_ratios = compute_pca(
+        data=gdf,
+        number_of_components=number_of_components,
+        columns=columns,
+        nodata_handling=nodata_handling,
+        nodata=nodata,
+    )
 
-    pca_df.to_csv(output_file)
+    # Create dictionary from the variance ratios array
+    variances_ratios_dict = {}
+    for i, variance_ratio in enumerate(variance_ratios):
+        name = "PC " + str(i) + " explained variance"
+        variances_ratios_dict[name] = variance_ratio
+    json_str = json.dumps(variances_ratios_dict)
+
+    pca_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo(f"PCA computation (vector) completed, output vector saved to {output_vector}.")
 
 
 # DESCRIPTIVE STATISTICS (RASTER)
@@ -547,6 +621,32 @@ def reproject_raster_cli(
     typer.echo(f"Reprojecting completed, writing raster to {output_raster}.")
 
 
+# RESAMPLE RASTER
+@app.command()
+def resample_raster_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    resolution: float = typer.Option(),
+    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.bilinear),
+):
+    """Resamples raster according to given resolution."""
+    from eis_toolkit.raster_processing.resampling import resample
+
+    typer.echo("Progress: 10%")
+
+    method = RESAMPLING_MAPPING[resampling_method]
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = resample(raster=raster, resolution=resolution, resampling_method=method)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image)
+    typer.echo("Progress 100%")
+
+    typer.echo(f"Resampling completed, writing raster to {output_raster}.")
+
+
 # SNAP RASTER
 @app.command()
 def snap_raster_cli(
@@ -574,19 +674,21 @@ def snap_raster_cli(
 # UNIFY RASTERS
 @app.command()
 def unify_rasters_cli(
+    rasters_to_unify: INPUT_FILES_ARGUMENT,
     base_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_directory: Annotated[Path, OUTPUT_DIR_OPTION],  # Directory path?
-    rasters_to_unify: Annotated[List[Path], INPUT_FILE_OPTION],
-    resampling_method: ResamplingMethods = typer.Option(help="resample help", default=ResamplingMethods.nearest),
+    output_directory: Annotated[Path, OUTPUT_DIR_OPTION],
+    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest),
     same_extent: bool = False,
 ):
-    """Unify given rasters relative to base raster. WIP."""
+    """Unify rasters to match the base raster."""
     from eis_toolkit.raster_processing.unifying import unify_raster_grids
 
     typer.echo("Progress: 10%")
 
     with rasterio.open(base_raster) as raster:
-        to_unify = [rasterio.open(rstr) for rstr in rasters_to_unify]  # Open all rasters to be unfiied
+        to_unify = [rasterio.open(rstr) for rstr in rasters_to_unify]  # Open all rasters to be unified
+        typer.echo("Progress: 25%")
+
         unified = unify_raster_grids(
             base_raster=raster,
             rasters_to_unify=to_unify,
@@ -596,13 +698,43 @@ def unify_rasters_cli(
         [rstr.close() for rstr in to_unify]  # Close all rasters
     typer.echo("Progress: 75%")
 
+    out_rasters_dict = {}
     for i, (out_image, out_meta) in enumerate(unified[1:]):  # Skip writing base raster
-        output_raster = output_directory.joinpath(f"unified_raster {i+1}.tif")
-        with rasterio.open(output_raster, "w", **out_meta) as dst:
+        in_raster_name = os.path.splitext(os.path.split(rasters_to_unify[i - 1])[1])[0]
+        output_raster_name = f"{in_raster_name}_unified"
+        output_raster_path = output_directory.joinpath(output_raster_name + ".tif")
+        with rasterio.open(output_raster_path, "w", **out_meta) as dst:
             dst.write(out_image)
+        out_rasters_dict[output_raster_name] = str(output_raster_path)
     typer.echo("Progress: 100%")
 
-    typer.echo(f"Unifying completed, writing rasters to {output_directory}.")
+    json_str = json.dumps(out_rasters_dict)
+    typer.echo(f"Output rasters: {json_str}")
+    typer.echo(f"Unifying completed, rasters saved to {output_directory}.")
+
+
+# GET UNIQUE COMBINATIONS
+@app.command()
+def unique_combinations_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+):
+    """Get combinations of raster values between rasters."""
+    from eis_toolkit.raster_processing.unique_combinations import unique_combinations
+
+    typer.echo("Progress: 10%")
+    rasters = [rasterio.open(rstr) for rstr in input_rasters]
+
+    typer.echo("Progress: 25%")
+    out_image, out_meta = unique_combinations(rasters)
+    [rstr.close() for rstr in rasters]
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image, 1)
+
+    typer.echo(f"Writing results to {output_raster}.")
+    typer.echo("Getting unique combinations completed.")
 
 
 # EXTRACT WINDOW

@@ -7,7 +7,7 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Dict, List, Literal, Optional, Sequence, Tuple
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import ClassificationFailedException, InvalidColumnException, InvalidParameterValueException
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
 CLASS_COLUMN = "Class"
@@ -136,7 +136,7 @@ def _generalized_classes_categorical(df: pd.DataFrame, studentized_contrast_thre
             reclassified = True
 
     if not reclassified:
-        raise exceptions.ClassificationFailedException(
+        raise ClassificationFailedException(
             "Failed to create generalized classes with given studentized contrast treshold ({})".format(
                 studentized_contrast_threshold
             )
@@ -187,7 +187,7 @@ def _generalized_classes_cumulative(df: pd.DataFrame, studentized_contrast_thres
         gen_df.loc[index, STUDENTIZED_CONTRAST_COLUMN] < studentized_contrast_threshold
         or index == len(gen_df.index) - 1
     ):
-        raise exceptions.ClassificationFailedException(
+        raise ClassificationFailedException(
             "Failed to create generalized classes with given studentized contrast treshold ({} < {})".format(
                 gen_df.loc[index, STUDENTIZED_CONTRAST_COLUMN], studentized_contrast_threshold
             )
@@ -289,6 +289,12 @@ def weights_of_evidence_calculate_weights(
         Raster metadata.
         Number of deposit pixels.
         Number of all evidence pixels.
+
+    Raises:
+        ClassificationFailedException: Unable to create generalized classes with the given
+            studentized_contrast_threshold.
+        InvalidColumnException: Arrays to generate contains invalid column name(s).
+        InvalidParameterValueException: Input weights_type is not one of the accepted values.
     """
 
     if arrays_to_generate is None:
@@ -299,9 +305,7 @@ def weights_of_evidence_calculate_weights(
     else:
         for col_name in arrays_to_generate:
             if col_name not in VALID_DF_COLUMNS:
-                raise exceptions.InvalidColumnException(
-                    f"Arrays to generate contains invalid metric / column name: {col_name}."
-                )
+                raise InvalidColumnException(f"Arrays to generate contains invalid metric / column name: {col_name}.")
         metrics_to_arrays = arrays_to_generate.copy()
 
     # 1. Preprocess data
@@ -326,7 +330,7 @@ def weights_of_evidence_calculate_weights(
     elif weights_type == "descending":
         wofe_weights = _cumulative_weights(masked_deposit_array, masked_evidence_array, ascending=False)
     else:
-        raise exceptions.InvalidParameterValueException(
+        raise InvalidParameterValueException(
             "Expected weights_type to be one of unique, categorical, ascending or descending."
         )
 

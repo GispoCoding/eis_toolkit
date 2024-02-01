@@ -138,6 +138,20 @@ def check_raster_bands(raster: rasterio.io.DatasetReader, bands: Sequence[int]) 
 
 
 @beartype
+def check_single_band(raster: rasterio.io.DatasetReader):
+    """
+    Check if the raster has a single band.
+
+    Args:
+        raster: The raster dataset.
+
+    Returns:
+        True if the raster has a single band, False otherwise.
+    """
+    return raster.count == 1
+
+
+@beartype
 def check_quadratic_pixels(raster: rasterio.io.DatasetReader) -> bool:
     """
     Check if raster pixels are quadratic.

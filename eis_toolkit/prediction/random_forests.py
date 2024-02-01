@@ -4,7 +4,7 @@ from beartype import beartype
 from beartype.typing import Literal, Optional, Sequence, Tuple, Union
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.prediction.machine_learning_general import _train_and_validate_sklearn_model
 
 
@@ -57,13 +57,14 @@ def random_forest_classifier_train(
 
     Raises:
         InvalidParameterValueException: If some of the numeric parameters are given invalid input values.
+        NonMatchingParameterLengthsException: X and y have mismatching sizes.
     """
     if not n_estimators >= 1:
-        raise exceptions.InvalidParameterValueException("N-estimators must be at least 1.")
+        raise InvalidParameterValueException("N-estimators must be at least 1.")
     if max_depth is not None and not max_depth >= 1:
-        raise exceptions.InvalidParameterValueException("Max depth must be at least 1 or None.")
+        raise InvalidParameterValueException("Max depth must be at least 1 or None.")
     if verbose < 0:
-        raise exceptions.InvalidParameterValueException("Verbose must be a non-negative number.")
+        raise InvalidParameterValueException("Verbose must be a non-negative number.")
 
     model = RandomForestClassifier(
         n_estimators=n_estimators, max_depth=max_depth, random_state=random_state, verbose=verbose, **kwargs
@@ -132,13 +133,14 @@ def random_forest_regressor_train(
 
     Raises:
         InvalidParameterValueException: If some of the numeric parameters are given invalid input values.
+        NonMatchingParameterLengthsException: X and y have mismatching sizes.
     """
     if not n_estimators >= 1:
-        raise exceptions.InvalidParameterValueException("N-estimators must be at least 1.")
+        raise InvalidParameterValueException("N-estimators must be at least 1.")
     if max_depth is not None and not max_depth >= 1:
-        raise exceptions.InvalidParameterValueException("Max depth must be at least 1 or None.")
+        raise InvalidParameterValueException("Max depth must be at least 1 or None.")
     if verbose < 0:
-        raise exceptions.InvalidParameterValueException("Verbose must be a non-negative number.")
+        raise InvalidParameterValueException("Verbose must be a non-negative number.")
 
     model = RandomForestRegressor(
         n_estimators=n_estimators, max_depth=max_depth, random_state=random_state, verbose=verbose, **kwargs

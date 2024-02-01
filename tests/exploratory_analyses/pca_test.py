@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from shapely.geometry import Point
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import EmptyDataException, InvalidColumnException, InvalidParameterValueException
 from eis_toolkit.exploratory_analyses.pca import compute_pca
 
 parent_dir = Path(__file__).parent
@@ -122,19 +122,19 @@ def test_pca_with_nodata_removal():
 def test_pca_empty_data():
     """Test that empty dataframe raises the correct exception."""
     empty_df = pd.DataFrame()
-    with pytest.raises(exceptions.EmptyDataException):
+    with pytest.raises(EmptyDataException):
         compute_pca(empty_df, 2)
 
 
 def test_pca_too_low_number_of_components():
     """Test that invalid (too low) number of PCA components raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         compute_pca(DATA, 0)
 
 
 def test_pca_too_high_number_of_components():
     """Test that invalid (too high) number of PCA components raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         compute_pca(DATA, 4)
 
 
@@ -142,5 +142,5 @@ def test_pca_invalid_columns():
     """Test that invalid columns selection raises the correct exception."""
     data_df = pd.DataFrame(data=DATA, columns=["A", "B"])
 
-    with pytest.raises(exceptions.InvalidColumnException):
+    with pytest.raises(InvalidColumnException):
         compute_pca(data_df, 2, columns=["A", "C"])

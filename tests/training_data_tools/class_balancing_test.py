@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from sklearn.datasets import make_classification
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import NonMatchingParameterLengthsException
 from eis_toolkit.training_data_tools.class_balancing import balance_SMOTETomek
 
 # CREATE TEST DATA
@@ -32,7 +32,7 @@ def test_SMOTETomek():
 
 def test_invalid_label_length():
     """Test that different length for feature matrix and labels raises the correct exception."""
-    with pytest.raises(exceptions.NonMatchingParameterLengthsException):
+    with pytest.raises(NonMatchingParameterLengthsException):
         balance_SMOTETomek(X, np.append(y, "C"))
 
 

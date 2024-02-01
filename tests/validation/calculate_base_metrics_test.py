@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 import rasterio
 
-from eis_toolkit.exceptions import NonMatchingCrsException, NotApplicableGeometryTypeException
+from eis_toolkit.exceptions import GeometryTypeException, NonMatchingCrsException
 from eis_toolkit.validation.calculate_base_metrics import calculate_base_metrics
 
 test_dir = Path(__file__).parent.parent
@@ -43,7 +43,7 @@ def test_calculate_base_metrics():
 
 def test_calculate_base_metrics_wrong_geometry_type():
     """Tests that non-polygon geometry raises the correct exception."""
-    with pytest.raises(NotApplicableGeometryTypeException):
+    with pytest.raises(GeometryTypeException):
         polygon = gpd.read_file(polygon_path)
         with rasterio.open(raster_path) as raster:
             calculate_base_metrics(raster=raster, deposits=polygon, negatives=polygon)

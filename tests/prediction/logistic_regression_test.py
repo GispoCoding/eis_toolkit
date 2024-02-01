@@ -4,7 +4,7 @@ from beartype.roar import BeartypeCallHintParamViolation
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
 
-from eis_toolkit import exceptions
+from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.prediction.logistic_regression import logistic_regression_train
 
 X_IRIS, Y_IRIS = load_iris(return_X_y=True)
@@ -35,5 +35,5 @@ def test_invalid_penalty():
 
 def test_invalid_max_iter():
     """Test that invalid value for the maximum number of iterations raises the correct exception."""
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(InvalidParameterValueException):
         logistic_regression_train(X_IRIS, Y_IRIS, max_iter=0)
