@@ -1,10 +1,9 @@
 import functools
 from numbers import Number
-from typing import Any, Union
 
 import numpy as np
 from beartype import beartype
-from beartype.typing import Callable, Dict, Sequence
+from beartype.typing import Any, Callable, Dict, Sequence, Union
 
 from eis_toolkit.exceptions import InvalidRasterBandException
 from eis_toolkit.utilities.miscellaneous import replace_values

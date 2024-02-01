@@ -1,11 +1,10 @@
 import os
-from typing import Optional
 
 import geopandas as gpd
 import pandas as pd
 import rasterio
 from beartype import beartype
-from beartype.typing import Sequence
+from beartype.typing import Optional, Sequence
 
 from eis_toolkit.exceptions import NonMatchingParameterLengthsException
 

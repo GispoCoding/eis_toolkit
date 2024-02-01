@@ -1,9 +1,8 @@
-from typing import Optional
-
 import matplotlib
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from beartype.typing import Optional
 
 from eis_toolkit.exceptions import EmptyDataFrameException
 

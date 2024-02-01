@@ -1,8 +1,8 @@
 from numbers import Number
-from typing import Literal, Optional, Sequence, Tuple
 
 import numpy as np
 from beartype import beartype
+from beartype.typing import Literal, Optional, Sequence, Tuple
 from tensorflow import keras
 from tensorflow.keras.optimizers.legacy import SGD, Adagrad, Adam, RMSprop
 

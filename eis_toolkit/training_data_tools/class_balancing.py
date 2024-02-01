@@ -1,8 +1,7 @@
-from typing import Optional, Union
-
 import numpy as np
 import pandas as pd
 from beartype import beartype
+from beartype.typing import Optional, Union
 from imblearn.combine import SMOTETomek
 
 from eis_toolkit.exceptions import NonMatchingParameterLengthsException

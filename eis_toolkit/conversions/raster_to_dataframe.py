@@ -1,10 +1,8 @@
-from typing import Optional
-
 import numpy as np
 import pandas as pd
 import rasterio
 from beartype import beartype
-from beartype.typing import Sequence
+from beartype.typing import Optional, Sequence
 
 
 def _raster_to_dataframe(

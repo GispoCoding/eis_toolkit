@@ -1,8 +1,7 @@
-from typing import Optional
-
 import geopandas as gdp
 import numpy as np
 from beartype import beartype
+from beartype.typing import Optional
 from sklearn.cluster import KMeans
 
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
