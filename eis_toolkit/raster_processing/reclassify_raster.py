@@ -17,13 +17,9 @@ def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     breaks: Sequence[int],
 ) -> np.ndarray:
 
-    out_image = []
-
     data = np.digitize(band, breaks)
 
-    out_image.append(data)
-
-    return out_image
+    return data
 
 
 @beartype
@@ -57,7 +53,7 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
 
     for band in raster.read(bands_to_read):
 
-        manual_breaks_band = _raster_with_manual_breaks(breaks, band)
+        manual_breaks_band = _raster_with_manual_breaks(band, breaks)
 
         out_image.append(manual_breaks_band)
 
@@ -69,15 +65,11 @@ def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
     interval_size: int,
 ) -> np.ndarray:
 
-    out_image = []
-
     _, edges = np.histogram(band, bins=interval_size)
 
     data = np.digitize(band, edges)
 
-    out_image.append(data)
-
-    return out_image
+    return data
 
 
 @beartype
@@ -123,14 +115,13 @@ def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     number_of_intervals: int,
 ) -> np.ndarray:
 
-    out_image = []
-
     percentiles = np.linspace(0, 100, number_of_intervals)
-    intervals = np.percentile(band, percentiles)
-    data = np.digitize(band, intervals)
-    out_image.append(data)
 
-    return out_image
+    intervals = np.percentile(band, percentiles)
+
+    data = np.digitize(band, intervals)
+
+    return data
 
 
 @beartype
@@ -176,14 +167,10 @@ def _raster_with_quantiles(  # type: ignore[no-any-unimported]
     number_of_quantiles: int,
 ) -> np.ndarray:
 
-    out_image = []
-
     intervals = [np.percentile(band, i * 100 / number_of_quantiles) for i in range(number_of_quantiles)]
     data = np.digitize(band, intervals)
 
-    out_image.append(data)
-
-    return out_image
+    return data
 
 
 @beartype
@@ -229,14 +216,10 @@ def _raster_with_natural_breaks(  # type: ignore[no-any-unimported]
     number_of_classes: int,
 ) -> np.ndarray:
 
-    out_image = []
-
     breaks = mc.JenksCaspall(band, number_of_classes)
     data = np.digitize(band, np.sort(breaks.bins))
 
-    out_image.append(data)
-
-    return out_image
+    return data
 
 
 @beartype
@@ -281,7 +264,6 @@ def _raster_with_geometrical_intervals(
     band: np.ndarray, number_of_classes: int, nan_value: Union[int, float]
 ) -> np.ndarray:
 
-    out_image = []
     is_integer = np.issubdtype(band.dtype, int)
     is_float = np.issubdtype(band.dtype, float)
 
@@ -340,9 +322,7 @@ def _raster_with_geometrical_intervals(
     values_out[np.where(((median_value - width[k + 1]) > band) & nan_condition)] = -k - 1
     values_out[np.where(median_value == band)] = 0
 
-    out_image.append(values_out)
-
-    return out_image
+    return values_out
 
 
 @beartype
@@ -387,8 +367,6 @@ def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
     number_of_intervals: int,
 ) -> np.ndarray:
 
-    out_image = []
-
     band_statistics = []
 
     stddev = np.nanstd(band)
@@ -408,9 +386,7 @@ def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
     interval = ((band - (mean - stddev)) / interval_size).astype(int)
     classified[in_between] = interval[in_between] - number_of_intervals // 2
 
-    out_image.append(classified)
-
-    return out_image
+    return classified
 
 
 @beartype

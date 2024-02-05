@@ -1,6 +1,6 @@
 import numpy as np
 import rasterio
-from beartype.typing import Sequence
+from beartype.typing import Sequence, Tuple
 
 from eis_toolkit.raster_processing import reclassify_raster
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
@@ -16,10 +16,9 @@ def test_raster_with_defined_intervals():
 
     expected_output = np.array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3], [4, 4, 4, 4]])
 
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
+    assert isinstance(result, np.ndarray)
 
-    np.testing.assert_allclose(result[0], expected_output)
+    np.testing.assert_allclose(result, expected_output)
 
 
 def test_raster_with_defined_intervals_main():
@@ -30,8 +29,10 @@ def test_raster_with_defined_intervals_main():
             interval_size=3,
             bands=[1],
         )
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
+
+    assert isinstance(result, Tuple)
+    assert isinstance(result[0], Sequence)
+    assert isinstance(result[1], dict)
 
 
 def test_raster_with_equal_intervals():
@@ -40,12 +41,11 @@ def test_raster_with_equal_intervals():
 
     result = reclassify_raster._raster_with_equal_intervals(TEST_ARRAY, number_of_intervals)
 
-    expected_output = np.array([[1, 2, 3, 4], [5, 6, 6, 7], [9, 9, 10, 10], [11, 11, 11, 11]])
+    expected_output = np.array([[1, 1, 2, 2], [3, 4, 4, 5], [6, 6, 7, 7], [10, 10, 10, 10]])
 
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
+    assert isinstance(result, np.ndarray)
 
-    np.testing.assert_allclose(result[0], expected_output)
+    np.testing.assert_allclose(result, expected_output)
 
 
 def test_raster_with_equal_intervals_main():
@@ -56,8 +56,9 @@ def test_raster_with_equal_intervals_main():
             interval_size=10,
             bands=[1],
         )
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
+    assert isinstance(result, Tuple)
+    assert isinstance(result[0], Sequence)
+    assert isinstance(result[1], dict)
 
 
 def test_raster_with_geometrical_intervals():
@@ -67,12 +68,11 @@ def test_raster_with_geometrical_intervals():
 
     result = reclassify_raster._raster_with_geometrical_intervals(TEST_ARRAY, number_of_classes, nan_value)
 
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
-
     expected_output = np.array([[-9, -9, -9, -9], [-9, -9, -9, -8], [8, 8, 9, 9], [9, 9, 9, 9]])
 
-    np.testing.assert_allclose(result[0], expected_output)
+    assert isinstance(result, np.ndarray)
+
+    np.testing.assert_allclose(result, expected_output)
 
 
 def test_raster_with_geometrical_intervals_main():
@@ -84,8 +84,9 @@ def test_raster_with_geometrical_intervals_main():
             nan_value=-1.0e32,
             bands=[1],
         )
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
+    assert isinstance(result, Tuple)
+    assert isinstance(result[0], Sequence)
+    assert isinstance(result[1], dict)
 
 
 def test_raster_with_manual_breaks():
@@ -94,12 +95,11 @@ def test_raster_with_manual_breaks():
 
     result = reclassify_raster._raster_with_manual_breaks(TEST_ARRAY, breaks)
 
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
-
     expected_output = np.array([[0, 0, 1, 1], [2, 2, 2, 3], [4, 4, 4, 4], [4, 4, 4, 4]])
 
-    np.testing.assert_allclose(result[0], expected_output)
+    assert isinstance(result, np.ndarray)
+
+    np.testing.assert_allclose(result, expected_output)
 
 
 def test_raster_with_manual_breaks_main():
@@ -111,8 +111,9 @@ def test_raster_with_manual_breaks_main():
             breaks=[2, 5, 9],
             bands=[1],
         )
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
+    assert isinstance(result, Tuple)
+    assert isinstance(result[0], Sequence)
+    assert isinstance(result[1], dict)
 
 
 def test_raster_with_natural_breaks():
@@ -121,12 +122,11 @@ def test_raster_with_natural_breaks():
 
     result = reclassify_raster._raster_with_natural_breaks(TEST_ARRAY, number_of_classes)
 
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
-
     expected_output = np.array([[0, 1, 1, 2], [3, 4, 4, 5], [6, 6, 7, 7], [8, 8, 8, 8]])
 
-    np.testing.assert_allclose(result[0], expected_output)
+    assert isinstance(result, np.ndarray)
+
+    np.testing.assert_allclose(result, expected_output)
 
 
 def test_raster_with_natural_breaks_main():
@@ -137,8 +137,9 @@ def test_raster_with_natural_breaks_main():
             number_of_classes=10,
             bands=[1],
         )
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
+    assert isinstance(result, Tuple)
+    assert isinstance(result[0], Sequence)
+    assert isinstance(result[1], dict)
 
 
 def test_raster_with_standard_deviation():
@@ -147,12 +148,11 @@ def test_raster_with_standard_deviation():
 
     result = reclassify_raster._raster_with_standard_deviation(TEST_ARRAY, number_of_intervals)
 
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
-
     expected_output = np.array([[-75, -75, -75, -36], [-25, -14, -14, -3], [20, 20, 31, 31], [75, 75, 75, 75]])
 
-    np.testing.assert_allclose(result[0], expected_output)
+    assert isinstance(result, np.ndarray)
+
+    np.testing.assert_allclose(result, expected_output)
 
 
 def test_raster_with_standard_deviation_main():
@@ -163,8 +163,9 @@ def test_raster_with_standard_deviation_main():
             number_of_intervals=75,
             bands=[1],
         )
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
+    assert isinstance(result, Tuple)
+    assert isinstance(result[0], Sequence)
+    assert isinstance(result[1], dict)
 
 
 def test_raster_with_quantiles():
@@ -173,12 +174,11 @@ def test_raster_with_quantiles():
 
     result = reclassify_raster._raster_with_quantiles(TEST_ARRAY, number_of_quantiles)
 
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
-
     expected_output = np.array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3], [4, 4, 4, 4]])
 
-    np.testing.assert_allclose(result[0], expected_output)
+    assert isinstance(result, np.ndarray)
+
+    np.testing.assert_allclose(result, expected_output)
 
 
 def test_raster_with_quantiles_main():
@@ -189,5 +189,6 @@ def test_raster_with_quantiles_main():
             number_of_quantiles=4,
             bands=[1],
         )
-    assert isinstance(result, Sequence)
-    assert isinstance(result[0], np.ndarray)
+    assert isinstance(result, Tuple)
+    assert isinstance(result[0], Sequence)
+    assert isinstance(result[1], dict)
