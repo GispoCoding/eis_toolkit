@@ -107,7 +107,6 @@ def test_raster_with_manual_breaks():
 def test_raster_with_manual_breaks_main():
     """Test raster with manual break intervals parameters."""
     with rasterio.open(SMALL_RASTER_PATH) as raster:
-        print(raster.statistics(1))
         result = reclassify_raster.raster_with_manual_breaks(
             raster=raster,
             breaks=[2, 5, 9],
