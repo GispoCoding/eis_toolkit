@@ -66,9 +66,11 @@ def test_raster_with_geometrical_intervals():
     number_of_classes = 10
     nan_value = -9999
 
-    result = reclassify_raster._raster_with_geometrical_intervals(TEST_ARRAY, number_of_classes, nan_value)
+    array_with_nan_value = np.array([[nan_value, 10, 20, 30], [40, 50, 50, 60], [80, 80, 90, 90], [100, 100, 100, 100]])
 
-    expected_output = np.array([[-9, -9, -9, -9], [-9, -9, -9, -8], [8, 8, 9, 9], [9, 9, 9, 9]])
+    result = reclassify_raster._raster_with_geometrical_intervals(array_with_nan_value, number_of_classes, nan_value)
+
+    expected_output = np.array([[0, -9, -9, -9], [-9, -9, -9, -8], [8, 8, 9, 9], [9, 9, 9, 9]])
 
     assert isinstance(result, np.ndarray)
 

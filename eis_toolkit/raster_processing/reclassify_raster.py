@@ -264,30 +264,23 @@ def _raster_with_geometrical_intervals(
     band: np.ndarray, number_of_classes: int, nan_value: Union[int, float]
 ) -> np.ndarray:
 
-    is_integer = np.issubdtype(band.dtype, int)
-    is_float = np.issubdtype(band.dtype, float)
+    # nan_value is either a set integer (e.g. -9999) or np.nan
+    mask = band == nan_value
+    masked_array = np.ma.masked_array(data=band, mask=mask)
 
-    if is_integer:
-        mask = band == nan_value
-        band[mask] = nan_value
-    elif is_float:
-        band[band == nan_value] = np.nan
+    median_value = np.nanmedian(masked_array)
+    max_value = masked_array.max()
+    min_value = masked_array.min()
 
-    median_value = np.nanmedian(band)
-    max_value = np.nanmax(band)
-    min_value = np.nanmin(band)
-
-    values_out = np.zeros_like(band)
-
-    nan_condition = ~np.isnan(band)
+    values_out = np.ma.zeros_like(masked_array)
 
     # Determine the tail with larger length
     if (median_value - min_value) < (max_value - median_value):  # Large end tail longer
-        tail_values = band[np.where((band > median_value) & nan_condition)]
+        tail_values = masked_array[np.ma.where((masked_array > median_value))]
         range_tail = max_value - median_value
         tail_values = tail_values - median_value + range_tail / 1000.0
     else:  # Small end tail longer
-        tail_values = band[np.where((band < median_value) & nan_condition)]
+        tail_values = masked_array[np.ma.where((masked_array < median_value))]
         range_tail = median_value - min_value
         tail_values = tail_values - min_value + range_tail / 1000.0
 
@@ -311,18 +304,20 @@ def _raster_with_geometrical_intervals(
 
     for j in range(1, len(width) - 2):
         values_out[
-            np.where(((median_value + width[j]) < band) & ((band <= (median_value + width[j + 1])) & nan_condition))
+            np.ma.where(((median_value + width[j]) < masked_array) & ((masked_array <= (median_value + width[j + 1]))))
         ] = (j + 1)
         values_out[
-            np.where(((median_value - width[j]) > band) & ((band >= (median_value - width[j + 1])) & nan_condition))
+            np.ma.where(((median_value - width[j]) > masked_array) & ((masked_array >= (median_value - width[j + 1]))))
         ] = (-j - 1)
         k = j
 
-    values_out[np.where(((median_value + width[k + 1]) < band) & nan_condition)] = k + 1
-    values_out[np.where(((median_value - width[k + 1]) > band) & nan_condition)] = -k - 1
-    values_out[np.where(median_value == band)] = 0
+    values_out[np.ma.where(((median_value + width[k + 1]) < masked_array))] = k + 1
+    values_out[np.ma.where(((median_value - width[k + 1]) > masked_array))] = -k - 1
+    values_out[np.ma.where(median_value == masked_array)] = 0
 
-    return values_out
+    output = np.array(values_out)
+
+    return output
 
 
 @beartype
