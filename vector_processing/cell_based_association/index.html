@@ -946,6 +946,264 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_10" id="__nav_6_10_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Derivatives
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_10">
+            <span class="md-nav__icon md-icon"></span>
+            Derivatives
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/derivatives/classification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Classification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/derivatives/parameters/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/derivatives/partial_derivatives/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Partial derivatives
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/derivatives/utilities/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utilities
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_11" id="__nav_6_11_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Filters
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_11">
+            <span class="md-nav__icon md-icon"></span>
+            Filters
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/filters/focal/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Focal
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/filters/kernels/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Kernels
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/filters/speckle/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Speckle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/filters/utilities/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utilities
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2174,9 +2432,7 @@ CRS (if projected CRS in meters: value in meters).</p>
 <span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="normal">116</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">cell_based_association</span><span class="p">(</span>
     <span class="n">cell_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">geodata</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">],</span>
@@ -2229,29 +2485,27 @@ CRS (if projected CRS in meters: value in meters).</p>
     <span class="c1"># Consistency checks on input data</span>
     <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">geodata</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;The input GeoDataFrame is empty.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;The input GeoDataFrame is empty.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">cell_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Expected cell size to be positive and non-zero.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Expected cell size to be positive and non-zero.&quot;</span><span class="p">)</span>
 
     <span class="n">add_buffer</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">add_buffer</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">num</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">add_buffer</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Expected buffer value to be positive, null or False.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Expected buffer value to be positive, null or False.&quot;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">column</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">column</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">subset_target_attribute_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Can&#39;t use subset of values if no column is targeted.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Can&#39;t use subset of values if no column is targeted.&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">column</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">geodata</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidColumnException</span><span class="p">(</span><span class="s2">&quot;Targeted column not found in the GeoDataFrame.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InvalidColumnException</span><span class="p">(</span><span class="s2">&quot;Targeted column not found in the GeoDataFrame.&quot;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subset_target_attribute_values</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">subset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">geodata</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">column</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
-                    <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span>
-                        <span class="s2">&quot;Subset of value(s) not found in the targeted column.&quot;</span>
-                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Subset of value(s) not found in the targeted column.&quot;</span><span class="p">)</span>
 
     <span class="c1"># Computation</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">geodata</span><span class="p">):</span>

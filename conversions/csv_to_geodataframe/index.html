@@ -1006,6 +1006,264 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_10" id="__nav_6_10_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Derivatives
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_10">
+            <span class="md-nav__icon md-icon"></span>
+            Derivatives
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/derivatives/classification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Classification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/derivatives/parameters/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/derivatives/partial_derivatives/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Partial derivatives
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/derivatives/utilities/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utilities
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_11" id="__nav_6_11_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Filters
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_11">
+            <span class="md-nav__icon md-icon"></span>
+            Filters
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/filters/focal/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Focal
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/filters/kernels/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Kernels
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/filters/speckle/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Speckle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/filters/utilities/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utilities
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2005,6 +2263,52 @@ Usage of two indexes expects POINT feature(s) X-coordinate as the first index an
     </tbody>
   </table>
 
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.InvalidColumnIndexException">InvalidColumnIndexException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>There is a mismatch between the provided indexes and the shape of
+the dataframe read from the csv.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.InvalidParameterValueException">InvalidParameterValueException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Unable to create a GeoDataFrame with point features from the given input
+parameters.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.InvalidWktFormatException">InvalidWktFormatException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Unable to create a GeoDataFrame of WKT geometry from the given input parameters.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
           <details class="quote">
             <summary>Source code in <code>eis_toolkit/conversions/csv_to_geodataframe.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 79</span>
@@ -2033,7 +2337,14 @@ Usage of two indexes expects POINT feature(s) X-coordinate as the first index an
 <span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
-<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">csv_to_geodataframe</span><span class="p">(</span>
     <span class="n">csv</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">indexes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
@@ -2052,6 +2363,13 @@ Usage of two indexes expects POINT feature(s) X-coordinate as the first index an
 
 <span class="sd">    Returns:</span>
 <span class="sd">        CSV file read to a GeoDataFrame.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        InvalidColumnIndexException: There is a mismatch between the provided indexes and the shape of</span>
+<span class="sd">            the dataframe read from the csv.</span>
+<span class="sd">        InvalidParameterValueException: Unable to create a GeoDataFrame with point features from the given input</span>
+<span class="sd">            parameters.</span>
+<span class="sd">        InvalidWktFormatException: Unable to create a GeoDataFrame of WKT geometry from the given input parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">data_frame</span> <span class="o">=</span> <span class="n">_csv_to_geodataframe</span><span class="p">(</span>

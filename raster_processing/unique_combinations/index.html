@@ -1006,6 +1006,264 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_10" id="__nav_6_10_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Derivatives
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_10">
+            <span class="md-nav__icon md-icon"></span>
+            Derivatives
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../derivatives/classification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Classification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../derivatives/parameters/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../derivatives/partial_derivatives/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Partial derivatives
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../derivatives/utilities/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utilities
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_11" id="__nav_6_11_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Filters
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_11">
+            <span class="md-nav__icon md-icon"></span>
+            Filters
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filters/focal/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Focal
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filters/kernels/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Kernels
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filters/speckle/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Speckle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filters/utilities/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utilities
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1959,13 +2217,13 @@ The first band of the first raster is used for reference when making the output.
   <table>
     <thead>
       <tr>
-<th>Name</th>        <th>Type</th>
+        <th>Type</th>
         <th>Description</th>
       </tr>
     </thead>
     <tbody>
         <tr>
-<td><code>out_image</code></td>          <td>
+          <td>
                 <code><span title="numpy.ndarray">ndarray</span></code>
           </td>
           <td>
@@ -1975,12 +2233,37 @@ The first band of the first raster is used for reference when making the output.
           </td>
         </tr>
         <tr>
-<td><code>out_meta</code></td>          <td>
+          <td>
                 <code>dict</code>
           </td>
           <td>
             <div class="doc-md-description">
               <p>The metadata of the first raster in raster_list.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.InvalidParameterValueException">InvalidParameterValueException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Input rasters don't have enough bands to perform
+the operation or input rasters are of different shape.</p>
             </div>
           </td>
         </tr>
@@ -2022,7 +2305,11 @@ The first band of the first raster is used for reference when making the output.
 <span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span>
-<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">unique_combinations</span><span class="p">(</span>  <span class="c1"># type: ignore[no-any-unimported]</span>
     <span class="n">raster_list</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
@@ -2035,8 +2322,12 @@ The first band of the first raster is used for reference when making the output.
 <span class="sd">        raster_list: Rasters to be used for finding combinations.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        out_image: Combinations of rasters.</span>
-<span class="sd">        out_meta: The metadata of the first raster in raster_list.</span>
+<span class="sd">        Combinations of rasters.</span>
+<span class="sd">        The metadata of the first raster in raster_list.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        InvalidParameterValueException: Input rasters don&#39;t have enough bands to perform</span>
+<span class="sd">            the operation or input rasters are of different shape.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">bands</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">out_meta</span> <span class="o">=</span> <span class="n">raster_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">meta</span>
@@ -2052,7 +2343,7 @@ The first band of the first raster is used for reference when making the output.
         <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Expected to have more bands than 1&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">check_raster_grids</span><span class="p">(</span><span class="n">raster_profiles</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Expected raster grids to be of same shape&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">NonMatchingRasterMetadataException</span><span class="p">(</span><span class="s2">&quot;Expected raster grids to be have the same grid properties.&quot;</span><span class="p">)</span>
 
     <span class="n">out_image</span> <span class="o">=</span> <span class="n">_unique_combinations</span><span class="p">(</span><span class="n">bands</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out_image</span><span class="p">,</span> <span class="n">out_meta</span>

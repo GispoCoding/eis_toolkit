@@ -946,6 +946,264 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_10" id="__nav_6_10_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Derivatives
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_10">
+            <span class="md-nav__icon md-icon"></span>
+            Derivatives
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/derivatives/classification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Classification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/derivatives/parameters/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/derivatives/partial_derivatives/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Partial derivatives
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/derivatives/utilities/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utilities
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_11" id="__nav_6_11_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Filters
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_11">
+            <span class="md-nav__icon md-icon"></span>
+            Filters
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/filters/focal/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Focal
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/filters/kernels/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Kernels
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/filters/speckle/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Speckle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/filters/utilities/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utilities
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2084,14 +2342,65 @@ each cell is the count of intersecting geometries.</p>
     </tbody>
   </table>
 
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.EmptyDataFrameException">EmptyDataFrameException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The geodataframe does not contain geometries.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.InvalidColumnException">InvalidColumnException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Given value_column is not in the input geodataframe.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.InvalidParameterValueException">InvalidParameterValueException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>No resolution or base_raster_profile is given,
+or base_raster_profile has the wrong type.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.NumericValueSignException">NumericValueSignException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Input resolution value is zero or negative, or input
+buffer_value is negative.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
           <details class="quote">
             <summary>Source code in <code>eis_toolkit/vector_processing/rasterize_vector.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span>
@@ -2162,7 +2471,14 @@ each cell is the count of intersecting geometries.</p>
 <span class="normal">84</span>
 <span class="normal">85</span>
 <span class="normal">86</span>
-<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">rasterize_vector</span><span class="p">(</span>
     <span class="n">geodataframe</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
     <span class="n">resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -2198,31 +2514,33 @@ each cell is the count of intersecting geometries.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Rasterized vector data and metadata.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        EmptyDataFrameException: The geodataframe does not contain geometries.</span>
+<span class="sd">        InvalidColumnException: Given value_column is not in the input geodataframe.</span>
+<span class="sd">        InvalidParameterValueException: No resolution or base_raster_profile is given,</span>
+<span class="sd">            or base_raster_profile has the wrong type.</span>
+<span class="sd">        NumericValueSignException: Input resolution value is zero or negative, or input</span>
+<span class="sd">            buffer_value is negative.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">geodataframe</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="c1"># Empty GeoDataFrame</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;Expected geodataframe to contain geometries.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;Expected geodataframe to contain geometries.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">resolution</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">base_raster_profile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span>
-            <span class="s2">&quot;Expected either resolution or base_raster_profile to be given.&quot;</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Expected either resolution or base_raster_profile to be given.&quot;</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">resolution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">resolution</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">NumericValueSignException</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Expected a positive value resolution (</span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">NumericValueSignException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected a positive resolution value (</span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">value_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">value_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">geodataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Expected value_column (</span><span class="si">{</span><span class="n">value_column</span><span class="si">}</span><span class="s2">) to be contained in geodataframe columns.&quot;</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">InvalidColumnException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected value_column (</span><span class="si">{</span><span class="n">value_column</span><span class="si">}</span><span class="s2">) to be contained in geodataframe columns.&quot;</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">buffer_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">buffer_value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">NumericValueSignException</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Expected a positive buffer_value (</span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="n">buffer_value</span><span class="o">=</span><span class="n">buffer_value</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">NumericValueSignException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected a positive buffer_value (</span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="n">buffer_value</span><span class="o">=</span><span class="n">buffer_value</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">base_raster_profile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">base_raster_profile</span><span class="p">,</span> <span class="p">(</span><span class="n">profiles</span><span class="o">.</span><span class="n">Profile</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Expected base_raster_profile (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">base_raster_profile</span><span class="p">)</span><span class="si">}</span><span class="s2">) to be dict or rasterio.profiles.Profile.&quot;</span>
         <span class="p">)</span>
 
