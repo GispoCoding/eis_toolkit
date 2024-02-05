@@ -59,7 +59,7 @@ def test_empty_geodataframe():
 def test_geodataframe_missing_column():
     """Test Local Moran's I raises InvalidParameterValueException for missing column."""
 
-    gdf = gpd.GeoDataFrame({'test_col': [1, 2, 3]})
+    gdf = gpd.GeoDataFrame({"test_col": [1, 2, 3]})
 
     with pytest.raises(exceptions.InvalidParameterValueException):
         local_morans_i(gdf, column="value", weight_type="queen", k=4, permutations=999)
@@ -68,17 +68,16 @@ def test_geodataframe_missing_column():
 def test_invalid_k_value():
     """Test Local Moran's I raises InvalidParameterValueException for k value under 1."""
 
-    gdf = gpd.GeoDataFrame({'value': [1, 2, 3]})
+    gdf = gpd.GeoDataFrame({"value": [1, 2, 3]})
 
     with pytest.raises(exceptions.InvalidParameterValueException):
-            local_morans_i(gdf, column="value", weight_type="queen", k=0, permutations=999)
+        local_morans_i(gdf, column="value", weight_type="queen", k=0, permutations=999)
+
 
 def test_invalid_permutations_value():
     """Test Local Moran's I raises InvalidParameterValueException for permutations value under 100."""
 
-    gdf = gpd.GeoDataFrame({'value': [1, 2, 3]})
+    gdf = gpd.GeoDataFrame({"value": [1, 2, 3]})
 
     with pytest.raises(exceptions.InvalidParameterValueException):
-            local_morans_i(gdf, column="value", weight_type="queen", k=4, permutations=99)
-
-
+        local_morans_i(gdf, column="value", weight_type="queen", k=4, permutations=99)

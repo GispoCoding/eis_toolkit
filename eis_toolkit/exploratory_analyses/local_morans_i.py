@@ -2,11 +2,10 @@ import geopandas as gpd
 import libpysal
 import numpy as np
 from beartype import beartype
-from beartype.typing import Literal, Union
+from beartype.typing import Literal
 from esda.moran import Moran_Local
 
 from eis_toolkit import exceptions
-
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
@@ -22,8 +21,7 @@ def _local_morans_i(
     else:
         raise InvalidParameterValueException("Invalid weight_type. Use 'queen' or 'knn'.")
 
-    w.transform = 'R'
-
+    w.transform = "R"
 
     if len(gdf[column]) != len(w.weights):
         raise InvalidParameterValueException("Dimension mismatch between data and weights matrix.")
@@ -56,7 +54,8 @@ def local_morans_i(
         permutations: Number of permutations for significance testing. Defaults to 999.
 
     Returns:
-        Geodataframe appended with two new columns: one with Local Moran's I statistic and one with p-value for the statistic.
+        Geodataframe appended with two new columns: one with Local Moran's I
+          statistic and one with p-value for the statistic.
 
     Raises:
         EmptyDataFrameException: The input geodataframe is empty.
@@ -69,11 +68,10 @@ def local_morans_i(
 
     if k < 1:
         raise exceptions.InvalidParameterValueException("k must be > 0.")
-    
+
     if permutations < 100:
         raise exceptions.InvalidParameterValueException("permutations must be > 99.")
 
-    
     calculations = _local_morans_i(gdf, column, weight_type, k, permutations)
 
     return calculations
