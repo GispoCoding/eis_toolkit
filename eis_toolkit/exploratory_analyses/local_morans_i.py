@@ -33,7 +33,7 @@ def _local_morans_i(
     gdf[f"{column}_local_moran_I"] = moran_loc.Is
     gdf[f"{column}_local_moran_I_p_value"] = moran_loc.p_sim
 
-    gdf[f"{column}_p_value"].fillna(value=np.nan, inplace=True)
+    gdf[f"{column}_local_moran_I_p_value"].fillna(value=np.nan, inplace=True)
 
     return gdf
 

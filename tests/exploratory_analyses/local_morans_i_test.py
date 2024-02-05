@@ -24,13 +24,13 @@ def test_local_morans_i_queen_correctness():
     result = local_morans_i(gdf=gdf, column=column, weight_type="queen", permutations=permutations)
 
     np.testing.assert_allclose(result[f"{column}_local_moran_I"], moran_loc.Is, rtol=0.1, atol=0.1)
-    np.testing.assert_allclose(result[f"{column}_p_value"], moran_loc.p_sim, rtol=0.1, atol=0.1)
+    np.testing.assert_allclose(result[f"{column}_local_moran_I_p_value"], moran_loc.p_sim, rtol=0.1, atol=0.1)
 
 
 def test_local_morans_i_knn_correctness():
     """Test Local Moran's I KNN correctness."""
 
-    k = 3
+    k = 4
     permutations = 999
 
     column = "gdp_md_est"
@@ -43,7 +43,7 @@ def test_local_morans_i_knn_correctness():
     result = local_morans_i(gdf, column, "knn", k=k, permutations=permutations)
 
     np.testing.assert_allclose(result[f"{column}_local_moran_I"], moran_loc.Is, rtol=0.1, atol=0.1)
-    np.testing.assert_allclose(result[f"{column}_p_value"], moran_loc.p_sim, rtol=0.1, atol=0.1)
+    np.testing.assert_allclose(result[f"{column}_local_moran_I_p_value"], moran_loc.p_sim, rtol=0.1, atol=0.1)
 
 
 def test_empty_geodataframe():
@@ -56,14 +56,29 @@ def test_empty_geodataframe():
         local_morans_i(empty_gdf, column="value", weight_type="queen", k=2, permutations=999)
 
 
-#Test no column raises error, test k under 1 raises error, test permutations under 100 causes an error
-def test_empty_geodataframe():
+def test_geodataframe_missing_column():
     """Test Local Moran's I raises InvalidParameterValueException for missing column."""
 
-    gdf = gpd.GeoDataFrame()
-    test_col = "test_col"
-    test_col_values = [1,2,3]
+    gdf = gpd.GeoDataFrame({'test_col': [1, 2, 3]})
 
-    gdf[test_col] = test_col_values
     with pytest.raises(exceptions.InvalidParameterValueException):
-        local_morans_i(gdf, column="value", weight_type="queen", k=2, permutations=999)
+        local_morans_i(gdf, column="value", weight_type="queen", k=4, permutations=999)
+
+
+def test_invalid_k_value():
+    """Test Local Moran's I raises InvalidParameterValueException for k value under 1."""
+
+    gdf = gpd.GeoDataFrame({'value': [1, 2, 3]})
+
+    with pytest.raises(exceptions.InvalidParameterValueException):
+            local_morans_i(gdf, column="value", weight_type="queen", k=0, permutations=999)
+
+def test_invalid_permutations_value():
+    """Test Local Moran's I raises InvalidParameterValueException for permutations value under 100."""
+
+    gdf = gpd.GeoDataFrame({'value': [1, 2, 3]})
+
+    with pytest.raises(exceptions.InvalidParameterValueException):
+            local_morans_i(gdf, column="value", weight_type="queen", k=4, permutations=99)
+
+
