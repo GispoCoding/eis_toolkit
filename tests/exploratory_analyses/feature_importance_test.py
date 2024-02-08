@@ -43,12 +43,12 @@ def test_empty_data():
     empty_labels = np.array([])
     with pytest.raises(InvalidDatasetException):
         _, _ = evaluate_feature_importance(
-            classifier=classifier, x_test=empty_data, y_test=labels, feature_names=feature_names
+            model=classifier, x_test=empty_data, y_test=labels, feature_names=feature_names
         )
 
     with pytest.raises(InvalidDatasetException):
         _, _ = evaluate_feature_importance(
-            classifier=classifier, x_test=data, y_test=empty_labels, feature_names=feature_names
+            model=classifier, x_test=data, y_test=empty_labels, feature_names=feature_names
         )
 
 
@@ -56,7 +56,7 @@ def test_invalid_n_repeats():
     """Test that invalid value for 'n_repeats' raises exception."""
     with pytest.raises(InvalidParameterValueException):
         _, _ = evaluate_feature_importance(
-            classifier=classifier, x_test=data, y_test=labels, feature_names=feature_names, n_repeats=0
+            model=classifier, x_test=data, y_test=labels, feature_names=feature_names, n_repeats=0
         )
 
 
@@ -64,7 +64,7 @@ def test_model_output():
     """Test that function output is as expected."""
     classifier.fit(data, labels.ravel())
     feature_importance, importance_results = evaluate_feature_importance(
-        classifier=classifier, x_test=data, y_test=labels, feature_names=feature_names, random_state=0
+        model=classifier, x_test=data, y_test=labels, feature_names=feature_names, random_state=0
     )
 
     np.testing.assert_almost_equal(

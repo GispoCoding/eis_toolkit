@@ -10,7 +10,7 @@ from eis_toolkit.exceptions import InvalidDatasetException, InvalidParameterValu
 
 @beartype
 def evaluate_feature_importance(
-    classifier: sklearn.base.BaseEstimator,
+    model: sklearn.base.BaseEstimator,
     x_test: np.ndarray,
     y_test: np.ndarray,
     feature_names: Sequence[str],
@@ -21,7 +21,7 @@ def evaluate_feature_importance(
     Evaluate the feature importance of a sklearn classifier or regressor.
 
     Args:
-        classifier: A trained and fitted Sklearn model.
+        model: A trained and fitted Sklearn model.
         x_test: Testing feature data (X data need to be normalized / standardized).
         y_test: Testing label data.
         feature_names: Names of the feature columns.
@@ -46,7 +46,7 @@ def evaluate_feature_importance(
     if n_repeats < 1:
         raise InvalidParameterValueException("Value for 'n_repeats' is less than one.")
 
-    result = permutation_importance(classifier, x_test, y_test.ravel(), n_repeats=n_repeats, random_state=random_state)
+    result = permutation_importance(model, x_test, y_test.ravel(), n_repeats=n_repeats, random_state=random_state)
 
     feature_importance = pd.DataFrame({"Feature": feature_names, "Importance": result.importances_mean * 100})
 
