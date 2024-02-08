@@ -18,19 +18,19 @@ def evaluate_feature_importance(
     random_state: Optional[int] = None,
 ) -> tuple[pd.DataFrame, dict]:
     """
-    Evaluate the feature importance of a sklearn classifier or linear model.
+    Evaluate the feature importance of a sklearn classifier or regressor.
 
     Args:
-        classifier: A trained classifier.
+        classifier: A trained and fitted Sklearn model.
         x_test: Testing feature data (X data need to be normalized / standardized).
-        y_test: Testing target data.
+        y_test: Testing label data.
         feature_names: Names of the feature columns.
         n_repeats: Number of iteration used when calculate feature importance. Defaults to 50.
         random_state: random state for repeatability of results. Optional parameter.
 
     Returns:
-        A dataframe containing features and their importance, and
-        a dictionary containing importance mean, importance std, and overall importance
+        A dataframe containing features and their importance.
+        A dictionary containing importance mean, importance std, and overall importance.
 
     Raises:
         InvalidDatasetException: Either array is empty.
