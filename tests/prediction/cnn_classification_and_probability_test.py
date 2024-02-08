@@ -1,63 +1,126 @@
 import os
 
 import numpy as np
+from sklearn.metrics import confusion_matrix
+from sklearn.preprocessing import OneHotEncoder
 
-from eis_toolkit.prediction.cnn_classification_and_regression import (
+from eis_toolkit.prediction.cnn_classification_and_probability import (
     train_and_predict_for_classification,
     train_and_predict_for_regression,
 )
-
-PATH = "tests/prediction/Windows_test"
-
-dataset = list()
-labels = list()
-
-for windows in os.listdir(PATH):
-    path = f"{PATH}/{windows}"
-    for folder in os.listdir(f"{path}"):
-        for single_windows in os.listdir(f"{path}/{folder}"):
-            full_path = f"{path}/{folder}/{single_windows}"
-            dataset.append(np.load(full_path))
-            temp = full_path.split("_")[-1].split(".")[0]
-            labels.append(int(temp))
-
-X = np.array(dataset)
-y = np.array(labels)
+from eis_toolkit.prediction.model_performance_estimation import performance_model_estimation
 
 
-def test_do_classification():
+def make_one_hot_encoding(labels):
+    """You can delete this when I find the original one-hot encoding from the toolkit."""
+    # to categorical
+    enc = OneHotEncoder(handle_unknown="ignore")
+    # train and valid set
+    temp = np.reshape(labels, (-1, 1))
+    label_encoded = enc.fit_transform(temp).toarray()
+    return label_encoded
+
+
+def test_do_the_classification():
     """Test for classification."""
-    best_model, cm = train_and_predict_for_classification(
-        dataset=X,
-        labels=y,
-        batch_size=32,
-        epochs=1,
-        cross_validation="LOOCV",
-        input_shape_for_cnn=(X.shape[1], X.shape[2], X.shape[3]),
-        convolutional_kernel_size=(X.shape[3], X.shape[3]),
-        conv_list=[8, 16],
-        neuron_list=[8],
-        dropout_rate=0.1,
-    )
+    print(f"{os.getcwd()}")
+    data = np.load(f'{os.path.join("data", "data.npy")}')
+    labels = np.load(f'{os.path.join("data", "labels.npy")}')
 
+    # do the encoding
+    encoded_labels = make_one_hot_encoding(labels)
+
+    # make cv
+    selected_cv = performance_model_estimation(cross_validation_type="SKFOLD", number_of_split=5)
+
+    stacked_true, stacked_predicted = None, None
+
+    for i, (train_idx, validation_idx) in enumerate(selected_cv.split(data, labels)):
+
+        x_train = data[train_idx]
+        y_train = encoded_labels[train_idx]
+        x_validation = data[validation_idx]
+        y_validation = encoded_labels[validation_idx]
+
+        cnn_model, true_labels, predicted_labels, score = train_and_predict_for_classification(
+            x_train=x_train,
+            y_train=y_train,
+            x_validation=x_validation,
+            y_validation=y_validation,
+            batch_size=32,
+            epochs=10,
+            conv_list=[4, 8],
+            neuron_list=[8],
+            input_shape_for_cnn=(x_train.shape[1], x_train.shape[2], x_train.shape[3]),
+            convolutional_kernel_size=(x_train.shape[3], x_train.shape[3]),
+        )
+
+        if stacked_true is None:
+            stacked_true = true_labels
+            print(stacked_true.shape)
+        else:
+            stacked_true = np.concatenate((stacked_true, true_labels))
+            print(stacked_true.shape)
+
+        if stacked_predicted is None:
+            stacked_predicted = predicted_labels
+        else:
+            stacked_predicted = np.concatenate((stacked_predicted, predicted_labels))
+
+    # make cm
+    cm = confusion_matrix(stacked_true, stacked_predicted)
     print(cm)
-    assert cm.to_numpy().shape[0] != 0 and cm.to_numpy().shape[1] != 0
+    assert cm.shape[0] != 0 and cm.shape[1] != 0
 
 
-def test_do_regression():
-    """Test for regression."""
-    best_model, cm = train_and_predict_for_regression(
-        dataset=X,
-        labels=y,
-        batch_size=32,
-        epochs=1,
-        cross_validation="LOOCV",
-        input_shape_for_cnn=(X.shape[1], X.shape[2], X.shape[3]),
-        convolutional_kernel_size=(X.shape[3], X.shape[3]),
-        conv_list=[8, 16],
-        neuron_list=[8],
-        dropout_rate=0.1,
-        threshold=0.5,
-    )
+def test_do_the_regression():
+    """Test for classification."""
+    print(f"{os.getcwd()}")
+    data = np.load(f'{os.path.join("data", "data.npy")}')
+    labels = np.load(f'{os.path.join("data", "labels.npy")}')
+
+    # do the encoding
+    # encoded_labels = make_one_hot_encoding(labels)
+
+    # make cv
+    selected_cv = performance_model_estimation(cross_validation_type="SKFOLD", number_of_split=5)
+
+    stacked_true, stacked_predicted = None, None
+
+    for i, (train_idx, validation_idx) in enumerate(selected_cv.split(data, labels)):
+
+        x_train = data[train_idx]
+        y_train = labels[train_idx]
+        x_validation = data[validation_idx]
+        y_validation = labels[validation_idx]
+
+        cnn_model, true_labels, predicted_labels, probabilities, score = train_and_predict_for_regression(
+            x_train=x_train,
+            y_train=y_train,
+            x_validation=x_validation,
+            y_validation=y_validation,
+            batch_size=32,
+            epochs=10,
+            conv_list=[4, 8],
+            neuron_list=[8],
+            input_shape_for_cnn=(x_train.shape[1], x_train.shape[2], x_train.shape[3]),
+            convolutional_kernel_size=(x_train.shape[3], x_train.shape[3]),
+            threshold=0.5,
+        )
+
+        if stacked_true is None:
+            stacked_true = true_labels
+            print(stacked_true.shape)
+        else:
+            stacked_true = np.concatenate((stacked_true, true_labels))
+            print(stacked_true.shape)
+
+        if stacked_predicted is None:
+            stacked_predicted = predicted_labels
+        else:
+            stacked_predicted = np.concatenate((stacked_predicted, predicted_labels))
+
+    # make cm
+    cm = confusion_matrix(stacked_true, stacked_predicted)
     print(cm)
-    assert cm.to_numpy().shape[0] != 0 and cm.to_numpy().shape[1] != 0
+    assert cm.shape[0] != 0 and cm.shape[1] != 0
