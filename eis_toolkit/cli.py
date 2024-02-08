@@ -491,7 +491,7 @@ def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPT
     typer.echo("Progress: 75%")
 
     json_str = json.dumps(results_dict)
-    typer.echo("Progress: 10%")
+    typer.echo("Progress: 100%")
 
     typer.echo(f"Results: {json_str}")
     typer.echo("Descriptive statistics (vector) completed")
@@ -513,11 +513,15 @@ def check_raster_grids_cli(input_rasters: INPUT_FILES_ARGUMENT, same_extent: boo
         with rasterio.open(input_raster) as raster:
             raster_profiles.append(raster.profile)
     typer.echo("Progress: 50%")
-    result = check_raster_grids(raster_profiles=raster_profiles, same_extent=same_extent)
 
+    result = check_raster_grids(raster_profiles=raster_profiles, same_extent=same_extent)
+    results_dict = {"result": result}
+    typer.echo("Progress: 75%")
+
+    json_str = json.dumps(results_dict)
     typer.echo("Progress: 100%")
 
-    typer.echo(f"Result: {str(result)}")
+    typer.echo(f"Results: {json_str}")
     typer.echo("Checking raster grids completed.")
 
 
