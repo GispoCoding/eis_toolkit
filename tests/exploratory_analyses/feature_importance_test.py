@@ -51,12 +51,14 @@ def test_empty_data():
             model=classifier, x_test=data, y_test=empty_labels, feature_names=feature_names
         )
 
+
 def test_invalid_n_repeats():
     """Test that invalid value for 'n_repeats' raises exception."""
     with pytest.raises(InvalidParameterValueException):
         _, _ = evaluate_feature_importance(
             model=classifier, x_test=data, y_test=labels, feature_names=feature_names, n_repeats=0
         )
+
 
 def test_model_output():
     """Test that function output is as expected."""
