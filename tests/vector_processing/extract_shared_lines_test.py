@@ -23,11 +23,12 @@ def test_validated_extracted_shared_lines(example_polygons):
     result = extract_shared_lines(example_polygons)
     expected_lines = [LineString([(1, 1), (1, 0)]), LineString([(2, 1), (2, 0)])]
 
-    result = extract_shared_lines(example_polygons)
-
     assert len(result) == len(expected_lines), "Unexpected amount of lines"
 
-    assert result["geometry"].equals(gpd.GeoSeries(expected_lines))
+    result_geometries = result["geometry"].to_list()
+    expected_geometries = gpd.GeoSeries(expected_lines).to_list()
+
+    assert result_geometries == expected_geometries
 
 
 @pytest.fixture
