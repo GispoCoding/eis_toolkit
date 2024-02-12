@@ -284,7 +284,7 @@ def _raster_with_geometrical_intervals(
         range_tail = median_value - min_value
         tail_values = tail_values - min_value + range_tail / 1000.0
 
-    min_tail = np.ma.nmin(tail_values)
+    min_tail = np.ma.min(tail_values)
     max_tail = np.ma.max(tail_values)
 
     # number of classes
