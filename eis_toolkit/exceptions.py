@@ -90,14 +90,6 @@ class InvalidDatasetException(Exception):
     """Exception error class when the dataset is null."""
 
 
-class CNNException(Exception):
-    """Exception throws when something is invalid in the cnn."""
-
-
-class CNNRunningParameterException(Exception):
-    """Exception throws when running parameters are wrong."""
-
-
 class InvalidCrossValidationSelected(Exception):
     """Exception throws when running parameters are wrong."""
 

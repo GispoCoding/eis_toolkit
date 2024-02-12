@@ -4,14 +4,14 @@ import numpy as np
 import tensorflow as tf
 from beartype import beartype
 from keras import Model
-from numpy import long, ndarray, signedinteger
+from numpy import ndarray
 from sklearn.utils.class_weight import compute_sample_weight
 
-from eis_toolkit.exceptions import CNNException, CNNRunningParameterException, InvalidArgumentTypeException
+from eis_toolkit.exceptions import InvalidArgumentTypeException, InvalidParameterValueException
 
 
 @beartype
-def __do_the_cnn(
+def _create_an_instance_of_cnn(
     input_shape_for_cnn: Union[tuple[int, int, int], tuple[int, int]],
     convolution_kernel_size: tuple[int, int],
     conv_list: list[int],
@@ -26,24 +26,32 @@ def __do_the_cnn(
     output_units=2,
 ) -> tf.keras.Model:
     """
-     Do an instance of CNN. This is a private function that can be used to create an instance of CNN.
+     Do an instance of the CNN. Just the body of the CNN.
 
-    Parameters:
-       input_shape_for_cnn: shape of the input.
-       convolution_kernel_size: size of the kernel (usually is the last number of the input tuple)
-       pool_size: size of the pooling layer
-       conv_list: list of unit for the conv layers.
-       regularization: Type of regularization to insert into the CNN or MLP.
-       data_augmentation: if you want data augmentation or not (Random rotation is implemented).
-       optimizer: select one optimizer for the MLP.
-       loss: the loss function used to calculate accuracy.
-       neuron_list: List of unit or neuron used to build the network.
-       dropout_rate: if you want to use dropout add a number as floating point.
+    Args::
+       input_shape_for_cnn: Shape of the input. How big the input should be. It is possible to build an input:
+                         - windows: (h, w, c) windows height, windows width and channel or windows dimension.
+                         - point (p, c) point value and dimension of the point.
+       convolution_kernel_size: Size of the kernel (usually is the last number of the input tuple). Usually is the "c"
+                                of the input_shape_for_cnn.
+       pool_size: Size of the pooling layer (How much you want to reduce the dimension of the data).
+       conv_list: list of unit for the conv layers. Here the length of the list is the number of convolution layers.
+       regularization: Regularization of each  layer. None if you do not want it:
+                     - None if you prefer to avoid regularization.
+                     - L1 for L1 regularization.
+                     - L2 for L2 regularization.
+                     - L1L2 for L1 L2 regularization.
+       data_augmentation: If you want data augmentation or not (Random rotation is implemented).
+       optimizer: Select one optimizer for the CNN. The default value is Adam.
+       loss: The loss function used to measure how good the CNN is performing.
+       neuron_list: List of unit or neuron used to build the network final part of the network. the length of the list
+                    is the number of fully connected layers.
+       dropout_rate: Float number that help avoiding over-fitting. It just randomly drops samples.
        output_units: number of output classes.
        last_activation: usually you should use softmax or sigmoid.
 
     Return:
-        return the compiled model.
+        model: the model that has been created.
 
     Raises:
         CNNException: raised when the input is not valid
@@ -51,7 +59,7 @@ def __do_the_cnn(
 
     # check that the input is not null
     if input_shape_for_cnn is None:
-        raise CNNException
+        raise InvalidParameterValueException
 
     if len(neuron_list) <= 0 or dropout_rate <= 0:
         raise InvalidArgumentTypeException
@@ -96,21 +104,17 @@ def __do_the_cnn(
         if dropout_rate is not None:
             body = tf.keras.layers.Dropout(dropout_rate)(body)
 
-    # we flatten
     body = tf.keras.layers.Flatten()(body)
 
-    # create the model
     classifier = tf.keras.layers.Dense(output_units, activation=last_activation, kernel_regularizer=regularization)(
         body
     )
 
-    # create the model
     model = tf.keras.Model(inputs=input_layer, outputs=classifier)
     model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
     return model
 
 
-# now let's prepare two mega function one for classification and one for regression
 @beartype
 def train_and_predict_for_classification(
     x_train: np.ndarray,
@@ -130,44 +134,63 @@ def train_and_predict_for_classification(
     data_augmentation: bool = False,
     optimizer: str = "Adam",
     output_units=2,
-) -> tuple[Model, list[signedinteger[Any] | long], list[signedinteger[Any] | long | Any], Any]:
+) -> tuple[Model, ndarray, ndarray, Any]:
     """
-    Do training and evaluation of the model with cross validation.
+    Do a CNN for training and evaluation of data. It is designed to classify the data provided in the given labels.
 
-    Parameters:
-         x_train: This is the dataset you need to analyse,
-         y_train: partition of the labels used for training they can be encoded (done with OHE) or a list of integers,
-         x_validation: This is the partition of the dataset used for validation,
-         y_validation: partition of the labels used for validation in the same form of the y_train,
-         batch_size: how much we want the batch size,
-         epochs: how many epochs we want to run the model,
-         input_shape_for_cnn: shape of the inputs windows -> tuple[int, int, int] just a point -> tuple[int, int],
-         convolutional_kernel_size: size of the kernel (usually is the last number of the input tuple)
-         pool_size: size of the pooling layer
-         conv_list: list of unit for the conv layers.
-         sample_weights: if you want to sample weights,
-         neuron_list: How deep you want to MLP
-         dropout_rate: float number that help avoiding over-fitting,
-         regularization: regularization of each MLP layers, None if you do not want it.
-         data_augmentation: bool in case you use windows you can have random rotation,
-         optimizer: loss optimization function,
-         output_units: how many class you have to predicts
+    Here, you can select how many convolutional layer and Dense layer you  want. This CNN can be used to classify
+    the data provided as classes. The CNN works both with windows and points. If you select windows, iti is possible
+    to use random rotation to augment the data. In case the CNN is over-fitting, you can try to avoid it adding
+    dropout or regularization.
+
+    Args:
+         x_train: This is the portion of the data used for training the model.
+         y_train: Partition of the labels used for training: they can be encoded (done with OHE) or a list of integers.
+         x_validation: This is the partition of the dataset used for validation.
+         y_validation: Partition of the labels used for validation in the same form of the y_train.
+         batch_size: How much we want the batch size. This is the number os samples that the CNN takes during each
+                     iteration.
+         epochs: How many iterations we want to run the model.
+         input_shape_for_cnn: Shape of the inputs windows should follow:
+                              - tuple[int, int, int] feed the cnn with windows: format (h, w, c).
+                              - tuple[int, int] feed a network with points: format (value, c).
+         convolutional_kernel_size: Size of the kernel (usually is the last number of the input tuple).
+         pool_size: Size of the pooling layer (How much you want to reduce the dimension of the data).
+         conv_list: List of units used in each convolutional layer.The length of the list is the number of layers.
+         sample_weights: If you want to sample weights. It is used when there is strong imbalance of the data.
+                  neuron_list: This is a list of dense layers used for the last section of the network (fully connected
+                  layers). The length of the list shows the number of layers.
+         neuron_list: This is a list of dense layers used for the last section of the network (fully connected layers).
+                      The length of the list shows the number of layers.
+         dropout_rate: Float number that help avoiding over-fitting. It just randomly drops samples.
+         regularization: Regularization of each  layer. None if you do not want it:
+                         - None if you prefer to avoid regularization.
+                         - L1 for L1 regularization.
+                         - L2 for L2 regularization.
+                         - L1L2 for L1 L2 regularization.
+         data_augmentation: Usable only if the network is fed by windows.
+         optimizer: Loss optimization function, default is Adam.
+         output_units: How many class you have to predicts.
 
     Return:
-        return the compiled model, the true validation labels, the predicted labels, score
+        cnn_model: The compiled model used in this instance.
+        true_value_of_the_labels: The true labels values of the data. (the test section).
+        predicted_values: The predicted labels of the data. (the test section).
+        score: Value of the evaluation of the network.
 
     Raises:
         CNNRunningParameterException: when the batch size or epochs are wrong integer
     """
 
+    true_value_of_the_labels, predicted_values = list(), list()
+
     if batch_size <= 0 or epochs <= 0:
-        raise CNNRunningParameterException
+        raise InvalidArgumentTypeException
 
     if len(conv_list) <= 0 or len(neuron_list) <= 0:
-        raise CNNRunningParameterException
+        raise InvalidArgumentTypeException
 
-    # generate the model
-    cnn_model = __do_the_cnn(
+    cnn_model = _create_an_instance_of_cnn(
         input_shape_for_cnn=input_shape_for_cnn,
         convolution_kernel_size=convolutional_kernel_size,
         conv_list=conv_list,
@@ -182,8 +205,6 @@ def train_and_predict_for_classification(
         output_units=output_units,
     )
 
-    stacked_true, stacked_prediction = list(), list()
-
     _ = cnn_model.fit(
         x_train,
         y_train,
@@ -193,17 +214,13 @@ def train_and_predict_for_classification(
         sample_weight=compute_sample_weight("balanced", y_train) if sample_weights is not False else None,
     )
 
-    # make the score and the prediction
     score = cnn_model.evaluate(x_validation, y_validation)[1]
     prediction = cnn_model.predict(x_validation)
 
-    stacked_true.append(np.argmax(y_validation))
-    stacked_prediction.append(np.argmax(prediction))
+    true_value_of_the_labels.append(np.argmax(y_validation))
+    predicted_values.append(np.argmax(prediction))
 
-    # create a cm
-    # cm = confusion_matrix(np.array(stacked_true), np.array(stacked_prediction), normalize="all")
-    # df = pd.DataFrame(cm, columns=["Non deposit", "deposit"], index=["Non deposit", "deposit"])
-    return cnn_model, stacked_true, stacked_prediction, score
+    return cnn_model, np.array(true_value_of_the_labels), np.array(predicted_values), score
 
 
 @beartype
@@ -226,48 +243,66 @@ def train_and_predict_for_regression(
     data_augmentation: bool = False,
     optimizer: str = "Adam",
     output_units=1,
-) -> tuple[Model, ndarray, list[int], Any]:
+) -> tuple[Model, ndarray, ndarray, ndarray, Any]:
     """
-    Do training and evaluation of the model with cross validation.
+    Do a CNN for training and evaluation of data. It is designed to classify pixels using threshold.
 
-    Parameters:
-         x_train: This is the dataset you need to analyse,
-         y_train: partition of the labels used for training they can be encoded (done with OHE) or a list of integers,
-         x_validation: This is the partition of the dataset used for validation,
-         y_validation: partition of the labels used for validation in the same form of the y_train,
-         threshold: number that determine bound between positive or negative,
-         batch_size: how much we want the batch size,
-         convolutional_kernel_size: size of the kernel (usually is the last number of the input tuple)
-         pool_size: size of the pooling layer
-         conv_list: list of unit for the conv layers.
+    Here, you can select how many convolutional layer and Dense layer you  want.  This CNN can be used to classify
+    the data provided as classes. In addition, this function uses threshold as boundary lines between classes.
+    The CNN works both with windows and points. If you select windows,  it is possible to use random rotation to augment
+    the data. In case the  CNN is over-fitting, you can try to avoid  it adding dropout or regularization.
+
+    Args:
+         x_train: This is the portion of the data used for training the model.
+         y_train: Partition of the labels used for training: they can be encoded (done with OHE) or a list of integers.
+         x_validation: This is the partition of the dataset used for validation.
+         y_validation: Partition of the labels used for validation in the same form of the y_train.
+         batch_size: How much we want the batch size. This is the number os samples that the CNN takes during each
+                     iteration.
+         epochs: How many iterations we want to run the model.
+         input_shape_for_cnn: Shape of the inputs windows should follow:
+                              - tuple[int, int, int] feed the cnn with windows: format (h, w, c).
+                              - tuple[int, int] feed a network with points: format (value, c).
+         convolutional_kernel_size: Size of the kernel (usually is the last number of the input tuple).
+         conv_list: list of units used in each convolutional layer.The length of the list is the number of layers.
          epochs: how many epochs we want to run the model,
          input_shape_for_cnn: shape of the inputs windows -> tuple[int, int, int] just a point -> tuple[int, int],
-         sample_weights: if you want to sample weights,
-         neuron_list: How deep you want to MLP
-         dropout_rate: float number that help avoiding over-fitting,
-         regularization: regularization of each MLP layers, None if you do not want it.
-         data_augmentation: bool in case you use windows you can have random rotation,
-         optimizer: loss optimization function,
-         output_units: how many class you have to predicts
+         sample_weights: If you want to sample weights. It is used when there is strong imbalance of the data.
+         neuron_list: This is a list of dense layers used for the last section of the network (fully connected layers).
+                      The length of the list shows the number of layers.
+         pool_size: Size of the pooling layer (How much you want to reduce the dimension of the data).
+         dropout_rate: Float number that help avoiding over-fitting. It just randomly drops samples.
+         regularization: Regularization of each  layer. None if you do not want it:
+                         - None if you prefer to avoid regularization.
+                         - L1 for L1 regularization.
+                         - L2 for L2 regularization.
+                         - L1L2 for L1 L2 regularization.
+         data_augmentation: Usable only if the network is fed by windows.
+         optimizer: Loss optimization function, default is Adam.
+         output_units: How many class you have to predicts.
+         threshold: This number is used as borderline between classes.
 
     Return:
-        return the compiled model, the true validation labels, the predicted labels, score
+        cnn_model: The compiled model used in this instance.
+        true_value_of_the_labels: The true labels values of the data. (the test section).
+        predicted_values: The predicted labels of the data. (the test section).
+        prediction: The value of the prediction (probabilities).
+        score: Value of the evaluation of the network.
 
     Raises:
         CNNRunningParameterException: when the batch size or epochs are wrong integer
     """
 
     if batch_size <= 0 or epochs <= 0:
-        raise CNNRunningParameterException
+        raise InvalidParameterValueException
 
     if len(conv_list) <= 0 or len(neuron_list) <= 0:
-        raise CNNRunningParameterException
+        raise InvalidArgumentTypeException
 
     if threshold <= 0.0:
-        raise CNNRunningParameterException
+        raise InvalidArgumentTypeException
 
-    # generate the model
-    cnn_model = __do_the_cnn(
+    cnn_model = _create_an_instance_of_cnn(
         input_shape_for_cnn=input_shape_for_cnn,
         convolution_kernel_size=convolutional_kernel_size,
         conv_list=conv_list,
@@ -282,7 +317,7 @@ def train_and_predict_for_regression(
         output_units=output_units,
     )
 
-    stacked_prediction = list()
+    predicted_values = list()
 
     _ = cnn_model.fit(
         x_train,
@@ -293,16 +328,12 @@ def train_and_predict_for_regression(
         sample_weight=compute_sample_weight("balanced", y_train) if sample_weights is not False else None,
     )
 
-    # make the score and the prediction
     score = cnn_model.evaluate(x_validation, y_validation)[1]
     prediction = cnn_model.predict(x_validation)
 
     if prediction[0] <= threshold:
-        stacked_prediction.append(0)
+        predicted_values.append(0)
     else:
-        stacked_prediction.append(1)
+        predicted_values.append(1)
 
-    # create a cm
-    # cm = confusion_matrix(np.array(stacked_true), np.array(stacked_prediction), normalize="all")
-    # df = pd.DataFrame(cm, columns=["Non deposit", "deposit"], index=["Non deposit", "deposit"])
-    return cnn_model, y_validation, stacked_prediction, score
+    return cnn_model, y_validation, np.array(predicted_values), prediction, score

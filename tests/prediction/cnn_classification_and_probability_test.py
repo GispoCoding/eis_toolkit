@@ -2,23 +2,15 @@ import os
 
 import numpy as np
 from sklearn.metrics import confusion_matrix
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import StandardScaler
 
 from eis_toolkit.prediction.cnn_classification_and_probability import (
     train_and_predict_for_classification,
     train_and_predict_for_regression,
 )
 from eis_toolkit.prediction.model_performance_estimation import performance_model_estimation
-
-
-def make_one_hot_encoding(labels):
-    """You can delete this when I find the original one-hot encoding from the toolkit."""
-    # to categorical
-    enc = OneHotEncoder(handle_unknown="ignore")
-    # train and valid set
-    temp = np.reshape(labels, (-1, 1))
-    label_encoded = enc.fit_transform(temp).toarray()
-    return label_encoded
+from eis_toolkit.transformations.normalize_data import normalize_the_data
+from eis_toolkit.transformations.one_hot_encoding import one_hot_encode
 
 
 def test_do_the_classification():
@@ -28,7 +20,11 @@ def test_do_the_classification():
     labels = np.load(f'{os.path.join("data", "labels.npy")}')
 
     # do the encoding
-    encoded_labels = make_one_hot_encoding(labels)
+    encoded_labels = one_hot_encode(labels)
+
+    # create a scaler agent
+    scaler_agent = StandardScaler()
+    scaler_agent.fit(data)
 
     # make cv
     selected_cv = performance_model_estimation(cross_validation_type="SKFOLD", number_of_split=5)
@@ -37,9 +33,10 @@ def test_do_the_classification():
 
     for i, (train_idx, validation_idx) in enumerate(selected_cv.split(data, labels)):
 
-        x_train = data[train_idx]
+        x_train = normalize_the_data(scaler_agent=scaler_agent, data=data[train_idx])
         y_train = encoded_labels[train_idx]
-        x_validation = data[validation_idx]
+
+        x_validation = normalize_the_data(scaler_agent=scaler_agent, data=data[validation_idx])
         y_validation = encoded_labels[validation_idx]
 
         cnn_model, true_labels, predicted_labels, score = train_and_predict_for_classification(
@@ -60,7 +57,6 @@ def test_do_the_classification():
             print(stacked_true.shape)
         else:
             stacked_true = np.concatenate((stacked_true, true_labels))
-            print(stacked_true.shape)
 
         if stacked_predicted is None:
             stacked_predicted = predicted_labels
@@ -79,8 +75,9 @@ def test_do_the_regression():
     data = np.load(f'{os.path.join("data", "data.npy")}')
     labels = np.load(f'{os.path.join("data", "labels.npy")}')
 
-    # do the encoding
-    # encoded_labels = make_one_hot_encoding(labels)
+    # create a scaler agent
+    scaler_agent = StandardScaler()
+    scaler_agent.fit(data)
 
     # make cv
     selected_cv = performance_model_estimation(cross_validation_type="SKFOLD", number_of_split=5)
@@ -89,9 +86,10 @@ def test_do_the_regression():
 
     for i, (train_idx, validation_idx) in enumerate(selected_cv.split(data, labels)):
 
-        x_train = data[train_idx]
+        x_train = normalize_the_data(scaler_agent=scaler_agent, data=data[train_idx])
         y_train = labels[train_idx]
-        x_validation = data[validation_idx]
+
+        x_validation = normalize_the_data(scaler_agent=scaler_agent, data=data[validation_idx])
         y_validation = labels[validation_idx]
 
         cnn_model, true_labels, predicted_labels, probabilities, score = train_and_predict_for_regression(
