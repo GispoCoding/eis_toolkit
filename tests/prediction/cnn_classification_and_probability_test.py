@@ -20,11 +20,11 @@ def test_do_the_classification():
     labels = np.load(f'{os.path.join("data", "labels.npy")}')
 
     # do the encoding
-    encoded_labels = one_hot_encode(labels)
+    encoded_labels = one_hot_encode(labels, sparse_output=False)
 
     # create a scaler agent
     scaler_agent = StandardScaler()
-    scaler_agent.fit(data)
+    scaler_agent.fit(data.reshape(-1, data.shape[-1]))
 
     # make cv
     selected_cv = performance_model_estimation(cross_validation_type="SKFOLD", number_of_split=5)
@@ -53,15 +53,14 @@ def test_do_the_classification():
         )
 
         if stacked_true is None:
-            stacked_true = true_labels
-            print(stacked_true.shape)
+            stacked_true = np.argmax(true_labels, axis=1)
         else:
-            stacked_true = np.concatenate((stacked_true, true_labels))
+            stacked_true = np.concatenate((stacked_true, np.argmax(true_labels, axis=1)))
 
         if stacked_predicted is None:
-            stacked_predicted = predicted_labels
+            stacked_predicted = np.argmax(predicted_labels, axis=1)
         else:
-            stacked_predicted = np.concatenate((stacked_predicted, predicted_labels))
+            stacked_predicted = np.concatenate((stacked_predicted, np.argmax(predicted_labels, axis=1)))
 
     # make cm
     cm = confusion_matrix(stacked_true, stacked_predicted)
@@ -77,7 +76,7 @@ def test_do_the_regression():
 
     # create a scaler agent
     scaler_agent = StandardScaler()
-    scaler_agent.fit(data)
+    scaler_agent.fit(data.reshape(-1, data.shape[-1]))
 
     # make cv
     selected_cv = performance_model_estimation(cross_validation_type="SKFOLD", number_of_split=5)
@@ -111,10 +110,10 @@ def test_do_the_regression():
             print(stacked_true.shape)
         else:
             stacked_true = np.concatenate((stacked_true, true_labels))
-            print(stacked_true.shape)
 
         if stacked_predicted is None:
             stacked_predicted = predicted_labels
+            print(predicted_labels.shape)
         else:
             stacked_predicted = np.concatenate((stacked_predicted, predicted_labels))
 

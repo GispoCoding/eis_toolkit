@@ -61,7 +61,10 @@ def _create_an_instance_of_cnn(
     if input_shape_for_cnn is None:
         raise InvalidParameterValueException
 
-    if len(neuron_list) <= 0 or dropout_rate <= 0:
+    if len(neuron_list) <= 0:
+        raise InvalidArgumentTypeException
+
+    if dropout_rate is not None and dropout_rate <= 0:
         raise InvalidArgumentTypeException
 
     # generate the input
@@ -115,7 +118,6 @@ def _create_an_instance_of_cnn(
     return model
 
 
-@beartype
 def train_and_predict_for_classification(
     x_train: np.ndarray,
     y_train: np.ndarray,
@@ -220,7 +222,7 @@ def train_and_predict_for_classification(
     true_value_of_the_labels.append(np.argmax(y_validation))
     predicted_values.append(np.argmax(prediction))
 
-    return cnn_model, np.array(true_value_of_the_labels), np.array(predicted_values), score
+    return cnn_model, y_validation, prediction, score
 
 
 @beartype
@@ -331,9 +333,9 @@ def train_and_predict_for_regression(
     score = cnn_model.evaluate(x_validation, y_validation)[1]
     prediction = cnn_model.predict(x_validation)
 
-    if prediction[0] <= threshold:
-        predicted_values.append(0)
-    else:
-        predicted_values.append(1)
-
+    for p in prediction:
+        if p <= threshold:
+            predicted_values.append(0)
+        else:
+            predicted_values.append(1)
     return cnn_model, y_validation, np.array(predicted_values), prediction, score
