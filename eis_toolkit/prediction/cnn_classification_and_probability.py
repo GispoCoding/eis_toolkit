@@ -65,7 +65,7 @@ def _create_an_instance_of_cnn(
         raise InvalidArgumentTypeException
 
     if dropout_rate is not None and dropout_rate <= 0:
-        raise InvalidArgumentTypeException
+        raise InvalidParameterValueException
 
     # generate the input
     input_layer = tf.keras.Input(shape=input_shape_for_cnn)
@@ -181,16 +181,23 @@ def train_and_predict_for_classification(
         score: Value of the evaluation of the network.
 
     Raises:
-        CNNRunningParameterException: when the batch size or epochs are wrong integer
+        InvalidArgumentTypeException: Argument like train adapter, valid adapter are invalid.
+        InvalidParameterValueException: Argument like convolution list, neuron list are invalid.
     """
 
     true_value_of_the_labels, predicted_values = list(), list()
+
+    if x_train.size == 0 or y_train.size == 0 or y_validation.size == 0 or x_validation.size == 0:
+        raise InvalidArgumentTypeException
 
     if batch_size <= 0 or epochs <= 0:
         raise InvalidArgumentTypeException
 
     if len(conv_list) <= 0 or len(neuron_list) <= 0:
         raise InvalidArgumentTypeException
+
+    if dropout_rate is not None and dropout_rate <= 0:
+        raise InvalidParameterValueException
 
     cnn_model = _create_an_instance_of_cnn(
         input_shape_for_cnn=input_shape_for_cnn,
@@ -292,8 +299,12 @@ def train_and_predict_for_regression(
         score: Value of the evaluation of the network.
 
     Raises:
-        CNNRunningParameterException: when the batch size or epochs are wrong integer
+        InvalidArgumentTypeException: Argument like train adapter, valid adapter are invalid.
+        InvalidParameterValueException: Argument like convolution list, neuron list are invalid.
     """
+
+    if x_train.size == 0 or y_train.size == 0 or y_validation.size == 0 or x_validation.size == 0:
+        raise InvalidArgumentTypeException
 
     if batch_size <= 0 or epochs <= 0:
         raise InvalidParameterValueException
