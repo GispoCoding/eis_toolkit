@@ -7,7 +7,7 @@ from beartype.typing import Sequence, Tuple, Union
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
-def _bands_non_negative(band: Sequence):
+def _check_bands_non_negative(band: Sequence):
     if any(n < 0 for n in band):
         raise InvalidParameterValueException("The list bands contains negative values.")
 
@@ -49,7 +49,7 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _bands_non_negative(bands_to_read)
+    _check_bands_non_negative(bands_to_read)
 
     for band in raster.read(bands_to_read):
 
@@ -99,7 +99,7 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _bands_non_negative(bands_to_read)
+    _check_bands_non_negative(bands_to_read)
 
     for band in raster.read(bands_to_read):
 
@@ -151,7 +151,7 @@ def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _bands_non_negative(bands_to_read)
+    _check_bands_non_negative(bands_to_read)
 
     for band in raster.read(bands_to_read):
 
@@ -200,7 +200,7 @@ def raster_with_quantiles(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _bands_non_negative(bands_to_read)
+    _check_bands_non_negative(bands_to_read)
 
     for band in raster.read(bands_to_read):
 
@@ -249,7 +249,7 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _bands_non_negative(bands_to_read)
+    _check_bands_non_negative(bands_to_read)
 
     for band in raster.read(bands_to_read):
 
@@ -268,7 +268,7 @@ def _raster_with_geometrical_intervals(
     mask = band == nan_value
     masked_array = np.ma.masked_array(data=band, mask=mask)
 
-    median_value = np.nanmedian(masked_array)
+    median_value = np.ma.median(masked_array)
     max_value = masked_array.max()
     min_value = masked_array.min()
 
@@ -284,8 +284,8 @@ def _raster_with_geometrical_intervals(
         range_tail = median_value - min_value
         tail_values = tail_values - min_value + range_tail / 1000.0
 
-    min_tail = np.nanmin(tail_values)
-    max_tail = np.nanmax(tail_values)
+    min_tail = np.ma.nmin(tail_values)
+    max_tail = np.ma.max(tail_values)
 
     # number of classes
     factor = (max_tail / min_tail) ** (1 / number_of_classes)
@@ -346,7 +346,7 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _bands_non_negative(bands_to_read)
+    _check_bands_non_negative(bands_to_read)
 
     for band in raster.read(bands_to_read):
 
@@ -411,7 +411,7 @@ def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _bands_non_negative(bands_to_read)
+    _check_bands_non_negative(bands_to_read)
 
     for band in raster.read(bands_to_read):
 
