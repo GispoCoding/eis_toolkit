@@ -1,9 +1,11 @@
 import os
 
 import numpy as np
+import pytest
 from sklearn.metrics import confusion_matrix
 from sklearn.preprocessing import StandardScaler
 
+from eis_toolkit.exceptions import InvalidArgumentTypeException, InvalidParameterValueException
 from eis_toolkit.prediction.cnn_classification_and_probability import (
     train_and_predict_for_classification,
     train_and_predict_for_regression,
@@ -121,3 +123,84 @@ def test_do_the_regression():
     cm = confusion_matrix(stacked_true, stacked_predicted)
     print(cm)
     assert cm.shape[0] != 0 and cm.shape[1] != 0
+
+
+def test_invalid_convolutional_layer():
+    """Test invalid convolutional layer."""
+    with pytest.raises(InvalidArgumentTypeException):
+        x_train = np.load(f'{os.path.join("data", "data.npy")}')
+        y_train = np.load(f'{os.path.join("data", "labels.npy")}')
+
+        cnn_model, true_labels, predicted_labels, score = train_and_predict_for_classification(
+            x_train=x_train,
+            y_train=y_train,
+            x_validation=None,
+            y_validation=None,
+            batch_size=32,
+            epochs=10,
+            conv_list=[],
+            neuron_list=[8],
+            input_shape_for_cnn=(x_train.shape[1], x_train.shape[2], x_train.shape[3]),
+            convolutional_kernel_size=(x_train.shape[3], x_train.shape[3]),
+        )
+
+
+def test_invalid_neurons_layer():
+    """Test invalid neuron layers."""
+    with pytest.raises(InvalidArgumentTypeException):
+        x_train = np.load(f'{os.path.join("data", "data.npy")}')
+        y_train = np.load(f'{os.path.join("data", "labels.npy")}')
+
+        cnn_model, true_labels, predicted_labels, score = train_and_predict_for_classification(
+            x_train=x_train,
+            y_train=y_train,
+            x_validation=None,
+            y_validation=None,
+            batch_size=32,
+            epochs=10,
+            conv_list=[8],
+            neuron_list=[],
+            input_shape_for_cnn=(x_train.shape[1], x_train.shape[2], x_train.shape[3]),
+            convolutional_kernel_size=(x_train.shape[3], x_train.shape[3]),
+        )
+
+
+def test_invalid_parameters_dropout_exception():
+    """Invalid dropout test."""
+    with pytest.raises(InvalidParameterValueException):
+        x_train = np.load(f'{os.path.join("data", "data.npy")}')
+        y_train = np.load(f'{os.path.join("data", "labels.npy")}')
+
+        cnn_model, true_labels, predicted_labels, score = train_and_predict_for_classification(
+            x_train=x_train,
+            y_train=y_train,
+            x_validation=None,
+            y_validation=None,
+            batch_size=32,
+            epochs=10,
+            conv_list=[8],
+            neuron_list=[8],
+            input_shape_for_cnn=(x_train.shape[1], x_train.shape[2], x_train.shape[3]),
+            convolutional_kernel_size=(x_train.shape[3], x_train.shape[3]),
+            dropout_rate=-10.0,
+        )
+
+
+def test_invalid_parameters_inputs_exception():
+    """Invalid inputs test."""
+    with pytest.raises(InvalidArgumentTypeException):
+        x_train = np.load(f'{os.path.join("data", "data.npy")}')
+
+        cnn_model, true_labels, predicted_labels, score = train_and_predict_for_classification(
+            x_train=np.array([]),
+            y_train=np.array([]),
+            x_validation=None,
+            y_validation=None,
+            batch_size=32,
+            epochs=10,
+            conv_list=[8],
+            neuron_list=[8],
+            input_shape_for_cnn=(x_train.shape[1], x_train.shape[2], x_train.shape[3]),
+            convolutional_kernel_size=(x_train.shape[3], x_train.shape[3]),
+            dropout_rate=None,
+        )
