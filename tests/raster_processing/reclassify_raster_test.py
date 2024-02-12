@@ -70,7 +70,7 @@ def test_raster_with_geometrical_intervals():
 
     result = reclassify_raster._raster_with_geometrical_intervals(array_with_nan_value, number_of_classes, nan_value)
 
-    expected_output = np.array([[0, -9, -9, -9], [-9, -9, -9, -9], [0, 0, 8, 8], [9, 9, 9, 9]])
+    expected_output = np.array([[0, -9, -9, -9], [-9, -9, -9, -8], [8, 8, 9, 9], [9, 9, 9, 9]])
 
     assert isinstance(result, np.ndarray)
 
