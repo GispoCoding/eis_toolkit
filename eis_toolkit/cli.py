@@ -267,6 +267,48 @@ OUTPUT_DIR_OPTION = typer.Option(
 
 # --- EXPLORATORY ANALYSES ---
 
+# NORMALITY TEST RASTER
+@app.command()
+def normality_test_raster_cli(input_raster: Annotated[Path, INPUT_FILE_OPTION]):
+    """Compute Shapiro-Wilk test for normality on the input data."""
+    from eis_toolkit.exploratory_analyses.statistical_tests import normality_test
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        data = raster.read()
+        typer.echo("Progress: 25%")
+
+        results_dict = normality_test(data)
+
+    typer.echo("Progress: 75%")
+
+    json_str = json.dumps(results_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo("Normality test (raster) completed")
+
+
+# NORMALITY TEST VECTOR
+@app.command()
+def normality_test_vector_cli(input_vector: Annotated[Path, INPUT_FILE_OPTION], columns: List[str] = None):
+    """Compute Shapiro-Wilk test for normality on the input data."""
+    from eis_toolkit.exploratory_analyses.statistical_tests import normality_test
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    results_dict = normality_test(geodataframe, columns)
+
+    typer.echo("Progress: 75%")
+
+    json_str = json.dumps(results_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo("Normality test (vector) completed")
+
 
 # DBSCAN
 @app.command()
