@@ -54,7 +54,8 @@ def _create_an_instance_of_cnn(
         model: the model that has been created.
 
     Raises:
-        CNNException: raised when the input is not valid
+        InvalidParameterValueException: Raised when the input is not valid.
+        InvalidParameterValueException: Raised when parameters like dropout is invalid.
     """
 
     # check that the input is not null
