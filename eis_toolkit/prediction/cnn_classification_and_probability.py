@@ -7,7 +7,7 @@ from keras import Model
 from numpy import ndarray
 from sklearn.utils.class_weight import compute_sample_weight
 
-from eis_toolkit.exceptions import InvalidArgumentTypeException, InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException
 
 
 @beartype
@@ -62,9 +62,9 @@ def _create_an_instance_of_cnn(
     Raises:
         InvalidParameterValueException: Raised when the input shape of the CNN is not valid. It can be risen.
                                         For example, when the user plan to build a windows CNN approach and feed it
-                                        with point.
-        InvalidArgumentTypeException: Raised when argument of the function is invalid. It is applied to convolution
-                                      layers and dense layers.
+                                        with point. Moreover, Raised when argument of the function is invalid. It is
+                                        applied to convolution layers and dense layers.
+
     """
 
     # check that the input is not null
@@ -72,13 +72,13 @@ def _create_an_instance_of_cnn(
         raise InvalidParameterValueException
 
     if len(conv_list) <= 0:
-        raise InvalidArgumentTypeException
+        raise InvalidParameterValueException
 
     if len(neuron_list) <= 0:
-        raise InvalidArgumentTypeException
+        raise InvalidParameterValueException
 
     if dropout_rate is not None and dropout_rate <= 0:
-        raise InvalidArgumentTypeException
+        raise InvalidParameterValueException
 
     # generate the input
     input_layer = tf.keras.Input(shape=input_shape_for_cnn)
@@ -199,23 +199,23 @@ def run_inference(
         The trained model together with the predicted values and the model's score.  When
         the validation set is None, true labels, predicted labels and scores assumes None.
     Raises:
-        InvalidArgumentTypeException: Raised when argument of the function is invalid. It is applied to convolution
-                                      layers and dense layers. Moreover, Raised when the input shape of the CNN is not
-                                      valid. It can be risen. For example, when the user plan to build a windows CNN
-                                      approach and feed it with point.
+        InvalidParameterValueException: Raised when argument of the function is invalid. It is applied to convolution
+                                       layers and dense layers. Moreover, Raised when the input shape of the CNN is not
+                                       valid. It can be risen. For example, when the user plan to build a windows CNN
+                                       approach and feed it with point.
     """
 
     if X.size == 0 or y.size == 0:
-        raise InvalidArgumentTypeException
+        raise InvalidParameterValueException
 
     if batch_size <= 0 or epochs <= 0:
-        raise InvalidArgumentTypeException
+        raise InvalidParameterValueException
 
     if len(conv_list) <= 0 or len(neuron_list) <= 0:
-        raise InvalidArgumentTypeException
+        raise InvalidParameterValueException
 
     if dropout_rate is not None and dropout_rate <= 0:
-        raise InvalidArgumentTypeException
+        raise InvalidParameterValueException
 
     cnn_model = _create_an_instance_of_cnn(
         input_shape_for_cnn=input_shape_for_cnn,
@@ -249,130 +249,3 @@ def run_inference(
         return cnn_model, prediction, score
     else:
         return cnn_model, None, None
-
-
-"NICO WE CAN REMOVE THIS ONE AND TAKE ONLY THE OTHER. BECAUSE THEY DO THE EXACT JOB."
-
-
-def run_inference_for_regression(
-    X: np.ndarray,
-    y: np.ndarray,
-    batch_size: int,
-    epochs: int,
-    threshold: float,
-    conv_list: list[int],
-    neuron_list: list[int],
-    input_shape_for_cnn: Union[tuple[int, int, int], tuple[int, int], tuple[int], int],
-    convolutional_kernel_size: tuple[int, int],
-    validation_split: Optional[float] = 0.2,
-    validation_data: Optional[Tuple[np.ndarray, np.ndarray]] = None,
-    sample_weights: bool = False,
-    pool_size: int = 2,
-    dropout_rate: Union[None, float] = None,
-    regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2, None] = None,
-    data_augmentation: bool = False,
-    optimizer: str = "Adam",
-    output_units=1,
-    last_activation_layer: Literal["softmax", "sigmoid", None] = "sigmoid",
-    loss_function: Union[
-        tf.keras.losses.BinaryCrossentropy(),
-        tf.keras.losses.CategoricalCrossentropy(),
-        tf.keras.losses.MeanAbsoluteError(),
-    ] = tf.keras.losses.BinaryCrossentropy(),
-) -> tuple[Model, ndarray or None, ndarray or None, Any or None]:
-    """
-    Do a CNN for training and evaluation of data. It is designed to classify pixels using threshold.
-
-    Here, you can select how many convolutional layer and Dense layer you  want.  This CNN can be used to classify
-    the data provided as classes. In addition, this function uses threshold as boundary lines between classes.
-    The CNN works both with windows and points. If you select windows,  it is possible to use random rotation to augment
-    the data. In case the  CNN is over-fitting, you can try to avoid  it adding dropout or regularization.
-
-    Args:
-         X: This is the dataset used for the model inference.
-         y: The labels used for training: they can be encoded (done with OHE) or a list of integers.
-         validation_split: split between train and validation of the data.
-         validation_data: Partition of dataset used as validation (unseen data).
-         batch_size: How much we want the batch size. This is the number os samples that the CNN takes during each
-            iteration.
-         epochs: How many iterations we want to run the model.
-         input_shape_for_cnn: Shape of the inputs windows should follow:
-            - tuple[int, int, int] feed the cnn with windows: format (h, w, c).
-            - tuple[int, int] feed a network with points: format (value, c).
-         convolutional_kernel_size: Size of the kernel (usually is the last number of the input tuple).
-         conv_list: list of units used in each convolutional layer.The length of the list is the number of layers.
-         epochs: how many epochs we want to run the model,
-         input_shape_for_cnn: shape of the inputs windows -> tuple[int, int, int] just a point -> tuple[int, int],
-         sample_weights: If you want to sample weights. It is used when there is strong imbalance of the data.
-         neuron_list: This is a list of dense layers used for the last section of the network (fully connected layers).
-            The length of the list shows the number of layers.
-         pool_size: Size of the pooling layer (How much you want to reduce the dimension of the data).
-         dropout_rate: Float number that help avoiding over-fitting. It just randomly drops samples.
-         regularization: Regularization of each  layer. None if you do not want it:
-            - None if you prefer to avoid regularization.
-            - L1 for L1 regularization.
-            - L2 for L2 regularization.
-            - L1L2 for L1 L2 regularization.
-         data_augmentation: Usable only if the network is fed by windows.
-         optimizer: Loss optimization function, default is Adam.
-         output_units: How many class you have to predicts.
-         threshold: This number is used as borderline between classes.
-         last_activation_layer: How the output of the network is calculated.
-         loss_function: The loss function used to measure how good the CNN is performing.
-
-    Return:
-        The trained model together with the true validation labels, the predicted values, predicted probabilities, and
-        the score of the model.  When the validation set is None, true labels, predicted labels and scores assumes None.
-
-    Raises:
-        InvalidArgumentTypeException: Raised when argument of the function is invalid. It is applied to convolution
-                                      layers and dense layers. Moreover, Raised when the input shape of the CNN is not
-                                      valid. It can be risen. For example, when the user plan to build a windows CNN
-                                      approach and feed it with point.
-    """
-
-    if X.size == 0 or y.size == 0:
-        raise InvalidArgumentTypeException
-
-    if batch_size <= 0 or epochs <= 0:
-        raise InvalidArgumentTypeException
-
-    if len(conv_list) <= 0 or len(neuron_list) <= 0:
-        raise InvalidArgumentTypeException
-
-    if threshold <= 0.0:
-        raise InvalidArgumentTypeException
-
-    cnn_model = _create_an_instance_of_cnn(
-        input_shape_for_cnn=input_shape_for_cnn,
-        convolution_kernel_size=convolutional_kernel_size,
-        conv_list=conv_list,
-        pool_size=pool_size,
-        neuron_list=neuron_list,
-        dropout_rate=dropout_rate,
-        last_activation=last_activation_layer,
-        regularization=regularization,
-        data_augmentation=data_augmentation,
-        optimizer=optimizer,
-        loss=loss_function,
-        output_units=output_units,
-    )
-
-    _ = cnn_model.fit(
-        X,
-        y,
-        validation_split=validation_split if validation_split is None else None,
-        batch_size=batch_size,
-        epochs=epochs,
-        sample_weight=compute_sample_weight("balanced", y) if sample_weights is not False else None,
-    )
-
-    if validation_split is not None:
-
-        x_valid, y_valid = validation_data
-        score = cnn_model.evaluate(x_valid, y_valid)[1]
-        prediction = cnn_model.predict(x_valid)
-        predicted_values = (prediction >= threshold).astype(int)
-        return cnn_model, predicted_values, prediction, score
-    else:
-        return cnn_model, None, None, None

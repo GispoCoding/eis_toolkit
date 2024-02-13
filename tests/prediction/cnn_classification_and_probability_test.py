@@ -1,52 +1,15 @@
 import os
-from typing import Literal, Optional, Union
 
 import numpy as np
 import pytest
 import tensorflow as tf
-from sklearn.model_selection import KFold, LeaveOneOut, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 
-from eis_toolkit.exceptions import InvalidArgumentTypeException, InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.prediction.cnn_classification_and_probability import run_inference
+from eis_toolkit.prediction.machine_learning_general import _get_cross_validator
 from eis_toolkit.transformations.normalize_data import normalize_the_data
 from eis_toolkit.transformations.one_hot_encoding import one_hot_encode
-
-SPLIT = "split"
-KFOLD_CV = "kfold_cv"
-SKFOLD_CV = "skfold_cv"
-LOO_CV = "loo_cv"
-NO_VALIDATION = "none"
-
-
-def _get_cross_validator(
-    cv: Literal["kfold_cv", "skfold_cv", "loo_cv"], folds: int, shuffle: bool, random_state: Optional[int]
-) -> Union[KFold, StratifiedKFold, LeaveOneOut]:
-    """
-    Create a Sklearn cross-validator.
-
-    Args:
-        cv: Name/identifier of the cross-validator.
-        folds: Number of folds to use (for Kfold and StratifiedKFold).
-        shuffle: If data is shuffled before splitting.
-        random_state: Seed for random number generation.
-
-    Returns:
-        Sklearn cross-validator instance.
-
-    Raises:
-        InvalidParameterValueException: Invalid input for `cv`.
-    """
-    if cv == KFOLD_CV:
-        cross_validator = KFold(n_splits=folds, shuffle=shuffle, random_state=random_state)
-    elif cv == SKFOLD_CV:
-        cross_validator = StratifiedKFold(n_splits=folds, shuffle=shuffle, random_state=random_state)
-    elif cv == LOO_CV:
-        cross_validator = LeaveOneOut()
-    else:
-        raise InvalidParameterValueException(f"CV method was not recognized: {cv}")
-
-    return cross_validator
 
 
 def test_train_CNN_classifier_with_categorical_crossentropy():
@@ -210,7 +173,7 @@ def test_train_CNN_regressor():
 
 def test_invalid_convolutional_layer():
     """Test invalid convolutional layer."""
-    with pytest.raises(InvalidArgumentTypeException):
+    with pytest.raises(InvalidParameterValueException):
         x_train = np.load(f'{os.path.join("data", "data.npy")}')
         y_train = np.load(f'{os.path.join("data", "labels.npy")}')
 
@@ -230,7 +193,7 @@ def test_invalid_convolutional_layer():
 
 def test_invalid_neurons_layer():
     """Test invalid neuron layers."""
-    with pytest.raises(InvalidArgumentTypeException):
+    with pytest.raises(InvalidParameterValueException):
         x_train = np.load(f'{os.path.join("data", "data.npy")}')
         y_train = np.load(f'{os.path.join("data", "labels.npy")}')
 
@@ -250,7 +213,7 @@ def test_invalid_neurons_layer():
 
 def test_invalid_parameters_dropout_exception():
     """Invalid dropout test."""
-    with pytest.raises(InvalidArgumentTypeException):
+    with pytest.raises(InvalidParameterValueException):
         x_train = np.load(f'{os.path.join("data", "data.npy")}')
         y_train = np.load(f'{os.path.join("data", "labels.npy")}')
 
@@ -271,7 +234,7 @@ def test_invalid_parameters_dropout_exception():
 
 def test_invalid_parameters_inputs_exception():
     """Invalid inputs test."""
-    with pytest.raises(InvalidArgumentTypeException):
+    with pytest.raises(InvalidParameterValueException):
         x_train = np.load(f'{os.path.join("data", "data.npy")}')
 
         cnn_model, predicted_labels, score = run_inference(
