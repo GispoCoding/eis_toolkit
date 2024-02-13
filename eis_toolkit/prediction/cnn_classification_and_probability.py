@@ -1,4 +1,4 @@
-from typing import Any, Literal, Union
+from typing import Any, Literal, Optional, Tuple, Union
 
 import numpy as np
 import tensorflow as tf
@@ -18,12 +18,17 @@ def _create_an_instance_of_cnn(
     neuron_list: list[int],
     pool_size: int = 2,
     dropout_rate: Union[None, float] = None,
-    last_activation: Literal["softmax", "sigmoid"] = "softmax",
+    last_activation: Literal["softmax", "sigmoid", None] = "softmax",
     regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2, None] = None,
     data_augmentation: bool = False,
     optimizer: str = "Adam",
-    loss=Union[tf.keras.losses.BinaryCrossentropy(), tf.keras.losses.CategoricalCrossentropy()],
+    loss=Union[
+        tf.keras.losses.BinaryCrossentropy(),
+        tf.keras.losses.CategoricalCrossentropy(),
+        tf.keras.losses.MeanSquaredError(),
+    ],
     output_units=2,
+    metrics="accuracy",
 ) -> tf.keras.Model:
     """
      Do an instance of the CNN. Just the body of the CNN.
@@ -49,24 +54,31 @@ def _create_an_instance_of_cnn(
        dropout_rate: Float number that help avoiding over-fitting. It just randomly drops samples.
        output_units: number of output classes.
        last_activation: usually you should use softmax or sigmoid.
+       metrics: In case of classification accuracy is the best metrics, otherwise for regression MAE is the way.
 
     Return:
-        model: the model that has been created.
+         the model that has been created.
 
     Raises:
-        InvalidParameterValueException: Raised when the input is not valid.
-        InvalidParameterValueException: Raised when parameters like dropout is invalid.
+        InvalidParameterValueException: Raised when the input shape of the CNN is not valid. It can be risen.
+                                        For example, when the user plan to build a windows CNN approach and feed it
+                                        with point.
+        InvalidArgumentTypeException: Raised when argument of the function is invalid. It is applied to convolution
+                                      layers and dense layers.
     """
 
     # check that the input is not null
     if input_shape_for_cnn is None:
         raise InvalidParameterValueException
 
+    if len(conv_list) <= 0:
+        raise InvalidArgumentTypeException
+
     if len(neuron_list) <= 0:
         raise InvalidArgumentTypeException
 
     if dropout_rate is not None and dropout_rate <= 0:
-        raise InvalidParameterValueException
+        raise InvalidArgumentTypeException
 
     # generate the input
     input_layer = tf.keras.Input(shape=input_shape_for_cnn)
@@ -115,21 +127,21 @@ def _create_an_instance_of_cnn(
     )
 
     model = tf.keras.Model(inputs=input_layer, outputs=classifier)
-    model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
+    model.compile(optimizer=optimizer, loss=loss, metrics=[metrics])
     return model
 
 
-def train_and_predict_for_classification(
-    x_train: np.ndarray,
-    y_train: np.ndarray,
-    x_validation: np.ndarray,
-    y_validation: np.ndarray,
+def run_inference_for_classification(
+    X: np.ndarray,
+    y: np.ndarray,
     batch_size: int,
     epochs: int,
     conv_list: list[int],
     neuron_list: list[int],
     input_shape_for_cnn: Union[tuple[int, int, int], tuple[int, int], tuple[int], int],
     convolutional_kernel_size: tuple[int, int],
+    validation_split: Optional[float] = 0.2,
+    validation_data: Optional[Tuple[np.ndarray, np.ndarray]] = None,
     pool_size: int = 2,
     sample_weights: bool = False,
     dropout_rate: Union[None, float] = None,
@@ -137,7 +149,13 @@ def train_and_predict_for_classification(
     data_augmentation: bool = False,
     optimizer: str = "Adam",
     output_units=2,
-) -> tuple[Model, ndarray, ndarray, Any]:
+    last_activation_layer: Literal["softmax", "sigmoid", None] = "softmax",
+    loss_function: Union[
+        tf.keras.losses.BinaryCrossentropy(),
+        tf.keras.losses.CategoricalCrossentropy(),
+        tf.keras.losses.MeanAbsoluteError(),
+    ] = tf.keras.losses.BinaryCrossentropy(),
+) -> tuple[Model, ndarray or None, Any or None]:
     """
     Do a CNN for training and evaluation of data. It is designed to classify the data provided in the given labels.
 
@@ -147,48 +165,47 @@ def train_and_predict_for_classification(
     dropout or regularization.
 
     Args:
-         x_train: This is the portion of the data used for training the model.
-         y_train: Partition of the labels used for training: they can be encoded (done with OHE) or a list of integers.
-         x_validation: This is the partition of the dataset used for validation.
-         y_validation: Partition of the labels used for validation in the same form of the y_train.
+         X: This is the dataset used for the model inference.
+         y: The labels used for training: they can be encoded (done with OHE) or a list of integers.
+         validation_split: split between train and validation of the data.
+         validation_data: Partition of dataset used as validation (unseen data).
          batch_size: How much we want the batch size. This is the number os samples that the CNN takes during each
-                     iteration.
+            iteration.
          epochs: How many iterations we want to run the model.
          input_shape_for_cnn: Shape of the inputs windows should follow:
-                              - tuple[int, int, int] feed the cnn with windows: format (h, w, c).
-                              - tuple[int, int] feed a network with points: format (value, c).
+            - tuple[int, int, int] feed the cnn with windows: format (h, w, c).
+            - tuple[int, int] feed a network with points: format (value, c).
          convolutional_kernel_size: Size of the kernel (usually is the last number of the input tuple).
          pool_size: Size of the pooling layer (How much you want to reduce the dimension of the data).
          conv_list: List of units used in each convolutional layer.The length of the list is the number of layers.
          sample_weights: If you want to sample weights. It is used when there is strong imbalance of the data.
-                  neuron_list: This is a list of dense layers used for the last section of the network (fully connected
-                  layers). The length of the list shows the number of layers.
+            neuron_list: This is a list of dense layers used for the last section of the network (fully connected
+            layers). The length of the list shows the number of layers.
          neuron_list: This is a list of dense layers used for the last section of the network (fully connected layers).
-                      The length of the list shows the number of layers.
+            The length of the list shows the number of layers.
          dropout_rate: Float number that help avoiding over-fitting. It just randomly drops samples.
          regularization: Regularization of each  layer. None if you do not want it:
-                         - None if you prefer to avoid regularization.
-                         - L1 for L1 regularization.
-                         - L2 for L2 regularization.
-                         - L1L2 for L1 L2 regularization.
+            - None if you prefer to avoid regularization.
+            - L1 for L1 regularization.
+            - L2 for L2 regularization.
+            - L1L2 for L1 L2 regularization.
          data_augmentation: Usable only if the network is fed by windows.
          optimizer: Loss optimization function, default is Adam.
          output_units: How many class you have to predicts.
+         last_activation_layer: How the output of the network is calculated.
+         loss_function: The loss function used to measure how good the CNN is performing.
 
-    Return:
-        cnn_model: The compiled model used in this instance.
-        true_value_of_the_labels: The true labels values of the data. (the test section).
-        predicted_values: The predicted labels of the data. (the test section).
-        score: Value of the evaluation of the network.
-
+    Returns:
+        The trained model together with the predicted values and the model's score.  When
+        the validation set is None, true labels, predicted labels and scores assumes None.
     Raises:
-        InvalidArgumentTypeException: Argument like train adapter, valid adapter are invalid.
-        InvalidParameterValueException: Argument like convolution list, neuron list are invalid.
+        InvalidArgumentTypeException: Raised when argument of the function is invalid. It is applied to convolution
+                                      layers and dense layers. Moreover, Raised when the input shape of the CNN is not
+                                      valid. It can be risen. For example, when the user plan to build a windows CNN
+                                      approach and feed it with point.
     """
 
-    true_value_of_the_labels, predicted_values = list(), list()
-
-    if x_train.size == 0 or y_train.size == 0 or y_validation.size == 0 or x_validation.size == 0:
+    if X.size == 0 or y.size == 0:
         raise InvalidArgumentTypeException
 
     if batch_size <= 0 or epochs <= 0:
@@ -198,7 +215,7 @@ def train_and_predict_for_classification(
         raise InvalidArgumentTypeException
 
     if dropout_rate is not None and dropout_rate <= 0:
-        raise InvalidParameterValueException
+        raise InvalidArgumentTypeException
 
     cnn_model = _create_an_instance_of_cnn(
         input_shape_for_cnn=input_shape_for_cnn,
@@ -207,38 +224,36 @@ def train_and_predict_for_classification(
         pool_size=pool_size,
         neuron_list=neuron_list,
         dropout_rate=dropout_rate,
-        last_activation="softmax",
+        last_activation=last_activation_layer,
         regularization=regularization,
         data_augmentation=data_augmentation,
         optimizer=optimizer,
-        loss=tf.keras.losses.CategoricalCrossentropy(),
+        loss=loss_function,
         output_units=output_units,
     )
 
     _ = cnn_model.fit(
-        x_train,
-        y_train,
-        validation_data=(x_validation, y_validation),
+        X,
+        y,
+        validation_split=validation_split if validation_split is not None else None,
         batch_size=batch_size,
         epochs=epochs,
-        sample_weight=compute_sample_weight("balanced", y_train) if sample_weights is not False else None,
+        sample_weight=compute_sample_weight("balanced", y) if sample_weights is not False else None,
     )
 
-    score = cnn_model.evaluate(x_validation, y_validation)[1]
-    prediction = cnn_model.predict(x_validation)
+    if validation_split is not None:
+        x_valid, y_valid = validation_data
+        score = cnn_model.evaluate(x_valid, y_valid)[1]
+        prediction = cnn_model.predict(x_valid)
 
-    true_value_of_the_labels.append(np.argmax(y_validation))
-    predicted_values.append(np.argmax(prediction))
+        return cnn_model, prediction, score
+    else:
+        return cnn_model, None, None
 
-    return cnn_model, y_validation, prediction, score
 
-
-@beartype
-def train_and_predict_for_regression(
-    x_train: np.ndarray,
-    y_train: np.ndarray,
-    x_validation: np.ndarray,
-    y_validation: np.ndarray,
+def run_inference_for_regression(
+    X: np.ndarray,
+    y: np.ndarray,
     batch_size: int,
     epochs: int,
     threshold: float,
@@ -246,6 +261,8 @@ def train_and_predict_for_regression(
     neuron_list: list[int],
     input_shape_for_cnn: Union[tuple[int, int, int], tuple[int, int], tuple[int], int],
     convolutional_kernel_size: tuple[int, int],
+    validation_split: Optional[float] = 0.2,
+    validation_data: Optional[Tuple[np.ndarray, np.ndarray]] = None,
     sample_weights: bool = False,
     pool_size: int = 2,
     dropout_rate: Union[None, float] = None,
@@ -253,7 +270,13 @@ def train_and_predict_for_regression(
     data_augmentation: bool = False,
     optimizer: str = "Adam",
     output_units=1,
-) -> tuple[Model, ndarray, ndarray, ndarray, Any]:
+    last_activation_layer: Literal["softmax", "sigmoid", None] = "sigmoid",
+    loss_function: Union[
+        tf.keras.losses.BinaryCrossentropy(),
+        tf.keras.losses.CategoricalCrossentropy(),
+        tf.keras.losses.MeanAbsoluteError(),
+    ] = tf.keras.losses.BinaryCrossentropy(),
+) -> tuple[Model, ndarray or None, ndarray or None, Any or None]:
     """
     Do a CNN for training and evaluation of data. It is designed to classify pixels using threshold.
 
@@ -263,52 +286,53 @@ def train_and_predict_for_regression(
     the data. In case the  CNN is over-fitting, you can try to avoid  it adding dropout or regularization.
 
     Args:
-         x_train: This is the portion of the data used for training the model.
-         y_train: Partition of the labels used for training: they can be encoded (done with OHE) or a list of integers.
-         x_validation: This is the partition of the dataset used for validation.
-         y_validation: Partition of the labels used for validation in the same form of the y_train.
+         X: This is the dataset used for the model inference.
+         y: The labels used for training: they can be encoded (done with OHE) or a list of integers.
+         validation_split: split between train and validation of the data.
+         validation_data: Partition of dataset used as validation (unseen data).
          batch_size: How much we want the batch size. This is the number os samples that the CNN takes during each
-                     iteration.
+            iteration.
          epochs: How many iterations we want to run the model.
          input_shape_for_cnn: Shape of the inputs windows should follow:
-                              - tuple[int, int, int] feed the cnn with windows: format (h, w, c).
-                              - tuple[int, int] feed a network with points: format (value, c).
+            - tuple[int, int, int] feed the cnn with windows: format (h, w, c).
+            - tuple[int, int] feed a network with points: format (value, c).
          convolutional_kernel_size: Size of the kernel (usually is the last number of the input tuple).
          conv_list: list of units used in each convolutional layer.The length of the list is the number of layers.
          epochs: how many epochs we want to run the model,
          input_shape_for_cnn: shape of the inputs windows -> tuple[int, int, int] just a point -> tuple[int, int],
          sample_weights: If you want to sample weights. It is used when there is strong imbalance of the data.
          neuron_list: This is a list of dense layers used for the last section of the network (fully connected layers).
-                      The length of the list shows the number of layers.
+            The length of the list shows the number of layers.
          pool_size: Size of the pooling layer (How much you want to reduce the dimension of the data).
          dropout_rate: Float number that help avoiding over-fitting. It just randomly drops samples.
          regularization: Regularization of each  layer. None if you do not want it:
-                         - None if you prefer to avoid regularization.
-                         - L1 for L1 regularization.
-                         - L2 for L2 regularization.
-                         - L1L2 for L1 L2 regularization.
+            - None if you prefer to avoid regularization.
+            - L1 for L1 regularization.
+            - L2 for L2 regularization.
+            - L1L2 for L1 L2 regularization.
          data_augmentation: Usable only if the network is fed by windows.
          optimizer: Loss optimization function, default is Adam.
          output_units: How many class you have to predicts.
          threshold: This number is used as borderline between classes.
+         last_activation_layer: How the output of the network is calculated.
+         loss_function: The loss function used to measure how good the CNN is performing.
 
     Return:
-        cnn_model: The compiled model used in this instance.
-        true_value_of_the_labels: The true labels values of the data. (the test section).
-        predicted_values: The predicted labels of the data. (the test section).
-        prediction: The value of the prediction (probabilities).
-        score: Value of the evaluation of the network.
+        The trained model together with the true validation labels, the predicted values, predicted probabilities, and
+        the score of the model.  When the validation set is None, true labels, predicted labels and scores assumes None.
 
     Raises:
-        InvalidArgumentTypeException: Argument like train adapter, valid adapter are invalid.
-        InvalidParameterValueException: Argument like convolution list, neuron list are invalid.
+        InvalidArgumentTypeException: Raised when argument of the function is invalid. It is applied to convolution
+                                      layers and dense layers. Moreover, Raised when the input shape of the CNN is not
+                                      valid. It can be risen. For example, when the user plan to build a windows CNN
+                                      approach and feed it with point.
     """
 
-    if x_train.size == 0 or y_train.size == 0 or y_validation.size == 0 or x_validation.size == 0:
+    if X.size == 0 or y.size == 0:
         raise InvalidArgumentTypeException
 
     if batch_size <= 0 or epochs <= 0:
-        raise InvalidParameterValueException
+        raise InvalidArgumentTypeException
 
     if len(conv_list) <= 0 or len(neuron_list) <= 0:
         raise InvalidArgumentTypeException
@@ -323,31 +347,29 @@ def train_and_predict_for_regression(
         pool_size=pool_size,
         neuron_list=neuron_list,
         dropout_rate=dropout_rate,
-        last_activation="sigmoid",
+        last_activation=last_activation_layer,
         regularization=regularization,
         data_augmentation=data_augmentation,
         optimizer=optimizer,
-        loss=tf.keras.losses.BinaryCrossentropy(),
+        loss=loss_function,
         output_units=output_units,
     )
 
-    predicted_values = list()
-
     _ = cnn_model.fit(
-        x_train,
-        y_train,
-        validation_data=(x_validation, y_validation),
+        X,
+        y,
+        validation_split=validation_split if validation_split is None else None,
         batch_size=batch_size,
         epochs=epochs,
-        sample_weight=compute_sample_weight("balanced", y_train) if sample_weights is not False else None,
+        sample_weight=compute_sample_weight("balanced", y) if sample_weights is not False else None,
     )
 
-    score = cnn_model.evaluate(x_validation, y_validation)[1]
-    prediction = cnn_model.predict(x_validation)
+    if validation_split is not None:
 
-    for p in prediction:
-        if p <= threshold:
-            predicted_values.append(0)
-        else:
-            predicted_values.append(1)
-    return cnn_model, y_validation, np.array(predicted_values), prediction, score
+        x_valid, y_valid = validation_data
+        score = cnn_model.evaluate(x_valid, y_valid)[1]
+        prediction = cnn_model.predict(x_valid)
+        predicted_values = (prediction >= threshold).astype(int)
+        return cnn_model, predicted_values, prediction, score
+    else:
+        return cnn_model, None, None, None
