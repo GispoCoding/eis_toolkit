@@ -6,10 +6,7 @@ import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
 
 from eis_toolkit.exceptions import InvalidArgumentTypeException
-from eis_toolkit.prediction.cnn_classification_and_probability import (
-    run_inference_for_classification,
-    run_inference_for_regression,
-)
+from eis_toolkit.prediction.cnn_classification_and_probability import run_inference
 from eis_toolkit.prediction.model_performance_estimation import performance_model_estimation
 from eis_toolkit.transformations.normalize_data import normalize_the_data
 from eis_toolkit.transformations.one_hot_encoding import one_hot_encode
@@ -40,7 +37,7 @@ def test_train_CNN_classifier_with_categorical_crossentropy():
         x_validation = normalize_the_data(scaler_agent=scaler_agent, data=data[validation_idx])
         y_validation = encoded_labels[validation_idx]
 
-        cnn_model, predicted_labels, score = run_inference_for_classification(
+        cnn_model, predicted_labels, score = run_inference(
             X=x_train,
             y=y_train,
             validation_split=0.2,
@@ -90,7 +87,7 @@ def test_train_CNN_classifier_with_binary_crossentropy():
         x_validation = normalize_the_data(scaler_agent=scaler_agent, data=data[validation_idx])
         y_validation = labels[validation_idx]
 
-        cnn_model, predicted_labels, score = run_inference_for_classification(
+        cnn_model, predicted_labels, score = run_inference(
             X=x_train,
             y=y_train,
             validation_split=0.2,
@@ -142,7 +139,7 @@ def test_train_CNN_regressor():
         x_validation = normalize_the_data(scaler_agent=scaler_agent, data=data[validation_idx])
         y_validation = labels[validation_idx]
 
-        cnn_model, predicted_labels, probabilities, score = run_inference_for_regression(
+        cnn_model, predicted_labels, score = run_inference(
             X=x_train,
             y=y_train,
             validation_split=0.2,
@@ -153,7 +150,6 @@ def test_train_CNN_regressor():
             neuron_list=[8],
             input_shape_for_cnn=(x_train.shape[1], x_train.shape[2], x_train.shape[3]),
             convolutional_kernel_size=(x_train.shape[3], x_train.shape[3]),
-            threshold=0.5,
             last_activation_layer=None,
             loss_function=tf.keras.losses.MeanAbsoluteError(),
             output_units=1,
@@ -163,10 +159,14 @@ def test_train_CNN_regressor():
             stacked_true = y_validation
         else:
             stacked_true = np.concatenate((stacked_true, y_validation))
+
+        pred = (predicted_labels >= 0.5).astype(int)
+
         if stacked_predicted is None:
-            stacked_predicted = predicted_labels
+
+            stacked_predicted = pred
         else:
-            stacked_predicted = np.concatenate((stacked_predicted, predicted_labels))
+            stacked_predicted = np.concatenate((stacked_predicted, pred))
 
     assert stacked_true.shape[0] != 0 and stacked_predicted.shape[0] != 0
 
@@ -177,7 +177,7 @@ def test_invalid_convolutional_layer():
         x_train = np.load(f'{os.path.join("data", "data.npy")}')
         y_train = np.load(f'{os.path.join("data", "labels.npy")}')
 
-        cnn_model, predicted_labels, score = run_inference_for_classification(
+        cnn_model, predicted_labels, score = run_inference(
             X=x_train,
             y=y_train,
             validation_split=0.2,
@@ -197,7 +197,7 @@ def test_invalid_neurons_layer():
         x_train = np.load(f'{os.path.join("data", "data.npy")}')
         y_train = np.load(f'{os.path.join("data", "labels.npy")}')
 
-        cnn_model, predicted_labels, score = run_inference_for_classification(
+        cnn_model, predicted_labels, score = run_inference(
             X=x_train,
             y=y_train,
             validation_split=0.2,
@@ -217,7 +217,7 @@ def test_invalid_parameters_dropout_exception():
         x_train = np.load(f'{os.path.join("data", "data.npy")}')
         y_train = np.load(f'{os.path.join("data", "labels.npy")}')
 
-        cnn_model, predicted_labels, score = run_inference_for_classification(
+        cnn_model, predicted_labels, score = run_inference(
             X=x_train,
             y=y_train,
             validation_split=None,
@@ -237,7 +237,7 @@ def test_invalid_parameters_inputs_exception():
     with pytest.raises(InvalidArgumentTypeException):
         x_train = np.load(f'{os.path.join("data", "data.npy")}')
 
-        cnn_model, predicted_labels, score = run_inference_for_classification(
+        cnn_model, predicted_labels, score = run_inference(
             X=np.array([]),
             y=np.array([]),
             validation_split=None,

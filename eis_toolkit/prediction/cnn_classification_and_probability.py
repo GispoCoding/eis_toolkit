@@ -131,7 +131,7 @@ def _create_an_instance_of_cnn(
     return model
 
 
-def run_inference_for_classification(
+def run_inference(
     X: np.ndarray,
     y: np.ndarray,
     batch_size: int,
@@ -249,6 +249,9 @@ def run_inference_for_classification(
         return cnn_model, prediction, score
     else:
         return cnn_model, None, None
+
+
+"NICO WE CAN REMOVE THIS ONE AND TAKE ONLY THE OTHER. BECAUSE THEY DO THE EXACT JOB."
 
 
 def run_inference_for_regression(
