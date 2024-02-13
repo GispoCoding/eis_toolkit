@@ -1,5 +1,3 @@
-import os
-
 import numpy as np
 import pytest
 import tensorflow as tf
@@ -11,18 +9,15 @@ from eis_toolkit.prediction.machine_learning_general import _get_cross_validator
 from eis_toolkit.transformations.normalize_data import normalize_the_data
 from eis_toolkit.transformations.one_hot_encoding import one_hot_encode
 
-DATA_PATH = os.path.join("prediction", "data", "data.npy")
-LABEL_PATH = os.path.join("prediction", "data", "labels.npy")
+shape = (1258, 5, 5, 1)
+data = np.random.randint(0, 256, size=shape)
+labels = np.random.randint(0, 2, size=(shape[0],))
 
 
 def test_train_CNN_classifier_with_categorical_crossentropy():
     """Test for classification."""
-    data = np.load(f"{DATA_PATH}")
-    labels = np.load(f"{LABEL_PATH}")
-
     # do the encoding
     encoded_labels = one_hot_encode(labels, sparse_output=False)
-
     # create a scaler agent
     scaler_agent = StandardScaler()
     scaler_agent.fit(data.reshape(-1, data.shape[-1]))
@@ -70,9 +65,6 @@ def test_train_CNN_classifier_with_categorical_crossentropy():
 
 def test_train_CNN_classifier_with_binary_crossentropy():
     """Test for classification with binary cross entropy."""
-    data = np.load(DATA_PATH)
-    labels = np.load(LABEL_PATH)
-
     # create a scaler agent
     scaler_agent = StandardScaler()
     scaler_agent.fit(data.reshape(-1, data.shape[-1]))
@@ -122,9 +114,6 @@ def test_train_CNN_classifier_with_binary_crossentropy():
 
 def test_train_CNN_regressor():
     """Test for classification."""
-    data = np.load(DATA_PATH)
-    labels = np.load(LABEL_PATH)
-
     # create a scaler agent
     scaler_agent = StandardScaler()
     scaler_agent.fit(data.reshape(-1, data.shape[-1]))
@@ -178,40 +167,35 @@ def test_invalid_convolutional_layer():
     """Test invalid convolutional layer."""
     with pytest.raises(InvalidParameterValueException):
 
-        x_train = np.load(DATA_PATH)
-        y_train = np.load(LABEL_PATH)
-
         cnn_model, predicted_labels, score = run_inference(
-            X=x_train,
-            y=y_train,
+            X=data,
+            y=labels,
             validation_split=0.2,
             validation_data=None,
             batch_size=32,
             epochs=10,
             conv_list=[],
             neuron_list=[8],
-            input_shape_for_cnn=(x_train.shape[1], x_train.shape[2], x_train.shape[3]),
-            convolutional_kernel_size=(x_train.shape[3], x_train.shape[3]),
+            input_shape_for_cnn=(data.shape[1], data.shape[2], data.shape[3]),
+            convolutional_kernel_size=(data.shape[3], data.shape[3]),
         )
 
 
 def test_invalid_neurons_layer():
     """Test invalid neuron layers."""
     with pytest.raises(InvalidParameterValueException):
-        x_train = np.load(DATA_PATH)
-        y_train = np.load(LABEL_PATH)
 
         cnn_model, predicted_labels, score = run_inference(
-            X=x_train,
-            y=y_train,
+            X=data,
+            y=labels,
             validation_split=0.2,
             validation_data=None,
             batch_size=32,
             epochs=10,
             conv_list=[8],
             neuron_list=[],
-            input_shape_for_cnn=(x_train.shape[1], x_train.shape[2], x_train.shape[3]),
-            convolutional_kernel_size=(x_train.shape[3], x_train.shape[3]),
+            input_shape_for_cnn=(data.shape[1], data.shape[2], data.shape[3]),
+            convolutional_kernel_size=(data.shape[3], data.shape[3]),
         )
 
 
@@ -220,20 +204,17 @@ def test_invalid_parameters_dropout_exception():
 
     with pytest.raises(InvalidParameterValueException):
 
-        x_train = np.load(DATA_PATH)
-        y_train = np.load(LABEL_PATH)
-
         cnn_model, predicted_labels, score = run_inference(
-            X=x_train,
-            y=y_train,
+            X=data,
+            y=labels,
             validation_split=None,
             validation_data=None,
             batch_size=32,
             epochs=10,
             conv_list=[8],
             neuron_list=[8],
-            input_shape_for_cnn=(x_train.shape[1], x_train.shape[2], x_train.shape[3]),
-            convolutional_kernel_size=(x_train.shape[3], x_train.shape[3]),
+            input_shape_for_cnn=(data.shape[1], data.shape[2], data.shape[3]),
+            convolutional_kernel_size=(data.shape[3], data.shape[3]),
             dropout_rate=-10.0,
         )
 
@@ -241,7 +222,6 @@ def test_invalid_parameters_dropout_exception():
 def test_invalid_parameters_inputs_exception():
     """Invalid inputs test."""
     with pytest.raises(InvalidParameterValueException):
-        x_train = np.load(DATA_PATH)
 
         cnn_model, predicted_labels, score = run_inference(
             X=np.array([]),
@@ -252,7 +232,7 @@ def test_invalid_parameters_inputs_exception():
             epochs=10,
             conv_list=[8],
             neuron_list=[8],
-            input_shape_for_cnn=(x_train.shape[1], x_train.shape[2], x_train.shape[3]),
-            convolutional_kernel_size=(x_train.shape[3], x_train.shape[3]),
+            input_shape_for_cnn=(data.shape[1], data.shape[2], data.shape[3]),
+            convolutional_kernel_size=(data.shape[3], data.shape[3]),
             dropout_rate=None,
         )
