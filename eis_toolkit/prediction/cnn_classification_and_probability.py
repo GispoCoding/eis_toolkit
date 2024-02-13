@@ -62,8 +62,8 @@ def _create_an_instance_of_cnn(
     Raises:
         InvalidParameterValueException: Raised when the input shape of the CNN is not valid. It can be risen.
                                         For example, when the user plan to build a windows CNN approach and feed it
-                                        with point. Moreover, Raised when argument of the function is invalid. It is
-                                        applied to convolution layers and dense layers.
+                                        with point. Moreover, it is raised when argument of the function is invalid.
+                                        It is applied to convolution layers and dense layers.
 
     """
 
@@ -200,9 +200,9 @@ def run_inference(
         the validation set is None, true labels, predicted labels and scores assumes None.
     Raises:
         InvalidParameterValueException: Raised when argument of the function is invalid. It is applied to convolution
-                                       layers and dense layers. Moreover, Raised when the input shape of the CNN is not
-                                       valid. It can be risen. For example, when the user plan to build a windows CNN
-                                       approach and feed it with point.
+                                        layers and dense layers. Moreover, Raised when the input shape of the CNN is not
+                                        valid. It can be risen. For example, when the user plan to build a windows CNN
+                                        approach and feed it with point.
     """
 
     if X.size == 0 or y.size == 0:
@@ -241,7 +241,7 @@ def run_inference(
         sample_weight=compute_sample_weight("balanced", y) if sample_weights is not False else None,
     )
 
-    if validation_split is not None:
+    if validation_data is not None:
         x_valid, y_valid = validation_data
         score = cnn_model.evaluate(x_valid, y_valid)[1]
         prediction = cnn_model.predict(x_valid)

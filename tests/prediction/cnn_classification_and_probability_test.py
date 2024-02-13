@@ -174,6 +174,7 @@ def test_train_CNN_regressor():
 def test_invalid_convolutional_layer():
     """Test invalid convolutional layer."""
     with pytest.raises(InvalidParameterValueException):
+
         x_train = np.load(f'{os.path.join("data", "data.npy")}')
         y_train = np.load(f'{os.path.join("data", "labels.npy")}')
 
@@ -213,7 +214,9 @@ def test_invalid_neurons_layer():
 
 def test_invalid_parameters_dropout_exception():
     """Invalid dropout test."""
+
     with pytest.raises(InvalidParameterValueException):
+
         x_train = np.load(f'{os.path.join("data", "data.npy")}')
         y_train = np.load(f'{os.path.join("data", "labels.npy")}')
 
