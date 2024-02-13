@@ -1,15 +1,52 @@
 import os
+from typing import Literal, Optional, Union
 
 import numpy as np
 import pytest
 import tensorflow as tf
+from sklearn.model_selection import KFold, LeaveOneOut, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 
-from eis_toolkit.exceptions import InvalidArgumentTypeException
+from eis_toolkit.exceptions import InvalidArgumentTypeException, InvalidParameterValueException
 from eis_toolkit.prediction.cnn_classification_and_probability import run_inference
-from eis_toolkit.prediction.model_performance_estimation import performance_model_estimation
 from eis_toolkit.transformations.normalize_data import normalize_the_data
 from eis_toolkit.transformations.one_hot_encoding import one_hot_encode
+
+SPLIT = "split"
+KFOLD_CV = "kfold_cv"
+SKFOLD_CV = "skfold_cv"
+LOO_CV = "loo_cv"
+NO_VALIDATION = "none"
+
+
+def _get_cross_validator(
+    cv: Literal["kfold_cv", "skfold_cv", "loo_cv"], folds: int, shuffle: bool, random_state: Optional[int]
+) -> Union[KFold, StratifiedKFold, LeaveOneOut]:
+    """
+    Create a Sklearn cross-validator.
+
+    Args:
+        cv: Name/identifier of the cross-validator.
+        folds: Number of folds to use (for Kfold and StratifiedKFold).
+        shuffle: If data is shuffled before splitting.
+        random_state: Seed for random number generation.
+
+    Returns:
+        Sklearn cross-validator instance.
+
+    Raises:
+        InvalidParameterValueException: Invalid input for `cv`.
+    """
+    if cv == KFOLD_CV:
+        cross_validator = KFold(n_splits=folds, shuffle=shuffle, random_state=random_state)
+    elif cv == SKFOLD_CV:
+        cross_validator = StratifiedKFold(n_splits=folds, shuffle=shuffle, random_state=random_state)
+    elif cv == LOO_CV:
+        cross_validator = LeaveOneOut()
+    else:
+        raise InvalidParameterValueException(f"CV method was not recognized: {cv}")
+
+    return cross_validator
 
 
 def test_train_CNN_classifier_with_categorical_crossentropy():
@@ -25,7 +62,7 @@ def test_train_CNN_classifier_with_categorical_crossentropy():
     scaler_agent.fit(data.reshape(-1, data.shape[-1]))
 
     # make cv
-    selected_cv = performance_model_estimation(cross_validation_type="SKFOLD", number_of_split=5)
+    selected_cv = _get_cross_validator(cv="skfold_cv", folds=5, shuffle=True, random_state=42)
 
     stacked_true, stacked_predicted = None, None
 
@@ -75,7 +112,7 @@ def test_train_CNN_classifier_with_binary_crossentropy():
     scaler_agent.fit(data.reshape(-1, data.shape[-1]))
 
     # make cv
-    selected_cv = performance_model_estimation(cross_validation_type="SKFOLD", number_of_split=5)
+    selected_cv = _get_cross_validator(cv="skfold_cv", folds=5, shuffle=True, random_state=42)
 
     stacked_true, stacked_predicted = None, None
 
@@ -127,7 +164,7 @@ def test_train_CNN_regressor():
     scaler_agent.fit(data.reshape(-1, data.shape[-1]))
 
     # make cv
-    selected_cv = performance_model_estimation(cross_validation_type="SKFOLD", number_of_split=5)
+    selected_cv = _get_cross_validator(cv="skfold_cv", folds=5, shuffle=True, random_state=42)
 
     stacked_true, stacked_predicted = None, None
 
