@@ -11,12 +11,14 @@ from eis_toolkit.prediction.machine_learning_general import _get_cross_validator
 from eis_toolkit.transformations.normalize_data import normalize_the_data
 from eis_toolkit.transformations.one_hot_encoding import one_hot_encode
 
+DATA_PATH = os.path.join("prediction", "data", "data.npy")
+LABEL_PATH = os.path.join("prediction", "data", "labels.npy")
+
 
 def test_train_CNN_classifier_with_categorical_crossentropy():
     """Test for classification."""
-    print(os.getcwd())
-    data = np.load(f'{os.path.join("data", "data.npy")}')
-    labels = np.load(f'{os.path.join("data", "labels.npy")}')
+    data = np.load(f"{DATA_PATH}")
+    labels = np.load(f"{LABEL_PATH}")
 
     # do the encoding
     encoded_labels = one_hot_encode(labels, sparse_output=False)
@@ -68,8 +70,8 @@ def test_train_CNN_classifier_with_categorical_crossentropy():
 
 def test_train_CNN_classifier_with_binary_crossentropy():
     """Test for classification with binary cross entropy."""
-    data = np.load(f'{os.path.join("data", "data.npy")}')
-    labels = np.load(f'{os.path.join("data", "labels.npy")}')
+    data = np.load(DATA_PATH)
+    labels = np.load(LABEL_PATH)
 
     # create a scaler agent
     scaler_agent = StandardScaler()
@@ -120,8 +122,8 @@ def test_train_CNN_classifier_with_binary_crossentropy():
 
 def test_train_CNN_regressor():
     """Test for classification."""
-    data = np.load(f'{os.path.join("data", "data.npy")}')
-    labels = np.load(f'{os.path.join("data", "labels.npy")}')
+    data = np.load(DATA_PATH)
+    labels = np.load(LABEL_PATH)
 
     # create a scaler agent
     scaler_agent = StandardScaler()
@@ -176,8 +178,8 @@ def test_invalid_convolutional_layer():
     """Test invalid convolutional layer."""
     with pytest.raises(InvalidParameterValueException):
 
-        x_train = np.load(f'{os.path.join("data", "data.npy")}')
-        y_train = np.load(f'{os.path.join("data", "labels.npy")}')
+        x_train = np.load(DATA_PATH)
+        y_train = np.load(LABEL_PATH)
 
         cnn_model, predicted_labels, score = run_inference(
             X=x_train,
@@ -196,8 +198,8 @@ def test_invalid_convolutional_layer():
 def test_invalid_neurons_layer():
     """Test invalid neuron layers."""
     with pytest.raises(InvalidParameterValueException):
-        x_train = np.load(f'{os.path.join("data", "data.npy")}')
-        y_train = np.load(f'{os.path.join("data", "labels.npy")}')
+        x_train = np.load(DATA_PATH)
+        y_train = np.load(LABEL_PATH)
 
         cnn_model, predicted_labels, score = run_inference(
             X=x_train,
@@ -218,8 +220,8 @@ def test_invalid_parameters_dropout_exception():
 
     with pytest.raises(InvalidParameterValueException):
 
-        x_train = np.load(f'{os.path.join("data", "data.npy")}')
-        y_train = np.load(f'{os.path.join("data", "labels.npy")}')
+        x_train = np.load(DATA_PATH)
+        y_train = np.load(LABEL_PATH)
 
         cnn_model, predicted_labels, score = run_inference(
             X=x_train,
@@ -239,7 +241,7 @@ def test_invalid_parameters_dropout_exception():
 def test_invalid_parameters_inputs_exception():
     """Invalid inputs test."""
     with pytest.raises(InvalidParameterValueException):
-        x_train = np.load(f'{os.path.join("test", "data", "data.npy")}')
+        x_train = np.load(DATA_PATH)
 
         cnn_model, predicted_labels, score = run_inference(
             X=np.array([]),
