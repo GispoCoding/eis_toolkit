@@ -1,4 +1,5 @@
 from itertools import chain
+from numbers import Number
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -13,7 +14,7 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.utilities.miscellaneous import row_points, toggle_gdal_exceptions
 from eis_toolkit.vector_processing.distance_computation import distance_computation
 
-THRESHOLD_CRITERIA_VALUE_TYPE = Union[Tuple[float, float], float]
+THRESHOLD_CRITERIA_VALUE_TYPE = Union[Tuple[Number, Number], Number]
 THRESHOLD_CRITERIA_TYPE = Literal["lower", "higher", "in_between", "outside"]
 
 
@@ -142,7 +143,7 @@ def _write_binary_anomaly_raster(tmp_dir: Path, anomaly_raster_profile, data_fit
 def _distance_to_anomaly_gdal(
     anomaly_raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_data: np.ndarray,
-    threshold_criteria_value: Union[Tuple[float, float], float],
+    threshold_criteria_value: THRESHOLD_CRITERIA_VALUE_TYPE,
     threshold_criteria: THRESHOLD_CRITERIA_TYPE,
     output_path: Path,
     verbose: bool,
@@ -175,7 +176,7 @@ def _distance_to_anomaly(
     raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_data: np.ndarray,
-    threshold_criteria_value: Union[Tuple[float, float], float],
+    threshold_criteria_value: THRESHOLD_CRITERIA_VALUE_TYPE,
     threshold_criteria: THRESHOLD_CRITERIA_TYPE,
 ) -> np.ndarray:
     data_fits_criteria = _fits_criteria(
