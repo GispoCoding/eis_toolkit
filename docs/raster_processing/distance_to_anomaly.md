@@ -1,3 +1,3 @@
-# Distance computation
+# Distance to anomaly
 
-::: eis_toolkit.vector_processing.distance_computation
+::: eis_toolkit.raster_processing.distance_to_anomaly
