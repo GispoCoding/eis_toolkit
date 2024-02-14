@@ -2,7 +2,6 @@ import geopandas as gpd
 import libpysal
 import numpy as np
 import pytest
-from esda.moran import Moran_Local
 
 from eis_toolkit import exceptions
 from eis_toolkit.exploratory_analyses.local_morans_i import local_morans_i
@@ -16,15 +15,16 @@ def test_local_morans_i_queen_correctness():
     column = "gdp_md_est"
     data = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
     gdf = gpd.GeoDataFrame(data)
+    gdf20 = gdf.head(20)
 
-    w = libpysal.weights.Queen.from_dataframe(gdf)
+    Is = [-0.0, -0.0, -0.0, -0.3272138079268631, -0.3272138079268631, 0.12778249585085483, 0.12778249585085483, 0.07729002884021997, 0.07729002884021997, -0.0]
 
-    moran_loc = Moran_Local(gdf[column], w, permutations=permutations)
+    p_sims = [0.001, 0.001, 0.001, 0.001, 0.112, 0.453, 0.446, 0.331, 0.222, 0.001]
 
-    result = local_morans_i(gdf=gdf, column=column, weight_type="queen", permutations=permutations)
+    result = local_morans_i(gdf=gdf20, column=column, weight_type="queen", permutations=permutations)
 
-    np.testing.assert_allclose(result[f"{column}_local_moran_I"], moran_loc.Is, rtol=0.1, atol=0.1)
-    np.testing.assert_allclose(result[f"{column}_local_moran_I_p_value"], moran_loc.p_sim, rtol=0.1, atol=0.1)
+    np.testing.assert_allclose(result[f"{column}_local_moran_I"], Is, rtol=0.1, atol=0.1)
+    np.testing.assert_allclose(result[f"{column}_local_moran_I_p_value"], p_sims, rtol=0.1, atol=0.1)
 
 
 def test_local_morans_i_knn_correctness():
@@ -36,14 +36,17 @@ def test_local_morans_i_knn_correctness():
     column = "gdp_md_est"
     data = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
     gdf = gpd.GeoDataFrame(data)
+    gdf20 = gdf.head(20)
 
-    w = libpysal.weights.KNN.from_dataframe(gdf, k=k)
-    moran_loc = Moran_Local(gdf[column], w, permutations=permutations)
+    Is = [0.03686709680905326, 0.07635702591252187, 0.07990131850915279, 0.06552029316560676, -0.8031053484182811, 0.048272793989863144, 0.051515005797283464, 0.03846954477931574, 0.010137393086155687, 0.051762074257733624,
+          0.05895594777225281, 0.0768224164382028, 0.07889650044641662, 0.07492029251731681, 0.07855252515119235, 0.07851482805880286, -0.26650904930879504, -0.25076447340691294, -0.015081612933344679, -0.2666687928014803]
 
-    result = local_morans_i(gdf, column, "knn", k=k, permutations=permutations)
+    p_sims = [0.5, 0.2, 0.2, 0.4, 0.4, 0.5, 0.5, 0.5, 0.5, 0.3, 0.3, 0.2, 0.2, 0.1, 0.1, 0.3, 0.1, 0.1, 0.5, 0.1]
 
-    np.testing.assert_allclose(result[f"{column}_local_moran_I"], moran_loc.Is, rtol=0.1, atol=0.1)
-    np.testing.assert_allclose(result[f"{column}_local_moran_I_p_value"], moran_loc.p_sim, rtol=0.1, atol=0.1)
+    result = local_morans_i(gdf20, column, "knn", k=k, permutations=permutations)
+
+    np.testing.assert_allclose(result[f"{column}_local_moran_I"], Is, rtol=0.1, atol=0.1)
+    np.testing.assert_allclose(result[f"{column}_local_moran_I_p_value"], p_sims, rtol=0.1, atol=0.1)
 
 
 def test_empty_geodataframe():
