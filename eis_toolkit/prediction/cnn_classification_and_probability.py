@@ -177,7 +177,7 @@ def run_inference(
 
     Returns:
         A tuple containing the trained model, predictions on the validation set, and evaluation score.
-        
+
     Raises:
         InvalidParameterValueException: If any input parameter is invalid.
     """
