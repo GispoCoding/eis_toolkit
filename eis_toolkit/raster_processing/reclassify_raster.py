@@ -1,15 +1,12 @@
+from numbers import Number
+
 import mapclassify as mc
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import Sequence, Tuple, Union
+from beartype.typing import Optional, Sequence, Tuple
 
-from eis_toolkit.exceptions import InvalidParameterValueException
-
-
-def _check_bands_non_negative(band: Sequence):
-    if any(n < 0 for n in band):
-        raise InvalidParameterValueException("The list bands contains negative values.")
+from eis_toolkit.utilities.checks.raster import check_raster_bands
 
 
 def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
@@ -26,7 +23,7 @@ def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
 def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     breaks: Sequence[int],
-    bands: Sequence[int],
+    bands: Optional[Sequence[int]] = None,
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with manual breaks.
 
@@ -49,7 +46,7 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _check_bands_non_negative(bands_to_read)
+    check_raster_bands(raster, bands_to_read)
 
     for band in raster.read(bands_to_read):
 
@@ -76,7 +73,7 @@ def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
 def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     interval_size: int,
-    bands: Sequence[int],
+    bands: Optional[Sequence[int]] = None,
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with defined intervals.
 
@@ -99,7 +96,7 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _check_bands_non_negative(bands_to_read)
+    check_raster_bands(raster, bands_to_read)
 
     for band in raster.read(bands_to_read):
 
@@ -128,7 +125,7 @@ def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
 def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
-    bands: Sequence[int],
+    bands: Optional[Sequence[int]] = None,
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with equal intervals.
 
@@ -151,7 +148,7 @@ def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _check_bands_non_negative(bands_to_read)
+    check_raster_bands(raster, bands_to_read)
 
     for band in raster.read(bands_to_read):
 
@@ -177,7 +174,7 @@ def _raster_with_quantiles(  # type: ignore[no-any-unimported]
 def raster_with_quantiles(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_quantiles: int,
-    bands: Sequence[int],
+    bands: Optional[Sequence[int]] = None,
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with quantiles.
 
@@ -200,7 +197,7 @@ def raster_with_quantiles(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _check_bands_non_negative(bands_to_read)
+    check_raster_bands(raster, bands_to_read)
 
     for band in raster.read(bands_to_read):
 
@@ -226,7 +223,7 @@ def _raster_with_natural_breaks(  # type: ignore[no-any-unimported]
 def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_classes: int,
-    bands: Sequence[int],
+    bands: Optional[Sequence[int]] = None,
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with natural breaks (Jenks Caspall).
 
@@ -249,7 +246,7 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _check_bands_non_negative(bands_to_read)
+    check_raster_bands(raster, bands_to_read)
 
     for band in raster.read(bands_to_read):
 
@@ -260,12 +257,10 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
     return out_image, out_meta
 
 
-def _raster_with_geometrical_intervals(
-    band: np.ndarray, number_of_classes: int, nan_value: Union[int, float]
-) -> np.ndarray:
+def _raster_with_geometrical_intervals(band: np.ndarray, number_of_classes: int, nodata_value: Number) -> np.ndarray:
 
     # nan_value is either a set integer (e.g. -9999) or np.nan
-    mask = band == nan_value
+    mask = band == nodata_value
     masked_array = np.ma.masked_array(data=band, mask=mask)
 
     median_value = np.ma.median(masked_array)
@@ -322,9 +317,9 @@ def _raster_with_geometrical_intervals(
 
 @beartype
 def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
-    raster: rasterio.io.DatasetReader, number_of_classes: int, nan_value: Union[int, float], bands: Sequence[int]
+    raster: rasterio.io.DatasetReader, number_of_classes: int, bands: Optional[Sequence[int]] = None
 ) -> Tuple[Sequence[np.ndarray], dict]:
-    """Classify raster with geometrical intervals (Torppa, 2023).
+    """Classify raster with geometrical intervals.
 
     If bands are not given, all bands are used for classification.
 
@@ -335,7 +330,7 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        Raster classified with geometrical intervals (Torppa, 2023) and metadata.
+        Raster classified with geometrical intervals and metadata.
 
     Raises:
         InvalidParameterValueException: Bands contain negative values.
@@ -343,14 +338,15 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
 
     out_image = []
     out_meta = raster.meta.copy()
+    nodata_value = raster.nodata
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _check_bands_non_negative(bands_to_read)
+    check_raster_bands(raster, bands_to_read)
 
     for band in raster.read(bands_to_read):
 
-        geometrical_intervals_band = _raster_with_geometrical_intervals(band, number_of_classes, nan_value)
+        geometrical_intervals_band = _raster_with_geometrical_intervals(band, number_of_classes, nodata_value)
 
         out_image.append(geometrical_intervals_band)
 
@@ -388,7 +384,7 @@ def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
 def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
-    bands: Sequence[int],
+    bands: Optional[Sequence[int]] = None,
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with standard deviation.
 
@@ -411,7 +407,7 @@ def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
 
     bands_to_read = bands if bands is not None else raster.indexes
 
-    _check_bands_non_negative(bands_to_read)
+    check_raster_bands(raster, bands_to_read)
 
     for band in raster.read(bands_to_read):
 
