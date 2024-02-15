@@ -31,39 +31,30 @@ def _create_an_instance_of_cnn(
     metrics="accuracy",
 ) -> tf.keras.Model:
     """
-     Do an instance of the CNN. Just the body of the CNN.
+    Create an instance of the CNN model.
 
-    Args::
-       input_shape_for_cnn: Shape of the input. How big the input should be. It is possible to build an input:
-                         - windows: (h, w, c) windows height, windows width and channel or windows dimension.
-                         - point (p, c) point value and dimension of the point.
-       convolution_kernel_size: Size of the kernel (usually is the last number of the input tuple). Usually is the "c"
-                                of the input_shape_for_cnn.
-       pool_size: Size of the pooling layer (How much you want to reduce the dimension of the data).
-       conv_list: list of unit for the conv layers. Here the length of the list is the number of convolution layers.
-       regularization: Regularization of each  layer. None if you do not want it:
-                     - None if you prefer to avoid regularization.
-                     - L1 for L1 regularization.
-                     - L2 for L2 regularization.
-                     - L1L2 for L1 L2 regularization.
-       data_augmentation: If you want data augmentation or not (Random rotation is implemented).
-       optimizer: Select one optimizer for the CNN. The default value is Adam.
-       loss: The loss function used to measure how good the CNN is performing.
-       neuron_list: List of unit or neuron used to build the network final part of the network. the length of the list
-                    is the number of fully connected layers.
-       dropout_rate: Float number that help avoiding over-fitting. It just randomly drops samples.
-       output_units: number of output classes.
-       last_activation: usually you should use softmax or sigmoid.
-       metrics: In case of classification accuracy is the best metrics, otherwise for regression MAE is the way.
+    Args:
+        input_shape_for_cnn: Shape of the input data. It can be:
+            - For windows: (h, w, c) where h is the height, w is the width, and c is the number of channels.
+            - For points: (p, c) where p is the point value and c is the dimension of the point.
+        convolution_kernel_size: Size of the convolution kernel.
+        conv_list: List of units for the convolution layers.
+        neuron_list: List of units for the fully connected layers.
+        pool_size: Size of the pooling layer. Defaults to 2.
+        dropout_rate: Dropout rate to prevent overfitting. Defaults to None.
+        last_activation: Activation function for the last layer. Defaults to "softmax".
+        regularization: Regularization for the layers. Defaults to None.
+        data_augmentation: Enable data augmentation. Defaults to False.
+        optimizer: Optimizer for training. Defaults to "Adam".
+        loss: Loss function for training. Defaults to BinaryCrossentropy.
+        output_units: Number of output units. Defaults to 2.
+        metrics: Evaluation metric for training. Defaults to "accuracy".
 
-    Return:
-         the model that has been created.
+    Returns:
+        Compiled Keras Model.
 
     Raises:
-        InvalidParameterValueException: Raised when the input shape of the CNN is not valid. It can be risen.
-                                        For example, when the user plan to build a windows CNN approach and feed it
-                                        with point. Moreover, it is raised when argument of the function is invalid.
-                                        It is applied to convolution layers and dense layers.
+        InvalidParameterValueException: Raised when the input parameters are invalid.
 
     """
 
