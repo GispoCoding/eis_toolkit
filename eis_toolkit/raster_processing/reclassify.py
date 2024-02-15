@@ -9,7 +9,7 @@ from beartype.typing import Optional, Sequence, Tuple
 from eis_toolkit.utilities.checks.raster import check_raster_bands
 
 
-def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
+def _reclassify_with_manual_breaks(  # type: ignore[no-any-unimported]
     band: np.ndarray,
     breaks: Sequence[int],
 ) -> np.ndarray:
@@ -20,7 +20,7 @@ def _raster_with_manual_breaks(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
+def reclassify_with_manual_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     breaks: Sequence[int],
     bands: Optional[Sequence[int]] = None,
@@ -50,14 +50,14 @@ def raster_with_manual_breaks(  # type: ignore[no-any-unimported]
 
     for band in raster.read(bands_to_read):
 
-        manual_breaks_band = _raster_with_manual_breaks(band, breaks)
+        manual_breaks_band = _reclassify_with_manual_breaks(band, breaks)
 
         out_image.append(manual_breaks_band)
 
     return out_image, out_meta
 
 
-def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
+def _reclassify_with_defined_intervals(  # type: ignore[no-any-unimported]
     band: np.ndarray,
     interval_size: int,
 ) -> np.ndarray:
@@ -70,7 +70,7 @@ def _raster_with_defined_intervals(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
+def reclassify_with_defined_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     interval_size: int,
     bands: Optional[Sequence[int]] = None,
@@ -100,14 +100,14 @@ def raster_with_defined_intervals(  # type: ignore[no-any-unimported]
 
     for band in raster.read(bands_to_read):
 
-        defined_intervals_band = _raster_with_defined_intervals(band, interval_size)
+        defined_intervals_band = _reclassify_with_defined_intervals(band, interval_size)
 
         out_image.append(defined_intervals_band)
 
     return out_image, out_meta
 
 
-def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
+def _reclassify_with_equal_intervals(  # type: ignore[no-any-unimported]
     band: np.ndarray,
     number_of_intervals: int,
 ) -> np.ndarray:
@@ -122,7 +122,7 @@ def _raster_with_equal_intervals(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
+def reclassify_with_equal_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
     bands: Optional[Sequence[int]] = None,
@@ -152,14 +152,14 @@ def raster_with_equal_intervals(  # type: ignore[no-any-unimported]
 
     for band in raster.read(bands_to_read):
 
-        equal_intervals_band = _raster_with_equal_intervals(band, number_of_intervals)
+        equal_intervals_band = _reclassify_with_equal_intervals(band, number_of_intervals)
 
         out_image.append(equal_intervals_band)
 
     return out_image, out_meta
 
 
-def _raster_with_quantiles(  # type: ignore[no-any-unimported]
+def _reclassify_with_quantiles(  # type: ignore[no-any-unimported]
     band: np.ndarray,
     number_of_quantiles: int,
 ) -> np.ndarray:
@@ -171,7 +171,7 @@ def _raster_with_quantiles(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def raster_with_quantiles(  # type: ignore[no-any-unimported]
+def reclassify_with_quantiles(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_quantiles: int,
     bands: Optional[Sequence[int]] = None,
@@ -201,14 +201,14 @@ def raster_with_quantiles(  # type: ignore[no-any-unimported]
 
     for band in raster.read(bands_to_read):
 
-        numbered_quantiles_band = _raster_with_quantiles(band, number_of_quantiles)
+        numbered_quantiles_band = _reclassify_with_quantiles(band, number_of_quantiles)
 
         out_image.append(numbered_quantiles_band)
 
     return out_image, out_meta
 
 
-def _raster_with_natural_breaks(  # type: ignore[no-any-unimported]
+def _reclassify_with_natural_breaks(  # type: ignore[no-any-unimported]
     band: np.ndarray,
     number_of_classes: int,
 ) -> np.ndarray:
@@ -220,7 +220,7 @@ def _raster_with_natural_breaks(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
+def reclassify_with_natural_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_classes: int,
     bands: Optional[Sequence[int]] = None,
@@ -250,14 +250,16 @@ def raster_with_natural_breaks(  # type: ignore[no-any-unimported]
 
     for band in raster.read(bands_to_read):
 
-        natural_breaks_band = _raster_with_natural_breaks(band, number_of_classes)
+        natural_breaks_band = _reclassify_with_natural_breaks(band, number_of_classes)
 
         out_image.append(natural_breaks_band)
 
     return out_image, out_meta
 
 
-def _raster_with_geometrical_intervals(band: np.ndarray, number_of_classes: int, nodata_value: Number) -> np.ndarray:
+def _reclassify_with_geometrical_intervals(
+    band: np.ndarray, number_of_classes: int, nodata_value: Number
+) -> np.ndarray:
 
     # nan_value is either a set integer (e.g. -9999) or np.nan
     mask = band == nodata_value
@@ -316,7 +318,7 @@ def _raster_with_geometrical_intervals(band: np.ndarray, number_of_classes: int,
 
 
 @beartype
-def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
+def reclassify_with_geometrical_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader, number_of_classes: int, bands: Optional[Sequence[int]] = None
 ) -> Tuple[Sequence[np.ndarray], dict]:
     """Classify raster with geometrical intervals.
@@ -346,14 +348,14 @@ def raster_with_geometrical_intervals(  # type: ignore[no-any-unimported]
 
     for band in raster.read(bands_to_read):
 
-        geometrical_intervals_band = _raster_with_geometrical_intervals(band, number_of_classes, nodata_value)
+        geometrical_intervals_band = _reclassify_with_geometrical_intervals(band, number_of_classes, nodata_value)
 
         out_image.append(geometrical_intervals_band)
 
     return out_image, out_meta
 
 
-def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
+def _reclassify_with_standard_deviation(  # type: ignore[no-any-unimported]
     band: np.ndarray,
     number_of_intervals: int,
 ) -> np.ndarray:
@@ -381,7 +383,7 @@ def _raster_with_standard_deviation(  # type: ignore[no-any-unimported]
 
 
 @beartype
-def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
+def reclassify_with_standard_deviation(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
     bands: Optional[Sequence[int]] = None,
@@ -411,7 +413,7 @@ def raster_with_standard_deviation(  # type: ignore[no-any-unimported]
 
     for band in raster.read(bands_to_read):
 
-        standard_deviation_band = _raster_with_standard_deviation(band, number_of_intervals)
+        standard_deviation_band = _reclassify_with_standard_deviation(band, number_of_intervals)
 
         out_image.append(standard_deviation_band)
 
