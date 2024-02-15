@@ -8,13 +8,13 @@ import json
 import os
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio
 import typer
+from beartype.typing import List, Optional, Tuple
 from rasterio import warp
 from typing_extensions import Annotated
 
@@ -36,6 +36,55 @@ class CoordinatesType(str, Enum):
 
     euclidean = "euclidean"
     geographic = "geographic"
+
+
+class AngleUnits(str, Enum):
+    """Unit for classify aspect."""
+
+    radians = "radians"
+    degrees = "degrees"
+
+
+class SlopeGradientUnit(str, Enum):
+    """Slope gradient unit for first order surface derivatives."""
+
+    degrees = "degrees"
+    radians = "radians"
+    rise = "rise"
+
+
+class FirstOrderMethod(str, Enum):
+    """Method for first order surface derivatives."""
+
+    Horn = "Horn"
+    Evans = "Evans"
+    Young = "Young"
+    Zevenbergen = "Zevenbergen"
+
+
+class SurfaceParameter(str, Enum):
+    """Parameter choice for surface derivatives."""
+
+    G = "G"
+    A = "A"
+    planc = "planc"
+    profc = "profc"
+    profc_min = "profc_min"
+    profc_max = "profc_max"
+    longc = "longc"
+    crosc = "crosc"
+    rot = "rot"
+    K = "K"
+    genc = "genc"
+    tangc = "tangc"
+
+
+class SecondOrderMethod(str, Enum):
+    """Method for second order surface derivatives."""
+
+    Evans = "Evans"
+    Young = "Young"
+    Zevenbergen = "Zevenbergen"
 
 
 class KrigingMethod(str, Enum):
@@ -463,7 +512,7 @@ def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPT
     typer.echo("Progress: 75%")
 
     json_str = json.dumps(results_dict)
-    typer.echo("Progress: 10%")
+    typer.echo("Progress: 100%")
 
     typer.echo(f"Results: {json_str}")
     typer.echo("Descriptive statistics (vector) completed")
@@ -767,11 +816,15 @@ def check_raster_grids_cli(input_rasters: INPUT_FILES_ARGUMENT, same_extent: boo
         with rasterio.open(input_raster) as raster:
             raster_profiles.append(raster.profile)
     typer.echo("Progress: 50%")
-    result = check_raster_grids(raster_profiles=raster_profiles, same_extent=same_extent)
 
+    result = check_raster_grids(raster_profiles=raster_profiles, same_extent=same_extent)
+    results_dict = {"result": result}
+    typer.echo("Progress: 75%")
+
+    json_str = json.dumps(results_dict)
     typer.echo("Progress: 100%")
 
-    typer.echo(f"Result: {str(result)}")
+    typer.echo(f"Results: {json_str}")
     typer.echo("Checking raster grids completed.")
 
 
@@ -904,7 +957,7 @@ def reproject_raster_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     target_crs: int = typer.Option(help="crs help"),
-    resampling_method: ResamplingMethods = typer.Option(help="resample help", default=ResamplingMethods.nearest),
+    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest),
 ):
     """Reproject the input raster to given CRS."""
     from eis_toolkit.raster_processing.reprojecting import reproject_raster
@@ -1064,6 +1117,100 @@ def extract_window_cli(
     typer.echo("Progress: 100%")
 
     typer.echo(f"Windowing completed, writing raster to {output_raster}")
+
+
+# SURFACE DERIVATIVES - CLASSIFY ASPECT
+@app.command()
+def classify_aspect_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    unit: AngleUnits = AngleUnits.radians,
+    num_classes: int = 8,
+):
+    """Classify an aspect raster data set."""
+    from eis_toolkit.raster_processing.derivatives.classification import classify_aspect
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, class_mapping, out_meta = classify_aspect(raster=raster, unit=unit, num_classes=num_classes)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image, 1)
+    json_str = json.dumps(class_mapping)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo(f"Classifying aspect completed, writing raster to {output_raster}")
+
+
+# SURFACE DERIVATIVES
+@app.command()
+def surface_derivatives_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    parameters: Annotated[List[SurfaceParameter], typer.Option()],
+    scaling_factor: Optional[float] = 1.0,
+    slope_tolerance: Optional[float] = 0.0,
+    slope_gradient_unit: SlopeGradientUnit = SlopeGradientUnit.radians,
+    slope_direction_unit: AngleUnits = AngleUnits.radians,
+    first_order_method: FirstOrderMethod = FirstOrderMethod.Horn,
+    second_order_method: SecondOrderMethod = SecondOrderMethod.Young,
+):
+    """Calculate the first and/or second order surface attributes."""
+    from eis_toolkit.raster_processing.derivatives.parameters import first_order, second_order_basic_set
+
+    typer.echo("Progress: 10%")
+
+    first_order_parameters = []
+    second_order_parameters = []
+    for parameter in parameters:
+        if parameter in ("G", "A"):
+            first_order_parameters.append(parameter)
+        else:
+            second_order_parameters.append(parameter)
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        if first_order_parameters:
+            first_order_results = first_order(
+                raster=raster,
+                parameters=first_order_parameters,
+                scaling_factor=scaling_factor,
+                slope_tolerance=slope_tolerance,
+                slope_gradient_unit=slope_gradient_unit,
+                slope_direction_unit=slope_direction_unit,
+                method=first_order_method,
+            )
+
+        typer.echo("Progress: 50%")
+        if second_order_parameters:
+            second_order_results = second_order_basic_set(
+                raster=raster,
+                parameters=second_order_parameters,
+                scaling_factor=scaling_factor,
+                slope_tolerance=slope_tolerance,
+                method=second_order_method,
+            )
+    typer.echo("Progres: 75%")
+
+    if first_order_parameters:
+        for parameter, (out_image, out_meta) in first_order_results.items():
+            out_raster_name = str(output_raster)[:-4] + "_" + parameter + str(output_raster)[-4:]
+            with rasterio.open(out_raster_name, "w", **out_meta) as dest:
+                dest.write(out_image, 1)
+        typer.echo("Progress: 90%")
+
+    if second_order_parameters:
+        for parameter, (out_image, out_meta) in second_order_results.items():
+            out_raster_name = str(output_raster)[:-4] + "_" + parameter + str(output_raster)[-4:]
+            with rasterio.open(out_raster_name, "w", **out_meta) as dest:
+                dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Calculating first and/or second order surface attributes completed, writing raster to {output_raster}")
 
 
 # --- VECTOR PROCESSING ---

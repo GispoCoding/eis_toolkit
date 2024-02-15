@@ -1,10 +1,9 @@
-from typing import Union
-
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio
 from beartype import beartype
+from beartype.typing import Union
 from statsmodels.stats import stattools
 from statsmodels.stats.weightstats import DescrStatsW
 

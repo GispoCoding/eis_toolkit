@@ -1,8 +1,7 @@
-from typing import Union
-
 import numpy as np
 import pandas as pd
 from beartype import beartype
+from beartype.typing import Union
 from sklearn import metrics
 
 from eis_toolkit.exceptions import InvalidParameterValueException

@@ -1,7 +1,7 @@
 from numbers import Number
-from typing import Any, Sequence, Union
 
 from beartype import beartype
+from beartype.typing import Any, Sequence, Union
 
 
 def check_parameter_value(parameter_value: Union[Number, str], allowed_values: Union[list, tuple]) -> bool:

@@ -22,7 +22,7 @@ def test_encode_dataframe_sparse_all_columns(sample_dataframe):
     """Test that encoding DataFrame with sparse output works as expected."""
     encoded_df = one_hot_encode(sample_dataframe)
     assert all(item in encoded_df.columns for item in ["A_cat", "A_dog", "A_fish", "B_apple", "B_banana", "B_orange"])
-    assert encoded_df.dtypes.apply(pd.api.types.is_sparse).all()
+    assert encoded_df.dtypes.apply(lambda x: isinstance(x, pd.SparseDtype)).all()
 
 
 def test_encode_dataframe_sparse_selected_columns(sample_dataframe):
@@ -31,14 +31,14 @@ def test_encode_dataframe_sparse_selected_columns(sample_dataframe):
     encoded_df_without_column_C = encoded_df.drop(["C"], axis=1)
     assert "C" in encoded_df.columns
     assert "A_fish" in encoded_df.columns
-    assert encoded_df_without_column_C.dtypes.apply(pd.api.types.is_sparse).all()
+    assert encoded_df_without_column_C.dtypes.apply(lambda x: isinstance(x, pd.SparseDtype)).all()
     assert encoded_df["C"].dtype in (int, np.dtype("int64"))
 
 
 def test_encode_dataframe_dense(sample_dataframe):
     """Test that encoding DataFrame with dense output works as expected."""
     encoded_df = one_hot_encode(sample_dataframe, sparse_output=False)
-    assert not encoded_df.dtypes.apply(pd.api.types.is_sparse).any()
+    assert not encoded_df.dtypes.apply(lambda x: isinstance(x, pd.SparseDtype)).any()
 
 
 def test_encode_numpy_array_sparse(sample_numpy_array):
