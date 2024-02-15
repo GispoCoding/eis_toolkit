@@ -31,40 +31,30 @@ def _create_an_instance_of_cnn(
     metrics="accuracy",
 ) -> tf.keras.Model:
     """
-     Do an instance of the CNN. Just the body of the CNN.
+    Create an instance of the CNN model.
 
-    Args::
-       input_shape_for_cnn: Shape of the input. How big the input should be. It is possible to build an input:
-                         - windows: (h, w, c) windows height, windows width and channel or windows dimension.
-                         - point (p, c) point value and dimension of the point.
-       convolution_kernel_size: Size of the kernel (usually is the last number of the input tuple). Usually is the "c"
-                                of the input_shape_for_cnn.
-       pool_size: Size of the pooling layer (How much you want to reduce the dimension of the data).
-       conv_list: list of unit for the conv layers. Here the length of the list is the number of convolution layers.
-       regularization: Regularization of each  layer. None if you do not want it:
-                     - None if you prefer to avoid regularization.
-                     - L1 for L1 regularization.
-                     - L2 for L2 regularization.
-                     - L1L2 for L1 L2 regularization.
-       data_augmentation: If you want data augmentation or not (Random rotation is implemented).
-       optimizer: Select one optimizer for the CNN. The default value is Adam.
-       loss: The loss function used to measure how good the CNN is performing.
-       neuron_list: List of unit or neuron used to build the network final part of the network. the length of the list
-                    is the number of fully connected layers.
-       dropout_rate: Float number that help avoiding over-fitting. It just randomly drops samples.
-       output_units: number of output classes.
-       last_activation: usually you should use softmax or sigmoid.
-       metrics: In case of classification accuracy is the best metrics, otherwise for regression MAE is the way.
+    Args:
+        input_shape_for_cnn: Shape of the input data. It can be:
+            - For windows: (h, w, c) where h is the height, w is the width, and c is the number of channels.
+            - For points: (p, c) where p is the point value and c is the dimension of the point.
+        convolution_kernel_size: Size of the convolution kernel.
+        conv_list: List of units for the convolution layers.
+        neuron_list: List of units for the fully connected layers.
+        pool_size: Size of the pooling layer. Defaults to 2.
+        dropout_rate: Dropout rate to prevent overfitting. Defaults to None.
+        last_activation: Activation function for the last layer. Defaults to "softmax".
+        regularization: Regularization for the layers. Defaults to None.
+        data_augmentation: Enable data augmentation. Defaults to False.
+        optimizer: Optimizer for training. Defaults to "Adam".
+        loss: Loss function for training. Defaults to BinaryCrossentropy.
+        output_units: Number of output units. Defaults to 2.
+        metrics: Evaluation metric for training. Defaults to "accuracy".
 
-    Return:
-         the model that has been created.
+    Returns:
+        Compiled Keras Model.
 
     Raises:
-        InvalidParameterValueException: Raised when the input shape of the CNN is not valid. It can be risen.
-                                        For example, when the user plan to build a windows CNN approach and feed it
-                                        with point. Moreover, it is raised when argument of the function is invalid.
-                                        It is applied to convolution layers and dense layers.
-
+        InvalidParameterValueException: Raised when the input parameters are invalid.
     """
 
     # check that the input is not null
@@ -157,66 +147,49 @@ def run_inference(
     ] = tf.keras.losses.BinaryCrossentropy(),
 ) -> tuple[Model, ndarray or None, Any or None]:
     """
-    Do a CNN for training and evaluation of data. It is designed to classify the data provided in the given labels.
+    Train and evaluate a Convolutional Neural Network (CNN) for data classification.
 
-    Here, you can select how many convolutional layer and Dense layer you  want. This CNN can be used to classify
-    the data provided as classes. The CNN works both with windows and points. If you select windows, iti is possible
-    to use random rotation to augment the data. In case the CNN is over-fitting, you can try to avoid it adding
-    dropout or regularization.
+    This function allows for flexible CNN architecture specification, including the number of convolutional
+    and dense layers, input shape, and various hyperparameters. It supports data augmentation, dropout, and
+    regularization to prevent overfitting. The function can work with both raw data points and structured
+    input like images or sequences.
 
     Args:
-         X: This is the dataset used for the model inference.
-         y: The labels used for training: they can be encoded (done with OHE) or a list of integers.
-         validation_split: split between train and validation of the data.
-         validation_data: Partition of dataset used as validation (unseen data).
-         batch_size: How much we want the batch size. This is the number os samples that the CNN takes during each
-            iteration.
-         epochs: How many iterations we want to run the model.
-         input_shape_for_cnn: Shape of the inputs windows should follow:
-            - tuple[int, int, int] feed the cnn with windows: format (h, w, c).
-            - tuple[int, int] feed a network with points: format (value, c).
-         convolutional_kernel_size: Size of the kernel (usually is the last number of the input tuple).
-         pool_size: Size of the pooling layer (How much you want to reduce the dimension of the data).
-         conv_list: List of units used in each convolutional layer.The length of the list is the number of layers.
-         sample_weights: If you want to sample weights. It is used when there is strong imbalance of the data.
-            neuron_list: This is a list of dense layers used for the last section of the network (fully connected
-            layers). The length of the list shows the number of layers.
-         neuron_list: This is a list of dense layers used for the last section of the network (fully connected layers).
-            The length of the list shows the number of layers.
-         dropout_rate: Float number that help avoiding over-fitting. It just randomly drops samples.
-         regularization: Regularization of each  layer. None if you do not want it:
-            - None if you prefer to avoid regularization.
-            - L1 for L1 regularization.
-            - L2 for L2 regularization.
-            - L1L2 for L1 L2 regularization.
-         data_augmentation: Usable only if the network is fed by windows.
-         optimizer: Loss optimization function, default is Adam.
-         output_units: How many class you have to predicts.
-         last_activation_layer: How the output of the network is calculated.
-         loss_function: The loss function used to measure how good the CNN is performing.
+        X: Input data for the model.
+        y: Target labels for the input data. They can be encoded using either one-hot encoding (OHE) or represented as a list of integers.
+        batch_size: Number of samples per gradient update.
+        epochs: Number of epochs to train the model.
+        conv_list: Number of filters in each convolutional layer.
+        neuron_list: Number of neurons in each dense layer.
+        input_shape_for_cnn: Shape of the input data.
+        convolutional_kernel_size: Size of the convolution kernels.
+        validation_split: Fraction of the data to use as validation set. Defaults to 0.2.
+        validation_data: Explicit validation set.
+        pool_size: Size of the pooling windows. Defaults to 2.
+        sample_weights: Whether to use sample weighting. Defaults to False.
+        dropout_rate: Fraction of the input units to drop. Defaults to None.
+        regularization: Regularization function applied to the activation functions. Defaults to None.
+        data_augmentation: Whether to use data augmentation. Defaults to False.
+        optimizer: Optimization algorithm. Defaults to "Adam".
+        output_units: Number of output units in the final layer. Defaults to 2.
+        last_activation_layer: Activation function for the output layer. Defaults to "softmax".
+        loss_function: Loss function for the optimization. Defaults to `tf.keras.losses.BinaryCrossentropy()`.
 
     Returns:
-        The trained model together with the predicted values and the model's score.  When
-        the validation set is None, true labels, predicted labels and scores assumes None.
+        A tuple containing the trained model, predictions on the validation set, and evaluation score.
+
     Raises:
-        InvalidParameterValueException: Raised when argument of the function is invalid. It is applied to convolution
-                                        layers and dense layers. Moreover, Raised when the input shape of the CNN is not
-                                        valid. It can be risen. For example, when the user plan to build a windows CNN
-                                        approach and feed it with point.
+        InvalidParameterValueException: If any input parameter is invalid.
     """
 
-    if X.size == 0 or y.size == 0:
-        raise InvalidParameterValueException
+    # Validation checks for input parameters
+    if X.size == 0 or y.size == 0 or batch_size <= 0 or epochs <= 0 or len(conv_list) <= 0 or len(neuron_list) <= 0:
+        raise InvalidParameterValueException("Input parameters have invalid values.")
 
-    if batch_size <= 0 or epochs <= 0:
-        raise InvalidParameterValueException
+    if dropout_rate is not None and (dropout_rate <= 0 or dropout_rate > 1):
+        raise InvalidParameterValueException("Dropout rate must be in the range (0, 1].")
 
-    if len(conv_list) <= 0 or len(neuron_list) <= 0:
-        raise InvalidParameterValueException
-
-    if dropout_rate is not None and dropout_rate <= 0:
-        raise InvalidParameterValueException
-
+    # Model instantiation
     cnn_model = _create_an_instance_of_cnn(
         input_shape_for_cnn=input_shape_for_cnn,
         convolution_kernel_size=convolutional_kernel_size,
@@ -232,6 +205,7 @@ def run_inference(
         output_units=output_units,
     )
 
+    # Model training
     _ = cnn_model.fit(
         X,
         y,
@@ -240,12 +214,13 @@ def run_inference(
         epochs=epochs,
         sample_weight=compute_sample_weight("balanced", y) if sample_weights is not False else None,
     )
-
+    
+    # Evaluation on validation data if provided
     if validation_data is not None:
         x_valid, y_valid = validation_data
         score = cnn_model.evaluate(x_valid, y_valid)[1]
         prediction = cnn_model.predict(x_valid)
 
         return cnn_model, prediction, score
-    else:
-        return cnn_model, None, None
+    
+    return cnn_model, None, None
