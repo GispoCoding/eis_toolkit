@@ -156,7 +156,7 @@ def run_inference(
 
     Args:
         X: Input data for the model.
-        y: Target labels for the input data. They can be encoded as one-hot encoding (OHE) or a list of integers.
+        y: Target labels for the input data. They can be encoded using either one-hot encoding (OHE) or represented as a list of integers.
         batch_size: Number of samples per gradient update.
         epochs: Number of epochs to train the model.
         conv_list: Number of filters in each convolutional layer.
