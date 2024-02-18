@@ -4,7 +4,7 @@ import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
 
 from eis_toolkit.exceptions import InvalidParameterValueException
-from eis_toolkit.prediction.cnn_classification_and_probability import run_inference
+from eis_toolkit.prediction.cnn_classification_and_probability import run_inference, run_inference_regression
 from eis_toolkit.prediction.machine_learning_general import _get_cross_validator
 from eis_toolkit.transformations.normalize_data import normalize_the_data
 from eis_toolkit.transformations.one_hot_encoding import one_hot_encode
@@ -131,7 +131,7 @@ def test_train_CNN_regressor():
         x_validation = normalize_the_data(scaler_agent=scaler_agent, data=data[validation_idx])
         y_validation = labels[validation_idx]
 
-        cnn_model, predicted_labels, score = run_inference(
+        cnn_model, predicted_labels, score = run_inference_regression(
             X=x_train,
             y=y_train,
             validation_split=0.2,
@@ -143,7 +143,6 @@ def test_train_CNN_regressor():
             input_shape_for_cnn=(x_train.shape[1], x_train.shape[2], x_train.shape[3]),
             convolutional_kernel_size=(x_train.shape[3], x_train.shape[3]),
             last_activation_layer=None,
-            loss_function=tf.keras.losses.MeanAbsoluteError(),
             output_units=1,
         )
 

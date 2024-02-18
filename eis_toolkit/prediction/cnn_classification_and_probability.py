@@ -226,3 +226,104 @@ def run_inference(
         return cnn_model, prediction, score
     else:
         return cnn_model, None, None
+
+
+def run_inference_regression(
+    X: np.ndarray,
+    y: np.ndarray,
+    batch_size: int,
+    epochs: int,
+    conv_list: list[int],
+    neuron_list: list[int],
+    input_shape_for_cnn: Union[tuple[int, int, int], tuple[int, int], tuple[int], int],
+    convolutional_kernel_size: tuple[int, int],
+    validation_split: Optional[float] = 0.2,
+    validation_data: Optional[Tuple[np.ndarray, np.ndarray]] = None,
+    pool_size: int = 2,
+    sample_weights: bool = False,
+    dropout_rate: Union[None, float] = None,
+    regularization: Union[tf.keras.regularizers.L1, tf.keras.regularizers.L2, tf.keras.regularizers.L1L2, None] = None,
+    data_augmentation: bool = False,
+    optimizer: str = "Adam",
+    output_units=2,
+    last_activation_layer: Literal["softmax", "sigmoid", None] = "softmax",
+) -> tuple[Model, ndarray or None, Any or None]:
+    """
+    Train and evaluate a Convolutional Neural Network (CNN) for data classification.
+
+    This function allows for flexible CNN architecture specification, including the number of convolutional
+    and dense layers, input shape, and various hyperparameters. It supports data augmentation, dropout, and
+    regularization to prevent overfitting. The function can work with both raw data points and structured
+    input like images or sequences.
+
+    Args:
+        X: Input data for the model.
+        y: Target labels for the input data. They can be encoded as one-hot encoding (OHE) or a list of integers.
+        batch_size: Number of samples per gradient update.
+        epochs: Number of epochs to train the model.
+        conv_list: Number of filters in each convolutional layer.
+        neuron_list: Number of neurons in each dense layer.
+        input_shape_for_cnn: Shape of the input data.
+        convolutional_kernel_size: Size of the convolution kernels.
+        validation_split: Fraction of the data to use as validation set. Defaults to 0.2.
+        validation_data: Explicit validation set.
+        pool_size: Size of the pooling windows. Defaults to 2.
+        sample_weights: Whether to use sample weighting. Defaults to False.
+        dropout_rate: Fraction of the input units to drop. Defaults to None.
+        regularization: Regularization function applied to the activation functions. Defaults to None.
+        data_augmentation: Whether to use data augmentation. Defaults to False.
+        optimizer: Optimization algorithm. Defaults to "Adam".
+        output_units: Number of output units in the final layer. Defaults to 2.
+        last_activation_layer: Activation function for the output layer. Defaults to "softmax".
+
+    Returns:
+        A tuple containing the trained model, predictions on the validation set, and evaluation score.
+
+    Raises:
+        InvalidParameterValueException: If any input parameter is invalid.
+    """
+
+    if X.size == 0 or y.size == 0:
+        raise InvalidParameterValueException
+
+    if batch_size <= 0 or epochs <= 0:
+        raise InvalidParameterValueException
+
+    if len(conv_list) <= 0 or len(neuron_list) <= 0:
+        raise InvalidParameterValueException
+
+    if dropout_rate is not None and dropout_rate <= 0:
+        raise InvalidParameterValueException
+
+    cnn_model = _create_an_instance_of_cnn(
+        input_shape_for_cnn=input_shape_for_cnn,
+        convolution_kernel_size=convolutional_kernel_size,
+        conv_list=conv_list,
+        pool_size=pool_size,
+        neuron_list=neuron_list,
+        dropout_rate=dropout_rate,
+        last_activation=last_activation_layer,
+        regularization=regularization,
+        data_augmentation=data_augmentation,
+        optimizer=optimizer,
+        loss=tf.keras.losses.MeanSquaredError(),
+        output_units=output_units,
+    )
+
+    _ = cnn_model.fit(
+        X,
+        y,
+        validation_split=validation_split if validation_split is not None else None,
+        batch_size=batch_size,
+        epochs=epochs,
+        sample_weight=compute_sample_weight("balanced", y) if sample_weights is not False else None,
+    )
+
+    if validation_data is not None:
+        x_valid, y_valid = validation_data
+        score = cnn_model.evaluate(x_valid, y_valid)[1]
+        prediction = cnn_model.predict(x_valid)
+
+        return cnn_model, prediction, score
+    else:
+        return cnn_model, None, None
