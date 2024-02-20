@@ -20,7 +20,7 @@ eis = "eis_toolkit.cli:app"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
-gdal = "3.4.3"
+gdal = ">=3.4.3,<4.0.0"
 rasterio = "^1.3.0"
 pandas = "^2.0.0"
 geopandas = "^0.11.1"
@@ -30,7 +30,7 @@ statsmodels = "^0.14.0"
 keras = "^2.9.0"
 tensorflow = "^2.9.1"
 beartype = "^0.13.1"
-seaborn = "0.13.0"
+seaborn = ">=0.13.0,<1.0.0"
 pykrige = "^1.7.0"
 rtree = "^1.0.1"
 typer = {extras = ["all"], version = "^0.9.0"}
