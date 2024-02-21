@@ -1,10 +1,9 @@
-from typing import Optional
-
 import geopandas
 import numpy as np
 import pandas as pd
 import rasterio
 from beartype import beartype
+from beartype.typing import Optional
 
 from eis_toolkit.exceptions import GeometryTypeException, NonMatchingCrsException
 from eis_toolkit.utilities.checks.geometry import check_geometry_types

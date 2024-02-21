@@ -1,9 +1,8 @@
-from typing import Union
-
 import matplotlib
 import numpy as np
 import pandas as pd
 from beartype import beartype
+from beartype.typing import Union
 from matplotlib import pyplot as plt
 
 from eis_toolkit.exceptions import InvalidParameterValueException

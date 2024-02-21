@@ -1,5 +1,3 @@
-from typing import Optional
-
 import matplotlib
 import matplotlib.colors as mcolors
 import matplotlib.patches as patches
@@ -8,7 +6,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from beartype import beartype
-from beartype.typing import Tuple
+from beartype.typing import Optional, Tuple
 from matplotlib.cm import ScalarMappable
 from matplotlib.path import Path
 from sklearn.preprocessing import LabelEncoder
