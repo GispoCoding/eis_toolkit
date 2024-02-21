@@ -24,7 +24,7 @@ def reclassify_with_manual_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     breaks: Sequence[int],
     bands: Optional[Sequence[int]] = None,
-) -> Tuple[Sequence[np.ndarray], dict]:
+) -> Tuple[np.ndarray, dict]:
     """Classify raster with manual breaks.
 
     If bands are not given, all bands are used for classification.
@@ -41,18 +41,17 @@ def reclassify_with_manual_breaks(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands contain negative values.
     """
 
-    out_image = []
+    if bands is None or len(bands) == 0:
+        bands = range(1, raster.count + 1)
+    else:
+        check_raster_bands(raster, bands)
+
+    out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
 
-    bands_to_read = bands if bands is not None else raster.indexes
-
-    check_raster_bands(raster, bands_to_read)
-
-    for band in raster.read(bands_to_read):
-
-        manual_breaks_band = _reclassify_with_manual_breaks(band, breaks)
-
-        out_image.append(manual_breaks_band)
+    for i, band in enumerate(bands):
+        band_data = raster.read(band)
+        out_image[i] = _reclassify_with_manual_breaks(band_data, breaks)
 
     return out_image, out_meta
 
@@ -74,7 +73,7 @@ def reclassify_with_defined_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     interval_size: int,
     bands: Optional[Sequence[int]] = None,
-) -> Tuple[Sequence[np.ndarray], dict]:
+) -> Tuple[np.ndarray, dict]:
     """Classify raster with defined intervals.
 
     If bands are not given, all bands are used for classification.
@@ -91,18 +90,17 @@ def reclassify_with_defined_intervals(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands contain negative values.
     """
 
-    out_image = []
+    if bands is None or len(bands) == 0:
+        bands = range(1, raster.count + 1)
+    else:
+        check_raster_bands(raster, bands)
+
+    out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
 
-    bands_to_read = bands if bands is not None else raster.indexes
-
-    check_raster_bands(raster, bands_to_read)
-
-    for band in raster.read(bands_to_read):
-
-        defined_intervals_band = _reclassify_with_defined_intervals(band, interval_size)
-
-        out_image.append(defined_intervals_band)
+    for i, band in enumerate(bands):
+        band_data = raster.read(band)
+        out_image[i] = _reclassify_with_defined_intervals(band_data, interval_size)
 
     return out_image, out_meta
 
@@ -126,7 +124,7 @@ def reclassify_with_equal_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
     bands: Optional[Sequence[int]] = None,
-) -> Tuple[Sequence[np.ndarray], dict]:
+) -> Tuple[np.ndarray, dict]:
     """Classify raster with equal intervals.
 
     If bands are not given, all bands are used for classification.
@@ -143,18 +141,17 @@ def reclassify_with_equal_intervals(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands contain negative values.
     """
 
-    out_image = []
+    if bands is None or len(bands) == 0:
+        bands = range(1, raster.count + 1)
+    else:
+        check_raster_bands(raster, bands)
+
+    out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
 
-    bands_to_read = bands if bands is not None else raster.indexes
-
-    check_raster_bands(raster, bands_to_read)
-
-    for band in raster.read(bands_to_read):
-
-        equal_intervals_band = _reclassify_with_equal_intervals(band, number_of_intervals)
-
-        out_image.append(equal_intervals_band)
+    for i, band in enumerate(bands):
+        band_data = raster.read(band)
+        out_image[i] = _reclassify_with_equal_intervals(band_data, number_of_intervals)
 
     return out_image, out_meta
 
@@ -175,7 +172,7 @@ def reclassify_with_quantiles(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_quantiles: int,
     bands: Optional[Sequence[int]] = None,
-) -> Tuple[Sequence[np.ndarray], dict]:
+) -> Tuple[np.ndarray, dict]:
     """Classify raster with quantiles.
 
     If bands are not given, all bands are used for classification.
@@ -192,18 +189,17 @@ def reclassify_with_quantiles(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands contain negative values.
     """
 
-    out_image = []
+    if bands is None or len(bands) == 0:
+        bands = range(1, raster.count + 1)
+    else:
+        check_raster_bands(raster, bands)
+
+    out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
 
-    bands_to_read = bands if bands is not None else raster.indexes
-
-    check_raster_bands(raster, bands_to_read)
-
-    for band in raster.read(bands_to_read):
-
-        numbered_quantiles_band = _reclassify_with_quantiles(band, number_of_quantiles)
-
-        out_image.append(numbered_quantiles_band)
+    for i, band in enumerate(bands):
+        band_data = raster.read(band)
+        out_image[i] = _reclassify_with_quantiles(band_data, number_of_quantiles)
 
     return out_image, out_meta
 
@@ -224,7 +220,7 @@ def reclassify_with_natural_breaks(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_classes: int,
     bands: Optional[Sequence[int]] = None,
-) -> Tuple[Sequence[np.ndarray], dict]:
+) -> Tuple[np.ndarray, dict]:
     """Classify raster with natural breaks (Jenks Caspall).
 
     If bands are not given, all bands are used for classification.
@@ -241,18 +237,17 @@ def reclassify_with_natural_breaks(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands contain negative values.
     """
 
-    out_image = []
+    if bands is None or len(bands) == 0:
+        bands = range(1, raster.count + 1)
+    else:
+        check_raster_bands(raster, bands)
+
+    out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
 
-    bands_to_read = bands if bands is not None else raster.indexes
-
-    check_raster_bands(raster, bands_to_read)
-
-    for band in raster.read(bands_to_read):
-
-        natural_breaks_band = _reclassify_with_natural_breaks(band, number_of_classes)
-
-        out_image.append(natural_breaks_band)
+    for i, band in enumerate(bands):
+        band_data = raster.read(band)
+        out_image[i] = _reclassify_with_natural_breaks(band_data, number_of_classes)
 
     return out_image, out_meta
 
@@ -320,7 +315,7 @@ def _reclassify_with_geometrical_intervals(
 @beartype
 def reclassify_with_geometrical_intervals(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader, number_of_classes: int, bands: Optional[Sequence[int]] = None
-) -> Tuple[Sequence[np.ndarray], dict]:
+) -> Tuple[np.ndarray, dict]:
     """Classify raster with geometrical intervals.
 
     If bands are not given, all bands are used for classification.
@@ -338,19 +333,18 @@ def reclassify_with_geometrical_intervals(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands contain negative values.
     """
 
-    out_image = []
+    if bands is None or len(bands) == 0:
+        bands = range(1, raster.count + 1)
+    else:
+        check_raster_bands(raster, bands)
+
+    out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
     nodata_value = raster.nodata
 
-    bands_to_read = bands if bands is not None else raster.indexes
-
-    check_raster_bands(raster, bands_to_read)
-
-    for band in raster.read(bands_to_read):
-
-        geometrical_intervals_band = _reclassify_with_geometrical_intervals(band, number_of_classes, nodata_value)
-
-        out_image.append(geometrical_intervals_band)
+    for i, band in enumerate(bands):
+        band_data = raster.read(band)
+        out_image[i] = _reclassify_with_geometrical_intervals(band_data, number_of_classes, nodata_value)
 
     return out_image, out_meta
 
@@ -387,7 +381,7 @@ def reclassify_with_standard_deviation(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
     number_of_intervals: int,
     bands: Optional[Sequence[int]] = None,
-) -> Tuple[Sequence[np.ndarray], dict]:
+) -> Tuple[np.ndarray, dict]:
     """Classify raster with standard deviation.
 
     If bands are not given, all bands are used for classification.
@@ -404,17 +398,16 @@ def reclassify_with_standard_deviation(  # type: ignore[no-any-unimported]
         InvalidParameterValueException: Bands contain negative values.
     """
 
-    out_image = []
+    if bands is None or len(bands) == 0:
+        bands = range(1, raster.count + 1)
+    else:
+        check_raster_bands(raster, bands)
+
+    out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
 
-    bands_to_read = bands if bands is not None else raster.indexes
-
-    check_raster_bands(raster, bands_to_read)
-
-    for band in raster.read(bands_to_read):
-
-        standard_deviation_band = _reclassify_with_standard_deviation(band, number_of_intervals)
-
-        out_image.append(standard_deviation_band)
+    for i, band in enumerate(bands):
+        band_data = raster.read(band)
+        out_image[i] = _reclassify_with_standard_deviation(band_data, number_of_intervals)
 
     return out_image, out_meta
