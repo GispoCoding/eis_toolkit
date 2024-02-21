@@ -1,6 +1,6 @@
 import numpy as np
 import rasterio
-from beartype.typing import Sequence, Tuple
+from beartype.typing import Tuple
 
 from eis_toolkit.raster_processing import reclassify
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
@@ -31,7 +31,7 @@ def test_reclassify_with_defined_intervals_main():
         )
 
     assert isinstance(result, Tuple)
-    assert isinstance(result[0], Sequence)
+    assert isinstance(result[0], np.ndarray)
     assert isinstance(result[1], dict)
 
 
@@ -57,7 +57,7 @@ def test_reclassify_with_equal_intervals_main():
             bands=[1],
         )
     assert isinstance(result, Tuple)
-    assert isinstance(result[0], Sequence)
+    assert isinstance(result[0], np.ndarray)
     assert isinstance(result[1], dict)
 
 
@@ -88,7 +88,7 @@ def test_reclassify_with_geometrical_intervals_main():
             bands=[1],
         )
     assert isinstance(result, Tuple)
-    assert isinstance(result[0], Sequence)
+    assert isinstance(result[0], np.ndarray)
     assert isinstance(result[1], dict)
 
 
@@ -114,7 +114,7 @@ def test_reclassify_with_manual_breaks_main():
             bands=[1],
         )
     assert isinstance(result, Tuple)
-    assert isinstance(result[0], Sequence)
+    assert isinstance(result[0], np.ndarray)
     assert isinstance(result[1], dict)
 
 
@@ -140,7 +140,7 @@ def test_reclassify_with_natural_breaks_main():
             bands=[1],
         )
     assert isinstance(result, Tuple)
-    assert isinstance(result[0], Sequence)
+    assert isinstance(result[0], np.ndarray)
     assert isinstance(result[1], dict)
 
 
@@ -166,7 +166,7 @@ def test_reclassify_with_standard_deviation_main():
             bands=[1],
         )
     assert isinstance(result, Tuple)
-    assert isinstance(result[0], Sequence)
+    assert isinstance(result[0], np.ndarray)
     assert isinstance(result[1], dict)
 
 
@@ -192,5 +192,5 @@ def test_reclassify_with_quantiles_main():
             bands=[1],
         )
     assert isinstance(result, Tuple)
-    assert isinstance(result[0], Sequence)
+    assert isinstance(result[0], np.ndarray)
     assert isinstance(result[1], dict)
