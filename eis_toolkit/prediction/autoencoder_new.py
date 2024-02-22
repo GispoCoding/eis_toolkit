@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Sequence, Tuple
+from typing import Any, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import tensorflow as tf
@@ -19,9 +19,10 @@ from keras.layers import (
 from keras.models import Model
 from keras.regularizers import l1
 
+from eis_toolkit.exceptions import NonMatchingParameterLengthsException
+
 # NOTES:
 # - Change modality -> band ?
-# - With current parameters, these models are classifiers? Should name accordingly and/or create regression models?
 
 
 @beartype
@@ -35,7 +36,13 @@ def _scale_tensors(input_images: Sequence[tf.Tensor], multipliers: Sequence[floa
 
     Returns:
         Scaled tensors.
+
+    Raises:
+        NonMatchingParameterLengthsException: Length of input images does not match the length of multipliers.
     """
+    if len(input_images) != len(multipliers):
+        raise NonMatchingParameterLengthsException("The number of input images must match the number of multipliers.")
+
     multipliers_const = tf.constant(multipliers, dtype=tf.float32)
 
     return [input_images[i] * multipliers_const[i] for i in range(len(input_images))]
@@ -81,8 +88,8 @@ def _attention_block_skip(x: tf.Tensor, g: tf.Tensor, inter_channel: int) -> tf.
 
 @beartype
 def train_autoencoder_regular(
-    X: np.ndarray | List[np.ndarray],  # NOTE CHECK LIST
-    y: Optional[np.ndarray | List[np.ndarray]],  # NOTE CHECK LIST
+    X: Union[np.ndarray, List[np.ndarray]],
+    y: Optional[Union[np.ndarray, List[np.ndarray]]],
     input_shape: tuple,
     modality: int = 1,
     dropout: float = 0.2,
@@ -92,26 +99,24 @@ def train_autoencoder_regular(
     epochs: int = 50,
     batch_size: int = 128,
     validation_split: float = 0.1,
-    validation_data: None | np.ndarray | Tuple[np.ndarray, np.ndarray] = None,
+    validation_data: Optional[Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]] = None,
     shuffle: bool = True,
     early_stopping: bool = True,
 ) -> Tuple[Model, dict]:
     """
     Build an autoencoder model that can handle multiple modalities/bands.
 
+    Each modality/band is processed in a common way.
+
     Parameters:
         X: Training data.
         y: Target labels. In case of autoencoders, it's optional as the targets are often the input.
-
-        (! autoencoder build)
         input_shape: Shape of the input data (excluding batch dimension).
         number_of_layers: Number of layers in encoder and decoder.
         filter_size_start: Initial number of filters in the encoder.
         dropout: Dropout rate to apply between layers.
         regularization: Regularization strength for L1 regularization.
         modality: Number of modalities or bands.
-
-        (!train)
         epochs: Number of epochs for training.
         batch_size: Batch size for training.
         validation_split: Fraction of the training data to be used as validation data. Only used when no explicit
@@ -123,10 +128,12 @@ def train_autoencoder_regular(
     Returns:
         Trained autoencoder model and training history..
     """
-    # 1. Check input data TODO
+    # 1. Check input data
+    # TODO
 
-    # 2. Build and compile autoencoder model
+    # 2. Build and compile regular autoencoder model
     input_images = [Input(shape=input_shape) for _ in range(modality)]
+
     # Encoding
     encoded_layers = []
     for image in input_images:
@@ -162,7 +169,7 @@ def train_autoencoder_regular(
     model.compile(optimizer="adam", loss="binary_crossentropy")
 
     # 3. Train the model
-    # If no y, targets == inputs
+    # Autoencoding with targets = inputs
     if y is None:
         y = X
 
@@ -171,7 +178,7 @@ def train_autoencoder_regular(
         # U-Net multi-modal training
         y = y[0]
 
-    # If validation data is provided and there are not targets, copy input like trainig data
+    # Use input data as targets for validation if no separate validation targets are provided
     if validation_data and len(validation_data) == 1:
         validation_data = (validation_data, validation_data)
 
@@ -205,20 +212,19 @@ def train_autoencoder_unet(
     epochs: int = 50,
     batch_size: int = 128,
     validation_split: float = 0.1,
-    validation_data: None | np.ndarray | Tuple[np.ndarray, np.ndarray] = None,
+    validation_data: Optional[Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]] = None,
     shuffle: bool = True,
     early_stopping: bool = True,
 ) -> Tuple[Model, dict]:
     """
     Build and trains a U-Net architecture with attention blocks and support for multiple modalities/bands.
 
-    Recommended when regular autoencoder cannot perform well with a task, or when having multiple modalities,
+    Recommended when regular autoencoder cannot perform well with a task, or when having multiple modalities.
+    Each modality/band is processed in a common way.
 
     Parameters:
         X: Training data.
         y: Target labels. In case of autoencoders, it's optional as the targets are often the input.
-
-        (!unet build)
         resolution: Image resolution for each modality.
         modality: The number of modalities or bands.
         dropout: Dropout rate.
@@ -226,8 +232,6 @@ def train_autoencoder_unet(
         modality_multipliers: Multipliers for each modality.
         number_of_layers: Number of layers in the encoder/decoder.
         filter_size_start: Initial filter size.
-
-        (!train)
         epochs: Number of epochs for training.
         batch_size: Batch size for training.
         validation_split: Fraction of the training data to be used as validation data. Only used when no explicit
@@ -239,16 +243,17 @@ def train_autoencoder_unet(
     Returns:
         Trained autoencoder model and training history.
     """
-    # 1. Check input data TODO
+    # 1. Check input data
+    # TODO
 
-    # 2. Build and compile autoencoder model
+    # 2. Build and compile unet autoencoder model
     input_images: List[Any] = [Input(shape=(resolution, resolution, 1)) for _ in range(modality)]
 
     # Scaling
     modality_multipliers = [1 for _ in range(modality)] if modality_multipliers is None else modality_multipliers
     scaled_images = _scale_tensors(input_images, modality_multipliers)
 
-    # Encoder
+    # Encoding
     skip_connections = []
     encoded_images = []
     for input_img in scaled_images:
@@ -272,7 +277,7 @@ def train_autoencoder_unet(
 
     x = concatenate(encoded_images, axis=-1)
 
-    # Decoder
+    # Decoding
     current_filter_size = filter_size_start * number_of_layers
     for i in range(number_of_layers):
         x = Conv2D(current_filter_size, (3, 3), padding="same", kernel_regularizer=l1(regularization))(x)
@@ -298,7 +303,7 @@ def train_autoencoder_unet(
     model.compile(optimizer="adam", loss="binary_crossentropy")
 
     # 3. Train the model
-    # If no y, targets == inputs
+    # Autoencoding with targets = inputs
     if y is None:
         y = X
 
@@ -307,7 +312,7 @@ def train_autoencoder_unet(
         # U-Net multi-modal training
         y = y[0]
 
-    # If validation data is provided and there are not targets, copy input like trainig data
+    # Use input data as targets for validation if no separate validation targets are provided
     if validation_data and len(validation_data) == 1:
         validation_data = (validation_data, validation_data)
 
