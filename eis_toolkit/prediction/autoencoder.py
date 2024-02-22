@@ -1,7 +1,6 @@
 from typing import Any, List, Optional, Tuple
 
 # from sklearn.manifold import TSNE
-import keras
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
@@ -10,26 +9,18 @@ import tensorflow as tf
 from beartype import beartype
 from keras import backend as K
 from keras.callbacks import EarlyStopping
-from keras.losses import mean_squared_error
-from keras.metrics import binary_crossentropy
 from keras.models import Model
-from keras.regularizers import l1, l2
+from keras.regularizers import l1
 from skimage.metrics import structural_similarity as ssim
 from tensorflow.keras.layers import (
     Activation,
     Add,
     BatchNormalization,
     Conv2D,
-    Conv2DTranspose,
-    Dense,
     Dropout,
-    Flatten,
     Input,
-    Lambda,
-    Layer,
     MaxPooling2D,
     Multiply,
-    Reshape,
     UpSampling2D,
     concatenate,
 )
@@ -50,7 +41,8 @@ def train(
     validation_data: None | np.ndarray | Tuple[np.ndarray, np.ndarray] = None,
 ) -> Model:
     """
-    Train the provided model using the given training data
+    Train the provided model using the given training data.
+
     Parameters:
     - model (tf.keras.Model): The model to train
     - x_train (numpy.ndarray or list of numpy.ndarray): Training data
@@ -82,7 +74,8 @@ def train(
         )
         callbacks_list.append(early_stopping)
 
-    # Check if validation data is provided, and copy the targets to input like training data in case there are no targets
+    # Check if validation data is provided, and copy the targets to input like training data
+    # in case there are no targets
     if validation_data is not None:
         if isinstance(validation_data, tuple) and len(validation_data) == 2:
             x_val, y_val = validation_data
@@ -131,7 +124,8 @@ def build_autoencoder(
     filter_size_start: int = 16,
 ) -> Model:
     """
-    Builds an autoencoder model that can handle multiple modalities/bands.
+    Build an autoencoder model that can handle multiple modalities/bands.
+
     Parameters:
     - input_shape (tuple): Shape of the input data (excluding batch dimension).
     - number_of_layers (int): Number of layers in encoder and decoder.
@@ -189,10 +183,11 @@ def build_autoencoder_u_net(
     number_of_layers: int = 2,
     filter_size_start: int = 8,
 ) -> Model:
-
     """
     Build a U-Net architecture with attention blocks and support for multiple modalities/bands.
+
     Recommended when regular autoencoder cannot perform well with a task, or when having multiple modalities
+
     Parameters:
     - resolution: Image resolution for each modality.
     - modality: The number of modalities or bands.
@@ -265,7 +260,8 @@ def build_autoencoder_u_net(
 @beartype
 def reshape(data: np.ndarray, shape: tuple | int) -> np.ndarray | None:
     """
-    Reshapes the provided data to the specified shape
+    Reshapes the provided data to the specified shape.
+
     Parameters:
     - data (numpy.ndarray): Input data to be reshaped
     - shape: Desired shape
@@ -284,7 +280,8 @@ def reshape(data: np.ndarray, shape: tuple | int) -> np.ndarray | None:
 @beartype
 def model_predict(model: Model, input: np.ndarray) -> np.ndarray:
     """
-    Predict using an autoencoder
+    Predict using an autoencoder.
+
     Parameters:
     - model: Trained autoencoder model
     - input: List or numpy array of images to predict (take care to reshape)
@@ -301,7 +298,8 @@ def model_predict(model: Model, input: np.ndarray) -> np.ndarray:
 @beartype
 def preview(model: Model, data: np.ndarray, max_display: int = 10) -> None:
     """
-    Reshapes the provided data to the specified shape
+    Reshapes the provided data to the specified shape.
+
     Parameters:
     - model: model to predict and preview on
     - data: Data to predict and preview
@@ -341,7 +339,8 @@ def preview(model: Model, data: np.ndarray, max_display: int = 10) -> None:
 @beartype
 def evaluate(model: Model, test_data: np.ndarray) -> Tuple[float, float]:
     """
-    Compute the MSE (Mean squared error) and SSIM (Structural similarity index) for the set of test images using the provided model.
+    Compute the MSE (Mean squared error) and SSIM (Structural similarity index) for the set of test images.
+
     Parameters:
     - model: Trained autoencoder model
     - test_data: List or numpy array of test images
@@ -382,7 +381,8 @@ def prepare_data_for_model(
     dataset: (Tuple[np.ndarray, np.ndarray] | Tuple[np.ndarray]), input_shape: Tuple[int, ...], is_unet: bool = False
 ) -> Tuple[np.ndarray, np.ndarray] | Tuple[np.ndarray]:
     """
-    Prepares the dataset based on the model's expected input shape.
+    Prepare the dataset based on the model's expected input shape.
+
     Parameters:
     - dataset (tuple): Input data in the format (x_train, x_test).
     - input_shape (tuple): Expected input shape of the model excluding the batch size.
@@ -401,9 +401,9 @@ def prepare_data_for_model(
 
     # If it's a U-Net model or a multi-modal regular autoencoder, split the channels
     if is_unet or (len(input_shape) == 3 and input_shape[2] > 1):
-        x_train = [x_train[..., i : i + 1] for i in range(input_shape[2])]
+        x_train = [x_train[..., i : i + 1] for i in range(input_shape[2])]  # noqa: E203
         if x_test is not None:
-            x_test = [x_test[..., i : i + 1] for i in range(input_shape[2])]
+            x_test = [x_test[..., i : i + 1] for i in range(input_shape[2])]  # noqa: E203
 
     # Handle case with no test data
     if x_test is None:
@@ -422,6 +422,7 @@ _______________________________________
 def scale_tensors(input_imgs, multipliers):
     """
     Scales each tensor in the input based on the given multipliers.
+
     Parameters
     - input_imgs (list of tf.Tensor): List of input tensors
     - multipliers (list of float): List of scaling factors
@@ -437,6 +438,7 @@ def scale_tensors(input_imgs, multipliers):
 def attention_block_skip(x, g, inter_channel):
     """
     Implement an attention block with a skip connection.
+
     Parameters:
     - x (tf.Tensor): The input feature map
     - g (tf.Tensor): The gating signal
