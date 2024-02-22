@@ -38,7 +38,7 @@ EIS Toolkit is a comprehensive Python package for mineral prospectivity mapping 
 
 
 ## Installation
-You can find the latest release of EIS Toolkit in the [releases page](https://github.com/GispoCoding/eis_toolkit/releases) as Python wheel. To install EIS Toolkit, simply download the wheel and install with pip
+You can find the latest release of EIS Toolkit in the [releases page](https://github.com/GispoCoding/eis_toolkit/releases) as a Python wheel. To install EIS Toolkit, download the wheel and install with pip
 
 ```console
 pip install eis_toolkit-0.1.0-py3-none-any.whl
@@ -65,7 +65,7 @@ You can find several Jupyter notebooks in this repostiory that demonstrate how t
 
 
 ### EIS QGIS Plugin
-For those that prefer using tools of EIS Toolkit via a graphical user interface, check [EIS QGIS Plugin](https://github.com/GispoCoding/eis_qgis_plugin). The plugin offers both a sectioned and comprehensive wizard and all individual EIS Toolkit tools as QGIS processing algorithms.
+For those that prefer using tools of EIS Toolkit via a graphical user interface, check [EIS QGIS Plugin](https://github.com/GispoCoding/eis_qgis_plugin). The plugin includes the main GUI application called EIS Wizard and all individual EIS Toolkit tools as QGIS processing algorithms.
 
 The plugin is developed by the same core team that develops EIS Toolkit.
 
@@ -86,7 +86,7 @@ to get started. However, please note that the CLI has been primarily designed to
 ## Roadmap
 
 - Milestone 1: **Beta release 0.1** (November 2023). The toolkit should have the basic funtionalities required for a full MPM workflow. Official testing phase begins. The plugin will be still under active development.
-- Milestone 2: **Release 1.0** (April 2024). All features should be incorporated at this time and the toolkit useful for actual MPM work. Testing will continue and potential bugs will be fixed and the user experience refined.
+- Milestone 2: **Release 1.0** (April 2024). All features should be incorporated at this time and the toolkit useful for actual MPM work. Testing will continue, potential bugs will be fixed and the user experience refined.
 
 ## Contributing
 
