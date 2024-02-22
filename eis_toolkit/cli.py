@@ -943,6 +943,184 @@ def surface_derivatives_cli(
     typer.echo(f"Calculating first and/or second order surface attributes completed, writing raster to {output_raster}")
 
 
+@app.command()
+def reclassify_with_manual_breaks_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    breaks: Annotated[List[int], typer.Option()],
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with manual breaks."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_manual_breaks
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_manual_breaks(raster=raster, breaks=breaks, bands=bands)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with manual breaks completed, writing raster to {output_raster}")
+
+
+@app.command()
+def reclassify_with_defined_intervals_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    interval_size: int = typer.Option(),
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with defined intervals."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_defined_intervals
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_defined_intervals(raster=raster, interval_size=interval_size, bands=bands)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with defined intervals completed, writing raster to {output_raster}")
+
+
+@app.command()
+def reclassify_with_equal_intervals_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_intervals: int = typer.Option(),
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with equal intervals."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_equal_intervals
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_equal_intervals(
+            raster=raster, number_of_intervals=number_of_intervals, bands=bands
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with equal intervals completed, writing raster to {output_raster}")
+
+
+@app.command()
+def reclassify_with_quantiles_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_quantiles: int = typer.Option(),
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with quantiles."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_quantiles
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_quantiles(
+            raster=raster, number_of_quantiles=number_of_quantiles, bands=bands
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with quantiles completed, writing raster to {output_raster}")
+
+
+@app.command()
+def reclassify_with_natural_breaks_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_classes: int = typer.Option(),
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with natural breaks (Jenks Caspall)."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_natural_breaks
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_natural_breaks(
+            raster=raster, number_of_classes=number_of_classes, bands=bands
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with natural breaks completed, writing raster to {output_raster}")
+
+
+@app.command()
+def reclassify_with_geometrical_intervals_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_classes: int = typer.Option(),
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with geometrical intervals."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_geometrical_intervals
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_geometrical_intervals(
+            raster=raster, number_of_classes=number_of_classes, bands=bands
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with geometric intervals completed, writing raster to {output_raster}")
+
+
+@app.command()
+def reclassify_with_standard_deviation_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_intervals: int = typer.Option(),
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with standard deviation."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_standard_deviation
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_standard_deviation(
+            raster=raster, number_of_intervals=number_of_intervals, bands=bands
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with standard deviation completed, writing raster to {output_raster}")
+
+
 # --- VECTOR PROCESSING ---
 
 
