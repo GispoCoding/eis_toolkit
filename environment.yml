@@ -21,6 +21,7 @@ dependencies:
   - rtree >= 1.0.1
   - typer >=0.9.0
   - imbalanced-learn >= 0.11.0
+  - mapclassify >= 2.6.1
   - esda >= 2.5.1
   # Dependencies for testing
   - pytest >=7.2.1
