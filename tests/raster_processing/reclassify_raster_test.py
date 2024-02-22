@@ -1,7 +1,9 @@
 import numpy as np
+import pytest
 import rasterio
 from beartype.typing import Tuple
 
+from eis_toolkit.exceptions import InvalidParameterValueException, InvalidRasterBandException
 from eis_toolkit.raster_processing import reclassify
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
@@ -194,3 +196,52 @@ def test_reclassify_with_quantiles_main():
     assert isinstance(result, Tuple)
     assert isinstance(result[0], np.ndarray)
     assert isinstance(result[1], dict)
+
+
+def test_invalid_band_selection():
+    """Test that an invalid band selection raises the correct exception."""
+    with pytest.raises(InvalidRasterBandException):
+        with rasterio.open(SMALL_RASTER_PATH) as raster:
+            reclassify.reclassify_with_defined_intervals(raster=raster, interval_size=2, bands=[3, 4])
+
+
+def test_reclassify_with_defined_intervals_invalid_interval_size():
+    """Test that an invalid interval size raises the correct exception."""
+    with pytest.raises(InvalidParameterValueException):
+        with rasterio.open(SMALL_RASTER_PATH) as raster:
+            reclassify.reclassify_with_defined_intervals(raster=raster, interval_size=0)
+
+
+def test_reclassify_with_equal_intervals_invalid_number_of_intervals():
+    """Test that an invalid number of intervals raises the correct exception."""
+    with pytest.raises(InvalidParameterValueException):
+        with rasterio.open(SMALL_RASTER_PATH) as raster:
+            reclassify.reclassify_with_equal_intervals(raster=raster, number_of_intervals=1)
+
+
+def test_reclassify_with_quantiles_invalid_number_of_quantiles():
+    """Test that an invalid number of quantiles raises the correct exception."""
+    with pytest.raises(InvalidParameterValueException):
+        with rasterio.open(SMALL_RASTER_PATH) as raster:
+            reclassify.reclassify_with_quantiles(raster=raster, number_of_quantiles=1)
+
+
+def test_reclassify_with_natural_breaks_invalid_number_of_classes():
+    """Test that an invalid number of classes raises the correct exception."""
+    with pytest.raises(InvalidParameterValueException):
+        with rasterio.open(SMALL_RASTER_PATH) as raster:
+            reclassify.reclassify_with_natural_breaks(raster=raster, number_of_classes=1)
+
+
+def test_reclassify_with_geometric_intervals_invalid_number_of_classes():
+    """Test that an invalid number of classes raises the correct exception."""
+    with pytest.raises(InvalidParameterValueException):
+        with rasterio.open(SMALL_RASTER_PATH) as raster:
+            reclassify.reclassify_with_geometrical_intervals(raster=raster, number_of_classes=1)
+
+
+def test_reclassify_with_standard_deviation_invalid_number_of_intervals():
+    """Test that an invalid number of intervals raises the correct exception."""
+    with pytest.raises(InvalidParameterValueException):
+        with rasterio.open(SMALL_RASTER_PATH) as raster:
+            reclassify.reclassify_with_standard_deviation(raster=raster, number_of_intervals=1)

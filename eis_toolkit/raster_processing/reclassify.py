@@ -6,6 +6,7 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Optional, Sequence, Tuple
 
+from eis_toolkit.exceptions import InvalidParameterValueException, InvalidRasterBandException
 from eis_toolkit.utilities.checks.raster import check_raster_bands
 
 
@@ -35,16 +36,19 @@ def reclassify_with_manual_breaks(  # type: ignore[no-any-unimported]
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        Raster classified with manual breaks and metadata.
+        Raster data classified with manual breaks.
+        Raster metadata.
 
     Raises:
-        InvalidParameterValueException: Bands contain negative values.
+        InvalidRasterBandException: All selected bands are not contained in the input raster.
     """
+    # Add check for input breaks at some point?
 
     if bands is None or len(bands) == 0:
         bands = range(1, raster.count + 1)
     else:
-        check_raster_bands(raster, bands)
+        if not check_raster_bands(raster, bands):
+            raise InvalidRasterBandException(f"Input raster does not contain all selected bands: {bands}.")
 
     out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
@@ -84,16 +88,22 @@ def reclassify_with_defined_intervals(  # type: ignore[no-any-unimported]
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        Raster classified with defined intervals and metadata.
+        Raster data classified with defined intervals.
+        Raster metadata.
 
     Raises:
-        InvalidParameterValueException: Bands contain negative values.
+        InvalidRasterBandException: All selected bands are not contained in the input raster.
+        InvalidParameterValueException: Interval size is less than 1.
     """
 
     if bands is None or len(bands) == 0:
         bands = range(1, raster.count + 1)
     else:
-        check_raster_bands(raster, bands)
+        if not check_raster_bands(raster, bands):
+            raise InvalidRasterBandException(f"Input raster does not contain all selected bands: {bands}.")
+
+    if interval_size < 1:
+        raise InvalidParameterValueException("Interval size must be 1 or more.")
 
     out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
@@ -135,16 +145,22 @@ def reclassify_with_equal_intervals(  # type: ignore[no-any-unimported]
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        Raster classified with equal intervals.
+        Raster data classified with equal intervals.
+        Raster metadata.
 
     Raises:
-        InvalidParameterValueException: Bands contain negative values.
+        InvalidRasterBandException: All selected bands are not contained in the input raster.
+        InvalidParameterValueException: Number of intervals is less than 2.
     """
 
     if bands is None or len(bands) == 0:
         bands = range(1, raster.count + 1)
     else:
-        check_raster_bands(raster, bands)
+        if not check_raster_bands(raster, bands):
+            raise InvalidRasterBandException(f"Input raster does not contain all selected bands: {bands}.")
+
+    if number_of_intervals < 2:
+        raise InvalidParameterValueException("Number of intervals must be 2 or more.")
 
     out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
@@ -183,16 +199,22 @@ def reclassify_with_quantiles(  # type: ignore[no-any-unimported]
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        Raster classified with quantiles and metadata.
+        Raster data classified with quantiles.
+        Raster metadata.
 
     Raises:
-        InvalidParameterValueException: Bands contain negative values.
+        InvalidRasterBandException: All selected bands are not contained in the input raster.
+        InvalidParameterValueException: Number of quantiles is less than 2.
     """
 
     if bands is None or len(bands) == 0:
         bands = range(1, raster.count + 1)
     else:
-        check_raster_bands(raster, bands)
+        if not check_raster_bands(raster, bands):
+            raise InvalidRasterBandException(f"Input raster does not contain all selected bands: {bands}.")
+
+    if number_of_quantiles < 2:
+        raise InvalidParameterValueException("Number of quantiles must be 2 or more.")
 
     out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
@@ -231,16 +253,22 @@ def reclassify_with_natural_breaks(  # type: ignore[no-any-unimported]
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        Raster classified with natural breaks (Jenks Caspall) and metadata.
+        Raster data classified with natural breaks (Jenks Caspall).
+        Raster metadata.
 
     Raises:
-        InvalidParameterValueException: Bands contain negative values.
+        InvalidRasterBandException: All selected bands are not contained in the input raster.
+        InvalidParameterValueException: Number of classes is less than 2.
     """
 
     if bands is None or len(bands) == 0:
         bands = range(1, raster.count + 1)
     else:
-        check_raster_bands(raster, bands)
+        if not check_raster_bands(raster, bands):
+            raise InvalidRasterBandException(f"Input raster does not contain all selected bands: {bands}.")
+
+    if number_of_classes < 2:
+        raise InvalidParameterValueException("Number of classes must be 2 or more.")
 
     out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
@@ -323,20 +351,26 @@ def reclassify_with_geometrical_intervals(  # type: ignore[no-any-unimported]
     Args:
         raster: Raster to be classified.
         number_of_classes: The number of classes. The true number of classes is at most double the amount,
-        depending how symmetrical the input data is.
+            depending how symmetrical the input data is.
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        Raster classified with geometrical intervals and metadata.
+        Raster data classified with geometrical intervals.
+        Raster metadata.
 
     Raises:
-        InvalidParameterValueException: Bands contain negative values.
+        InvalidRasterBandException: All selected bands are not contained in the input raster.
+        InvalidParameterValueException: Number of classes is less than 2.
     """
 
     if bands is None or len(bands) == 0:
         bands = range(1, raster.count + 1)
     else:
-        check_raster_bands(raster, bands)
+        if not check_raster_bands(raster, bands):
+            raise InvalidRasterBandException(f"Input raster does not contain all selected bands: {bands}.")
+
+    if number_of_classes < 2:
+        raise InvalidParameterValueException("Number of classes must be 2 or more.")
 
     out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
@@ -392,16 +426,22 @@ def reclassify_with_standard_deviation(  # type: ignore[no-any-unimported]
         bands: Selected bands from multiband raster. Indexing begins from one. Defaults to None.
 
     Returns:
-        Raster classified with standard deviation and metadata.
+        Raster data classified with standard deviation.
+        Raster metadata.
 
     Raises:
-        InvalidParameterValueException: Bands contain negative values.
+        InvalidRasterBandException: All selected bands are not contained in the input raster.
+        InvalidParameterValueException: Number of intervals is less than 2.
     """
 
     if bands is None or len(bands) == 0:
         bands = range(1, raster.count + 1)
     else:
-        check_raster_bands(raster, bands)
+        if not check_raster_bands(raster, bands):
+            raise InvalidRasterBandException(f"Input raster does not contain all selected bands: {bands}.")
+
+    if number_of_intervals < 2:
+        raise InvalidParameterValueException("Number of intervals must be 2 or more.")
 
     out_image = np.empty((len(bands), raster.height, raster.width))
     out_meta = raster.meta.copy()
