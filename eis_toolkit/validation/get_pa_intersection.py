@@ -1,6 +1,7 @@
 import numpy as np
+import pandas as pd
 from beartype import beartype
-from beartype.typing import Tuple
+from beartype.typing import Tuple, Union
 from shapely.geometry import LineString
 from shapely.geometry.point import Point
 
@@ -8,7 +9,9 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 
 
 def _get_pa_intersection(
-    true_positive_rate_values: np.ndarray, proportion_of_area_values: np.ndarray, threshold_values: np.ndarray
+    true_positive_rate_values: Union[np.ndarray, pd.Series],
+    proportion_of_area_values: Union[np.ndarray, pd.Series],
+    threshold_values: Union[np.ndarray, pd.Series],
 ) -> Point:
     true_positive_area_curve = LineString(np.column_stack((threshold_values, true_positive_rate_values)))
     proportion_of_area_values_curve = LineString(np.column_stack((threshold_values, 1 - proportion_of_area_values)))
@@ -19,7 +22,9 @@ def _get_pa_intersection(
 
 @beartype
 def get_pa_intersection(
-    true_positive_rate_values: np.ndarray, proportion_of_area_values: np.ndarray, threshold_values: np.ndarray
+    true_positive_rate_values: Union[np.ndarray, pd.Series],
+    proportion_of_area_values: Union[np.ndarray, pd.Series],
+    threshold_values: Union[np.ndarray, pd.Series],
 ) -> Tuple[float, float]:
     """Calculate the intersection point for prediction rate and area curves in (P-A plot).
 

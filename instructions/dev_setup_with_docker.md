@@ -2,13 +2,13 @@
 
 Build and run the eis_toolkit container. Run this and every other command in the repository root unless otherwise directed.
 
-```console
+```bash
 docker compose up -d
 ```
 
 If you need to rebuild already existing container (e.g. dependencies have been updated), run
 
-```console
+```bash
 docker compose up -d --build
 ```
 
@@ -16,7 +16,7 @@ docker compose up -d --build
 
 Attach to the running container
 
-```console
+```bash
 docker attach eis_toolkit
 ```
 
@@ -34,24 +34,24 @@ For your workflow this means that:
 
 Whether or not using docker we manage the python dependencies with poetry. This means that a python venv is found in the container too. Inside the container, you can get into the venv like you normally would
 
-```console
+```bash
 poetry shell
 ```
 
 and run your code and tests from the command line. For example:
 
-```console
+```bash
 python <path/to/your/file.py>
 ```
 
 or
 
-```console
+```bash
 pytest
 ```
 
 You can also run commands from outside the venv, just prefix them with poetry run. For example:
 
-```console
+```bash
 poetry run pytest
 ```

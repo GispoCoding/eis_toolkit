@@ -4,9 +4,11 @@ from beartype import beartype
 from eis_toolkit.exceptions import InvalidParameterValueException
 
 
-def _check_input_data(data):
+def _check_input_data(data: np.ndarray):
     if data.min() < 0 or data.max() > 1:
-        raise InvalidParameterValueException("All data must be in range [0, 1]")
+        raise InvalidParameterValueException("All data must be in range [0, 1].")
+    if data.ndim != 3:
+        raise InvalidParameterValueException("Input data for overlay should be 3D numpy array.")
 
 
 @beartype
@@ -92,8 +94,8 @@ def gamma_overlay(data: np.ndarray, gamma: float) -> np.ndarray:
     Args:
         data: The input data as a 3D Numpy array. Each 2D array represents a raster band.
             Data points should be in the range [0, 1].
-        gamma: The gamma parameter. With gamma value 0, result will be same as 'product'overlay.
-            When gamma is closer to 1, the weight of 'sum' overlay is increased.
+        gamma: The gamma parameter. With gamma value of 0, the result will be the same as 'product' overlay.
+            When gamma is closer to 1, the weight of the 'sum' overlay is increased.
             Value must be in the range [0, 1].
 
     Returns:

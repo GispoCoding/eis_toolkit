@@ -95,6 +95,13 @@ def csv_to_geodataframe(
 
     Returns:
         CSV file read to a GeoDataFrame.
+
+    Raises:
+        InvalidColumnIndexException: There is a mismatch between the provided indexes and the shape of
+            the dataframe read from the csv.
+        InvalidParameterValueException: Unable to create a GeoDataFrame with point features from the given input
+            parameters.
+        InvalidWktFormatException: Unable to create a GeoDataFrame of WKT geometry from the given input parameters.
     """
 
     data_frame = _csv_to_geodataframe(
