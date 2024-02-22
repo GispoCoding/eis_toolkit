@@ -200,6 +200,13 @@ class NodataHandling(str, Enum):
     remove = "remove"
 
 
+class LocalMoranWeightType(str, Enum):
+    """Weight type for Local Moran's I."""
+
+    queen = "queen"
+    knn = "knn"
+
+
 RESAMPLING_MAPPING = {
     "nearest": warp.Resampling.nearest,
     "bilinear": warp.Resampling.bilinear,
@@ -495,6 +502,32 @@ def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPT
 
     typer.echo(f"Results: {json_str}")
     typer.echo("Descriptive statistics (vector) completed")
+
+
+# LOCAL MORAN'S I
+@app.command()
+def local_morans_i_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    column: str = typer.Option(),
+    weight_type: LocalMoranWeightType = LocalMoranWeightType.queen,
+    k: int = 4,
+    permutations: int = 999,
+):
+    """Execute Local Moran's I calculation for the data."""
+    from eis_toolkit.exploratory_analyses.local_morans_i import local_morans_i
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    out_gdf = local_morans_i(gdf, column, weight_type, k, permutations)
+    typer.echo("Progress: 75%")
+
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Local Moran's I completed, output vector saved to {output_vector}.")
 
 
 # --- RASTER PROCESSING ---
