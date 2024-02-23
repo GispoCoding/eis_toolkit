@@ -207,32 +207,20 @@ def _generalized_weights_cumulative(df: pd.DataFrame, deposits: np.ndarray) -> p
     Assumes there are classes 1 and 2 as the general classes.
     """
     gen_df = df.copy()
-    total_deposits = np.sum(deposits == 1)
-    total_no_deposits = deposits.size - total_deposits
 
     # Class 2
     class_2_max_index = gen_df.idxmax()[CONTRAST_COLUMN]
-    class_2_count = gen_df.loc[class_2_max_index, PIXEL_COUNT_COLUMN]
-    class_2_point_count = gen_df.loc[class_2_max_index, DEPOSIT_COUNT_COLUMN]
 
-    class_2_w_gen = np.log(class_2_point_count / total_deposits) - np.log(
-        (class_2_count - class_2_point_count) / total_no_deposits
-    )
-    clas_2_s_wpls_gen = np.sqrt((1 / class_2_point_count) + (1 / (class_2_count - class_2_point_count)))
-
-    gen_df[GENERALIZED_WEIGHT_PLUS_COLUMN] = round(class_2_w_gen, 4)
-    gen_df[GENERALIZED_S_WEIGHT_PLUS_COLUMN] = round(clas_2_s_wpls_gen, 4)
+    gen_df[GENERALIZED_WEIGHT_PLUS_COLUMN] = gen_df.loc[class_2_max_index, WEIGHT_PLUS_COLUMN]
+    gen_df[GENERALIZED_S_WEIGHT_PLUS_COLUMN] = gen_df.loc[class_2_max_index, WEIGHT_S_PLUS_COLUMN]
 
     # Class 1
-    class_1_count = gen_df.loc[len(gen_df.index) - 1, PIXEL_COUNT_COLUMN] - class_2_count
-    class_1_point_count = gen_df.loc[len(gen_df.index) - 1, DEPOSIT_COUNT_COLUMN] - class_2_point_count
-
-    class_1_w_gen = np.log(class_1_point_count / total_deposits) - np.log(
-        (class_1_count - class_1_point_count) / total_no_deposits
-    )
-    clas_1_s_wpls_gen = np.sqrt((1 / class_1_point_count) + (1 / (class_1_count - class_1_point_count)))
-    gen_df.loc[gen_df[GENERALIZED_CLASS_COLUMN] == 1, GENERALIZED_WEIGHT_PLUS_COLUMN] = round(class_1_w_gen, 4)
-    gen_df.loc[gen_df[GENERALIZED_CLASS_COLUMN] == 1, GENERALIZED_S_WEIGHT_PLUS_COLUMN] = round(clas_1_s_wpls_gen, 4)
+    gen_df.loc[gen_df[GENERALIZED_CLASS_COLUMN] == 1, GENERALIZED_WEIGHT_PLUS_COLUMN] = gen_df.loc[
+        class_2_max_index, WEIGHT_MINUS_COLUMN
+    ]
+    gen_df.loc[gen_df[GENERALIZED_CLASS_COLUMN] == 1, GENERALIZED_S_WEIGHT_PLUS_COLUMN] = gen_df.loc[
+        class_2_max_index, WEIGHT_S_MINUS_COLUMN
+    ]
 
     return gen_df
 

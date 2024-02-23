@@ -1,52 +1,76 @@
-# EIS Toolkit
+<!-- logo -->
+<p align="center">
+  <img src="https://github.com/GispoCoding/eis_toolkit/assets/113038549/e25b6d40-2785-4e21-bf74-221e8b096c64" align="center"/>
+</p>
 
-![tests](https://github.com/GispoCoding/eis_toolkit/workflows/Tests/badge.svg)
-[![EUPL1.2 license](https://img.shields.io/badge/License-EUPL1.2-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+<h1 align="center">EIS Toolkit</h2>
+<p align="center">Python package for mineral prospectivity mapping</p>
 
-## Python library for mineral prospectivity mapping
-EIS Toolkit will be a comprehensive Python library for mineral prospectivity mapping and analysis. EIS Toolkit is developed as part of [EIS Horizon EU project](https://eis-he.eu/), which aims to aid EU's efforts in the green transition by securing critical raw materials. EIS Toolkit will serve both as a standalone library that brings together and implements relevant tools for mineral prospectivity mapping and as a computational backend for [EIS QGIS Plugin](https://github.com/GispoCoding/eis_qgis_plugin).
+<!-- badges -->
+<p align="center">
+  <img src="https://github.com/GispoCoding/eis_toolkit/workflows/Tests/badge.svg"/>
+  <a href="https://github.com/GispoCoding/eis_toolkit/actions/workflows/pre-commit.yaml">
+    <img src="https://github.com/GispoCoding/eis_toolkit/actions/workflows/pre-commit.yaml/badge.svg"
+  /></a>
+  <a href="http://perso.crans.org/besson/LICENSE.html">
+    <img src="https://img.shields.io/badge/License-EUPL1.2-blue.svg"
+  /></a>
+</p>
+
+<!-- links to sections / TOC -->
+<p align="center">
+  <a href="#installation">Installation</a>
+  ·
+  <a href="#usage">Usage</a>
+  ·
+  <a href="#roadmap">Roadmap</a>
+  ·
+  <a href="#contributing">Contributing</a>
+  ·
+  <a href="#license">License</a>
+</p>
 
 
-## Repository status
-The first beta release of EIS Toolkit is now out, but this repository is still in development. 
+EIS Toolkit is a comprehensive Python package for mineral prospectivity mapping and analysis. EIS Toolkit is developed as part of [EIS Horizon EU project](https://eis-he.eu/), which aims to aid EU's efforts in the green transition by securing critical raw materials. EIS Toolkit serves both as a standalone library that brings together and implements relevant tools for mineral prospectivity mapping and as a computational backend for [EIS QGIS Plugin](https://github.com/GispoCoding/eis_qgis_plugin).
 
-Current repository contents include
-- implementations of basic tools to conduct MPM
-- Jupyter notebooks showing usage and functionality of some of the implemented tools
-- basic tests for implemented features
-- instructions on how to contribute to the repository
-
-To check the implementation status of the toolkit and planned tools, visit the [wiki page of EIS Toolkit](https://github.com/GispoCoding/eis_toolkit/wiki).
-
-This repository contains source code related to eis_toolkit Python package, not source code of EIS QGIS Plugin.
+> [!NOTE]  
+> This repository is still in development. Check the [wiki page of EIS Toolkit](https://github.com/GispoCoding/eis_toolkit/wiki) for list of tools and [roadmap](#roadmap) for more details about the project.
 
 
-## Installing
-You can find the latest release of EIS Toolkit in the [releases page](https://github.com/GispoCoding/eis_toolkit/releases) as Python wheel. To install EIS Toolkit, simply download the wheel and install with pip
+## Installation
+You can find the latest release of EIS Toolkit in the [releases page](https://github.com/GispoCoding/eis_toolkit/releases) as a Python wheel. To install EIS Toolkit, download the wheel and install with pip
 
 ```console
 pip install eis_toolkit-0.1.0-py3-none-any.whl
 ```
 
-We recommend installing EIS Toolkit in a dedicated virtual environment as the library has a lot of dependencies.
+We recommend installing EIS Toolkit in an empty virtual environment to ensure compatibility between package versions.
 
-Note that EIS Toolkit is not yet released in PyPi or Conda, but will be at a later stage.
+> [!NOTE]
+> EIS Toolkit has not yet been released in PyPi or Conda, but will be at a later stage.
 
 
-## Using EIS Toolkit
-EIS Toolkit can be used in Python scripts, Jupyter notebooks or via the CLI. At the moment, almost all tools have their own module and can be imported like this:
+## Usage
+EIS Toolkit can be used in Python scripts, Jupyter notebooks or via the CLI. At the moment, most tools have their own module and are imported like this:
 ```python
 # In general
 from eis_toolkit.category.module import module_function
 
 # Some examples
 from eis_toolkit.raster_processing.reprojecting import reproject_raster
-from eis_toolkit.exploratory_analyses.pca import compute_pca, plot_pca
+from eis_toolkit.exploratory_analyses.pca import compute_pca
 ```
 
-To use the CLI, simply use the command
+You can find several Jupyter notebooks in this repostiory that demonstrate how tools of EIS Toolkit can be used. The documentation of EIS Toolkit can be read [here](https://gispocoding.github.io/eis_toolkit/).
+
+
+### EIS QGIS Plugin
+For those that prefer using tools of EIS Toolkit via a graphical user interface, check [EIS QGIS Plugin](https://github.com/GispoCoding/eis_qgis_plugin). The plugin includes the main GUI application called EIS Wizard and all individual EIS Toolkit tools as QGIS processing algorithms.
+
+The plugin is developed by the same core team that develops EIS Toolkit.
+
+### CLIthe
+EIS Toolkit includes a [Typer](https://typer.tiangolo.com/) command-line interface that serves as a common interface for integrating the toolkit with external applications, such as QGIS. However, it can be used directly too. To use the CLI, simply use the command
 ```console
 eis
 ```
@@ -57,20 +81,26 @@ or
 eis --help
 ```
 
-to get started. However, please note that the CLI has been primarily designed to communicate with other programs, such as QGIS.
+to get started. However, please note that the CLI has been primarily designed to communicate with external programs and may feel clunky in direct use.
 
-Documentation of EIS Toolkit can be read [here](https://gispocoding.github.io/eis_toolkit/) (generated from docstrings).
+## Roadmap
 
+- Milestone 1: **Beta release 0.1** (November 2023). The toolkit should have the basic funtionalities required for a full MPM workflow. Official testing phase begins. The plugin will be still under active development.
+- Milestone 2: **Release 1.0** (April 2024). All features should be incorporated at this time and the toolkit useful for actual MPM work. Testing will continue, potential bugs will be fixed and the user experience refined.
 
 ## Contributing
 
-If you are contributing by implementing new functionalities, read the **For developers** section. It will guide you to set up a local development environment. If you wish to just test the installation of eis_toolkit, follow the **For users** section (note that the currently documented installation process is by no means final).
+We welcome contributions to EIS Toolkit in various forms:
+- ✨ Developing new tools
+- 🐞 Fixing bugs in the code
+- 📝 Bug and other reporting
+- 💡 Feature suggestions
 
-*For general contributing guidelines, see [CONTRIBUTING](./CONTRIBUTING.md).*
+To contribute with code or documentation, you'll need a local development environment and a copy of the repository. Please refer to the **For developers** section below for detailed setup instructions. If you're interested in bug reporting or making feature suggestions, you can familiarize yourself with the toolkit and test it as described in the **Usage** section. When you encounter bugs or have ideas for new features, you can create an issue in this repository.
 
-## For developers
+### For developers
 
-All contributing developers need git, and a copy of the repository.
+All contributing developers need Git and a copy of the repository.
 
 ```console
 git clone https://github.com/GispoCoding/eis_toolkit.git
@@ -81,13 +111,7 @@ After this you have three options for setting up your local development environm
 2. Poetry - [instructions](./instructions/dev_setup_without_docker.md)
 3. Conda - [instructions](./instructions/dev_setup_without_docker_with_conda.md)
 
-
-### Additonal instructions
-
-Here are some additional instructions related to the development of EIS toolkit:
-- [Testing your changes](./instructions/testing.md)
-- [Generating documentation](./instructions/generating_documentation.md)
-- [Using jupyterlab](./instructions/using_jupyterlab.md)
+*For general contributing guidelines, see [CONTRIBUTING](./CONTRIBUTING.md).*
 
 ## License
 

@@ -3,18 +3,8 @@ import pandas as pd
 import pytest
 from beartype.roar import BeartypeCallHintParamViolation
 
-from eis_toolkit.exceptions import (
-    EmptyDataException,
-    InvalidParameterValueException,
-    NonNumericDataException,
-    SampleSizeExceededException,
-)
-from eis_toolkit.exploratory_analyses.statistical_tests import (
-    chi_square_test,
-    correlation_matrix,
-    covariance_matrix,
-    normality_test,
-)
+from eis_toolkit.exceptions import InvalidParameterValueException, NonNumericDataException
+from eis_toolkit.exploratory_analyses.statistical_tests import chi_square_test, correlation_matrix, covariance_matrix
 
 data = np.array([[0, 1, 2, 1], [2, 0, 1, 2], [2, 1, 0, 2], [0, 1, 2, 1]])
 missing_data = np.array([[0, 1, 2, 1], [2, 0, np.nan, 2], [2, 1, 0, 2], [0, 1, 2, 1]])
@@ -33,26 +23,6 @@ def test_chi_square_test():
     """Test that returned statistics for independence are correct."""
     output_statistics = chi_square_test(data=categorical_data, target_column=target_column, columns=["f"])
     np.testing.assert_array_equal((output_statistics["f"]), (0.0, 1.0, 1))
-
-
-def test_normality_test():
-    """Test that returned statistics for normality are correct."""
-    output_statistics = normality_test(data=numeric_data, columns=["a"])
-    np.testing.assert_array_almost_equal(output_statistics["a"], (0.72863, 0.02386), decimal=5)
-    output_statistics = normality_test(data=data)
-    np.testing.assert_array_almost_equal(output_statistics, (0.8077, 0.00345), decimal=5)
-    output_statistics = normality_test(data=np.array([0, 2, 2, 0]))
-    np.testing.assert_array_almost_equal(output_statistics, (0.72863, 0.02386), decimal=5)
-
-
-def test_normality_test_missing_data():
-    """Test that input with missing data returns statistics correctly."""
-    output_statistics = normality_test(data=missing_data)
-    np.testing.assert_array_almost_equal(output_statistics, (0.79921, 0.00359), decimal=5)
-    output_statistics = normality_test(data=np.array([0, 2, 2, 0, np.nan]))
-    np.testing.assert_array_almost_equal(output_statistics, (0.72863, 0.02386), decimal=5)
-    output_statistics = normality_test(data=missing_values_df, columns=["a", "b"])
-    np.testing.assert_array_almost_equal(output_statistics["a"], (0.72863, 0.02386), decimal=5)
 
 
 def test_correlation_matrix_nan():
@@ -121,33 +91,6 @@ def test_covariance_matrix_negative_min_periods():
     """Test that negative min_periods value raises the correct exception."""
     with pytest.raises(InvalidParameterValueException):
         covariance_matrix(data=numeric_data, min_periods=-1)
-
-
-def test_empty_df():
-    """Test that empty DataFrame raises the correct exception."""
-    empty_df = pd.DataFrame()
-    with pytest.raises(EmptyDataException):
-        normality_test(data=empty_df)
-
-
-def test_max_samples():
-    """Test that sample count > 5000 raises the correct exception."""
-    with pytest.raises(SampleSizeExceededException):
-        normality_test(data=large_data)
-        normality_test(data=large_df, columns=["a"])
-
-
-def test_invalid_columns():
-    """Test that invalid column name in raises the correct exception."""
-    with pytest.raises(InvalidParameterValueException):
-        chi_square_test(data=categorical_data, target_column=target_column, columns=["f", "x"])
-        normality_test(data=numeric_data, columns=["e", "f"])
-
-
-def test_non_numeric_data():
-    """Test that non-numeric data raises the correct exception."""
-    with pytest.raises(NonNumericDataException):
-        normality_test(data=non_numeric_df, columns=["a"])
 
 
 def test_invalid_target_column():

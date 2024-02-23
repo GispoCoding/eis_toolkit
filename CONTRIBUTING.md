@@ -305,3 +305,11 @@ Here are some things to remember while implementing a new tool:
     tool! With data functions, you can usually assume file
     reading/writing, nodata handling and other such processes are done
     before/after executing your tool
+
+
+## Additonal instructions
+
+Here are some additional instructions related to the development of EIS toolkit:
+- [Testing your changes](./instructions/testing.md)
+- [Generating documentation](./instructions/generating_documentation.md)
+- [Using jupyterlab](./instructions/using_jupyterlab.md)
