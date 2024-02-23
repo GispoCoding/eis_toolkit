@@ -1,10 +1,11 @@
+import numpy as np
 import pandas as pd
 from beartype import beartype
 from beartype.typing import Literal, Optional, Sequence
 from scipy.stats import chi2_contingency
 
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException, NonNumericDataException
-from eis_toolkit.utilities.checks.dataframe import check_columns_numeric, check_columns_valid, check_empty_dataframe
+from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_empty_dataframe
 
 
 @beartype
@@ -53,6 +54,7 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Se
 @beartype
 def correlation_matrix(
     data: pd.DataFrame,
+    columns: Optional[Sequence[str]] = None,
     correlation_method: Literal["pearson", "kendall", "spearman"] = "pearson",
     min_periods: Optional[int] = None,
 ) -> pd.DataFrame:
@@ -62,6 +64,7 @@ def correlation_matrix(
 
     Args:
         data: Dataframe containing the input data.
+        columns: Columns to include in the correlation matrix. If None, all numeric columns are used.
         correlation_method: 'pearson', 'kendall', or 'spearman'. Defaults to 'pearson'.
         min_periods: Minimum number of observations required per pair of columns to have valid result. Optional.
 
@@ -72,12 +75,20 @@ def correlation_matrix(
     Raises:
         EmptyDataFrameException: The input Dataframe is empty.
         InvalidParameterValueException: min_periods argument is used with method 'kendall'.
-        NonNumericDataException: The input data contain non-numeric data.
+        NonNumericDataException: The selected columns contain non-numeric data.
     """
     if check_empty_dataframe(data):
         raise EmptyDataFrameException("The input Dataframe is empty.")
 
-    if not check_columns_numeric(data, data.columns.to_list()):
+    if columns:
+        invalid_columns = [column for column in columns if column not in data.columns]
+        if invalid_columns:
+            raise InvalidParameterValueException(f"Invalid columns: {invalid_columns}")
+        data_subset = data[columns]
+    else:
+        data_subset = data.select_dtypes(include=np.number)
+
+    if not all(data_subset.dtypes.apply(lambda x: np.issubdtype(x, np.number))):
         raise NonNumericDataException("The input data contain non-numeric data.")
 
     if correlation_method == "kendall" and min_periods is not None:
@@ -85,14 +96,17 @@ def correlation_matrix(
             "The argument min_periods is available only with correlation methods 'pearson' and 'spearman'."
         )
 
-    matrix = data.corr(method=correlation_method, min_periods=min_periods, numeric_only=True)
+    matrix = data_subset.corr(method=correlation_method, min_periods=min_periods, numeric_only=True)
 
     return matrix
 
 
 @beartype
 def covariance_matrix(
-    data: pd.DataFrame, min_periods: Optional[int] = None, delta_degrees_of_freedom: int = 1
+    data: pd.DataFrame,
+    columns: Optional[Sequence[str]] = None,
+    min_periods: Optional[int] = None,
+    delta_degrees_of_freedom: int = 1,
 ) -> pd.DataFrame:
     """Compute covariance matrix on the input data.
 
@@ -100,6 +114,7 @@ def covariance_matrix(
 
     Args:
         data: Dataframe containing the input data.
+        columns: Columns to include in the covariance matrix. If None, all numeric columns are used.
         min_periods: Minimum number of observations required per pair of columns to have valid result. Optional.
         delta_degrees_of_freedom: Delta degrees of freedom used for computing covariance matrix. Defaults to 1.
 
@@ -114,7 +129,15 @@ def covariance_matrix(
     if check_empty_dataframe(data):
         raise EmptyDataFrameException("The input Dataframe is empty.")
 
-    if not check_columns_numeric(data, data.columns.to_list()):
+    if columns:
+        invalid_columns = [column for column in columns if column not in data.columns]
+        if invalid_columns:
+            raise InvalidParameterValueException(f"Invalid columns: {invalid_columns}")
+        data_subset = data[columns]
+    else:
+        data_subset = data.select_dtypes(include=np.number)
+
+    if not all(data_subset.dtypes.apply(lambda x: np.issubdtype(x, np.number))):
         raise NonNumericDataException("The input data contain non-numeric data.")
 
     if delta_degrees_of_freedom < 0:
@@ -123,6 +146,6 @@ def covariance_matrix(
     if min_periods and min_periods < 0:
         raise InvalidParameterValueException("Min perioids must be non-negative.")
 
-    matrix = data.cov(min_periods=min_periods, ddof=delta_degrees_of_freedom)
+    matrix = data_subset.cov(min_periods=min_periods, ddof=delta_degrees_of_freedom)
 
     return matrix
