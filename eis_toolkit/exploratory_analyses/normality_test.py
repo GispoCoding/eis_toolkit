@@ -59,7 +59,8 @@ def normality_test_dataframe(
     for column in columns:
         if len(data[column]) > 5000:
             raise SampleSizeExceededException(f"Sample size for column '{column}' exceeds the limit of 5000 samples.")
-        statistics[column] = shapiro(data[column])
+        stat, p_value = shapiro(data[column])
+        statistics[column] = {"Statistic": stat, "p-value": p_value}
 
     return statistics
 
@@ -67,7 +68,7 @@ def normality_test_dataframe(
 @beartype
 def normality_test_array(
     data: np.ndarray, bands: Optional[Sequence[int]] = None, nodata_value: Optional[Number] = None
-) -> Dict[int, Tuple[float, float]]:
+) -> Dict[str, Tuple[float, float]]:
     """
     Compute Shapiro-Wilk test for normality on the input Numpy array.
 
@@ -94,14 +95,14 @@ def normality_test_array(
 
     if data.ndim == 1 or data.ndim == 2:
         prepared_data = np.expand_dims(data, axis=0)
-        bands = range(1)
+        bands = [1]
 
     elif data.ndim == 3:
         if bands is not None:
-            if not all(band < len(data) for band in bands):
+            if not all(band - 1 < len(data) for band in bands):
                 raise InvalidRasterBandException("All selected bands were not found in the input array.")
         else:
-            bands = range(len(data))
+            bands = range(1, len(data) + 1)
         prepared_data = data
 
     else:
@@ -110,7 +111,8 @@ def normality_test_array(
     statistics = {}
 
     for band in bands:
-        flattened_data = prepared_data[band].ravel()
+        band_idx = band - 1
+        flattened_data = prepared_data[band_idx].ravel()
 
         nan_mask = flattened_data == np.nan
         if nodata_value is not None:
@@ -121,6 +123,7 @@ def normality_test_array(
         if len(masked_data) > 5000:
             raise SampleSizeExceededException(f"Sample size for band '{band}' exceeds the limit of 5000 samples.")
 
-        statistics[band] = shapiro(masked_data)
+        stat, p_value = shapiro(masked_data)
+        statistics[f"Band {band}"] = {"Statistic": stat, "p-value": p_value}
 
     return statistics

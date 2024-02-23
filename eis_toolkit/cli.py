@@ -276,9 +276,9 @@ OUTPUT_DIR_OPTION = typer.Option(
 
 # NORMALITY TEST RASTER
 @app.command()
-def normality_test_raster_cli(input_raster: Annotated[Path, INPUT_FILE_OPTION]):
-    """Compute Shapiro-Wilk test for normality on the input data."""
-    from eis_toolkit.exploratory_analyses.statistical_tests import normality_test
+def normality_test_raster_cli(input_raster: Annotated[Path, INPUT_FILE_OPTION], bands: Optional[List[int]] = None):
+    """Compute Shapiro-Wilk test for normality on the input raster data."""
+    from eis_toolkit.exploratory_analyses.normality_test import normality_test_array
 
     typer.echo("Progress: 10%")
 
@@ -286,7 +286,9 @@ def normality_test_raster_cli(input_raster: Annotated[Path, INPUT_FILE_OPTION]):
         data = raster.read()
         typer.echo("Progress: 25%")
 
-        results_dict = normality_test(data)
+        if len(bands) == 0:
+            bands = None
+        results_dict = normality_test_array(data=data, bands=bands, nodata_value=raster.nodata)
 
     typer.echo("Progress: 75%")
 
@@ -299,15 +301,15 @@ def normality_test_raster_cli(input_raster: Annotated[Path, INPUT_FILE_OPTION]):
 # NORMALITY TEST VECTOR
 @app.command()
 def normality_test_vector_cli(input_vector: Annotated[Path, INPUT_FILE_OPTION], columns: List[str] = None):
-    """Compute Shapiro-Wilk test for normality on the input data."""
-    from eis_toolkit.exploratory_analyses.statistical_tests import normality_test
+    """Compute Shapiro-Wilk test for normality on the input vector data."""
+    from eis_toolkit.exploratory_analyses.normality_test import normality_test_dataframe
 
     typer.echo("Progress: 10%")
 
     geodataframe = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    results_dict = normality_test(geodataframe, columns)
+    results_dict = normality_test_dataframe(geodataframe, columns)
 
     typer.echo("Progress: 75%")
 
