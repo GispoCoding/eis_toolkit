@@ -300,7 +300,7 @@ def normality_test_raster_cli(input_raster: Annotated[Path, INPUT_FILE_OPTION], 
 
 # NORMALITY TEST VECTOR
 @app.command()
-def normality_test_vector_cli(input_vector: Annotated[Path, INPUT_FILE_OPTION], columns: List[str] = None):
+def normality_test_vector_cli(input_vector: Annotated[Path, INPUT_FILE_OPTION], columns: Optional[List[str]] = None):
     """Compute Shapiro-Wilk test for normality on the input vector data."""
     from eis_toolkit.exploratory_analyses.normality_test import normality_test_dataframe
 
@@ -309,7 +309,7 @@ def normality_test_vector_cli(input_vector: Annotated[Path, INPUT_FILE_OPTION], 
     geodataframe = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    results_dict = normality_test_dataframe(geodataframe, columns)
+    results_dict = normality_test_dataframe(data=geodataframe, columns=columns)
 
     typer.echo("Progress: 75%")
 
@@ -317,6 +317,31 @@ def normality_test_vector_cli(input_vector: Annotated[Path, INPUT_FILE_OPTION], 
     typer.echo("Progress: 100%")
     typer.echo(f"Results: {json_str}")
     typer.echo("Normality test (vector) completed")
+
+
+# CHI-SQUARE_TEST
+@app.command()
+def chi_square_test_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    target_column: str = typer.Option(),
+    columns: Optional[List[str]] = None,
+):
+    """Perform a Chi-square test of independence between a target variable and one or more other variables."""
+    from eis_toolkit.exploratory_analyses.statistical_tests import chi_square_test
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    results_dict = chi_square_test(data=geodataframe, target_column=target_column, columns=columns)
+
+    typer.echo("Progress: 75%")
+
+    json_str = json.dumps(results_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo("Chi-square test completed")
 
 
 # DBSCAN

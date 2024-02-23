@@ -9,22 +9,24 @@ from eis_toolkit.utilities.checks.dataframe import check_columns_numeric, check_
 
 @beartype
 def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Sequence[str]] = None) -> dict:
-    """Compute Chi-square test for independence on the input data.
+    """Perform a Chi-square test of independence between a target variable and one or more other variables.
 
-    It is assumed that the variables in the input data are independent and that they are categorical, i.e. strings,
-    booleans or integers, but not floats.
+    Input data should be categorical data. Continuous data or non-categorical data should be discretized or
+    binned before using this function, as Chi-square tests are not applicable to continuous variables directly.
+
+    The test assumes that the observed frequencies in each category are independent.
 
     Args:
-        data: Dataframe containing the input data
+        data: Dataframe containing the input data.
         target_column: Variable against which independence of other variables is tested.
         columns: Variables that are tested against the variable in target_column. If None, every column is used.
 
     Returns:
-        Test statistics for each variable (except target_column).
+        Test statistics, p-value and degrees of freedom for each variable.
 
     Raises:
-        EmptyDataFrameException: The input Dataframe is empty.
-        InvalidParameterValueException: The target_column is not in input Dataframe or invalid column is provided.
+        EmptyDataFrameException: Input Dataframe is empty.
+        InvalidParameterValueException: Invalid column is input.
     """
     if check_empty_dataframe(data):
         raise EmptyDataFrameException("The input Dataframe is empty.")
@@ -32,19 +34,18 @@ def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Se
     if not check_columns_valid(data, [target_column]):
         raise InvalidParameterValueException("Target column not found in the Dataframe.")
 
-    if columns is not None:
+    if columns:
         invalid_columns = [column for column in columns if column not in data.columns]
-        if any(invalid_columns):
-            raise InvalidParameterValueException(f"The following variables are not in the dataframe: {invalid_columns}")
+        if invalid_columns:
+            raise InvalidParameterValueException(f"Invalid columns: {invalid_columns}")
     else:
-        columns = data.columns
+        columns = [col for col in data.columns if col != target_column]
 
     statistics = {}
     for column in columns:
-        if column != target_column:
-            contingency_table = pd.crosstab(data[target_column], data[column])
-            chi_square, p_value, degrees_of_freedom, _ = chi2_contingency(contingency_table)
-            statistics[column] = (chi_square, p_value, degrees_of_freedom)
+        contingency_table = pd.crosstab(data[target_column], data[column])
+        chi_square, p_value, degrees_of_freedom, _ = chi2_contingency(contingency_table)
+        statistics[column] = {"chi_square": chi_square, "p-value": p_value, "degrees_of_freedom": degrees_of_freedom}
 
     return statistics
 
