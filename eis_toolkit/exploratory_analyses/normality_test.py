@@ -3,7 +3,7 @@ from numbers import Number
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Dict, Optional, Sequence, Tuple
+from beartype.typing import Dict, Optional, Sequence
 from scipy.stats import shapiro
 
 from eis_toolkit.exceptions import (
@@ -20,7 +20,7 @@ from eis_toolkit.utilities.checks.dataframe import check_columns_numeric, check_
 @beartype
 def normality_test_dataframe(
     data: pd.DataFrame, columns: Optional[Sequence[str]] = None
-) -> Dict[str, Tuple[float, float]]:
+) -> Dict[str, Dict[str, float]]:
     """
     Compute Shapiro-Wilk test for normality on the input DataFrame.
 
@@ -68,7 +68,7 @@ def normality_test_dataframe(
 @beartype
 def normality_test_array(
     data: np.ndarray, bands: Optional[Sequence[int]] = None, nodata_value: Optional[Number] = None
-) -> Dict[str, Tuple[float, float]]:
+) -> Dict[str, Dict[str, float]]:
     """
     Compute Shapiro-Wilk test for normality on the input Numpy array.
 

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Literal, Optional, Sequence
+from beartype.typing import Dict, Literal, Optional, Sequence
 from scipy.stats import chi2_contingency
 
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException, NonNumericDataException
@@ -9,7 +9,9 @@ from eis_toolkit.utilities.checks.dataframe import check_columns_valid, check_em
 
 
 @beartype
-def chi_square_test(data: pd.DataFrame, target_column: str, columns: Optional[Sequence[str]] = None) -> dict:
+def chi_square_test(
+    data: pd.DataFrame, target_column: str, columns: Optional[Sequence[str]] = None
+) -> Dict[str, Dict[str, float]]:
     """Perform a Chi-square test of independence between a target variable and one or more other variables.
 
     Input data should be categorical data. Continuous data or non-categorical data should be discretized or

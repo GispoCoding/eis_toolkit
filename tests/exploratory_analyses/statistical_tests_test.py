@@ -22,7 +22,7 @@ large_df = pd.DataFrame(large_data, columns=["a"])
 def test_chi_square_test():
     """Test that returned statistics for independence are correct."""
     output_statistics = chi_square_test(data=categorical_data, target_column=target_column, columns=["f"])
-    np.testing.assert_array_equal((output_statistics["f"]), (0.0, 1.0, 1))
+    np.testing.assert_array_equal(list(output_statistics["f"].values()), [0.0, 1.0, 1])
 
 
 def test_correlation_matrix_nan():
@@ -56,7 +56,7 @@ def test_correlation_matrix():
 def test_correlation_matrix_non_numeric():
     """Test that returned correlation matrix is correct."""
     with pytest.raises(NonNumericDataException):
-        correlation_matrix(data=non_numeric_df)
+        correlation_matrix(data=non_numeric_df, columns=["a", "b"])
 
 
 def test_covariance_matrix_nan():
