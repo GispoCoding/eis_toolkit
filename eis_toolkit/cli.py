@@ -985,7 +985,7 @@ def reclassify_with_defined_intervals_cli(
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
+        dest.write(out_image)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Reclassification with defined intervals completed, writing raster to {output_raster}")
@@ -1011,7 +1011,7 @@ def reclassify_with_equal_intervals_cli(
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
+        dest.write(out_image)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Reclassification with equal intervals completed, writing raster to {output_raster}")
@@ -1037,7 +1037,7 @@ def reclassify_with_quantiles_cli(
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
+        dest.write(out_image)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Reclassification with quantiles completed, writing raster to {output_raster}")
@@ -1063,7 +1063,7 @@ def reclassify_with_natural_breaks_cli(
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
+        dest.write(out_image)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Reclassification with natural breaks completed, writing raster to {output_raster}")
@@ -1089,7 +1089,7 @@ def reclassify_with_geometrical_intervals_cli(
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
+        dest.write(out_image)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Reclassification with geometric intervals completed, writing raster to {output_raster}")
@@ -1115,7 +1115,7 @@ def reclassify_with_standard_deviation_cli(
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
+        dest.write(out_image)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Reclassification with standard deviation completed, writing raster to {output_raster}")
