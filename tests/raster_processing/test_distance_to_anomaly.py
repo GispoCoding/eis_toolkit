@@ -1,11 +1,15 @@
 import sys
+from contextlib import nullcontext
+from functools import partial
 from pathlib import Path
 
 import numpy as np
 import pytest
 import rasterio
 import rasterio.plot
+import rasterio.profiles
 
+from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.raster_processing import distance_to_anomaly
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
@@ -16,10 +20,14 @@ with rasterio.open(SMALL_RASTER_PATH) as raster:
 EXPECTED_SMALL_RASTER_SHAPE = SMALL_RASTER_PROFILE["height"], SMALL_RASTER_PROFILE["width"]
 
 
+def _check_result(out_image, out_profile):
+    assert isinstance(out_image, np.ndarray)
+    assert isinstance(out_profile, (dict, rasterio.profiles.Profile))
+
+
 @pytest.mark.parametrize(
     ",".join(
         [
-            "raster_profile",
             "anomaly_raster_profile",
             "anomaly_raster_data",
             "threshold_criteria_value",
@@ -31,7 +39,6 @@ EXPECTED_SMALL_RASTER_SHAPE = SMALL_RASTER_PROFILE["height"], SMALL_RASTER_PROFI
     [
         pytest.param(
             SMALL_RASTER_PROFILE,
-            SMALL_RASTER_PROFILE,
             SMALL_RASTER_DATA,
             5.0,
             "higher",
@@ -41,8 +48,7 @@ EXPECTED_SMALL_RASTER_SHAPE = SMALL_RASTER_PROFILE["height"], SMALL_RASTER_PROFI
         ),
     ],
 )
-def test_distance_to_anomaly(
-    raster_profile,
+def test_distance_to_anomaly_expected(
     anomaly_raster_profile,
     anomaly_raster_data,
     threshold_criteria_value,
@@ -50,20 +56,20 @@ def test_distance_to_anomaly(
     expected_shape,
     expected_mean,
 ):
-    """Test distance_to_anomaly."""
+    """Test distance_to_anomaly with expected result."""
 
-    result = distance_to_anomaly.distance_to_anomaly(
-        raster_profile=raster_profile,
+    out_image, out_profile = distance_to_anomaly.distance_to_anomaly(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data,
         threshold_criteria_value=threshold_criteria_value,
         threshold_criteria=threshold_criteria,
     )
 
-    assert isinstance(result, np.ndarray)
-    assert result.shape == expected_shape
+    _check_result(out_image=out_image, out_profile=out_profile)
+
+    assert out_image.shape == expected_shape
     if expected_mean is not None:
-        assert np.isclose(np.mean(result), expected_mean)
+        assert np.isclose(np.mean(out_image), expected_mean)
 
 
 @pytest.mark.parametrize(
@@ -123,3 +129,70 @@ def test_distance_to_anomaly_gdal(
     assert result_raster_data.shape == expected_shape
     if expected_mean is not None:
         assert np.isclose(np.mean(result_raster_data), expected_mean)
+
+
+@pytest.mark.parametrize(
+    ",".join(
+        [
+            "anomaly_raster_profile",
+            "anomaly_raster_data",
+            "threshold_criteria_value",
+            "threshold_criteria",
+            "profile_additions",
+            "raises",
+        ]
+    ),
+    [
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            SMALL_RASTER_DATA,
+            5.0,
+            "higher",
+            dict,
+            nullcontext,
+            id="no_expected_exception",
+        ),
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            SMALL_RASTER_DATA,
+            5.0,
+            "higher",
+            partial(dict, height=2.2),
+            partial(pytest.raises, InvalidParameterValueException),
+            id="expected_invalid_param_due_to_float_value",
+        ),
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            SMALL_RASTER_DATA,
+            5.0,
+            "higher",
+            partial(dict, transform=None),
+            partial(pytest.raises, InvalidParameterValueException),
+            id="expected_invalid_param_due_to_transform_value",
+        ),
+    ],
+)
+def test_distance_to_anomaly_check(
+    anomaly_raster_profile,
+    anomaly_raster_data,
+    threshold_criteria_value,
+    threshold_criteria,
+    profile_additions,
+    raises,
+):
+    """Test distance_to_anomaly checks."""
+
+    anomaly_raster_profile_with_additions = {**anomaly_raster_profile, **profile_additions()}
+    with raises() as exc_info:
+        out_image, out_profile = distance_to_anomaly.distance_to_anomaly(
+            anomaly_raster_profile=anomaly_raster_profile_with_additions,
+            anomaly_raster_data=anomaly_raster_data,
+            threshold_criteria_value=threshold_criteria_value,
+            threshold_criteria=threshold_criteria,
+        )
+
+    if exc_info is not None:
+        # Expected error
+        return
+
+    _check_result(out_image=out_image, out_profile=out_profile)
