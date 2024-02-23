@@ -8,24 +8,20 @@ import numpy as np
 import rasterio
 from beartype import beartype
 from beartype.typing import Literal, Tuple, Union
-from rasterio import profiles, transform
+from rasterio import profiles
 
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.utilities.checks.raster import check_raster_profile
 from eis_toolkit.utilities.miscellaneous import row_points, toggle_gdal_exceptions
 from eis_toolkit.vector_processing.distance_computation import distance_computation
-
-THRESHOLD_CRITERIA_VALUE_TYPE = Union[Tuple[Number, Number], Number]
-THRESHOLD_CRITERIA_TYPE = Literal["lower", "higher", "in_between", "outside"]
 
 
 @beartype
 def distance_to_anomaly(
-    raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_data: np.ndarray,
-    threshold_criteria_value: THRESHOLD_CRITERIA_VALUE_TYPE,
-    threshold_criteria: THRESHOLD_CRITERIA_TYPE,
-) -> np.ndarray:
+    threshold_criteria_value: Union[Tuple[Number, Number], Number],
+    threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
+) -> Tuple[np.ndarray, Union[profiles.Profile, dict]]:
     """Calculate distance from raster cell to nearest anomaly.
 
     The criteria for what is anomalous can be defined as a single number and
@@ -34,47 +30,35 @@ def distance_to_anomaly(
     marked as anomalous (criteria text of "outside").
 
     Args:
-        raster_profile: The raster profile of which the distances
+        anomaly_raster_profile: The raster profile in which the distances
             to the nearest anomalous value are determined.
-        anomaly_raster: The raster in which the distances
+        anomaly_raster_data: The raster data in which the distances
             to the nearest anomalous value are determined.
         threshold_criteria_value: Value(s) used to define anomalous
         threshold_criteria: Method to define anomalous
 
     Returns:
-        A 2D numpy array with the distances to anomalies computed.
+        A 2D numpy array with the distances to anomalies computed
+        and the original anomaly raster profile.
 
     """
-    raster_width = raster_profile.get("width")
-    raster_height = raster_profile.get("height")
+    check_raster_profile(raster_profile=anomaly_raster_profile)
 
-    if not isinstance(raster_width, int) or not isinstance(raster_height, int):
-        raise InvalidParameterValueException(
-            f"Expected raster_profile to contain integer width and height. {raster_profile}"
-        )
-
-    raster_transform = raster_profile.get("transform")
-
-    if not isinstance(raster_transform, transform.Affine):
-        raise InvalidParameterValueException(
-            f"Expected raster_profile to contain an affine transformation. {raster_profile}"
-        )
-
-    return _distance_to_anomaly(
-        raster_profile=raster_profile,
+    out_image = _distance_to_anomaly(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data,
         threshold_criteria=threshold_criteria,
         threshold_criteria_value=threshold_criteria_value,
     )
+    return out_image, anomaly_raster_profile
 
 
 @beartype
 def distance_to_anomaly_gdal(
     anomaly_raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_data: np.ndarray,
-    threshold_criteria_value: THRESHOLD_CRITERIA_VALUE_TYPE,
-    threshold_criteria: THRESHOLD_CRITERIA_TYPE,
+    threshold_criteria_value: Union[Tuple[Number, Number], Number],
+    threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
     output_path: Path,
     verbose: bool = False,
 ) -> Path:
@@ -90,7 +74,9 @@ def distance_to_anomaly_gdal(
     Does not work on Windows.
 
     Args:
-        anomaly_raster: The raster in which the distances
+        anomaly_raster_profile: The raster profile in which the distances
+            to the nearest anomalous value are determined.
+        anomaly_raster_data: The raster data in which the distances
             to the nearest anomalous value are determined.
         threshold_criteria_value: Value(s) used to define anomalous
         threshold_criteria: Method to define anomalous
@@ -101,6 +87,8 @@ def distance_to_anomaly_gdal(
     Returns:
         The path to the raster with the distances to anomalies calculated.
     """
+    check_raster_profile(raster_profile=anomaly_raster_profile)
+
     return _distance_to_anomaly_gdal(
         output_path=output_path,
         anomaly_raster_profile=anomaly_raster_profile,
@@ -112,8 +100,8 @@ def distance_to_anomaly_gdal(
 
 
 def _fits_criteria(
-    threshold_criteria_value: THRESHOLD_CRITERIA_VALUE_TYPE,
-    threshold_criteria: THRESHOLD_CRITERIA_TYPE,
+    threshold_criteria_value: Union[Tuple[Number, Number], Number],
+    threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
     anomaly_raster_data: np.ndarray,
 ) -> np.ndarray:
     criteria_dict = {
@@ -143,8 +131,8 @@ def _write_binary_anomaly_raster(tmp_dir: Path, anomaly_raster_profile, data_fit
 def _distance_to_anomaly_gdal(
     anomaly_raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_data: np.ndarray,
-    threshold_criteria_value: THRESHOLD_CRITERIA_VALUE_TYPE,
-    threshold_criteria: THRESHOLD_CRITERIA_TYPE,
+    threshold_criteria_value: Union[Tuple[Number, Number], Number],
+    threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
     output_path: Path,
     verbose: bool,
 ):
@@ -173,11 +161,10 @@ def _distance_to_anomaly_gdal(
 
 
 def _distance_to_anomaly(
-    raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_data: np.ndarray,
-    threshold_criteria_value: THRESHOLD_CRITERIA_VALUE_TYPE,
-    threshold_criteria: THRESHOLD_CRITERIA_TYPE,
+    threshold_criteria_value: Union[Tuple[Number, Number], Number],
+    threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
 ) -> np.ndarray:
     data_fits_criteria = _fits_criteria(
         threshold_criteria=threshold_criteria,
@@ -195,6 +182,6 @@ def _distance_to_anomaly(
     all_points = list(chain(*all_points_by_rows))
     all_points_gdf = gpd.GeoDataFrame(geometry=all_points, crs=anomaly_raster_profile["crs"])
 
-    distance_array = distance_computation(raster_profile=raster_profile, geometries=all_points_gdf)
+    distance_array = distance_computation(raster_profile=anomaly_raster_profile, geometries=all_points_gdf)
 
     return distance_array

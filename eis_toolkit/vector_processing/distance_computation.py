@@ -5,7 +5,8 @@ from beartype.typing import Union
 from rasterio import profiles, transform
 from shapely.geometry.base import BaseGeometry, BaseMultipartGeometry
 
-from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException, NonMatchingCrsException
+from eis_toolkit.exceptions import EmptyDataFrameException, NonMatchingCrsException
+from eis_toolkit.utilities.checks.raster import check_raster_profile
 from eis_toolkit.utilities.miscellaneous import row_points
 
 
@@ -27,20 +28,11 @@ def distance_computation(raster_profile: Union[profiles.Profile, dict], geometri
     if geometries.shape[0] == 0:
         raise EmptyDataFrameException("Expected GeoDataFrame to not be empty.")
 
+    check_raster_profile(raster_profile=raster_profile)
+
     raster_width = raster_profile.get("width")
     raster_height = raster_profile.get("height")
-
-    if not isinstance(raster_width, int) or not isinstance(raster_height, int):
-        raise InvalidParameterValueException(
-            f"Expected raster_profile to contain integer width and height. {raster_profile}"
-        )
-
     raster_transform = raster_profile.get("transform")
-
-    if not isinstance(raster_transform, transform.Affine):
-        raise InvalidParameterValueException(
-            f"Expected raster_profile to contain an affine transformation. {raster_profile}"
-        )
 
     return _distance_computation(
         raster_width=raster_width, raster_height=raster_height, raster_transform=raster_transform, geometries=geometries
