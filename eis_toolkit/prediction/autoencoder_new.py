@@ -47,7 +47,8 @@ def _scale_tensors(input_images: Sequence[tf.Tensor], multipliers: Sequence[floa
 
 @beartype
 def _attention_block_skip(x: tf.Tensor, g: tf.Tensor, inter_channel: int) -> tf.Tensor:
-    """Implement an attention block with a skip connection.
+    """
+    Implement an attention block with a skip connection.
 
     Parameters:
         x: The input feature map.
@@ -106,7 +107,7 @@ def train_autoencoder_regular(
     Each modality/band is processed in a common way.
 
     Parameters:
-        X: Training data.
+        X: Feature/evidence data.
         y: Target labels. In case of autoencoders, it's optional as the targets are often the input.
         input_shape: Shape of the input data (excluding batch dimension).
         number_of_layers: Number of layers in encoder and decoder.
@@ -197,8 +198,8 @@ def train_autoencoder_regular(
 
 @beartype
 def train_autoencoder_unet(
-    X: Union[np.ndarray, List[np.ndarray]],  # NOTE CHECK LIST
-    y: Optional[Union[np.ndarray, List[np.ndarray]]],  # NOTE CHECK LIST
+    X: Union[np.ndarray, List[np.ndarray]],
+    y: Optional[Union[np.ndarray, List[np.ndarray]]],
     resolution: int,
     modality: int,
     dropout: float = 0.2,
@@ -220,7 +221,7 @@ def train_autoencoder_unet(
     Each modality/band is processed in a common way.
 
     Parameters:
-        X: Training data.
+        X: Feature/evidence data.
         y: Target labels. In case of autoencoders, it's optional as the targets are often the input.
         resolution: Image resolution for each modality.
         modality: The number of modalities or bands.
