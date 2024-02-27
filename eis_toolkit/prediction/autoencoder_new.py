@@ -21,9 +21,6 @@ from keras.regularizers import l1
 
 from eis_toolkit.exceptions import NonMatchingParameterLengthsException
 
-# NOTES:
-# - Change modality -> band ?
-
 
 @beartype
 def _scale_tensors(input_images: Sequence[tf.Tensor], multipliers: Sequence[float]) -> Sequence[tf.Tensor]:
@@ -126,7 +123,7 @@ def train_autoencoder_regular(
         early_stopping: Whether to use early stopping.
 
     Returns:
-        Trained autoencoder model and training history..
+        Trained autoencoder model and training history.
     """
     # 1. Check input data
     # TODO
@@ -200,8 +197,8 @@ def train_autoencoder_regular(
 
 @beartype
 def train_autoencoder_unet(
-    X: np.ndarray | List[np.ndarray],  # NOTE CHECK LIST
-    y: Optional[np.ndarray | List[np.ndarray]],  # NOTE CHECK LIST
+    X: Union[np.ndarray, List[np.ndarray]],  # NOTE CHECK LIST
+    y: Optional[Union[np.ndarray, List[np.ndarray]]],  # NOTE CHECK LIST
     resolution: int,
     modality: int,
     dropout: float = 0.2,
