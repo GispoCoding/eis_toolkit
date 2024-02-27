@@ -69,7 +69,7 @@ For those that prefer using tools of EIS Toolkit via a graphical user interface,
 
 The plugin is developed by the same core team that develops EIS Toolkit.
 
-### CLIthe
+### CLI
 EIS Toolkit includes a [Typer](https://typer.tiangolo.com/) command-line interface that serves as a common interface for integrating the toolkit with external applications, such as QGIS. However, it can be used directly too. To use the CLI, simply use the command
 ```console
 eis
