@@ -85,6 +85,7 @@ def read_and_stack_rasters(
 
     Returns:
         3D array with shape (total bands, height, width).
+        List of raster profiles.
 
     Raises:
         NonMatchingRasterMetadataException: If input rasters do not have same grid properties or nodata_handling
@@ -119,7 +120,8 @@ def read_and_stack_rasters(
         raise exceptions.NonMatchingRasterMetadataException("Input rasters should have the same properties.")
 
     # Stack all bands into a single 3D array
-    return np.stack(bands, axis=0), profiles
+    stacked_arrays = np.stack(bands, axis=0)
+    return stacked_arrays, profiles
 
 
 @beartype
