@@ -335,7 +335,7 @@ def chi_square_test_cli(
     columns: Optional[List[str]] = None,
 ):
     """Perform a Chi-square test of independence between a target variable and one or more other variables."""
-    from eis_toolkit.exploratory_analyses.statistical_tests import chi_square_test
+    from eis_toolkit.exploratory_analyses.chi_square_test import chi_square_test
 
     typer.echo("Progress: 10%")
 
@@ -362,7 +362,7 @@ def correlation_matrix_cli(
     min_periods: Optional[int] = None,
 ):
     """Compute correlation matrix on the input data."""
-    from eis_toolkit.exploratory_analyses.statistical_tests import correlation_matrix
+    from eis_toolkit.exploratory_analyses.correlation_matrix import correlation_matrix
 
     typer.echo("Progress: 10%")
 
@@ -392,7 +392,7 @@ def covariance_matrix_cli(
     delta_degrees_of_freedom: int = 1,
 ):
     """Compute covariance matrix on the input data."""
-    from eis_toolkit.exploratory_analyses.statistical_tests import covariance_matrix
+    from eis_toolkit.exploratory_analyses.covariance_matrix import covariance_matrix
 
     typer.echo("Progress: 10%")
 
