@@ -1778,24 +1778,26 @@ def predict_with_trained_model_cli(
 # AND OVERLAY
 @app.command()
 def and_overlay_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
     """Compute an 'and' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import and_overlay
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_raster) as raster:
-        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
-        typer.echo("Progress: 25%")
-        out_image = and_overlay(data)
-        out_meta = raster.meta.copy()
-        out_meta["count"] = 1
+    data, profiles = read_and_stack_rasters(input_rasters)
+    typer.echo("Progress: 25%")
+
+    out_image = and_overlay(data)
     typer.echo("Progress: 75%")
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, out_meta["count"])
+    out_profile = profiles[0]
+    out_profile["count"] = 1
+    out_profile["nodata"] = -9999
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"'And' overlay completed, writing raster to {output_raster}.")
@@ -1804,24 +1806,26 @@ def and_overlay_cli(
 # OR OVERLAY
 @app.command()
 def or_overlay_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
     """Compute an 'or' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import or_overlay
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_raster) as raster:
-        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
-        typer.echo("Progress: 25%")
-        out_image = or_overlay(data)
-        out_meta = raster.meta.copy()
-        out_meta["count"] = 1
+    data, profiles = read_and_stack_rasters(input_rasters)
+    typer.echo("Progress: 25%")
+
+    out_image = or_overlay(data)
     typer.echo("Progress: 75%")
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, out_meta["count"])
+    out_profile = profiles[0]
+    out_profile["count"] = 1
+    out_profile["nodata"] = -9999
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"'Or' overlay completed, writing raster to {output_raster}.")
@@ -1830,24 +1834,26 @@ def or_overlay_cli(
 # PRODUCT OVERLAY
 @app.command()
 def product_overlay_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
-    """Compute a 'product' overlay operation with fuzzy logic."""
+    """Compute an 'product' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import product_overlay
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_raster) as raster:
-        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
-        typer.echo("Progress: 25%")
-        out_image = product_overlay(data)
-        out_meta = raster.meta.copy()
-        out_meta["count"] = 1
+    data, profiles = read_and_stack_rasters(input_rasters)
+    typer.echo("Progress: 25%")
+
+    out_image = product_overlay(data)
     typer.echo("Progress: 75%")
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, out_meta["count"])
+    out_profile = profiles[0]
+    out_profile["count"] = 1
+    out_profile["nodata"] = -9999
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"'Product' overlay completed, writing raster to {output_raster}.")
@@ -1856,24 +1862,26 @@ def product_overlay_cli(
 # SUM OVERLAY
 @app.command()
 def sum_overlay_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
-    """Compute a 'sum' overlay operation with fuzzy logic."""
+    """Compute an 'sum' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import sum_overlay
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_raster) as raster:
-        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
-        typer.echo("Progress: 25%")
-        out_image = sum_overlay(data)
-        out_meta = raster.meta.copy()
-        out_meta["count"] = 1
+    data, profiles = read_and_stack_rasters(input_rasters)
+    typer.echo("Progress: 25%")
+
+    out_image = sum_overlay(data)
     typer.echo("Progress: 75%")
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, out_meta["count"])
+    out_profile = profiles[0]
+    out_profile["count"] = 1
+    out_profile["nodata"] = -9999
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"'Sum' overlay completed, writing raster to {output_raster}.")
@@ -1881,26 +1889,26 @@ def sum_overlay_cli(
 
 # GAMMA OVERLAY
 @app.command()
-def gamme_overlay_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    gamma: float = typer.Option(),
+def gamma_overlay_cli(
+    input_rasters: INPUT_FILES_ARGUMENT, output_raster: Annotated[Path, OUTPUT_FILE_OPTION], gamma: float = 0.5
 ):
-    """Compute a 'gamma' overlay operation with fuzzy logic."""
+    """Compute an 'gamma' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import gamma_overlay
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_raster) as raster:
-        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
-        typer.echo("Progress: 25%")
-        out_image = gamma_overlay(data, gamma)
-        out_meta = raster.meta.copy()
-        out_meta["count"] = 1
+    data, profiles = read_and_stack_rasters(input_rasters)
+    typer.echo("Progress: 25%")
+
+    out_image = gamma_overlay(data, gamma)
     typer.echo("Progress: 75%")
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, out_meta["count"])
+    out_profile = profiles[0]
+    out_profile["count"] = 1
+    out_profile["nodata"] = -9999
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"'Gamma' overlay completed, writing raster to {output_raster}.")
