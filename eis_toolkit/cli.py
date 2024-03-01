@@ -695,7 +695,7 @@ def lee_enhanced_filter_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     size: int = 3,
-    n_looks: float = 1.0,
+    n_looks: int = 1,
     damping_factor: float = 1.0,
 ):
     """Apply an enhanced Lee filter to the input raster."""
@@ -723,7 +723,7 @@ def gamma_filter_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     size: int = 3,
-    n_looks: float = 1.0,
+    n_looks: int = 1,
 ):
     """Apply a Gamma filter to the input raster."""
     from eis_toolkit.raster_processing.filters.speckle import gamma_filter
@@ -781,7 +781,7 @@ def kuan_filter_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
     size: int = 3,
-    n_looks: float = 1.0,
+    n_looks: int = 1,
 ):
     """Apply a Kuan filter to the input raster."""
     from eis_toolkit.raster_processing.filters.speckle import kuan_filter
