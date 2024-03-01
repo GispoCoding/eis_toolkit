@@ -23,9 +23,12 @@ from sklearn.metrics import (
 from sklearn.model_selection import KFold, LeaveOneOut, StratifiedKFold, train_test_split
 from tensorflow import keras
 
-from eis_toolkit.exceptions import InvalidParameterValueException, NonMatchingParameterLengthsException
-
-# from eis_toolkit.utilities.checks.raster import check_raster_grids
+from eis_toolkit.exceptions import (
+    InvalidParameterValueException,
+    NonMatchingParameterLengthsException,
+    NonMatchingRasterMetadataException,
+)
+from eis_toolkit.utilities.checks.raster import check_raster_grids
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
 SPLIT = "split"
@@ -182,50 +185,55 @@ def reshape_predictions(
 
 @beartype
 def prepare_data_for_ml(
-    training_raster_files: Sequence[Union[str, os.PathLike]],
+    feature_raster_files: Sequence[Union[str, os.PathLike]],
     label_file: Optional[Union[str, os.PathLike]] = None,
 ) -> Tuple[np.ndarray, Optional[np.ndarray], rasterio.profiles.Profile, Any]:
     """
     Prepare data ready for machine learning model training.
 
     Performs the following steps:
-    - Read all bands of all training rasters into a stacked Numpy array
+    - Read all bands of all feature/evidence rasters into a stacked Numpy array
     - Read label data (and rasterize if a vector file is given)
-    - Create a nodata mask using all training rasters and labels, and mask nodata cells out
+    - Create a nodata mask using all feature rasters and labels, and mask nodata cells out
 
     Args:
-        training_raster_files: List of filepaths of training rasters. Files should only include
+        feature_raster_files: List of filepaths of feature/evidence rasters. Files should only include
             raster that have the same grid properties and extent.
         label_file: Filepath to label (deposits) data. File can be either a vector file or raster file.
-            If a vector file is provided, it will be rasterized into similar grid as training rasters. If
-            a raster file is provided, it needs to have same grid properties and extent as training rasters.
+            If a vector file is provided, it will be rasterized into similar grid as feature rasters. If
+            a raster file is provided, it needs to have same grid properties and extent as feature rasters.
             Optional parameter and can be omitted if preparing data for predicting. Defaults to None.
 
     Returns:
-        Training data (X) in prepared shape, target labels (y) in prepared shape (if `label_file` was given),
-            refrence raster metadata and nodata mask applied to X and y.
+        Feature data (X) in prepared shape.
+        Target labels (y) in prepared shape (if `label_file` was given).
+        Refrence raster metadata .
+        Nodata mask applied to X and y.
+
+    Raises:
+        NonMatchingRasterMetadataException: Input feature rasters don't have same grid properties.
     """
 
-    def _read_and_stack_training_raster(filepath: Union[str, os.PathLike]) -> Tuple[np.ndarray, dict]:
-        """Read all bands of raster file with training data in a stack."""
+    def _read_and_stack_feature_raster(filepath: Union[str, os.PathLike]) -> Tuple[np.ndarray, dict]:
+        """Read all bands of raster file with feature/evidence data in a stack."""
         with rasterio.open(filepath) as src:
             raster_data = np.stack([src.read(i) for i in range(1, src.count + 1)])
             profile = src.profile
         return raster_data, profile
 
-    # Read and stack training rasters
-    training_data, profiles = zip(*[_read_and_stack_training_raster(file) for file in training_raster_files])
-    # # TODO. Waiting for check_raster_grids input modification to profiles
-    # if not check_raster_grids(profiles, same_extent=True):
-    #     raise NonMatchingRasterGridException
+    # Read and stack feature rasters
+    feature_data, profiles = zip(*[_read_and_stack_feature_raster(file) for file in feature_raster_files])
+    if not check_raster_grids(profiles, same_extent=True):
+        raise NonMatchingRasterMetadataException("Input feature rasters should have same grid properties.")
+
     reference_profile = profiles[0]
     nodata_values = [profile["nodata"] for profile in profiles]
 
-    # Reshape training data for ML and create mask
+    # Reshape feature rasters for ML and create mask
     reshaped_data = []
     nodata_mask = None
 
-    for raster, nodata in zip(training_data, nodata_values):
+    for raster, nodata in zip(feature_data, nodata_values):
         raster_reshaped = raster.reshape(raster.shape[0], -1).T
         reshaped_data.append(raster_reshaped)
 
