@@ -1,3 +1,3 @@
-# One-hot encoding
+# Standardize
 
-::: eis_toolkit.transformations.one_hot_encoding
+::: eis_toolkit.transformations.standardize
