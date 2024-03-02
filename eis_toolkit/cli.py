@@ -2356,6 +2356,111 @@ def winsorize_transform_cli(
     typer.echo(f"Winsorize transform completed, writing raster to {output_raster}.")
 
 
+# NORMALIZE RASTER
+@app.command()
+def normalize_raster_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+):
+    """Normalize input raster data."""
+    from eis_toolkit.transformations.normalize import normalize
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        data = raster.read()
+        out_meta = raster.meta.copy()
+    typer.echo("Progress: 25%")
+
+    out_image = normalize(data=data, array_type="raster")
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Normalizing completed, output raster written to {output_raster}.")
+
+
+# NORMALIZE VECTOR
+@app.command()
+def normalize_vector_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    columns: Optional[List[str]] = None,
+):
+    """Normalize input vector data."""
+    from eis_toolkit.transformations.normalize import normalize
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    geometries = gdf["geometry"]
+    typer.echo("Progress: 25%")
+
+    normalized_df = normalize(data=df, columns=columns)
+    typer.echo("Progess 75%")
+
+    out_gdf = gpd.GeoDataFrame(normalized_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Normalizing completed, output vector written to {output_vector}.")
+
+
+# STANDARDIZE RASTER
+@app.command()
+def standardize_raster_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION], output_raster: Annotated[Path, OUTPUT_FILE_OPTION]
+):
+    """Standardize input raster data."""
+    from eis_toolkit.transformations.standardize import standardize
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        data = raster.read()
+        out_meta = raster.meta.copy()
+    typer.echo("Progress: 25%")
+
+    out_image = standardize(data=data, array_type="raster")
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Standardizing completed, output raster written to {output_raster}.")
+
+
+# STANDARDIZE VECTOR
+@app.command()
+def standardize_vector_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    columns: Optional[List[str]] = None,
+):
+    """Standardize input vector data."""
+    from eis_toolkit.transformations.standardize import standardize
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    df = pd.DataFrame(gdf.drop(columns="geometry"))
+    geometries = gdf["geometry"]
+    typer.echo("Progress: 25%")
+
+    standardized_df = standardize(data=df, columns=columns)
+    typer.echo("Progess: 75%")
+
+    out_gdf = gpd.GeoDataFrame(standardized_df, geometry=geometries)
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Standardizing completed, output vector written to {output_vector}.")
+
+
 # ---VALIDATION ---
 # TODO
 
