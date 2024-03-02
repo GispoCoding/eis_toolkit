@@ -25,7 +25,8 @@ def standardize(
         array_type: Specifies how the data is interpreted if input is numpy array.
             `tabular` is used for 2D data where each column is a variable (data preparation for ML modeling),
             and `raster` for 2D/3D data where 2D array is a variable.
-        columns: Column selection if input is a DataFrame, ignored if input is numpy array.
+        columns: Column selection for DataFrame input, ignored if input is numpy array. Defaults to None
+            (all found numeric columns used).
 
     Returns:
         Standardized data in the input format.
@@ -36,8 +37,8 @@ def standardize(
     """
     out_data = data.copy().astype(np.float64)
     if isinstance(data, pd.DataFrame):
-        if columns is None:
-            columns = data.columns
+        if columns is None or columns == []:
+            columns = data.select_dtypes(include=[np.number]).columns
         for col in columns:
             if col not in data.columns:
                 raise InvalidColumnException(f"Column {col} was not found in the input DataFrame.")
