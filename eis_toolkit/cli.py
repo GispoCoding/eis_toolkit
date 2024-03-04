@@ -293,7 +293,7 @@ def normality_test_raster_cli(input_raster: Annotated[Path, INPUT_FILE_OPTION], 
     with rasterio.open(input_raster) as raster:
         data = raster.read()
         typer.echo("Progress: 25%")
-
+        print(bands)
         if len(bands) == 0:
             bands = None
         results_dict = normality_test_array(data=data, bands=bands, nodata_value=raster.nodata)

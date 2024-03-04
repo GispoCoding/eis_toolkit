@@ -36,13 +36,13 @@ def normality_test_dataframe(
     Raises:
         EmptyDataException: The input data is empty.
         InvalidColumnException: All selected columns were not found in the input data.
-        NonNumericDataException: Selected data or columns contains non-numeric data.
+        NonNumericDataException: Selected columns contain non-numeric data or no numeric columns were found.
         SampleSizeExceededException: Input data exceeds the maximum of 5000 samples.
     """
     if check_empty_dataframe(data):
         raise EmptyDataException("The input Dataframe is empty.")
 
-    if columns is not None:
+    if columns is not None and columns != []:
         if not check_columns_valid(data, columns):
             raise InvalidColumnException("All selected columns were not found in the input DataFrame.")
         if not check_columns_numeric(data, columns):
@@ -51,9 +51,9 @@ def normality_test_dataframe(
         data = data[columns].dropna()
 
     else:
-        if not check_columns_numeric(data, data.columns):
-            raise NonNumericDataException("The input data contain non-numeric data.")
-        columns = data.columns
+        columns = data.select_dtypes(include=[np.number]).columns
+        if len(columns) == 0:
+            raise NonNumericDataException("No numeric columns were found.")
 
     statistics = {}
     for column in columns:
