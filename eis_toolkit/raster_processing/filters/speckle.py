@@ -423,7 +423,7 @@ def lee_enhanced_filter(
 
     out_array = cast_array_to_float(out_array, cast_float=True)
     out_meta = raster.meta.copy()
-    
+
     return out_array, out_meta
 
 
