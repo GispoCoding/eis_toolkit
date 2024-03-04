@@ -220,6 +220,13 @@ class MexicanHatFilterDirection(str, Enum):
     rectangular = "rectangular"
     circular = "circular"
 
+    
+class LocalMoranWeightType(str, Enum):
+    """Weight type for Local Moran's I."""
+
+    queen = "queen"
+    knn = "knn"
+
 
 RESAMPLING_MAPPING = {
     "nearest": warp.Resampling.nearest,
@@ -516,6 +523,32 @@ def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPT
 
     typer.echo(f"Results: {json_str}")
     typer.echo("Descriptive statistics (vector) completed")
+
+
+# LOCAL MORAN'S I
+@app.command()
+def local_morans_i_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    column: str = typer.Option(),
+    weight_type: LocalMoranWeightType = LocalMoranWeightType.queen,
+    k: int = 4,
+    permutations: int = 999,
+):
+    """Execute Local Moran's I calculation for the data."""
+    from eis_toolkit.exploratory_analyses.local_morans_i import local_morans_i
+
+    typer.echo("Progress: 10%")
+
+    gdf = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    out_gdf = local_morans_i(gdf, column, weight_type, k, permutations)
+    typer.echo("Progress: 75%")
+
+    out_gdf.to_file(output_vector)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Local Moran's I completed, output vector saved to {output_vector}.")
 
 
 # --- RASTER PROCESSING ---
@@ -1201,6 +1234,184 @@ def surface_derivatives_cli(
     typer.echo(f"Calculating first and/or second order surface attributes completed, writing raster to {output_raster}")
 
 
+@app.command()
+def reclassify_with_manual_breaks_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    breaks: Annotated[List[int], typer.Option()],
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with manual breaks."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_manual_breaks
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_manual_breaks(raster=raster, breaks=breaks, bands=bands)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with manual breaks completed, writing raster to {output_raster}")
+
+
+@app.command()
+def reclassify_with_defined_intervals_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    interval_size: int = typer.Option(),
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with defined intervals."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_defined_intervals
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_defined_intervals(raster=raster, interval_size=interval_size, bands=bands)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with defined intervals completed, writing raster to {output_raster}")
+
+
+@app.command()
+def reclassify_with_equal_intervals_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_intervals: int = typer.Option(),
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with equal intervals."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_equal_intervals
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_equal_intervals(
+            raster=raster, number_of_intervals=number_of_intervals, bands=bands
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with equal intervals completed, writing raster to {output_raster}")
+
+
+@app.command()
+def reclassify_with_quantiles_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_quantiles: int = typer.Option(),
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with quantiles."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_quantiles
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_quantiles(
+            raster=raster, number_of_quantiles=number_of_quantiles, bands=bands
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with quantiles completed, writing raster to {output_raster}")
+
+
+@app.command()
+def reclassify_with_natural_breaks_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_classes: int = typer.Option(),
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with natural breaks (Jenks Caspall)."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_natural_breaks
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_natural_breaks(
+            raster=raster, number_of_classes=number_of_classes, bands=bands
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with natural breaks completed, writing raster to {output_raster}")
+
+
+@app.command()
+def reclassify_with_geometrical_intervals_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_classes: int = typer.Option(),
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with geometrical intervals."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_geometrical_intervals
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_geometrical_intervals(
+            raster=raster, number_of_classes=number_of_classes, bands=bands
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with geometric intervals completed, writing raster to {output_raster}")
+
+
+@app.command()
+def reclassify_with_standard_deviation_cli(
+    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    number_of_intervals: int = typer.Option(),
+    bands: Annotated[List[int], typer.Option()] = None,
+):
+    """Classify raster with standard deviation."""
+    from eis_toolkit.raster_processing.reclassify import reclassify_with_standard_deviation
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = reclassify_with_standard_deviation(
+            raster=raster, number_of_intervals=number_of_intervals, bands=bands
+        )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Reclassification with standard deviation completed, writing raster to {output_raster}")
+
+
 # --- VECTOR PROCESSING ---
 
 
@@ -1858,24 +2069,26 @@ def predict_with_trained_model_cli(
 # AND OVERLAY
 @app.command()
 def and_overlay_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
     """Compute an 'and' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import and_overlay
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_raster) as raster:
-        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
-        typer.echo("Progress: 25%")
-        out_image = and_overlay(data)
-        out_meta = raster.meta.copy()
-        out_meta["count"] = 1
+    data, profiles = read_and_stack_rasters(input_rasters)
+    typer.echo("Progress: 25%")
+
+    out_image = and_overlay(data)
     typer.echo("Progress: 75%")
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, out_meta["count"])
+    out_profile = profiles[0]
+    out_profile["count"] = 1
+    out_profile["nodata"] = -9999
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"'And' overlay completed, writing raster to {output_raster}.")
@@ -1884,24 +2097,26 @@ def and_overlay_cli(
 # OR OVERLAY
 @app.command()
 def or_overlay_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
     """Compute an 'or' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import or_overlay
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_raster) as raster:
-        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
-        typer.echo("Progress: 25%")
-        out_image = or_overlay(data)
-        out_meta = raster.meta.copy()
-        out_meta["count"] = 1
+    data, profiles = read_and_stack_rasters(input_rasters)
+    typer.echo("Progress: 25%")
+
+    out_image = or_overlay(data)
     typer.echo("Progress: 75%")
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, out_meta["count"])
+    out_profile = profiles[0]
+    out_profile["count"] = 1
+    out_profile["nodata"] = -9999
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"'Or' overlay completed, writing raster to {output_raster}.")
@@ -1910,24 +2125,26 @@ def or_overlay_cli(
 # PRODUCT OVERLAY
 @app.command()
 def product_overlay_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
-    """Compute a 'product' overlay operation with fuzzy logic."""
+    """Compute an 'product' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import product_overlay
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_raster) as raster:
-        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
-        typer.echo("Progress: 25%")
-        out_image = product_overlay(data)
-        out_meta = raster.meta.copy()
-        out_meta["count"] = 1
+    data, profiles = read_and_stack_rasters(input_rasters)
+    typer.echo("Progress: 25%")
+
+    out_image = product_overlay(data)
     typer.echo("Progress: 75%")
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, out_meta["count"])
+    out_profile = profiles[0]
+    out_profile["count"] = 1
+    out_profile["nodata"] = -9999
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"'Product' overlay completed, writing raster to {output_raster}.")
@@ -1936,24 +2153,26 @@ def product_overlay_cli(
 # SUM OVERLAY
 @app.command()
 def sum_overlay_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
+    input_rasters: INPUT_FILES_ARGUMENT,
     output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
 ):
-    """Compute a 'sum' overlay operation with fuzzy logic."""
+    """Compute an 'sum' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import sum_overlay
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_raster) as raster:
-        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
-        typer.echo("Progress: 25%")
-        out_image = sum_overlay(data)
-        out_meta = raster.meta.copy()
-        out_meta["count"] = 1
+    data, profiles = read_and_stack_rasters(input_rasters)
+    typer.echo("Progress: 25%")
+
+    out_image = sum_overlay(data)
     typer.echo("Progress: 75%")
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, out_meta["count"])
+    out_profile = profiles[0]
+    out_profile["count"] = 1
+    out_profile["nodata"] = -9999
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"'Sum' overlay completed, writing raster to {output_raster}.")
@@ -1962,25 +2181,25 @@ def sum_overlay_cli(
 # GAMMA OVERLAY
 @app.command()
 def gamma_overlay_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    gamma: float = typer.Option(),
+    input_rasters: INPUT_FILES_ARGUMENT, output_raster: Annotated[Path, OUTPUT_FILE_OPTION], gamma: float = 0.5
 ):
-    """Compute a 'gamma' overlay operation with fuzzy logic."""
+    """Compute an 'gamma' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import gamma_overlay
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_raster) as raster:
-        data = raster.read()  # NOTE: Overlays take in data while for example transforms rasters, consistentency?
-        typer.echo("Progress: 25%")
-        out_image = gamma_overlay(data, gamma)
-        out_meta = raster.meta.copy()
-        out_meta["count"] = 1
+    data, profiles = read_and_stack_rasters(input_rasters)
+    typer.echo("Progress: 25%")
+
+    out_image = gamma_overlay(data, gamma)
     typer.echo("Progress: 75%")
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, out_meta["count"])
+    out_profile = profiles[0]
+    out_profile["count"] = 1
+    out_profile["nodata"] = -9999
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"'Gamma' overlay completed, writing raster to {output_raster}.")

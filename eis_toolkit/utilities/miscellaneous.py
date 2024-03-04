@@ -5,9 +5,44 @@ import pandas as pd
 from beartype import beartype
 from beartype.typing import Any, List, Optional, Sequence, Tuple, Union
 
-from eis_toolkit.exceptions import InvalidColumnException, InvalidColumnIndexException
+from eis_toolkit.exceptions import InvalidColumnException, InvalidColumnIndexException, InvalidDataShapeException
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid
 from eis_toolkit.utilities.checks.parameter import check_dtype_for_int
+
+
+@beartype
+def stack_raster_arrays(arrays: Sequence[np.ndarray]) -> np.ndarray:
+    """
+    Stack 2D and 3D NumPy arrays (each representing a raster with one or multiple bands) along the bands axis.
+
+    Parameters:
+        arrays: List of 2D and 3D NumPy arrays. Each 2D array should have shape (height, width).
+            and 3D array shape (bands, height, width).
+
+    Returns:
+        A single 3D NumPy array where the first dimension size equals the total number of bands.
+    """
+    processed_arrays = []
+    for array in arrays:
+        # Add a new axis if the array is 2D
+        if array.ndim == 2:
+            array = array[np.newaxis, :]
+            print(array)
+            print(array.ndim)
+        elif array.ndim != 3:
+            raise InvalidDataShapeException("All raster arrays must be 2D or 3D for stacking.")
+        processed_arrays.append(array)
+
+    shape_set = {arr.shape[1:] for arr in processed_arrays}
+    if len(shape_set) != 1:
+        raise InvalidDataShapeException(
+            "All raster arrays must have the same shape in 2 last dimensions (height, width)."
+        )
+
+    # Stack along the first axis
+    stacked_array = np.concatenate(processed_arrays, axis=0)
+
+    return stacked_array
 
 
 @beartype

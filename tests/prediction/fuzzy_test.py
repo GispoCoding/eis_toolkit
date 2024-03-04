@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from beartype import roar
 
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidDatasetException, InvalidParameterValueException
 from eis_toolkit.prediction.fuzzy_overlay import and_overlay, gamma_overlay, or_overlay, product_overlay, sum_overlay
 
 RASTER_DATA_1 = np.array([[1.0, 0.5, 0.2], [0.7, 0.6, 0.5], [1.0, 0.2, 0.5]])
@@ -12,9 +12,21 @@ RASTER_DATA_2 = np.array([[0.7, 0.3, 0.1], [0.4, 0.9, 0.7], [0.9, 0.2, 1.0]])
 RASTERS_DATA = np.stack((RASTER_DATA_1, RASTER_DATA_2))
 
 
-def test_and_overlay():
-    """Test that AND overlay works as expected."""
+def test_and_overlay_3D_input():
+    """Test that AND overlay works as expected with 3D array input."""
     result = and_overlay(data=RASTERS_DATA)
+    np.testing.assert_array_equal(result, np.array([[0.7, 0.3, 0.1], [0.4, 0.6, 0.5], [0.9, 0.2, 0.5]]))
+
+
+def test_and_overlay_series_of_2D_inputs():
+    """Test that AND overlay works as expected with multiple 2D array inputs."""
+    result = and_overlay(data=[RASTER_DATA_1, RASTER_DATA_2])
+    np.testing.assert_array_equal(result, np.array([[0.7, 0.3, 0.1], [0.4, 0.6, 0.5], [0.9, 0.2, 0.5]]))
+
+
+def test_and_overlay_series_of_2D_and_3D_inputs():
+    """Test that AND overlay works as expected with mix of 2D and 3D array inputs."""
+    result = and_overlay(data=[RASTER_DATA_1, RASTER_DATA_2, RASTERS_DATA])
     np.testing.assert_array_equal(result, np.array([[0.7, 0.3, 0.1], [0.4, 0.6, 0.5], [0.9, 0.2, 0.5]]))
 
 
@@ -76,3 +88,9 @@ def test_overlay_wrong_input_type():
     """Test that a wrong input parameter type raises the correct exception."""
     with pytest.raises(roar.BeartypeCallHintParamViolation):
         and_overlay(data=[1, 2, 3])
+
+
+def test_overlay_insufficient_inputs():
+    """Test that input containing only 1 2D Numpy array raises the correct exception."""
+    with pytest.raises(InvalidDatasetException):
+        and_overlay(data=RASTER_DATA_1)
