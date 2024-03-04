@@ -689,7 +689,6 @@ def lee_additive_multiplicative_noise_filter_cli(
 
 
 # LEE ENHANCED FILTER
-# TODO: SystemError: <built-in function len> returned a result with an exception set
 @app.command()
 def lee_enhanced_filter_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
@@ -732,9 +731,6 @@ def gamma_filter_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        print(f"input_raster: {type(raster)}")
-        print(f"size: {type(size)}")
-        print(f"n_looks: {type(n_looks)}")
         out_image, out_meta = gamma_filter(raster=raster, size=size, n_looks=n_looks)
     typer.echo("Progress: 75%")
 
@@ -746,7 +742,6 @@ def gamma_filter_cli(
 
 
 # FROST FILTER
-# TODO: SystemError: <built-in function len> returned a result with an exception set
 @app.command()
 def frost_filter_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
@@ -761,9 +756,6 @@ def frost_filter_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        print(f"input_raster: {type(raster)}")
-        print(f"size: {type(size)}")
-        print(f"damping_factor: {type(damping_factor)}")
         out_image, out_meta = frost_filter(raster=raster, size=size, damping_factor=damping_factor)
     typer.echo("Progress: 75%")
 
@@ -775,7 +767,6 @@ def frost_filter_cli(
 
 
 # KUAN FILTER
-# TODO: SystemError: <built-in function len> returned a result with an exception set
 @app.command()
 def kuan_filter_cli(
     input_raster: Annotated[Path, INPUT_FILE_OPTION],
@@ -790,9 +781,6 @@ def kuan_filter_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("progress: 25%")
-        print(f"input_raster: {type(raster)}")
-        print(f"size: {type(size)}")
-        print(f"n_looks: {type(n_looks)}")
         out_image, out_meta = kuan_filter(raster=raster, size=size, n_looks=n_looks)
     typer.echo("Progress: 75%")
 
