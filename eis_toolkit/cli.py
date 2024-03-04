@@ -220,7 +220,7 @@ class MexicanHatFilterDirection(str, Enum):
     rectangular = "rectangular"
     circular = "circular"
 
-    
+
 class LocalMoranWeightType(str, Enum):
     """Weight type for Local Moran's I."""
 
