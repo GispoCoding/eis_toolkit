@@ -253,14 +253,17 @@ RESAMPLING_MAPPING = {
 
 
 # TODO: Check this and output file option
-INPUT_FILE_OPTION = typer.Option(
-    exists=True,
-    file_okay=True,
-    dir_okay=False,
-    writable=False,
-    readable=True,
-    resolve_path=True,
-)
+INPUT_FILE_OPTION = Annotated[
+    Path,
+    typer.Option(
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        writable=False,
+        readable=True,
+        resolve_path=True,
+    ),
+]
 
 INPUT_FILES_ARGUMENT = Annotated[
     List[Path],
@@ -276,21 +279,27 @@ INPUT_FILES_ARGUMENT = Annotated[
     ),
 ]
 
-OUTPUT_FILE_OPTION = typer.Option(
-    file_okay=True,
-    dir_okay=False,
-    writable=True,
-    readable=True,
-    resolve_path=True,
-)
+OUTPUT_FILE_OPTION = Annotated[
+    Path,
+    typer.Option(
+        file_okay=True,
+        dir_okay=False,
+        writable=True,
+        readable=True,
+        resolve_path=True,
+    ),
+]
 
-OUTPUT_DIR_OPTION = typer.Option(
-    file_okay=False,
-    dir_okay=True,
-    writable=True,
-    readable=True,
-    resolve_path=True,
-)
+OUTPUT_DIR_OPTION = Annotated[
+    Path,
+    typer.Option(
+        file_okay=False,
+        dir_okay=True,
+        writable=True,
+        readable=True,
+        resolve_path=True,
+    ),
+]
 
 
 # --- EXPLORATORY ANALYSES ---
@@ -299,8 +308,8 @@ OUTPUT_DIR_OPTION = typer.Option(
 # DBSCAN
 @app.command()
 def dbscan_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
     max_distance: float = 0.5,
     min_samples: int = 5,
 ):
@@ -324,10 +333,10 @@ def dbscan_cli(
 # K-MEANS CLUSTERING
 @app.command()
 def k_means_clustering_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
     number_of_clusters: Optional[int] = None,
-    random_state: int = None,  # NOTE: Check typing
+    random_state: int = None,
 ):
     """Perform k-means clustering on the input data."""
     from eis_toolkit.exploratory_analyses.k_means_cluster import k_means_clustering
@@ -351,8 +360,8 @@ def k_means_clustering_cli(
 # PARALLEL COORDINATES
 @app.command()
 def parallel_coordinates_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Optional[Annotated[Path, OUTPUT_FILE_OPTION]] = None,
+    input_vector: INPUT_FILE_OPTION,
+    output_file: Optional[OUTPUT_FILE_OPTION] = None,
     color_column_name: str = typer.Option(),
     plot_title: Optional[str] = None,
     palette_name: Optional[str] = None,
@@ -395,10 +404,10 @@ def parallel_coordinates_cli(
 @app.command()
 def compute_pca_raster_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    output_raster: OUTPUT_FILE_OPTION,
     number_of_components: int = typer.Option(),
     # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
-    nodata_handling: NodataHandling = NodataHandling.remove,
+    nodata_handling: NodataHandling = typer.Option(NodataHandling.remove, case_sensitive=False),
     # NOTE: Omitted nodata parameter. Should use raster nodata.
 ):
     """Compute defined number of principal components for raster data."""
@@ -440,12 +449,12 @@ def compute_pca_raster_cli(
 # PCA FOR VECTOR DATA
 @app.command()
 def compute_pca_vector_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
     number_of_components: int = typer.Option(),
     columns: Annotated[List[str], typer.Option()] = None,
     # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
-    nodata_handling: NodataHandling = NodataHandling.remove,
+    nodata_handling: NodataHandling = typer.Option(NodataHandling.remove, case_sensitive=False),
     nodata: float = None,
 ):
     """Compute defined number of principal components for vector data."""
@@ -479,7 +488,7 @@ def compute_pca_vector_cli(
 
 # DESCRIPTIVE STATISTICS (RASTER)
 @app.command()
-def descriptive_statistics_raster_cli(input_file: Annotated[Path, INPUT_FILE_OPTION]):
+def descriptive_statistics_raster_cli(input_file: INPUT_FILE_OPTION):
     """Generate descriptive statistics from raster data."""
     from eis_toolkit.exploratory_analyses.descriptive_statistics import descriptive_statistics_raster
 
@@ -498,7 +507,7 @@ def descriptive_statistics_raster_cli(input_file: Annotated[Path, INPUT_FILE_OPT
 
 # DESCRIPTIVE STATISTICS (VECTOR)
 @app.command()
-def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPTION], column: str = None):
+def descriptive_statistics_vector_cli(input_file: INPUT_FILE_OPTION, column: str = None):
     """Generate descriptive statistics from vector or tabular data."""
     from eis_toolkit.exploratory_analyses.descriptive_statistics import descriptive_statistics_dataframe
 
@@ -528,10 +537,10 @@ def descriptive_statistics_vector_cli(input_file: Annotated[Path, INPUT_FILE_OPT
 # LOCAL MORAN'S I
 @app.command()
 def local_morans_i_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
     column: str = typer.Option(),
-    weight_type: LocalMoranWeightType = LocalMoranWeightType.queen,
+    weight_type: LocalMoranWeightType = typer.Option(LocalMoranWeightType.queen, case_sensitive=False),
     k: int = 4,
     permutations: int = 999,
 ):
@@ -852,9 +861,9 @@ def check_raster_grids_cli(input_rasters: INPUT_FILES_ARGUMENT, same_extent: boo
 # CLIP RASTER
 @app.command()
 def clip_raster_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    geometries: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    geometries: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
 ):
     """Clip the input raster with geometries in a geodataframe."""
     from eis_toolkit.raster_processing.clipping import clip_raster
@@ -881,9 +890,9 @@ def clip_raster_cli(
 # CREATE CONSTANT RASTER
 @app.command()
 def create_constant_raster_cli(
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    output_raster: OUTPUT_FILE_OPTION,
     constant_value: float = typer.Option(),
-    template_raster: Annotated[Path, INPUT_FILE_OPTION] = None,
+    template_raster: INPUT_FILE_OPTION = None,
     coord_west: float = None,
     coord_north: float = None,
     coord_east: float = None,
@@ -950,9 +959,9 @@ def create_constant_raster_cli(
 # EXTRACT VALUES FROM RASTER
 @app.command()
 def extract_values_from_raster_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    geometries: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    geometries: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
 ):
     """Extract raster values using point data to a DataFrame."""
     from eis_toolkit.raster_processing.extract_values_from_raster import extract_values_from_raster
@@ -975,10 +984,10 @@ def extract_values_from_raster_cli(
 # REPROJECT RASTER
 @app.command()
 def reproject_raster_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     target_crs: int = typer.Option(help="crs help"),
-    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest),
+    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest, case_sensitive=False),
 ):
     """Reproject the input raster to given CRS."""
     from eis_toolkit.raster_processing.reprojecting import reproject_raster
@@ -1001,10 +1010,10 @@ def reproject_raster_cli(
 # RESAMPLE RASTER
 @app.command()
 def resample_raster_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     resolution: float = typer.Option(),
-    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.bilinear),
+    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.bilinear, case_sensitive=False),
 ):
     """Resamples raster according to given resolution."""
     from eis_toolkit.raster_processing.resampling import resample
@@ -1027,9 +1036,9 @@ def resample_raster_cli(
 # SNAP RASTER
 @app.command()
 def snap_raster_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    snap_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    snap_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
 ):
     """Snaps/aligns input raster to the given snap raster."""
     from eis_toolkit.raster_processing.snapping import snap_with_raster
@@ -1052,9 +1061,9 @@ def snap_raster_cli(
 @app.command()
 def unify_rasters_cli(
     rasters_to_unify: INPUT_FILES_ARGUMENT,
-    base_raster: Annotated[Path, INPUT_FILE_OPTION],
+    base_raster: INPUT_FILE_OPTION,
     output_directory: Annotated[Path, OUTPUT_DIR_OPTION],
-    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest),
+    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest, case_sensitive=False),
     same_extent: bool = False,
 ):
     """Unify rasters to match the base raster."""
@@ -1094,7 +1103,7 @@ def unify_rasters_cli(
 @app.command()
 def unique_combinations_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    output_raster: OUTPUT_FILE_OPTION,
 ):
     """Get combinations of raster values between rasters."""
     from eis_toolkit.raster_processing.unique_combinations import unique_combinations
@@ -1117,8 +1126,8 @@ def unique_combinations_cli(
 # EXTRACT WINDOW
 @app.command()
 def extract_window_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     center_coords: Tuple[float, float] = typer.Option(),
     height: int = typer.Option(),
     width: int = typer.Option(),
@@ -1143,9 +1152,9 @@ def extract_window_cli(
 # SURFACE DERIVATIVES - CLASSIFY ASPECT
 @app.command()
 def classify_aspect_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    unit: AngleUnits = AngleUnits.radians,
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    unit: AngleUnits = typer.Option(AngleUnits.radians, case_sensitive=False),
     num_classes: int = 8,
 ):
     """Classify an aspect raster data set."""
@@ -1170,15 +1179,15 @@ def classify_aspect_cli(
 # SURFACE DERIVATIVES
 @app.command()
 def surface_derivatives_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    parameters: Annotated[List[SurfaceParameter], typer.Option()],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    parameters: Annotated[List[SurfaceParameter], typer.Option(case_sensitive=False)],
     scaling_factor: Optional[float] = 1.0,
     slope_tolerance: Optional[float] = 0.0,
-    slope_gradient_unit: SlopeGradientUnit = SlopeGradientUnit.radians,
-    slope_direction_unit: AngleUnits = AngleUnits.radians,
-    first_order_method: FirstOrderMethod = FirstOrderMethod.Horn,
-    second_order_method: SecondOrderMethod = SecondOrderMethod.Young,
+    slope_gradient_unit: SlopeGradientUnit = typer.Option(SlopeGradientUnit.radians, case_sensitive=False),
+    slope_direction_unit: AngleUnits = typer.Option(AngleUnits.radians, case_sensitive=False),
+    first_order_method: FirstOrderMethod = typer.Option(FirstOrderMethod.Horn, case_sensitive=False),
+    second_order_method: SecondOrderMethod = typer.Option(SecondOrderMethod.Young, case_sensitive=False),
 ):
     """Calculate the first and/or second order surface attributes."""
     from eis_toolkit.raster_processing.derivatives.parameters import first_order, second_order_basic_set
@@ -1236,8 +1245,8 @@ def surface_derivatives_cli(
 
 @app.command()
 def reclassify_with_manual_breaks_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     breaks: Annotated[List[int], typer.Option()],
     bands: Annotated[List[int], typer.Option()] = None,
 ):
@@ -1260,8 +1269,8 @@ def reclassify_with_manual_breaks_cli(
 
 @app.command()
 def reclassify_with_defined_intervals_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     interval_size: int = typer.Option(),
     bands: Annotated[List[int], typer.Option()] = None,
 ):
@@ -1284,8 +1293,8 @@ def reclassify_with_defined_intervals_cli(
 
 @app.command()
 def reclassify_with_equal_intervals_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     number_of_intervals: int = typer.Option(),
     bands: Annotated[List[int], typer.Option()] = None,
 ):
@@ -1310,8 +1319,8 @@ def reclassify_with_equal_intervals_cli(
 
 @app.command()
 def reclassify_with_quantiles_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     number_of_quantiles: int = typer.Option(),
     bands: Annotated[List[int], typer.Option()] = None,
 ):
@@ -1336,8 +1345,8 @@ def reclassify_with_quantiles_cli(
 
 @app.command()
 def reclassify_with_natural_breaks_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     number_of_classes: int = typer.Option(),
     bands: Annotated[List[int], typer.Option()] = None,
 ):
@@ -1362,8 +1371,8 @@ def reclassify_with_natural_breaks_cli(
 
 @app.command()
 def reclassify_with_geometrical_intervals_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     number_of_classes: int = typer.Option(),
     bands: Annotated[List[int], typer.Option()] = None,
 ):
@@ -1388,8 +1397,8 @@ def reclassify_with_geometrical_intervals_cli(
 
 @app.command()
 def reclassify_with_standard_deviation_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     number_of_intervals: int = typer.Option(),
     bands: Annotated[List[int], typer.Option()] = None,
 ):
@@ -1417,9 +1426,7 @@ def reclassify_with_standard_deviation_cli(
 
 # CALCULATE GEOMETRY
 @app.command()
-def calculate_geometry_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
-):
+def calculate_geometry_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FILE_OPTION):
     """Calculate the length or area of the given geometries."""
     from eis_toolkit.vector_processing.calculate_geometry import calculate_geometry
 
@@ -1438,9 +1445,7 @@ def calculate_geometry_cli(
 
 # EXTRACT SHARED LINES
 @app.command()
-def extract_shared_lines_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
-):
+def extract_shared_lines_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FILE_OPTION):
     """Extract shared lines/borders/edges between polygons."""
     from eis_toolkit.vector_processing.extract_shared_lines import extract_shared_lines
 
@@ -1460,8 +1465,8 @@ def extract_shared_lines_cli(
 # IDW INTERPOLATION
 @app.command()
 def idw_interpolation_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     target_column: str = typer.Option(),
     resolution: float = typer.Option(),
     power: float = 2.0,
@@ -1505,14 +1510,14 @@ def idw_interpolation_cli(
 # KRIGING INTERPOLATION
 @app.command()
 def kriging_interpolation_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     target_column: str = typer.Option(),
     resolution: float = typer.Option(),
     extent: Tuple[float, float, float, float] = (None, None, None, None),  # TODO Change this
-    variogram_model: VariogramModel = VariogramModel.linear,
-    coordinates_type: CoordinatesType = CoordinatesType.geographic,
-    method: KrigingMethod = KrigingMethod.ordinary,
+    variogram_model: VariogramModel = typer.Option(VariogramModel.linear, case_sensitive=False),
+    coordinates_type: CoordinatesType = typer.Option(CoordinatesType.geographic, case_sensitive=False),
+    method: KrigingMethod = typer.Option(KrigingMethod.ordinary, case_sensitive=False),
 ):
     """Apply kriging interpolation to input vector file."""
     from eis_toolkit.vector_processing.kriging_interpolation import kriging
@@ -1554,15 +1559,15 @@ def kriging_interpolation_cli(
 # RASTERIZE
 @app.command()
 def rasterize_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     resolution: float = None,
     value_column: str = None,
     default_value: float = 1.0,
     fill_value: float = 0.0,
-    base_raster_profile_raster: Annotated[Path, INPUT_FILE_OPTION] = None,
+    base_raster_profile_raster: INPUT_FILE_OPTION = None,
     buffer_value: float = None,
-    merge_strategy: MergeStrategy = MergeStrategy.replace,
+    merge_strategy: MergeStrategy = typer.Option(MergeStrategy.replace, case_sensitive=False),
 ):
     """
     Rasterize input vector.
@@ -1612,8 +1617,8 @@ def rasterize_cli(
 # REPROJECT VECTOR
 @app.command()
 def reproject_vector_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
     target_crs: int = typer.Option(help="crs help"),
 ):
     """Reproject the input vector to given CRS."""
@@ -1636,12 +1641,12 @@ def reproject_vector_cli(
 # VECTOR DENSITY
 @app.command()
 def vector_density_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     resolution: float = None,
-    base_raster_profile_raster: Annotated[Path, INPUT_FILE_OPTION] = None,
+    base_raster_profile_raster: INPUT_FILE_OPTION = None,
     buffer_value: float = None,
-    statistic: VectorDensityStatistic = VectorDensityStatistic.density,
+    statistic: VectorDensityStatistic = typer.Option(VectorDensityStatistic.density, case_sensitive=False),
 ):
     """
     Compute density of geometries within raster.
@@ -1688,9 +1693,9 @@ def vector_density_cli(
 # DISTANCE COMPUTATION
 @app.command()
 def distance_computation_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    geometries: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    geometries: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
 ):
     """Calculate distance from raster cell to nearest geometry."""
     from eis_toolkit.vector_processing.distance_computation import distance_computation
@@ -1724,15 +1729,15 @@ def distance_computation_cli(
 @app.command()
 def logistic_regression_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    target_labels: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
-    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy),
+    target_labels: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
+    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy, case_sensitive=False),
     split_size: float = 0.2,
     cv_folds: int = 5,
-    penalty: LogisticRegressionPenalties = typer.Option(default=LogisticRegressionPenalties.l2),
+    penalty: LogisticRegressionPenalties = typer.Option(default=LogisticRegressionPenalties.l2, case_sensitive=False),
     max_iter: int = 100,
-    solver: LogisticRegressionSolvers = typer.Option(default=LogisticRegressionSolvers.lbfgs),
+    solver: LogisticRegressionSolvers = typer.Option(default=LogisticRegressionSolvers.lbfgs, case_sensitive=False),
     verbose: int = 0,
     random_state: Optional[int] = None,
 ):
@@ -1776,10 +1781,10 @@ def logistic_regression_train_cli(
 @app.command()
 def random_forest_classifier_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    target_labels: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
-    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy),
+    target_labels: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
+    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy, case_sensitive=False),
     split_size: float = 0.2,
     cv_folds: int = 5,
     n_estimators: int = 100,
@@ -1826,10 +1831,10 @@ def random_forest_classifier_train_cli(
 @app.command()
 def random_forest_regressor_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    target_labels: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
-    validation_metric: RegressorMetrics = typer.Option(default=RegressorMetrics.mse),
+    target_labels: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
+    validation_metric: RegressorMetrics = typer.Option(default=RegressorMetrics.mse, case_sensitive=False),
     split_size: float = 0.2,
     cv_folds: int = 5,
     n_estimators: int = 100,
@@ -1876,10 +1881,10 @@ def random_forest_regressor_train_cli(
 @app.command()
 def gradient_boosting_classifier_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    target_labels: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
-    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy),
+    target_labels: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
+    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy, case_sensitive=False),
     split_size: float = 0.2,
     cv_folds: int = 5,
     loss: GradientBoostingClassifierLosses = typer.Option(default=GradientBoostingClassifierLosses.log_loss),
@@ -1932,10 +1937,10 @@ def gradient_boosting_classifier_train_cli(
 @app.command()
 def gradient_boosting_regressor_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    target_labels: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once),
-    validation_metric: RegressorMetrics = typer.Option(default=RegressorMetrics.mse),
+    target_labels: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
+    validation_metric: RegressorMetrics = typer.Option(default=RegressorMetrics.mse, case_sensitive=False),
     split_size: float = 0.2,
     cv_folds: int = 5,
     loss: GradientBoostingRegressorLosses = typer.Option(default=GradientBoostingRegressorLosses.squared_error),
@@ -1988,9 +1993,9 @@ def gradient_boosting_regressor_train_cli(
 @app.command()
 def evaluate_trained_model_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    target_labels: Annotated[Path, INPUT_FILE_OPTION],
-    model_file: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    target_labels: INPUT_FILE_OPTION,
+    model_file: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     validation_metric: str = typer.Option(),
 ):
     """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
@@ -2031,8 +2036,8 @@ def evaluate_trained_model_cli(
 @app.command()
 def predict_with_trained_model_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    model_file: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    model_file: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
 ):
     """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
     from eis_toolkit.prediction.machine_learning_general import (
@@ -2070,7 +2075,7 @@ def predict_with_trained_model_cli(
 @app.command()
 def and_overlay_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    output_raster: OUTPUT_FILE_OPTION,
 ):
     """Compute an 'and' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import and_overlay
@@ -2098,7 +2103,7 @@ def and_overlay_cli(
 @app.command()
 def or_overlay_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    output_raster: OUTPUT_FILE_OPTION,
 ):
     """Compute an 'or' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import or_overlay
@@ -2126,7 +2131,7 @@ def or_overlay_cli(
 @app.command()
 def product_overlay_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    output_raster: OUTPUT_FILE_OPTION,
 ):
     """Compute an 'product' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import product_overlay
@@ -2154,7 +2159,7 @@ def product_overlay_cli(
 @app.command()
 def sum_overlay_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    output_raster: OUTPUT_FILE_OPTION,
 ):
     """Compute an 'sum' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import sum_overlay
@@ -2180,9 +2185,7 @@ def sum_overlay_cli(
 
 # GAMMA OVERLAY
 @app.command()
-def gamma_overlay_cli(
-    input_rasters: INPUT_FILES_ARGUMENT, output_raster: Annotated[Path, OUTPUT_FILE_OPTION], gamma: float = 0.5
-):
+def gamma_overlay_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT_FILE_OPTION, gamma: float = 0.5):
     """Compute an 'gamma' overlay operation with fuzzy logic."""
     from eis_toolkit.prediction.fuzzy_overlay import gamma_overlay
     from eis_toolkit.utilities.file_io import read_and_stack_rasters
@@ -2215,8 +2218,8 @@ def gamma_overlay_cli(
 # CODA - ALR TRANSFORM
 @app.command()
 def alr_transform_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
     column: str = None,
     keep_denominator_column: bool = False,
 ):
@@ -2242,8 +2245,8 @@ def alr_transform_cli(
 # CODA - INVERSE ALR TRANSFORM
 @app.command()
 def inverse_alr_transform_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
     denominator_column: str = typer.Option(),
     scale: float = 1.0,
 ):
@@ -2268,9 +2271,7 @@ def inverse_alr_transform_cli(
 
 # CODA - CLR TRANSFORM
 @app.command()
-def clr_transform_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
-):
+def clr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FILE_OPTION):
     """Perform a centered logratio transformation on the data."""
     from eis_toolkit.transformations.coda.clr import clr_transform
 
@@ -2293,8 +2294,8 @@ def clr_transform_cli(
 # CODA - INVERSE CLR TRANSFORM
 @app.command()
 def inverse_clr_transform_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
     colnames: Annotated[List[str], typer.Option()] = None,
     scale: float = 1.0,
 ):
@@ -2320,8 +2321,8 @@ def inverse_clr_transform_cli(
 # CODA - SINGLE ILR TRANSFORM
 @app.command()
 def single_ilr_transform_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
     subcomposition_1: Annotated[List[str], typer.Option()],
     subcomposition_2: Annotated[List[str], typer.Option()],
 ):
@@ -2349,8 +2350,8 @@ def single_ilr_transform_cli(
 # CODA - PAIRWISE LOGRATIO TRANSFORM
 @app.command()
 def pairwise_logratio_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
     numerator_column: str = typer.Option(),
     denominator_column: str = typer.Option(),
 ):
@@ -2378,8 +2379,8 @@ def pairwise_logratio_cli(
 # CODA - SINGLE PLR TRANSFORM
 @app.command()
 def single_plr_transform_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_vector: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
     column: str = typer.Option(),
 ):
     """Perform a pivot logratio transformation on the selected column."""
@@ -2405,9 +2406,7 @@ def single_plr_transform_cli(
 
 # CODA - PLR TRANSFORM
 @app.command()
-def plr_transform_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION], output_vector: Annotated[Path, OUTPUT_FILE_OPTION]
-):
+def plr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FILE_OPTION):
     """Perform a pivot logratio transformation on the dataframe, returning the full set of transforms."""
     from eis_toolkit.transformations.coda.plr import plr_transform
 
@@ -2430,8 +2429,8 @@ def plr_transform_cli(
 # BINARIZE
 @app.command()
 def binarize_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     threshold: float = typer.Option(),
 ):
     """
@@ -2459,8 +2458,8 @@ def binarize_cli(
 # CLIP TRANSFORM
 @app.command()
 def clip_transform_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     limit_lower: Optional[float] = None,
     limit_higher: Optional[float] = None,
 ):
@@ -2489,8 +2488,8 @@ def clip_transform_cli(
 # Z-SCORE NORMALIZATION
 @app.command()
 def z_score_normalization_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
 ):
     """
     Normalize data based on mean and standard deviation.
@@ -2516,8 +2515,8 @@ def z_score_normalization_cli(
 # MIX_MAX SCALING
 @app.command()
 def min_max_scaling_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     min: float = 0.0,
     max: float = 1.0,
 ):
@@ -2545,9 +2544,9 @@ def min_max_scaling_cli(
 # LOGARITHMIC
 @app.command()
 def log_transform_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
-    log_type: LogarithmTransforms = LogarithmTransforms.log2,
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    log_type: LogarithmTransforms = typer.Option(LogarithmTransforms.log2, case_sensitive=False),
 ):
     """
     Perform a logarithmic transformation on the provided data.
@@ -2574,8 +2573,8 @@ def log_transform_cli(
 # SIGMOID
 @app.command()
 def sigmoid_transform_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     limit_lower: float = 0.0,
     limit_upper: float = 1.0,
     slope: float = 1,
@@ -2607,8 +2606,8 @@ def sigmoid_transform_cli(
 # WINSORIZE
 @app.command()
 def winsorize_transform_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     percentile_lower: Optional[float] = None,
     percentile_higher: Optional[float] = None,
     inside: bool = False,
