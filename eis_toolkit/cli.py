@@ -228,6 +228,14 @@ class LocalMoranWeightType(str, Enum):
     knn = "knn"
 
 
+class CorrelationMethod(str, Enum):
+    """Correlation methods available."""
+
+    pearson = "pearson"
+    kendall = "kendall"
+    spearman = "spearman"
+
+
 RESAMPLING_MAPPING = {
     "nearest": warp.Resampling.nearest,
     "bilinear": warp.Resampling.bilinear,
@@ -294,6 +302,135 @@ OUTPUT_DIR_OPTION = typer.Option(
 
 
 # --- EXPLORATORY ANALYSES ---
+
+# NORMALITY TEST RASTER
+@app.command()
+def normality_test_raster_cli(input_raster: Annotated[Path, INPUT_FILE_OPTION], bands: Optional[List[int]] = None):
+    """Compute Shapiro-Wilk test for normality on the input raster data."""
+    from eis_toolkit.exploratory_analyses.normality_test import normality_test_array
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        data = raster.read()
+        typer.echo("Progress: 25%")
+        print(bands)
+        if len(bands) == 0:
+            bands = None
+        results_dict = normality_test_array(data=data, bands=bands, nodata_value=raster.nodata)
+
+    typer.echo("Progress: 75%")
+
+    json_str = json.dumps(results_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo("Normality test (raster) completed")
+
+
+# NORMALITY TEST VECTOR
+@app.command()
+def normality_test_vector_cli(input_vector: Annotated[Path, INPUT_FILE_OPTION], columns: Optional[List[str]] = None):
+    """Compute Shapiro-Wilk test for normality on the input vector data."""
+    from eis_toolkit.exploratory_analyses.normality_test import normality_test_dataframe
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    results_dict = normality_test_dataframe(data=geodataframe, columns=columns)
+
+    typer.echo("Progress: 75%")
+
+    json_str = json.dumps(results_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo("Normality test (vector) completed")
+
+
+# CHI-SQUARE_TEST
+@app.command()
+def chi_square_test_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    target_column: str = typer.Option(),
+    columns: Optional[List[str]] = None,
+):
+    """Perform a Chi-square test of independence between a target variable and one or more other variables."""
+    from eis_toolkit.exploratory_analyses.chi_square_test import chi_square_test
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)  # Should we drop geometry columns?
+    typer.echo("Progress: 25%")
+
+    results_dict = chi_square_test(data=geodataframe, target_column=target_column, columns=columns)
+
+    typer.echo("Progress: 75%")
+
+    json_str = json.dumps(results_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+    typer.echo("Chi-square test completed")
+
+
+# CORRELATION MATRIX
+@app.command()
+def correlation_matrix_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    columns: Optional[List[str]] = None,
+    correlation_method: CorrelationMethod = CorrelationMethod.pearson,
+    min_periods: Optional[int] = None,
+):
+    """Compute correlation matrix on the input data."""
+    from eis_toolkit.exploratory_analyses.correlation_matrix import correlation_matrix
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    output_df = correlation_matrix(
+        data=dataframe, columns=columns, correlation_method=correlation_method, min_periods=min_periods
+    )
+
+    typer.echo("Progress: 75%")
+
+    output_df.to_csv(output_file)
+    typer.echo("Progress: 100%")
+
+    typer.echo("Correlation matrix completed")
+
+
+# COVARIANCE MATRIX
+@app.command()
+def covariance_matrix_cli(
+    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    columns: Optional[List[str]] = None,
+    min_periods: Optional[int] = None,
+    delta_degrees_of_freedom: int = 1,
+):
+    """Compute covariance matrix on the input data."""
+    from eis_toolkit.exploratory_analyses.covariance_matrix import covariance_matrix
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
+    typer.echo("Progress: 25%")
+
+    output_df = covariance_matrix(
+        data=dataframe, columns=columns, min_periods=min_periods, delta_degrees_of_freedom=delta_degrees_of_freedom
+    )
+
+    typer.echo("Progress: 75%")
+
+    output_df.to_csv(output_file)
+    typer.echo("Progress: 100%")
+
+    typer.echo("Covariance matrix completed")
 
 
 # DBSCAN

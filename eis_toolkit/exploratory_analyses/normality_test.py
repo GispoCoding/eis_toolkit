@@ -3,7 +3,7 @@ from numbers import Number
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Dict, Optional, Sequence, Tuple
+from beartype.typing import Dict, Optional, Sequence
 from scipy.stats import shapiro
 
 from eis_toolkit.exceptions import (
@@ -20,7 +20,7 @@ from eis_toolkit.utilities.checks.dataframe import check_columns_numeric, check_
 @beartype
 def normality_test_dataframe(
     data: pd.DataFrame, columns: Optional[Sequence[str]] = None
-) -> Dict[str, Tuple[float, float]]:
+) -> Dict[str, Dict[str, float]]:
     """
     Compute Shapiro-Wilk test for normality on the input DataFrame.
 
@@ -36,13 +36,13 @@ def normality_test_dataframe(
     Raises:
         EmptyDataException: The input data is empty.
         InvalidColumnException: All selected columns were not found in the input data.
-        NonNumericDataException: Selected data or columns contains non-numeric data.
+        NonNumericDataException: Selected columns contain non-numeric data or no numeric columns were found.
         SampleSizeExceededException: Input data exceeds the maximum of 5000 samples.
     """
     if check_empty_dataframe(data):
         raise EmptyDataException("The input Dataframe is empty.")
 
-    if columns is not None:
+    if columns is not None and columns != []:
         if not check_columns_valid(data, columns):
             raise InvalidColumnException("All selected columns were not found in the input DataFrame.")
         if not check_columns_numeric(data, columns):
@@ -51,15 +51,16 @@ def normality_test_dataframe(
         data = data[columns].dropna()
 
     else:
-        if not check_columns_numeric(data, data.columns):
-            raise NonNumericDataException("The input data contain non-numeric data.")
-        columns = data.columns
+        columns = data.select_dtypes(include=[np.number]).columns
+        if len(columns) == 0:
+            raise NonNumericDataException("No numeric columns were found.")
 
     statistics = {}
     for column in columns:
         if len(data[column]) > 5000:
             raise SampleSizeExceededException(f"Sample size for column '{column}' exceeds the limit of 5000 samples.")
-        statistics[column] = shapiro(data[column])
+        stat, p_value = shapiro(data[column])
+        statistics[column] = {"Statistic": stat, "p-value": p_value}
 
     return statistics
 
@@ -67,7 +68,7 @@ def normality_test_dataframe(
 @beartype
 def normality_test_array(
     data: np.ndarray, bands: Optional[Sequence[int]] = None, nodata_value: Optional[Number] = None
-) -> Dict[int, Tuple[float, float]]:
+) -> Dict[str, Dict[str, float]]:
     """
     Compute Shapiro-Wilk test for normality on the input Numpy array.
 
@@ -94,14 +95,14 @@ def normality_test_array(
 
     if data.ndim == 1 or data.ndim == 2:
         prepared_data = np.expand_dims(data, axis=0)
-        bands = range(1)
+        bands = [1]
 
     elif data.ndim == 3:
         if bands is not None:
-            if not all(band < len(data) for band in bands):
+            if not all(band - 1 < len(data) for band in bands):
                 raise InvalidRasterBandException("All selected bands were not found in the input array.")
         else:
-            bands = range(len(data))
+            bands = range(1, len(data) + 1)
         prepared_data = data
 
     else:
@@ -110,7 +111,8 @@ def normality_test_array(
     statistics = {}
 
     for band in bands:
-        flattened_data = prepared_data[band].ravel()
+        band_idx = band - 1
+        flattened_data = prepared_data[band_idx].ravel()
 
         nan_mask = flattened_data == np.nan
         if nodata_value is not None:
@@ -121,6 +123,7 @@ def normality_test_array(
         if len(masked_data) > 5000:
             raise SampleSizeExceededException(f"Sample size for band '{band}' exceeds the limit of 5000 samples.")
 
-        statistics[band] = shapiro(masked_data)
+        stat, p_value = shapiro(masked_data)
+        statistics[f"Band {band}"] = {"Statistic": stat, "p-value": p_value}
 
     return statistics
