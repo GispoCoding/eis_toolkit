@@ -179,7 +179,7 @@ def _gamma(window: np.ndarray, n_looks: int) -> np.ndarray:
 
 
 @beartype
-def _frost(window: np.ndarray, damping_factor: int) -> Number:
+def _frost(window: np.ndarray, damping_factor: Number) -> Number:
     """
     Calculate the weighted value for a Frost filter from a window of pixels.
 
@@ -381,8 +381,8 @@ def lee_additive_multiplicative_noise_filter(
 def lee_enhanced_filter(
     raster: rasterio.io.DatasetReader,
     size: int = 3,
-    n_looks: Number = 1,
-    damping_factor: Number = 1,
+    n_looks: int = 1,
+    damping_factor: Number = 1.0,
 ) -> tuple[np.ndarray, dict]:
     """
     Apply an enhanced Lee filter to the input raster.
@@ -431,7 +431,7 @@ def lee_enhanced_filter(
 def gamma_filter(
     raster: rasterio.io.DatasetReader,
     size: int = 3,
-    n_looks: Number = 1,
+    n_looks: int = 1,
 ) -> tuple[np.ndarray, dict]:
     """
     Apply a Gamma filter to the input raster.
@@ -476,7 +476,7 @@ def gamma_filter(
 def frost_filter(
     raster: rasterio.io.DatasetReader,
     size: int = 3,
-    damping_factor: Number = 1,
+    damping_factor: Number = 1.0,
 ) -> tuple[np.ndarray, dict]:
     """
     Apply a Frost filter to the input raster.
@@ -521,7 +521,7 @@ def frost_filter(
 def kuan_filter(
     raster: rasterio.io.DatasetReader,
     size: int = 3,
-    n_looks: Number = 1,
+    n_looks: int = 1,
 ) -> tuple[np.ndarray, dict]:
     """
     Apply a Kuan filter to the input raster.
