@@ -442,10 +442,12 @@ def agterberg_cheng_CI_test(
     T = np.sum(posterior_probabilities)
 
     ratio = T / nr_of_deposits
+    ratio_msg = "T / n > 1 may suggest lack of conditional independence.\n"
+    ratio_msg_bonham_carter = "According to Bonham-Carter (1994), T / n should not exceed 1.15.\n"
 
     difference = T - nr_of_deposits
 
-    T_std = np.sum(posterior_probabilities_std)
+    T_std = np.sqrt(np.sum(posterior_probabilities_std))
 
     confidence_limit_99 = 2.33 * T_std
     confidence_limit_95 = 1.645 * T_std
@@ -455,4 +457,16 @@ def agterberg_cheng_CI_test(
 
     conditional_independence = confidence_99 and confidence_95
 
-    return conditional_independence, confidence_99, confidence_95, ratio, ""
+    summary = f"""
+    Observed number of deposits n: {nr_of_deposits}\n
+    Expected number of deposits T: {T}\n
+    Standard deviation of the expected number of deposits, s(T): {T_std}\n
+    T - n = {difference}\n
+    T / n = {ratio}\n
+    {ratio_msg if ratio > 1 else ""}
+    {ratio_msg_bonham_carter if ratio > 1.15 else ""}
+    T - n {"<" if confidence_99 else ">"}2.33 * s(T)\n
+    T - n {"<" if confidence_95 else ">"}1.645 * s(T)
+    """
+
+    return conditional_independence, confidence_99, confidence_95, ratio, summary
