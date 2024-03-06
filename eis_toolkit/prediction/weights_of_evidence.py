@@ -413,8 +413,8 @@ def weights_of_evidence_calculate_responses(
 @beartype
 def agterberg_cheng_CI_test(
     posterior_probabilities: np.ndarray, posterior_probabilities_std: np.ndarray, nr_of_deposits: int, nr_of_pixels: int
-):
-    """Perform the conditional independence test defined by Agterberg-Cheng (2002).
+) -> Tuple[bool, bool, bool, float, str]:
+    """Perform the conditional independence test presented by Agterberg-Cheng (2002).
 
     Args:
         posterior_probabilities: Array of posterior probabilites.
@@ -422,15 +422,37 @@ def agterberg_cheng_CI_test(
         nr_of_deposits: Number of deposit pixels in the input data for weights of evidence calculations.
         nr_of_pixels: Number of evidence pixels in the input data for weights of evidence calculations.
     Returns:
-        TODO
+        Whether the conditional hypothesis can be accepted for the evidence layers that the input
+            posterior probabilities and standard deviations of posterior probabilities are calculated from.
+        Whether the probability satisfies the 99% confidence limit.
+        Whether the probability satisfies the 95% confidence limit.
+        Ratio T/n. Results > 1, may be because of lack of conditional independence of layers.
+            T should not exceed n by more than 15% (Bonham-Carter 1994, p. 316).
+        A summary of the the conditional independence calculations.
 
     Raises:
         TODO
     """
-
     # T = the sum of posterior probabilities in all unit cells in the study area
     # n = total number of deposits
-    # T should approx. n, but in practice T > n
-    # T should not exceed n by more than 15% (Bonham-Carter 1994, p. 316)
+    # conditional independence must satisfy:
+    # T-n < 1.645 * T_std for confidence limit 95%
+    # and T-n < 2.33 * T_std for confidence limit 99%
 
-    return None
+    T = np.sum(posterior_probabilities)
+
+    ratio = T / nr_of_deposits
+
+    difference = T - nr_of_deposits
+
+    T_std = np.sum(posterior_probabilities_std)
+
+    confidence_limit_99 = 2.33 * T_std
+    confidence_limit_95 = 1.645 * T_std
+
+    confidence_99 = difference < confidence_limit_99
+    confidence_95 = difference < confidence_limit_95
+
+    conditional_independence = confidence_99 and confidence_95
+
+    return conditional_independence, confidence_99, confidence_95, ratio, ""
