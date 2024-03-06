@@ -408,3 +408,29 @@ def weights_of_evidence_calculate_responses(
 
     confidence_array = posterior_probabilities / posterior_probabilities_std
     return posterior_probabilities, posterior_probabilities_std, confidence_array
+
+
+@beartype
+def agterberg_cheng_CI_test(
+    posterior_probabilities: np.ndarray, posterior_probabilities_std: np.ndarray, nr_of_deposits: int, nr_of_pixels: int
+):
+    """Perform the conditional independence test defined by Agterberg-Cheng (2002).
+
+    Args:
+        posterior_probabilities: Array of posterior probabilites.
+        posterior_probabilities_std: Array of standard deviations in the posterior probability calculations.
+        nr_of_deposits: Number of deposit pixels in the input data for weights of evidence calculations.
+        nr_of_pixels: Number of evidence pixels in the input data for weights of evidence calculations.
+    Returns:
+        TODO
+
+    Raises:
+        TODO
+    """
+
+    # T = the sum of posterior probabilities in all unit cells in the study area
+    # n = total number of deposits
+    # T should approx. n, but in practice T > n
+    # T should not exceed n by more than 15% (Bonham-Carter 1994, p. 316)
+
+    return None
