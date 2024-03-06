@@ -24,35 +24,35 @@ DATA_DF = pd.DataFrame(DATA_ARRAY[0], columns=["a", "b", "c", "d", "e", "f"])
 def test_normality_test_dataframe():
     """Test that returned normality statistics for DataFrame data are correct."""
     output_statistics = normality_test_dataframe(data=DATA_DF, columns=["a"])
-    np.testing.assert_array_almost_equal(output_statistics["a"], (0.82827, 0.13502), decimal=5)
+    np.testing.assert_array_almost_equal(list(output_statistics["a"].values()), [0.82827, 0.13502], decimal=5)
 
 
 def test_normality_test_array():
     """Test that returned normality statistics for Numpy array data are correct."""
     # 3D array
-    output_statistics = normality_test_array(data=DATA_ARRAY, bands=[0])
-    np.testing.assert_array_almost_equal(output_statistics[0], (0.91021, 0.01506), decimal=5)
+    output_statistics = normality_test_array(data=DATA_ARRAY, bands=[1])
+    np.testing.assert_array_almost_equal(list(output_statistics["Band 1"].values()), [0.91021, 0.01506], decimal=5)
 
     # 2D array
     output_statistics = normality_test_array(data=DATA_ARRAY[0])
-    np.testing.assert_array_almost_equal(output_statistics[0], (0.91021, 0.01506), decimal=5)
+    np.testing.assert_array_almost_equal(list(output_statistics["Band 1"].values()), [0.91021, 0.01506], decimal=5)
 
     # 1D array
     output_statistics = normality_test_array(data=DATA_ARRAY[0][0])
-    np.testing.assert_array_almost_equal(output_statistics[0], (0.9067, 0.41504), decimal=5)
+    np.testing.assert_array_almost_equal(list(output_statistics["Band 1"].values()), [0.9067, 0.41504], decimal=5)
 
 
 def test_normality_test_dataframe_missing_data():
     """Test that DataFrame input with missing data returns statistics correctly."""
     df_with_nan = DATA_DF.replace(3, np.nan)
     output_statistics = normality_test_dataframe(data=df_with_nan, columns=["a"])
-    np.testing.assert_array_almost_equal(output_statistics["a"], (0.62978, 0.00124), decimal=5)
+    np.testing.assert_array_almost_equal(list(output_statistics["a"].values()), (0.62978, 0.00124), decimal=5)
 
 
 def test_normality_test_array_nodata():
     """Test that Numpy array input with missing data returns statistics correctly."""
     output_statistics = normality_test_array(data=DATA_ARRAY, nodata_value=3)
-    np.testing.assert_array_almost_equal(output_statistics[0], (0.91021, 0.01506), decimal=5)
+    np.testing.assert_array_almost_equal(list(output_statistics["Band 1"].values()), [0.91021, 0.01506], decimal=5)
 
 
 def test_invalid_selection():
