@@ -431,8 +431,11 @@ def agterberg_cheng_CI_test(
         A summary of the the conditional independence calculations.
 
     Raises:
-        TODO
+        InvalidParameterValueException: Value of nr_of_deposits is not at least 1.
     """
+    if nr_of_deposits < 1:
+        raise InvalidParameterValueException("Expected input deposits count to be at least 1.")
+
     # T = the sum of posterior probabilities in all unit cells in the study area
     # n = total number of deposits
     # conditional independence must satisfy:
