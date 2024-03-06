@@ -412,15 +412,17 @@ def weights_of_evidence_calculate_responses(
 
 @beartype
 def agterberg_cheng_CI_test(
-    posterior_probabilities: np.ndarray, posterior_probabilities_std: np.ndarray, nr_of_deposits: int, nr_of_pixels: int
+    posterior_probabilities: np.ndarray, posterior_probabilities_std: np.ndarray, nr_of_deposits: int
 ) -> Tuple[bool, bool, bool, float, str]:
     """Perform the conditional independence test presented by Agterberg-Cheng (2002).
+
+    Agterberg, F. P. & Cheng, Q. (2002). Conditional Independence Test for Weights-of-Evidence Modeling.
+    Natural Resources Research. 11. 249-255.
 
     Args:
         posterior_probabilities: Array of posterior probabilites.
         posterior_probabilities_std: Array of standard deviations in the posterior probability calculations.
         nr_of_deposits: Number of deposit pixels in the input data for weights of evidence calculations.
-        nr_of_pixels: Number of evidence pixels in the input data for weights of evidence calculations.
     Returns:
         Whether the conditional hypothesis can be accepted for the evidence layers that the input
             posterior probabilities and standard deviations of posterior probabilities are calculated from.
@@ -436,11 +438,13 @@ def agterberg_cheng_CI_test(
     if nr_of_deposits < 1:
         raise InvalidParameterValueException("Expected input deposits count to be at least 1.")
 
+    # One-tailed significance test according to Agterberg-Cheng (2002):
+    # Conditional independence must satisfy:
+    # T - n < 1.645 * s(T) with a probability of 95%
+    # T - n < 2.33 * s(T) with a probability of 99%,
+    # where
     # T = the sum of posterior probabilities in all unit cells in the study area
     # n = total number of deposits
-    # conditional independence must satisfy:
-    # T-n < 1.645 * T_std for confidence limit 95%
-    # and T-n < 2.33 * T_std for confidence limit 99%
 
     T = np.sum(posterior_probabilities)
 
@@ -468,8 +472,10 @@ def agterberg_cheng_CI_test(
     T / n = {ratio}\n
     {ratio_msg if ratio > 1 else ""}
     {ratio_msg_bonham_carter if ratio > 1.15 else ""}
+    Agterberg & Cheng conditional independence test:
     T - n {"<" if confidence_99 else ">"}2.33 * s(T)\n
-    T - n {"<" if confidence_95 else ">"}1.645 * s(T)
+    T - n {"<" if confidence_95 else ">"}1.645 * s(T)\n
+    {"Conditional independence hypothesis should be rejected" if not conditional_independence else ""}
     """
 
     return conditional_independence, confidence_99, confidence_95, ratio, summary
