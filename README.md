@@ -41,7 +41,7 @@ EIS Toolkit is a comprehensive Python package for mineral prospectivity mapping 
 You can find the latest release of EIS Toolkit in the [releases page](https://github.com/GispoCoding/eis_toolkit/releases) as a Python wheel. To install EIS Toolkit, download the wheel and install with pip
 
 ```console
-pip install eis_toolkit-0.1.0-py3-none-any.whl
+pip install eis_toolkit-0.4.0-py3-none-any.whl
 ```
 
 We recommend installing EIS Toolkit in an empty virtual environment to ensure compatibility between package versions.
