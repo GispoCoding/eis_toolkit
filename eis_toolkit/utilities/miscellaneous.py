@@ -403,12 +403,10 @@ def toggle_gdal_exceptions():
     """
     already_has_exceptions_enabled = False
     try:
-
-        gdal.UseExceptions()
         if gdal.GetUseExceptions() != 0:
             already_has_exceptions_enabled = True
+        gdal.UseExceptions()
         yield
-
     finally:
         if not already_has_exceptions_enabled:
             gdal.DontUseExceptions()
