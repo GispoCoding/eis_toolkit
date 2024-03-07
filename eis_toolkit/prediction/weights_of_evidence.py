@@ -446,7 +446,7 @@ def agterberg_cheng_CI_test(
     # T = the sum of posterior probabilities in all unit cells in the study area
     # n = total number of deposits
 
-    T = np.sum(posterior_probabilities)
+    T = np.nansum(posterior_probabilities)
 
     ratio = T / nr_of_deposits
     ratio_msg = "T / n > 1 may suggest lack of conditional independence.\n"
@@ -454,27 +454,30 @@ def agterberg_cheng_CI_test(
 
     difference = T - nr_of_deposits
 
-    T_std = np.sqrt(np.sum(posterior_probabilities_std))
+    T_std = np.sqrt(np.nansum(posterior_probabilities_std))
 
     confidence_limit_99 = 2.33 * T_std
     confidence_limit_95 = 1.645 * T_std
 
-    confidence_99 = difference < confidence_limit_99
-    confidence_95 = difference < confidence_limit_95
+    confidence_99 = bool(difference < confidence_limit_99)
+    confidence_95 = bool(difference < confidence_limit_95)
+    sign_99 = "<" if confidence_99 else ">"
+    sign_95 = "<" if confidence_95 else ">"
 
     conditional_independence = confidence_99 and confidence_95
 
     summary = f"""
-    Observed number of deposits n: {nr_of_deposits}\n
-    Expected number of deposits T: {T}\n
+    Results of conditional independence test:\n\n
+    Observed number of deposits, n: {nr_of_deposits}\n
+    Expected number of deposits, T: {T}\n
     Standard deviation of the expected number of deposits, s(T): {T_std}\n
     T - n = {difference}\n
-    T / n = {ratio}\n
-    {ratio_msg if ratio > 1 else ""}
-    {ratio_msg_bonham_carter if ratio > 1.15 else ""}
-    Agterberg & Cheng conditional independence test:
-    T - n {"<" if confidence_99 else ">"}2.33 * s(T)\n
-    T - n {"<" if confidence_95 else ">"}1.645 * s(T)\n
+    T / n = {ratio}\n{ratio_msg if ratio > 1 else ""}{ratio_msg_bonham_carter if ratio > 1.15 else ""}
+    Agterberg & Cheng CI test:\n
+    Data {"satisfies" if confidence_99 else "does not satisfy"} condition T - n < 2.33 * s(T):\n
+    {difference} {sign_99} {confidence_limit_99}\n
+    Data {"satisfies" if confidence_99 else "does not satisfy"} condition T - n < 1.645 * s(T):\n
+    {difference} {sign_95} {confidence_limit_95}\n
     {"Conditional independence hypothesis should be rejected" if not conditional_independence else ""}
     """
 
