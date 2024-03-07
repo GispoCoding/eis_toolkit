@@ -476,7 +476,7 @@ def agterberg_cheng_CI_test(
     Agterberg & Cheng CI test:\n
     Data {"satisfies" if confidence_99 else "does not satisfy"} condition T - n < 2.33 * s(T):\n
     {difference} {sign_99} {confidence_limit_99}\n
-    Data {"satisfies" if confidence_99 else "does not satisfy"} condition T - n < 1.645 * s(T):\n
+    Data {"satisfies" if confidence_95 else "does not satisfy"} condition T - n < 1.645 * s(T):\n
     {difference} {sign_95} {confidence_limit_95}\n
     {"Conditional independence hypothesis should be rejected" if not conditional_independence else ""}
     """
