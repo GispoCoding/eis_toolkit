@@ -7,7 +7,7 @@ import geopandas as gpd
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import Literal, Tuple, Union
+from beartype.typing import Literal, Optional, Tuple, Union
 from rasterio import profiles
 
 from eis_toolkit.utilities.checks.raster import check_raster_profile
@@ -27,7 +27,8 @@ def distance_to_anomaly(
     The criteria for what is anomalous can be defined as a single number and
     criteria text of "higher" or "lower". Alternatively, the definition can be
     a range where values inside (criteria text of "within") or outside are
-    marked as anomalous (criteria text of "outside").
+    marked as anomalous (criteria text of "outside"). If anomaly_raster_profile does
+    contain "nodata" key, np.nan is assumed to correspond to nodata values.
 
     Args:
         anomaly_raster_profile: The raster profile in which the distances
@@ -69,7 +70,8 @@ def distance_to_anomaly_gdal(
     defined as a single number and criteria text of "higher" or "lower".
     Alternatively, the definition can be a range where values inside
     (criteria text of "within") or outside are marked as anomalous
-    (criteria text of "outside").
+    (criteria text of "outside"). If anomaly_raster_profile does
+    contain "nodata" key, np.nan is assumed to correspond to nodata values.
 
     Does not work on Windows.
 
@@ -103,7 +105,9 @@ def _fits_criteria(
     threshold_criteria_value: Union[Tuple[Number, Number], Number],
     threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
     anomaly_raster_data: np.ndarray,
+    nodata_value: Optional[Number],
 ) -> np.ndarray:
+
     criteria_dict = {
         "lower": lambda anomaly_raster_data: anomaly_raster_data < threshold_criteria_value,
         "higher": lambda anomaly_raster_data: anomaly_raster_data > threshold_criteria_value,
@@ -114,7 +118,8 @@ def _fits_criteria(
             np.logical_or(anomaly_raster_data < threshold_criteria[0], anomaly_raster_data > threshold_criteria[1])
         ),
     }
-    return np.where(np.isnan(anomaly_raster_data), False, criteria_dict[threshold_criteria](anomaly_raster_data))
+    mask = anomaly_raster_data == nodata_value if nodata_value is not None else np.isnan(anomaly_raster_data)
+    return np.where(mask, False, criteria_dict[threshold_criteria](anomaly_raster_data))
 
 
 def _write_binary_anomaly_raster(tmp_dir: Path, anomaly_raster_profile, data_fits_criteria: np.ndarray):
@@ -142,6 +147,7 @@ def _distance_to_anomaly_gdal(
         threshold_criteria=threshold_criteria,
         threshold_criteria_value=threshold_criteria_value,
         anomaly_raster_data=anomaly_raster_data,
+        nodata_value=anomaly_raster_profile.get("nodata"),
     )
 
     with TemporaryDirectory() as tmp_dir_str:
@@ -170,6 +176,7 @@ def _distance_to_anomaly(
         threshold_criteria=threshold_criteria,
         threshold_criteria_value=threshold_criteria_value,
         anomaly_raster_data=anomaly_raster_data,
+        nodata_value=anomaly_raster_profile.get("nodata"),
     )
 
     cols = np.arange(anomaly_raster_data.shape[1])
