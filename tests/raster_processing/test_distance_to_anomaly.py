@@ -23,6 +23,7 @@ EXPECTED_SMALL_RASTER_SHAPE = SMALL_RASTER_PROFILE["height"], SMALL_RASTER_PROFI
 def _check_result(out_image, out_profile):
     assert isinstance(out_image, np.ndarray)
     assert isinstance(out_profile, (dict, rasterio.profiles.Profile))
+    assert not np.any(np.isnan(out_image))
 
 
 @pytest.mark.parametrize(
@@ -58,6 +59,8 @@ def test_distance_to_anomaly_expected(
 ):
     """Test distance_to_anomaly with expected result."""
 
+    # No np.nan expected in input here
+    assert not np.any(np.isnan(anomaly_raster_data))
     out_image, out_profile = distance_to_anomaly.distance_to_anomaly(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data,
@@ -196,3 +199,58 @@ def test_distance_to_anomaly_check(
         return
 
     _check_result(out_image=out_image, out_profile=out_profile)
+
+
+@pytest.mark.parametrize(
+    ",".join(
+        [
+            "anomaly_raster_profile",
+            "anomaly_raster_data",
+            "threshold_criteria_value",
+            "threshold_criteria",
+            "expected_shape",
+            "expected_mean_without_nodata",
+            "nodata_mask_value",
+        ]
+    ),
+    [
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            SMALL_RASTER_DATA,
+            5.0,
+            "higher",
+            EXPECTED_SMALL_RASTER_SHAPE,
+            6.451948,
+            # Part of values over 5 will now be masked as nodata
+            9.0,
+            id="small_raster_with_inserted_nodata",
+        ),
+    ],
+)
+def test_distance_to_anomaly_nodata_handling(
+    anomaly_raster_profile,
+    anomaly_raster_data,
+    threshold_criteria_value,
+    threshold_criteria,
+    expected_shape,
+    expected_mean_without_nodata,
+    nodata_mask_value,
+):
+    """Test distance_to_anomaly with expected result."""
+
+    anomaly_raster_data_with_nodata = np.where(anomaly_raster_data > nodata_mask_value, np.nan, anomaly_raster_data)
+    assert np.any(np.isnan(anomaly_raster_data_with_nodata))
+
+    out_image, out_profile = distance_to_anomaly.distance_to_anomaly(
+        anomaly_raster_profile=anomaly_raster_profile,
+        anomaly_raster_data=anomaly_raster_data_with_nodata,
+        threshold_criteria_value=threshold_criteria_value,
+        threshold_criteria=threshold_criteria,
+    )
+
+    _check_result(out_image=out_image, out_profile=out_profile)
+
+    assert out_image.shape == expected_shape
+
+    # Result should not be same as without nodata addition
+    assert not np.isclose(np.mean(out_image), expected_mean_without_nodata)
