@@ -10,9 +10,28 @@ from beartype import beartype
 from beartype.typing import Literal, Optional, Tuple, Union
 from rasterio import profiles
 
+from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.utilities.checks.raster import check_raster_profile
 from eis_toolkit.utilities.miscellaneous import row_points, toggle_gdal_exceptions
 from eis_toolkit.vector_processing.distance_computation import distance_computation
+
+
+def _check_threshold_criteria_and_value(threshold_criteria, threshold_criteria_value):
+    if threshold_criteria in {"lower", "higher"} and not isinstance(threshold_criteria_value, Number):
+        raise InvalidParameterValueException(
+            f"Expected threshold_criteria_value {threshold_criteria_value} "
+            "to be a single number rather than a tuple."
+        )
+    if threshold_criteria in {"in_between", "outside"}:
+        if not isinstance(threshold_criteria_value, tuple):
+            raise InvalidParameterValueException(
+                f"Expected threshold_criteria_value ({threshold_criteria_value}) " "to be a tuple rather than a number."
+            )
+        if threshold_criteria_value[0] >= threshold_criteria_value[1]:
+            raise InvalidParameterValueException(
+                f"Expected first value in threshold_criteria_value ({threshold_criteria_value})"
+                "tuple to be lower than the second."
+            )
 
 
 @beartype
@@ -35,7 +54,10 @@ def distance_to_anomaly(
             to the nearest anomalous value are determined.
         anomaly_raster_data: The raster data in which the distances
             to the nearest anomalous value are determined.
-        threshold_criteria_value: Value(s) used to define anomalous
+        threshold_criteria_value: Value(s) used to define anomalous.
+            If the threshold criteria requires a tuple of values,
+            the first value should be the minimum and the second
+            the maximum value.
         threshold_criteria: Method to define anomalous
 
     Returns:
@@ -44,6 +66,9 @@ def distance_to_anomaly(
 
     """
     check_raster_profile(raster_profile=anomaly_raster_profile)
+    _check_threshold_criteria_and_value(
+        threshold_criteria=threshold_criteria, threshold_criteria_value=threshold_criteria_value
+    )
 
     out_image = _distance_to_anomaly(
         anomaly_raster_profile=anomaly_raster_profile,
@@ -90,6 +115,9 @@ def distance_to_anomaly_gdal(
         The path to the raster with the distances to anomalies calculated.
     """
     check_raster_profile(raster_profile=anomaly_raster_profile)
+    _check_threshold_criteria_and_value(
+        threshold_criteria=threshold_criteria, threshold_criteria_value=threshold_criteria_value
+    )
 
     return _distance_to_anomaly_gdal(
         output_path=output_path,
