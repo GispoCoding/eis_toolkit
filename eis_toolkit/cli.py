@@ -247,20 +247,6 @@ RESAMPLING_MAPPING = {
 }
 
 
-# def file_option(help: str = None, default: Any = None, read: bool = True, write: bool = False):
-#     return typer.Option(
-#         default=default,
-#         help=help,
-#         exists=True,
-#         file_okay=True,
-#         dir_okay=False,
-#         writable=write,
-#         readable=read,
-#         resolve_path=True,
-#     )
-
-
-# TODO: Check this and output file option
 INPUT_FILE_OPTION = Annotated[
     Path,
     typer.Option(
@@ -314,7 +300,7 @@ OUTPUT_DIR_OPTION = Annotated[
 
 # NORMALITY TEST RASTER
 @app.command()
-def normality_test_raster_cli(input_raster: Annotated[Path, INPUT_FILE_OPTION], bands: Optional[List[int]] = None):
+def normality_test_raster_cli(input_raster: INPUT_FILE_OPTION, bands: Optional[List[int]] = None):
     """Compute Shapiro-Wilk test for normality on the input raster data."""
     from eis_toolkit.exploratory_analyses.normality_test import normality_test_array
 
@@ -338,7 +324,7 @@ def normality_test_raster_cli(input_raster: Annotated[Path, INPUT_FILE_OPTION], 
 
 # NORMALITY TEST VECTOR
 @app.command()
-def normality_test_vector_cli(input_vector: Annotated[Path, INPUT_FILE_OPTION], columns: Optional[List[str]] = None):
+def normality_test_vector_cli(input_vector: INPUT_FILE_OPTION, columns: Optional[List[str]] = None):
     """Compute Shapiro-Wilk test for normality on the input vector data."""
     from eis_toolkit.exploratory_analyses.normality_test import normality_test_dataframe
 
@@ -360,7 +346,7 @@ def normality_test_vector_cli(input_vector: Annotated[Path, INPUT_FILE_OPTION], 
 # CHI-SQUARE_TEST
 @app.command()
 def chi_square_test_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
     target_column: str = typer.Option(),
     columns: Optional[List[str]] = None,
 ):
@@ -385,8 +371,8 @@ def chi_square_test_cli(
 # CORRELATION MATRIX
 @app.command()
 def correlation_matrix_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
     columns: Optional[List[str]] = None,
     correlation_method: CorrelationMethod = CorrelationMethod.pearson,
     min_periods: Optional[int] = None,
@@ -415,8 +401,8 @@ def correlation_matrix_cli(
 # COVARIANCE MATRIX
 @app.command()
 def covariance_matrix_cli(
-    input_vector: Annotated[Path, INPUT_FILE_OPTION],
-    output_file: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_vector: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
     columns: Optional[List[str]] = None,
     min_periods: Optional[int] = None,
     delta_degrees_of_freedom: int = 1,
@@ -703,8 +689,8 @@ def local_morans_i_cli(
 # FOCAL FILTER
 @app.command()
 def focal_filter_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     method: FocalFilterMethod = FocalFilterMethod.mean,
     size: int = 3,
     shape: FocalFilterShape = FocalFilterShape.circle,
@@ -729,8 +715,8 @@ def focal_filter_cli(
 # GAUSSIAN FILTER
 @app.command()
 def gaussian_filter_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     sigma: float = 1.0,
     truncate: float = 4.0,
     size: int = None,
@@ -755,8 +741,8 @@ def gaussian_filter_cli(
 # MEXICAN HAT FILTER
 @app.command()
 def mexican_hat_filter_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     sigma: float = 1.0,
     truncate: float = 4.0,
     size: int = None,
@@ -784,8 +770,8 @@ def mexican_hat_filter_cli(
 # LEE ADDITIVE NOISE FILTER
 @app.command()
 def lee_additive_noise_filter_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     size: int = 3,
     add_noise_var: float = 0.25,
 ):
@@ -809,8 +795,8 @@ def lee_additive_noise_filter_cli(
 # LEE MULTIPLICATIVE NOISE FILTER
 @app.command()
 def lee_multiplicative_noise_filter_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     size: int = 3,
     multi_noise_mean: float = 1.0,
     n_looks: int = 1,
@@ -837,8 +823,8 @@ def lee_multiplicative_noise_filter_cli(
 # LEE ADDITIVE MULTIPLICATIVE NOISE FILTER
 @app.command()
 def lee_additive_multiplicative_noise_filter_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     size: int = 3,
     add_noise_var: float = 0.25,
     add_noise_mean: float = 0,
@@ -870,8 +856,8 @@ def lee_additive_multiplicative_noise_filter_cli(
 # LEE ENHANCED FILTER
 @app.command()
 def lee_enhanced_filter_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     size: int = 3,
     n_looks: int = 1,
     damping_factor: float = 1.0,
@@ -898,8 +884,8 @@ def lee_enhanced_filter_cli(
 # GAMMA FILTER
 @app.command()
 def gamma_filter_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     size: int = 3,
     n_looks: int = 1,
 ):
@@ -923,8 +909,8 @@ def gamma_filter_cli(
 # FROST FILTER
 @app.command()
 def frost_filter_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     size: int = 3,
     damping_factor: float = 1.0,
 ):
@@ -948,8 +934,8 @@ def frost_filter_cli(
 # KUAN FILTER
 @app.command()
 def kuan_filter_cli(
-    input_raster: Annotated[Path, INPUT_FILE_OPTION],
-    output_raster: Annotated[Path, OUTPUT_FILE_OPTION],
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
     size: int = 3,
     n_looks: int = 1,
 ):
@@ -1199,7 +1185,7 @@ def snap_raster_cli(
 def unify_rasters_cli(
     rasters_to_unify: INPUT_FILES_ARGUMENT,
     base_raster: INPUT_FILE_OPTION,
-    output_directory: Annotated[Path, OUTPUT_DIR_OPTION],
+    output_directory: OUTPUT_DIR_OPTION,
     resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest, case_sensitive=False),
     same_extent: bool = False,
 ):
