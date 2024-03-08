@@ -139,14 +139,17 @@ def _fits_criteria(
     criteria_dict = {
         "lower": lambda anomaly_raster_data: anomaly_raster_data < threshold_criteria_value,
         "higher": lambda anomaly_raster_data: anomaly_raster_data > threshold_criteria_value,
-        "in_between": lambda anomaly_raster_data: np.where(
-            np.logical_and(anomaly_raster_data > threshold_criteria[0], anomaly_raster_data < threshold_criteria[1])
+        "in_between": lambda anomaly_raster_data: np.logical_and(
+            anomaly_raster_data > threshold_criteria_value[0],  # type: ignore
+            anomaly_raster_data < threshold_criteria_value[1],  # type: ignore
         ),
-        "outside": lambda anomaly_raster_data: np.where(
-            np.logical_or(anomaly_raster_data < threshold_criteria[0], anomaly_raster_data > threshold_criteria[1])
+        "outside": lambda anomaly_raster_data: np.logical_or(
+            anomaly_raster_data < threshold_criteria_value[0],  # type: ignore
+            anomaly_raster_data > threshold_criteria_value[1],  # type: ignore
         ),
     }
     mask = anomaly_raster_data == nodata_value if nodata_value is not None else np.isnan(anomaly_raster_data)
+
     return np.where(mask, False, criteria_dict[threshold_criteria](anomaly_raster_data))
 
 
