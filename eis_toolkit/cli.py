@@ -382,7 +382,7 @@ def correlation_matrix_cli(
     input_vector: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
     columns: Optional[List[str]] = None,
-    correlation_method: CorrelationMethod = CorrelationMethod.pearson,
+    correlation_method: Annotated[CorrelationMethod, typer.Option(case_sensitive=False)] = CorrelationMethod.pearson,
     min_periods: Optional[int] = None,
 ):
     """Compute correlation matrix on the input data."""
@@ -538,7 +538,7 @@ def compute_pca_raster_cli(
     output_raster: OUTPUT_FILE_OPTION,
     number_of_components: int = typer.Option(),
     # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
-    nodata_handling: NodataHandling = typer.Option(NodataHandling.remove, case_sensitive=False),
+    nodata_handling: Annotated[NodataHandling, typer.Option(case_sensitive=False)] = NodataHandling.remove,
     # NOTE: Omitted nodata parameter. Should use raster nodata.
 ):
     """Compute defined number of principal components for raster data."""
@@ -585,7 +585,7 @@ def compute_pca_vector_cli(
     number_of_components: int = typer.Option(),
     columns: Annotated[List[str], typer.Option()] = None,
     # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
-    nodata_handling: NodataHandling = typer.Option(NodataHandling.remove, case_sensitive=False),
+    nodata_handling: Annotated[NodataHandling, typer.Option(case_sensitive=False)] = NodataHandling.remove,
     nodata: float = None,
 ):
     """Compute defined number of principal components for vector data."""
@@ -671,7 +671,7 @@ def local_morans_i_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
     column: str = typer.Option(),
-    weight_type: LocalMoranWeightType = typer.Option(LocalMoranWeightType.queen, case_sensitive=False),
+    weight_type: Annotated[LocalMoranWeightType, typer.Option(case_sensitive=False)] = LocalMoranWeightType.queen,
     k: int = 4,
     permutations: int = 999,
 ):
@@ -701,7 +701,7 @@ def focal_filter_cli(
     output_raster: OUTPUT_FILE_OPTION,
     method: FocalFilterMethod = FocalFilterMethod.mean,
     size: int = 3,
-    shape: FocalFilterShape = FocalFilterShape.circle,
+    shape: Annotated[FocalFilterShape, typer.Option(case_sensitive=False)] = FocalFilterShape.circle,
 ):
     """Apply a basic focal filter to the input raster."""
     from eis_toolkit.raster_processing.filters.focal import focal_filter
@@ -754,7 +754,9 @@ def mexican_hat_filter_cli(
     sigma: float = 1.0,
     truncate: float = 4.0,
     size: int = None,
-    direction: MexicanHatFilterDirection = MexicanHatFilterDirection.circular,
+    direction: Annotated[
+        MexicanHatFilterDirection, typer.Option(case_sensitive=False)
+    ] = MexicanHatFilterDirection.circular,
 ):
     """Apply a mexican hat filter to the input raster."""
     from eis_toolkit.raster_processing.filters.focal import mexican_hat_filter
@@ -1118,7 +1120,7 @@ def reproject_raster_cli(
     input_raster: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
     target_crs: int = typer.Option(help="crs help"),
-    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest, case_sensitive=False),
+    resampling_method: Annotated[ResamplingMethods, typer.Option(case_sensitive=False)] = ResamplingMethods.nearest,
 ):
     """Reproject the input raster to given CRS."""
     from eis_toolkit.raster_processing.reprojecting import reproject_raster
@@ -1144,7 +1146,7 @@ def resample_raster_cli(
     input_raster: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
     resolution: float = typer.Option(),
-    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.bilinear, case_sensitive=False),
+    resampling_method: Annotated[ResamplingMethods, typer.Option(case_sensitive=False)] = ResamplingMethods.bilinear,
 ):
     """Resamples raster according to given resolution."""
     from eis_toolkit.raster_processing.resampling import resample
@@ -1194,7 +1196,7 @@ def unify_rasters_cli(
     rasters_to_unify: INPUT_FILES_ARGUMENT,
     base_raster: INPUT_FILE_OPTION,
     output_directory: OUTPUT_DIR_OPTION,
-    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest, case_sensitive=False),
+    resampling_method: Annotated[ResamplingMethods, typer.Option(case_sensitive=False)] = ResamplingMethods.nearest,
     same_extent: bool = False,
 ):
     """Unify rasters to match the base raster."""
@@ -1285,7 +1287,7 @@ def extract_window_cli(
 def classify_aspect_cli(
     input_raster: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
-    unit: AngleUnits = typer.Option(AngleUnits.radians, case_sensitive=False),
+    unit: Annotated[AngleUnits, typer.Option(case_sensitive=False)] = AngleUnits.radians,
     num_classes: int = 8,
 ):
     """Classify an aspect raster data set."""
@@ -1315,10 +1317,10 @@ def surface_derivatives_cli(
     parameters: Annotated[List[SurfaceParameter], typer.Option(case_sensitive=False)],
     scaling_factor: Optional[float] = 1.0,
     slope_tolerance: Optional[float] = 0.0,
-    slope_gradient_unit: SlopeGradientUnit = typer.Option(SlopeGradientUnit.radians, case_sensitive=False),
-    slope_direction_unit: AngleUnits = typer.Option(AngleUnits.radians, case_sensitive=False),
-    first_order_method: FirstOrderMethod = typer.Option(FirstOrderMethod.Horn, case_sensitive=False),
-    second_order_method: SecondOrderMethod = typer.Option(SecondOrderMethod.Young, case_sensitive=False),
+    slope_gradient_unit: Annotated[SlopeGradientUnit, typer.Option(case_sensitive=False)] = SlopeGradientUnit.radians,
+    slope_direction_unit: Annotated[AngleUnits, typer.Option(case_sensitive=False)] = AngleUnits.radians,
+    first_order_method: Annotated[FirstOrderMethod, typer.Option(case_sensitive=False)] = FirstOrderMethod.Horn,
+    second_order_method: Annotated[SecondOrderMethod, typer.Option(case_sensitive=False)] = SecondOrderMethod.Young,
 ):
     """Calculate the first and/or second order surface attributes."""
     from eis_toolkit.raster_processing.derivatives.parameters import first_order, second_order_basic_set
@@ -1646,9 +1648,9 @@ def kriging_interpolation_cli(
     target_column: str = typer.Option(),
     resolution: float = typer.Option(),
     extent: Tuple[float, float, float, float] = (None, None, None, None),  # TODO Change this
-    variogram_model: VariogramModel = typer.Option(VariogramModel.linear, case_sensitive=False),
-    coordinates_type: CoordinatesType = typer.Option(CoordinatesType.geographic, case_sensitive=False),
-    method: KrigingMethod = typer.Option(KrigingMethod.ordinary, case_sensitive=False),
+    variogram_model: Annotated[VariogramModel, typer.Option(case_sensitive=False)] = VariogramModel.linear,
+    coordinates_type: Annotated[CoordinatesType, typer.Option(case_sensitive=False)] = CoordinatesType.geographic,
+    method: Annotated[KrigingMethod, typer.Option(case_sensitive=False)] = KrigingMethod.ordinary,
 ):
     """Apply kriging interpolation to input vector file."""
     from eis_toolkit.vector_processing.kriging_interpolation import kriging
@@ -1698,7 +1700,7 @@ def rasterize_cli(
     fill_value: float = 0.0,
     base_raster_profile_raster: INPUT_FILE_OPTION = None,
     buffer_value: float = None,
-    merge_strategy: MergeStrategy = typer.Option(MergeStrategy.replace, case_sensitive=False),
+    merge_strategy: Annotated[MergeStrategy, typer.Option(case_sensitive=False)] = MergeStrategy.replace,
 ):
     """
     Rasterize input vector.
@@ -1777,7 +1779,7 @@ def vector_density_cli(
     resolution: float = None,
     base_raster_profile_raster: INPUT_FILE_OPTION = None,
     buffer_value: float = None,
-    statistic: VectorDensityStatistic = typer.Option(VectorDensityStatistic.density, case_sensitive=False),
+    statistic: Annotated[VectorDensityStatistic, typer.Option(case_sensitive=False)] = VectorDensityStatistic.density,
 ):
     """
     Compute density of geometries within raster.
@@ -2689,7 +2691,7 @@ def min_max_scaling_cli(
 def log_transform_cli(
     input_raster: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
-    log_type: LogarithmTransforms = typer.Option(LogarithmTransforms.log2, case_sensitive=False),
+    log_type: Annotated[LogarithmTransforms, typer.Option(case_sensitive=False)] = LogarithmTransforms.log2,
 ):
     """
     Perform a logarithmic transformation on the provided data.
