@@ -8,6 +8,7 @@ import pytest
 import rasterio
 import rasterio.plot
 import rasterio.profiles
+from beartype.roar import BeartypeCallHintParamViolation
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.raster_processing import distance_to_anomaly
@@ -42,10 +43,37 @@ def _check_result(out_image, out_profile):
             SMALL_RASTER_PROFILE,
             SMALL_RASTER_DATA,
             5.0,
+            "lower",
+            EXPECTED_SMALL_RASTER_SHAPE,
+            5.694903,
+            id="small_raster_lower",
+        ),
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            SMALL_RASTER_DATA,
+            5.0,
             "higher",
             EXPECTED_SMALL_RASTER_SHAPE,
             6.451948,
             id="small_raster_higher",
+        ),
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            SMALL_RASTER_DATA,
+            (2.5, 7.5),
+            "in_between",
+            EXPECTED_SMALL_RASTER_SHAPE,
+            2.114331,
+            id="small_raster_in_between",
+        ),
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            SMALL_RASTER_DATA,
+            (2.5, 7.5),
+            "outside",
+            EXPECTED_SMALL_RASTER_SHAPE,
+            32.490106,
+            id="small_raster_outside",
         ),
     ],
 )
@@ -162,7 +190,7 @@ def test_distance_to_anomaly_gdal(
             "higher",
             partial(dict, height=2.2),
             partial(pytest.raises, InvalidParameterValueException),
-            id="expected_invalid_param_due_to_float_value",
+            id="expected_invalid_param_due_to_float_value_in_profile",
         ),
         pytest.param(
             SMALL_RASTER_PROFILE,
@@ -171,7 +199,34 @@ def test_distance_to_anomaly_gdal(
             "higher",
             partial(dict, transform=None),
             partial(pytest.raises, InvalidParameterValueException),
-            id="expected_invalid_param_due_to_transform_value",
+            id="expected_invalid_param_due_to_none_transform_value",
+        ),
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            SMALL_RASTER_DATA,
+            5.0,
+            "in_between",
+            dict,
+            partial(pytest.raises, InvalidParameterValueException),
+            id="expected_invalid_param_due_to_number_rather_than_range",
+        ),
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            SMALL_RASTER_DATA,
+            (7.5, 2.5),
+            "in_between",
+            dict,
+            partial(pytest.raises, InvalidParameterValueException),
+            id="expected_invalid_param_due_to_invalid_order_in_tuple",
+        ),
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            SMALL_RASTER_DATA,
+            (1.5, 2.5, 7.5),
+            "in_between",
+            dict,
+            partial(pytest.raises, BeartypeCallHintParamViolation),
+            id="expected_invalid_param_due_to_tuple_of_length_three",
         ),
     ],
 )
