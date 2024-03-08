@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 import typer
-from beartype.typing import List, Optional, Tuple
+from beartype.typing import List, Optional, Tuple, Union
 from rasterio import warp
 from typing_extensions import Annotated
 
@@ -294,6 +294,14 @@ OUTPUT_DIR_OPTION = Annotated[
         resolve_path=True,
     ),
 ]
+
+
+def get_enum_values(parameter: Union[Enum, List[Enum]]) -> Union[str, List[str]]:
+    """Get values behind enum parameter definition (required for list enums)."""
+    if isinstance(parameter, List):
+        return [list_item.value for list_item in parameter]
+    else:
+        return parameter.value
 
 
 # --- EXPLORATORY ANALYSES ---
@@ -1854,13 +1862,17 @@ def logistic_regression_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
-    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy, case_sensitive=False),
+    validation_method: Annotated[ValidationMethods, typer.Option(case_sensitive=False)] = ValidationMethods.split_once,
+    validation_metrics: Annotated[List[ClassifierMetrics], typer.Option(case_sensitive=False)] = [
+        ClassifierMetrics.accuracy
+    ],
     split_size: float = 0.2,
     cv_folds: int = 5,
-    penalty: LogisticRegressionPenalties = typer.Option(default=LogisticRegressionPenalties.l2, case_sensitive=False),
+    penalty: Annotated[
+        LogisticRegressionPenalties, typer.Option(case_sensitive=False)
+    ] = LogisticRegressionPenalties.l2,
     max_iter: int = 100,
-    solver: LogisticRegressionSolvers = typer.Option(default=LogisticRegressionSolvers.lbfgs, case_sensitive=False),
+    solver: Annotated[LogisticRegressionSolvers, typer.Option(case_sensitive=False)] = LogisticRegressionSolvers.lbfgs,
     verbose: int = 0,
     random_state: Optional[int] = None,
 ):
@@ -1876,13 +1888,13 @@ def logistic_regression_train_cli(
     model, metrics_dict = logistic_regression_train(
         X=X,
         y=y,
-        validation_method=validation_method,
-        metrics=[validation_metric],
+        validation_method=get_enum_values(validation_method),
+        metrics=get_enum_values(validation_metrics),
         split_size=split_size,
         cv_folds=cv_folds,
-        penalty=penalty,
+        penalty=get_enum_values(penalty),
         max_iter=max_iter,
-        solver=solver,
+        solver=get_enum_values(solver),
         verbose=verbose,
         random_state=random_state,
     )
@@ -1906,8 +1918,10 @@ def random_forest_classifier_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
-    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy, case_sensitive=False),
+    validation_method: Annotated[ValidationMethods, typer.Option(case_sensitive=False)] = ValidationMethods.split_once,
+    validation_metrics: Annotated[List[ClassifierMetrics], typer.Option(case_sensitive=False)] = [
+        ClassifierMetrics.accuracy
+    ],
     split_size: float = 0.2,
     cv_folds: int = 5,
     n_estimators: int = 100,
@@ -1927,8 +1941,8 @@ def random_forest_classifier_train_cli(
     model, metrics_dict = random_forest_classifier_train(
         X=X,
         y=y,
-        validation_method=validation_method,
-        metrics=[validation_metric],
+        validation_method=get_enum_values(validation_method),
+        metrics=get_enum_values(validation_metrics),
         split_size=split_size,
         cv_folds=cv_folds,
         n_estimators=n_estimators,
@@ -1956,8 +1970,8 @@ def random_forest_regressor_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
-    validation_metric: RegressorMetrics = typer.Option(default=RegressorMetrics.mse, case_sensitive=False),
+    validation_method: Annotated[ValidationMethods, typer.Option(case_sensitive=False)] = ValidationMethods.split_once,
+    validation_metrics: Annotated[List[RegressorMetrics], typer.Option(case_sensitive=False)] = [RegressorMetrics.mse],
     split_size: float = 0.2,
     cv_folds: int = 5,
     n_estimators: int = 100,
@@ -1977,8 +1991,8 @@ def random_forest_regressor_train_cli(
     model, metrics_dict = random_forest_regressor_train(
         X=X,
         y=y,
-        validation_method=validation_method,
-        metrics=[validation_metric],
+        validation_method=get_enum_values(validation_method),
+        metrics=get_enum_values(validation_metrics),
         split_size=split_size,
         cv_folds=cv_folds,
         n_estimators=n_estimators,
@@ -2006,11 +2020,15 @@ def gradient_boosting_classifier_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
-    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy, case_sensitive=False),
+    validation_method: Annotated[ValidationMethods, typer.Option(case_sensitive=False)] = ValidationMethods.split_once,
+    validation_metrics: Annotated[List[ClassifierMetrics], typer.Option(case_sensitive=False)] = [
+        ClassifierMetrics.accuracy
+    ],
     split_size: float = 0.2,
     cv_folds: int = 5,
-    loss: GradientBoostingClassifierLosses = typer.Option(default=GradientBoostingClassifierLosses.log_loss),
+    loss: Annotated[
+        GradientBoostingClassifierLosses, typer.Option(case_sensitive=False)
+    ] = GradientBoostingClassifierLosses.log_loss,
     learning_rate: float = 0.1,
     n_estimators: int = 100,
     max_depth: Optional[int] = 3,
@@ -2030,11 +2048,11 @@ def gradient_boosting_classifier_train_cli(
     model, metrics_dict = gradient_boosting_classifier_train(
         X=X,
         y=y,
-        validation_method=validation_method,
-        metrics=[validation_metric],
+        validation_method=get_enum_values(validation_method),
+        metrics=get_enum_values(validation_metrics),
         split_size=split_size,
         cv_folds=cv_folds,
-        loss=loss,
+        loss=get_enum_values(loss),
         learning_rate=learning_rate,
         n_estimators=n_estimators,
         max_depth=max_depth,
@@ -2062,11 +2080,13 @@ def gradient_boosting_regressor_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
-    validation_metric: RegressorMetrics = typer.Option(default=RegressorMetrics.mse, case_sensitive=False),
+    validation_method: Annotated[ValidationMethods, typer.Option(case_sensitive=False)] = ValidationMethods.split_once,
+    validation_metrics: Annotated[List[RegressorMetrics], typer.Option(case_sensitive=False)] = [RegressorMetrics.mse],
     split_size: float = 0.2,
     cv_folds: int = 5,
-    loss: GradientBoostingRegressorLosses = typer.Option(default=GradientBoostingRegressorLosses.squared_error),
+    loss: Annotated[
+        GradientBoostingRegressorLosses, typer.Option(case_sensitive=False)
+    ] = GradientBoostingRegressorLosses.squared_error,
     learning_rate: float = 0.1,
     n_estimators: int = 100,
     max_depth: Optional[int] = 3,
@@ -2086,8 +2106,8 @@ def gradient_boosting_regressor_train_cli(
     model, metrics_dict = gradient_boosting_regressor_train(
         X=X,
         y=y,
-        validation_method=validation_method,
-        metrics=[validation_metric],
+        validation_method=get_enum_values(validation_method),
+        metrics=get_enum_values(validation_metrics),
         split_size=split_size,
         cv_folds=cv_folds,
         loss=loss,
@@ -2119,7 +2139,7 @@ def evaluate_trained_model_cli(
     target_labels: INPUT_FILE_OPTION,
     model_file: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
-    validation_metric: str = typer.Option(),
+    validation_metrics: Annotated[List[str], typer.Option()],
 ):
     """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
     from eis_toolkit.prediction.machine_learning_general import (
@@ -2134,7 +2154,7 @@ def evaluate_trained_model_cli(
     typer.echo("Progress: 30%")
 
     model = load_model(model_file)
-    predictions, metrics_dict = evaluate_model(X, y, model, [validation_metric])
+    predictions, metrics_dict = evaluate_model(X, y, model, validation_metrics)
     predictions_reshaped = reshape_predictions(
         predictions, reference_profile["height"], reference_profile["width"], nodata_mask
     )
