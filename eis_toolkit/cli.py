@@ -395,7 +395,7 @@ def correlation_matrix_cli(
     typer.echo("Progress: 25%")
 
     output_df = correlation_matrix(
-        data=dataframe, columns=columns, correlation_method=correlation_method, min_periods=min_periods
+        data=dataframe, columns=columns, correlation_method=get_enum_values(correlation_method), min_periods=min_periods
     )
 
     typer.echo("Progress: 75%")
@@ -551,7 +551,7 @@ def compute_pca_raster_cli(
     typer.echo("Progress: 25%")
 
     pca_array, variance_ratios = compute_pca(
-        data=stacked_array, number_of_components=number_of_components, nodata_handling=nodata_handling
+        data=stacked_array, number_of_components=number_of_components, nodata_handling=get_enum_values(nodata_handling)
     )
 
     # Fill np.nan with nodata before writing data to raster
@@ -600,7 +600,7 @@ def compute_pca_vector_cli(
         data=gdf,
         number_of_components=number_of_components,
         columns=columns,
-        nodata_handling=nodata_handling,
+        nodata_handling=get_enum_values(nodata_handling),
         nodata=nodata,
     )
 
@@ -683,7 +683,7 @@ def local_morans_i_cli(
     gdf = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    out_gdf = local_morans_i(gdf, column, weight_type, k, permutations)
+    out_gdf = local_morans_i(gdf, column, get_enum_values(weight_type), k, permutations)
     typer.echo("Progress: 75%")
 
     out_gdf.to_file(output_vector)
@@ -710,7 +710,7 @@ def focal_filter_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta = focal_filter(raster=raster, method=method, size=size, shape=shape)
+        out_image, out_meta = focal_filter(raster=raster, method=method, size=size, shape=get_enum_values(shape))
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
@@ -766,7 +766,7 @@ def mexican_hat_filter_cli(
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
         out_image, out_meta = mexican_hat_filter(
-            raster=raster, sigma=sigma, truncate=truncate, size=size, direction=direction
+            raster=raster, sigma=sigma, truncate=truncate, size=size, direction=get_enum_values(direction)
         )
     typer.echo("Progress: 75%")
 
@@ -1130,7 +1130,9 @@ def reproject_raster_cli(
     method = RESAMPLING_MAPPING[resampling_method]
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta = reproject_raster(raster=raster, target_crs=target_crs, resampling_method=method)
+        out_image, out_meta = reproject_raster(
+            raster=raster, target_crs=target_crs, resampling_method=get_enum_values(method)
+        )
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
@@ -1156,7 +1158,7 @@ def resample_raster_cli(
     method = RESAMPLING_MAPPING[resampling_method]
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta = resample(raster=raster, resolution=resolution, resampling_method=method)
+        out_image, out_meta = resample(raster=raster, resolution=resolution, resampling_method=get_enum_values(method))
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
@@ -1211,7 +1213,7 @@ def unify_rasters_cli(
         unified = unify_raster_grids(
             base_raster=raster,
             rasters_to_unify=to_unify,
-            resampling_method=RESAMPLING_MAPPING[resampling_method],
+            resampling_method=RESAMPLING_MAPPING[get_enum_values(resampling_method)],
             same_extent=same_extent,
         )
         [rstr.close() for rstr in to_unify]  # Close all rasters
@@ -1297,7 +1299,9 @@ def classify_aspect_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, class_mapping, out_meta = classify_aspect(raster=raster, unit=unit, num_classes=num_classes)
+        out_image, class_mapping, out_meta = classify_aspect(
+            raster=raster, unit=get_enum_values(unit), num_classes=num_classes
+        )
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
@@ -1329,7 +1333,7 @@ def surface_derivatives_cli(
 
     first_order_parameters = []
     second_order_parameters = []
-    for parameter in parameters:
+    for parameter in get_enum_values(parameters):
         if parameter in ("G", "A"):
             first_order_parameters.append(parameter)
         else:
@@ -1343,9 +1347,9 @@ def surface_derivatives_cli(
                 parameters=first_order_parameters,
                 scaling_factor=scaling_factor,
                 slope_tolerance=slope_tolerance,
-                slope_gradient_unit=slope_gradient_unit,
-                slope_direction_unit=slope_direction_unit,
-                method=first_order_method,
+                slope_gradient_unit=get_enum_values(slope_gradient_unit),
+                slope_direction_unit=get_enum_values(slope_direction_unit),
+                method=get_enum_values(first_order_method),
             )
 
         typer.echo("Progress: 50%")
@@ -1355,7 +1359,7 @@ def surface_derivatives_cli(
                 parameters=second_order_parameters,
                 scaling_factor=scaling_factor,
                 slope_tolerance=slope_tolerance,
-                method=second_order_method,
+                method=get_enum_values(second_order_method),
             )
     typer.echo("Progres: 75%")
 
@@ -1668,9 +1672,9 @@ def kriging_interpolation_cli(
         target_column=target_column,
         resolution=(resolution, resolution),
         extent=extent,
-        variogram_model=variogram_model,
-        coordinates_type=coordinates_type,
-        method=method,
+        variogram_model=get_enum_values(variogram_model),
+        coordinates_type=get_enum_values(coordinates_type),
+        method=get_enum_values(method),
     )
     typer.echo("Progress: 75%")
 
@@ -1728,7 +1732,7 @@ def rasterize_cli(
         fill_value,
         base_raster_profile,
         buffer_value,
-        merge_strategy,
+        get_enum_values(merge_strategy),
     )
     typer.echo("Progress: 75%")
 
@@ -1804,7 +1808,7 @@ def vector_density_cli(
         resolution=resolution,
         base_raster_profile=base_raster_profile,
         buffer_value=buffer_value,
-        statistic=statistic,
+        statistic=get_enum_values(statistic),
     )
     typer.echo("Progress: 75%")
 
@@ -2705,7 +2709,7 @@ def log_transform_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta, _ = log_transform(raster=raster, log_transform=[log_type])
+        out_image, out_meta, _ = log_transform(raster=raster, log_transform=[get_enum_values(log_type)])
     typer.echo("Progress: 70%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
