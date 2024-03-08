@@ -36,6 +36,9 @@ def gradient_boosting_classifier_train(
     number of folds, size of the split). Depending on the details of the validation process,
     the output metrics dictionary can be empty, one-dimensional or nested.
 
+    For more information about Sklearn Gradient Boosting classifier read the documentation here:
+    https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingClassifier.html.
+
     Args:
         X: Training data.
         y: Target labels.
@@ -132,6 +135,9 @@ def gradient_boosting_regressor_train(
     metric(s) to calculate can be defined and validation process configured (cross-validation method,
     number of folds, size of the split). Depending on the details of the validation process,
     the output metrics dictionary can be empty, one-dimensional or nested.
+
+    For more information about Sklearn Gradient Boosting regressor read the documentation here:
+    https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html.
 
     Args:
         X: Training data.

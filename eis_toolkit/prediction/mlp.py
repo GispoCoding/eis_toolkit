@@ -118,6 +118,8 @@ def train_MLP_classifier(
     Parameters default to a binary classification model using sigmoid as last activation, binary crossentropy as loss
     function and 1 output neuron/unit.
 
+    For more information about Keras models, read the documentation here: https://keras.io/.
+
     Args:
         X: Input data. Should be a 2-dimensional array where each row represents a sample and each column a
             feature. Features should ideally be normalized or standardized.
@@ -229,6 +231,8 @@ def train_MLP_regressor(
     Creates a Sequential model with Dense NN layers. For each element in `neurons`, Dense layer with corresponding
     dimensionality/neurons is created with the specified activation function (`activation`). If `dropout_rate` is
     specified, a Dropout layer is added after each Dense layer.
+
+    For more information about Keras models, read the documentation here: https://keras.io/.
 
     Args:
         X: Input data. Should be a 2-dimensional array where each row represents a sample and each column a

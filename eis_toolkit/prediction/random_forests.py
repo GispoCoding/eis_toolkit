@@ -17,6 +17,7 @@ def random_forest_classifier_train(
     split_size: float = 0.2,
     cv_folds: int = 5,
     n_estimators: int = 100,
+    criterion: Literal["gini", "entropy", "log_loss"] = "gini",
     max_depth: Optional[int] = None,
     verbose: int = 0,
     random_state: Optional[int] = None,
@@ -31,6 +32,9 @@ def random_forest_classifier_train(
     number of folds, size of the split). Depending on the details of the validation process,
     the output metrics dictionary can be empty, one-dimensional or nested.
 
+    For more information about Sklearn Random Forest classifier, read the documentation here:
+    https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html.
+
     Args:
         X: Training data.
         y: Target labels.
@@ -44,6 +48,7 @@ def random_forest_classifier_train(
         cv_folds: Number of folds used in cross-validation. Used only when validation_method is "kfold_cv"
             or "skfold_cv". Defaults to 5.
         n_estimators: The number of trees in the forest. Defaults to 100.
+        criterion: The function to measure the quality of a split. Defaults to "gini".
         max_depth: The maximum depth of the tree. Values must be >= 1 or None, in which case nodes are
             expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.
             Defaults to None.
@@ -67,7 +72,12 @@ def random_forest_classifier_train(
         raise InvalidParameterValueException("Verbose must be a non-negative number.")
 
     model = RandomForestClassifier(
-        n_estimators=n_estimators, max_depth=max_depth, random_state=random_state, verbose=verbose, **kwargs
+        n_estimators=n_estimators,
+        criterion=criterion,
+        max_depth=max_depth,
+        random_state=random_state,
+        verbose=verbose,
+        **kwargs,
     )
 
     model, metrics = _train_and_validate_sklearn_model(
@@ -93,6 +103,7 @@ def random_forest_regressor_train(
     split_size: float = 0.2,
     cv_folds: int = 5,
     n_estimators: int = 100,
+    criterion: Literal["squared_error", "absolute_error", "friedman_mse", "poisson"] = "squared_error",
     max_depth: Optional[int] = None,
     verbose: int = 0,
     random_state: Optional[int] = None,
@@ -107,6 +118,9 @@ def random_forest_regressor_train(
     number of folds, size of the split). Depending on the details of the validation process,
     the output metrics dictionary can be empty, one-dimensional or nested.
 
+    For more information about Sklearn Random Forest regressor, read the documentation here:
+    https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html.
+
     Args:
         X: Training data.
         y: Target labels.
@@ -120,6 +134,8 @@ def random_forest_regressor_train(
         cv_folds: Number of folds used in cross-validation. Used only when validation_method is "kfold_cv"
             or "skfold_cv". Defaults to 5.
         n_estimators: The number of trees in the forest. Defaults to 100.
+        criterion: The function to measure the quality of a split. "absolute_error" results in significantly
+            longer training time than "squared_error". Defaults to "squared_error".
         max_depth: The maximum depth of the tree. Values must be >= 1 or None, in which case nodes are
             expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.
             Defaults to None.
