@@ -159,7 +159,12 @@ def random_forest_regressor_train(
         raise InvalidParameterValueException("Verbose must be a non-negative number.")
 
     model = RandomForestRegressor(
-        n_estimators=n_estimators, max_depth=max_depth, random_state=random_state, verbose=verbose, **kwargs
+        n_estimators=n_estimators,
+        criterion=criterion,
+        max_depth=max_depth,
+        random_state=random_state,
+        verbose=verbose,
+        **kwargs,
     )
 
     model, metrics = _train_and_validate_sklearn_model(
