@@ -11,7 +11,7 @@ def _prepare_data_for_fuzzy_overlay(data: Union[Sequence[np.ndarray], np.ndarray
         data = stack_raster_arrays(data)
     if (data.ndim == 3 and data.shape[0] < 2) or data.ndim == 2:
         raise InvalidDatasetException("At least 2 arrays/raster bands are needed for fuzzy overlay.")
-    if data.min() < 0 or data.max() > 1:
+    if np.nanmin(data) < 0 or np.nanmax(data) > 1:
         raise InvalidParameterValueException("All data must be in range [0, 1].")
     return data
 
