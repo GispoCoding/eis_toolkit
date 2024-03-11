@@ -25,7 +25,7 @@ def _check_threshold_criteria_and_value(threshold_criteria, threshold_criteria_v
     if threshold_criteria in {"in_between", "outside"}:
         if not isinstance(threshold_criteria_value, tuple):
             raise InvalidParameterValueException(
-                f"Expected threshold_criteria_value ({threshold_criteria_value}) " "to be a tuple rather than a number."
+                f"Expected threshold_criteria_value ({threshold_criteria_value}) to be a tuple rather than a number."
             )
         if threshold_criteria_value[0] >= threshold_criteria_value[1]:
             raise InvalidParameterValueException(
@@ -58,7 +58,7 @@ def distance_to_anomaly(
             If the threshold criteria requires a tuple of values,
             the first value should be the minimum and the second
             the maximum value.
-        threshold_criteria: Method to define anomalous
+        threshold_criteria: Method to define anomalous.
 
     Returns:
         A 2D numpy array with the distances to anomalies computed
@@ -105,8 +105,8 @@ def distance_to_anomaly_gdal(
             to the nearest anomalous value are determined.
         anomaly_raster_data: The raster data in which the distances
             to the nearest anomalous value are determined.
-        threshold_criteria_value: Value(s) used to define anomalous
-        threshold_criteria: Method to define anomalous
+        threshold_criteria_value: Value(s) used to define anomalous.
+        threshold_criteria: Method to define anomalous.
         output_path: The path to the raster with the distances to anomalies
             calculated.
         verbose: Whether to print gdal_proximity output.
@@ -156,8 +156,7 @@ def _fits_criteria(
 def _write_binary_anomaly_raster(tmp_dir: Path, anomaly_raster_profile, data_fits_criteria: np.ndarray):
     anomaly_raster_binary_path = tmp_dir / "anomaly_raster_binary.tif"
 
-    anomaly_raster_binary_profile = anomaly_raster_profile
-    anomaly_raster_binary_profile.update(dtype=rasterio.uint8, count=1, nodata=None)
+    anomaly_raster_binary_profile = {**anomaly_raster_profile, **dict(dtype=rasterio.uint8, count=1, nodata=None)}
     with rasterio.open(anomaly_raster_binary_path, mode="w", **anomaly_raster_binary_profile) as anomaly_raster_binary:
         anomaly_raster_binary.write(data_fits_criteria.astype(rasterio.uint8), 1)
 
