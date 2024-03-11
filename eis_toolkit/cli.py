@@ -236,6 +236,23 @@ class CorrelationMethod(str, Enum):
     spearman = "spearman"
 
 
+class RandomForestClassifierCriterion(str, Enum):
+    """Criterion type for Random Forest classifier."""
+
+    gini = "gini"
+    entropy = "entropy"
+    log_loss = "log_loss"
+
+
+class RandomForestRegressorCriterion(str, Enum):
+    """Criterion type for Random Forest regressor."""
+
+    squared_error = "squared_error"
+    absolute_error = "absolute_error"
+    friedman_mse = "friedman_mse"
+    poisson = "poisson"
+
+
 RESAMPLING_MAPPING = {
     "nearest": warp.Resampling.nearest,
     "bilinear": warp.Resampling.bilinear,
@@ -1931,6 +1948,9 @@ def random_forest_classifier_train_cli(
     split_size: float = 0.2,
     cv_folds: int = 5,
     n_estimators: int = 100,
+    criterion: Annotated[
+        RandomForestClassifierCriterion, typer.Option(case_sensitive=False)
+    ] = RandomForestClassifierCriterion.gini,
     max_depth: Optional[int] = None,
     verbose: int = 0,
     random_state: Optional[int] = None,
@@ -1952,6 +1972,7 @@ def random_forest_classifier_train_cli(
         split_size=split_size,
         cv_folds=cv_folds,
         n_estimators=n_estimators,
+        criterion=criterion,
         max_depth=max_depth,
         verbose=verbose,
         random_state=random_state,
@@ -1981,6 +2002,9 @@ def random_forest_regressor_train_cli(
     split_size: float = 0.2,
     cv_folds: int = 5,
     n_estimators: int = 100,
+    criterion: Annotated[
+        RandomForestRegressorCriterion, typer.Option(case_sensitive=False)
+    ] = RandomForestRegressorCriterion.squared_error,
     max_depth: Optional[int] = None,
     verbose: int = 0,
     random_state: Optional[int] = None,
@@ -2002,6 +2026,7 @@ def random_forest_regressor_train_cli(
         split_size=split_size,
         cv_folds=cv_folds,
         n_estimators=n_estimators,
+        criterion=criterion,
         max_depth=max_depth,
         verbose=verbose,
         random_state=random_state,
