@@ -15,7 +15,6 @@ import pandas as pd
 import rasterio
 import typer
 from beartype.typing import List, Optional, Tuple, Union
-from rasterio import warp
 from typing_extensions import Annotated
 
 app = typer.Typer()
@@ -253,17 +252,6 @@ class RandomForestRegressorCriterion(str, Enum):
     poisson = "poisson"
 
 
-RESAMPLING_MAPPING = {
-    "nearest": warp.Resampling.nearest,
-    "bilinear": warp.Resampling.bilinear,
-    "cubic": warp.Resampling.cubic,
-    "average": warp.Resampling.average,
-    "gauss": warp.Resampling.gauss,
-    "max": warp.Resampling.max,
-    "min": warp.Resampling.min,
-}
-
-
 INPUT_FILE_OPTION = Annotated[
     Path,
     typer.Option(
@@ -472,7 +460,7 @@ def dbscan_cli(
     output_geodataframe = dbscan(data=geodataframe, max_distance=max_distance, min_samples=min_samples)
     typer.echo("Progress: 75%")
 
-    output_geodataframe.to_file(output_vector, driver="GeoJSON")
+    output_geodataframe.to_file(output_vector, driver="GPKG")
     typer.echo("Progress: 100%")
 
     typer.echo(f"DBSCAN completed, output vector written to {output_vector}.")
@@ -499,7 +487,7 @@ def k_means_clustering_cli(
     )
     typer.echo("Progress: 75%")
 
-    output_geodataframe.to_file(output_vector, driver="GeoJSON")
+    output_geodataframe.to_file(output_vector, driver="GPKG")
     typer.echo("Progress: 100%")
 
     typer.echo(f"K-means clustering completed, output vector written to {output_vector}.")
@@ -1144,11 +1132,10 @@ def reproject_raster_cli(
 
     typer.echo("Progress: 10%")
 
-    method = RESAMPLING_MAPPING[resampling_method]
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
         out_image, out_meta = reproject_raster(
-            raster=raster, target_crs=target_crs, resampling_method=get_enum_values(method)
+            raster=raster, target_crs=target_crs, resampling_method=get_enum_values(resampling_method)
         )
     typer.echo("Progress: 75%")
 
@@ -1172,10 +1159,11 @@ def resample_raster_cli(
 
     typer.echo("Progress: 10%")
 
-    method = RESAMPLING_MAPPING[resampling_method]
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta = resample(raster=raster, resolution=resolution, resampling_method=get_enum_values(method))
+        out_image, out_meta = resample(
+            raster=raster, resolution=resolution, resampling_method=get_enum_values(resampling_method)
+        )
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
@@ -1230,7 +1218,7 @@ def unify_rasters_cli(
         unified = unify_raster_grids(
             base_raster=raster,
             rasters_to_unify=to_unify,
-            resampling_method=RESAMPLING_MAPPING[get_enum_values(resampling_method)],
+            resampling_method=get_enum_values(resampling_method),
             same_extent=same_extent,
         )
         [rstr.close() for rstr in to_unify]  # Close all rasters

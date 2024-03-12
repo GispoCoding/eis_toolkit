@@ -1,11 +1,12 @@
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import List, Sequence, Tuple
+from beartype.typing import List, Literal, Sequence, Tuple
 from rasterio import warp
 from rasterio.enums import Resampling
 
 from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.raster_processing.resampling import RESAMPLE_METHOD_MAP
 
 
 def _unify_raster_grids(
@@ -88,7 +89,7 @@ def _unify_raster_grids(
 def unify_raster_grids(
     base_raster: rasterio.io.DatasetReader,
     rasters_to_unify: Sequence[rasterio.io.DatasetReader],
-    resampling_method: Resampling = Resampling.nearest,
+    resampling_method: Literal["nearest", "bilinear", "cubic", "average", "gauss", "max", "min"] = "nearest",
     same_extent: bool = False,
 ) -> List[Tuple[np.ndarray, dict]]:
     """Unifies (reprojects, resamples, aligns and optionally clips) given rasters relative to base raster.
@@ -111,5 +112,6 @@ def unify_raster_grids(
     if len(rasters_to_unify) == 0:
         raise InvalidParameterValueException("Rasters to unify is empty.")
 
-    out_rasters = _unify_raster_grids(base_raster, rasters_to_unify, resampling_method, same_extent)
+    method = RESAMPLE_METHOD_MAP[resampling_method]
+    out_rasters = _unify_raster_grids(base_raster, rasters_to_unify, method, same_extent)
     return out_rasters
