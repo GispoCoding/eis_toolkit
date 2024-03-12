@@ -179,7 +179,7 @@ def _generalized_weights_categorical(df: pd.DataFrame, deposits) -> pd.DataFrame
 
 
 def _generalized_classes_cumulative(df: pd.DataFrame, studentized_contrast_threshold: Number) -> pd.DataFrame:
-    """Create generalized classes based on contrast and studentized contrast threhsold value."""
+    """Create generalized classes based on contrast and studentized contrast threshold value."""
     gen_df = df.copy()
     index = gen_df.idxmax()[CONTRAST_COLUMN]
 
@@ -237,6 +237,99 @@ def _generate_arrays_from_metrics(
             metric_array[mask] = row[metric]
         array_dict[metric] = metric_array
     return array_dict
+
+
+@beartype
+def generalize_weights_cumulative(
+    df: pd.DataFrame,
+    classification_method: Literal[
+        "manual", "max_contrast", "max_contrast_if_feasible", "max_feasible_contrast", "max_studentized_contrast"
+    ],
+    manual_cutoff_index: Optional[Number] = None,
+    studentized_contrast_threshold: Number = 1,
+) -> pd.DataFrame:
+    """
+    Perform binary reclassification for cumulative weights type according to the selected method.
+
+    Args:
+        df: A weights table returned by weights_of_evidence_calculate_weights.
+        classification_method: Accepted values are 'manual', 'max_contrast',
+            max_contrast_if_feasible, 'max_feasible_contrast' and 'max_studentized_contrast'.
+            'manual': requires a valid row index to use as cutoff value.
+            'max_contrast': uses the maximum contrast value regardless of studentized contrast.
+            'max_contrast_if_feasible': uses the maximum contrast value if the corresponding studentized
+                contrast is greater than the provided threshold value.
+            'max_feasible_contrast': uses the highest contrast value for which the studentized contrast
+                is greater than the provided threshold value.
+            'max_studentized_contrast': uses the highest studentized contrast value.
+        manual_cutoff_index: Index of the last row to be included in class 2.
+        studentized_contrast_threshold: Studentized contrast threshold value used to check that class with
+            max contrast has studentized contrast value at least the defined value (cumulative). Defaults to 1.
+    Returns:
+        The weights table with the addition of a generalized class column.
+    Raises:
+        ClassificationFailedException
+        InvalidColumnException
+    """
+    df = df.copy()
+
+    df[GENERALIZED_CLASS_COLUMN] = 1
+
+    if classification_method == "max_contrast_if_feasible":
+        if (CONTRAST_COLUMN not in df.columns) and (STUDENTIZED_CONTRAST_COLUMN not in df.columns):
+            raise InvalidColumnException(
+                f"Failed to create generalized classes. Dataframe must have columns '{CONTRAST_COLUMN}' \
+                    and '{STUDENTIZED_CONTRAST_COLUMN}'"
+            )
+        return _generalized_classes_cumulative(df, studentized_contrast_threshold)
+
+    if classification_method == "manual":
+        if manual_cutoff_index is None or manual_cutoff_index >= len(df.index) - 1:
+            raise ClassificationFailedException(
+                f"Failed to create generalized classes with the row index {manual_cutoff_index}"
+            )
+
+        index = manual_cutoff_index
+    else:
+        if classification_method == "max_contrast":
+            if CONTRAST_COLUMN not in df.columns:
+                raise InvalidColumnException(
+                    f"Failed to create generalized classes. Dataframe must have column '{CONTRAST_COLUMN}'"
+                )
+            index = df.idxmax()[CONTRAST_COLUMN]
+
+        elif classification_method == "max_feasible_contrast":
+            if (CONTRAST_COLUMN not in df.columns) and (STUDENTIZED_CONTRAST_COLUMN not in df.columns):
+                raise InvalidColumnException(
+                    f"Failed to create generalized classes. Dataframe must have columns '{CONTRAST_COLUMN}' \
+                        and '{STUDENTIZED_CONTRAST_COLUMN}'"
+                )
+
+            df_studentized_contrast = df[df[STUDENTIZED_CONTRAST_COLUMN] > studentized_contrast_threshold]
+
+            if len(df_studentized_contrast) == 0:
+                raise ClassificationFailedException(
+                    f"Failed to create generalized classes with the studentized contrast threshold \
+                        {studentized_contrast_threshold}"
+                )
+
+            index = df_studentized_contrast.idxmax()[CONTRAST_COLUMN]
+
+        else:
+            # max_studentized_contrast
+            if STUDENTIZED_CONTRAST_COLUMN not in df.columns:
+                raise InvalidColumnException(
+                    f"Failed to create generalized classes. Dataframe must have column '{STUDENTIZED_CONTRAST_COLUMN}'"
+                )
+            index = df.idxmax()[STUDENTIZED_CONTRAST_COLUMN]
+
+        if index == len(df.index) - 1:
+            raise ClassificationFailedException()
+
+    for i in range(0, index + 1):
+        df.loc[i, GENERALIZED_CLASS_COLUMN] = 2
+
+    return df
 
 
 @beartype
