@@ -40,6 +40,9 @@ def logistic_regression_train(
     'sag' - ['l2', None]
     'saga' - ['elasticnet', 'l1', 'l2', None]
 
+    For more information about Sklearn Logistic Regression, read the documentation here:
+    https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html.
+
     Args:
         X: Training data.
         y: Target labels.

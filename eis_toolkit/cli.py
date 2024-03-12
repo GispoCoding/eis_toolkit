@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 import typer
-from beartype.typing import List, Optional, Tuple
+from beartype.typing import List, Optional, Tuple, Union
 from rasterio import warp
 from typing_extensions import Annotated
 
@@ -236,6 +236,23 @@ class CorrelationMethod(str, Enum):
     spearman = "spearman"
 
 
+class RandomForestClassifierCriterion(str, Enum):
+    """Criterion type for Random Forest classifier."""
+
+    gini = "gini"
+    entropy = "entropy"
+    log_loss = "log_loss"
+
+
+class RandomForestRegressorCriterion(str, Enum):
+    """Criterion type for Random Forest regressor."""
+
+    squared_error = "squared_error"
+    absolute_error = "absolute_error"
+    friedman_mse = "friedman_mse"
+    poisson = "poisson"
+
+
 RESAMPLING_MAPPING = {
     "nearest": warp.Resampling.nearest,
     "bilinear": warp.Resampling.bilinear,
@@ -294,6 +311,14 @@ OUTPUT_DIR_OPTION = Annotated[
         resolve_path=True,
     ),
 ]
+
+
+def get_enum_values(parameter: Union[Enum, List[Enum]]) -> Union[str, List[str]]:
+    """Get values behind enum parameter definition (required for list enums)."""
+    if isinstance(parameter, List):
+        return [list_item.value for list_item in parameter]
+    else:
+        return parameter.value
 
 
 # --- EXPLORATORY ANALYSES ---
@@ -374,7 +399,7 @@ def correlation_matrix_cli(
     input_vector: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
     columns: Optional[List[str]] = None,
-    correlation_method: CorrelationMethod = CorrelationMethod.pearson,
+    correlation_method: Annotated[CorrelationMethod, typer.Option(case_sensitive=False)] = CorrelationMethod.pearson,
     min_periods: Optional[int] = None,
 ):
     """Compute correlation matrix on the input data."""
@@ -387,7 +412,7 @@ def correlation_matrix_cli(
     typer.echo("Progress: 25%")
 
     output_df = correlation_matrix(
-        data=dataframe, columns=columns, correlation_method=correlation_method, min_periods=min_periods
+        data=dataframe, columns=columns, correlation_method=get_enum_values(correlation_method), min_periods=min_periods
     )
 
     typer.echo("Progress: 75%")
@@ -530,7 +555,7 @@ def compute_pca_raster_cli(
     output_raster: OUTPUT_FILE_OPTION,
     number_of_components: int = typer.Option(),
     # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
-    nodata_handling: NodataHandling = typer.Option(NodataHandling.remove, case_sensitive=False),
+    nodata_handling: Annotated[NodataHandling, typer.Option(case_sensitive=False)] = NodataHandling.remove,
     # NOTE: Omitted nodata parameter. Should use raster nodata.
 ):
     """Compute defined number of principal components for raster data."""
@@ -543,7 +568,7 @@ def compute_pca_raster_cli(
     typer.echo("Progress: 25%")
 
     pca_array, variance_ratios = compute_pca(
-        data=stacked_array, number_of_components=number_of_components, nodata_handling=nodata_handling
+        data=stacked_array, number_of_components=number_of_components, nodata_handling=get_enum_values(nodata_handling)
     )
 
     # Fill np.nan with nodata before writing data to raster
@@ -577,7 +602,7 @@ def compute_pca_vector_cli(
     number_of_components: int = typer.Option(),
     columns: Annotated[List[str], typer.Option()] = None,
     # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
-    nodata_handling: NodataHandling = typer.Option(NodataHandling.remove, case_sensitive=False),
+    nodata_handling: Annotated[NodataHandling, typer.Option(case_sensitive=False)] = NodataHandling.remove,
     nodata: float = None,
 ):
     """Compute defined number of principal components for vector data."""
@@ -592,7 +617,7 @@ def compute_pca_vector_cli(
         data=gdf,
         number_of_components=number_of_components,
         columns=columns,
-        nodata_handling=nodata_handling,
+        nodata_handling=get_enum_values(nodata_handling),
         nodata=nodata,
     )
 
@@ -663,7 +688,7 @@ def local_morans_i_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
     column: str = typer.Option(),
-    weight_type: LocalMoranWeightType = typer.Option(LocalMoranWeightType.queen, case_sensitive=False),
+    weight_type: Annotated[LocalMoranWeightType, typer.Option(case_sensitive=False)] = LocalMoranWeightType.queen,
     k: int = 4,
     permutations: int = 999,
 ):
@@ -675,7 +700,7 @@ def local_morans_i_cli(
     gdf = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    out_gdf = local_morans_i(gdf, column, weight_type, k, permutations)
+    out_gdf = local_morans_i(gdf, column, get_enum_values(weight_type), k, permutations)
     typer.echo("Progress: 75%")
 
     out_gdf.to_file(output_vector)
@@ -693,7 +718,7 @@ def focal_filter_cli(
     output_raster: OUTPUT_FILE_OPTION,
     method: FocalFilterMethod = FocalFilterMethod.mean,
     size: int = 3,
-    shape: FocalFilterShape = FocalFilterShape.circle,
+    shape: Annotated[FocalFilterShape, typer.Option(case_sensitive=False)] = FocalFilterShape.circle,
 ):
     """Apply a basic focal filter to the input raster."""
     from eis_toolkit.raster_processing.filters.focal import focal_filter
@@ -702,7 +727,7 @@ def focal_filter_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta = focal_filter(raster=raster, method=method, size=size, shape=shape)
+        out_image, out_meta = focal_filter(raster=raster, method=method, size=size, shape=get_enum_values(shape))
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
@@ -746,7 +771,9 @@ def mexican_hat_filter_cli(
     sigma: float = 1.0,
     truncate: float = 4.0,
     size: int = None,
-    direction: MexicanHatFilterDirection = MexicanHatFilterDirection.circular,
+    direction: Annotated[
+        MexicanHatFilterDirection, typer.Option(case_sensitive=False)
+    ] = MexicanHatFilterDirection.circular,
 ):
     """Apply a mexican hat filter to the input raster."""
     from eis_toolkit.raster_processing.filters.focal import mexican_hat_filter
@@ -756,7 +783,7 @@ def mexican_hat_filter_cli(
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
         out_image, out_meta = mexican_hat_filter(
-            raster=raster, sigma=sigma, truncate=truncate, size=size, direction=direction
+            raster=raster, sigma=sigma, truncate=truncate, size=size, direction=get_enum_values(direction)
         )
     typer.echo("Progress: 75%")
 
@@ -1110,7 +1137,7 @@ def reproject_raster_cli(
     input_raster: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
     target_crs: int = typer.Option(help="crs help"),
-    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest, case_sensitive=False),
+    resampling_method: Annotated[ResamplingMethods, typer.Option(case_sensitive=False)] = ResamplingMethods.nearest,
 ):
     """Reproject the input raster to given CRS."""
     from eis_toolkit.raster_processing.reprojecting import reproject_raster
@@ -1120,7 +1147,9 @@ def reproject_raster_cli(
     method = RESAMPLING_MAPPING[resampling_method]
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta = reproject_raster(raster=raster, target_crs=target_crs, resampling_method=method)
+        out_image, out_meta = reproject_raster(
+            raster=raster, target_crs=target_crs, resampling_method=get_enum_values(method)
+        )
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
@@ -1136,7 +1165,7 @@ def resample_raster_cli(
     input_raster: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
     resolution: float = typer.Option(),
-    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.bilinear, case_sensitive=False),
+    resampling_method: Annotated[ResamplingMethods, typer.Option(case_sensitive=False)] = ResamplingMethods.bilinear,
 ):
     """Resamples raster according to given resolution."""
     from eis_toolkit.raster_processing.resampling import resample
@@ -1146,7 +1175,7 @@ def resample_raster_cli(
     method = RESAMPLING_MAPPING[resampling_method]
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta = resample(raster=raster, resolution=resolution, resampling_method=method)
+        out_image, out_meta = resample(raster=raster, resolution=resolution, resampling_method=get_enum_values(method))
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
@@ -1186,7 +1215,7 @@ def unify_rasters_cli(
     rasters_to_unify: INPUT_FILES_ARGUMENT,
     base_raster: INPUT_FILE_OPTION,
     output_directory: OUTPUT_DIR_OPTION,
-    resampling_method: ResamplingMethods = typer.Option(default=ResamplingMethods.nearest, case_sensitive=False),
+    resampling_method: Annotated[ResamplingMethods, typer.Option(case_sensitive=False)] = ResamplingMethods.nearest,
     same_extent: bool = False,
 ):
     """Unify rasters to match the base raster."""
@@ -1201,7 +1230,7 @@ def unify_rasters_cli(
         unified = unify_raster_grids(
             base_raster=raster,
             rasters_to_unify=to_unify,
-            resampling_method=RESAMPLING_MAPPING[resampling_method],
+            resampling_method=RESAMPLING_MAPPING[get_enum_values(resampling_method)],
             same_extent=same_extent,
         )
         [rstr.close() for rstr in to_unify]  # Close all rasters
@@ -1277,7 +1306,7 @@ def extract_window_cli(
 def classify_aspect_cli(
     input_raster: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
-    unit: AngleUnits = typer.Option(AngleUnits.radians, case_sensitive=False),
+    unit: Annotated[AngleUnits, typer.Option(case_sensitive=False)] = AngleUnits.radians,
     num_classes: int = 8,
 ):
     """Classify an aspect raster data set."""
@@ -1287,7 +1316,9 @@ def classify_aspect_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, class_mapping, out_meta = classify_aspect(raster=raster, unit=unit, num_classes=num_classes)
+        out_image, class_mapping, out_meta = classify_aspect(
+            raster=raster, unit=get_enum_values(unit), num_classes=num_classes
+        )
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
@@ -1307,10 +1338,10 @@ def surface_derivatives_cli(
     parameters: Annotated[List[SurfaceParameter], typer.Option(case_sensitive=False)],
     scaling_factor: Optional[float] = 1.0,
     slope_tolerance: Optional[float] = 0.0,
-    slope_gradient_unit: SlopeGradientUnit = typer.Option(SlopeGradientUnit.radians, case_sensitive=False),
-    slope_direction_unit: AngleUnits = typer.Option(AngleUnits.radians, case_sensitive=False),
-    first_order_method: FirstOrderMethod = typer.Option(FirstOrderMethod.Horn, case_sensitive=False),
-    second_order_method: SecondOrderMethod = typer.Option(SecondOrderMethod.Young, case_sensitive=False),
+    slope_gradient_unit: Annotated[SlopeGradientUnit, typer.Option(case_sensitive=False)] = SlopeGradientUnit.radians,
+    slope_direction_unit: Annotated[AngleUnits, typer.Option(case_sensitive=False)] = AngleUnits.radians,
+    first_order_method: Annotated[FirstOrderMethod, typer.Option(case_sensitive=False)] = FirstOrderMethod.Horn,
+    second_order_method: Annotated[SecondOrderMethod, typer.Option(case_sensitive=False)] = SecondOrderMethod.Young,
 ):
     """Calculate the first and/or second order surface attributes."""
     from eis_toolkit.raster_processing.derivatives.parameters import first_order, second_order_basic_set
@@ -1319,7 +1350,7 @@ def surface_derivatives_cli(
 
     first_order_parameters = []
     second_order_parameters = []
-    for parameter in parameters:
+    for parameter in get_enum_values(parameters):
         if parameter in ("G", "A"):
             first_order_parameters.append(parameter)
         else:
@@ -1333,9 +1364,9 @@ def surface_derivatives_cli(
                 parameters=first_order_parameters,
                 scaling_factor=scaling_factor,
                 slope_tolerance=slope_tolerance,
-                slope_gradient_unit=slope_gradient_unit,
-                slope_direction_unit=slope_direction_unit,
-                method=first_order_method,
+                slope_gradient_unit=get_enum_values(slope_gradient_unit),
+                slope_direction_unit=get_enum_values(slope_direction_unit),
+                method=get_enum_values(first_order_method),
             )
 
         typer.echo("Progress: 50%")
@@ -1345,7 +1376,7 @@ def surface_derivatives_cli(
                 parameters=second_order_parameters,
                 scaling_factor=scaling_factor,
                 slope_tolerance=slope_tolerance,
-                method=second_order_method,
+                method=get_enum_values(second_order_method),
             )
     typer.echo("Progres: 75%")
 
@@ -1638,9 +1669,9 @@ def kriging_interpolation_cli(
     target_column: str = typer.Option(),
     resolution: float = typer.Option(),
     extent: Tuple[float, float, float, float] = (None, None, None, None),  # TODO Change this
-    variogram_model: VariogramModel = typer.Option(VariogramModel.linear, case_sensitive=False),
-    coordinates_type: CoordinatesType = typer.Option(CoordinatesType.geographic, case_sensitive=False),
-    method: KrigingMethod = typer.Option(KrigingMethod.ordinary, case_sensitive=False),
+    variogram_model: Annotated[VariogramModel, typer.Option(case_sensitive=False)] = VariogramModel.linear,
+    coordinates_type: Annotated[CoordinatesType, typer.Option(case_sensitive=False)] = CoordinatesType.geographic,
+    method: Annotated[KrigingMethod, typer.Option(case_sensitive=False)] = KrigingMethod.ordinary,
 ):
     """Apply kriging interpolation to input vector file."""
     from eis_toolkit.vector_processing.kriging_interpolation import kriging
@@ -1658,9 +1689,9 @@ def kriging_interpolation_cli(
         target_column=target_column,
         resolution=(resolution, resolution),
         extent=extent,
-        variogram_model=variogram_model,
-        coordinates_type=coordinates_type,
-        method=method,
+        variogram_model=get_enum_values(variogram_model),
+        coordinates_type=get_enum_values(coordinates_type),
+        method=get_enum_values(method),
     )
     typer.echo("Progress: 75%")
 
@@ -1690,7 +1721,7 @@ def rasterize_cli(
     fill_value: float = 0.0,
     base_raster_profile_raster: INPUT_FILE_OPTION = None,
     buffer_value: float = None,
-    merge_strategy: MergeStrategy = typer.Option(MergeStrategy.replace, case_sensitive=False),
+    merge_strategy: Annotated[MergeStrategy, typer.Option(case_sensitive=False)] = MergeStrategy.replace,
 ):
     """
     Rasterize input vector.
@@ -1718,7 +1749,7 @@ def rasterize_cli(
         fill_value,
         base_raster_profile,
         buffer_value,
-        merge_strategy,
+        get_enum_values(merge_strategy),
     )
     typer.echo("Progress: 75%")
 
@@ -1769,7 +1800,7 @@ def vector_density_cli(
     resolution: float = None,
     base_raster_profile_raster: INPUT_FILE_OPTION = None,
     buffer_value: float = None,
-    statistic: VectorDensityStatistic = typer.Option(VectorDensityStatistic.density, case_sensitive=False),
+    statistic: Annotated[VectorDensityStatistic, typer.Option(case_sensitive=False)] = VectorDensityStatistic.density,
 ):
     """
     Compute density of geometries within raster.
@@ -1794,7 +1825,7 @@ def vector_density_cli(
         resolution=resolution,
         base_raster_profile=base_raster_profile,
         buffer_value=buffer_value,
-        statistic=statistic,
+        statistic=get_enum_values(statistic),
     )
     typer.echo("Progress: 75%")
 
@@ -1854,13 +1885,17 @@ def logistic_regression_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
-    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy, case_sensitive=False),
+    validation_method: Annotated[ValidationMethods, typer.Option(case_sensitive=False)] = ValidationMethods.split_once,
+    validation_metrics: Annotated[List[ClassifierMetrics], typer.Option(case_sensitive=False)] = [
+        ClassifierMetrics.accuracy
+    ],
     split_size: float = 0.2,
     cv_folds: int = 5,
-    penalty: LogisticRegressionPenalties = typer.Option(default=LogisticRegressionPenalties.l2, case_sensitive=False),
+    penalty: Annotated[
+        LogisticRegressionPenalties, typer.Option(case_sensitive=False)
+    ] = LogisticRegressionPenalties.l2,
     max_iter: int = 100,
-    solver: LogisticRegressionSolvers = typer.Option(default=LogisticRegressionSolvers.lbfgs, case_sensitive=False),
+    solver: Annotated[LogisticRegressionSolvers, typer.Option(case_sensitive=False)] = LogisticRegressionSolvers.lbfgs,
     verbose: int = 0,
     random_state: Optional[int] = None,
 ):
@@ -1876,13 +1911,13 @@ def logistic_regression_train_cli(
     model, metrics_dict = logistic_regression_train(
         X=X,
         y=y,
-        validation_method=validation_method,
-        metrics=[validation_metric],
+        validation_method=get_enum_values(validation_method),
+        metrics=get_enum_values(validation_metrics),
         split_size=split_size,
         cv_folds=cv_folds,
-        penalty=penalty,
+        penalty=get_enum_values(penalty),
         max_iter=max_iter,
-        solver=solver,
+        solver=get_enum_values(solver),
         verbose=verbose,
         random_state=random_state,
     )
@@ -1906,11 +1941,16 @@ def random_forest_classifier_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
-    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy, case_sensitive=False),
+    validation_method: Annotated[ValidationMethods, typer.Option(case_sensitive=False)] = ValidationMethods.split_once,
+    validation_metrics: Annotated[List[ClassifierMetrics], typer.Option(case_sensitive=False)] = [
+        ClassifierMetrics.accuracy
+    ],
     split_size: float = 0.2,
     cv_folds: int = 5,
     n_estimators: int = 100,
+    criterion: Annotated[
+        RandomForestClassifierCriterion, typer.Option(case_sensitive=False)
+    ] = RandomForestClassifierCriterion.gini,
     max_depth: Optional[int] = None,
     verbose: int = 0,
     random_state: Optional[int] = None,
@@ -1927,11 +1967,12 @@ def random_forest_classifier_train_cli(
     model, metrics_dict = random_forest_classifier_train(
         X=X,
         y=y,
-        validation_method=validation_method,
-        metrics=[validation_metric],
+        validation_method=get_enum_values(validation_method),
+        metrics=get_enum_values(validation_metrics),
         split_size=split_size,
         cv_folds=cv_folds,
         n_estimators=n_estimators,
+        criterion=criterion,
         max_depth=max_depth,
         verbose=verbose,
         random_state=random_state,
@@ -1956,11 +1997,14 @@ def random_forest_regressor_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
-    validation_metric: RegressorMetrics = typer.Option(default=RegressorMetrics.mse, case_sensitive=False),
+    validation_method: Annotated[ValidationMethods, typer.Option(case_sensitive=False)] = ValidationMethods.split_once,
+    validation_metrics: Annotated[List[RegressorMetrics], typer.Option(case_sensitive=False)] = [RegressorMetrics.mse],
     split_size: float = 0.2,
     cv_folds: int = 5,
     n_estimators: int = 100,
+    criterion: Annotated[
+        RandomForestRegressorCriterion, typer.Option(case_sensitive=False)
+    ] = RandomForestRegressorCriterion.squared_error,
     max_depth: Optional[int] = None,
     verbose: int = 0,
     random_state: Optional[int] = None,
@@ -1977,11 +2021,12 @@ def random_forest_regressor_train_cli(
     model, metrics_dict = random_forest_regressor_train(
         X=X,
         y=y,
-        validation_method=validation_method,
-        metrics=[validation_metric],
+        validation_method=get_enum_values(validation_method),
+        metrics=get_enum_values(validation_metrics),
         split_size=split_size,
         cv_folds=cv_folds,
         n_estimators=n_estimators,
+        criterion=criterion,
         max_depth=max_depth,
         verbose=verbose,
         random_state=random_state,
@@ -2006,11 +2051,15 @@ def gradient_boosting_classifier_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
-    validation_metric: ClassifierMetrics = typer.Option(default=ClassifierMetrics.accuracy, case_sensitive=False),
+    validation_method: Annotated[ValidationMethods, typer.Option(case_sensitive=False)] = ValidationMethods.split_once,
+    validation_metrics: Annotated[List[ClassifierMetrics], typer.Option(case_sensitive=False)] = [
+        ClassifierMetrics.accuracy
+    ],
     split_size: float = 0.2,
     cv_folds: int = 5,
-    loss: GradientBoostingClassifierLosses = typer.Option(default=GradientBoostingClassifierLosses.log_loss),
+    loss: Annotated[
+        GradientBoostingClassifierLosses, typer.Option(case_sensitive=False)
+    ] = GradientBoostingClassifierLosses.log_loss,
     learning_rate: float = 0.1,
     n_estimators: int = 100,
     max_depth: Optional[int] = 3,
@@ -2030,11 +2079,11 @@ def gradient_boosting_classifier_train_cli(
     model, metrics_dict = gradient_boosting_classifier_train(
         X=X,
         y=y,
-        validation_method=validation_method,
-        metrics=[validation_metric],
+        validation_method=get_enum_values(validation_method),
+        metrics=get_enum_values(validation_metrics),
         split_size=split_size,
         cv_folds=cv_folds,
-        loss=loss,
+        loss=get_enum_values(loss),
         learning_rate=learning_rate,
         n_estimators=n_estimators,
         max_depth=max_depth,
@@ -2062,11 +2111,13 @@ def gradient_boosting_regressor_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    validation_method: ValidationMethods = typer.Option(default=ValidationMethods.split_once, case_sensitive=False),
-    validation_metric: RegressorMetrics = typer.Option(default=RegressorMetrics.mse, case_sensitive=False),
+    validation_method: Annotated[ValidationMethods, typer.Option(case_sensitive=False)] = ValidationMethods.split_once,
+    validation_metrics: Annotated[List[RegressorMetrics], typer.Option(case_sensitive=False)] = [RegressorMetrics.mse],
     split_size: float = 0.2,
     cv_folds: int = 5,
-    loss: GradientBoostingRegressorLosses = typer.Option(default=GradientBoostingRegressorLosses.squared_error),
+    loss: Annotated[
+        GradientBoostingRegressorLosses, typer.Option(case_sensitive=False)
+    ] = GradientBoostingRegressorLosses.squared_error,
     learning_rate: float = 0.1,
     n_estimators: int = 100,
     max_depth: Optional[int] = 3,
@@ -2086,8 +2137,8 @@ def gradient_boosting_regressor_train_cli(
     model, metrics_dict = gradient_boosting_regressor_train(
         X=X,
         y=y,
-        validation_method=validation_method,
-        metrics=[validation_metric],
+        validation_method=get_enum_values(validation_method),
+        metrics=get_enum_values(validation_metrics),
         split_size=split_size,
         cv_folds=cv_folds,
         loss=loss,
@@ -2119,7 +2170,7 @@ def evaluate_trained_model_cli(
     target_labels: INPUT_FILE_OPTION,
     model_file: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
-    validation_metric: str = typer.Option(),
+    validation_metrics: Annotated[List[str], typer.Option()],
 ):
     """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
     from eis_toolkit.prediction.machine_learning_general import (
@@ -2134,7 +2185,7 @@ def evaluate_trained_model_cli(
     typer.echo("Progress: 30%")
 
     model = load_model(model_file)
-    predictions, metrics_dict = evaluate_model(X, y, model, [validation_metric])
+    predictions, metrics_dict = evaluate_model(X, y, model, validation_metrics)
     predictions_reshaped = reshape_predictions(
         predictions, reference_profile["height"], reference_profile["width"], nodata_mask
     )
@@ -2669,7 +2720,7 @@ def min_max_scaling_cli(
 def log_transform_cli(
     input_raster: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
-    log_type: LogarithmTransforms = typer.Option(LogarithmTransforms.log2, case_sensitive=False),
+    log_type: Annotated[LogarithmTransforms, typer.Option(case_sensitive=False)] = LogarithmTransforms.log2,
 ):
     """
     Perform a logarithmic transformation on the provided data.
@@ -2683,7 +2734,7 @@ def log_transform_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        out_image, out_meta, _ = log_transform(raster=raster, log_transform=[log_type])
+        out_image, out_meta, _ = log_transform(raster=raster, log_transform=[get_enum_values(log_type)])
     typer.echo("Progress: 70%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dst:
