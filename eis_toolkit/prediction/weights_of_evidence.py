@@ -1,3 +1,4 @@
+import warnings
 from numbers import Number
 
 import geopandas as gpd
@@ -9,6 +10,7 @@ from beartype.typing import Dict, List, Literal, Optional, Sequence, Tuple
 
 from eis_toolkit.exceptions import ClassificationFailedException, InvalidColumnException, InvalidParameterValueException
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
+from eis_toolkit.warnings import ClassificationFailedWarning, InvalidColumnWarning
 
 CLASS_COLUMN = "Class"
 PIXEL_COUNT_COLUMN = "Pixel count"
@@ -266,68 +268,85 @@ def generalize_weights_cumulative(
         studentized_contrast_threshold: Studentized contrast threshold value used to check that class with
             max contrast has studentized contrast value at least the defined value (cumulative). Defaults to 1.
     Returns:
-        The weights table with the addition of a generalized class column.
-    Raises:
-        ClassificationFailedException
-        InvalidColumnException
+        The weights table with the addition of a generalized class column. If generalization failed, returns
+            the original table.
+    Warns:
+        ClassificationFailedWarning
+        InvalidColumnWarning
     """
     df = df.copy()
 
-    df[GENERALIZED_CLASS_COLUMN] = 1
-
-    if classification_method == "max_contrast_if_feasible":
-        if (CONTRAST_COLUMN not in df.columns) and (STUDENTIZED_CONTRAST_COLUMN not in df.columns):
-            raise InvalidColumnException(
-                f"Failed to create generalized classes. Dataframe must have columns '{CONTRAST_COLUMN}' \
-                    and '{STUDENTIZED_CONTRAST_COLUMN}'"
-            )
-        return _generalized_classes_cumulative(df, studentized_contrast_threshold)
+    index = len(df.index) - 1
+    invalid_column_warning = ""
+    classification_failed_warning = ""
 
     if classification_method == "manual":
-        if manual_cutoff_index is None or manual_cutoff_index >= len(df.index) - 1:
-            raise ClassificationFailedException(
-                f"Failed to create generalized classes with the row index {manual_cutoff_index}"
-            )
+        if manual_cutoff_index is None:
+            classification_failed_warning = f"Failed to create generalized classes with the row index \
+                {manual_cutoff_index}"
+        else:
+            index = manual_cutoff_index
 
-        index = manual_cutoff_index
-    else:
-        if classification_method == "max_contrast":
-            if CONTRAST_COLUMN not in df.columns:
-                raise InvalidColumnException(
-                    f"Failed to create generalized classes. Dataframe must have column '{CONTRAST_COLUMN}'"
-                )
+    elif classification_method == "max_contrast":
+        if CONTRAST_COLUMN not in df.columns:
+            invalid_column_warning = f"Failed to create generalized classes. Dataframe must have columns \
+                '{CONTRAST_COLUMN}'"
+        else:
             index = df.idxmax()[CONTRAST_COLUMN]
 
-        elif classification_method == "max_feasible_contrast":
-            if (CONTRAST_COLUMN not in df.columns) and (STUDENTIZED_CONTRAST_COLUMN not in df.columns):
-                raise InvalidColumnException(
-                    f"Failed to create generalized classes. Dataframe must have columns '{CONTRAST_COLUMN}' \
-                        and '{STUDENTIZED_CONTRAST_COLUMN}'"
-                )
+    elif classification_method == "max_contrast_if_feasible":
+        if (CONTRAST_COLUMN not in df.columns) and (STUDENTIZED_CONTRAST_COLUMN not in df.columns):
+            invalid_column_warning = f"Failed to create generalized classes. Dataframe must have columns \
+                '{CONTRAST_COLUMN}' and '{STUDENTIZED_CONTRAST_COLUMN}'"
+        else:
+            index = df.idxmax()[CONTRAST_COLUMN]
 
+            if df.loc[index, STUDENTIZED_CONTRAST_COLUMN] < studentized_contrast_threshold:
+                classification_failed_warning = f"Failed to create generalized classes with given studentized \
+                    contrast threshold {studentized_contrast_threshold}"
+
+    elif classification_method == "max_feasible_contrast":
+        if (CONTRAST_COLUMN not in df.columns) and (STUDENTIZED_CONTRAST_COLUMN not in df.columns):
+            invalid_column_warning = f"Failed to create generalized classes. Dataframe must have columns \
+                '{CONTRAST_COLUMN}' and '{STUDENTIZED_CONTRAST_COLUMN}'"
+        else:
             df_studentized_contrast = df[df[STUDENTIZED_CONTRAST_COLUMN] > studentized_contrast_threshold]
 
             if len(df_studentized_contrast) == 0:
-                raise ClassificationFailedException(
-                    f"Failed to create generalized classes with the studentized contrast threshold \
-                        {studentized_contrast_threshold}"
-                )
+                classification_failed_warning = f"Failed to create generalized classes with given studentized \
+                    contrast threshold {studentized_contrast_threshold}"
+            else:
+                index = df_studentized_contrast.idxmax()[CONTRAST_COLUMN]
 
-            index = df_studentized_contrast.idxmax()[CONTRAST_COLUMN]
-
+    else:
+        # max_studentized_contrast
+        if STUDENTIZED_CONTRAST_COLUMN not in df.columns:
+            invalid_column_warning = f"Failed to create generalized classes. Dataframe must have column \
+                '{STUDENTIZED_CONTRAST_COLUMN}'"
         else:
-            # max_studentized_contrast
-            if STUDENTIZED_CONTRAST_COLUMN not in df.columns:
-                raise InvalidColumnException(
-                    f"Failed to create generalized classes. Dataframe must have column '{STUDENTIZED_CONTRAST_COLUMN}'"
-                )
             index = df.idxmax()[STUDENTIZED_CONTRAST_COLUMN]
 
-        if index == len(df.index) - 1:
-            raise ClassificationFailedException()
+    if invalid_column_warning != "":
+        warnings.warn(
+            invalid_column_warning,
+            InvalidColumnWarning,
+        )
+        return df
 
-    for i in range(0, index + 1):
-        df.loc[i, GENERALIZED_CLASS_COLUMN] = 2
+    if classification_failed_warning != "":
+        warnings.warn(
+            classification_failed_warning,
+            ClassificationFailedWarning,
+        )
+        return df
+
+    if index >= len(df.index) - 1:
+        warnings.warn("Failed to create generalized classes.", ClassificationFailedWarning)
+    else:
+        df[GENERALIZED_CLASS_COLUMN] = 1
+
+        for i in range(0, index + 1):
+            df.loc[i, GENERALIZED_CLASS_COLUMN] = 2
 
     return df
 

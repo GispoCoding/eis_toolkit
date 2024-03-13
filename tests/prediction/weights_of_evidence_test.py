@@ -16,6 +16,7 @@ from eis_toolkit.prediction.weights_of_evidence import (
     generalize_weights_cumulative,
     weights_of_evidence_calculate_weights,
 )
+from eis_toolkit.warnings import ClassificationFailedWarning
 
 test_dir = Path(__file__).parent.parent
 EVIDENCE_PATH = test_dir.joinpath("../tests/data/remote/wofe/wofe_evidence_raster.tif")
@@ -75,8 +76,9 @@ def test_cumulative_reclassification_manual():
     expected_output = pd.Series([2, 2, 2, 2, 2, 1, 1, 1, 1], dtype=np.int64)
     pd.testing.assert_series_equal(expected_output, result[GENERALIZED_CLASS_COLUMN], check_names=False)
 
-    with pytest.raises(ClassificationFailedException):
-        generalize_weights_cumulative(df, "manual", 8)
+    with pytest.warns(ClassificationFailedWarning):
+        result = generalize_weights_cumulative(df, "manual", 8)
+        assert GENERALIZED_CLASS_COLUMN not in result.columns.values
 
 
 def test_cumulative_reclassification_max_contrast():
@@ -90,7 +92,7 @@ def test_cumulative_reclassification_max_contrast():
     expected_output = pd.Series([2, 2, 2, 2, 2, 2, 2, 1, 1], dtype=np.int64)
     pd.testing.assert_series_equal(expected_output, result[GENERALIZED_CLASS_COLUMN], check_names=False)
 
-    with pytest.raises(ClassificationFailedException):
+    with pytest.warns(ClassificationFailedWarning):
         # Last row has the highest contrast
         df = pd.DataFrame(
             [
@@ -101,7 +103,9 @@ def test_cumulative_reclassification_max_contrast():
             columns=[CLASS_COLUMN, CONTRAST_COLUMN, S_CONTRAST_COLUMN, STUDENTIZED_CONTRAST_COLUMN],
         )
 
-        generalize_weights_cumulative(df, "max_contrast")
+        result = generalize_weights_cumulative(df, "max_contrast")
+
+        assert GENERALIZED_CLASS_COLUMN not in result.columns.values
 
 
 def test_cumulative_reclassification_max_contrast_if_feasible():
@@ -115,10 +119,9 @@ def test_cumulative_reclassification_max_contrast_if_feasible():
     expected_output = pd.Series([2, 2, 2, 2, 2, 2, 2, 1, 1], dtype=np.int64)
     pd.testing.assert_series_equal(expected_output, result[GENERALIZED_CLASS_COLUMN], check_names=False)
 
-    with pytest.raises(ClassificationFailedException):
-        df = weights_table.copy()
-
-        generalize_weights_cumulative(df, "max_contrast_if_feasible", studentized_contrast_threshold=2)
+    with pytest.warns(ClassificationFailedWarning):
+        result = generalize_weights_cumulative(df, "max_contrast_if_feasible", studentized_contrast_threshold=2)
+        assert GENERALIZED_CLASS_COLUMN not in result.columns.values
 
 
 def test_cumulative_reclassification_max_feasible_contrast():
@@ -132,8 +135,9 @@ def test_cumulative_reclassification_max_feasible_contrast():
     expected_output = pd.Series([2, 2, 2, 2, 2, 2, 1, 1, 1], dtype=np.int64)
     pd.testing.assert_series_equal(expected_output, result[GENERALIZED_CLASS_COLUMN], check_names=False)
 
-    with pytest.raises(ClassificationFailedException):
-        generalize_weights_cumulative(df, "max_feasible_contrast", studentized_contrast_threshold=2.5)
+    with pytest.warns(ClassificationFailedWarning):
+        result = generalize_weights_cumulative(df, "max_feasible_contrast", studentized_contrast_threshold=2.5)
+        assert GENERALIZED_CLASS_COLUMN not in result.columns.values
 
 
 def test_cumulative_reclassification_max_studentized_contrast():
@@ -147,7 +151,7 @@ def test_cumulative_reclassification_max_studentized_contrast():
     expected_output = pd.Series([2, 2, 2, 2, 2, 2, 1, 1, 1], dtype=np.int64)
     pd.testing.assert_series_equal(expected_output, result[GENERALIZED_CLASS_COLUMN], check_names=False)
 
-    with pytest.raises(ClassificationFailedException):
+    with pytest.warns(ClassificationFailedWarning):
         # Last row has the highest studentized contrast
         df = pd.DataFrame(
             [
@@ -158,4 +162,5 @@ def test_cumulative_reclassification_max_studentized_contrast():
             columns=[CLASS_COLUMN, CONTRAST_COLUMN, S_CONTRAST_COLUMN, STUDENTIZED_CONTRAST_COLUMN],
         )
 
-        generalize_weights_cumulative(df, "max_studentized_contrast")
+        result = generalize_weights_cumulative(df, "max_studentized_contrast")
+        assert GENERALIZED_CLASS_COLUMN not in result.columns.values
