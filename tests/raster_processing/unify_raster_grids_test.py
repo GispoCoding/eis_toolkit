@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pytest
 import rasterio
-from rasterio.enums import Resampling
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.raster_processing.unifying import unify_raster_grids
@@ -33,7 +32,7 @@ def test_unify_raster_grids_case1():
 
     with rasterio.open(raster_to_unify_path_1) as raster_to_unify:
         with rasterio.open(base_raster_path_1) as base_raster:
-            out_rasters = unify_raster_grids(base_raster, [raster_to_unify], Resampling.nearest, False)
+            out_rasters = unify_raster_grids(base_raster, [raster_to_unify], "nearest", False)
             out_image, out_meta = out_rasters[1]
 
             assert len(out_rasters) == 2
@@ -63,7 +62,7 @@ def test_unify_raster_grids_case2():
 
     with rasterio.open(raster_to_unify_path_2) as raster_to_unify:
         with rasterio.open(base_raster_path_2) as base_raster:
-            out_rasters = unify_raster_grids(base_raster, [raster_to_unify], Resampling.bilinear, True)
+            out_rasters = unify_raster_grids(base_raster, [raster_to_unify], "bilinear", True)
             out_image, out_meta = out_rasters[1]
 
             assert len(out_rasters) == 2

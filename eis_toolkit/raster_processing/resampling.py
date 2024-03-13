@@ -3,11 +3,21 @@ from numbers import Number
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import Tuple
+from beartype.typing import Literal, Tuple
 from rasterio import warp
 from rasterio.enums import Resampling
 
 from eis_toolkit.exceptions import NumericValueSignException
+
+RESAMPLE_METHOD_MAP = {
+    "nearest": warp.Resampling.nearest,
+    "bilinear": warp.Resampling.bilinear,
+    "cubic": warp.Resampling.cubic,
+    "average": warp.Resampling.average,
+    "gauss": warp.Resampling.gauss,
+    "max": warp.Resampling.max,
+    "min": warp.Resampling.min,
+}
 
 
 def _resample(
@@ -53,7 +63,7 @@ def _resample(
 def resample(
     raster: rasterio.io.DatasetReader,
     resolution: Number,
-    resampling_method: Resampling = Resampling.bilinear,
+    resampling_method: Literal["nearest", "bilinear", "cubic", "average", "gauss", "max", "min"] = "bilinear",
 ) -> Tuple[np.ndarray, dict]:
     """Resamples raster according to given resolution.
 
@@ -74,5 +84,6 @@ def resample(
     if resolution <= 0:
         raise NumericValueSignException(f"Expected a positive value for resolution: {resolution})")
 
-    out_image, out_meta = _resample(raster, resolution, resampling_method)
+    method = RESAMPLE_METHOD_MAP[resampling_method]
+    out_image, out_meta = _resample(raster, resolution, method)
     return out_image, out_meta
