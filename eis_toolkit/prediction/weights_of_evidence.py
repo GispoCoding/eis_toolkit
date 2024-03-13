@@ -51,6 +51,8 @@ DEFAULT_METRICS_CUMULATIVE = [
     GENERALIZED_S_WEIGHT_PLUS_COLUMN,
 ]
 
+GENERALIZED_COLUMNS = [GENERALIZED_CLASS_COLUMN, GENERALIZED_WEIGHT_PLUS_COLUMN, GENERALIZED_S_WEIGHT_PLUS_COLUMN]
+
 
 def _read_and_preprocess_evidence(
     raster: rasterio.io.DatasetReader, nodata: Optional[Number] = None, band: int = 1
@@ -275,6 +277,9 @@ def generalize_weights_cumulative(
         InvalidColumnWarning
     """
     df = df.copy()
+
+    columns_to_drop = [col for col in df.columns.values if col in GENERALIZED_COLUMNS]
+    df = df.drop(columns_to_drop, axis=1)
 
     index = len(df.index) - 1
     invalid_column_warning = ""
