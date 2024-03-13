@@ -52,6 +52,20 @@ DEFAULT_METRICS_CUMULATIVE = [
 ]
 
 GENERALIZED_COLUMNS = [GENERALIZED_CLASS_COLUMN, GENERALIZED_WEIGHT_PLUS_COLUMN, GENERALIZED_S_WEIGHT_PLUS_COLUMN]
+WEIGHTS_COLUMNS = [
+    WEIGHT_PLUS_COLUMN,
+    WEIGHT_S_PLUS_COLUMN,
+    WEIGHT_MINUS_COLUMN,
+    WEIGHT_S_MINUS_COLUMN,
+]
+
+REQUIRED_FOR_GENERALIZATION = {
+    "manual": [],
+    "max_contrast": [CONTRAST_COLUMN],
+    "max_contrast_if_feasible": [CONTRAST_COLUMN, STUDENTIZED_CONTRAST_COLUMN],
+    "max_feasible_contrast": [CONTRAST_COLUMN, STUDENTIZED_CONTRAST_COLUMN],
+    "max_studentized_contrast": [STUDENTIZED_CONTRAST_COLUMN],
+}
 
 
 def _read_and_preprocess_evidence(
@@ -204,7 +218,7 @@ def _generalized_classes_cumulative(df: pd.DataFrame, studentized_contrast_thres
     return gen_df
 
 
-def _generalized_weights_cumulative(df: pd.DataFrame, deposits: np.ndarray) -> pd.DataFrame:
+def _generalized_weights_cumulative(df: pd.DataFrame) -> pd.DataFrame:
     """
     Calculate generalized weights for cumulative methods.
 
@@ -278,11 +292,20 @@ def generalize_weights_cumulative(
     """
     df = df.copy()
 
+    required_columns = WEIGHTS_COLUMNS + REQUIRED_FOR_GENERALIZATION[classification_method]
+    missing_columns = [col for col in required_columns if col not in df.columns.values]
+
+    if len(missing_columns) != 0:
+        warnings.warn(
+            f"Failed to create generalized classes. The following columns are required: {missing_columns}",
+            InvalidColumnWarning,
+        )
+        return df
+
     columns_to_drop = [col for col in df.columns.values if col in GENERALIZED_COLUMNS]
     df = df.drop(columns_to_drop, axis=1)
 
     index = len(df.index) - 1
-    invalid_column_warning = ""
     classification_failed_warning = ""
 
     if classification_method == "manual":
@@ -293,50 +316,27 @@ def generalize_weights_cumulative(
             index = manual_cutoff_index
 
     elif classification_method == "max_contrast":
-        if CONTRAST_COLUMN not in df.columns:
-            invalid_column_warning = f"Failed to create generalized classes. Dataframe must have columns \
-                '{CONTRAST_COLUMN}'"
-        else:
-            index = df.idxmax()[CONTRAST_COLUMN]
+        index = df.idxmax()[CONTRAST_COLUMN]
 
     elif classification_method == "max_contrast_if_feasible":
-        if (CONTRAST_COLUMN not in df.columns) and (STUDENTIZED_CONTRAST_COLUMN not in df.columns):
-            invalid_column_warning = f"Failed to create generalized classes. Dataframe must have columns \
-                '{CONTRAST_COLUMN}' and '{STUDENTIZED_CONTRAST_COLUMN}'"
-        else:
-            index = df.idxmax()[CONTRAST_COLUMN]
+        index = df.idxmax()[CONTRAST_COLUMN]
 
-            if df.loc[index, STUDENTIZED_CONTRAST_COLUMN] < studentized_contrast_threshold:
-                classification_failed_warning = f"Failed to create generalized classes with given studentized \
-                    contrast threshold {studentized_contrast_threshold}"
+        if df.loc[index, STUDENTIZED_CONTRAST_COLUMN] < studentized_contrast_threshold:
+            classification_failed_warning = f"Failed to create generalized classes with given studentized \
+            contrast threshold {studentized_contrast_threshold}"
 
     elif classification_method == "max_feasible_contrast":
-        if (CONTRAST_COLUMN not in df.columns) and (STUDENTIZED_CONTRAST_COLUMN not in df.columns):
-            invalid_column_warning = f"Failed to create generalized classes. Dataframe must have columns \
-                '{CONTRAST_COLUMN}' and '{STUDENTIZED_CONTRAST_COLUMN}'"
-        else:
-            df_studentized_contrast = df[df[STUDENTIZED_CONTRAST_COLUMN] > studentized_contrast_threshold]
+        df_studentized_contrast = df[df[STUDENTIZED_CONTRAST_COLUMN] > studentized_contrast_threshold]
 
-            if len(df_studentized_contrast) == 0:
-                classification_failed_warning = f"Failed to create generalized classes with given studentized \
-                    contrast threshold {studentized_contrast_threshold}"
-            else:
-                index = df_studentized_contrast.idxmax()[CONTRAST_COLUMN]
+        if len(df_studentized_contrast) == 0:
+            classification_failed_warning = f"Failed to create generalized classes with given studentized \
+                contrast threshold {studentized_contrast_threshold}"
+        else:
+            index = df_studentized_contrast.idxmax()[CONTRAST_COLUMN]
 
     else:
         # max_studentized_contrast
-        if STUDENTIZED_CONTRAST_COLUMN not in df.columns:
-            invalid_column_warning = f"Failed to create generalized classes. Dataframe must have column \
-                '{STUDENTIZED_CONTRAST_COLUMN}'"
-        else:
-            index = df.idxmax()[STUDENTIZED_CONTRAST_COLUMN]
-
-    if invalid_column_warning != "":
-        warnings.warn(
-            invalid_column_warning,
-            InvalidColumnWarning,
-        )
-        return df
+        index = df.idxmax()[STUDENTIZED_CONTRAST_COLUMN]
 
     if classification_failed_warning != "":
         warnings.warn(
@@ -352,6 +352,16 @@ def generalize_weights_cumulative(
 
         for i in range(0, index + 1):
             df.loc[i, GENERALIZED_CLASS_COLUMN] = 2
+
+        # Class 2
+        df[GENERALIZED_WEIGHT_PLUS_COLUMN] = df.loc[index, WEIGHT_PLUS_COLUMN]
+        df[GENERALIZED_S_WEIGHT_PLUS_COLUMN] = df.loc[index, WEIGHT_S_PLUS_COLUMN]
+
+        # Class 1
+        df.loc[df[GENERALIZED_CLASS_COLUMN] == 1, GENERALIZED_WEIGHT_PLUS_COLUMN] = df.loc[index, WEIGHT_MINUS_COLUMN]
+        df.loc[df[GENERALIZED_CLASS_COLUMN] == 1, GENERALIZED_S_WEIGHT_PLUS_COLUMN] = df.loc[
+            index, WEIGHT_S_MINUS_COLUMN
+        ]
 
     return df
 
@@ -466,7 +476,7 @@ def weights_of_evidence_calculate_weights(
         weights_df = _generalized_weights_categorical(weights_df, masked_deposit_array)
     elif weights_type == "ascending" or weights_type == "descending":
         weights_df = _generalized_classes_cumulative(weights_df, studentized_contrast_threshold)
-        weights_df = _generalized_weights_cumulative(weights_df, masked_deposit_array)
+        weights_df = _generalized_weights_cumulative(weights_df)
 
     # 5. Generate arrays for desired metrics
     arrays_dict = _generate_arrays_from_metrics(evidence_array, weights_df, metrics_to_arrays)
