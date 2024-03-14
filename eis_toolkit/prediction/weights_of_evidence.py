@@ -267,22 +267,25 @@ def generalize_weights_cumulative(
     studentized_contrast_threshold: Number = 1,
 ) -> pd.DataFrame:
     """
-    Perform binary reclassification for cumulative weights type according to the selected method.
+    Calculate generalized weights for cumulative methods.
+
+    Perform binary reclassification into the generalized classes 1 and 2 according to the selected
+    classification method. Calculate generalized weights for the two classes.
 
     Args:
         df: A weights table returned by weights_of_evidence_calculate_weights.
         classification_method: Accepted values are 'manual', 'max_contrast',
-            max_contrast_if_feasible, 'max_feasible_contrast' and 'max_studentized_contrast'.
-            'manual': requires a valid row index to use as cutoff value.
-            'max_contrast': uses the maximum contrast value regardless of studentized contrast.
-            'max_contrast_if_feasible': uses the maximum contrast value if the corresponding studentized
+            max_contrast_if_feasible, 'max_feasible_contrast' and 'max_studentized_contrast', detailed below:
+            'manual': Requires a valid row index to use as cutoff value.
+            'max_contrast': Uses the maximum contrast value regardless of studentized contrast.
+            'max_contrast_if_feasible': Uses the maximum contrast value if the corresponding studentized
                 contrast is greater than the provided threshold value.
-            'max_feasible_contrast': uses the highest contrast value for which the studentized contrast
+            'max_feasible_contrast': Uses the highest contrast value for which the studentized contrast
                 is greater than the provided threshold value.
-            'max_studentized_contrast': uses the highest studentized contrast value.
+            'max_studentized_contrast': Uses the highest studentized contrast value.
         manual_cutoff_index: Index of the last row to be included in class 2.
         studentized_contrast_threshold: Studentized contrast threshold value used to check that class with
-            max contrast has studentized contrast value at least the defined value (cumulative). Defaults to 1.
+            max contrast has studentized contrast value at least the defined value. Defaults to 1.
     Returns:
         The weights table with the addition of a generalized class column. If generalization failed, returns
             the original table.
@@ -475,8 +478,7 @@ def weights_of_evidence_calculate_weights(
         weights_df = _generalized_classes_categorical(weights_df, studentized_contrast_threshold)
         weights_df = _generalized_weights_categorical(weights_df, masked_deposit_array)
     elif weights_type == "ascending" or weights_type == "descending":
-        weights_df = _generalized_classes_cumulative(weights_df, studentized_contrast_threshold)
-        weights_df = _generalized_weights_cumulative(weights_df)
+        weights_df = generalize_weights_cumulative(weights_df, classification_method="max_contrast_if_feasible")
 
     # 5. Generate arrays for desired metrics
     arrays_dict = _generate_arrays_from_metrics(evidence_array, weights_df, metrics_to_arrays)
