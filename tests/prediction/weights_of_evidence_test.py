@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 import rasterio
 
-from eis_toolkit.exceptions import ClassificationFailedException, InvalidColumnException
+from eis_toolkit.exceptions import InvalidColumnException
 from eis_toolkit.prediction.weights_of_evidence import (
     CLASS_COLUMN,
     CONTRAST_COLUMN,
@@ -65,11 +65,13 @@ def test_weights_of_evidence():
 
 
 def test_too_high_studentized_contrast_threshold():
-    """Tests that too high studentized contrast threshold for reclassification raises the correct exception."""
-    with pytest.raises(ClassificationFailedException):
-        weights_of_evidence_calculate_weights(
+    """Tests that too high studentized contrast threshold for reclassification results in warning."""
+    with pytest.warns(ClassificationFailedWarning):
+        result, _, _, _, _ = weights_of_evidence_calculate_weights(
             evidence_raster, deposits, weights_type="ascending", studentized_contrast_threshold=2
         )
+
+        assert GENERALIZED_CLASS_COLUMN not in result.columns.values
 
 
 def test_invalid_choice_in_rasters_to_generate():

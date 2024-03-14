@@ -196,53 +196,6 @@ def _generalized_weights_categorical(df: pd.DataFrame, deposits) -> pd.DataFrame
     return gen_df
 
 
-def _generalized_classes_cumulative(df: pd.DataFrame, studentized_contrast_threshold: Number) -> pd.DataFrame:
-    """Create generalized classes based on contrast and studentized contrast threshold value."""
-    gen_df = df.copy()
-    index = gen_df.idxmax()[CONTRAST_COLUMN]
-
-    if (
-        gen_df.loc[index, STUDENTIZED_CONTRAST_COLUMN] < studentized_contrast_threshold
-        or index == len(gen_df.index) - 1
-    ):
-        raise ClassificationFailedException(
-            "Failed to create generalized classes with given studentized contrast treshold ({} < {})".format(
-                gen_df.loc[index, STUDENTIZED_CONTRAST_COLUMN], studentized_contrast_threshold
-            )
-        )
-
-    gen_df[GENERALIZED_CLASS_COLUMN] = 1
-    for i in range(0, index + 1):
-        gen_df.loc[i, GENERALIZED_CLASS_COLUMN] = 2
-
-    return gen_df
-
-
-def _generalized_weights_cumulative(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Calculate generalized weights for cumulative methods.
-
-    Assumes there are classes 1 and 2 as the general classes.
-    """
-    gen_df = df.copy()
-
-    # Class 2
-    class_2_max_index = gen_df.idxmax()[CONTRAST_COLUMN]
-
-    gen_df[GENERALIZED_WEIGHT_PLUS_COLUMN] = gen_df.loc[class_2_max_index, WEIGHT_PLUS_COLUMN]
-    gen_df[GENERALIZED_S_WEIGHT_PLUS_COLUMN] = gen_df.loc[class_2_max_index, WEIGHT_S_PLUS_COLUMN]
-
-    # Class 1
-    gen_df.loc[gen_df[GENERALIZED_CLASS_COLUMN] == 1, GENERALIZED_WEIGHT_PLUS_COLUMN] = gen_df.loc[
-        class_2_max_index, WEIGHT_MINUS_COLUMN
-    ]
-    gen_df.loc[gen_df[GENERALIZED_CLASS_COLUMN] == 1, GENERALIZED_S_WEIGHT_PLUS_COLUMN] = gen_df.loc[
-        class_2_max_index, WEIGHT_S_MINUS_COLUMN
-    ]
-
-    return gen_df
-
-
 def _generate_arrays_from_metrics(
     evidence: np.ndarray, df: pd.DataFrame, metrics_to_include: List[str]
 ) -> Dict[str, np.ndarray]:
@@ -264,7 +217,7 @@ def generalize_weights_cumulative(
         "manual", "max_contrast", "max_contrast_if_feasible", "max_feasible_contrast", "max_studentized_contrast"
     ],
     manual_cutoff_index: Optional[Number] = None,
-    studentized_contrast_threshold: Number = 1,
+    studentized_contrast_threshold: Optional[Number] = 1,
 ) -> pd.DataFrame:
     """
     Calculate generalized weights for cumulative methods.
@@ -322,6 +275,7 @@ def generalize_weights_cumulative(
         index = df.idxmax()[CONTRAST_COLUMN]
 
     elif classification_method == "max_contrast_if_feasible":
+
         index = df.idxmax()[CONTRAST_COLUMN]
 
         if df.loc[index, STUDENTIZED_CONTRAST_COLUMN] < studentized_contrast_threshold:
@@ -473,17 +427,25 @@ def weights_of_evidence_calculate_weights(
         )
     weights_df = pd.DataFrame(df_entries)
 
-    # 4. If we use cumulative weights type, calculate generalized classes and weights
+    # 4. If we use cumulative or categorical weights type, calculate generalized classes and weights
     if weights_type == "categorical":
         weights_df = _generalized_classes_categorical(weights_df, studentized_contrast_threshold)
         weights_df = _generalized_weights_categorical(weights_df, masked_deposit_array)
     elif weights_type == "ascending" or weights_type == "descending":
-        weights_df = generalize_weights_cumulative(weights_df, classification_method="max_contrast_if_feasible")
+        weights_df = generalize_weights_cumulative(
+            weights_df,
+            classification_method="max_contrast_if_feasible",
+            studentized_contrast_threshold=studentized_contrast_threshold,
+        )
+        if GENERALIZED_CLASS_COLUMN not in weights_df.columns.values:
+            for key in GENERALIZED_COLUMNS:
+                if key in metrics_to_arrays:
+                    metrics_to_arrays.remove(key)
 
     # 5. Generate arrays for desired metrics
     arrays_dict = _generate_arrays_from_metrics(evidence_array, weights_df, metrics_to_arrays)
 
-    # Return nr. of deposit pixels  and nr. of all evidence pixels for to be used in calculate responses
+    # Return nr. of deposit pixels and nr. of all evidence pixels for to be used in calculate responses
     nr_of_deposits = int(np.sum(masked_deposit_array == 1))
     nr_of_pixels = int(np.size(masked_evidence_array))
 
