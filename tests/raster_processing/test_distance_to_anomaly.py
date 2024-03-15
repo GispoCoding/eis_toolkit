@@ -10,7 +10,7 @@ import rasterio.plot
 import rasterio.profiles
 from beartype.roar import BeartypeCallHintParamViolation
 
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import EmptyDataException, InvalidParameterValueException
 from eis_toolkit.raster_processing import distance_to_anomaly
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
@@ -227,6 +227,15 @@ def test_distance_to_anomaly_gdal(
             dict,
             partial(pytest.raises, BeartypeCallHintParamViolation),
             id="expected_invalid_param_due_to_tuple_of_length_three",
+        ),
+        pytest.param(
+            SMALL_RASTER_PROFILE,
+            SMALL_RASTER_DATA,
+            (100.5, 122.5),
+            "in_between",
+            dict,
+            partial(pytest.raises, EmptyDataException),
+            id="expected_empty_data_due_to_threshold_range_outside_values",
         ),
     ],
 )
