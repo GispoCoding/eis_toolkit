@@ -3,10 +3,11 @@ import numpy as np
 from beartype import beartype
 from beartype.typing import Union
 from rasterio import profiles, transform
-from shapely.geometry import Point
 from shapely.geometry.base import BaseGeometry, BaseMultipartGeometry
 
-from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException, NonMatchingCrsException
+from eis_toolkit.exceptions import EmptyDataFrameException, NonMatchingCrsException
+from eis_toolkit.utilities.checks.raster import check_raster_profile
+from eis_toolkit.utilities.miscellaneous import row_points
 
 
 @beartype
@@ -27,20 +28,11 @@ def distance_computation(raster_profile: Union[profiles.Profile, dict], geometri
     if geometries.shape[0] == 0:
         raise EmptyDataFrameException("Expected GeoDataFrame to not be empty.")
 
+    check_raster_profile(raster_profile=raster_profile)
+
     raster_width = raster_profile.get("width")
     raster_height = raster_profile.get("height")
-
-    if not isinstance(raster_width, int) or not isinstance(raster_height, int):
-        raise InvalidParameterValueException(
-            f"Expected raster_profile to contain integer width and height. {raster_profile}"
-        )
-
     raster_transform = raster_profile.get("transform")
-
-    if not isinstance(raster_transform, transform.Affine):
-        raise InvalidParameterValueException(
-            f"Expected raster_profile to contain an affine transformation. {raster_profile}"
-        )
 
     return _distance_computation(
         raster_width=raster_width, raster_height=raster_height, raster_transform=raster_transform, geometries=geometries
@@ -53,12 +45,12 @@ def _calculate_row_distances(
     raster_transform: transform.Affine,
     geometries_unary_union: Union[BaseGeometry, BaseMultipartGeometry],
 ) -> np.ndarray:
-    # transform.xy accepts either cols or rows as an array. The other then has
-    # to be an integer. The resulting x and y point coordinates are therefore
-    # in a 1D array
-    point_xs, point_ys = transform.xy(transform=raster_transform, cols=cols, rows=row)
-    row_points = [Point(x, y) for x, y in zip(point_xs, point_ys)]
-    row_distances = np.array([point.distance(geometries_unary_union) for point in row_points])
+    row_distances = np.array(
+        [
+            point.distance(geometries_unary_union)
+            for point in row_points(row=row, cols=cols, raster_transform=raster_transform)
+        ]
+    )
     return row_distances
 
 

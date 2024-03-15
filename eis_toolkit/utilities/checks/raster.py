@@ -1,6 +1,10 @@
 import rasterio
+import rasterio.profiles
+import rasterio.transform
 from beartype import beartype
 from beartype.typing import Iterable, Sequence, Union
+
+from eis_toolkit.exceptions import InvalidParameterValueException
 
 
 @beartype
@@ -166,3 +170,28 @@ def check_quadratic_pixels(raster: rasterio.io.DatasetReader) -> bool:
         return True
     else:
         return False
+
+
+@beartype
+def check_raster_profile(
+    raster_profile: Union[rasterio.profiles.Profile, dict],
+):
+    """Check raster profile values.
+
+    Checks that width and height are sensible and that the profile contains a
+    transform.
+    """
+    raster_width = raster_profile.get("width")
+    raster_height = raster_profile.get("height")
+
+    if not isinstance(raster_width, int) or not isinstance(raster_height, int):
+        raise InvalidParameterValueException(
+            f"Expected raster_profile to contain integer width and height. {raster_profile}"
+        )
+
+    raster_transform = raster_profile.get("transform")
+
+    if not isinstance(raster_transform, rasterio.transform.Affine):
+        raise InvalidParameterValueException(
+            f"Expected raster_profile to contain an affine transformation. {raster_profile}"
+        )
