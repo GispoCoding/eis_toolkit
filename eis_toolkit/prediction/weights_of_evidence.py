@@ -363,10 +363,13 @@ def weights_of_evidence_calculate_weights(
         Number of all evidence pixels.
 
     Raises:
-        ClassificationFailedException: Unable to create generalized classes with the given
-            studentized_contrast_threshold.
+        ClassificationFailedException: Unable to create generalized classes for the categorical weights type.
         InvalidColumnException: Arrays to generate contains invalid column name(s).
         InvalidParameterValueException: Input weights_type is not one of the accepted values.
+
+    Warns:
+        ClassificationFailedWarning: Unable to create generalized classes for the cumulative weights types
+            with the given studentized_contrast_threshold.
     """
 
     if arrays_to_generate is None:
