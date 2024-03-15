@@ -249,7 +249,7 @@ def generalize_weights_cumulative(
     df: pd.DataFrame,
     classification_method: Literal[
         "manual", "max_contrast", "max_contrast_if_feasible", "max_feasible_contrast", "max_studentized_contrast"
-    ],
+    ] = "max_contrast_if_feasible",
     manual_cutoff_index: Optional[Number] = None,
     studentized_contrast_threshold: Optional[Number] = 1,
 ) -> pd.DataFrame:
