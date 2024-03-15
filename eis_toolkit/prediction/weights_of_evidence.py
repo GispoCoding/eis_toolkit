@@ -196,6 +196,40 @@ def _generalized_weights_categorical(df: pd.DataFrame, deposits) -> pd.DataFrame
     return gen_df
 
 
+def _generalized_classes_cumulative(df: pd.DataFrame, index: int) -> pd.DataFrame:
+    """Create generalized classes based on given index for cutoff row."""
+    gen_df = df.copy()
+
+    gen_df[GENERALIZED_CLASS_COLUMN] = 1
+    for i in range(0, index + 1):
+        gen_df.loc[i, GENERALIZED_CLASS_COLUMN] = 2
+
+    return gen_df
+
+
+def _generalized_weights_cumulative(df: pd.DataFrame, index: int) -> pd.DataFrame:
+    """
+    Calculate generalized weights for cumulative methods.
+
+    Assumes there are classes 1 and 2 as the general classes.
+    """
+    gen_df = df.copy()
+
+    # Class 2
+    gen_df[GENERALIZED_WEIGHT_PLUS_COLUMN] = gen_df.loc[index, WEIGHT_PLUS_COLUMN]
+    gen_df[GENERALIZED_S_WEIGHT_PLUS_COLUMN] = gen_df.loc[index, WEIGHT_S_PLUS_COLUMN]
+
+    # Class 1
+    gen_df.loc[gen_df[GENERALIZED_CLASS_COLUMN] == 1, GENERALIZED_WEIGHT_PLUS_COLUMN] = gen_df.loc[
+        index, WEIGHT_MINUS_COLUMN
+    ]
+    gen_df.loc[gen_df[GENERALIZED_CLASS_COLUMN] == 1, GENERALIZED_S_WEIGHT_PLUS_COLUMN] = gen_df.loc[
+        index, WEIGHT_S_MINUS_COLUMN
+    ]
+
+    return gen_df
+
+
 def _generate_arrays_from_metrics(
     evidence: np.ndarray, df: pd.DataFrame, metrics_to_include: List[str]
 ) -> Dict[str, np.ndarray]:
@@ -304,23 +338,12 @@ def generalize_weights_cumulative(
 
     if index >= len(df.index) - 1:
         warnings.warn("Failed to create generalized classes.", ClassificationFailedWarning)
+
+        return df
     else:
-        df[GENERALIZED_CLASS_COLUMN] = 1
+        df = _generalized_classes_cumulative(df, index)
 
-        for i in range(0, index + 1):
-            df.loc[i, GENERALIZED_CLASS_COLUMN] = 2
-
-        # Class 2
-        df[GENERALIZED_WEIGHT_PLUS_COLUMN] = df.loc[index, WEIGHT_PLUS_COLUMN]
-        df[GENERALIZED_S_WEIGHT_PLUS_COLUMN] = df.loc[index, WEIGHT_S_PLUS_COLUMN]
-
-        # Class 1
-        df.loc[df[GENERALIZED_CLASS_COLUMN] == 1, GENERALIZED_WEIGHT_PLUS_COLUMN] = df.loc[index, WEIGHT_MINUS_COLUMN]
-        df.loc[df[GENERALIZED_CLASS_COLUMN] == 1, GENERALIZED_S_WEIGHT_PLUS_COLUMN] = df.loc[
-            index, WEIGHT_S_MINUS_COLUMN
-        ]
-
-    return df
+        return _generalized_weights_cumulative(df, index)
 
 
 @beartype
