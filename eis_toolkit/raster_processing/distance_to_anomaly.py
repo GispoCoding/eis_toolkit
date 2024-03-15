@@ -10,7 +10,7 @@ from beartype import beartype
 from beartype.typing import Literal, Optional, Tuple, Union
 from rasterio import profiles
 
-from eis_toolkit.exceptions import InvalidParameterValueException
+from eis_toolkit.exceptions import EmptyDataException, InvalidParameterValueException
 from eis_toolkit.utilities.checks.raster import check_raster_profile
 from eis_toolkit.utilities.miscellaneous import row_points, toggle_gdal_exceptions
 from eis_toolkit.vector_processing.distance_computation import distance_computation
@@ -208,6 +208,17 @@ def _distance_to_anomaly(
         anomaly_raster_data=anomaly_raster_data,
         nodata_value=anomaly_raster_profile.get("nodata"),
     )
+    if np.sum(data_fits_criteria) == 0:
+        raise EmptyDataException(
+            " ".join(
+                [
+                    "Expected the passed threshold criteria to match at least some data.",
+                    f"Check that the values of threshold_criteria ({threshold_criteria})",
+                    f"and threshold_criteria_value {threshold_criteria_value}",
+                    "match at least part of the data.",
+                ]
+            )
+        )
 
     cols = np.arange(anomaly_raster_data.shape[1])
     rows = np.arange(anomaly_raster_data.shape[0])
