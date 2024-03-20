@@ -7,12 +7,12 @@ import tensorflow_probability as tfp
 
 
 def __posterior_mean_field(
-    kernel_size: int or tuple[int, int],
+    kernel_size=int or tuple[int, int],
     bias_size: int = 0,
-    scale: float = 1e-5,
     reinterpreted_batch_ndims: int = 1,
-    dtype=tf.float32,
-) -> tf.keras.Sequential:
+    scale: float = 1e-5,
+    dtype=None,
+) -> tf.keras.Sequential():
     """
     Do the posterior mean field.
 
@@ -34,7 +34,7 @@ def __posterior_mean_field(
             tfp.layers.DistributionLambda(
                 lambda t: tfp.distributions.Independent(
                     tfp.distributions.Normal(loc=t[..., :n], scale=scale + tf.nn.softplus(c + t[..., n:])),
-                    reinterpreted_batch_ndims=reinterpreted_batch_ndims,
+                    reinterpreted_batch_ndims=1,
                 )
             ),
         ]
@@ -44,7 +44,7 @@ def __posterior_mean_field(
 def __prior_trainable(
     kernel_size,
     bias_size=0,
-    dtype=tf.float32,
+    dtype=None,
     scale: float = 1.0,
     reinterpreted_batch_ndims: int = 1,
 ) -> tf.keras.Sequential:
@@ -93,28 +93,27 @@ def __create_probabilistic_bnn_model(
     - the model before compilation
     """
     inputs = {}
-    features = None
+
     for feature_name in features_name:
         inputs[feature_name] = tf.keras.layers.Input(name=feature_name, shape=(1,), dtype=tf.float32)
 
-        for ctn, units in enumerate(hidden_units):
-            features = (
-                tfp.layers.DenseVariational(
-                    units=units,
-                    make_prior_fn=__prior_trainable,
-                    make_posterior_fn=__posterior_mean_field,
-                    kl_weight=1 / train_size,
-                    activation=last_activation,
-                )(features)
-                if ctn != 0
-                else (inputs)
-            )
+    features = tf.keras.layers.Concatenate(axis=-1)(list(inputs.values()))
+    features = tf.keras.layers.BatchNormalization()(features)
 
-        distribution_params = tf.keras.layers.Dense(units=2)(features)
-        outputs = tfp.layers.IndependentNormal(1)(distribution_params)
+    for units in hidden_units:
+        features = tfp.layers.DenseVariational(
+            units=units,
+            make_prior_fn=__prior_trainable,
+            make_posterior_fn=__posterior_mean_field,
+            kl_weight=1 / train_size,
+            activation=last_activation,
+        )(features)
 
-        model = tf.keras.Model(inputs=inputs, outputs=outputs)
-        return model
+    distribution_params = tf.keras.layers.Dense(units=2)(features)
+    outputs = tfp.layers.IndependentNormal(1)(distribution_params)
+
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
+    return model
 
 
 def negative_loglikelihood(targets: tf.Tensor, estimated_distribution: tf.Tensor) -> tf.Tensor:
@@ -187,7 +186,7 @@ def generate_predictions(
     lower = (prediction_mean - (1.96 * prediction_stdv)).tolist()
     prediction_stdv = prediction_stdv.tolist()
 
-    for idx in range(sample):
+    for idx in range(len(prediction_mean)):
         results.append(
             {
                 "mean": round(prediction_mean[idx][0], 2),
