@@ -1,6 +1,5 @@
 import numpy as np
 import tensorflow as tf
-import tensorflow_probability as tfp
 
 from eis_toolkit.bayesian_nn.bayesian_nn import generate_predictions, negative_loglikelihood
 
@@ -17,13 +16,6 @@ print(f"y_test shape: {y_test.shape}")
 feature_names = ["MAG_1", "MAG_2", "MAG_3", "MAG_4", "MAG_5"]
 train_data_dict = {feature: X_train[:, idx] for idx, feature in enumerate(feature_names)}
 test_data_dict = {feature: X_test[:, idx] for idx, feature in enumerate(feature_names)}
-
-
-# TensorFlow and TensorFlow Probability shortcuts
-tfd = tfp.distributions
-tfpl = tfp.layers
-tfk = tf.keras
-tfkl = tf.keras.layers
 
 
 def test_compilation_of_the_model():
