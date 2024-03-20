@@ -26,8 +26,8 @@ tfk = tf.keras
 tfkl = tf.keras.layers
 
 
-if __name__ == "__main__":
-
+def test_compilation_of_the_model():
+    """Do the first test."""
     predicted_dictionary = generate_predictions(
         train_dataset=tf.data.Dataset.from_tensor_slices((train_data_dict, y_train.astype("float")))
         .shuffle(1000)
@@ -44,3 +44,4 @@ if __name__ == "__main__":
         loss=negative_loglikelihood,
         metrics=tf.keras.metrics.RootMeanSquaredError(),
     )
+    assert len(predicted_dictionary) > 0
