@@ -117,7 +117,7 @@ def __create_probabilistic_bnn_model(
         return model
 
 
-def __negative_loglikelihood(targets: tf.tensor, estimated_distribution: tf.tensor) -> tf.tensor:
+def negative_loglikelihood(targets: tf.Tensor, estimated_distribution: tf.Tensor) -> tf.Tensor:
     """
     Do the negative likelihood loss.
 
@@ -142,7 +142,7 @@ def generate_predictions(
     optimizer: Union[
         tf.keras.optimizers.Adam, tf.keras.optimizers.Nadam, tf.keras.optimizers.RMSprop, tf.keras.optimizers.SGD
     ],
-    loss: Union[tf.keras.losses.BinaryCrossentropy, tf.keras.losses.CategoricalCrossentropy, __negative_loglikelihood],
+    loss: Union[tf.keras.losses.BinaryCrossentropy, tf.keras.losses.CategoricalCrossentropy, negative_loglikelihood],
     metrics: Union[tf.keras.metrics.RootMeanSquaredError, tf.keras.metrics.Accuracy],
 ) -> list[dict[str, any]]:
     """
