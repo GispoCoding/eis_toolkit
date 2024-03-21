@@ -76,3 +76,7 @@ class NumericValueSignException(Exception):
 
 class InvalidNumberOfConv2DLayer(Exception):
     """Exception throws when when the list of conv layers is <= 0."""
+
+
+class InvalidInputDataException(Exception):
+    """Exception throws when the input data is None or invalid."""
