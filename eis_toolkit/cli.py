@@ -1323,7 +1323,8 @@ def classify_aspect_cli(
 def surface_derivatives_cli(
     input_raster: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
-    parameters: Annotated[List[SurfaceParameter], typer.Option(case_sensitive=False)],
+    first_order_parameters: Annotated[List[SurfaceParameter], typer.Option(case_sensitive=False)],
+    second_order_parameters: Annotated[List[SurfaceParameter], typer.Option(case_sensitive=False)],
     scaling_factor: Optional[float] = 1.0,
     slope_tolerance: Optional[float] = 0.0,
     slope_gradient_unit: Annotated[SlopeGradientUnit, typer.Option(case_sensitive=False)] = SlopeGradientUnit.radians,
@@ -1335,14 +1336,6 @@ def surface_derivatives_cli(
     from eis_toolkit.raster_processing.derivatives.parameters import first_order, second_order_basic_set
 
     typer.echo("Progress: 10%")
-
-    first_order_parameters = []
-    second_order_parameters = []
-    for parameter in get_enum_values(parameters):
-        if parameter in ("G", "A"):
-            first_order_parameters.append(parameter)
-        else:
-            second_order_parameters.append(parameter)
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")

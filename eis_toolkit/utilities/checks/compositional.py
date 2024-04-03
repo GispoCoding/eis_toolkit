@@ -1,13 +1,14 @@
 import numpy as np
 import pandas as pd
 from beartype import beartype
+from beartype.typing import Optional
 
 from eis_toolkit.exceptions import InvalidCompositionException, NumericValueSignException
 from eis_toolkit.utilities.checks.dataframe import check_dataframe_contains_only_positive_numbers
 
 
 @beartype
-def check_in_simplex_sample_space(df: pd.DataFrame, expected_sum: np.float64 = None) -> None:
+def check_in_simplex_sample_space(df: pd.DataFrame, expected_sum: Optional[np.float64] = None) -> None:
     """
     Check that the compositions represented by the data rows belong to a simplex sample space.
 
