@@ -24,8 +24,8 @@ def _binarize(
 @beartype
 def binarize(  # type: ignore[no-any-unimported]
     raster: rasterio.io.DatasetReader,
+    thresholds: Sequence[Number],
     bands: Optional[Sequence[int]] = None,
-    thresholds: Sequence[Number] = [Number],
     nodata: Optional[Number] = None,
 ) -> Tuple[np.ndarray, dict, dict]:
     """

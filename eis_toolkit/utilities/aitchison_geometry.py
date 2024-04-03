@@ -3,6 +3,7 @@ from numbers import Number
 import numpy as np
 import pandas as pd
 from beartype import beartype
+from beartype.typing import Optional
 
 
 @beartype
@@ -23,7 +24,7 @@ def _normalize(row: pd.Series, sum_value: Number = 1.0) -> pd.Series:
 
 
 @beartype
-def _closure(df: pd.DataFrame, scale: Number = None) -> pd.DataFrame:
+def _closure(df: pd.DataFrame, scale: Optional[Number] = None) -> pd.DataFrame:
     """
     Perform the closure operation on the dataframe.
 
