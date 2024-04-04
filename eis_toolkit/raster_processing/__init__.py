@@ -1,6 +1,6 @@
 from eis_toolkit.raster_processing.clipping import clip_raster
 from eis_toolkit.raster_processing.create_constant_raster import create_constant_raster
-from eis_toolkit.raster_processing.distance_to_anomaly import distance_to_anomaly
+from eis_toolkit.raster_processing.distance_to_anomaly import distance_to_anomaly, distance_to_anomaly_gdal
 from eis_toolkit.raster_processing.extract_values_from_raster import extract_values_from_raster
 from eis_toolkit.raster_processing.reclassify import (
     reclassify_with_defined_intervals,
