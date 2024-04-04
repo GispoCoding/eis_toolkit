@@ -1,0 +1,3 @@
+from eis_toolkit.raster_processing.derivatives.classification import classify_aspect
+from eis_toolkit.raster_processing.derivatives.parameters import first_order as first_order_derivatives
+from eis_toolkit.raster_processing.derivatives.parameters import second_order_basic_set as second_order_derivatives
