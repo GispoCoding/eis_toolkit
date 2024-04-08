@@ -408,3 +408,77 @@ def weights_of_evidence_calculate_responses(
 
     confidence_array = posterior_probabilities / posterior_probabilities_std
     return posterior_probabilities, posterior_probabilities_std, confidence_array
+
+
+@beartype
+def agterberg_cheng_CI_test(
+    posterior_probabilities: np.ndarray, posterior_probabilities_std: np.ndarray, nr_of_deposits: int
+) -> Tuple[bool, bool, bool, float, str]:
+    """Perform the conditional independence test presented by Agterberg-Cheng (2002).
+
+    Agterberg, F. P. & Cheng, Q. (2002). Conditional Independence Test for Weights-of-Evidence Modeling.
+    Natural Resources Research. 11. 249-255.
+
+    Args:
+        posterior_probabilities: Array of posterior probabilites.
+        posterior_probabilities_std: Array of standard deviations in the posterior probability calculations.
+        nr_of_deposits: Number of deposit pixels in the input data for weights of evidence calculations.
+    Returns:
+        Whether the conditional hypothesis can be accepted for the evidence layers that the input
+            posterior probabilities and standard deviations of posterior probabilities are calculated from.
+        Whether the probability satisfies the 99% confidence limit.
+        Whether the probability satisfies the 95% confidence limit.
+        Ratio T/n. Results > 1, may be because of lack of conditional independence of layers.
+            T should not exceed n by more than 15% (Bonham-Carter 1994, p. 316).
+        A summary of the the conditional independence calculations.
+
+    Raises:
+        InvalidParameterValueException: Value of nr_of_deposits is not at least 1.
+    """
+    if nr_of_deposits < 1:
+        raise InvalidParameterValueException("Expected input deposits count to be at least 1.")
+
+    # One-tailed significance test according to Agterberg-Cheng (2002):
+    # Conditional independence must satisfy:
+    # T - n < 1.645 * s(T) with a probability of 95%
+    # T - n < 2.33 * s(T) with a probability of 99%,
+    # where
+    # T = the sum of posterior probabilities in all unit cells in the study area
+    # n = total number of deposits
+
+    T = np.nansum(posterior_probabilities)
+
+    ratio = T / nr_of_deposits
+    ratio_msg = "T / n > 1 may suggest lack of conditional independence.\n"
+    ratio_msg_bonham_carter = "According to Bonham-Carter (1994), T / n should not exceed 1.15.\n"
+
+    difference = T - nr_of_deposits
+
+    T_std = np.sqrt(np.nansum(posterior_probabilities_std))
+
+    confidence_limit_99 = 2.33 * T_std
+    confidence_limit_95 = 1.645 * T_std
+
+    confidence_99 = bool(difference < confidence_limit_99)
+    confidence_95 = bool(difference < confidence_limit_95)
+    sign_99 = "<" if confidence_99 else ">"
+    sign_95 = "<" if confidence_95 else ">"
+
+    conditional_independence = confidence_99 and confidence_95
+
+    summary = f"""
+    Results of conditional independence test:\n\n
+    Observed number of deposits, n: {nr_of_deposits}\n
+    Expected number of deposits, T: {T}\n
+    Standard deviation of the expected number of deposits, s(T): {T_std}\n
+    T - n = {difference}\n
+    T / n = {ratio}\n{ratio_msg if ratio > 1 else ""}{ratio_msg_bonham_carter if ratio > 1.15 else ""}
+    Agterberg & Cheng CI test:\n
+    Data {"satisfies" if confidence_99 else "does not satisfy"} condition T - n < 2.33 * s(T):\n
+    {difference} {sign_99} {confidence_limit_99}\n
+    Data {"satisfies" if confidence_95 else "does not satisfy"} condition T - n < 1.645 * s(T):\n
+    {difference} {sign_95} {confidence_limit_95}\n
+    {"Conditional independence hypothesis should be rejected" if not conditional_independence else ""}
+    """
+
+    return conditional_independence, confidence_99, confidence_95, ratio, summary
