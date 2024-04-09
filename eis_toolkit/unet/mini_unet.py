@@ -15,19 +15,18 @@ from eis_toolkit.exceptions import InvalidNumberOfConv2DLayer, NumericValueSignE
 @beartype
 def img_loader(image_dir: str) -> (np.ndarray, list, np.ndarray):
     """
+    Fetches all the tiffs in the given directory and creates a numpy ndarray of the common shape.
 
-     Fetches all the tiffs in the given directory and creates a numpy ndarray of shape.
-
-     Calculates shape type (image_count, bands, width, height) from them. Returns the array, tiff metadata as a list and associated
-     nodatamasks in shape (image_count, width, height). Tiffs are assumed to be same size and are named as {number}.tif
+    Calculates shape (image_count, bands, width, height) from them. Returns the array, tiff metadata as a list and associated
+    nodatamasks in shape (image_count, width, height). Tiffs are assumed to be same size and are named as {number}.tif
     starting from 0
 
     Parameter:
         image_dir: the directory containing the images
 
     Returns:
-        the numpy ndarray of the tiffs
-        the list containing the meta
+        numpy ndarray of the tiffs
+        list containing the metadata
         nodata mask
     """
     # fetching the filepaths
@@ -92,9 +91,9 @@ def img_loader(image_dir: str) -> (np.ndarray, list, np.ndarray):
 @beartype
 def label_loader(label_dir: str) -> (np.ndarray, int):
     """
-    Do the Fetches all tiffs in the given directory and return a numpy ndarray of shape (image_count, width, height).
+    Fetches all the tiffs in the given directory and creates a numpy ndarray of the shape (image_count, bands, width, height).
 
-    The images are assumed to be same size and contain the labels with numbers showing classes.
+    The images are assumed to be the same size and contain the labels with numbers showing classes.
     The tiffs should have only one band.
 
     Parameters:
@@ -102,8 +101,7 @@ def label_loader(label_dir: str) -> (np.ndarray, int):
 
     Return:
         a numpy ndarray containing labels
-        no data value
-
+        nodata value
     """
     # fetching the filepaths
     paths = []
