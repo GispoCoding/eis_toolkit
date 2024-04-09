@@ -8,6 +8,7 @@ from eis_toolkit.exceptions import (
     EmptyDataException,
     EmptyDataFrameException,
     InvalidColumnException,
+    InvalidDataShapeException,
     InvalidParameterValueException,
 )
 from eis_toolkit.exploratory_analyses.k_means_cluster import k_means_clustering_array, k_means_clustering_vector
@@ -100,3 +101,9 @@ def test_invalid_columns():
     """Test that specifying missing/invalid columns for k-means vector raises the correct exception."""
     with pytest.raises(InvalidColumnException):
         k_means_clustering_vector(TEST_GDF, columns=["Invalid_column_name"])
+
+
+def test_invalid_array_shape():
+    """Test that invalid input array shape raises the correct exception."""
+    with pytest.raises(InvalidDataShapeException):
+        k_means_clustering_array(TEST_ARRAY[0])

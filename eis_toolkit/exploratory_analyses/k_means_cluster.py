@@ -1,13 +1,14 @@
 import geopandas as gpd
 import numpy as np
 from beartype import beartype
-from beartype.typing import Optional, Sequence, Union
+from beartype.typing import Optional, Sequence
 from sklearn.cluster import KMeans
 
 from eis_toolkit.exceptions import (
     EmptyDataException,
     EmptyDataFrameException,
     InvalidColumnException,
+    InvalidDataShapeException,
     InvalidParameterValueException,
 )
 
@@ -16,7 +17,7 @@ def _k_means_clustering(
     data_matrix: np.ndarray,
     number_of_clusters: Optional[int],
     random_state: Optional[int],
-) -> Union[np.ndarray, gpd.GeoDataFrame]:
+) -> KMeans:
     if number_of_clusters is None:
         # The elbow method
         k_max = 10
@@ -25,12 +26,11 @@ def _k_means_clustering(
         )
         inertia = np.diff(inertia, 2)
         scaled_derivatives = [i * 100 for i in inertia]
-        k_optimal = scaled_derivatives.index(min(scaled_derivatives))
-        kmeans = KMeans(n_clusters=k_optimal, random_state=random_state, n_init=10)
-    else:
-        kmeans = KMeans(n_clusters=number_of_clusters, random_state=random_state, n_init=10)
+        number_of_clusters = scaled_derivatives.index(min(scaled_derivatives))
 
+    kmeans = KMeans(n_clusters=number_of_clusters, random_state=random_state, n_init=10)
     kmeans.fit(data_matrix)
+
     return kmeans
 
 
@@ -46,7 +46,7 @@ def k_means_clustering_array(
     phenomena, consider normalizing or standardizing data before running k-means to avoid biased clusters.
 
     Args:
-        data: A Numpy array containing the input data. Expects data to be stacked 2D arrays
+        data: A 3D Numpy array containing the input data. Expects data to be stacked 2D arrays
             with shape (bands, height, width).
         number_of_clusters: The number of clusters (>= 1) to form. Optional parameter. If not provided,
             optimal number of clusters is computed using the elbow method.
@@ -58,10 +58,14 @@ def k_means_clustering_array(
 
     Raises:
         EmptyDataException: The input Numpy array is empty.
+        InvalidDataShapeException: Input data has incorrect number of dimensions (other than 3).
         InvalidParameterException: The number of clusters is less than one.
     """
     if data.size == 0:
         raise EmptyDataException("The input raster data is empty.")
+
+    if data.ndim != 3:
+        raise InvalidDataShapeException(f"The input array is not 3D: {data.ndim}.")
 
     if number_of_clusters is not None and number_of_clusters < 1:
         raise InvalidParameterValueException("The input value for number of clusters must be at least one.")
