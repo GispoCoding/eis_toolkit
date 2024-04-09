@@ -1,3 +1,5 @@
+from numbers import Number
+
 import geopandas as gdp
 import numpy as np
 from beartype import beartype
@@ -24,7 +26,7 @@ def dbscan_vector(
     data: gdp.GeoDataFrame,
     include_coordinates: bool = True,
     columns: Optional[Sequence[str]] = None,
-    max_distance: float = 0.5,
+    max_distance: Number = 0.5,
     min_samples: int = 5,
 ) -> gdp.GeoDataFrame:
     """
@@ -105,7 +107,7 @@ def dbscan_vector(
 
 
 @beartype
-def dbscan_array(data: np.ndarray, max_distance: float = 0.5, min_samples: int = 5) -> np.ndarray:
+def dbscan_array(data: np.ndarray, max_distance: Number = 0.5, min_samples: int = 5) -> np.ndarray:
     """
     Perform DBSCAN clustering on Numpy array data.
 

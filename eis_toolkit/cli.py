@@ -466,24 +466,30 @@ def dbscan_cli(
     typer.echo(f"DBSCAN completed, output vector written to {output_vector}.")
 
 
-# K-MEANS CLUSTERING
+# K-MEANS CLUSTERING VECTOR
 @app.command()
-def k_means_clustering_cli(
+def k_means_clustering_vector_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
+    include_coordinates: bool = True,
+    columns: Annotated[List[str], typer.Option()] = None,
     number_of_clusters: Optional[int] = None,
     random_state: int = None,
 ):
-    """Perform k-means clustering on the input data."""
-    from eis_toolkit.exploratory_analyses.k_means_cluster import k_means_clustering
+    """Perform k-means clustering on the input vector data."""
+    from eis_toolkit.exploratory_analyses.k_means_cluster import k_means_clustering_vector
 
     typer.echo("Progress: 10%")
 
     geodataframe = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    output_geodataframe = k_means_clustering(
-        data=geodataframe, number_of_clusters=number_of_clusters, random_state=random_state
+    output_geodataframe = k_means_clustering_vector(
+        data=geodataframe,
+        include_coordinates=include_coordinates,
+        columns=columns,
+        number_of_clusters=number_of_clusters,
+        random_state=random_state,
     )
     typer.echo("Progress: 75%")
 
@@ -491,6 +497,39 @@ def k_means_clustering_cli(
     typer.echo("Progress: 100%")
 
     typer.echo(f"K-means clustering completed, output vector written to {output_vector}.")
+
+
+# K-MEANS CLUSTERING RASTER
+@app.command()
+def k_means_clustering_raster_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    output_raster: OUTPUT_FILE_OPTION,
+    number_of_clusters: Optional[int] = None,
+    random_state: int = None,
+):
+    """Perform k-means clustering on the input raster data."""
+    from eis_toolkit.exploratory_analyses.k_means_cluster import k_means_clustering_array
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
+
+    typer.echo("Progress: 10%")
+
+    stacked_array, profiles = read_and_stack_rasters(input_rasters, nodata_handling="convert_to_nan")
+    typer.echo("Progress: 25%")
+
+    output_array = k_means_clustering_array(
+        data=stacked_array, number_of_clusters=number_of_clusters, random_state=random_state
+    )
+    typer.echo("Progress: 75%")
+
+    out_profile = profiles[0]
+    out_profile["nodata"] = -9999
+    out_profile["count"] = 1
+
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(output_array, 1)
+
+    typer.echo("Progress: 100%")
+    typer.echo(f"K-means clustering completed, output raster written to {output_raster}.")
 
 
 # PARALLEL COORDINATES
