@@ -16,10 +16,10 @@ from eis_toolkit.exceptions import InvalidNumberOfConv2DLayer, NumericValueSignE
 def img_loader(image_dir: str) -> (np.ndarray, list, np.ndarray):
     """
 
-     Do the Fetches all the tiffs in the given directory and creates a numpy ndarray of shape.
+     Fetches all the tiffs in the given directory and creates a numpy ndarray of shape.
 
-     Shape type (image_count, bands, width, height) from them. Returns the array, tiff metadata as list and associated
-     nodatamasks in shape (image_count, width, height) Tiffs are assumed to be same size and named {number}.tif
+     Calculates shape type (image_count, bands, width, height) from them. Returns the array, tiff metadata as a list and associated
+     nodatamasks in shape (image_count, width, height). Tiffs are assumed to be same size and are named as {number}.tif
     starting from 0
 
     Parameter:
@@ -28,7 +28,7 @@ def img_loader(image_dir: str) -> (np.ndarray, list, np.ndarray):
     Returns:
         the numpy ndarray of the tiffs
         the list containing the meta
-        no data mask
+        nodata mask
     """
     # fetching the filepaths
     paths = []
