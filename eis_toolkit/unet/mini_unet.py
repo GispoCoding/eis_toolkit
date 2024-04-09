@@ -110,7 +110,7 @@ def label_loader(label_dir: str) -> (np.ndarray, int):
 
     img_count = len(paths)
 
-    # Getting the size of the images
+    # Getting the size of the rasters
     with rasterio.open(paths[0]) as src:
         meta = src.meta.copy()
     nodata_value = meta["nodata"]
@@ -147,23 +147,23 @@ def build_autoencoder_multichannel_with_skip_connection(
 ) -> tf.keras.Model:
     """
 
-    Do build the Unet.
+    Build the Unet.
 
     Parameters:
-        input_shape The shap of the input used by the Unet:
+        input_shape The shape of the input used by the Unet:
         kernel_shape The shape of the convolution kernel:
         list_of_convolutional_layers The list of convolutional layers of the Unet. This list will be reversed
            for the decoder.
-        dropout: This is the dropout rate assigned.
+        dropout: The dropout rate assigned.
         pool_size: The size of the max pooling layer.
-        up_sampling_factor: the decoder need up sampling factor to enlarge the features layer by layer.
-        output_filters: the number of filters of the output.
-        output_kernel: the dimension of the output.
-        last_activation: last activation sigmoid by default.
-        data_augmentation: if you want to include data augmentation right before the input layer.
-        data_augmentation_params_crop: if data augmentation is true fill this value.
-        data_augmentation_params_rotation: if data augmentation is true fill this value.
-        regularization: type of regularization for each layer.
+        up_sampling_factor: The decoder need up sampling factor to enlarge the features layer by layer.
+        output_filters: The number of filters of the output.
+        output_kernel: The dimension of the output.
+        last_activation: Last activation sigmoid by default.
+        data_augmentation: If you want to include data augmentation right before the input layer.
+        data_augmentation_params_crop: If data augmentation is True fill this value.
+        data_augmentation_params_rotation: if data augmentation is True fill this value.
+        regularization: Type of regularization for each layer.
 
     Return:
         the built Unet.
