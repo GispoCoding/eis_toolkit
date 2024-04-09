@@ -441,29 +441,70 @@ def covariance_matrix_cli(
     typer.echo("Covariance matrix completed")
 
 
-# DBSCAN
+# DBSCAN VECTOR
 @app.command()
-def dbscan_cli(
+def dbscan_vector_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
+    include_coordinates: bool = True,
+    columns: Annotated[List[str], typer.Option()] = None,
     max_distance: float = 0.5,
     min_samples: int = 5,
 ):
-    """Perform DBSCAN clustering on the input data."""
-    from eis_toolkit.exploratory_analyses.dbscan import dbscan
+    """Perform DBSCAN clustering on the input vector data."""
+    from eis_toolkit.exploratory_analyses.dbscan import dbscan_vector
 
     typer.echo("Progress: 10%")
 
     geodataframe = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    output_geodataframe = dbscan(data=geodataframe, max_distance=max_distance, min_samples=min_samples)
+    output_geodataframe = dbscan_vector(
+        data=geodataframe,
+        include_coordinates=include_coordinates,
+        columns=columns,
+        max_distance=max_distance,
+        min_samples=min_samples,
+    )
     typer.echo("Progress: 75%")
+    print(np.unique(output_geodataframe["cluster"]))
 
     output_geodataframe.to_file(output_vector, driver="GPKG")
     typer.echo("Progress: 100%")
 
     typer.echo(f"DBSCAN completed, output vector written to {output_vector}.")
+
+
+# DBSCAN RASTER
+@app.command()
+def dbscan_raster_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    output_raster: OUTPUT_FILE_OPTION,
+    max_distance: float = 0.5,
+    min_samples: int = 5,
+):
+    """Perform DBSCAN clustering on the input raster data."""
+    from eis_toolkit.exploratory_analyses.dbscan import dbscan_array
+    from eis_toolkit.utilities.file_io import read_and_stack_rasters
+
+    typer.echo("Progress: 10%")
+
+    stacked_array, profiles = read_and_stack_rasters(input_rasters, nodata_handling="convert_to_nan")
+    typer.echo("Progress: 25%")
+
+    output_array = dbscan_array(data=stacked_array, max_distance=max_distance, min_samples=min_samples)
+    typer.echo("Progress: 75%")
+
+    out_profile = profiles[0]
+    out_profile["nodata"] = -9999
+    out_profile["count"] = 1
+
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(output_array, 1)
+
+    print(np.unique(output_array))
+    typer.echo("Progress: 100%")
+    typer.echo(f"DBSCAN clustering completed, output raster written to {output_raster}.")
 
 
 # K-MEANS CLUSTERING VECTOR
