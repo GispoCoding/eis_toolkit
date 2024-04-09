@@ -261,7 +261,7 @@ def dice_coeff_uncertain(
         smooth: the smooth factor.
 
     Return:
-        the dice loss value and the mask.
+        The dice loss value and the mask.
     """
 
     y_true = tf.cast(y_true, dtype=tf.float32)
@@ -285,14 +285,14 @@ def dice_coeff_uncertain(
 def regularization_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> float:
     """
 
-    Do compute the dice loss.
+    Computes the dice loss.
 
     Parameters:
         y_true: the true labels of the dataset.
         y_pred: the predicted labels from the model.
 
     Return:
-        a floating poit representing the loss.
+        a floating point representing the loss.
     """
 
     y_pred_uncertain = y_pred[:, :, :, 1]
@@ -303,14 +303,14 @@ def regularization_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> float:
 def dice_coefficient(prediction: tf.Tensor, true_label: tf.Tensor) -> tf.Tensor:
     """
 
-    Do calculate the dice loss coefficient.
+    Calculate the dice loss coefficient.
 
     Parameters:
         true_label: the true labels of the dataset.
         prediction: the predicted labels from the model.
 
     Return:
-        a floating poit representing the loss.
+        a floating point representing the loss.
     """
     prediction = tf.cast(prediction, tf.float32)
     true_label = tf.cast(true_label, tf.float32)
