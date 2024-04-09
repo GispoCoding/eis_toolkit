@@ -322,14 +322,14 @@ def dice_coefficient(prediction: tf.Tensor, true_label: tf.Tensor) -> tf.Tensor:
 def dice_loss(prediction: tf.Tensor, true_label: tf.Tensor) -> tf.Tensor:
     """
 
-    Do calculate the dice loss.
+    Calculate the dice loss.
 
     Parameters:
         true_label: the true labels of the dataset.
         prediction: the predicted labels from the model.
 
     Return:
-        a floating poit representing the loss.
+        a floating point representing the loss.
 
     """
 
@@ -402,28 +402,28 @@ def train_and_predict_the_model(
     Train and predict the Unet.
 
         Parameters:
-            x_train: a numpy array with the training sample inside
-            y_train: labels of the training dataset,
-            x_test: a numpy array with the testing sample inside,
-            y_test: labels of the testing dataset,
-            batch_size: how many sample per epochs should be used for fitting the model,
+            x_train: a numpy array with the training samplse
+            y_train: labels of the training dataset
+            x_test: a numpy array with the testing samples
+            y_test: labels of the testing dataset
+            batch_size: how many sample per epochs should be used for fitting the model
             epochs: how many epochs used for the training phase.
             is_uncertainty: bool = True,
             list_of_convolutional_layers: how many convolutional layer suggestion -> [32, 64, 128, 256],
             dropout: This is the dropout rate assigned.
             pool_size: The size of the max pooling layer.
-            up_sampling_factor: the decoder need up sampling factor to enlarge the features layer by layer.
+            up_sampling_factor: the decoder upsampling factor to enlarge the features layer by layer.
             output_filters: the number of filters of the output.
             output_kernel: the dimension of the output.
             last_activation: last activation sigmoid by default.
             data_augmentation: if you want to include data augmentation right before the input layer.
-            data_augmentation_params_crop: if data augmentation is true fill this value.
-            data_augmentation_params_rotation: if data augmentation is true fill this value.
+            data_augmentation_params_crop: if data augmentation is True fill this value.
+            data_augmentation_params_rotation: if data augmentation is True fill this value.
             regularization: type of regularization for each layer.
         Raise:
-            InvalidInputException: when one input is null.
+            InvalidInputException: when an input is null.
         Return:
-            the predicted numpy array
+            The predicted numpy array
     """
 
     if x_train.shape[0] == 0 or x_train is None:
