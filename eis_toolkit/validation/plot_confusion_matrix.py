@@ -1,21 +1,24 @@
-from typing import Optional
-
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from beartype import beartype
+from beartype.typing import Optional, Sequence, Union
+from matplotlib.colors import Colormap
 
 from eis_toolkit.exceptions import InvalidDataShapeException
 
 
 @beartype
-def plot_confusion_matrix(confusion_matrix: np.ndarray, cmap: Optional[str] = None) -> plt.Axes:
+def plot_confusion_matrix(
+    confusion_matrix: np.ndarray, cmap: Optional[Union[str, Colormap, Sequence]] = None
+) -> plt.Axes:
     """Plot confusion matrix to visualize classification results.
 
     Args:
         confusion_matrix: The confusion matrix as 2D Numpy array. Expects the first element
             (upper-left corner) to have True negatives.
-        cmap: Colormap name to be used in the plot. Optional parameter.
+        cmap: Colormap name, matploltib colormap objects or list of colors for coloring the plot.
+            Optional parameter.
 
     Returns:
         Matplotlib axes containing the plot.
@@ -25,7 +28,7 @@ def plot_confusion_matrix(confusion_matrix: np.ndarray, cmap: Optional[str] = No
     """
     shape = confusion_matrix.shape
     if shape[0] != shape[1]:
-        raise InvalidDataShapeException(f"Expected confusion matrix to be square, found shape: {shape}")
+        raise InvalidDataShapeException(f"Expected confusion matrix to be square, input array has shape: {shape}")
     names = None
 
     counts = ["{0:0.0f}".format(value) for value in confusion_matrix.flatten()]
