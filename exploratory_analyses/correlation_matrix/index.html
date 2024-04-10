@@ -9,22 +9,22 @@
       
       
       
-        <link rel="prev" href="../pca/">
+        <link rel="prev" href="../chi_square_test/">
       
       
-        <link rel="next" href="../../prediction/fuzzy_overlay/">
+        <link rel="next" href="../covariance_matrix/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.4">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.9">
     
     
       
-        <title>Statistical (hypothesis) testing - EIS Toolkit</title>
+        <title>Correlation matrix - EIS Toolkit</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.f2e4d321.min.css">
       
       
 
@@ -66,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#statistical-hypothesis-testing" class="md-skip">
+        <a href="#correlation-matrix" class="md-skip">
           Skip to content
         </a>
       
@@ -102,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Statistical (hypothesis) testing
+              Correlation matrix
             
           </span>
         </div>
@@ -262,10 +262,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
@@ -350,10 +348,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
@@ -376,6 +372,136 @@
             Exploratory analyses
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../chi_square_test/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Chi-square test
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Correlation matrix
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Correlation matrix
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.exploratory_analyses.correlation_matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      correlation_matrix
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.exploratory_analyses.correlation_matrix.correlation_matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      correlation_matrix
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.exploratory_analyses.correlation_matrix.plot_correlation_matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      plot_correlation_matrix
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../covariance_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Covariance matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -468,6 +594,48 @@
   
   
     <li class="md-nav__item">
+      <a href="../local_morans_i/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Local Moran's I
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../normality_test/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Normality test
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../parallel_coordinates/" class="md-nav__link">
         
   
@@ -503,112 +671,6 @@
 
               
             
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Statistical (hypothesis) testing
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  <span class="md-ellipsis">
-    Statistical (hypothesis) testing
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.exploratory_analyses.statistical_tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      statistical_tests
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.chi_square_test" class="md-nav__link">
-    <span class="md-ellipsis">
-      chi_square_test
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.correlation_matrix" class="md-nav__link">
-    <span class="md-ellipsis">
-      correlation_matrix
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.covariance_matrix" class="md-nav__link">
-    <span class="md-ellipsis">
-      covariance_matrix
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.normality_test" class="md-nav__link">
-    <span class="md-ellipsis">
-      normality_test
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -626,10 +688,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
@@ -817,10 +877,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
@@ -893,11 +951,53 @@
   
   
     <li class="md-nav__item">
+      <a href="../../raster_processing/distance_to_anomaly/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distance to anomaly
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../raster_processing/extract_values_from_raster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     Extract values from raster
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/reclassify/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reclassify raster
   </span>
   
 
@@ -1043,16 +1143,14 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_10" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_12" >
         
           
-          <label class="md-nav__link" for="__nav_6_10" id="__nav_6_10_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_12" id="__nav_6_12_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1063,8 +1161,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_10">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_12">
             <span class="md-nav__icon md-icon"></span>
             Derivatives
           </label>
@@ -1172,16 +1270,14 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_11" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_13" >
         
           
-          <label class="md-nav__link" for="__nav_6_11" id="__nav_6_11_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_13" id="__nav_6_13_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1192,8 +1288,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_11">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_13">
             <span class="md-nav__icon md-icon"></span>
             Filters
           </label>
@@ -1308,10 +1404,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
@@ -1373,10 +1467,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
@@ -1557,10 +1649,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
@@ -1714,10 +1804,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
@@ -1811,11 +1899,32 @@
   
   
     <li class="md-nav__item">
-      <a href="../../validation/plot_correlation_matrix/" class="md-nav__link">
+      <a href="../../validation/plot_confusion_matrix/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Plot correlation matrix
+    Plot confusion matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/plot_nn_model_performance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plot neural network training performance (accuracy and loss)
   </span>
   
 
@@ -1884,10 +1993,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
@@ -2134,25 +2241,7 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.exploratory_analyses.statistical_tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      statistical_tests
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.chi_square_test" class="md-nav__link">
-    <span class="md-ellipsis">
-      chi_square_test
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.correlation_matrix" class="md-nav__link">
+  <a href="#eis_toolkit.exploratory_analyses.correlation_matrix" class="md-nav__link">
     <span class="md-ellipsis">
       correlation_matrix
     </span>
@@ -2161,18 +2250,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.covariance_matrix" class="md-nav__link">
+  <a href="#eis_toolkit.exploratory_analyses.correlation_matrix.correlation_matrix" class="md-nav__link">
     <span class="md-ellipsis">
-      covariance_matrix
+      correlation_matrix
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.exploratory_analyses.statistical_tests.normality_test" class="md-nav__link">
+  <a href="#eis_toolkit.exploratory_analyses.correlation_matrix.plot_correlation_matrix" class="md-nav__link">
     <span class="md-ellipsis">
-      normality_test
+      plot_correlation_matrix
     </span>
   </a>
   
@@ -2196,14 +2285,14 @@
   
 
 
-<h1 id="statistical-hypothesis-testing">Statistical (hypothesis) testing</h1>
+<h1 id="correlation-matrix">Correlation matrix</h1>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<a id="eis_toolkit.exploratory_analyses.statistical_tests"></a>
+<a id="eis_toolkit.exploratory_analyses.correlation_matrix"></a>
   <div class="doc doc-contents first">
 
   
@@ -2223,228 +2312,8 @@
 
 
 
-<h3 id="eis_toolkit.exploratory_analyses.statistical_tests.chi_square_test" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">chi_square_test</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">target_column</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Compute Chi-square test for independence on the input data.</p>
-<p>It is assumed that the variables in the input data are independent and that they are categorical, i.e. strings,
-booleans or integers, but not floats.</p>
-
-
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>data</code></td>
-          <td>
-                <code><span title="pandas.DataFrame">DataFrame</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Dataframe containing the input data</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>target_column</code></td>
-          <td>
-                <code>str</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Variable against which independence of other variables is tested.</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>columns</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="beartype.typing.Sequence">Sequence</span>[str]]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Variables that are tested against the variable in target_column. If None, every column is used.</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>dict</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Test statistics for each variable (except target_column).</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-  <p><strong>Raises:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><span title="eis_toolkit.exceptions.EmptyDataFrameException">EmptyDataFrameException</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The input Dataframe is empty.</p>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-                <code><span title="eis_toolkit.exceptions.InvalidParameterValueException">InvalidParameterValueException</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The target_column is not in input Dataframe or invalid column is provided.</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-          <details class="quote">
-            <summary>Source code in <code>eis_toolkit/exploratory_analyses/statistical_tests.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">chi_square_test</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">target_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute Chi-square test for independence on the input data.</span>
-
-<span class="sd">    It is assumed that the variables in the input data are independent and that they are categorical, i.e. strings,</span>
-<span class="sd">    booleans or integers, but not floats.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        data: Dataframe containing the input data</span>
-<span class="sd">        target_column: Variable against which independence of other variables is tested.</span>
-<span class="sd">        columns: Variables that are tested against the variable in target_column. If None, every column is used.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Test statistics for each variable (except target_column).</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        EmptyDataFrameException: The input Dataframe is empty.</span>
-<span class="sd">        InvalidParameterValueException: The target_column is not in input Dataframe or invalid column is provided.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">check_empty_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;The input Dataframe is empty.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_columns_valid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="n">target_column</span><span class="p">]):</span>
-        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Target column not found in the Dataframe.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">columns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">invalid_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span> <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">invalid_columns</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The following variables are not in the dataframe: </span><span class="si">{</span><span class="n">invalid_columns</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">columns</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span>
-
-    <span class="n">statistics</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">column</span> <span class="o">!=</span> <span class="n">target_column</span><span class="p">:</span>
-            <span class="n">contingency_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">target_column</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">])</span>
-            <span class="n">chi_square</span><span class="p">,</span> <span class="n">p_value</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">chi2_contingency</span><span class="p">(</span><span class="n">contingency_table</span><span class="p">)</span>
-            <span class="n">statistics</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">chi_square</span><span class="p">,</span> <span class="n">p_value</span><span class="p">,</span> <span class="n">degrees_of_freedom</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">statistics</span>
-</code></pre></div></td></tr></table></div>
-          </details>
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 id="eis_toolkit.exploratory_analyses.statistical_tests.correlation_matrix" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">correlation_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">correlation_method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.exploratory_analyses.correlation_matrix.correlation_matrix" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">correlation_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">correlation_method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h3>
 
@@ -2479,6 +2348,20 @@ booleans or integers, but not floats.</p>
           </td>
           <td>
               <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>columns</code></td>
+          <td>
+                <code><span title="beartype.typing.Optional">Optional</span>[<span title="beartype.typing.Sequence">Sequence</span>[str]]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Columns to include in the correlation matrix. If None, all numeric columns are used.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
           </td>
         </tr>
         <tr>
@@ -2573,7 +2456,7 @@ booleans or integers, but not floats.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The input data contain non-numeric data.</p>
+              <p>The selected columns contain non-numeric data.</p>
             </div>
           </td>
         </tr>
@@ -2581,47 +2464,58 @@ booleans or integers, but not floats.</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/exploratory_analyses/statistical_tests.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+            <summary>Source code in <code>eis_toolkit/exploratory_analyses/correlation_matrix.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
 <span class="k">def</span> <span class="nf">correlation_matrix</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">correlation_method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;pearson&quot;</span><span class="p">,</span> <span class="s2">&quot;kendall&quot;</span><span class="p">,</span> <span class="s2">&quot;spearman&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;pearson&quot;</span><span class="p">,</span>
     <span class="n">min_periods</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -2631,6 +2525,7 @@ booleans or integers, but not floats.</p>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: Dataframe containing the input data.</span>
+<span class="sd">        columns: Columns to include in the correlation matrix. If None, all numeric columns are used.</span>
 <span class="sd">        correlation_method: &#39;pearson&#39;, &#39;kendall&#39;, or &#39;spearman&#39;. Defaults to &#39;pearson&#39;.</span>
 <span class="sd">        min_periods: Minimum number of observations required per pair of columns to have valid result. Optional.</span>
 
@@ -2641,12 +2536,20 @@ booleans or integers, but not floats.</p>
 <span class="sd">    Raises:</span>
 <span class="sd">        EmptyDataFrameException: The input Dataframe is empty.</span>
 <span class="sd">        InvalidParameterValueException: min_periods argument is used with method &#39;kendall&#39;.</span>
-<span class="sd">        NonNumericDataException: The input data contain non-numeric data.</span>
+<span class="sd">        NonNumericDataException: The selected columns contain non-numeric data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">check_empty_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;The input Dataframe is empty.&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_columns_numeric</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_list</span><span class="p">()):</span>
+    <span class="k">if</span> <span class="n">columns</span><span class="p">:</span>
+        <span class="n">invalid_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span> <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">invalid_columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid columns: </span><span class="si">{</span><span class="n">invalid_columns</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">data_subset</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_subset</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">data_subset</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">))):</span>
         <span class="k">raise</span> <span class="n">NonNumericDataException</span><span class="p">(</span><span class="s2">&quot;The input data contain non-numeric data.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">correlation_method</span> <span class="o">==</span> <span class="s2">&quot;kendall&quot;</span> <span class="ow">and</span> <span class="n">min_periods</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2654,7 +2557,7 @@ booleans or integers, but not floats.</p>
             <span class="s2">&quot;The argument min_periods is available only with correlation methods &#39;pearson&#39; and &#39;spearman&#39;.&quot;</span>
         <span class="p">)</span>
 
-    <span class="n">matrix</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">correlation_method</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="n">min_periods</span><span class="p">,</span> <span class="n">numeric_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">data_subset</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">correlation_method</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="n">min_periods</span><span class="p">,</span> <span class="n">numeric_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">matrix</span>
 </code></pre></div></td></tr></table></div>
@@ -2668,16 +2571,15 @@ booleans or integers, but not floats.</p>
 
 
 
-<h3 id="eis_toolkit.exploratory_analyses.statistical_tests.covariance_matrix" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">covariance_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delta_degrees_of_freedom</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.exploratory_analyses.correlation_matrix.plot_correlation_matrix" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">plot_correlation_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Compute covariance matrix on the input data.</p>
-<p>It is assumed that the data is numeric, i.e. integers or floats. NaN values are excluded from the calculations.</p>
+      <p>Create a Seaborn heatmap to visualize correlation matrix.</p>
 
 
 
@@ -2693,13 +2595,13 @@ booleans or integers, but not floats.</p>
     </thead>
     <tbody>
         <tr>
-          <td><code>data</code></td>
+          <td><code>matrix</code></td>
           <td>
                 <code><span title="pandas.DataFrame">DataFrame</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Dataframe containing the input data.</p>
+              <p>Correlation matrix as a DataFrame.</p>
             </div>
           </td>
           <td>
@@ -2707,13 +2609,28 @@ booleans or integers, but not floats.</p>
           </td>
         </tr>
         <tr>
-          <td><code>min_periods</code></td>
+          <td><code>annotate</code></td>
           <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[int]</code>
+                <code>bool</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Minimum number of observations required per pair of columns to have valid result. Optional.</p>
+              <p>If plot squares should display the correlation values. Defaults to True.</p>
+            </div>
+          </td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>cmap</code></td>
+          <td>
+                <code><span title="beartype.typing.Optional">Optional</span>[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Colormap name for plotting. Optional parameter. Defaults to None, in which
+case a default colormap is used.</p>
             </div>
           </td>
           <td>
@@ -2721,17 +2638,31 @@ booleans or integers, but not floats.</p>
           </td>
         </tr>
         <tr>
-          <td><code>delta_degrees_of_freedom</code></td>
+          <td><code>plot_title</code></td>
           <td>
-                <code>int</code>
+                <code><span title="beartype.typing.Optional">Optional</span>[str]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Delta degrees of freedom used for computing covariance matrix. Defaults to 1.</p>
+              <p>Title of the plot. Optional parameter, defaults to none (no title).</p>
             </div>
           </td>
           <td>
-                <code>1</code>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>**kwargs</code></td>
+          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Additional parameters to pass to Seaborn and matplotlib.</p>
+            </div>
+          </td>
+          <td>
+                <code>{}</code>
           </td>
         </tr>
     </tbody>
@@ -2750,11 +2681,11 @@ booleans or integers, but not floats.</p>
     <tbody>
         <tr>
           <td>
-                <code><span title="pandas.DataFrame">DataFrame</span></code>
+                <code><span title="matplotlib.Axes">Axes</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Dataframe containing matrix representing the covariance between the corresponding pair of variables.</p>
+              <p>Matplotlib axes object with the produced plot.</p>
             </div>
           </td>
         </tr>
@@ -2778,27 +2709,7 @@ booleans or integers, but not floats.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The input Dataframe is empty.</p>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-                <code><span title="eis_toolkit.exceptions.InvalidParameterValueException">InvalidParameterValueException</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Provided value for delta_degrees_of_freedom or min_periods is negative.</p>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-                <code><span title="eis_toolkit.exceptions.NonNumericDataException">NonNumericDataException</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The input data contain non-numeric data.</p>
+              <p>Input matrix is empty.</p>
             </div>
           </td>
         </tr>
@@ -2806,229 +2717,8 @@ booleans or integers, but not floats.</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/exploratory_analyses/statistical_tests.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">covariance_matrix</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">min_periods</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">delta_degrees_of_freedom</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute covariance matrix on the input data.</span>
-
-<span class="sd">    It is assumed that the data is numeric, i.e. integers or floats. NaN values are excluded from the calculations.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        data: Dataframe containing the input data.</span>
-<span class="sd">        min_periods: Minimum number of observations required per pair of columns to have valid result. Optional.</span>
-<span class="sd">        delta_degrees_of_freedom: Delta degrees of freedom used for computing covariance matrix. Defaults to 1.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Dataframe containing matrix representing the covariance between the corresponding pair of variables.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        EmptyDataFrameException: The input Dataframe is empty.</span>
-<span class="sd">        InvalidParameterValueException: Provided value for delta_degrees_of_freedom or min_periods is negative.</span>
-<span class="sd">        NonNumericDataException: The input data contain non-numeric data.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">check_empty_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;The input Dataframe is empty.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_columns_numeric</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_list</span><span class="p">()):</span>
-        <span class="k">raise</span> <span class="n">NonNumericDataException</span><span class="p">(</span><span class="s2">&quot;The input data contain non-numeric data.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">delta_degrees_of_freedom</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Delta degrees of freedom must be non-negative.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">min_periods</span> <span class="ow">and</span> <span class="n">min_periods</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;Min perioids must be non-negative.&quot;</span><span class="p">)</span>
-
-    <span class="n">matrix</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">min_periods</span><span class="o">=</span><span class="n">min_periods</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="n">delta_degrees_of_freedom</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">matrix</span>
-</code></pre></div></td></tr></table></div>
-          </details>
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 id="eis_toolkit.exploratory_analyses.statistical_tests.normality_test" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">normality_test</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Compute Shapiro-Wilk test for normality on the input data.</p>
-
-
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>data</code></td>
-          <td>
-                <code><span title="beartype.typing.Union">Union</span>[<span title="pandas.DataFrame">DataFrame</span>, <span title="numpy.ndarray">ndarray</span>]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Dataframe or Numpy array containing the input data.</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>columns</code></td>
-          <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="beartype.typing.Sequence">Sequence</span>[str]]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Optional columns to be used for testing.</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><span title="beartype.typing.Union">Union</span>[<span title="beartype.typing.Dict">Dict</span>[str, <span title="beartype.typing.Tuple">Tuple</span>[float, float]], <span title="beartype.typing.Tuple">Tuple</span>[float, float]]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Test statistics for each variable, output differs based on input data type.
-Numpy array input returns a Tuple of statistic and p_value.
-Dataframe input returns a dictionary where keys are column names
-and values are tuples containing the statistic and p-value.</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-  <p><strong>Raises:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><span title="eis_toolkit.exceptions.EmptyDataException">EmptyDataException</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The input data is empty.</p>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-                <code><span title="eis_toolkit.exceptions.InvalidColumnException">InvalidColumnException</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>All selected columns were not found in the input data.</p>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-                <code><span title="eis_toolkit.exceptions.NonNumericDataException">NonNumericDataException</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Selected data or columns contains non-numeric data.</p>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-                <code><span title="eis_toolkit.exceptions.SampleSizeExceededException">SampleSizeExceededException</span></code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Input data exceeds the maximum of 5000 samples.</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-          <details class="quote">
-            <summary>Source code in <code>eis_toolkit/exploratory_analyses/statistical_tests.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
+            <summary>Source code in <code>eis_toolkit/exploratory_analyses/correlation_matrix.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 62</span>
 <span class="normal"> 63</span>
 <span class="normal"> 64</span>
 <span class="normal"> 65</span>
@@ -3078,73 +2768,57 @@ and values are tuples containing the statistic and p-value.</p>
 <span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">normality_test</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute Shapiro-Wilk test for normality on the input data.</span>
+<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">plot_correlation_matrix</span><span class="p">(</span>
+    <span class="n">matrix</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">annotate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">plot_title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a Seaborn heatmap to visualize correlation matrix.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        data: Dataframe or Numpy array containing the input data.</span>
-<span class="sd">        columns: Optional columns to be used for testing.</span>
+<span class="sd">        matrix: Correlation matrix as a DataFrame.</span>
+<span class="sd">        annotate: If plot squares should display the correlation values. Defaults to True.</span>
+<span class="sd">        cmap: Colormap name for plotting. Optional parameter. Defaults to None, in which</span>
+<span class="sd">            case a default colormap is used.</span>
+<span class="sd">        plot_title: Title of the plot. Optional parameter, defaults to none (no title).</span>
+<span class="sd">        **kwargs: Additional parameters to pass to Seaborn and matplotlib.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Test statistics for each variable, output differs based on input data type.</span>
-<span class="sd">            Numpy array input returns a Tuple of statistic and p_value.</span>
-<span class="sd">            Dataframe input returns a dictionary where keys are column names</span>
-<span class="sd">            and values are tuples containing the statistic and p-value.</span>
+<span class="sd">        Matplotlib axes object with the produced plot.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        EmptyDataException: The input data is empty.</span>
-<span class="sd">        InvalidColumnException: All selected columns were not found in the input data.</span>
-<span class="sd">        NonNumericDataException: Selected data or columns contains non-numeric data.</span>
-<span class="sd">        SampleSizeExceededException: Input data exceeds the maximum of 5000 samples.</span>
+<span class="sd">        EmptyDataFrameException: Input matrix is empty.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">statistics</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">check_empty_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">EmptyDataException</span><span class="p">(</span><span class="s2">&quot;The input Dataframe is empty.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">matrix</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;Input matrix DataFrame is empty.&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">columns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">check_columns_valid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">InvalidColumnException</span><span class="p">(</span><span class="s2">&quot;All selected columns were not found in the input DataFrame.&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">check_columns_numeric</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">NonNumericDataException</span><span class="p">(</span><span class="s2">&quot;The selected columns contain non-numeric data.&quot;</span><span class="p">)</span>
+    <span class="c1"># Mask for the upper triangle of the heatmap</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">))</span>
 
-            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">cmap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Generate a default diverging colormap</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">diverging_palette</span><span class="p">(</span><span class="mi">230</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">as_cmap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">check_columns_numeric</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">NonNumericDataException</span><span class="p">(</span><span class="s2">&quot;The input data contain non-numeric data.&quot;</span><span class="p">)</span>
-            <span class="n">columns</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span>
+        <span class="n">matrix</span><span class="p">,</span>
+        <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+        <span class="n">center</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">square</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">annot</span><span class="o">=</span><span class="n">annotate</span><span class="p">,</span>
+        <span class="n">cbar_kws</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;shrink&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">plot_title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">plot_title</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">5000</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">SampleSizeExceededException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sample size for &#39;</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s2">&#39; exceeds the limit of 5000 samples.&quot;</span><span class="p">)</span>
-            <span class="n">statistic</span><span class="p">,</span> <span class="n">p_value</span> <span class="o">=</span> <span class="n">shapiro</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">])</span>
-            <span class="n">statistics</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">statistic</span><span class="p">,</span> <span class="n">p_value</span><span class="p">)</span>
-
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">EmptyDataException</span><span class="p">(</span><span class="s2">&quot;The input numpy array is empty.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5000</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SampleSizeExceededException</span><span class="p">(</span><span class="s2">&quot;Sample size exceeds the limit of 5000 samples.&quot;</span><span class="p">)</span>
-
-        <span class="n">nan_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">~</span><span class="n">nan_mask</span><span class="p">]</span>
-
-        <span class="n">flattened_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-        <span class="n">statistic</span><span class="p">,</span> <span class="n">p_value</span> <span class="o">=</span> <span class="n">shapiro</span><span class="p">(</span><span class="n">flattened_data</span><span class="p">)</span>
-        <span class="n">statistics</span> <span class="o">=</span> <span class="p">(</span><span class="n">statistic</span><span class="p">,</span> <span class="n">p_value</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">statistics</span>
+    <span class="k">return</span> <span class="n">ax</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -3208,10 +2882,10 @@ and values are tuples containing the statistic and p-value.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.c011b7c0.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.7389ff0e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
       
     
   </body>

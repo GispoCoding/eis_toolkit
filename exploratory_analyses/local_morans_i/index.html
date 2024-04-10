@@ -9,22 +9,22 @@
       
       
       
-        <link rel="prev" href="../get_pa_intersection/">
+        <link rel="prev" href="../k_means_cluster/">
       
       
-        <link rel="next" href="../plot_prediction_area_curves/">
+        <link rel="next" href="../normality_test/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.4">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.9">
     
     
       
-        <title>Plot correlation matrix - EIS Toolkit</title>
+        <title>Local Moran's I - EIS Toolkit</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.f2e4d321.min.css">
       
       
 
@@ -66,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#plot-correlation-matrix" class="md-skip">
+        <a href="#local-morans-i" class="md-skip">
           Skip to content
         </a>
       
@@ -102,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Plot correlation matrix
+              Local Moran's I
             
           </span>
         </div>
@@ -262,10 +262,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
@@ -342,19 +340,19 @@
       
   
   
+    
   
   
+  
     
     
     
     
-    
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
@@ -368,7 +366,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Exploratory analyses
@@ -382,7 +380,70 @@
   
   
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/dbscan/" class="md-nav__link">
+      <a href="../chi_square_test/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Chi-square test
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../correlation_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Correlation matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../covariance_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Covariance matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dbscan/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -403,7 +464,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/descriptive_statistics/" class="md-nav__link">
+      <a href="../descriptive_statistics/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -424,7 +485,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/feature_importance/" class="md-nav__link">
+      <a href="../feature_importance/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -445,7 +506,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/k_means_cluster/" class="md-nav__link">
+      <a href="../k_means_cluster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -463,10 +524,110 @@
                 
   
   
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Local Moran's I
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Local Moran's I
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.exploratory_analyses.local_morans_i" class="md-nav__link">
+    <span class="md-ellipsis">
+      local_morans_i
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.exploratory_analyses.local_morans_i.local_morans_i" class="md-nav__link">
+    <span class="md-ellipsis">
+      local_morans_i
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
   
   
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/parallel_coordinates/" class="md-nav__link">
+      <a href="../normality_test/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Normality test
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parallel_coordinates/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -487,32 +648,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../exploratory_analyses/pca/" class="md-nav__link">
+      <a href="../pca/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     PCA
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../exploratory_analyses/statistical_testing/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Statistical (hypothesis) testing
   </span>
   
 
@@ -539,10 +679,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
@@ -730,10 +868,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
@@ -806,11 +942,53 @@
   
   
     <li class="md-nav__item">
+      <a href="../../raster_processing/distance_to_anomaly/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distance to anomaly
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../raster_processing/extract_values_from_raster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     Extract values from raster
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster_processing/reclassify/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reclassify raster
   </span>
   
 
@@ -956,16 +1134,14 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_10" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_12" >
         
           
-          <label class="md-nav__link" for="__nav_6_10" id="__nav_6_10_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_12" id="__nav_6_12_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -976,8 +1152,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_10">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_12">
             <span class="md-nav__icon md-icon"></span>
             Derivatives
           </label>
@@ -1085,16 +1261,14 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_11" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_13" >
         
           
-          <label class="md-nav__link" for="__nav_6_11" id="__nav_6_11_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_13" id="__nav_6_13_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1105,8 +1279,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_11">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_13">
             <span class="md-nav__icon md-icon"></span>
             Filters
           </label>
@@ -1221,10 +1395,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
@@ -1286,10 +1458,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
@@ -1470,10 +1640,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
@@ -1621,21 +1789,17 @@
       
   
   
-    
   
   
-  
     
     
     
     
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
           <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
@@ -1649,7 +1813,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             Validation
@@ -1663,7 +1827,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calculate_auc/" class="md-nav__link">
+      <a href="../../validation/calculate_auc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1684,7 +1848,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../calculate_base_metrics/" class="md-nav__link">
+      <a href="../../validation/calculate_base_metrics/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1705,7 +1869,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../get_pa_intersection/" class="md-nav__link">
+      <a href="../../validation/get_pa_intersection/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1723,76 +1887,18 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Plot correlation matrix
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../validation/plot_confusion_matrix/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Plot correlation matrix
+    Plot confusion matrix
   </span>
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.validation.plot_correlation_matrix" class="md-nav__link">
-    <span class="md-ellipsis">
-      plot_correlation_matrix
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.validation.plot_correlation_matrix.plot_correlation_matrix" class="md-nav__link">
-    <span class="md-ellipsis">
-      plot_correlation_matrix
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1805,7 +1911,28 @@
   
   
     <li class="md-nav__item">
-      <a href="../plot_prediction_area_curves/" class="md-nav__link">
+      <a href="../../validation/plot_nn_model_performance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plot neural network training performance (accuracy and loss)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/plot_prediction_area_curves/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1826,7 +1953,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../plot_rate_curve/" class="md-nav__link">
+      <a href="../../validation/plot_rate_curve/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1857,10 +1984,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
@@ -2107,18 +2232,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.validation.plot_correlation_matrix" class="md-nav__link">
+  <a href="#eis_toolkit.exploratory_analyses.local_morans_i" class="md-nav__link">
     <span class="md-ellipsis">
-      plot_correlation_matrix
+      local_morans_i
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.validation.plot_correlation_matrix.plot_correlation_matrix" class="md-nav__link">
+  <a href="#eis_toolkit.exploratory_analyses.local_morans_i.local_morans_i" class="md-nav__link">
     <span class="md-ellipsis">
-      plot_correlation_matrix
+      local_morans_i
     </span>
   </a>
   
@@ -2142,14 +2267,14 @@
   
 
 
-<h1 id="plot-correlation-matrix">Plot correlation matrix</h1>
+<h1 id="local-morans-i">Local Moran's I</h1>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<a id="eis_toolkit.validation.plot_correlation_matrix"></a>
+<a id="eis_toolkit.exploratory_analyses.local_morans_i"></a>
   <div class="doc doc-contents first">
 
   
@@ -2169,15 +2294,15 @@
 
 
 
-<h3 id="eis_toolkit.validation.plot_correlation_matrix.plot_correlation_matrix" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">plot_correlation_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.exploratory_analyses.local_morans_i.local_morans_i" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">local_morans_i</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">weight_type</span><span class="o">=</span><span class="s1">&#39;queen&#39;</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">permutations</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span></code>
 
 </h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Create a Seaborn heatmap to visualize correlation matrix.</p>
+      <p>Execute Local Moran's I calculation for the data.</p>
 
 
 
@@ -2193,13 +2318,13 @@
     </thead>
     <tbody>
         <tr>
-          <td><code>matrix</code></td>
+          <td><code>gdf</code></td>
           <td>
-                <code><span title="pandas.DataFrame">DataFrame</span></code>
+                <code><span title="geopandas.GeoDataFrame">GeoDataFrame</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Correlation matrix as a DataFrame.</p>
+              <p>The geodataframe that contains the data to be examined with local morans I.</p>
             </div>
           </td>
           <td>
@@ -2207,60 +2332,59 @@
           </td>
         </tr>
         <tr>
-          <td><code>annotate</code></td>
+          <td><code>column</code></td>
           <td>
-                <code>bool</code>
+                <code>str</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>If plot squares should display the correlation values. Defaults to True.</p>
+              <p>The column to be used in the analysis.</p>
             </div>
           </td>
           <td>
-                <code>True</code>
+              <em>required</em>
           </td>
         </tr>
         <tr>
-          <td><code>cmap</code></td>
+          <td><code>weight_type</code></td>
           <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[<span title="matplotlib.colors.ListedColormap">ListedColormap</span>]</code>
+                <code><span title="beartype.typing.Literal">Literal</span>[queen, knn]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Colormap for plotting. Optional parameter. Defaults to None, in which
-case a default colormap is used.</p>
+              <p>The type of spatial weights matrix to be used. Defaults to "queen".</p>
             </div>
           </td>
           <td>
-                <code>None</code>
+                <code>&#39;queen&#39;</code>
           </td>
         </tr>
         <tr>
-          <td><code>plot_title</code></td>
+          <td><code>k</code></td>
           <td>
-                <code><span title="beartype.typing.Optional">Optional</span>[str]</code>
+                <code>int</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Title of the plot. Optional parameter, defaults to none (no title).</p>
+              <p>Number of nearest neighbors for the KNN weights matrix. Defaults to 4.</p>
             </div>
           </td>
           <td>
-                <code>None</code>
+                <code>4</code>
           </td>
         </tr>
         <tr>
-          <td><code>**kwargs</code></td>
+          <td><code>permutations</code></td>
           <td>
-                <code>dict</code>
+                <code>int</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Additional parameters to pass to Seaborn and matplotlib.</p>
+              <p>Number of permutations for significance testing. Defaults to 999.</p>
             </div>
           </td>
           <td>
-                <code>{}</code>
+                <code>999</code>
           </td>
         </tr>
     </tbody>
@@ -2279,11 +2403,12 @@ case a default colormap is used.</p>
     <tbody>
         <tr>
           <td>
-                <code><span title="matplotlib.axes.Axes">Axes</span></code>
+                <code><span title="geopandas.GeoDataFrame">GeoDataFrame</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Matplotlib axes object with the produced plot.</p>
+              <p>Geodataframe appended with two new columns: one with Local Moran's I
+statistic and one with p-value for the statistic.</p>
             </div>
           </td>
         </tr>
@@ -2303,11 +2428,11 @@ case a default colormap is used.</p>
     <tbody>
         <tr>
           <td>
-                <code><span title="eis_toolkit.exceptions.EmptyDataFrameException">EmptyDataFrameException</span></code>
+                <code>EmptyDataFrameException</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Input matrix is empty.</p>
+              <p>The input geodataframe is empty.</p>
             </div>
           </td>
         </tr>
@@ -2315,37 +2440,8 @@ case a default colormap is used.</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/validation/plot_correlation_matrix.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
+            <summary>Source code in <code>eis_toolkit/exploratory_analyses/local_morans_i.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">39</span>
 <span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span>
@@ -2365,56 +2461,63 @@ case a default colormap is used.</p>
 <span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
-<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">plot_correlation_matrix</span><span class="p">(</span>
-    <span class="n">matrix</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-    <span class="n">annotate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">cmap</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">ListedColormap</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">plot_title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a Seaborn heatmap to visualize correlation matrix.</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">local_morans_i</span><span class="p">(</span>
+    <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">weight_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;queen&quot;</span><span class="p">,</span> <span class="s2">&quot;knn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;queen&quot;</span><span class="p">,</span>
+    <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">permutations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">999</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Execute Local Moran&#39;s I calculation for the data.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        matrix: Correlation matrix as a DataFrame.</span>
-<span class="sd">        annotate: If plot squares should display the correlation values. Defaults to True.</span>
-<span class="sd">        cmap: Colormap for plotting. Optional parameter. Defaults to None, in which</span>
-<span class="sd">            case a default colormap is used.</span>
-<span class="sd">        plot_title: Title of the plot. Optional parameter, defaults to none (no title).</span>
-<span class="sd">        **kwargs: Additional parameters to pass to Seaborn and matplotlib.</span>
+<span class="sd">        gdf: The geodataframe that contains the data to be examined with local morans I.</span>
+<span class="sd">        column: The column to be used in the analysis.</span>
+<span class="sd">        weight_type: The type of spatial weights matrix to be used. Defaults to &quot;queen&quot;.</span>
+<span class="sd">        k: Number of nearest neighbors for the KNN weights matrix. Defaults to 4.</span>
+<span class="sd">        permutations: Number of permutations for significance testing. Defaults to 999.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Matplotlib axes object with the produced plot.</span>
+<span class="sd">        Geodataframe appended with two new columns: one with Local Moran&#39;s I</span>
+<span class="sd">          statistic and one with p-value for the statistic.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        EmptyDataFrameException: Input matrix is empty.</span>
+<span class="sd">        EmptyDataFrameException: The input geodataframe is empty.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">matrix</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;Input matrix DataFrame is empty.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gdf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">EmptyDataFrameException</span><span class="p">(</span><span class="s2">&quot;Geodataframe is empty.&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Mask for the upper triangle of the heatmap</span>
-    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Column &#39;</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s2">&#39; not found in the GeoDataFrame.&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">cmap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># Generate a default diverging colormap</span>
-        <span class="n">cmap</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">diverging_palette</span><span class="p">(</span><span class="mi">230</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">as_cmap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;k must be &gt; 0.&quot;</span><span class="p">)</span>
 
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span>
-        <span class="n">matrix</span><span class="p">,</span>
-        <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
-        <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
-        <span class="n">vmax</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
-        <span class="n">center</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">square</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-        <span class="n">annot</span><span class="o">=</span><span class="n">annotate</span><span class="p">,</span>
-        <span class="n">cbar_kws</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;shrink&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>
-        <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span>
-    <span class="k">if</span> <span class="n">plot_title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">plot_title</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">permutations</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;permutations must be &gt; 99.&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">ax</span>
+    <span class="n">calculations</span> <span class="o">=</span> <span class="n">_local_morans_i</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">weight_type</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">permutations</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">calculations</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -2478,10 +2581,10 @@ case a default colormap is used.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.c011b7c0.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.7389ff0e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
       
     
   </body>
