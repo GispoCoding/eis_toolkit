@@ -11,7 +11,8 @@ def plot_nn_model_accuracy(model_history: dict) -> plt.Axes:
     """Plot training and validation accuracies for a neural network model.
 
     Args:
-        model_history: Dictionary containing model training history information.
+        model_history: Dictionary containing neural network model training history information,
+            specifically entries for "accuracy" and "val_accuracy".
 
     Returns:
         Matplotlib axes containing the produced plot.
@@ -42,7 +43,8 @@ def plot_nn_model_loss(model_history: dict) -> plt.Axes:
     """Plot training and validation losses for a neural network model.
 
     Args:
-        model_history: Dictionary containing model training history information.
+        model_history: Dictionary containing neural network model training history information,
+            specifically entries for "loss" and "val_loss".
 
     Returns:
         Matplotlib axes containing the produced plot.
@@ -65,33 +67,3 @@ def plot_nn_model_loss(model_history: dict) -> plt.Axes:
     ax = sns.lineplot(data=df)
     ax.set(xlabel="Epoch", ylabel="Loss")
     return ax
-
-
-# from eis_toolkit.prediction.mlp import train_MLP_classifier
-# from sklearn.datasets import load_diabetes, load_iris
-# from sklearn.model_selection import train_test_split
-# from sklearn.preprocessing import StandardScaler
-# from eis_toolkit.transformations.one_hot_encoding import one_hot_encode
-
-# X_IRIS, Y_IRIS = load_iris(return_X_y=True)
-# X_DIABETES, Y_DIABETES = load_diabetes(return_X_y=True)
-# SEED = 42
-
-
-# X = StandardScaler().fit_transform(X_IRIS)
-# y = one_hot_encode(Y_IRIS).toarray()
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
-
-# model, history = train_MLP_classifier(
-#     X_train,
-#     y_train,
-#     neurons=[16],
-#     output_neurons=3,
-#     last_activation="softmax",
-#     loss_function="categorical_crossentropy",
-#     metrics=["accuracy"],
-#     random_state=SEED,
-# )
-
-# plot_nn_model_loss(history)
-# plt.show()
