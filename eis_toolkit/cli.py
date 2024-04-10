@@ -467,7 +467,6 @@ def dbscan_vector_cli(
         min_samples=min_samples,
     )
     typer.echo("Progress: 75%")
-    print(np.unique(output_geodataframe["cluster"]))
 
     output_geodataframe.to_file(output_vector, driver="GPKG")
     typer.echo("Progress: 100%")
@@ -502,7 +501,6 @@ def dbscan_raster_cli(
     with rasterio.open(output_raster, "w", **out_profile) as dst:
         dst.write(output_array, 1)
 
-    print(np.unique(output_array))
     typer.echo("Progress: 100%")
     typer.echo(f"DBSCAN clustering completed, output raster written to {output_raster}.")
 
