@@ -8,20 +8,10 @@ import numpy as np
 import pandas as pd
 import rasterio
 from beartype import beartype
-from beartype.typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union
+from beartype.typing import Any, List, Literal, Optional, Sequence, Tuple, Union
 from scipy import sparse
-from sklearn.base import BaseEstimator, is_classifier, is_regressor
-from sklearn.metrics import (
-    accuracy_score,
-    f1_score,
-    mean_absolute_error,
-    mean_squared_error,
-    precision_score,
-    r2_score,
-    recall_score,
-)
+from sklearn.base import BaseEstimator
 from sklearn.model_selection import KFold, LeaveOneOut, StratifiedKFold, train_test_split
-from tensorflow import keras
 
 from eis_toolkit.exceptions import (
     InvalidParameterValueException,
@@ -29,6 +19,7 @@ from eis_toolkit.exceptions import (
     NonMatchingRasterMetadataException,
 )
 from eis_toolkit.utilities.checks.raster import check_raster_grids
+from eis_toolkit.validation.scoring import score_predictions
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
 SPLIT = "split"
@@ -97,97 +88,6 @@ def split_data(
     split_data = train_test_split(*data, test_size=split_size, random_state=random_state, shuffle=shuffle)
 
     return split_data
-
-
-@beartype
-def evaluate_model(
-    X_test: Union[np.ndarray, pd.DataFrame],
-    y_test: Union[np.ndarray, pd.Series],
-    model: Union[BaseEstimator, keras.Model],
-    metrics: Optional[Sequence[Literal["mse", "rmse", "mae", "r2", "accuracy", "precision", "recall", "f1"]]] = None,
-) -> Tuple[np.ndarray, Dict[str, Number]]:
-    """
-    Evaluate/score a trained model with test data.
-
-    Predicts with the given test data and evaluates the predictions.
-
-    Args:
-        X_test: Test data.
-        y_test: Target labels for test data.
-        model: Trained Sklearn classifier or regressor.
-        metrics: Metrics to use for scoring the model. Defaults to "accuracy" for a classifier
-            and to "mse" for a regressor.
-
-    Returns:
-        Predictions and metric scores as a dictionary.
-    """
-    x_size = X_test.index.size if isinstance(X_test, pd.DataFrame) else X_test.shape[0]
-    if x_size != y_test.size:
-        raise NonMatchingParameterLengthsException(f"X and y must have the length {x_size} != {y_test.size}.")
-
-    if metrics is None:
-        metrics = ["accuracy"] if is_classifier(model) else ["mse"]
-
-    y_pred = model.predict(X_test)
-
-    out_metrics = {}
-    for metric in metrics:
-        score = _score_model(model, y_test, y_pred, metric)
-        out_metrics[metric] = score
-
-    return y_pred, out_metrics
-
-
-@beartype
-def predict_classifier(
-    data: Union[np.ndarray, pd.DataFrame], model: Union[BaseEstimator, keras.Model], include_probabilities: bool = True
-) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
-    """
-    Predict with a trained model.
-
-    Args:
-        data: Data used to make predictions.
-        model: Trained classifier or regressor. Can be any machine learning model trained with
-            EIS Toolkit (Sklearn and Keras models).
-        include_probabilities: If the probability array should be returned too. Defaults to True.
-
-    Returns:
-        Predicted labels and optionally predicted probabilities by a classifier model.
-    """
-    if isinstance(model, keras.Model):
-        probabilities = model.predict(data)
-        labels = probabilities.argmax(axis=-1)
-        if include_probabilities:
-            return labels, probabilities
-        else:
-            return labels
-    elif include_probabilities:
-        probabilities = model.predict_proba(data)
-        labels = model.predict(data)
-        return labels, probabilities
-    else:
-        labels = model.predict(data)
-        return labels
-
-
-@beartype
-def predict_regressor(
-    data: Union[np.ndarray, pd.DataFrame],
-    model: Union[BaseEstimator, keras.Model],
-) -> np.ndarray:
-    """
-    Predict with a trained model.
-
-    Args:
-        data: Data used to make predictions.
-        model: Trained classifier or regressor. Can be any machine learning model trained with
-            EIS Toolkit (Sklearn and Keras models).
-
-    Returns:
-        Regression model prediction array.
-    """
-    result = model.predict(data)
-    return result
 
 
 @beartype
@@ -370,7 +270,7 @@ def _train_and_validate_sklearn_model(
 
         out_metrics = {}
         for metric in metrics:
-            score = _score_model(model, y_valid, y_pred, metric)
+            score = score_predictions(y_valid, y_pred, metric)
             out_metrics[metric] = score
 
     # Validation approach 3: Cross-validation
@@ -389,7 +289,7 @@ def _train_and_validate_sklearn_model(
             y_pred = model.predict(X[valid_index])
 
             for metric in metrics:
-                score = _score_model(model, y[valid_index], y_pred, metric)
+                score = score_predictions(y[valid_index], y_pred, metric)
                 all_scores = out_metrics[metric][f"{metric}_all"]
                 all_scores.append(score)
 
@@ -410,68 +310,6 @@ def _train_and_validate_sklearn_model(
         raise InvalidParameterValueException(f"Unrecognized validation method: {validation_method}")
 
     return model, out_metrics
-
-
-@beartype
-def _score_model(
-    model: BaseEstimator,
-    y_true: Union[np.ndarray, pd.Series],
-    y_pred: Union[np.ndarray, pd.Series],
-    metric: Literal["mse", "rmse", "mae", "r2", "accuracy", "precision", "recall", "f1"],
-) -> float:
-    """
-    Score predictions of Sklearn model using the selected metric.
-
-    Args:
-        model: Sklearn model used to produce the predictions. Used only to identify the type
-            of model (regressor or classifier).
-        y_true: Target values ("ground truth") against which scoring is performed.
-        y_pred: Predicted values generated by the model.
-        metric: The scoring metric. Different options for regressor and classifier.
-
-    Returns:
-        The prediction score.
-
-    Raises:
-        InvalidParameterValueException: If model type is invalid for the given metric or metric was not recognized.
-    """
-    if metric in ["mae", "mse", "rmse", "r2"] and not is_regressor(model):
-        raise InvalidParameterValueException(
-            f"Chosen metric ({metric}) is not applicable for given model type (classifier)."
-        )
-    if metric in ["accuracy", "precision", "recall", "f1"] and not is_classifier(model):
-        raise InvalidParameterValueException(
-            f"Chosen metric ({metric}) is not applicable for given model type (regressor)."
-        )
-
-    if is_classifier(model):
-        # Multiclass classification
-        if len(y_true) > 2:
-            average_method = "micro"
-        # Binary classification
-        else:
-            average_method = "binary"
-
-    if metric == "mae":
-        score = mean_absolute_error(y_true, y_pred)
-    elif metric == "mse":
-        score = mean_squared_error(y_true, y_pred)
-    elif metric == "rmse":
-        score = mean_squared_error(y_true, y_pred, squared=False)
-    elif metric == "r2":
-        score = r2_score(y_true, y_pred)
-    elif metric == "accuracy":
-        score = accuracy_score(y_true, y_pred)
-    elif metric == "precision":
-        score = precision_score(y_true, y_pred, average=average_method)
-    elif metric == "recall":
-        score = recall_score(y_true, y_pred, average=average_method)
-    elif metric == "f1":
-        score = f1_score(y_true, y_pred, average=average_method)
-    else:
-        raise InvalidParameterValueException(f"Unrecognized metric: {metric}")
-
-    return score
 
 
 @beartype

@@ -9,12 +9,12 @@ from sklearn.ensemble import RandomForestClassifier
 from eis_toolkit.exceptions import InvalidParameterValueException, NonMatchingParameterLengthsException
 from eis_toolkit.prediction.machine_learning_general import (
     _train_and_validate_sklearn_model,
-    evaluate_model,
     load_model,
-    predict_classifier,
     save_model,
     split_data,
 )
+from eis_toolkit.prediction.machine_learning_predict import predict_classifier
+from eis_toolkit.validation.scoring import score_predictions
 
 TEST_DIR = Path(__file__).parent.parent
 
@@ -118,8 +118,9 @@ def test_evaluate_model_sklearn():
         X_train, y_train, model=RF_MODEL, validation_method="none", metrics=CLF_METRICS, random_state=42
     )
 
-    _, out_metrics = evaluate_model(X_test, y_test, model)
-    np.testing.assert_equal(out_metrics["accuracy"], 1.0)
+    predictions = predict_classifier(X_test, model, include_probabilities=False)
+    accuracy = score_predictions(y_test, predictions, "accuracy")
+    np.testing.assert_equal(accuracy, 1.0)
 
 
 def test_predict_classifier_sklearn():
