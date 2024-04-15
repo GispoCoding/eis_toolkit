@@ -24,7 +24,7 @@ def plot_confusion_matrix(
         cmap: Colormap name, matploltib colormap objects or list of colors for coloring the plot.
             Optional parameter.
         plot_title: Title for the plot. Defaults to "Confusion matrix".
-        ax: Existing Axes in which to draw the plot. Defaults to None.
+        ax: An existing Axes in which to draw the plot. Defaults to None.
         **kwargs: Additional keyword arguments passed to sns.heatmap.
 
     Returns:

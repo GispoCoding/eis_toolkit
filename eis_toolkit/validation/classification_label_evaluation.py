@@ -9,6 +9,9 @@ def summarize_label_metrics_binary(y_true: np.ndarray, y_pred: np.ndarray) -> Di
     """
     Generate a comprehensive report of various evaluation metrics for binary classification results.
 
+    The output includes accuracy, precision, recall, F1 scores and confusion matrix elements
+    (true negatives, false positives, false negatives, true positives).
+
     Args:
         y_true: True labels.
         y_pred: Predicted labels. The array should come from a binary classifier.
