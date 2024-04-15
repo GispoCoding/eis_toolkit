@@ -10,7 +10,10 @@ from eis_toolkit.exceptions import InvalidDataShapeException
 
 @beartype
 def plot_confusion_matrix(
-    confusion_matrix: np.ndarray, cmap: Optional[Union[str, Colormap, Sequence]] = None
+    confusion_matrix: np.ndarray,
+    cmap: Optional[Union[str, Colormap, Sequence]] = None,
+    plot_title: str = "Confusion matrix",
+    ax: Optional[plt.Axes] = None,
 ) -> plt.Axes:
     """Plot confusion matrix to visualize classification results.
 
@@ -40,7 +43,7 @@ def plot_confusion_matrix(
     else:
         labels = np.asarray([f"{v1}\n{v2}" for v1, v2 in zip(counts, percentages)]).reshape(shape)
 
-    ax = sns.heatmap(confusion_matrix, annot=labels, fmt="", cmap=cmap)
-    ax.set(xlabel="Predicted label", ylabel="True label")
+    out_ax = sns.heatmap(confusion_matrix, annot=labels, fmt="", cmap=cmap, ax=ax)
+    out_ax.set(xlabel="Predicted label", ylabel="True label", title=plot_title)
 
-    return ax
+    return out_ax
