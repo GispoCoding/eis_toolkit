@@ -415,8 +415,8 @@ def train_and_predict_the_model(
             dropout: This is the dropout rate assigned. It is used to randomly remove some predictions.
             pool_size: The size of the max pooling layer.
             up_sampling_factor: the decoder need up sampling factor to enlarge the features layer by layer.
-            output_filters: the number of filters of the output.
-            output_kernel: the dimension of the output.
+            output_filters: the number of output nodes.
+            output_kernel: the dimension of the output, it should be the same of the input.
             last_activation: last activation sigmoid by default.
             data_augmentation: if you want to include data augmentation right before the input layer.
             data_augmentation_params_crop: if data augmentation is true fill this value (crop range).
