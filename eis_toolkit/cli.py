@@ -1103,70 +1103,75 @@ def clip_raster_cli(
     typer.echo(f"Clipping completed, output raster written to {output_raster}.")
 
 
-# CREATE CONSTANT RASTER
+# CREATE CONSTANT RASTER MANUALLY
 @app.command()
-def create_constant_raster_cli(
+def create_constant_raster_manually_cli(
     output_raster: OUTPUT_FILE_OPTION,
     constant_value: float = typer.Option(),
-    template_raster: INPUT_FILE_OPTION = None,
-    coord_west: float = None,
-    coord_north: float = None,
-    coord_east: float = None,
-    coord_south: float = None,
-    target_epsg: int = None,
-    target_pixel_size: int = None,
-    raster_width: int = None,
-    raster_height: int = None,
-    nodata_value: float = None,
+    target_epsg: int = typer.Option(),
+    extent: Tuple[float, float, float, float] = typer.Option(),
+    target_pixel_size: int = typer.Option(),
+    nodata_value: float = typer.Option(),
 ):
     """
-    Create a constant raster with the given value.
+    Create constant raster manually by defining CRS, extent and pixel size.
 
-    There are 3 methods for raster creation:
-    - Set extent and coordinate system based on a template raster.
-    - Set extent from origin, based on the western and northern coordinates and the pixel size.
-    - Set extent from bounds, based on western, northern, eastern and southern points.
+    If the resulting raster height and width are not exact multiples of the pixel size, \
+    the output raster extent will differ slightly from the defined extent.
     """
     from eis_toolkit.raster_processing.create_constant_raster import create_constant_raster
 
     typer.echo("Progress: 10%")
 
-    if template_raster is not None:
-        with rasterio.open(template_raster) as raster:
-            typer.echo("Progress: 25%")
-            out_image, out_meta = create_constant_raster(
-                constant_value,
-                raster,
-                coord_west,
-                coord_north,
-                coord_east,
-                coord_south,
-                target_epsg,
-                target_pixel_size,
-                raster_width,
-                raster_height,
-                nodata_value,
-            )
-    else:
-        typer.echo("Progress: 25%")
-        out_image, out_meta = create_constant_raster(
-            constant_value,
-            template_raster,
-            coord_west,
-            coord_north,
-            coord_east,
-            coord_south,
-            target_epsg,
-            target_pixel_size,
-            raster_width,
-            raster_height,
-            nodata_value,
-        )
+    coord_west, coord_east, coord_south, coord_north = extent
+    raster_width = round(abs(coord_east - coord_west) / target_pixel_size)
+    raster_height = round(abs(coord_north - coord_south) / target_pixel_size)
+    out_image, out_meta = create_constant_raster(
+        constant_value=constant_value,
+        coord_west=coord_west,
+        coord_north=coord_north,
+        coord_east=coord_east,
+        coord_south=coord_south,
+        target_epsg=target_epsg,
+        raster_width=raster_width,
+        raster_height=raster_height,
+        nodata_value=nodata_value,
+    )
+
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **out_meta) as dest:
-        for band_n in range(1, out_meta["count"] + 1):
-            dest.write(out_image, band_n)
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Creating constant raster completed, writing raster to {output_raster}.")
+
+
+# CREATE CONSTANT RASTER FROM TEMPLATE
+@app.command()
+def create_constant_raster_from_template_cli(
+    template_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    constant_value: float = typer.Option(),
+    nodata_value: float = typer.Option(),
+):
+    """Create constant raster from a template raster."""
+    from eis_toolkit.raster_processing.create_constant_raster import create_constant_raster
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(template_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = create_constant_raster(
+            constant_value=constant_value,
+            template_raster=raster,
+            nodata_value=nodata_value,
+        )
+
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Creating constant raster completed, writing raster to {output_raster}.")
