@@ -2,13 +2,18 @@ import numpy as np
 import rasterio
 from beartype import beartype
 from beartype.typing import Sequence, Tuple
+from rasterio import profiles
 
-from eis_toolkit.exceptions import InvalidDataShapeException, InvalidParameterValueException
+from eis_toolkit.exceptions import (
+    InvalidDataShapeException,
+    InvalidParameterValueException,
+    NonMatchingRasterMetadataException,
+)
 from eis_toolkit.utilities.checks.raster import check_raster_grids
 
 
 @beartype
-def split_raster_bands(raster: rasterio.io.DatasetReader) -> Sequence[Tuple[np.ndarray, dict]]:
+def split_raster_bands(raster: rasterio.io.DatasetReader) -> Sequence[Tuple[np.ndarray, profiles.Profile]]:
     """
     Split multiband raster into singleband rasters.
 
@@ -17,7 +22,7 @@ def split_raster_bands(raster: rasterio.io.DatasetReader) -> Sequence[Tuple[np.n
 
     Returns:
         Output singleband raster list. List elements are tuples where first element is raster data and second \
-        element is raster metadata.
+        element is raster profile.
 
     Raises:
         InvalidParameterValueException: Input raster contains only one band.
@@ -29,14 +34,14 @@ def split_raster_bands(raster: rasterio.io.DatasetReader) -> Sequence[Tuple[np.n
 
     for i in range(1, count + 1):
         band_data = raster.read(i)
-        band_meta = raster.meta.copy()
-        band_meta.update({"count": 1, "dtype": band_data.dtype})
-        out_rasters.append((band_data, band_meta))
+        band_profile = raster.profile.copy()
+        band_profile.update({"count": 1, "dtype": band_data.dtype})
+        out_rasters.append((band_data, band_profile))
     return out_rasters
 
 
 @beartype
-def combine_raster_bands(input_rasters: Sequence[rasterio.io.DatasetReader]) -> Tuple[np.ndarray, dict]:
+def combine_raster_bands(input_rasters: Sequence[rasterio.io.DatasetReader]) -> Tuple[np.ndarray, profiles.Profile]:
     """
     Combine multiple rasters into one multiband raster.
 
@@ -50,10 +55,11 @@ def combine_raster_bands(input_rasters: Sequence[rasterio.io.DatasetReader]) -> 
 
     Returns:
         The combined raster data.
-        The updated metadata.
+        The updated raster profile.
 
     Raises:
         InvalidParameterValueException: Input rasters contains only one raster.
+        NonMatchingRasterMetadataException: Input rasters have mismatching spatial metadata.
     """
     if len(input_rasters) < 2:
         raise InvalidParameterValueException(
@@ -68,7 +74,7 @@ def combine_raster_bands(input_rasters: Sequence[rasterio.io.DatasetReader]) -> 
             bands_arrays.append(raster.read(i))
 
     if not check_raster_grids(profiles, same_extent=True):
-        raise Exception("Mismatching profiles found.")
+        raise NonMatchingRasterMetadataException("Input rasters have mismatching metadata/profiles.")
 
     out_image = np.stack(bands_arrays, axis=0)
 
