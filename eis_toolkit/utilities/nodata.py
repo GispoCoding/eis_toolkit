@@ -42,7 +42,7 @@ def unify_raster_nodata(
 
     out_rasters = []
     for raster in input_rasters:
-        out_image, out_meta = convert_raster_nodata(raster, new_nodata)
+        out_image, out_meta = convert_raster_nodata(raster, new_nodata=new_nodata)
         out_rasters.append((out_image, out_meta))
 
     return out_rasters
@@ -87,15 +87,15 @@ def convert_raster_nodata(
     Raises:
         InvalidParameterValueException: Nodata is not defined in raster metadata and old_nodata was not specified.
     """
-    with rasterio.open(input_raster) as raster:
-        if old_nodata is None and not raster.meta["nodata"]:
-            raise InvalidParameterValueException(
-                "Could not find old nodata value from raster metadata. Either define old_nodata or use \
-                'set_raster_nodata' tool to fix broken raster metadata."
-            )
-        raster_arr = raster.read()
-        out_image = replace_values(raster_arr, raster.nodata, new_nodata)
-        out_meta = raster.meta.copy()
+    if old_nodata is None and not input_raster.meta["nodata"]:
+        raise InvalidParameterValueException(
+            "Could not find old nodata value from raster metadata. Either define old_nodata or use \
+            'set_raster_nodata' tool to fix broken raster metadata."
+        )
+    raster_arr = input_raster.read()
+    old_nodata = input_raster.nodata if old_nodata is None else old_nodata
+    out_image = replace_values(raster_arr, old_nodata, new_nodata)
+    out_meta = input_raster.meta.copy()
     out_meta["nodata"] = new_nodata
 
     return out_image, out_meta
