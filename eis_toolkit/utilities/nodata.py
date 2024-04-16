@@ -2,64 +2,103 @@ import functools
 from numbers import Number
 
 import numpy as np
+import rasterio
 from beartype import beartype
-from beartype.typing import Any, Callable, Dict, Sequence, Union
+from beartype.typing import Any, Callable, Dict, Optional, Sequence, Tuple, Union
+from rasterio import profiles
 
-from eis_toolkit.exceptions import InvalidRasterBandException
+from eis_toolkit.exceptions import InvalidParameterValueException
 from eis_toolkit.utilities.miscellaneous import replace_values
 
 
 @beartype
-def set_nodata_raster_meta(raster_meta: Dict, nodata_value: Number) -> Dict:
+def unify_raster_nodata(
+    input_rasters: Sequence[rasterio.io.DatasetReader], new_nodata: Number = -9999
+) -> Sequence[Tuple[np.ndarray, dict]]:
     """
-    Set new nodata value for raster metadata.
+    Unifies nodata for the input rasters.
 
-    Note that this function does not convert any data values, only changes/fixes metadata.
+    All old nodata values in the input rasters are converted to the new nodata value. Raster metadatas
+    is also updated with the new nodata value.
 
     Args:
-        raster_meta: Raster metadata to be updated.
-        nodata_value: Nodata value to be set.
+        input_rasters:
+        new_nodata: New nodata value that will be used to replace existing nodata for all bands in all
+            input rasters. Defaults to -9999.
 
     Returns:
-        Raster metadata with updated nodata value.
+        Output raster list. List elements are tuples where first element is raster data and second \
+        element is raster metadata.
+
+    Raises:
+        InvalidParameterValueException: Input raster list contains only one raster.
+    """
+
+    if len(input_rasters) < 2:
+        raise InvalidParameterValueException(
+            f"Expected multiple rasters in the input_rasters list. Rasters: {len(input_rasters)}. \
+            To convert nodata of one raster, use the 'convert_raster_nodata' tool."
+        )
+
+    out_rasters = []
+    for raster in input_rasters:
+        out_image, out_meta = convert_raster_nodata(raster, new_nodata)
+        out_rasters.append((out_image, out_meta))
+
+    return out_rasters
+
+
+@beartype
+def set_raster_nodata(raster_meta: Union[Dict, profiles.Profile], new_nodata: Number) -> Union[Dict, profiles.Profile]:
+    """
+    Set new nodata value for raster metadata or profile.
+
+    Note that this function does not convert any data values, it only changes the metadata.
+    The inteded use case for this tool is fixing metadata with invalid nodata value.
+
+    Args:
+        raster_meta: Raster metadata or profile to be updated.
+        nodata_value: New nodata value.
+
+    Returns:
+        Raster metadata / profile with updated nodata value.
     """
     out_meta = raster_meta.copy()
-    out_meta.update({"nodata": nodata_value})
+    out_meta.update({"nodata": new_nodata})
     return out_meta
 
 
 @beartype
-def replace_raster_nodata_each_band(
-    raster_data: np.ndarray,
-    nodata_per_band: Dict[int, Union[Number, Sequence[Number]]],
-    new_nodata: Number = -9999,  # type: ignore
-) -> np.ndarray:
+def convert_raster_nodata(
+    input_raster: rasterio.io.DatasetReader,
+    old_nodata: Optional[Number] = None,
+    new_nodata: Number = -9999,
+) -> Tuple[np.ndarray, dict]:
     """
-    Replace old nodata values with a new nodata value in a raster for each band separately.
+    Convert existing nodata values with a new nodata value for a raster.
 
     Args:
-        raster_data: Multiband raster's data.
-        nodata_per_band: Mapping of bands and their current nodata values.
-        new_nodata: A new nodata value that will be used for all old nodata values and all bands. Defaults to -9999.
+        input_raster: Input raster dataset.
+        new_nodata: New nodata value that will be used to replace existing nodata for all bands. Defaults to -9999.
 
     Returns:
-        The original raster data with replaced nodata values.
+        The input raster data and metadata updated with the new nodata.
 
     Raises:
-        InvalidRasterBandException: Invalid band index in nodata mapping.
+        InvalidParameterValueException: Nodata is not defined in raster metadata and old_nodata was not specified.
     """
-    if any(band > len(raster_data) or band < 1 for band in nodata_per_band.keys()):
-        raise InvalidRasterBandException("Invalid band index in nodata mapping.")
+    with rasterio.open(input_raster) as raster:
+        if old_nodata is None and not raster.meta["nodata"]:
+            raise InvalidParameterValueException(
+                "Could not find old nodata value from raster metadata. Either define old_nodata or use \
+                'set_raster_nodata' tool to fix broken raster metadata."
+            )
+        raster_arr = raster.read()
+        out_image = replace_values(raster_arr, raster.nodata, new_nodata)
+        out_meta = raster.meta.copy()
+    out_meta["nodata"] = new_nodata
 
-    out_raster_data = raster_data.copy()
-
-    for band, nodata_values in nodata_per_band.items():
-        index = band - 1
-        band_data = raster_data[index]
-        out_data = replace_values(band_data, nodata_values, new_nodata)
-        out_raster_data[index] = out_data
-
-    return out_raster_data
+    return out_image, out_meta
 
 
 @beartype
