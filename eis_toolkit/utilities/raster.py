@@ -21,7 +21,7 @@ def split_raster_bands(raster: rasterio.io.DatasetReader) -> Sequence[Tuple[np.n
         raster: Input multiband raster.
 
     Returns:
-        Output singleband raster list. List elements are tuples where first element is raster data and second \
+        Output singleband raster list. List elements are tuples where first element is raster data (2D) and second \
         element is raster profile.
 
     Raises:
