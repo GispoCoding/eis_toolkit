@@ -226,7 +226,7 @@ def get_output_paths_from_names(
 
 
 def get_output_paths_from_common_name(
-    outputs: Sequence[Any], directory: Path, common_name: str, extension: str
+    outputs: Sequence[Any], directory: Path, common_name: str, extension: str, first_num: int = 1
 ) -> Sequence[Path]:
     """
     Get output paths for cases where outputs should be just numbered.
@@ -242,12 +242,13 @@ def get_output_paths_from_common_name(
         directory: Path of the output directory.
         common_name: Common name used as the basis of each output file name. A number is appended to this.
         extension: The extension used for the output path, for example ".tif".
+        first_num: The first number used as a suffix.
 
     Returns:
         List of output paths.
     """
     output_paths = []
-    for i in range(len(outputs)):
+    for i in range(first_num, len(outputs) + first_num):
         output_path = directory.joinpath(common_name + f"_{i}" + extension)
         output_paths.append(output_path)
 

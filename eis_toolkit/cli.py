@@ -2913,7 +2913,7 @@ def split_raster_bands_cli(input_raster: INPUT_FILE_OPTION, output_dir: OUTPUT_D
 
 
 @app.command()
-def combine_rasters_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT_FILE_OPTION):
+def combine_raster_bands_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT_FILE_OPTION):
     """Combine multiple rasters into one multiband raster."""
     from eis_toolkit.utilities.raster import combine_raster_bands
 
