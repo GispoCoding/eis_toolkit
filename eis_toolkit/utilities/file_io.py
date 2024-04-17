@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import geopandas as gpd
@@ -5,7 +6,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 from beartype import beartype
-from beartype.typing import Literal, Sequence, Tuple, Union
+from beartype.typing import Any, Literal, Sequence, Tuple, Union
 
 from eis_toolkit import exceptions
 from eis_toolkit.utilities.checks.raster import check_raster_grids
@@ -162,3 +163,94 @@ def read_tabular(file_path: Path) -> pd.DataFrame:
     except pd.errors.ParserError:
         raise exceptions.FileReadError(f"Failed to read tabular data from {file_path}.")
     return data
+
+
+def get_output_paths_from_inputs(
+    input_paths: Sequence[Path], directory: Path, suffix: str, extension: str
+) -> Sequence[Path]:
+    """
+    Get output paths using input paths to extract file name bases.
+
+    Combines directory, file name extracted from input path, suffix and extension.
+    Include dot in the extension, for example '.tif'.
+
+    This tool is designed mainly for convenience in CLI functions.
+
+    Args:
+        input_paths: Input paths.
+        directory: Path of the output directory.
+        suffix: Common suffix added to the end of each output file name, for example "nodata_unified".
+        extension: The extension used for the output path, for example ".tif".
+
+    Returns:
+        List of output paths.
+    """
+    output_paths = []
+    for input_path in input_paths:
+        input_file_name_with_extension = os.path.split(input_path)[1]
+        input_file_name = os.path.splitext(input_file_name_with_extension)[0]
+        output_file_name = f"{input_file_name}_{suffix}"
+        output_path = directory.joinpath(output_file_name + extension)
+        output_paths.append(output_path)
+
+    return output_paths
+
+
+def get_output_paths_from_names(
+    file_names: Sequence[str], directory: Path, suffix: str, extension: str
+) -> Sequence[Path]:
+    """
+    Get output paths directly from given file names.
+
+    Combines directory, file name, suffix and extension.
+    Include dot in the extension, for example '.tif'.
+
+    This tool is designed mainly for convenience in CLI functions.
+
+    Args:
+        input_paths: Raw file names.
+        directory: Path of the output directory.
+        suffix: Common suffix added to the end of each output file name, for example "nodata_unified".
+        extension: The extension used for the output path, for example ".tif".
+
+    Returns:
+        List of output paths.
+    """
+    output_paths = []
+    for name in file_names:
+        output_file_name = f"{name}_{suffix}"
+        output_path = directory.joinpath(output_file_name + extension)
+        output_paths.append(output_path)
+
+    return output_paths
+
+
+def get_output_paths_from_common_name(
+    outputs: Sequence[Any], directory: Path, common_name: str, extension: str
+) -> Sequence[Path]:
+    """
+    Get output paths for cases where outputs should be just numbered.
+
+    Combines directory, given common file name, number and extension. Outputs are used
+    to get the number used as suffix.
+    Include dot in the extension, for example '.tif'.
+
+    This tool is designed mainly for convenience in CLI functions.
+
+    Args:
+        input_paths: Outputs. Used just to iterate and get numbers for suffixes.
+        directory: Path of the output directory.
+        common_name: Common name used as the basis of each output file name. A number is appended to this.
+        extension: The extension used for the output path, for example ".tif".
+
+    Returns:
+        List of output paths.
+    """
+    output_paths = []
+    for i in range(len(outputs)):
+        output_path = directory.joinpath(common_name + f"_{i}" + extension)
+        output_paths.append(output_path)
+
+        output_paths.append
+
+    return output_paths
