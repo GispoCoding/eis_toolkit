@@ -3,7 +3,7 @@ from beartype import beartype
 from beartype.typing import Sequence, Union
 
 from eis_toolkit.exceptions import InvalidDatasetException, InvalidParameterValueException
-from eis_toolkit.utilities.miscellaneous import stack_raster_arrays
+from eis_toolkit.utilities.raster import stack_raster_arrays
 
 
 def _prepare_data_for_fuzzy_overlay(data: Union[Sequence[np.ndarray], np.ndarray]) -> np.ndarray:
