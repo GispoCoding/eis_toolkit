@@ -2888,6 +2888,123 @@ def winsorize_transform_cli(
 # TODO
 
 
+# --- UTILITIES ---
+@app.command()
+def split_raster_bands_cli(input_raster: INPUT_FILE_OPTION, output_dir: OUTPUT_DIR_OPTION):  # CHECK
+    """Split multiband raster into singleband rasters."""
+    from eis_toolkit.utilities.file_io import get_output_paths_from_common_name
+    from eis_toolkit.utilities.raster import split_raster_bands
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        output_singleband_rasters = split_raster_bands(raster)
+    typer.echo("Progress: 70%")
+
+    name = os.path.splitext(os.path.basename(input_raster))[0]
+    output_paths = get_output_paths_from_common_name(output_singleband_rasters, output_dir, f"{name}_split", ".tif")
+    for output_path, (out_image, out_profile) in zip(output_paths, output_singleband_rasters):
+        with rasterio.open(output_path, "w", **out_profile) as dst:
+            dst.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Splitting raster completed, writing rasters to directory {output_dir}.")
+
+
+@app.command()
+def combine_rasters_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT_FILE_OPTION):
+    """Combine multiple rasters into one multiband raster."""
+    from eis_toolkit.utilities.raster import combine_raster_bands
+
+    typer.echo("Progress: 10%")
+
+    rasters = [rasterio.open(raster) for raster in input_rasters]  # Open all rasters to be combined
+    typer.echo("Progress: 25%")
+
+    out_image, out_meta = combine_raster_bands(rasters)
+    [raster.close() for raster in rasters]
+    typer.echo("Progress: 70%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Combining rasters completed, writing raster to {output_raster}.")
+
+
+@app.command()
+def unify_raster_nodata_cli(
+    input_rasters: INPUT_FILES_ARGUMENT, output_dir: OUTPUT_DIR_OPTION, new_nodata: float = -9999  # CHECK
+):
+    """Unifies nodata for the input rasters."""
+    from eis_toolkit.utilities.file_io import get_output_paths_from_inputs
+    from eis_toolkit.utilities.nodata import unify_raster_nodata
+
+    typer.echo("Progress: 10%")
+
+    rasters = [rasterio.open(raster) for raster in input_rasters]  # Open all rasters to be unified
+    typer.echo("Progress: 25%")
+
+    unified = unify_raster_nodata(rasters, new_nodata)
+    [raster.close() for raster in rasters]
+    typer.echo("Progress: 70%")
+
+    output_paths = get_output_paths_from_inputs(input_rasters, output_dir, "nodata_unified", ".tif")
+    for output_path, (out_image, out_profile) in zip(output_paths, unified):
+        with rasterio.open(output_path, "w", **out_profile) as dst:
+            dst.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Unifying nodata completed, writing rasters to directory {output_dir}.")
+
+
+@app.command()
+def convert_raster_nodata_cli(
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    old_nodata: float = None,
+    new_nodata: float = -9999,
+):
+    """Convert existing nodata values with a new nodata value for a raster."""
+    from eis_toolkit.utilities.nodata import convert_raster_nodata
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = convert_raster_nodata(raster, old_nodata, new_nodata)
+    typer.echo("Progress: 70%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Converting nodata completed, writing raster to {output_raster}.")
+
+
+@app.command()
+def set_raster_nodata_cli(
+    input_raster: INPUT_FILE_OPTION, output_raster: OUTPUT_FILE_OPTION, new_nodata: float = typer.Option()
+):
+    """Set new nodata value for raster profile."""
+    from eis_toolkit.utilities.nodata import set_raster_nodata
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        out_image = raster.read()
+        typer.echo("Progress: 25%")
+        out_meta = set_raster_nodata(raster.meta, new_nodata)
+    typer.echo("Progress: 70%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Setting nodata completed, writing raster to {output_raster}.")
+
+
 # if __name__ == "__main__":
 def cli():
     """CLI app."""
