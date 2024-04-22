@@ -22,6 +22,9 @@ def distance_computation(raster_profile: Union[profiles.Profile, dict], geodataf
     Returns:
         A 2D numpy array with the distances computed.
 
+    Raises:
+        NonMatchingCrsException: The input raster profile and geodataframe have mismatching CRS.
+        EmptyDataFrameException: The input geodataframe is empty.
     """
     if raster_profile.get("crs") != geodataframe.crs:
         raise NonMatchingCrsException("Expected coordinate systems to match between raster and GeoDataFrame.")
