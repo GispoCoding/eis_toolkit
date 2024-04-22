@@ -1,106 +1,103 @@
-from numbers import Number
-
 import geopandas as gpd
 import numpy as np
 from beartype import beartype
-from beartype.typing import Literal, Optional, Tuple
+from beartype.typing import Literal, Union
 from pykrige.ok import OrdinaryKriging
 from pykrige.uk import UniversalKriging
-from rasterio import transform
+from rasterio import profiles, transform
 
-from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException, NonMatchingCrsException
+from eis_toolkit.utilities.checks.raster import check_raster_profile
 
 
 def _kriging(
     data: gpd.GeoDataFrame,
     target_column: str,
-    resolution: Tuple[Number, Number],
-    extent: Optional[Tuple[Number, Number, Number, Number]],
-    variogram_model: Literal,
-    coordinates_type: Literal,
-    method: Literal,
-) -> Tuple[np.ndarray, dict]:
+    raster_width: int,
+    raster_height: int,
+    raster_transform: transform.Affine,
+    variogram_model: Literal["linear", "power", "gaussian", "spherical", "exponential"],
+    coordinates_type: Literal["euclidean", "geographic"],
+    method: Literal["ordinary", "universal"],
+) -> np.ndarray:
 
     x = data.geometry.x
     y = data.geometry.y
     z = data[target_column].values
 
-    if extent is None:
-        grid_x_min = data.geometry.total_bounds[0]
-        grid_x_max = data.geometry.total_bounds[2]
-        grid_y_min = data.geometry.total_bounds[1]
-        grid_y_max = data.geometry.total_bounds[3]
+    pixel_size = raster_transform.a
+    grid_x_min = raster_transform.xoff
+    grid_x_max = grid_x_min + raster_width * pixel_size
+    grid_y_min = raster_transform.yoff
+    grid_y_max = grid_y_min + raster_height * pixel_size
 
-    else:
-        grid_x_min, grid_x_max, grid_y_min, grid_y_max = extent
-
-    grid_x = np.arange(grid_x_min, grid_x_max + resolution[0], resolution[0])
-    grid_y = np.arange(grid_y_min, grid_y_max + resolution[1], resolution[1])
+    grid_x = np.arange(grid_x_min, grid_x_max, pixel_size)
+    grid_y = np.arange(grid_y_min, grid_y_max, pixel_size)
 
     if method == "universal":
-        universal_kriging = UniversalKriging(x, y, z, variogram_model=variogram_model, drift_terms=["regional_linear"])
-        z_interpolated, _ = universal_kriging.execute("grid", grid_x, grid_y)
+        kriging_method = UniversalKriging(x, y, z, variogram_model=variogram_model, drift_terms=["regional_linear"])
+    elif method == "ordinary":
+        kriging_method = OrdinaryKriging(x, y, z, variogram_model=variogram_model, coordinates_type=coordinates_type)
+    z_interpolated, _ = kriging_method.execute("grid", grid_x, grid_y)
 
-    if method == "ordinary":
-        ordinary_kriging = OrdinaryKriging(x, y, z, variogram_model=variogram_model, coordinates_type=coordinates_type)
-        z_interpolated, _ = ordinary_kriging.execute("grid", grid_x, grid_y)
-
-    out_meta = {
-        "crs": data.crs,
-        "width": len(grid_x),
-        "height": len(grid_y),
-        "transform": transform.from_bounds(grid_x_min, grid_y_min, grid_x_max, grid_y_max, len(grid_x), len(grid_y)),
-    }
-
-    return z_interpolated, out_meta
+    return z_interpolated
 
 
 @beartype
 def kriging(
-    data: gpd.GeoDataFrame,
+    geodataframe: gpd.GeoDataFrame,
     target_column: str,
-    resolution: Tuple[Number, Number],
-    extent: Optional[Tuple[Number, Number, Number, Number]] = None,
+    raster_profile: Union[profiles.Profile, dict],
     variogram_model: Literal["linear", "power", "gaussian", "spherical", "exponential"] = "linear",
     coordinates_type: Literal["euclidean", "geographic"] = "geographic",
     method: Literal["ordinary", "universal"] = "ordinary",
-) -> Tuple[np.ndarray, dict]:
+) -> np.ndarray:
     """
     Perform Kriging interpolation on the input data.
 
     Args:
-        data: GeoDataFrame containing the input data.
+        geodataframe: GeoDataFrame containing the input data.
         target_column: The column name with values for each geometry.
-        resolution: The resolution i.e. cell size of the output raster as (pixel_size_x, pixel_size_y).
-        extent: The extent of the output raster as (x_min, x_max, y_min, y_max).
-            If None, calculate extent from the input vector data.
-        variogram_model: Variogram model to be used.
-            Either 'linear', 'power', 'gaussian', 'spherical' or 'exponential'. Defaults to 'linear'.
+        raster_profile: The raster profile used for output grid properties. Needs to include at least
+            crs, transform, width and height.
+        variogram_model: Variogram model to be used. Either 'linear', 'power', 'gaussian', 'spherical'
+            or 'exponential'. Defaults to 'linear'.
         coordinates_type: Determines are coordinates on a plane ('euclidean') or a sphere ('geographic').
             Used only in ordinary kriging. Defaults to 'geographic'.
         method: Ordinary or universal kriging. Defaults to 'ordinary'.
 
     Returns:
-        Grid containing the interpolated values and metadata.
+        Numpy array containing the interpolated values.
 
     Raises:
         EmptyDataFrameException: The input GeoDataFrame is empty.
         InvalidParameterValueException: Target column name is invalid or resolution is not greater than zero.
     """
 
-    if data.empty:
-        raise EmptyDataFrameException("The input GeoDataFrame is empty.")
-
-    if target_column not in data.columns:
+    if raster_profile.get("crs") != geodataframe.crs:
+        raise NonMatchingCrsException("Expected coordinate systems to match between raster and GeoDataFrame.")
+    if geodataframe.empty:
+        raise EmptyDataFrameException("Expected GeoDataFrame to not be empty.")
+    if target_column not in geodataframe.columns:
         raise InvalidParameterValueException(
-            f"Expected target_column ({target_column}) to be contained in geodataframe columns."
+            f"Expected target_column ({target_column}) to be contained in GeoDataFrame columns."
         )
 
-    if resolution[0] <= 0 or resolution[1] <= 0:
-        raise InvalidParameterValueException("The resolution must be greater than zero.")
+    check_raster_profile(raster_profile)
 
-    data_interpolated, out_meta = _kriging(
-        data, target_column, resolution, extent, variogram_model, coordinates_type, method
+    raster_width = raster_profile.get("width")
+    raster_height = raster_profile.get("height")
+    raster_transform = raster_profile.get("transform")
+
+    data_interpolated = _kriging(
+        geodataframe,
+        target_column,
+        raster_width,
+        raster_height,
+        raster_transform,
+        variogram_model,
+        coordinates_type,
+        method,
     )
 
-    return data_interpolated, out_meta
+    return data_interpolated
