@@ -230,6 +230,6 @@ def _distance_to_anomaly(
     all_points = list(chain(*all_points_by_rows))
     all_points_gdf = gpd.GeoDataFrame(geometry=all_points, crs=anomaly_raster_profile["crs"])
 
-    distance_array = distance_computation(raster_profile=anomaly_raster_profile, geometries=all_points_gdf)
+    distance_array = distance_computation(raster_profile=anomaly_raster_profile, geodataframe=all_points_gdf)
 
     return distance_array
