@@ -1,8 +1,11 @@
+from math import ceil, floor
+from numbers import Number
+
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import Sequence, Tuple
-from rasterio import profiles
+from beartype.typing import Literal, Sequence, Tuple
+from rasterio import profiles, transform
 
 from eis_toolkit.exceptions import (
     InvalidDataShapeException,
@@ -118,3 +121,47 @@ def stack_raster_arrays(arrays: Sequence[np.ndarray]) -> np.ndarray:
     stacked_array = np.concatenate(processed_arrays, axis=0)
 
     return stacked_array
+
+
+@beartype
+def profile_from_extent_and_pixel_size(
+    extent: Tuple[Number, Number, Number, Number],
+    pixel_size: Number,
+    round_strategy: Literal["nearest", "up", "down"] = "up",
+) -> profiles.Profile:
+    """
+    Create a raster profile from given extent and pixel size.
+
+    If extent and pixel size do not match exactly, i.e. raster width and height
+    calcalated from bounds and pixel size are not integers, rounding for the width and
+    height is performed.
+
+    Args:
+        extent: Raster extent in the form (coord_west, coord_east, coord_south, coord_north).
+        pixel_size: Desired pixel size. Pixel size is used for x and y, so only quadratic pixels
+            are supported.
+        round_strategy: The rounding strategy if extent and pixel size do not match exactly.
+            Defaults to "up".
+
+    Returns:
+        Rasterio profile.
+    """
+    coord_west, coord_east, coord_south, coord_north = extent
+    width_raw = abs(coord_east - coord_west) / pixel_size
+    height_raw = abs(coord_north - coord_south) / pixel_size
+    if round_strategy == "down":
+        width, height = floor(width_raw), floor(height_raw)
+    elif round_strategy == "up":
+        width, height = ceil(width_raw), ceil(height_raw)
+    else:
+        width, height = round(width_raw), round(height_raw)
+
+    raster_meta = {
+        "transform": transform.from_bounds(
+            coord_west, coord_south, coord_east, coord_north, width=width, height=height
+        ),
+        "width": width,
+        "height": height,
+    }
+    raster_profile = profiles.Profile(raster_meta)
+    return raster_profile
