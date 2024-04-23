@@ -65,6 +65,8 @@ def plot_prediction_area_curves(
     Plots prediction area plot that can be used to evaluate mineral prospectivity maps and evidential layers. See e.g.,
     Yousefi and Carranza (2015).
 
+    The inputs needed for this tool can be obtained with calculate_base_metrics() tool.
+
     Args:
         true_positive_rate_values: True positive rate values.
         proportion_of_area_values: Proportion of area values.

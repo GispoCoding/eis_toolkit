@@ -29,13 +29,13 @@ def predict_classifier(
             return labels, probabilities
         else:
             return labels
-    elif include_probabilities:
-        probabilities = model.predict_proba(data)
+    elif isinstance(model, BaseEstimator):
         labels = model.predict(data)
-        return labels, probabilities
-    else:
-        labels = model.predict(data)
-        return labels
+        if include_probabilities:
+            probabilities = model.predict_proba(data)
+            return labels, probabilities
+        else:
+            return labels
 
 
 @beartype

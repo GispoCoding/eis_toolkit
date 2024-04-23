@@ -98,7 +98,7 @@ def plot_det_curve(
     """
     display = DetCurveDisplay.from_predictions(y_true, y_prob, ax=ax, **kwargs)
     out_ax = display.ax_
-    out_ax.set(xlabel="False positive rate", ylabel="True positive rate", title=plot_title)
+    out_ax.set(xlabel="False positive rate", ylabel="False negative rate", title=plot_title)
     return out_ax
 
 
@@ -129,7 +129,7 @@ def plot_precision_recall_curve(
     """
     display = PrecisionRecallDisplay.from_predictions(y_true, y_prob, plot_chance_level=True, ax=ax, **kwargs)
     out_ax = display.ax_
-    out_ax.set(xlabel="False positive rate", ylabel="True positive rate", title=plot_title)
+    out_ax.set(xlabel="Recall", ylabel="Precision", title=plot_title)
     return out_ax
 
 
