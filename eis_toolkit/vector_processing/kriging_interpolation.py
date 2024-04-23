@@ -74,10 +74,10 @@ def kriging(
         InvalidParameterValueException: Target column name is invalid or resolution is not greater than zero.
     """
 
-    if raster_profile.get("crs") != geodataframe.crs:
-        raise NonMatchingCrsException("Expected coordinate systems to match between raster and GeoDataFrame.")
     if geodataframe.empty:
         raise EmptyDataFrameException("Expected GeoDataFrame to not be empty.")
+    if raster_profile.get("crs") != geodataframe.crs:
+        raise NonMatchingCrsException("Expected coordinate systems to match between raster and GeoDataFrame.")
     if target_column not in geodataframe.columns:
         raise InvalidParameterValueException(
             f"Expected target_column ({target_column}) to be contained in GeoDataFrame columns."
