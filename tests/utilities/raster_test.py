@@ -2,7 +2,12 @@ import numpy as np
 import rasterio
 from rasterio import profiles
 
-from eis_toolkit.utilities.raster import combine_raster_bands, split_raster_bands, stack_raster_arrays
+from eis_toolkit.utilities.raster import (
+    combine_raster_bands,
+    profile_from_extent_and_pixel_size,
+    split_raster_bands,
+    stack_raster_arrays,
+)
 from tests.exploratory_analyses.pca_test import MULTIBAND_RASTER_PATH
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
@@ -41,3 +46,17 @@ def test_stack_raster_arrays():
     stacked_arrays = stack_raster_arrays([arr_1, arr_2])
 
     assert len(stacked_arrays) == 3  # Combined singleband raster and multiband (2 bands) so should be 3
+
+
+def test_profile_from_extent_and_pixel_size():
+    """Test that creating raster profile from extent and pixel size works as expected."""
+    with rasterio.open(SMALL_RASTER_PATH) as small_raster:
+        profile = small_raster.profile.copy()
+        pixel_size = profile["transform"].a
+        west, south, east, north = small_raster.bounds
+
+    raster_profile = profile_from_extent_and_pixel_size((west, east, south, north), pixel_size)
+
+    np.testing.assert_equal(raster_profile["height"], profile["height"])
+    np.testing.assert_equal(raster_profile["width"], profile["width"])
+    np.testing.assert_equal(raster_profile["transform"], profile["transform"])
