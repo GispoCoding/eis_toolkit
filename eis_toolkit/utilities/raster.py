@@ -4,7 +4,7 @@ from numbers import Number
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import Literal, Sequence, Tuple
+from beartype.typing import Literal, Sequence, Tuple, Union
 from rasterio import profiles, transform
 
 from eis_toolkit.exceptions import (
@@ -126,7 +126,7 @@ def stack_raster_arrays(arrays: Sequence[np.ndarray]) -> np.ndarray:
 @beartype
 def profile_from_extent_and_pixel_size(
     extent: Tuple[Number, Number, Number, Number],
-    pixel_size: Number,
+    pixel_size: Union[Number, Tuple[Number, Number]],
     round_strategy: Literal["nearest", "up", "down"] = "up",
 ) -> profiles.Profile:
     """
@@ -138,17 +138,22 @@ def profile_from_extent_and_pixel_size(
 
     Args:
         extent: Raster extent in the form (coord_west, coord_east, coord_south, coord_north).
-        pixel_size: Desired pixel size. Pixel size is used for x and y, so only quadratic pixels
-            are supported.
+        pixel_size: Desired pixel size. If two values are provided, first is used for x and second for y.
+            If one value is provided, the value is used for both directions.
         round_strategy: The rounding strategy if extent and pixel size do not match exactly.
             Defaults to "up".
 
     Returns:
         Rasterio profile.
     """
+    if isinstance(pixel_size, Tuple):
+        pixel_size_x, pixel_size_y = pixel_size[0], pixel_size[1]
+    else:
+        pixel_size_x, pixel_size_y = pixel_size, pixel_size
+
     coord_west, coord_east, coord_south, coord_north = extent
-    width_raw = abs(coord_east - coord_west) / pixel_size
-    height_raw = abs(coord_north - coord_south) / pixel_size
+    width_raw = abs(coord_east - coord_west) / pixel_size_x
+    height_raw = abs(coord_north - coord_south) / pixel_size_y
     if round_strategy == "down":
         width, height = floor(width_raw), floor(height_raw)
     elif round_strategy == "up":
