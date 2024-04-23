@@ -11,13 +11,13 @@ from eis_toolkit.utilities.miscellaneous import row_points
 
 
 @beartype
-def distance_computation(raster_profile: Union[profiles.Profile, dict], geodataframe: gpd.GeoDataFrame) -> np.ndarray:
+def distance_computation(geodataframe: gpd.GeoDataFrame, raster_profile: Union[profiles.Profile, dict]) -> np.ndarray:
     """Calculate distance from raster cell to nearest geometry.
 
     Args:
+        geodataframe: The GeoDataFrame with geometries to determine distance to.
         raster_profile: The raster profile of the raster in which the distances
             to the nearest geometry are determined.
-        geodataframe: The GeoDataFrame with geometries to determine distance to.
 
     Returns:
         A 2D numpy array with the distances computed.
