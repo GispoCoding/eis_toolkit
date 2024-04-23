@@ -2879,7 +2879,7 @@ def winsorize_transform_cli(
     typer.echo(f"Winsorize transform completed, writing raster to {output_raster}.")
 
 
-# ---VALIDATION ---
+# ---EVALUATION ---
 # TODO
 
 

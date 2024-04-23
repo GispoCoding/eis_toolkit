@@ -13,13 +13,13 @@ from scipy import sparse
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import KFold, LeaveOneOut, StratifiedKFold, train_test_split
 
+from eis_toolkit.evaluation.scoring import score_predictions
 from eis_toolkit.exceptions import (
     InvalidParameterValueException,
     NonMatchingParameterLengthsException,
     NonMatchingRasterMetadataException,
 )
 from eis_toolkit.utilities.checks.raster import check_raster_grids
-from eis_toolkit.validation.scoring import score_predictions
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
 SPLIT = "split"

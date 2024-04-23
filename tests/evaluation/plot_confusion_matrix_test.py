@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
+from eis_toolkit.evaluation.plot_confusion_matrix import plot_confusion_matrix
 from eis_toolkit.exceptions import InvalidDataShapeException
-from eis_toolkit.validation.plot_confusion_matrix import plot_confusion_matrix
 
 
 def test_plot_confusion_matrix():

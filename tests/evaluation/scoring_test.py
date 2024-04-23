@@ -1,9 +1,9 @@
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 
+from eis_toolkit.evaluation.scoring import score_predictions
 from eis_toolkit.prediction.machine_learning_predict import predict_classifier
 from eis_toolkit.prediction.random_forests import random_forest_classifier_train
-from eis_toolkit.validation.scoring import score_predictions
 
 X, y = make_classification(n_samples=200, n_features=20, n_informative=2, n_redundant=10, random_state=42)
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)

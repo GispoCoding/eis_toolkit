@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
+from eis_toolkit.evaluation.plot_rate_curve import plot_rate_curve
 from eis_toolkit.exceptions import InvalidParameterValueException
-from eis_toolkit.validation.plot_rate_curve import plot_rate_curve
 
 
 def test_plot_rate_curve_x_values_out_of_bound():

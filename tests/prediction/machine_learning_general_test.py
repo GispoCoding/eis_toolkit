@@ -6,6 +6,7 @@ import pytest
 from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
 
+from eis_toolkit.evaluation.scoring import score_predictions
 from eis_toolkit.exceptions import InvalidParameterValueException, NonMatchingParameterLengthsException
 from eis_toolkit.prediction.machine_learning_general import (
     _train_and_validate_sklearn_model,
@@ -14,7 +15,6 @@ from eis_toolkit.prediction.machine_learning_general import (
     split_data,
 )
 from eis_toolkit.prediction.machine_learning_predict import predict_classifier
-from eis_toolkit.validation.scoring import score_predictions
 
 TEST_DIR = Path(__file__).parent.parent
 

@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
+from eis_toolkit.evaluation.plot_prediction_area_curves import _get_pa_intersection, plot_prediction_area_curves
 from eis_toolkit.exceptions import InvalidParameterValueException
-from eis_toolkit.validation.plot_prediction_area_curves import _get_pa_intersection, plot_prediction_area_curves
 
 
 def test_get_pa_intersection():
