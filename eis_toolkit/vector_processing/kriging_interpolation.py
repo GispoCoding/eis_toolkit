@@ -25,14 +25,15 @@ def _kriging(
     y = data.geometry.y
     z = data[target_column].values
 
-    pixel_size = raster_transform.a
+    pixel_size_x = raster_transform.a
+    pixel_size_y = abs(raster_transform.e)
     grid_x_min = raster_transform.xoff
-    grid_x_max = grid_x_min + raster_width * pixel_size
-    grid_y_min = raster_transform.yoff
-    grid_y_max = grid_y_min + raster_height * pixel_size
+    grid_x_max = grid_x_min + raster_width * pixel_size_x
+    grid_y_max = raster_transform.yoff
+    grid_y_min = grid_y_max - raster_height * pixel_size_y
 
-    grid_x = np.arange(grid_x_min, grid_x_max, pixel_size)
-    grid_y = np.arange(grid_y_min, grid_y_max, pixel_size)
+    grid_x = np.arange(grid_x_min, grid_x_max, pixel_size_x)
+    grid_y = np.arange(grid_y_min, grid_y_max, pixel_size_y)
 
     if method == "universal":
         kriging_method = UniversalKriging(x, y, z, variogram_model=variogram_model, drift_terms=["regional_linear"])
@@ -72,6 +73,7 @@ def kriging(
     Raises:
         EmptyDataFrameException: The input GeoDataFrame is empty.
         InvalidParameterValueException: Target column name is invalid or resolution is not greater than zero.
+        NonMatchingCrsException: The input GeoDataFrame and raster profile have mismatching CRS.
     """
 
     if geodataframe.empty:

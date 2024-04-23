@@ -18,7 +18,7 @@ df = pd.DataFrame(data, columns=["x", "y", "value"])
 gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df["x"], df["y"]))
 target_column = "value"
 
-raster_profile = profile_from_extent_and_pixel_size(extent=(0, 5, 5, 0), pixel_size=0.5)
+raster_profile = profile_from_extent_and_pixel_size(extent=(0, 5, 0, 5), pixel_size=0.5)
 raster_profile["crs"] = gdf.crs
 expected_shape = (10, 10)
 
