@@ -1786,54 +1786,57 @@ def kriging_interpolation_cli(
 def rasterize_cli(
     input_vector: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
-    resolution: float = None,
+    base_raster: INPUT_FILE_OPTION = None,
     value_column: str = None,
+    pixel_size: float = None,
+    extent: Tuple[float, float, float, float] = (None, None, None, None),
     default_value: float = 1.0,
     fill_value: float = 0.0,
-    base_raster_profile_raster: INPUT_FILE_OPTION = None,
     buffer_value: float = None,
     merge_strategy: Annotated[MergeStrategy, typer.Option(case_sensitive=False)] = MergeStrategy.replace,
 ):
     """
     Rasterize input vector.
 
-    Either resolution or base-raster-profile-raster must be provided.
+    Either base raster or pixel size + extent must be provided.
     """
+    from eis_toolkit.exceptions import InvalidParameterValueException
+    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
     from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
     typer.echo("Progress: 10%")
 
     geodataframe = gpd.read_file(input_vector)
-
-    if base_raster_profile_raster is not None:
-        with rasterio.open(base_raster_profile_raster) as raster:
-            base_raster_profile = raster.profile
-    else:
-        base_raster_profile = base_raster_profile_raster
     typer.echo("Progress: 25%")
 
-    out_image, out_meta = rasterize_vector(
+    if base_raster is None or base_raster == "":
+        if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
+            raise InvalidParameterValueException(
+                "Expected positive pixel size and defined extent in absence of base raster. "
+                + f"Pixel size: {pixel_size}, extent: {extent}."
+            )
+        profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
+        profile["crs"] = geodataframe.crs
+        profile["driver"] = "GTiff"
+        profile["dtype"] = "float32"
+    else:
+        with rasterio.open(base_raster) as raster:
+            profile = raster.profile.copy()
+
+    out_image = rasterize_vector(
         geodataframe,
-        resolution,
+        profile,
         value_column,
         default_value,
         fill_value,
-        base_raster_profile,
         buffer_value,
         get_enum_values(merge_strategy),
     )
     typer.echo("Progress: 75%")
 
-    out_meta.update(
-        {
-            "count": 1,
-            "dtype": base_raster_profile["dtype"] if base_raster_profile_raster else "float32",  # TODO change this
-        }
-    )
-
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        for band_n in range(1, out_meta["count"]):
-            dst.write(out_image, band_n)
+    profile["count"] = 1
+    with rasterio.open(output_raster, "w", **profile) as dst:
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Rasterizing completed, writing raster to {output_raster}.")
@@ -1868,48 +1871,51 @@ def reproject_vector_cli(
 def vector_density_cli(
     input_vector: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
-    resolution: float = None,
-    base_raster_profile_raster: INPUT_FILE_OPTION = None,
+    base_raster: INPUT_FILE_OPTION = None,
+    pixel_size: float = None,
+    extent: Tuple[float, float, float, float] = (None, None, None, None),
     buffer_value: float = None,
     statistic: Annotated[VectorDensityStatistic, typer.Option(case_sensitive=False)] = VectorDensityStatistic.density,
 ):
     """
     Compute density of geometries within raster.
 
-    Either resolution or base_raster_profile_raster must be provided.
+    Either base raster or pixel size + extent must be provided.
     """
+    from eis_toolkit.exceptions import InvalidParameterValueException
+    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
     from eis_toolkit.vector_processing.vector_density import vector_density
 
     typer.echo("Progress: 10%")
 
     geodataframe = gpd.read_file(input_vector)
-
-    if base_raster_profile_raster is not None:
-        with rasterio.open(base_raster_profile_raster) as raster:
-            base_raster_profile = raster.profile
-    else:
-        base_raster_profile = base_raster_profile_raster
     typer.echo("Progress: 25%")
 
-    out_image, out_meta = vector_density(
+    if base_raster is None or base_raster == "":
+        if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
+            raise InvalidParameterValueException(
+                "Expected positive pixel size and defined extent in absence of base raster. "
+                + f"Pixel size: {pixel_size}, extent: {extent}."
+            )
+        profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
+        profile["crs"] = geodataframe.crs
+        profile["driver"] = "GTiff"
+        profile["dtype"] = "float32"
+    else:
+        with rasterio.open(base_raster) as raster:
+            profile = raster.profile.copy()
+
+    out_image = vector_density(
         geodataframe=geodataframe,
-        resolution=resolution,
-        base_raster_profile=base_raster_profile,
+        raster_profile=profile,
         buffer_value=buffer_value,
         statistic=get_enum_values(statistic),
     )
     typer.echo("Progress: 75%")
 
-    out_meta.update(
-        {
-            "count": 1,
-            "dtype": base_raster_profile["dtype"] if base_raster_profile_raster else "float32",  # TODO change this
-        }
-    )
-
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        for band_n in range(1, out_meta["count"]):
-            dst.write(out_image, band_n)
+    profile["count"] = 1
+    with rasterio.open(output_raster, "w", **profile) as dst:
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Vector density computation completed, writing raster to {output_raster}.")
