@@ -301,8 +301,8 @@ def weights_of_evidence_calculate_weights(
     raster_meta = evidential_raster.meta
 
     # Rasterize deposits
-    deposit_array, _ = rasterize_vector(
-        geodataframe=deposits, default_value=1.0, base_raster_profile=raster_meta, fill_value=0.0
+    deposit_array = rasterize_vector(
+        geodataframe=deposits, raster_profile=raster_meta, default_value=1.0, fill_value=0.0
     )
 
     # Mask NaN out of the array
