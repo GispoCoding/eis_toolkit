@@ -89,7 +89,7 @@ def test_empty_geodataframe(test_empty_gdf, raster_profile):
 
 
 def test_invalid_profile(test_points, raster_profile):
-    """Test invalid resolution."""
+    """Test invalid profile, missing transform."""
     target_column = "random_number"
     profile_invalid = raster_profile.copy()
     profile_invalid["transform"] = None
@@ -98,7 +98,7 @@ def test_invalid_profile(test_points, raster_profile):
 
 
 def test_mismatching_crs(test_points, raster_profile):
-    """Test invalid resolution."""
+    """Test invalid profile, invalid CRS."""
     target_column = "random_number"
     profile_invalid = raster_profile.copy()
     profile_invalid["crs"] = crs.CRS.from_epsg(3067)
