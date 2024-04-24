@@ -40,7 +40,7 @@ POLYGON_GEOMETRIES_WITHIN_SMALL_RASTER = geodataframe_with_raster_crs(
 
 
 @pytest.mark.parametrize(
-    "raster_profile,geometries,expected_shape,expected_min,expected_max",
+    "raster_profile,geodataframe,expected_shape,expected_min,expected_max",
     [
         pytest.param(
             SMALL_RASTER_PROFILE,
@@ -69,11 +69,11 @@ POLYGON_GEOMETRIES_WITHIN_SMALL_RASTER = geodataframe_with_raster_crs(
     ],
 )
 def test_distance_computation_with_expected_results(
-    raster_profile, geometries, expected_shape, expected_min, expected_max
+    raster_profile, geodataframe, expected_shape, expected_min, expected_max
 ):
     """Test distance_computation."""
 
-    result = distance_computation(raster_profile=raster_profile, geometries=geometries)
+    result = distance_computation(raster_profile=raster_profile, geodataframe=geodataframe)
 
     assert isinstance(result, np.ndarray)
     assert result.shape == expected_shape
@@ -82,7 +82,7 @@ def test_distance_computation_with_expected_results(
 
 
 @pytest.mark.parametrize(
-    "raster_profile,geometries,expected_error",
+    "raster_profile,geodataframe,expected_error",
     [
         (
             SMALL_RASTER_PROFILE,
@@ -111,10 +111,10 @@ def test_distance_computation_with_expected_results(
         ),
     ],
 )
-def test_distance_computation(raster_profile, geometries, expected_error):
+def test_distance_computation(raster_profile, geodataframe, expected_error):
     """Test distance_computation."""
 
     with expected_error:
-        result = distance_computation(raster_profile=raster_profile, geometries=geometries)
+        result = distance_computation(raster_profile=raster_profile, geodataframe=geodataframe)
         assert isinstance(result, np.ndarray)
         assert len(result.shape) == 2

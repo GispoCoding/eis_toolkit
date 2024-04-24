@@ -1685,40 +1685,41 @@ def extract_shared_lines_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUT
 def idw_interpolation_cli(
     input_vector: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
+    base_raster: INPUT_FILE_OPTION = None,
     target_column: str = typer.Option(),
-    resolution: float = typer.Option(),
+    pixel_size: float = None,
+    extent: Tuple[float, float, float, float] = (None, None, None, None),
     power: float = 2.0,
-    extent: Tuple[float, float, float, float] = (None, None, None, None),  # TODO Change this
 ):
     """Apply inverse distance weighting (IDW) interpolation to input vector file."""
+    from eis_toolkit.exceptions import InvalidParameterValueException
+    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
     from eis_toolkit.vector_processing.idw_interpolation import idw
 
     typer.echo("Progress: 10%")
 
-    if extent == (None, None, None, None):
-        extent = None
-
     geodataframe = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    out_image, out_meta = idw(
-        geodataframe=geodataframe,
-        target_column=target_column,
-        resolution=(resolution, resolution),
-        extent=extent,
-        power=power,
-    )
+    if base_raster is None or base_raster == "":
+        if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
+            raise InvalidParameterValueException(
+                "Expected positive pixel size and defined extent in absence of base raster. "
+                + f"Pixel size: {pixel_size}, extent: {extent}."
+            )
+        profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
+        profile["crs"] = geodataframe.crs
+        profile["driver"] = "GTiff"
+        profile["dtype"] = "float32"
+    else:
+        with rasterio.open(base_raster) as raster:
+            profile = raster.profile.copy()
+
+    out_image = idw(geodataframe=geodataframe, target_column=target_column, raster_profile=profile, power=power)
     typer.echo("Progress: 75%")
 
-    out_meta.update(
-        {
-            "count": 1,
-            "driver": "GTiff",
-            "dtype": "float32",
-        }
-    )
-
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
+    profile["count"] = 1
+    with rasterio.open(output_raster, "w", **profile) as dst:
         dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
@@ -1730,44 +1731,50 @@ def idw_interpolation_cli(
 def kriging_interpolation_cli(
     input_vector: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
+    base_raster: INPUT_FILE_OPTION = None,
     target_column: str = typer.Option(),
-    resolution: float = typer.Option(),
-    extent: Tuple[float, float, float, float] = (None, None, None, None),  # TODO Change this
+    pixel_size: float = None,
+    extent: Tuple[float, float, float, float] = (None, None, None, None),
     variogram_model: Annotated[VariogramModel, typer.Option(case_sensitive=False)] = VariogramModel.linear,
     coordinates_type: Annotated[CoordinatesType, typer.Option(case_sensitive=False)] = CoordinatesType.geographic,
     method: Annotated[KrigingMethod, typer.Option(case_sensitive=False)] = KrigingMethod.ordinary,
 ):
     """Apply kriging interpolation to input vector file."""
+    from eis_toolkit.exceptions import InvalidParameterValueException
+    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
     from eis_toolkit.vector_processing.kriging_interpolation import kriging
 
     typer.echo("Progress: 10%")
 
-    if extent == (None, None, None, None):
-        extent = None
-
     geodataframe = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    out_image, out_meta = kriging(
-        data=geodataframe,
+    if base_raster is None or base_raster == "":
+        if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
+            raise InvalidParameterValueException(
+                "Expected positive pixel size and defined extent in absence of base raster. "
+                + f"Pixel size: {pixel_size}, extent: {extent}."
+            )
+        profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
+        profile["crs"] = geodataframe.crs
+        profile["driver"] = "GTiff"
+        profile["dtype"] = "float32"
+    else:
+        with rasterio.open(base_raster) as raster:
+            profile = raster.profile.copy()
+
+    out_image = kriging(
+        geodataframe=geodataframe,
         target_column=target_column,
-        resolution=(resolution, resolution),
-        extent=extent,
+        raster_profile=profile,
         variogram_model=get_enum_values(variogram_model),
         coordinates_type=get_enum_values(coordinates_type),
         method=get_enum_values(method),
     )
     typer.echo("Progress: 75%")
 
-    out_meta.update(
-        {
-            "count": 1,
-            "driver": "GTiff",
-            "dtype": "float32",
-        }
-    )
-
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
+    profile["count"] = 1
+    with rasterio.open(output_raster, "w", **profile) as dst:
         dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
@@ -1911,26 +1918,42 @@ def vector_density_cli(
 # DISTANCE COMPUTATION
 @app.command()
 def distance_computation_cli(
-    input_raster: INPUT_FILE_OPTION,
-    geometries: INPUT_FILE_OPTION,
+    input_vector: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
+    base_raster: INPUT_FILE_OPTION = None,
+    pixel_size: float = None,
+    extent: Tuple[float, float, float, float] = (None, None, None, None),
 ):
     """Calculate distance from raster cell to nearest geometry."""
+    from eis_toolkit.exceptions import InvalidParameterValueException
+    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
     from eis_toolkit.vector_processing.distance_computation import distance_computation
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_raster) as raster:
-        profile = raster.profile
-
-    geodataframe = gpd.read_file(geometries)
+    geodataframe = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    out_image = distance_computation(profile, geodataframe)
+    if base_raster is None or base_raster == "":
+        if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
+            raise InvalidParameterValueException(
+                "Expected positive pixel size and defined extent in absence of base raster. "
+                + f"Pixel size: {pixel_size}, extent: {extent}."
+            )
+        profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
+        profile["crs"] = geodataframe.crs
+        profile["driver"] = "GTiff"
+        profile["dtype"] = "float32"
+    else:
+        with rasterio.open(base_raster) as raster:
+            profile = raster.profile.copy()
+
+    out_image = distance_computation(geodataframe=geodataframe, raster_profile=profile)
+    profile["count"] = 1
     typer.echo("Progress: 75%")
 
     with rasterio.open(output_raster, "w", **profile) as dst:
-        dst.write(out_image, profile["count"])
+        dst.write(out_image, 1)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Distance computation completed, writing raster to {output_raster}.")

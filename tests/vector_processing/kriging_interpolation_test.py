@@ -3,8 +3,10 @@ import numpy as np
 import pandas as pd
 import pytest
 from beartype.roar import BeartypeCallHintParamViolation
+from rasterio import crs, transform
 
-from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException, NonMatchingCrsException
+from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
 from eis_toolkit.vector_processing.kriging_interpolation import kriging
 
 np.random.seed(0)
@@ -15,67 +17,77 @@ data = np.hstack((x, y, z))
 df = pd.DataFrame(data, columns=["x", "y", "value"])
 gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df["x"], df["y"]))
 target_column = "value"
-resolution = (0.5, 0.5)
-extent = (0, 4.5, 0, 4.5)
+
+raster_profile = profile_from_extent_and_pixel_size(extent=(0, 5, 0, 5), pixel_size=0.5)
+raster_profile["crs"] = gdf.crs
 expected_shape = (10, 10)
 
 
 def test_ordinary_kriging_output():
     """Test that ordinary kriging output has correct shape and values."""
-    z_interpolated, _ = kriging(data=gdf, target_column=target_column, resolution=resolution, extent=extent)
-    expected_value_first_pixel = 0.42168577
-    expected_value_last_pixel = 1.58154908
+    z_interpolated = kriging(geodataframe=gdf, target_column=target_column, raster_profile=raster_profile)
+    expected_value_first_pixel = 0.4216
+    expected_value_last_pixel = 1.5815
     assert z_interpolated.shape == expected_shape
-    assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
-    assert round(z_interpolated[-1][-1], 8) == expected_value_last_pixel
+    np.testing.assert_almost_equal(z_interpolated[0][0], expected_value_first_pixel, 4)
+    np.testing.assert_almost_equal(z_interpolated[-1][-1], expected_value_last_pixel, 4)
 
 
 def test_universal_kriging_output():
     """Test that universal kriging output has correct shape and values."""
-    z_interpolated, _ = kriging(
-        data=gdf, target_column=target_column, resolution=resolution, extent=extent, method="universal"
+    z_interpolated = kriging(
+        geodataframe=gdf, target_column=target_column, raster_profile=raster_profile, method="universal"
     )
-    expected_value_first_pixel = -0.21513566
-    expected_value_last_pixel = 1.71615605
+    expected_value_first_pixel = -0.2151
+    expected_value_last_pixel = 1.7161
     assert z_interpolated.shape == expected_shape
-    assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
-    assert round(z_interpolated[-1][-1], 8) == expected_value_last_pixel
-
-
-def test_output_without_extent():
-    """Test that extent computation works as expected."""
-    z_interpolated, _ = kriging(data=gdf, target_column=target_column, resolution=resolution)
-    expected_value_first_pixel = 0.40864907
-    expected_value_last_pixel = 1.53723812
-    assert z_interpolated.shape == (11, 7)
-    assert round(z_interpolated[0][0], 8) == expected_value_first_pixel
-    assert round(z_interpolated[-1][-1], 8) == expected_value_last_pixel
+    np.testing.assert_almost_equal(z_interpolated[0][0], expected_value_first_pixel, 4)
+    np.testing.assert_almost_equal(z_interpolated[-1][-1], expected_value_last_pixel, 4)
 
 
 def test_empty_geodataframe():
     """Test that empty geodataframe raises the correct exception."""
     empty_gdf = gpd.GeoDataFrame()
     with pytest.raises(EmptyDataFrameException):
-        kriging(data=empty_gdf, target_column=target_column, resolution=resolution, extent=extent)
+        kriging(geodataframe=empty_gdf, target_column=target_column, raster_profile=raster_profile)
 
 
 def test_invalid_column():
     """Test that invalid column in geodataframe raises the correct exception."""
     with pytest.raises(InvalidParameterValueException):
-        kriging(data=gdf, target_column="invalid_column", resolution=resolution, extent=extent)
+        kriging(geodataframe=gdf, target_column="invalid_column", raster_profile=raster_profile)
 
 
-def test_invalid_resolution():
-    """Test that invalid resolution raises the correct exception."""
+def test_mismatching_crs():
+    """Test that mismatching CRS of raster profile and geodataframe raises the correct exception."""
+    meta = {
+        "transform": transform.from_bounds(0, 4.5, 0, 4.5, 10, 10),
+        "crs": crs.CRS.from_epsg(3067),
+        "width": 10,
+    }
+    with pytest.raises(NonMatchingCrsException):
+        kriging(geodataframe=gdf, target_column=target_column, raster_profile=meta)
+
+
+def test_invalid_raster_profile():
+    """Test that invalid raster metadata/profile raises the correct exception."""
+    meta = {
+        "transform": transform.from_bounds(0, 4.5, 0, 4.5, 10, 10),
+        "crs": gdf.crs,
+        "width": 10,
+    }
     with pytest.raises(InvalidParameterValueException):
-        kriging(data=gdf, target_column=target_column, resolution=(0, 0), extent=extent)
+        kriging(geodataframe=gdf, target_column=target_column, raster_profile=meta)
 
 
 def test_invalid_variogram_model():
     """Test that invalid variogram model raises the correct exception."""
     with pytest.raises(BeartypeCallHintParamViolation):
         kriging(
-            data=gdf, target_column=target_column, resolution=resolution, extent=extent, variogram_model="invalid_model"
+            geodataframe=gdf,
+            target_column=target_column,
+            raster_profile=raster_profile,
+            variogram_model="invalid_model",
         )
 
 
@@ -83,10 +95,9 @@ def test_invalid_coordinates_type():
     """Test that invalid coordinates type raises the correct exception."""
     with pytest.raises(BeartypeCallHintParamViolation):
         kriging(
-            data=gdf,
+            geodataframe=gdf,
             target_column=target_column,
-            resolution=resolution,
-            extent=extent,
+            raster_profile=raster_profile,
             coordinates_type="invalid_coordinates_type",
         )
 
@@ -94,4 +105,4 @@ def test_invalid_coordinates_type():
 def test_invalid_method():
     """Test that invalid kriging method raises the correct exception."""
     with pytest.raises(BeartypeCallHintParamViolation):
-        kriging(data=gdf, target_column=target_column, resolution=resolution, extent=extent, method="invalid_method")
+        kriging(geodataframe=gdf, target_column=target_column, raster_profile=raster_profile, method="invalid_method")

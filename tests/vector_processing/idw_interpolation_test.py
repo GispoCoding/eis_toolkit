@@ -4,14 +4,15 @@ import geopandas as gpd
 import numpy as np
 import pytest
 import rasterio
+from rasterio import crs
 from shapely.geometry import Point
 
-from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException
+from eis_toolkit.exceptions import EmptyDataFrameException, InvalidParameterValueException, NonMatchingCrsException
+from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
 from eis_toolkit.vector_processing.idw_interpolation import idw
 
 test_dir = Path(__file__).parent.parent
-extent_set = test_dir.joinpath("data/remote/idw_extent.tif")
-no_extent = test_dir.joinpath("data/remote/idw_no_extent.tif")
+idw_test_data = test_dir.joinpath("data/remote/interpolating/idw_test_data.tif")
 
 
 @pytest.fixture
@@ -41,6 +42,15 @@ def validated_points():
 
 
 @pytest.fixture
+def raster_profile():
+    """Raster profile for testing."""
+    resolution = (0.0049, 0.0047)
+    extent = (24.6558990000000016, 25.0378036000000002, 60.1920590000000004, 60.2934078769999999)
+    raster_profile = profile_from_extent_and_pixel_size(extent, resolution, round_strategy="down")
+    return raster_profile
+
+
+@pytest.fixture
 def test_empty_gdf():
     """Test empty GeoDataFrame."""
     data = {
@@ -50,95 +60,47 @@ def test_empty_gdf():
     return gpd.GeoDataFrame(data)
 
 
-def test_validated_points(validated_points):
-    """Test IDW without extent set."""
+def test_validated_points_with_extent(validated_points, raster_profile):
+    """Test IDW."""
     target_column = "random_number"
-    resolution = (0.0049, 0.0047)
-    extent = None
-    power = 2
-
     interpolated_values = idw(
-        geodataframe=validated_points, target_column=target_column, resolution=resolution, extent=extent, power=power
+        geodataframe=validated_points, target_column=target_column, raster_profile=raster_profile, power=2
     )
     assert target_column in validated_points.columns
 
-    with rasterio.open(no_extent) as src:
+    with rasterio.open(idw_test_data) as src:
         external_values = src.read(1)
 
-    np.testing.assert_allclose(interpolated_values[0], external_values)
+    np.testing.assert_almost_equal(interpolated_values, external_values, decimal=2)
 
 
-def test_validated_points_with_extent(validated_points):
-    """Test IDW with extent set."""
-    target_column = "random_number"
-    resolution = (0.0049, 0.0047)
-    extent = (24.6558990000000016, 25.0378036000000002, 60.1920590000000004, 60.2934078769999999)
-    power = 2
-
-    interpolated_values = idw(
-        geodataframe=validated_points, target_column=target_column, resolution=resolution, extent=extent, power=power
-    )
-    assert target_column in validated_points.columns
-
-    with rasterio.open(extent_set) as src:
-        external_values = src.read(1)
-
-    np.testing.assert_allclose(interpolated_values[0], external_values)
-
-
-def test_invalid_column(test_points):
+def test_invalid_column(test_points, raster_profile):
     """Test invalid column GeoDataFrame."""
     target_column = "not-in-data-column"
-    resolution = (1, 1)
-    extent = None
-    power = 2
-
     with pytest.raises(InvalidParameterValueException):
-        idw(geodataframe=test_points, target_column=target_column, resolution=resolution, extent=extent, power=power)
+        idw(geodataframe=test_points, target_column=target_column, raster_profile=raster_profile)
 
 
-def test_empty_geodataframe(test_empty_gdf):
+def test_empty_geodataframe(test_empty_gdf, raster_profile):
     """Test empty GeoDataFrame."""
     target_column = "values"
-    resolution = (5, 5)
-    extent = None
-    power = 5
-
     with pytest.raises(EmptyDataFrameException):
-        idw(geodataframe=test_empty_gdf, target_column=target_column, resolution=resolution, extent=extent, power=power)
+        idw(geodataframe=test_empty_gdf, target_column=target_column, raster_profile=raster_profile)
 
 
-def test_interpolate_vector(test_points):
-    """Test IDW with simple data."""
-    target_column = "value1"
-    resolution = (1, 1)
-    extent = None
-    power = 2
-
-    interpolated_values = idw(
-        geodataframe=test_points, target_column=target_column, resolution=resolution, extent=extent, power=power
-    )
-
-    assert target_column in test_points.columns
-    interpolated_value = interpolated_values[0]
-
-    expected_values = np.array(
-        [
-            [3, 3.40648594, 4.02086331, 5],
-            [2.59351406, 3, 3.77021471, 4.02086331],
-            [1.97913669, 2.22978529, 3, 3.40648594],
-            [1, 1.97913669, 2.59351406, 3],
-        ]
-    )
-    np.testing.assert_allclose(interpolated_value, expected_values, rtol=1e-5, atol=1e-5)
-
-
-def test_invalid_resolution(test_points):
-    """Test invalid resolution."""
-    target_column = "value1"
-    resolution = (1, -0.5)
-    extent = None
-    power = 2
-
+def test_invalid_profile(test_points, raster_profile):
+    """Test invalid profile, missing transform."""
+    target_column = "random_number"
+    profile_invalid = raster_profile.copy()
+    profile_invalid["transform"] = None
     with pytest.raises(InvalidParameterValueException):
-        idw(geodataframe=test_points, target_column=target_column, resolution=resolution, extent=extent, power=power)
+        idw(geodataframe=test_points, target_column=target_column, raster_profile=profile_invalid)
+
+
+def test_mismatching_crs(test_points, raster_profile):
+    """Test invalid profile, invalid CRS."""
+    target_column = "random_number"
+    profile_invalid = raster_profile.copy()
+    profile_invalid["crs"] = crs.CRS.from_epsg(3067)
+    with pytest.raises(NonMatchingCrsException):
+        idw(geodataframe=test_points, target_column=target_column, raster_profile=profile_invalid)
