@@ -252,6 +252,15 @@ class RandomForestRegressorCriterion(str, Enum):
     poisson = "poisson"
 
 
+class ThresholdCriteria(str, Enum):
+    """Threshold criteria for distance to anomaly."""
+
+    lower = "lower"
+    higher = "higher"
+    in_between = "in_between"
+    outside = "outside"
+
+
 INPUT_FILE_OPTION = Annotated[
     Path,
     typer.Option(
@@ -1175,6 +1184,47 @@ def create_constant_raster_from_template_cli(
     typer.echo("Progress: 100%")
 
     typer.echo(f"Creating constant raster completed, writing raster to {output_raster}.")
+
+
+# DISTANCE TO ANOMALY
+@app.command()
+def distance_to_anomaly_cli(
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    threshold_criteria: Annotated[ThresholdCriteria, typer.Option(case_sensitive=False)],
+    first_threshold_criteria_value: float = typer.Option(),
+    second_threshold_criteria_value: float = None,
+):
+    """
+    Calculate distance from each raster cell to nearest anomaly cell.
+
+    Uses only the first band of the raster.
+    """
+    from eis_toolkit.raster_processing.distance_to_anomaly import distance_to_anomaly
+
+    typer.echo("Progress: 10%")
+
+    if second_threshold_criteria_value is not None:
+        threshold_criteria_value = (first_threshold_criteria_value, second_threshold_criteria_value)
+    else:
+        threshold_criteria_value = first_threshold_criteria_value
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = distance_to_anomaly(
+            anomaly_raster_profile=raster.profile,
+            anomaly_raster_data=raster.read(1),
+            threshold_criteria_value=threshold_criteria_value,
+            threshold_criteria=get_enum_values(threshold_criteria),
+        )
+
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Computing distance to anomaly completed, writing raster to {output_raster}.")
 
 
 # EXTRACT VALUES FROM RASTER
