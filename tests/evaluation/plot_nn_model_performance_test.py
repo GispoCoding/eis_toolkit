@@ -4,10 +4,10 @@ from sklearn.datasets import load_diabetes, load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
+from eis_toolkit.evaluation.plot_nn_model_performance import plot_nn_model_accuracy, plot_nn_model_loss
 from eis_toolkit.exceptions import InvalidDatasetException, InvalidDataShapeException
 from eis_toolkit.prediction.mlp import train_MLP_classifier
 from eis_toolkit.transformations.one_hot_encoding import one_hot_encode
-from eis_toolkit.validation.plot_nn_model_performance import plot_nn_model_accuracy, plot_nn_model_loss
 
 X_IRIS, Y_IRIS = load_iris(return_X_y=True)
 X_DIABETES, Y_DIABETES = load_diabetes(return_X_y=True)

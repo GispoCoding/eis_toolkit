@@ -5,8 +5,8 @@ import pandas as pd
 import pytest
 import rasterio
 
+from eis_toolkit.evaluation.calculate_base_metrics import calculate_base_metrics
 from eis_toolkit.exceptions import GeometryTypeException, NonMatchingCrsException
-from eis_toolkit.validation.calculate_base_metrics import calculate_base_metrics
 
 test_dir = Path(__file__).parent.parent
 raster_path = test_dir.joinpath("data/remote/small_raster.tif")
