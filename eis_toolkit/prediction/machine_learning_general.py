@@ -184,7 +184,7 @@ def prepare_data_for_ml(
 
         # Labels/deposits in vector format
         if file_extension in [".shp", ".geojson", ".json", ".gpkg"]:
-            y, _ = rasterize_vector(geodataframe=gpd.read_file(label_file), base_raster_profile=reference_profile)
+            y = rasterize_vector(geodataframe=gpd.read_file(label_file), raster_profile=reference_profile)
 
         # Labels/deposits in raster format
         else:
