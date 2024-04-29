@@ -40,6 +40,7 @@ def distance_to_anomaly(
     anomaly_raster_data: np.ndarray,
     threshold_criteria_value: Union[Tuple[Number, Number], Number],
     threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
+    max_distance: Optional[Number] = None,
 ) -> Tuple[np.ndarray, Union[profiles.Profile, dict]]:
     """Calculate distance from raster cell to nearest anomaly.
 
@@ -59,6 +60,7 @@ def distance_to_anomaly(
             the first value should be the minimum and the second
             the maximum value.
         threshold_criteria: Method to define anomalous.
+        max_distance: The maximum distance in the output array.
 
     Returns:
         A 2D numpy array with the distances to anomalies computed
@@ -75,6 +77,7 @@ def distance_to_anomaly(
         anomaly_raster_data=anomaly_raster_data,
         threshold_criteria=threshold_criteria,
         threshold_criteria_value=threshold_criteria_value,
+        max_distance=max_distance,
     )
     return out_image, anomaly_raster_profile
 
@@ -201,6 +204,7 @@ def _distance_to_anomaly(
     anomaly_raster_data: np.ndarray,
     threshold_criteria_value: Union[Tuple[Number, Number], Number],
     threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
+    max_distance: Optional[Number],
 ) -> np.ndarray:
     data_fits_criteria = _fits_criteria(
         threshold_criteria=threshold_criteria,
@@ -230,6 +234,8 @@ def _distance_to_anomaly(
     all_points = list(chain(*all_points_by_rows))
     all_points_gdf = gpd.GeoDataFrame(geometry=all_points, crs=anomaly_raster_profile["crs"])
 
-    distance_array = distance_computation(raster_profile=anomaly_raster_profile, geodataframe=all_points_gdf)
+    distance_array = distance_computation(
+        raster_profile=anomaly_raster_profile, geodataframe=all_points_gdf, max_distance=max_distance
+    )
 
     return distance_array
