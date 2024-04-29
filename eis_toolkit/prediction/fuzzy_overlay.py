@@ -94,7 +94,9 @@ def sum_overlay(data: Union[Sequence[np.ndarray], np.ndarray]) -> np.ndarray:
         InvalidParameterValueException: If data values are not in range [0, 1].
     """
     data = _prepare_data_for_fuzzy_overlay(data)
-    return data.sum(axis=0) - np.prod(data, axis=0)
+    product_term = np.prod(1 - data, axis=0)
+    fuzzy_sum = 1 - product_term
+    return fuzzy_sum
 
 
 @beartype
@@ -120,6 +122,7 @@ def gamma_overlay(data: Union[Sequence[np.ndarray], np.ndarray], gamma: float = 
     if gamma < 0 or gamma > 1:
         raise InvalidParameterValueException("The gamma parameter must be in range [0, 1]")
 
-    product = np.prod(data, axis=0)
-    sum = data.sum(axis=0) - product
-    return product ** (1 - gamma) * sum**gamma
+    fuzzy_product = np.prod(data, axis=0)
+    product_term_for_sum = np.prod(1 - data, axis=0)
+    fuzzy_sum = 1 - product_term_for_sum
+    return fuzzy_product ** (1 - gamma) * fuzzy_sum**gamma
