@@ -47,7 +47,7 @@ pip install eis_toolkit
 ```
 
 ```console
-conda-install -c conda-forge eis_toolkit
+conda install -c conda-forge eis_toolkit
 ```
 
 You can find the latest release of EIS Toolkit also in the [releases page](https://github.com/GispoCoding/eis_toolkit/releases) of this GitHub repository as a Python wheel. Just download the wheel and install with pip
