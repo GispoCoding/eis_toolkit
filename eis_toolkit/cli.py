@@ -1194,6 +1194,7 @@ def distance_to_anomaly_cli(
     threshold_criteria: Annotated[ThresholdCriteria, typer.Option(case_sensitive=False)],
     first_threshold_criteria_value: float = typer.Option(),
     second_threshold_criteria_value: float = None,
+    max_distance: float = None,
 ):
     """
     Calculate distance from each raster cell to nearest anomaly cell.
@@ -1216,6 +1217,7 @@ def distance_to_anomaly_cli(
             anomaly_raster_data=raster.read(1),
             threshold_criteria_value=threshold_criteria_value,
             threshold_criteria=get_enum_values(threshold_criteria),
+            max_distance=max_distance,
         )
 
     typer.echo("Progress: 75%")
@@ -1979,6 +1981,7 @@ def distance_computation_cli(
     base_raster: INPUT_FILE_OPTION = None,
     pixel_size: float = None,
     extent: Tuple[float, float, float, float] = (None, None, None, None),
+    max_distance: float = None,
 ):
     """Calculate distance from raster cell to nearest geometry."""
     from eis_toolkit.exceptions import InvalidParameterValueException
@@ -2004,7 +2007,7 @@ def distance_computation_cli(
         with rasterio.open(base_raster) as raster:
             profile = raster.profile.copy()
 
-    out_image = distance_computation(geodataframe=geodataframe, raster_profile=profile)
+    out_image = distance_computation(geodataframe=geodataframe, raster_profile=profile, max_distance=max_distance)
     profile["count"] = 1
     typer.echo("Progress: 75%")
 
