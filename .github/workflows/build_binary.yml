@@ -1,0 +1,23 @@
+name: Package Application with Pyinstaller
+
+on:
+  pull_request:
+    branches: [ build ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Package Application
+      uses: JackMcKew/pyinstaller-action-windows@main
+      with:
+        path: eis_toolkit
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: eis_executable_windows
+        path: building
