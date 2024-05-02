@@ -5,6 +5,8 @@ import numpy as np
 from beartype import beartype
 from beartype.typing import Optional, Union
 from rasterio import profiles, transform
+from rasterio.transform import xy
+from shapely.geometry import Point
 from shapely.geometry.base import BaseGeometry, BaseMultipartGeometry
 
 from eis_toolkit.exceptions import EmptyDataFrameException, NonMatchingCrsException, NumericValueSignException
@@ -88,5 +90,38 @@ def _distance_computation(
             for row in rows
         ]
     )
+
+    return distance_matrix
+
+
+def _distance_computation_optimized(
+    raster_width: int, raster_height: int, raster_transform: transform.Affine, geodataframe: gpd.GeoDataFrame
+) -> np.ndarray:
+    # Create spatial index on the geometries for efficient querying
+    spatial_index = geodataframe.sindex
+    distance_matrix = np.full((raster_height, raster_width), np.inf)  # Initialize the matrix with infinity
+
+    # Iterate through each pixel in the raster
+    for row in range(raster_height):
+        for col in range(raster_width):
+            # Calculate the coordinates for the center of the current raster cell
+            x, y = xy(raster_transform, row, col, offset="center")
+            point = Point(x, y)
+
+            # Use spatial index to find the geometries within the bounding box of the current point
+            possible_matches_index = list(spatial_index.intersection(point.bounds))
+            if possible_matches_index:
+                # Get the actual geometries that are potential matches
+                possible_matches = geodataframe.iloc[possible_matches_index]
+
+                # Calculate distances from the point to these geometries
+                distances = possible_matches.distance(point)
+                if not distances.empty:
+                    # Store the minimum distance in the distance matrix
+                    min_distance = distances.min()
+                    if min_distance == 0:
+                        distance_matrix[row, col] = 0  # Correcting to ensure zero distances are recorded correctly
+                    else:
+                        distance_matrix[row, col] = min_distance
 
     return distance_matrix
