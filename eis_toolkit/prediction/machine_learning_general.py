@@ -178,9 +178,14 @@ def prepare_data_for_ml(
         raster_reshaped = raster.reshape(raster.shape[0], -1).T
         reshaped_data.append(raster_reshaped)
 
+        nan_mask = (raster_reshaped == np.nan).any(axis=1)
+        combined_mask = nan_mask if nodata_mask is None else nodata_mask | nan_mask
+
         if nodata is not None:
             raster_mask = (raster_reshaped == nodata).any(axis=1)
-            nodata_mask = raster_mask if nodata_mask is None else nodata_mask | raster_mask
+            combined_mask = combined_mask | raster_mask
+
+        nodata_mask = combined_mask
 
     X = np.concatenate(reshaped_data, axis=1)
 
@@ -197,6 +202,7 @@ def prepare_data_for_ml(
             with rasterio.open(label_file) as label_raster:
                 y = label_raster.read(1)  # Assuming labels are in the first band
                 label_nodata = label_raster.nodata
+                profiles = list(profiles)
                 profiles.append(label_raster.profile)
                 if not check_raster_grids(profiles, same_extent=True):
                     raise NonMatchingRasterMetadataException(
@@ -216,6 +222,69 @@ def prepare_data_for_ml(
     X = X[~nodata_mask]
 
     return X, y, reference_profile, nodata_mask
+
+
+@beartype
+def read_data_for_evaluation(
+    rasters: Sequence[Union[str, os.PathLike]]
+) -> Tuple[Sequence[np.ndarray], rasterio.profiles.Profile, Any]:
+    """
+    Prepare data ready for evaluating modeling outputs.
+
+    Reads all rasters (only first band), reshapes them (flattens) and masks out all NaN
+    and nodata pixels by creating a combined mask from all input rasters.
+
+    Args:
+        rasters: List of filepaths of input rasters. Files should only include raster that have
+            the same grid properties and extent.
+
+    Returns:
+        List of reshaped and masked raster data.
+        Refrence raster profile.
+        Nodata mask applied to raster data.
+
+    Raises:
+        InvalidDatasetException: Input rasters contains only one path.
+        NonMatchingRasterMetadataException: Input rasters don't have same grid properties.
+    """
+    if len(rasters) < 2:
+        raise InvalidDatasetException(f"Expected more than one raster file: {len(rasters)}.")
+
+    profiles = []
+    raster_data = []
+    nodata_values = []
+
+    for raster in rasters:
+        with rasterio.open(raster) as src:
+            data = src.read(1)
+            profile = src.profile
+            profiles.append(profile)
+            raster_data.append(data)
+            nodata_values.append(profile.get("nodata"))
+
+    if not check_raster_grids(profiles, same_extent=True):
+        raise NonMatchingRasterMetadataException(f"Input rasters should have the same grid properties: {profiles}.")
+
+    reference_profile = profiles[0]
+    nodata_mask = None
+
+    for data, nodata in zip(raster_data, nodata_values):
+        nan_mask = np.isnan(data)
+        combined_mask = nan_mask if nodata_mask is None else nodata_mask | nan_mask
+
+        if nodata is not None:
+            raster_mask = data == nodata
+            combined_mask = combined_mask | raster_mask
+
+        nodata_mask = combined_mask
+    nodata_mask = nodata_mask.flatten()
+
+    masked_data = []
+    for data in raster_data:
+        flattened_data = data.flatten()
+        masked_data.append(flattened_data[~nodata_mask])
+
+    return masked_data, reference_profile, nodata_mask
 
 
 @beartype
