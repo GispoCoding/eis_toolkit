@@ -15,6 +15,7 @@ from sklearn.model_selection import KFold, LeaveOneOut, StratifiedKFold, train_t
 
 from eis_toolkit.evaluation.scoring import score_predictions
 from eis_toolkit.exceptions import (
+    InvalidDatasetException,
     InvalidParameterValueException,
     NonMatchingParameterLengthsException,
     NonMatchingRasterMetadataException,
@@ -146,7 +147,9 @@ def prepare_data_for_ml(
         Nodata mask applied to X and y.
 
     Raises:
-        NonMatchingRasterMetadataException: Input feature rasters don't have same grid properties.
+        InvalidDatasetException: Input feature rasters contains only one path.
+        NonMatchingRasterMetadataException: Input feature rasters, and optionally rasterized label file,
+            don't have same grid properties.
     """
 
     def _read_and_stack_feature_raster(filepath: Union[str, os.PathLike]) -> Tuple[np.ndarray, dict]:
@@ -155,6 +158,9 @@ def prepare_data_for_ml(
             raster_data = np.stack([src.read(i) for i in range(1, src.count + 1)])
             profile = src.profile
         return raster_data, profile
+
+    if len(feature_raster_files) < 2:
+        raise InvalidDatasetException(f"Expected more than one feature raster file: {len(feature_raster_files)}.")
 
     # Read and stack feature rasters
     feature_data, profiles = zip(*[_read_and_stack_feature_raster(file) for file in feature_raster_files])
@@ -191,6 +197,11 @@ def prepare_data_for_ml(
             with rasterio.open(label_file) as label_raster:
                 y = label_raster.read(1)  # Assuming labels are in the first band
                 label_nodata = label_raster.nodata
+                profiles.append(label_raster.profile)
+                if not check_raster_grids(profiles, same_extent=True):
+                    raise NonMatchingRasterMetadataException(
+                        "Label raster should have the same grid properties as feature rasters."
+                    )
 
             label_nodata_mask = y == label_nodata
 
