@@ -3105,6 +3105,159 @@ def plot_roc_curve_cli(
 
 
 @app.command()
+def plot_det_curve_cli(
+    true_labels: INPUT_FILE_OPTION,
+    probabilities: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    show_plot: bool = False,
+    save_dpi: Optional[int] = None,
+):
+    """
+    Plot DET (detection error tradeoff) curve.
+
+    DET curve is a binary classification multi-threshold metric. DET curves are a variation of ROC curves where
+    False Negative Rate is plotted on the y-axis instead of True Positive Rate. The ideal performance corner of
+    the plot is bottom-left. When comparing the performance of different models, DET curves can be
+    slightly easier to assess visually than ROC curves.
+    """
+    import matplotlib.pyplot as plt
+
+    from eis_toolkit.evaluation.classification_probability_evaluation import plot_det_curve
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
+    typer.echo("Progress: 25%")
+
+    _ = plot_det_curve(y_true=y_true, y_prob=y_prob)
+    typer.echo("Progress: 75%")
+    if show_plot:
+        plt.show()
+
+    if output_file is not None:
+        dpi = "figure" if save_dpi is None else save_dpi
+        plt.savefig(output_file, dpi=dpi)
+        echo_str_end = f", output figure saved to {output_file}."
+    typer.echo("Progress: 100% \n")
+
+    typer.echo("DET curve plot completed" + echo_str_end)
+
+
+@app.command()
+def plot_precision_recall_curve_cli(
+    true_labels: INPUT_FILE_OPTION,
+    probabilities: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    show_plot: bool = False,
+    save_dpi: Optional[int] = None,
+):
+    """
+    Plot precision-recall curve.
+
+    Precision-recall curve is a binary classification multi-threshold metric. Precision-recall curve shows
+    the tradeoff between precision and recall for different classification thresholds.
+    It can be a useful measure of success when classes are imbalanced.
+    """
+    import matplotlib.pyplot as plt
+
+    from eis_toolkit.evaluation.classification_probability_evaluation import plot_precision_recall_curve
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
+    typer.echo("Progress: 25%")
+
+    _ = plot_precision_recall_curve(y_true=y_true, y_prob=y_prob)
+    typer.echo("Progress: 75%")
+    if show_plot:
+        plt.show()
+
+    if output_file is not None:
+        dpi = "figure" if save_dpi is None else save_dpi
+        plt.savefig(output_file, dpi=dpi)
+        echo_str_end = f", output figure saved to {output_file}."
+    typer.echo("Progress: 100% \n")
+
+    typer.echo("Precision-Recall curve plot completed" + echo_str_end)
+
+
+@app.command()
+def plot_calibration_curve_cli(
+    true_labels: INPUT_FILE_OPTION,
+    probabilities: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    n_bins: int = 5,
+    show_plot: bool = False,
+    save_dpi: Optional[int] = None,
+):
+    """
+    Plot calibration curve (aka realibity diagram).
+
+    Calibration curve has the frequency of the positive labels on the y-axis and the predicted probability on
+    the x-axis. Generally, the close the calibration curve is to line x=y, the better the model is calibrated.
+    """
+    import matplotlib.pyplot as plt
+
+    from eis_toolkit.evaluation.classification_probability_evaluation import plot_calibration_curve
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
+    typer.echo("Progress: 25%")
+
+    _ = plot_calibration_curve(y_true=y_true, y_prob=y_prob, n_bins=n_bins)
+    typer.echo("Progress: 75%")
+    if show_plot:
+        plt.show()
+
+    if output_file is not None:
+        dpi = "figure" if save_dpi is None else save_dpi
+        plt.savefig(output_file, dpi=dpi)
+        echo_str_end = f", output figure saved to {output_file}."
+    typer.echo("Progress: 100% \n")
+
+    typer.echo("Calibration curve plot completed" + echo_str_end)
+
+
+@app.command()
+def plot_confusion_matrix_cli(
+    true_labels: INPUT_FILE_OPTION,
+    predictions: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    show_plot: bool = False,
+    save_dpi: Optional[int] = None,
+):
+    """Plot confusion matrix to visualize classification results."""
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import confusion_matrix
+
+    from eis_toolkit.evaluation.plot_confusion_matrix import plot_confusion_matrix
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
+    typer.echo("Progress: 25%")
+
+    matrix = confusion_matrix(y_true, y_pred)
+    _ = plot_confusion_matrix(confusion_matrix=matrix)
+    typer.echo("Progress: 75%")
+    if show_plot:
+        plt.show()
+
+    if output_file is not None:
+        dpi = "figure" if save_dpi is None else save_dpi
+        plt.savefig(output_file, dpi=dpi)
+        echo_str_end = f", output figure saved to {output_file}."
+    typer.echo("Progress: 100% \n")
+
+    typer.echo("Confusion matrix plot completed" + echo_str_end)
+
+
+@app.command()
 def score_predictions_cli(
     true_labels: INPUT_FILE_OPTION,
     predictions: INPUT_FILE_OPTION,
