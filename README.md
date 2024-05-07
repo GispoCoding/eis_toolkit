@@ -57,7 +57,7 @@ pip install eis_toolkit-0.4.0-py3-none-any.whl
 ```
 
 > [!TIP]
-> GDAL installation can cause issues on various platforms, especially on Windows. If you have trouble installing EIS Toolkit in a venv due to GDAL, download a compatible GDAL wheel (for example from [this repository](https://github.com/cgohlke/geospatial-wheels/releases)), install it first, and then attempt to install EIS Toolkit again.
+> GDAL needs to be installed separately on Windows when using pip / PyPI. If you have trouble installing EIS Toolkit in a venv due to GDAL, you can download a compatible GDAL wheel (for example from [this repository](https://github.com/cgohlke/geospatial-wheels/releases)), install it first, and then attempt to install EIS Toolkit again.
 
 
 ## Usage
