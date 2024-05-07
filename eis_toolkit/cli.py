@@ -722,10 +722,14 @@ def descriptive_statistics_raster_cli(input_file: INPUT_FILE_OPTION):
         results_dict = descriptive_statistics_raster(raster)
     typer.echo("Progress: 75%")
 
-    json_str = json.dumps(results_dict)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
-    typer.echo("Descriptive statistics (raster) completed")
+    # json_str = json.dumps(results_dict)
+    typer.echo("Progress: 100%\n")
+    # typer.echo(f"Results: {json_str}")
+    # typer.echo("Results:\n")
+    for key, value in results_dict.items():
+        typer.echo(f"{key}: {value}")
+
+    typer.echo("\nDescriptive statistics (raster) completed")
 
 
 # DESCRIPTIVE STATISTICS (VECTOR)
@@ -2318,7 +2322,7 @@ def evaluate_trained_model_cli(
     output_raster: OUTPUT_FILE_OPTION,
     validation_metrics: Annotated[List[str], typer.Option()],
 ):
-    """Evaluate a trained machine learning model by predicting and scoring."""
+    """Predict and evaluate a trained machine learning model by predicting and scoring."""
     from sklearn.base import is_classifier
 
     from eis_toolkit.evaluation.scoring import score_predictions
@@ -2326,15 +2330,21 @@ def evaluate_trained_model_cli(
     from eis_toolkit.prediction.machine_learning_predict import predict_classifier, predict_regressor
 
     X, y, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters, target_labels)
-    print(len(np.unique(y)))
     typer.echo("Progress: 30%")
 
     model = load_model(model_file)
     if is_classifier(model):
         predictions, probabilities = predict_classifier(X, model, True)
+        probabilities = probabilities[:, 1]
+        probabilities = probabilities.astype(np.float32)
+        probabilities_reshaped = reshape_predictions(
+            probabilities, reference_profile["height"], reference_profile["width"], nodata_mask
+        )
     else:
         predictions = predict_regressor(X, model)
+
     metrics_dict = score_predictions(y, predictions, validation_metrics)
+
     predictions_reshaped = reshape_predictions(
         predictions, reference_profile["height"], reference_profile["width"], nodata_mask
     )
@@ -2344,10 +2354,21 @@ def evaluate_trained_model_cli(
     json_str = json.dumps(metrics_dict)
 
     out_profile = reference_profile.copy()
-    out_profile.update({"count": 1, "dtype": predictions_reshaped.dtype})
+    out_profile.update({"count": 1, "dtype": np.float32})
 
-    with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(predictions_reshaped, 1)
+    if is_classifier(model):
+        directory = os.path.split(output_raster)[0]
+        name = os.path.splitext(os.path.basename(output_raster))[0]
+        labels_output = os.path.join(directory, name + "_labels" + ".tif")
+        probabilities_output = os.path.join(directory, name + "_probabilities" + ".tif")
+        for output_path, output_data in zip(
+            [labels_output, probabilities_output], [predictions_reshaped, probabilities_reshaped]
+        ):
+            with rasterio.open(output_path, "w", **out_profile) as dst:
+                dst.write(output_data, 1)
+    else:
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(predictions_reshaped, 1)
 
     typer.echo("Progress: 100%")
     typer.echo(f"Results: {json_str}")
@@ -2375,6 +2396,11 @@ def predict_with_trained_model_cli(
     model = load_model(model_file)
     if is_classifier(model):
         predictions, probabilities = predict_classifier(X, model, True)
+        probabilities = probabilities[:, 1]
+        probabilities = probabilities.astype(np.float32)
+        probabilities_reshaped = reshape_predictions(
+            probabilities, reference_profile["height"], reference_profile["width"], nodata_mask
+        )
     else:
         predictions = predict_regressor(X, model)
 
@@ -2385,10 +2411,21 @@ def predict_with_trained_model_cli(
     typer.echo("Progress: 80%")
 
     out_profile = reference_profile.copy()
-    out_profile.update({"count": 1, "dtype": predictions_reshaped.dtype})
+    out_profile.update({"count": 1, "dtype": np.float32})
 
-    with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(predictions_reshaped, 1)
+    if is_classifier(model):
+        directory = os.path.split(output_raster)[0]
+        name = os.path.splitext(os.path.basename(output_raster))[0]
+        labels_output = os.path.join(directory, name + "_labels" + ".tif")
+        probabilities_output = os.path.join(directory, name + "_probabilities" + ".tif")
+        for output_path, output_data in zip(
+            [labels_output, probabilities_output], [predictions_reshaped, probabilities_reshaped]
+        ):
+            with rasterio.open(output_path, "w", **out_profile) as dst:
+                dst.write(output_data, 1)
+    else:
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(predictions_reshaped, 1)
 
     typer.echo("Progress: 100%")
     typer.echo("Predicting completed")
@@ -2972,7 +3009,126 @@ def winsorize_transform_cli(
 
 
 # ---EVALUATION ---
-# TODO
+
+
+@app.command()
+def summarize_probability_metrics_cli(true_labels: INPUT_FILE_OPTION, probabilities: INPUT_FILE_OPTION):
+    """
+    Generate a comprehensive report of various evaluation metrics for classification probabilities.
+
+    The output includes ROC AUC, log loss, average precision and Brier score loss.
+    """
+    from eis_toolkit.evaluation.classification_probability_evaluation import summarize_probability_metrics
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
+    typer.echo("Progress: 25%")
+
+    results_dict = summarize_probability_metrics(y_true=y_true, y_prob=y_prob)
+
+    typer.echo("Progress: 75%")
+
+    # json_str = json.dumps(results_dict)
+    typer.echo("Progress: 100% \n")
+    # typer.echo("Results:\n")
+    for key, value in results_dict.items():
+        typer.echo(f"{key}: {value}")
+    # typer.echo(f"Results: {json_str}")
+    typer.echo("\nGenerating probability metrics summary completed.")
+
+
+@app.command()
+def summarize_label_metrics_binary_cli(true_labels: INPUT_FILE_OPTION, predictions: INPUT_FILE_OPTION):
+    """
+    Generate a comprehensive report of various evaluation metrics for binary classification results.
+
+    The output includes accuracy, precision, recall, F1 scores and confusion matrix elements
+    (true negatives, false positives, false negatives, true positives).
+    """
+    from eis_toolkit.evaluation.classification_label_evaluation import summarize_label_metrics_binary
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
+    typer.echo("Progress: 25%")
+
+    results_dict = summarize_label_metrics_binary(y_true=y_true, y_pred=y_pred)
+    typer.echo("Progress: 75%")
+
+    # json_str = json.dumps(results_dict)
+    typer.echo("Progress: 100% \n")
+    for key, value in results_dict.items():
+        typer.echo(f"{key}: {value}")
+    # typer.echo(f"Results: {json_str}")
+    typer.echo("\n Generating prediction label metrics summary completed.")
+
+
+@app.command()
+def plot_roc_curve_cli(
+    true_labels: INPUT_FILE_OPTION,
+    probabilities: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    show_plot: bool = False,
+    save_dpi: Optional[int] = None,
+):
+    """
+    Plot ROC (receiver operating characteristic) curve.
+
+    ROC curve is a binary classification multi-threshold metric. The ideal performance corner of the plot
+    is top-left. AUC of the ROC curve summarizes model performance across different classification thresholds.
+    """
+    import matplotlib.pyplot as plt
+
+    from eis_toolkit.evaluation.classification_probability_evaluation import plot_roc_curve
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
+    typer.echo("Progress: 25%")
+
+    _ = plot_roc_curve(y_true=y_true, y_prob=y_prob)
+    typer.echo("Progress: 75%")
+    if show_plot:
+        plt.show()
+
+    if output_file is not None:
+        dpi = "figure" if save_dpi is None else save_dpi
+        plt.savefig(output_file, dpi=dpi)
+        echo_str_end = f", output figure saved to {output_file}."
+    typer.echo("Progress: 100% \n")
+
+    typer.echo("ROC curve plot completed" + echo_str_end)
+
+
+@app.command()
+def score_predictions_cli(
+    true_labels: INPUT_FILE_OPTION,
+    predictions: INPUT_FILE_OPTION,
+    metrics: Annotated[List[str], typer.Option()],
+):
+    """Score predictions."""
+    from eis_toolkit.evaluation.scoring import score_predictions
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
+    typer.echo("Progress: 25%")
+
+    outputs = score_predictions(y_true, y_pred, metrics)
+    typer.echo("Progress: 100% \n")
+
+    if isinstance(outputs, dict):
+        for key, value in outputs.items():
+            typer.echo(f"{key}: {value}")
+    else:
+        typer.echo(outputs)
+
+    typer.echo("\nScoring predictions completed.")
 
 
 # --- UTILITIES ---
