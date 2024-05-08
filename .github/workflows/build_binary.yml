@@ -8,6 +8,9 @@ jobs:
   pyinstaller-build:
     runs-on: windows-latest
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+  
       - name: Install Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -17,10 +20,12 @@ jobs:
           auto-activate-base: false
           mamba-version: "*"
           channel-priority: true
+
       - name: Create requirements.txt
         run: |
           conda install pip
           pip freeze > requirements.txt
+
       - name: Create Executable
         uses: sayyid5416/pyinstaller@v1
         with:
