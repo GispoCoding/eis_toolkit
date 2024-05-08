@@ -24,13 +24,20 @@ jobs:
       - name: Create requirements.txt
         run: |
           conda install pip
-          pip freeze > requirements.txt
+          pip freeze > $GITHUB_WORKSPACE/requirements.txt
+          if [ -f "$GITHUB_WORKSPACE/requirements.txt" ]; then
+            echo "requirements.txt successfully created."
+            cat $GITHUB_WORKSPACE/requirements.txt  # Optional: Output contents for debugging
+          else
+            echo "ERROR: requirements.txt not found."
+            exit 1  # Exit with an error code if the file is missing
+          fi
 
       - name: Create Executable
         uses: sayyid5416/pyinstaller@v1
         with:
           python_ver: '3.9.13'
           spec: 'building/eis_toolkit_binary.spec'
-          requirements: 'requirements.txt'
+          requirements: '$GITHUB_WORKSPACE/requirements.txt'
           upload_exe_with_name: 'EIS_Toolkit_executable'
           options: --onefile, --name "EIS Toolkit executable", --windowed, 
