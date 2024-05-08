@@ -26,4 +26,4 @@ jobs:
       
       - name: Test Executable
         run: |
-          start dist/eis_toolkit_binary.exe --help
+          dist/eis_toolkit_binary.exe --help
