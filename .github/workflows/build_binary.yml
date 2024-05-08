@@ -8,6 +8,13 @@ jobs:
   pyinstaller-build:
     runs-on: windows-latest
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      
+      - name: Install GDAL
+        run: |
+          pip install building/GDAL-3.6.1-cp39-cp39-win32.whl
+
       - name: Create Executable
         uses: sayyid5416/pyinstaller@v1
         with:
