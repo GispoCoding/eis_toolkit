@@ -4,9 +4,10 @@ from PyInstaller.utils.hooks import collect_dynamic_libs
 
 a = Analysis(
     ['../eis_toolkit/__main__.py'],
+    pathex=['c:/hostedtoolcache/windows/python/3.9.13/x64/lib/site-packages'],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=['encodings', 'encodings.*'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

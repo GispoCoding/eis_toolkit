@@ -23,3 +23,7 @@ jobs:
           requirements: 'building/requirements.txt'
           upload_exe_with_name: 'EIS_Toolkit_executable'
           options: --onefile, --name "EIS Toolkit executable", --windowed, 
+      
+      - name: Test Executable
+        run: |
+          echo "start dist/eis_toolkit_binary.exe"
