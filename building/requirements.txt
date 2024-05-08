@@ -20,7 +20,7 @@ fiona==1.9.6
 flatbuffers==24.3.25
 fonttools==4.51.0
 gast==0.5.4
-GDAL==3.4.3
+GDAL==3.6.1
 geopandas==0.11.1
 giddy==2.3.5
 google-auth==2.29.0
