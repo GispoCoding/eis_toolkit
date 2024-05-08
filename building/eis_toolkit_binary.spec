@@ -3,7 +3,7 @@ from PyInstaller.utils.hooks import collect_dynamic_libs
 
 
 a = Analysis(
-    [os.path.join('..', '..', '..', '__main__.py')],
+    ['../eis_toolkit/__main__.py'],
     binaries=[],
     datas=[],
     hiddenimports=[],
