@@ -11,7 +11,7 @@ jobs:
       - name: Create Executable
         uses: sayyid5416/pyinstaller@v1
         with:
-          python_ver: '3.10.11'
+          python_ver: '3.9.13'
           spec: 'building/eis_toolkit_binary.spec'
           requirements: 'building/requirements.txt'
           upload_exe_with_name: 'EIS_Toolkit_executable'
