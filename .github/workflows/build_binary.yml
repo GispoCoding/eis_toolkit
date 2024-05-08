@@ -6,24 +6,17 @@ on:
 
 jobs:
   pyinstaller-build:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      
-      - name: Install GDAL
-        run: |
-          pip install building/GDAL-3.6.1-cp39-cp39-win_amd64.whl
+    runs-on: ubuntu-latest
 
-      - name: Create Executable
-        uses: sayyid5416/pyinstaller@v1
-        with:
-          python_ver: '3.9.13'
-          spec: 'building/eis_toolkit_binary.spec'
-          requirements: 'building/requirements.txt'
-          upload_exe_with_name: 'EIS_Toolkit_executable'
-          options: --onefile, --name "EIS Toolkit executable", --windowed, 
-      
-      - name: Test Executable
-        run: |
-          dist/eis_toolkit_binary.exe --help
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Package Application
+      uses: JackMcKew/pyinstaller-action-windows@main
+      with:
+        path: building
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: eis-toolkit-exe
+        path: dist/windows
