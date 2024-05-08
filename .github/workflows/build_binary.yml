@@ -25,13 +25,6 @@ jobs:
         run: |
           conda install pip
           pip freeze > $GITHUB_WORKSPACE/requirements.txt
-          if [ -f "$GITHUB_WORKSPACE/requirements.txt" ]; then
-            echo "requirements.txt successfully created."
-            cat $GITHUB_WORKSPACE/requirements.txt  # Optional: Output contents for debugging
-          else
-            echo "ERROR: requirements.txt not found."
-            exit 1  # Exit with an error code if the file is missing
-          fi
 
       - name: Create Executable
         uses: sayyid5416/pyinstaller@v1
