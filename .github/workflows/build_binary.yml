@@ -1,23 +1,18 @@
-name: Package Application with Pyinstaller
+name: Create EIS executable for Windows
 
 on:
   pull_request:
     branches: [ build ]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
+  pyinstaller-build:
+    runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Package Application
-      uses: JackMcKew/pyinstaller-action-windows@main
-      with:
-        path: eis_toolkit
-
-    - uses: actions/upload-artifact@v2
-      with:
-        name: eis_executable_windows
-        path: building
+      - name: Create Executable
+        uses: sayyid5416/pyinstaller@v1
+        with:
+          python_ver: '3.10.12'
+          spec: 'building/eis_toolkit_binary.spec'
+          requirements: 'building/requirements.txt'
+          upload_exe_with_name: 'EIS_Toolkit_executable'
+          options: --onefile, --name "EIS Toolkit executable", --windowed, 
