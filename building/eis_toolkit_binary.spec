@@ -1,5 +1,5 @@
 import glob, os
-from PyInstaller.utils.hooks import collect_dynamic_libs
+from PyInstaller.utils.hooks import collect_dynamic_libs, collect_submodules
 
 hiddenimports = collect_submodules('encodings')
 
