@@ -14,7 +14,9 @@ jobs:
       - name: Install GDAL
         run: |
           pip install building/GDAL-3.6.1-cp39-cp39-win_amd64.whl
-          unset PYTHONHOME
+          echo Current PYTHONHOME: %PYTHONHOME%
+          set PYTHONHOME=
+          echo PYTHONHOME unset, new value: %PYTHONHOME%
 
       - name: Create Executable
         uses: sayyid5416/pyinstaller@v1
