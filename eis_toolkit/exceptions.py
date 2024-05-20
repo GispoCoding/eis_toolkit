@@ -34,6 +34,10 @@ class InvalidDataShapeException(Exception):
     """Exception error for datasets with invalid shapes."""
 
 
+class InvalidModelTypeException(Exception):
+    """Exception error for invalid model type."""
+
+
 class InvalidParameterValueException(Exception):
     """Exception error class for invalid parameter values."""
 
