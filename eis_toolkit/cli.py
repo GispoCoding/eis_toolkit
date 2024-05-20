@@ -2322,9 +2322,7 @@ def classifier_test_cli(
     output_raster_probability: OUTPUT_FILE_OPTION,
     output_raster_classified: OUTPUT_FILE_OPTION,
     classification_threshold: float = 0.5,
-    validation_metrics: Annotated[List[ClassifierMetrics], typer.Option(case_sensitive=False)] = [
-        ClassifierMetrics.accuracy
-    ],
+    test_metrics: Annotated[List[ClassifierMetrics], typer.Option(case_sensitive=False)] = [ClassifierMetrics.accuracy],
 ):
     """Test trained machine learning classifier model by predicting and scoring."""
     from eis_toolkit.evaluation.scoring import score_predictions
@@ -2343,8 +2341,8 @@ def classifier_test_cli(
         predictions, reference_profile["height"], reference_profile["width"], nodata_mask
     )
 
-    metrics_dict = score_predictions(y, predictions, validation_metrics)
-    json_str = json.dumps(metrics_dict)
+    metrics_dict = score_predictions(y, predictions, test_metrics)
+    # json_str = json.dumps(metrics_dict)
     typer.echo("Progress: 80%")
 
     out_profile = reference_profile.copy()
@@ -2355,8 +2353,13 @@ def classifier_test_cli(
     with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
         dst.write(predictions_reshaped, 1)
 
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
+    typer.echo("Progress: 100%\n")
+    # typer.echo(f"Results:")
+
+    for key, value in metrics_dict.items():
+        typer.echo(f"{key}: {value}")
+
+    typer.echo("\n")
 
     typer.echo(
         (
@@ -2373,7 +2376,7 @@ def regressor_test_cli(
     target_labels: INPUT_FILE_OPTION,
     model_file: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
-    validation_metrics: Annotated[List[RegressorMetrics], typer.Option(case_sensitive=False)] = [RegressorMetrics.mse],
+    test_metrics: Annotated[List[RegressorMetrics], typer.Option(case_sensitive=False)] = [RegressorMetrics.mse],
 ):
     """Test trained machine learning regressor model by predicting and scoring."""
     from eis_toolkit.evaluation.scoring import score_predictions
@@ -2385,14 +2388,13 @@ def regressor_test_cli(
 
     model = load_model(model_file)
     predictions = predict_regressor(X, model)
-    metrics_dict = score_predictions(y, predictions, validation_metrics)
+    metrics_dict = score_predictions(y, predictions, test_metrics)
     predictions_reshaped = reshape_predictions(
         predictions, reference_profile["height"], reference_profile["width"], nodata_mask
     )
-
     typer.echo("Progress: 80%")
 
-    json_str = json.dumps(metrics_dict)
+    # json_str = json.dumps(metrics_dict)
 
     out_profile = reference_profile.copy()
     out_profile.update({"count": 1, "dtype": np.float32})
@@ -2400,8 +2402,13 @@ def regressor_test_cli(
     with rasterio.open(output_raster, "w", **out_profile) as dst:
         dst.write(predictions_reshaped, 1)
 
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
+    typer.echo("Progress: 100%\n")
+    # typer.echo("Results: ")
+
+    for key, value in metrics_dict.items():
+        typer.echo(f"{key}: {value}")
+
+    typer.echo("\n")
 
     typer.echo(f"Testing regressor model completed, writing raster to {output_raster}.")
 
