@@ -18,13 +18,12 @@ def predict_classifier(
     """
     Predict with a trained classifier model.
 
-    Only works for binary classification currently.
-
     Args:
         data: Data used to make predictions.
         model: Trained classifier or regressor. Can be any machine learning model trained with
             EIS Toolkit (Sklearn and Keras models).
-        classification_threshold: Threshold for classifying based on probabilities. Defaults to 0.5.
+        classification_threshold: Threshold for classifying based on probabilities. Only used for
+            binary classification. Defaults to 0.5.
         include_probabilities: If the probability array should be returned too. Defaults to True.
 
     Returns:
@@ -34,19 +33,27 @@ def predict_classifier(
         InvalidModelTypeException: Input model is not a classifier model.
     """
     if isinstance(model, keras.Model):
-        probabilities = model.predict(data).squeeze()
-        labels = probabilities >= classification_threshold
+        probabilities = model.predict(data).astype(np.float32)
+        if probabilities.shape[1] == 1:  # Binary classification
+            probabilities = probabilities.squeeze()
+            labels = (probabilities >= classification_threshold).astype(np.float32)
+        else:  # Multiclass classification
+            labels = probabilities.argmax(axis=-1).astype(np.float32)
         if include_probabilities:
-            return labels, probabilities.astype(np.float32)
+            return labels, probabilities
         else:
             return labels
     elif isinstance(model, BaseEstimator):
         if not is_classifier(model):
             raise InvalidModelTypeException(f"Expected a classifier model: {type(model)}.")
-        probabilities = model.predict_proba(data)[:, 1]
-        labels = (probabilities >= classification_threshold).astype(np.float32)
+        probabilities = model.predict_proba(data).astype(np.float32)
+        if probabilities.shape[1] == 2:  # Binary classification
+            probabilities = probabilities[:, 1]
+            labels = (probabilities >= classification_threshold).astype(np.float32)
+        else:  # Multiclass classification
+            labels = probabilities.argmax(axis=-1).astype(np.float32)
         if include_probabilities:
-            return labels, probabilities.astype(np.float32)
+            return labels, probabilities
         else:
             return labels
     else:

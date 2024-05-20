@@ -118,7 +118,7 @@ def test_evaluate_model_sklearn():
         X_train, y_train, model=RF_MODEL, validation_method="none", metrics=CLF_METRICS, random_state=42
     )
 
-    predictions = predict_classifier(X_test, model, include_probabilities=False)
+    predictions = predict_classifier(X_test, model, classification_threshold=0.5, include_probabilities=False)
     accuracy = score_predictions(y_test, predictions, "accuracy")
     np.testing.assert_equal(accuracy, 1.0)
 
@@ -131,7 +131,7 @@ def test_predict_classifier_sklearn():
         X_train, y_train, model=RF_MODEL, validation_method="none", metrics=CLF_METRICS, random_state=42
     )
 
-    predicted_labels, predicted_probabilities = predict_classifier(X_test, model, True)
+    predicted_labels, predicted_probabilities = predict_classifier(X_test, model, include_probabilities=True)
     np.testing.assert_equal(len(predicted_labels), len(y_test))
     np.testing.assert_equal(len(predicted_probabilities), len(y_test))
 

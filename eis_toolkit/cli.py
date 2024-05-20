@@ -2359,8 +2359,10 @@ def classifier_test_cli(
     typer.echo(f"Results: {json_str}")
 
     typer.echo(
-        f"Testing classifier model completed, writing rasters to \
-        {output_raster_probability} and {output_raster_classified}."
+        (
+            "Testing classifier model completed, writing rasters to "
+            f"{output_raster_probability} and {output_raster_classified}."
+        )
     )
 
 
