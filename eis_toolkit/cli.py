@@ -2313,97 +2313,162 @@ def gradient_boosting_regressor_train_cli(
     typer.echo("Gradient boosting regressor training completed")
 
 
-# EVALUATE ML MODEL
+# TEST CLASSIFIER ML MODEL
 @app.command()
-def evaluate_trained_model_cli(
+def classifier_test_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     model_file: INPUT_FILE_OPTION,
-    output_raster: OUTPUT_FILE_OPTION,
-    validation_metrics: Annotated[List[str], typer.Option()],
+    output_raster_probability: OUTPUT_FILE_OPTION,
+    output_raster_classified: OUTPUT_FILE_OPTION,
+    classification_threshold: float = 0.5,
+    test_metrics: Annotated[List[ClassifierMetrics], typer.Option(case_sensitive=False)] = [ClassifierMetrics.accuracy],
 ):
-    """Predict and evaluate a trained machine learning model by predicting and scoring."""
-    from sklearn.base import is_classifier
-
+    """Test trained machine learning classifier model by predicting and scoring."""
     from eis_toolkit.evaluation.scoring import score_predictions
     from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml, reshape_predictions
-    from eis_toolkit.prediction.machine_learning_predict import predict_classifier, predict_regressor
+    from eis_toolkit.prediction.machine_learning_predict import predict_classifier
 
     X, y, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters, target_labels)
     typer.echo("Progress: 30%")
 
     model = load_model(model_file)
-    if is_classifier(model):
-        predictions, probabilities = predict_classifier(X, model, True)
-        probabilities = probabilities[:, 1]
-        probabilities = probabilities.astype(np.float32)
-        probabilities_reshaped = reshape_predictions(
-            probabilities, reference_profile["height"], reference_profile["width"], nodata_mask
-        )
-    else:
-        predictions = predict_regressor(X, model)
-
-    metrics_dict = score_predictions(y, predictions, validation_metrics)
-
+    predictions, probabilities = predict_classifier(X, model, classification_threshold, True)
+    probabilities_reshaped = reshape_predictions(
+        probabilities, reference_profile["height"], reference_profile["width"], nodata_mask
+    )
     predictions_reshaped = reshape_predictions(
         predictions, reference_profile["height"], reference_profile["width"], nodata_mask
     )
 
+    metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics))
     typer.echo("Progress: 80%")
-
-    json_str = json.dumps(metrics_dict)
 
     out_profile = reference_profile.copy()
     out_profile.update({"count": 1, "dtype": np.float32})
 
-    if is_classifier(model):
-        directory = os.path.split(output_raster)[0]
-        name = os.path.splitext(os.path.basename(output_raster))[0]
-        labels_output = os.path.join(directory, name + "_labels" + ".tif")
-        probabilities_output = os.path.join(directory, name + "_probabilities" + ".tif")
-        for output_path, output_data in zip(
-            [labels_output, probabilities_output], [predictions_reshaped, probabilities_reshaped]
-        ):
-            with rasterio.open(output_path, "w", **out_profile) as dst:
-                dst.write(output_data, 1)
-    else:
-        with rasterio.open(output_raster, "w", **out_profile) as dst:
-            dst.write(predictions_reshaped, 1)
+    with rasterio.open(output_raster_probability, "w", **out_profile) as dst:
+        dst.write(probabilities_reshaped, 1)
+    with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
+        dst.write(predictions_reshaped, 1)
+
+    typer.echo("\n")
+    for key, value in metrics_dict.items():
+        typer.echo(f"{key}: {value}")
+    typer.echo("\n")
 
     typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
+    typer.echo(
+        (
+            "Testing classifier model completed, writing rasters to "
+            f"{output_raster_probability} and {output_raster_classified}."
+        )
+    )
 
-    typer.echo("Evaluating trained model completed")
+
+# TEST REGRESSOR ML MODEL
+@app.command()
+def regressor_test_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: INPUT_FILE_OPTION,
+    model_file: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    test_metrics: Annotated[List[RegressorMetrics], typer.Option(case_sensitive=False)] = [RegressorMetrics.mse],
+):
+    """Test trained machine learning regressor model by predicting and scoring."""
+    from eis_toolkit.evaluation.scoring import score_predictions
+    from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml, reshape_predictions
+    from eis_toolkit.prediction.machine_learning_predict import predict_regressor
+
+    X, y, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters, target_labels)
+    typer.echo("Progress: 30%")
+
+    model = load_model(model_file)
+    predictions = predict_regressor(X, model)
+    predictions_reshaped = reshape_predictions(
+        predictions, reference_profile["height"], reference_profile["width"], nodata_mask
+    )
+
+    metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics))
+    typer.echo("Progress: 80%")
+
+    out_profile = reference_profile.copy()
+    out_profile.update({"count": 1, "dtype": np.float32})
+
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(predictions_reshaped, 1)
+
+    typer.echo("\n")
+    for key, value in metrics_dict.items():
+        typer.echo(f"{key}: {value}")
+    typer.echo("\n")
+
+    typer.echo("Progress: 100%\n")
+
+    typer.echo(f"Testing regressor model completed, writing raster to {output_raster}.")
 
 
 # PREDICT WITH TRAINED ML MODEL
 @app.command()
-def predict_with_trained_model_cli(
+def classifier_predict_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     model_file: INPUT_FILE_OPTION,
-    output_raster: OUTPUT_FILE_OPTION,
+    output_raster_probability: OUTPUT_FILE_OPTION,
+    output_raster_classified: OUTPUT_FILE_OPTION,
+    classification_threshold: float = 0.5,
 ):
-    """Predict with a trained machine learning model."""
-    from sklearn.base import is_classifier
-
+    """Predict with a trained machine learning classifier model."""
     from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml, reshape_predictions
-    from eis_toolkit.prediction.machine_learning_predict import predict_classifier, predict_regressor
+    from eis_toolkit.prediction.machine_learning_predict import predict_classifier
 
     X, _, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters)
 
     typer.echo("Progress: 30%")
 
     model = load_model(model_file)
-    if is_classifier(model):
-        predictions, probabilities = predict_classifier(X, model, True)
-        probabilities = probabilities[:, 1]
-        probabilities = probabilities.astype(np.float32)
-        probabilities_reshaped = reshape_predictions(
-            probabilities, reference_profile["height"], reference_profile["width"], nodata_mask
-        )
-    else:
-        predictions = predict_regressor(X, model)
+    predictions, probabilities = predict_classifier(X, model, classification_threshold, True)
+    probabilities_reshaped = reshape_predictions(
+        probabilities, reference_profile["height"], reference_profile["width"], nodata_mask
+    )
+    predictions_reshaped = reshape_predictions(
+        predictions, reference_profile["height"], reference_profile["width"], nodata_mask
+    )
+    typer.echo("Progress: 80%")
 
+    out_profile = reference_profile.copy()
+    out_profile.update({"count": 1, "dtype": np.float32})
+
+    with rasterio.open(output_raster_probability, "w", **out_profile) as dst:
+        dst.write(probabilities_reshaped, 1)
+    with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
+        dst.write(predictions_reshaped, 1)
+
+    typer.echo("Progress: 100%")
+    typer.echo(
+        (
+            "Predicting with classifier model completed, writing rasters to "
+            f"{output_raster_probability} and {output_raster_classified}."
+        )
+    )
+
+
+# PREDICT WITH TRAINED ML MODEL
+@app.command()
+def regressor_predict_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    model_file: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+):
+    """Predict with a trained machine learning regressor model."""
+    from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml, reshape_predictions
+    from eis_toolkit.prediction.machine_learning_predict import predict_regressor
+
+    X, _, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters)
+
+    typer.echo("Progress: 30%")
+
+    model = load_model(model_file)
+    predictions = predict_regressor(X, model)
     predictions_reshaped = reshape_predictions(
         predictions, reference_profile["height"], reference_profile["width"], nodata_mask
     )
@@ -2413,22 +2478,11 @@ def predict_with_trained_model_cli(
     out_profile = reference_profile.copy()
     out_profile.update({"count": 1, "dtype": np.float32})
 
-    if is_classifier(model):
-        directory = os.path.split(output_raster)[0]
-        name = os.path.splitext(os.path.basename(output_raster))[0]
-        labels_output = os.path.join(directory, name + "_labels" + ".tif")
-        probabilities_output = os.path.join(directory, name + "_probabilities" + ".tif")
-        for output_path, output_data in zip(
-            [labels_output, probabilities_output], [predictions_reshaped, probabilities_reshaped]
-        ):
-            with rasterio.open(output_path, "w", **out_profile) as dst:
-                dst.write(output_data, 1)
-    else:
-        with rasterio.open(output_raster, "w", **out_profile) as dst:
-            dst.write(predictions_reshaped, 1)
+    with rasterio.open(output_raster, "w", **out_profile) as dst:
+        dst.write(predictions_reshaped, 1)
 
     typer.echo("Progress: 100%")
-    typer.echo("Predicting completed")
+    typer.echo(f"Predicting with regressor model completed, writing raster to {output_raster}.")
 
 
 # FUZZY OVERLAYS
