@@ -2341,8 +2341,7 @@ def classifier_test_cli(
         predictions, reference_profile["height"], reference_profile["width"], nodata_mask
     )
 
-    metrics_dict = score_predictions(y, predictions, test_metrics)
-    # json_str = json.dumps(metrics_dict)
+    metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics))
     typer.echo("Progress: 80%")
 
     out_profile = reference_profile.copy()
@@ -2353,14 +2352,12 @@ def classifier_test_cli(
     with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
         dst.write(predictions_reshaped, 1)
 
-    typer.echo("Progress: 100%\n")
-    # typer.echo(f"Results:")
-
+    typer.echo("\n")
     for key, value in metrics_dict.items():
         typer.echo(f"{key}: {value}")
-
     typer.echo("\n")
 
+    typer.echo("Progress: 100%")
     typer.echo(
         (
             "Testing classifier model completed, writing rasters to "
@@ -2388,13 +2385,12 @@ def regressor_test_cli(
 
     model = load_model(model_file)
     predictions = predict_regressor(X, model)
-    metrics_dict = score_predictions(y, predictions, test_metrics)
     predictions_reshaped = reshape_predictions(
         predictions, reference_profile["height"], reference_profile["width"], nodata_mask
     )
-    typer.echo("Progress: 80%")
 
-    # json_str = json.dumps(metrics_dict)
+    metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics))
+    typer.echo("Progress: 80%")
 
     out_profile = reference_profile.copy()
     out_profile.update({"count": 1, "dtype": np.float32})
@@ -2402,13 +2398,12 @@ def regressor_test_cli(
     with rasterio.open(output_raster, "w", **out_profile) as dst:
         dst.write(predictions_reshaped, 1)
 
-    typer.echo("Progress: 100%\n")
-    # typer.echo("Results: ")
-
+    typer.echo("\n")
     for key, value in metrics_dict.items():
         typer.echo(f"{key}: {value}")
-
     typer.echo("\n")
+
+    typer.echo("Progress: 100%\n")
 
     typer.echo(f"Testing regressor model completed, writing raster to {output_raster}.")
 
