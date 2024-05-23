@@ -2041,6 +2041,9 @@ def cell_based_association_cli(
     geodataframe = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
+    if subset_target_attribute_values is not None:
+        subset_target_attribute_values = [value.strip() for value in subset_target_attribute_values]
+
     cell_based_association(
         cell_size=cell_size,
         geodata=[geodataframe],

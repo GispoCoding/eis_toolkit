@@ -90,10 +90,8 @@ def cell_based_association(
             raise InvalidColumnException("Targeted column not found in the GeoDataFrame.")
 
     for i, subset in enumerate(subset_target_attribute_values):
-        if subset is not None:
-            for value in subset:
-                if value not in geodata[i][column[i]].unique():
-                    raise InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
+        if subset is not None and not all(value in geodata[i][column[i]].tolist() for value in subset):
+            raise InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
 
     # Computation
     for i, data in enumerate(geodata):
