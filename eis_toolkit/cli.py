@@ -2023,7 +2023,39 @@ def distance_computation_cli(
 
 
 # CBA
-# TODO
+@app.command()
+def cell_based_association_cli(
+    input_vector: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    cell_size: int = typer.Option(),
+    column: Optional[str] = None,
+    subset_target_attribute_values: Optional[List[str]] = None,
+    add_name: Optional[str] = None,
+    add_buffer: Optional[float] = None,
+):
+    """Create a CBA matrix."""
+    from eis_toolkit.vector_processing.cell_based_association import cell_based_association
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    cell_based_association(
+        cell_size=cell_size,
+        geodata=[geodataframe],
+        output_path=output_raster,
+        column=column if column is None else [column],
+        subset_target_attribute_values=subset_target_attribute_values
+        if subset_target_attribute_values is None
+        else [subset_target_attribute_values],
+        add_name=add_name if add_name is None else [add_name],
+        add_buffer=add_buffer if add_buffer is None else [add_buffer],
+    )
+
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Cell based association completed, writing raster to {output_raster}.")
 
 
 # --- PREDICTION ---
