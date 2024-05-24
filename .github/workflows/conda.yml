@@ -3,7 +3,7 @@ name: Conda
 on:
   pull_request:
   push:
-    branches: []  # Master temporarily removed, Sklearn util import fails in Conda tests
+    branches: ["main", "master"]
 jobs:
   conda-test:
     name: Conda Install & Test
