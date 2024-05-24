@@ -331,7 +331,6 @@ def normality_test_raster_cli(input_raster: INPUT_FILE_OPTION, bands: Optional[L
     with rasterio.open(input_raster) as raster:
         data = raster.read()
         typer.echo("Progress: 25%")
-        print(bands)
         if len(bands) == 0:
             bands = None
         results_dict = normality_test_array(data=data, bands=bands, nodata_value=raster.nodata)
@@ -340,6 +339,7 @@ def normality_test_raster_cli(input_raster: INPUT_FILE_OPTION, bands: Optional[L
 
     json_str = json.dumps(results_dict)
     typer.echo("Progress: 100%")
+
     typer.echo(f"Results: {json_str}")
     typer.echo("Normality test (raster) completed")
 
@@ -361,6 +361,7 @@ def normality_test_vector_cli(input_vector: INPUT_FILE_OPTION, columns: Optional
 
     json_str = json.dumps(results_dict)
     typer.echo("Progress: 100%")
+
     typer.echo(f"Results: {json_str}")
     typer.echo("Normality test (vector) completed")
 
@@ -386,6 +387,7 @@ def chi_square_test_cli(
 
     json_str = json.dumps(results_dict)
     typer.echo("Progress: 100%")
+
     typer.echo(f"Results: {json_str}")
     typer.echo("Chi-square test completed")
 
@@ -665,6 +667,7 @@ def compute_pca_raster_cli(
         dst.write(pca_array)
 
     typer.echo("Progress: 100%")
+
     typer.echo(f"Results: {json_str}")
     typer.echo(f"PCA computation (raster) completed, output raster saved to {output_raster}.")
 
@@ -705,6 +708,7 @@ def compute_pca_vector_cli(
 
     pca_gdf.to_file(output_vector)
     typer.echo("Progress: 100%")
+
     typer.echo(f"Results: {json_str}")
     typer.echo(f"PCA computation (vector) completed, output vector saved to {output_vector}.")
 
@@ -722,13 +726,10 @@ def descriptive_statistics_raster_cli(input_file: INPUT_FILE_OPTION):
         results_dict = descriptive_statistics_raster(raster)
     typer.echo("Progress: 75%")
 
-    # json_str = json.dumps(results_dict)
+    json_str = json.dumps(results_dict)
     typer.echo("Progress: 100%\n")
-    # typer.echo(f"Results: {json_str}")
-    # typer.echo("Results:\n")
-    for key, value in results_dict.items():
-        typer.echo(f"{key}: {value}")
 
+    typer.echo(f"Results: {json_str}")
     typer.echo("\nDescriptive statistics (raster) completed")
 
 
@@ -2387,12 +2388,10 @@ def classifier_test_cli(
     with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
         dst.write(predictions_reshaped, 1)
 
-    typer.echo("\n")
-    for key, value in metrics_dict.items():
-        typer.echo(f"{key}: {value}")
-    typer.echo("\n")
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100% \n")
 
-    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
     typer.echo(
         (
             "Testing classifier model completed, writing rasters to "
@@ -2433,13 +2432,10 @@ def regressor_test_cli(
     with rasterio.open(output_raster, "w", **out_profile) as dst:
         dst.write(predictions_reshaped, 1)
 
-    typer.echo("\n")
-    for key, value in metrics_dict.items():
-        typer.echo(f"{key}: {value}")
-    typer.echo("\n")
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100% \n")
 
-    typer.echo("Progress: 100%\n")
-
+    typer.echo(f"Results: {json_str}")
     typer.echo(f"Testing regressor model completed, writing raster to {output_raster}.")
 
 
@@ -3119,12 +3115,10 @@ def summarize_probability_metrics_cli(true_labels: INPUT_FILE_OPTION, probabilit
 
     typer.echo("Progress: 75%")
 
-    # json_str = json.dumps(results_dict)
+    json_str = json.dumps(results_dict)
     typer.echo("Progress: 100% \n")
-    # typer.echo("Results:\n")
-    for key, value in results_dict.items():
-        typer.echo(f"{key}: {value}")
-    # typer.echo(f"Results: {json_str}")
+
+    typer.echo(f"Results: {json_str}")
     typer.echo("\nGenerating probability metrics summary completed.")
 
 
@@ -3147,11 +3141,10 @@ def summarize_label_metrics_binary_cli(true_labels: INPUT_FILE_OPTION, predictio
     results_dict = summarize_label_metrics_binary(y_true=y_true, y_pred=y_pred)
     typer.echo("Progress: 75%")
 
-    # json_str = json.dumps(results_dict)
+    json_str = json.dumps(results_dict)
     typer.echo("Progress: 100% \n")
-    for key, value in results_dict.items():
-        typer.echo(f"{key}: {value}")
-    # typer.echo(f"Results: {json_str}")
+
+    typer.echo(f"Results: {json_str}")
     typer.echo("\n Generating prediction label metrics summary completed.")
 
 
