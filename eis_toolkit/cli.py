@@ -726,10 +726,9 @@ def descriptive_statistics_raster_cli(input_file: INPUT_FILE_OPTION):
         results_dict = descriptive_statistics_raster(raster)
     typer.echo("Progress: 75%")
 
-    json_str = json.dumps(results_dict)
-    typer.echo("Progress: 100%\n")
+    typer.echo("Progress: 100% \n")
 
-    typer.echo(f"Results: {json_str}")
+    typer.echo(f"Results: {str(results_dict)}")
     typer.echo("\nDescriptive statistics (raster) completed")
 
 
@@ -755,11 +754,10 @@ def descriptive_statistics_vector_cli(input_file: INPUT_FILE_OPTION, column: str
             raise Exception("Could not read input file as raster or dataframe")
     typer.echo("Progress: 75%")
 
-    json_str = json.dumps(results_dict)
     typer.echo("Progress: 100%")
 
-    typer.echo(f"Results: {json_str}")
-    typer.echo("Descriptive statistics (vector) completed")
+    typer.echo(f"Results: {str(results_dict)}")
+    typer.echo("\nDescriptive statistics (vector) completed")
 
 
 # LOCAL MORAN'S I
@@ -3115,10 +3113,9 @@ def summarize_probability_metrics_cli(true_labels: INPUT_FILE_OPTION, probabilit
 
     typer.echo("Progress: 75%")
 
-    json_str = json.dumps(results_dict)
     typer.echo("Progress: 100% \n")
 
-    typer.echo(f"Results: {json_str}")
+    typer.echo(f"Results: {str(results_dict)}")
     typer.echo("\nGenerating probability metrics summary completed.")
 
 
@@ -3141,11 +3138,10 @@ def summarize_label_metrics_binary_cli(true_labels: INPUT_FILE_OPTION, predictio
     results_dict = summarize_label_metrics_binary(y_true=y_true, y_pred=y_pred)
     typer.echo("Progress: 75%")
 
-    json_str = json.dumps(results_dict)
     typer.echo("Progress: 100% \n")
 
-    typer.echo(f"Results: {json_str}")
-    typer.echo("\n Generating prediction label metrics summary completed.")
+    typer.echo(f"Results: {str(results_dict)}")
+    typer.echo("\nGenerating prediction label metrics summary completed.")
 
 
 @app.command()
@@ -3357,12 +3353,7 @@ def score_predictions_cli(
     outputs = score_predictions(y_true, y_pred, metrics)
     typer.echo("Progress: 100% \n")
 
-    if isinstance(outputs, dict):
-        for key, value in outputs.items():
-            typer.echo(f"{key}: {value}")
-    else:
-        typer.echo(outputs)
-
+    typer.echo(f"Results: {str(outputs)}")
     typer.echo("\nScoring predictions completed.")
 
 
