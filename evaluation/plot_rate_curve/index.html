@@ -9,22 +9,22 @@
       
       
       
-        <link rel="prev" href="../calculate_base_metrics/">
+        <link rel="prev" href="../plot_prediction_area_curves/">
       
       
-        <link rel="next" href="../plot_confusion_matrix/">
+        <link rel="next" href="../../exploratory_analyses/chi_square_test/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.9">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
     
     
       
-        <title>Get P-A plot intersection point - EIS Toolkit</title>
+        <title>Plot rate curve - EIS Toolkit</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.f2e4d321.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.66ac8b77.min.css">
       
       
 
@@ -66,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#get-p-a-plot-intersection-point" class="md-skip">
+        <a href="#plot-rate-curve" class="md-skip">
           Skip to content
         </a>
       
@@ -102,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Get P-A plot intersection point
+              Plot rate curve
             
           </span>
         </div>
@@ -156,7 +156,7 @@
         <a href="https://github.com/GispoCoding/eis_toolkit" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     eis_toolkit
@@ -202,7 +202,7 @@
       <a href="https://github.com/GispoCoding/eis_toolkit" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     eis_toolkit
@@ -340,6 +340,255 @@
       
   
   
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Evaluation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Evaluation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../calculate_base_metrics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Calculate base metrics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../classification_label_evaluation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Classification label evaluation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../classification_probability_evaluation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Classification probability evaluation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plot_confusion_matrix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plot confusion matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plot_nn_model_performance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plot neural network training performance (accuracy and loss)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plot_prediction_area_curves/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plot prediction-area (P-A) curves
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Plot rate curve
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Plot rate curve
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.evaluation.plot_rate_curve" class="md-nav__link">
+    <span class="md-ellipsis">
+      plot_rate_curve
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eis_toolkit.evaluation.plot_rate_curve.plot_rate_curve" class="md-nav__link">
+    <span class="md-ellipsis">
+      plot_rate_curve
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
   
   
     
@@ -350,10 +599,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -364,8 +613,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Exploratory analyses
           </label>
@@ -623,10 +872,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -637,8 +886,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Prediction
           </label>
@@ -812,10 +1061,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -826,8 +1075,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             Raster processing
           </label>
@@ -1078,10 +1327,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_12" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_12" >
         
           
-          <label class="md-nav__link" for="__nav_6_12" id="__nav_6_12_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_12" id="__nav_7_12_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1092,8 +1341,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_12_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_12">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_12">
             <span class="md-nav__icon md-icon"></span>
             Derivatives
           </label>
@@ -1205,10 +1454,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_13" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_13" >
         
           
-          <label class="md-nav__link" for="__nav_6_13" id="__nav_6_13_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_13" id="__nav_7_13_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1219,8 +1468,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_13_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_13">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_13">
             <span class="md-nav__icon md-icon"></span>
             Filters
           </label>
@@ -1339,10 +1588,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1353,8 +1602,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             Training data tools
           </label>
@@ -1402,10 +1651,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1416,8 +1665,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             Transformations
           </label>
@@ -1584,10 +1833,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_8" >
         
           
-          <label class="md-nav__link" for="__nav_8_8" id="__nav_8_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9_8" id="__nav_9_8_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1598,8 +1847,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_8">
             <span class="md-nav__icon md-icon"></span>
             Coda
           </label>
@@ -1729,36 +1978,34 @@
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
             
   
   <span class="md-ellipsis">
-    Validation
+    Utilities
   </span>
   
 
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
-            Validation
+            Utilities
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1769,11 +2016,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../calculate_auc/" class="md-nav__link">
+      <a href="../../utilities/file_io/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Calculate AUC
+    File I/O utilities
   </span>
   
 
@@ -1790,111 +2037,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../calculate_base_metrics/" class="md-nav__link">
+      <a href="../../utilities/nodata/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Calculate base metrics
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Get P-A plot intersection point
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  <span class="md-ellipsis">
-    Get P-A plot intersection point
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.validation.get_pa_intersection" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_pa_intersection
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eis_toolkit.validation.get_pa_intersection.get_pa_intersection" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_pa_intersection
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../plot_confusion_matrix/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Plot confusion matrix
+    Nodata utilities
   </span>
   
 
@@ -1911,53 +2058,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../plot_nn_model_performance/" class="md-nav__link">
+      <a href="../../utilities/raster/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Plot neural network training performance (accuracy and loss)
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../plot_prediction_area_curves/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Plot prediction-area (P-A) curves
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../plot_rate_curve/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Plot rate curve
+    Raster data utilities
   </span>
   
 
@@ -1988,10 +2093,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
         
           
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -2002,8 +2107,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
             <span class="md-nav__icon md-icon"></span>
             Vector processing
           </label>
@@ -2232,18 +2337,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.validation.get_pa_intersection" class="md-nav__link">
+  <a href="#eis_toolkit.evaluation.plot_rate_curve" class="md-nav__link">
     <span class="md-ellipsis">
-      get_pa_intersection
+      plot_rate_curve
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#eis_toolkit.validation.get_pa_intersection.get_pa_intersection" class="md-nav__link">
+  <a href="#eis_toolkit.evaluation.plot_rate_curve.plot_rate_curve" class="md-nav__link">
     <span class="md-ellipsis">
-      get_pa_intersection
+      plot_rate_curve
     </span>
   </a>
   
@@ -2267,14 +2372,14 @@
   
 
 
-<h1 id="get-p-a-plot-intersection-point">Get P-A plot intersection point</h1>
+<h1 id="plot-rate-curve">Plot rate curve</h1>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<a id="eis_toolkit.validation.get_pa_intersection"></a>
+<a id="eis_toolkit.evaluation.plot_rate_curve"></a>
   <div class="doc doc-contents first">
 
   
@@ -2294,17 +2399,16 @@
 
 
 
-<h3 id="eis_toolkit.validation.get_pa_intersection.get_pa_intersection" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">get_pa_intersection</span><span class="p">(</span><span class="n">true_positive_rate_values</span><span class="p">,</span> <span class="n">proportion_of_area_values</span><span class="p">,</span> <span class="n">threshold_values</span><span class="p">)</span></code>
+<h3 id="eis_toolkit.evaluation.plot_rate_curve.plot_rate_curve" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">plot_rate_curve</span><span class="p">(</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">plot_title</span><span class="o">=</span><span class="s1">&#39;success_rate&#39;</span><span class="p">)</span></code>
 
 </h3>
 
 
   <div class="doc doc-contents ">
   
-      <p>Calculate the intersection point for prediction rate and area curves in (P-A plot).</p>
-<p>Threshold_values values act as x-axis for both curves. Prediction rate curve uses true positive rate for y-axis.
-Area curve uses inverted proportion of area as y-axis.</p>
+      <p>Plot success rate.</p>
+<p>Y-axis is true positive rate and x-axis is proportion of area.</p>
 
 
 
@@ -2320,13 +2424,13 @@ Area curve uses inverted proportion of area as y-axis.</p>
     </thead>
     <tbody>
         <tr>
-          <td><code>true_positive_rate_values</code></td>
+          <td><code>x_values</code></td>
           <td>
                 <code><span title="beartype.typing.Union">Union</span>[<span title="numpy.ndarray">ndarray</span>, <span title="pandas.Series">Series</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>True positive rate values, values should be within range 0-1.</p>
+              <p>Proportion of area values.</p>
             </div>
           </td>
           <td>
@@ -2334,13 +2438,13 @@ Area curve uses inverted proportion of area as y-axis.</p>
           </td>
         </tr>
         <tr>
-          <td><code>proportion_of_area_values</code></td>
+          <td><code>y_values</code></td>
           <td>
                 <code><span title="beartype.typing.Union">Union</span>[<span title="numpy.ndarray">ndarray</span>, <span title="pandas.Series">Series</span>]</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Proportion of area values, values should be within range 0-1.</p>
+              <p>True positive rate values.</p>
             </div>
           </td>
           <td>
@@ -2348,17 +2452,17 @@ Area curve uses inverted proportion of area as y-axis.</p>
           </td>
         </tr>
         <tr>
-          <td><code>threshold_values</code></td>
+          <td><code>plot_title</code></td>
           <td>
-                <code><span title="beartype.typing.Union">Union</span>[<span title="numpy.ndarray">ndarray</span>, <span title="pandas.Series">Series</span>]</code>
+                <code>str</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Threshold values that were used to calculate true positive rate and proportion of area.</p>
+              <p>Success rate</p>
             </div>
           </td>
           <td>
-              <em>required</em>
+                <code>&#39;success_rate&#39;</code>
           </td>
         </tr>
     </tbody>
@@ -2377,11 +2481,11 @@ Area curve uses inverted proportion of area as y-axis.</p>
     <tbody>
         <tr>
           <td>
-                <code><span title="beartype.typing.Tuple">Tuple</span>[float, float]</code>
+                <code><span title="matplotlib.figure.Figure">Figure</span></code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>X and y coordinates of the intersection point.</p>
+              <p>Matplotlib figure containing the produced plot.</p>
             </div>
           </td>
         </tr>
@@ -2405,7 +2509,17 @@ Area curve uses inverted proportion of area as y-axis.</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>true_positive_rate_values or proportion_of_area_values values are out of bounds.</p>
+              <p>Invalid plot type.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="eis_toolkit.exceptions.InvalidParameterValueException">InvalidParameterValueException</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>x_values or y_values are out of bounds.</p>
             </div>
           </td>
         </tr>
@@ -2413,16 +2527,8 @@ Area curve uses inverted proportion of area as y-axis.</p>
   </table>
 
           <details class="quote">
-            <summary>Source code in <code>eis_toolkit/validation/get_pa_intersection.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
+            <summary>Source code in <code>eis_toolkit/evaluation/plot_rate_curve.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">31</span>
 <span class="normal">32</span>
 <span class="normal">33</span>
 <span class="normal">34</span>
@@ -2448,41 +2554,47 @@ Area curve uses inverted proportion of area as y-axis.</p>
 <span class="normal">54</span>
 <span class="normal">55</span>
 <span class="normal">56</span>
-<span class="normal">57</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
-<span class="k">def</span> <span class="nf">get_pa_intersection</span><span class="p">(</span>
-    <span class="n">true_positive_rate_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
-    <span class="n">proportion_of_area_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
-    <span class="n">threshold_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the intersection point for prediction rate and area curves in (P-A plot).</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@beartype</span>
+<span class="k">def</span> <span class="nf">plot_rate_curve</span><span class="p">(</span>
+    <span class="n">x_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+    <span class="n">y_values</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span>
+    <span class="n">plot_title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;success_rate&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot success rate.</span>
 
-<span class="sd">    Threshold_values values act as x-axis for both curves. Prediction rate curve uses true positive rate for y-axis.</span>
-<span class="sd">    Area curve uses inverted proportion of area as y-axis.</span>
+<span class="sd">    Y-axis is true positive rate and x-axis is proportion of area.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        true_positive_rate_values: True positive rate values, values should be within range 0-1.</span>
-<span class="sd">        proportion_of_area_values: Proportion of area values, values should be within range 0-1.</span>
-<span class="sd">        threshold_values: Threshold values that were used to calculate true positive rate and proportion of area.</span>
+<span class="sd">        x_values: Proportion of area values.</span>
+<span class="sd">        y_values: True positive rate values.</span>
+<span class="sd">        plot_title: Success rate</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        X and y coordinates of the intersection point.</span>
+<span class="sd">        Matplotlib figure containing the produced plot.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        InvalidParameterValueException: true_positive_rate_values or proportion_of_area_values values are out of bounds.</span>
+<span class="sd">        InvalidParameterValueException: Invalid plot type.</span>
+<span class="sd">        InvalidParameterValueException: x_values or y_values are out of bounds.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">true_positive_rate_values</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">true_positive_rate_values</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;true_positive_rate_values values should be within range 0-1&quot;</span><span class="p">)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">plot_title</span>
+    <span class="n">xlab</span> <span class="o">=</span> <span class="s2">&quot;Proportion of area&quot;</span>
 
-    <span class="k">if</span> <span class="n">proportion_of_area_values</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">proportion_of_area_values</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;proportion_of_area_values values should be within range 0-1&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x_values</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">x_values</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;x_values should be within range 0-1&quot;</span><span class="p">)</span>
 
-    <span class="n">intersection</span> <span class="o">=</span> <span class="n">_get_pa_intersection</span><span class="p">(</span>
-        <span class="n">true_positive_rate_values</span><span class="o">=</span><span class="n">true_positive_rate_values</span><span class="p">,</span>
-        <span class="n">proportion_of_area_values</span><span class="o">=</span><span class="n">proportion_of_area_values</span><span class="p">,</span>
-        <span class="n">threshold_values</span><span class="o">=</span><span class="n">threshold_values</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">y_values</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">y_values</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidParameterValueException</span><span class="p">(</span><span class="s2">&quot;y_values should be within range 0-1&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">intersection</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">intersection</span><span class="o">.</span><span class="n">y</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">_plot_rate_curve</span><span class="p">(</span><span class="n">x_values</span><span class="o">=</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="o">=</span><span class="n">y_values</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">xlab</span><span class="o">=</span><span class="n">xlab</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -2549,7 +2661,7 @@ Area curve uses inverted proportion of area as y-axis.</p>
     <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a7c05c9e.min.js"></script>
       
     
   </body>
