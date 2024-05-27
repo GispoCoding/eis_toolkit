@@ -1366,7 +1366,7 @@ def unify_rasters_cli(
 
     out_rasters_dict = {}
     for i, (out_image, out_meta) in enumerate(unified[1:]):  # Skip writing base raster
-        in_raster_name = os.path.splitext(os.path.split(rasters_to_unify[i - 1])[1])[0]
+        in_raster_name = os.path.splitext(os.path.split(rasters_to_unify[i])[1])[0]
         output_raster_name = f"{in_raster_name}_unified"
         output_raster_path = output_directory.joinpath(output_raster_name + ".tif")
         with rasterio.open(output_raster_path, "w", **out_meta) as dst:
