@@ -350,7 +350,7 @@ def _train_and_validate_sklearn_model(
 
         out_metrics = {}
         for metric in metrics:
-            score = score_predictions(y_valid, y_pred, metric)
+            score = score_predictions(y_valid, y_pred, metric, decimals=3)
             out_metrics[metric] = score
 
     # Validation approach 3: Cross-validation
@@ -369,7 +369,7 @@ def _train_and_validate_sklearn_model(
             y_pred = model.predict(X[valid_index])
 
             for metric in metrics:
-                score = score_predictions(y[valid_index], y_pred, metric)
+                score = score_predictions(y[valid_index], y_pred, metric, decimals=3)
                 all_scores = out_metrics[metric][f"{metric}_all"]
                 all_scores.append(score)
 
