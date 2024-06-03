@@ -7,7 +7,7 @@ from eis_toolkit.prediction.random_forests import random_forest_classifier_train
 
 X, y = make_classification(n_samples=200, n_features=20, n_informative=2, n_redundant=10, random_state=42)
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
-rf_model, history = random_forest_classifier_train(X_train, y_train)
+rf_model, history = random_forest_classifier_train(X_train, y_train, random_state=42)
 y_pred = predict_classifier(X_test, rf_model, include_probabilities=False)
 
 
