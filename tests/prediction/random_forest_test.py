@@ -37,10 +37,10 @@ def test_random_forest_regressor():
     np.testing.assert_equal(len(predicted_labels), len(Y_IRIS))
 
     np.testing.assert_equal(count_false, 35)
-    np.testing.assert_almost_equal(out_metrics["mae"], 0.01366, decimal=4)
-    np.testing.assert_almost_equal(out_metrics["mse"], 0.00138, decimal=4)
-    np.testing.assert_almost_equal(out_metrics["rmse"], 0.03719, decimal=4)
-    np.testing.assert_almost_equal(out_metrics["r2"], 0.99802, decimal=4)
+    np.testing.assert_equal(out_metrics["mae"], 0.014)
+    np.testing.assert_equal(out_metrics["mse"], 0.001)
+    np.testing.assert_equal(out_metrics["rmse"], 0.037)
+    np.testing.assert_equal(out_metrics["r2"], 0.998)
 
 
 def test_random_forest_invalid_n_estimators():
