@@ -1,11 +1,15 @@
 from numbers import Number
-from typing import Dict
 
 import numpy as np
+from beartype.typing import Dict, Optional
 from sklearn.metrics import accuracy_score, confusion_matrix, precision_recall_fscore_support
 
 
-def summarize_label_metrics_binary(y_true: np.ndarray, y_pred: np.ndarray) -> Dict[str, Number]:
+def summarize_label_metrics_binary(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    decimals: Optional[int] = None,
+) -> Dict[str, Number]:
     """
     Generate a comprehensive report of various evaluation metrics for binary classification results.
 
@@ -15,18 +19,21 @@ def summarize_label_metrics_binary(y_true: np.ndarray, y_pred: np.ndarray) -> Di
     Args:
         y_true: True labels.
         y_pred: Predicted labels. The array should come from a binary classifier.
+        decimals: Number of decimals used in rounding the scores. If None, scores are not rounded.
+            Defaults to None.
 
     Returns:
         A dictionary containing the evaluated metrics.
     """
     metrics = {}
 
-    metrics["Accuracy"] = accuracy_score(y_true, y_pred)
+    accuracy = accuracy_score(y_true, y_pred)
+    metrics["Accuracy"] = round(accuracy, decimals) if decimals is not None else accuracy
 
     precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, average="binary")
-    metrics["Precision"] = precision
-    metrics["Recall"] = recall
-    metrics["F1_score"] = f1
+    metrics["Precision"] = round(precision, decimals) if decimals is not None else precision
+    metrics["Recall"] = round(recall, decimals) if decimals is not None else recall
+    metrics["F1_score"] = round(f1, decimals) if decimals is not None else f1
 
     tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
     metrics["True_negatives"] = tn

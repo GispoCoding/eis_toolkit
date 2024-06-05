@@ -3109,7 +3109,7 @@ def summarize_probability_metrics_cli(true_labels: INPUT_FILE_OPTION, probabilit
     (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
     typer.echo("Progress: 25%")
 
-    results_dict = summarize_probability_metrics(y_true=y_true, y_prob=y_prob)
+    results_dict = summarize_probability_metrics(y_true=y_true, y_prob=y_prob, decimals=3)
 
     typer.echo("Progress: 75%")
 
@@ -3135,7 +3135,7 @@ def summarize_label_metrics_binary_cli(true_labels: INPUT_FILE_OPTION, predictio
     (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
     typer.echo("Progress: 25%")
 
-    results_dict = summarize_label_metrics_binary(y_true=y_true, y_pred=y_pred)
+    results_dict = summarize_label_metrics_binary(y_true=y_true, y_pred=y_pred, decimals=3)
     typer.echo("Progress: 75%")
 
     typer.echo("Progress: 100% \n")
