@@ -53,8 +53,10 @@ def score_predictions(
 def _score_predictions(
     y_true: Union[np.ndarray, pd.Series], y_pred: Union[np.ndarray, pd.Series], metric: str
 ) -> Number:
+    num_classes = len(np.unique(y_true))
+
     # Multiclass classification
-    if len(y_true) > 2:
+    if num_classes > 2:
         average_method = "micro"
     # Binary classification
     else:
