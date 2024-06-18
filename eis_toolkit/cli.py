@@ -2375,7 +2375,7 @@ def classifier_test_cli(
         predictions, reference_profile["height"], reference_profile["width"], nodata_mask
     )
 
-    metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics))
+    metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics), decimals=3)
     typer.echo("Progress: 80%")
 
     out_profile = reference_profile.copy()
@@ -2421,7 +2421,7 @@ def regressor_test_cli(
         predictions, reference_profile["height"], reference_profile["width"], nodata_mask
     )
 
-    metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics))
+    metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics), decimals=3)
     typer.echo("Progress: 80%")
 
     out_profile = reference_profile.copy()
@@ -3109,7 +3109,7 @@ def summarize_probability_metrics_cli(true_labels: INPUT_FILE_OPTION, probabilit
     (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
     typer.echo("Progress: 25%")
 
-    results_dict = summarize_probability_metrics(y_true=y_true, y_prob=y_prob)
+    results_dict = summarize_probability_metrics(y_true=y_true, y_prob=y_prob, decimals=3)
 
     typer.echo("Progress: 75%")
 
@@ -3135,7 +3135,7 @@ def summarize_label_metrics_binary_cli(true_labels: INPUT_FILE_OPTION, predictio
     (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
     typer.echo("Progress: 25%")
 
-    results_dict = summarize_label_metrics_binary(y_true=y_true, y_pred=y_pred)
+    results_dict = summarize_label_metrics_binary(y_true=y_true, y_pred=y_pred, decimals=3)
     typer.echo("Progress: 75%")
 
     typer.echo("Progress: 100% \n")
@@ -3340,6 +3340,7 @@ def score_predictions_cli(
     true_labels: INPUT_FILE_OPTION,
     predictions: INPUT_FILE_OPTION,
     metrics: Annotated[List[str], typer.Option()],
+    decimals: Optional[int] = None,
 ):
     """Score predictions."""
     from eis_toolkit.evaluation.scoring import score_predictions
@@ -3350,7 +3351,7 @@ def score_predictions_cli(
     (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
     typer.echo("Progress: 25%")
 
-    outputs = score_predictions(y_true, y_pred, metrics)
+    outputs = score_predictions(y_true, y_pred, metrics, decimals)
     typer.echo("Progress: 100% \n")
 
     typer.echo(f"Results: {str(outputs)}")

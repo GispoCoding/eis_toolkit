@@ -40,10 +40,10 @@ def test_gradient_boosting_regressor():
     np.testing.assert_equal(len(predicted_labels), len(Y_IRIS))
 
     np.testing.assert_equal(count_false, 150)
-    np.testing.assert_almost_equal(out_metrics["mae"], 0.03101, decimal=4)
-    np.testing.assert_almost_equal(out_metrics["mse"], 0.00434, decimal=4)
-    np.testing.assert_almost_equal(out_metrics["rmse"], 0.06593, decimal=4)
-    np.testing.assert_almost_equal(out_metrics["r2"], 0.99377, decimal=4)
+    np.testing.assert_equal(out_metrics["mae"], 0.031)
+    np.testing.assert_equal(out_metrics["mse"], 0.004)
+    np.testing.assert_equal(out_metrics["rmse"], 0.066)
+    np.testing.assert_equal(out_metrics["r2"], 0.994)
 
 
 def test_invalid_learning_rate():

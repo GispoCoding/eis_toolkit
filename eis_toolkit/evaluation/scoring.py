@@ -1,4 +1,5 @@
 from numbers import Number
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -19,7 +20,10 @@ from eis_toolkit.exceptions import InvalidParameterValueException
 
 @beartype
 def score_predictions(
-    y_true: Union[np.ndarray, pd.Series], y_pred: Union[np.ndarray, pd.Series], metrics: Union[str, Sequence[str]]
+    y_true: Union[np.ndarray, pd.Series],
+    y_pred: Union[np.ndarray, pd.Series],
+    metrics: Union[str, Sequence[str]],
+    decimals: Optional[int] = None,
 ) -> Union[Number, Dict[str, Number]]:
     """
     Score model predictions with given metrics.
@@ -34,18 +38,20 @@ def score_predictions(
         y_pred: Predicted labels.
         metrics: The metrics to use for scoring the model. Select only metrics applicable
             for the model type.
+        decimals: Number of decimals used in rounding the scores. If None, scores are not rounded.
+            Defaults to None.
 
     Returns:
         Metric scores as a dictionary if multiple metrics, otherwise just the metric value.
     """
     if isinstance(metrics, str):
         score = _score_predictions(y_true, y_pred, metrics)
-        return score
+        return round(score, decimals) if decimals is not None else score
     else:
         out_metrics = {}
         for metric in metrics:
             score = _score_predictions(y_true, y_pred, metric)
-            out_metrics[metric] = score
+            out_metrics[metric] = round(score, decimals) if decimals is not None else score
         return out_metrics
 
 

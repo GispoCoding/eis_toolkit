@@ -1,9 +1,7 @@
-from typing import Dict
-
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from beartype.typing import Optional
+from beartype.typing import Dict, Optional
 from sklearn.calibration import CalibrationDisplay
 from sklearn.metrics import (
     DetCurveDisplay,
@@ -16,7 +14,11 @@ from sklearn.metrics import (
 )
 
 
-def summarize_probability_metrics(y_true: np.ndarray, y_prob: np.ndarray) -> Dict[str, float]:
+def summarize_probability_metrics(
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+    decimals: Optional[int] = None,
+) -> Dict[str, float]:
     """
     Generate a comprehensive report of various evaluation metrics for classification probabilities.
 
@@ -26,6 +28,8 @@ def summarize_probability_metrics(y_true: np.ndarray, y_prob: np.ndarray) -> Dic
         y_true: True labels.
         y_prob: Predicted probabilities for the positive class. The array should come from
             a binary classifier.
+        decimals: Number of decimals used in rounding the scores. If None, scores are not rounded.
+            Defaults to None.
 
     Returns:
         A dictionary containing the evaluated metrics.
@@ -36,6 +40,9 @@ def summarize_probability_metrics(y_true: np.ndarray, y_prob: np.ndarray) -> Dic
     metrics["log_loss"] = log_loss(y_true, y_prob)
     metrics["average_precision"] = average_precision_score(y_true, y_prob)
     metrics["brier_score_loss"] = brier_score_loss(y_true, y_prob)
+
+    for key, value in metrics.items():
+        metrics[key] = round(value, decimals) if decimals is not None else value
 
     return metrics
 
