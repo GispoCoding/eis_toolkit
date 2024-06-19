@@ -261,6 +261,63 @@ class ThresholdCriteria(str, Enum):
     outside = "outside"
 
 
+class MLPActivation(str, Enum):
+    """Activation function for MLP model."""
+
+    relu = "relu"
+    linear = "linear"
+    sigmoid = "sigmoid"
+    tanh = "tanh"
+
+
+class MLPLastActivation(str, Enum):
+    """Last activation function for MLP model."""
+
+    sigmoid = "sigmoid"
+    softmax = "softmax"
+
+
+class MLPOptimizer(str, Enum):
+    """Optimizer for MLP model."""
+
+    adam = "adam"
+    adangrad = "adangrad"
+    rmsprop = "rmsprop"
+    sdg = "sdg"
+
+
+class MLPClassifierLossFunction(str, Enum):
+    """Loss function for MLP classifier model."""
+
+    binary_crossentropy = ("binary_crossentropy",)
+    categorical_crossentropy = "categorical_crossentropy"
+
+
+class MLPRegressorLossFunction(str, Enum):
+    """Loss function for MLP regressor model."""
+
+    mse = ("mse",)
+    mae = "mae"
+    hinge = "hinge"
+    huber = "huber"
+
+
+class KerasClassifierMetrics(str, Enum):
+    """Metrics available for Keras classifier models."""
+
+    accuracy = "accuracy"
+    precision = "precision"
+    recall = "recall"
+    categorical_crossentropy = "categorical_crossentropy"
+
+
+class KerasRegressorMetrics(str, Enum):
+    """Metrics available for Keras regressor models."""
+
+    mse = "mse"
+    mae = "mae"
+
+
 INPUT_FILE_OPTION = Annotated[
     Path,
     typer.Option(
@@ -2345,6 +2402,141 @@ def gradient_boosting_regressor_train_cli(
     typer.echo(f"Results: {json_str}")
 
     typer.echo("Gradient boosting regressor training completed")
+
+
+# MLP CLASSIFIER
+@app.command()
+def mlp_classifier_train_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    neurons: Annotated[List[int], typer.Option()],
+    activation: Annotated[MLPActivation, typer.Option(case_sensitive=False)] = MLPActivation.relu,
+    output_neurons: int = 1,
+    last_activation: Annotated[MLPLastActivation, typer.Option(case_sensitive=False)] = MLPLastActivation.sigmoid,
+    epochs: int = 50,
+    batch_size: int = 32,
+    optimizer: Annotated[MLPOptimizer, typer.Option(case_sensitive=False)] = MLPOptimizer.adam,
+    learning_rate: float = 0.001,
+    loss_function: Annotated[
+        MLPClassifierLossFunction, typer.Option(case_sensitive=False)
+    ] = MLPClassifierLossFunction.binary_crossentropy,
+    dropout_rate: Optional[float] = None,
+    early_stopping: bool = True,
+    es_patience: int = 5,
+    validation_metrics: Annotated[List[KerasClassifierMetrics], typer.Option(case_sensitive=False)] = [
+        KerasClassifierMetrics.accuracy
+    ],
+    validation_split: float = 0.2,
+    random_state: Optional[int] = None,
+):
+    """Train and validate an MLP classifier model using Keras."""
+    from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
+    from eis_toolkit.prediction.mlp import train_MLP_classifier
+
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = train_MLP_classifier(
+        X=X,
+        y=y,
+        neurons=neurons,
+        activation=get_enum_values(activation),
+        output_neurons=output_neurons,
+        last_activation=get_enum_values(last_activation),
+        epochs=epochs,
+        batch_size=batch_size,
+        optimizer=get_enum_values(optimizer),
+        learning_rate=learning_rate,
+        loss_function=get_enum_values(loss_function),
+        dropout_rate=dropout_rate,
+        early_stopping=early_stopping,
+        es_patience=es_patience,
+        metrics=get_enum_values(validation_metrics),
+        validation_split=validation_split,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("MLP classifier training completed.")
+
+
+# MLP REGRESSOR
+@app.command()
+def mlp_regressor_train_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    neurons: Annotated[List[int], typer.Option()],
+    activation: Annotated[MLPActivation, typer.Option(case_sensitive=False)] = MLPActivation.relu,
+    output_neurons: int = 1,
+    epochs: int = 50,
+    batch_size: int = 32,
+    optimizer: Annotated[MLPOptimizer, typer.Option(case_sensitive=False)] = MLPOptimizer.adam,
+    learning_rate: float = 0.001,
+    loss_function: Annotated[
+        MLPRegressorLossFunction, typer.Option(case_sensitive=False)
+    ] = MLPRegressorLossFunction.mse,
+    dropout_rate: Optional[float] = None,
+    early_stopping: bool = True,
+    es_patience: int = 5,
+    validation_metrics: Annotated[List[KerasRegressorMetrics], typer.Option(case_sensitive=False)] = [
+        KerasRegressorMetrics.mse
+    ],
+    validation_split: float = 0.2,
+    random_state: Optional[int] = None,
+):
+    """Train and validate an MLP regressor model using Keras."""
+    from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
+    from eis_toolkit.prediction.mlp import train_MLP_regressor
+
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = train_MLP_regressor(
+        X=X,
+        y=y,
+        neurons=neurons,
+        activation=get_enum_values(activation),
+        output_neurons=output_neurons,
+        last_activation="linear",
+        epochs=epochs,
+        batch_size=batch_size,
+        optimizer=get_enum_values(optimizer),
+        learning_rate=learning_rate,
+        loss_function=get_enum_values(loss_function),
+        dropout_rate=dropout_rate,
+        early_stopping=early_stopping,
+        es_patience=es_patience,
+        metrics=get_enum_values(validation_metrics),
+        validation_split=validation_split,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("MLP regressor training completed.")
 
 
 # TEST CLASSIFIER ML MODEL
