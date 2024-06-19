@@ -5,7 +5,7 @@ from beartype.typing import Tuple, Union
 from sklearn.base import BaseEstimator, is_classifier
 from tensorflow import keras
 
-from eis_toolkit.exceptions import InvalidModelTypeException
+from eis_toolkit.exceptions import InvalidDataShapeException, InvalidModelTypeException
 
 
 @beartype
@@ -77,9 +77,19 @@ def predict_regressor(
         Regression model prediction array.
 
     Raises:
-        InvalidModelTypeException: Input model is not a regressor model.
+        InvalidModelTypeException: Input model is not a regressor model or is not recognized.
+        InvalidDataShapeException: Input models does not have single output unit.
     """
-    if is_classifier(model):
-        raise InvalidModelTypeException(f"Expected a regressor model: {type(model)}.")
+    if isinstance(model, BaseEstimator):
+        if is_classifier(model):
+            raise InvalidModelTypeException(f"Expected a regressor model: {type(model)}.")
+    elif isinstance(model, keras.Model):
+        if not model.output_shape[-1] == 1:
+            raise InvalidDataShapeException(f"Expected a single output unit for a regressor model: {type(model)}.")
+    else:
+        raise InvalidModelTypeException(f"Model type not recognized: {type(model)}.")
+
     result = model.predict(data)
+    if result.ndim == 2:
+        result = result.squeeze()
     return result

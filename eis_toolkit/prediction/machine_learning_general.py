@@ -12,6 +12,7 @@ from beartype.typing import Any, List, Literal, Optional, Sequence, Tuple, Union
 from scipy import sparse
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import KFold, LeaveOneOut, StratifiedKFold, train_test_split
+from tensorflow import keras
 
 from eis_toolkit.evaluation.scoring import score_predictions
 from eis_toolkit.exceptions import (
@@ -31,7 +32,7 @@ NO_VALIDATION = "none"
 
 
 @beartype
-def save_model(model: BaseEstimator, path: Path) -> None:
+def save_model(model: Union[BaseEstimator, keras.Model], path: Path) -> None:
     """
     Save a trained Sklearn model to a .joblib file.
 
@@ -43,7 +44,7 @@ def save_model(model: BaseEstimator, path: Path) -> None:
 
 
 @beartype
-def load_model(path: Path) -> BaseEstimator:
+def load_model(path: Path) -> Union[BaseEstimator, keras.Model]:
     """
     Load a Sklearn model from a .joblib file.
 
