@@ -199,6 +199,53 @@ class NodataHandling(str, Enum):
     remove = "remove"
 
 
+class MLPActivationFunctions(str, Enum):
+    """MLP activation functions."""
+
+    relu = "relu"
+    linear = "linear"
+    sigmoid = "sigmoid"
+    tanh = "tanh"
+
+
+class MLPClassifierLastActivations(str, Enum):
+    """MLP classifier last activation functions."""
+
+    sigmoid = "sigmoid"
+    softmax = "softmax"
+
+
+class MLPRegressorLastActivations(str, Enum):
+    """MLP regressor last activation functions."""
+
+    linear = "linear"
+
+
+class MLPOptimizers(str, Enum):
+    """MLP optimizers."""
+
+    adam = "adam"
+    adagrad = "adagrad"
+    rmsprop = "rmsprop"
+    sdg = "sdg"
+
+
+class MLPClassifierLossFunctions(str, Enum):
+    """MLP classifier loss functions."""
+
+    binary_crossentropy = "binary_crossentropy"
+    categorical_crossentropy = "categorical_crossentropy"
+
+
+class MLPRegressorLossFunctions(str, Enum):
+    """MLP regressor loss functions."""
+
+    mse = "mse"
+    mae = "mae"
+    hinge = "hinge"
+    huber = "huber"
+
+
 class FocalFilterMethod(str, Enum):
     """Focal filter methods."""
 
