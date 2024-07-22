@@ -5,7 +5,7 @@ from beartype.typing import Sequence
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidCompositionException, InvalidParameterValueException
-from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
+from eis_toolkit.utilities.checks.compositional import check_compositional_data
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid
 from eis_toolkit.utilities.checks.parameter import check_lists_overlap, check_numeric_value_sign
 
@@ -86,7 +86,7 @@ def single_ilr_transform(
         InvalidParameterValueException: At least one subcomposition provided was empty.
         NumericValueSignException: Data contains zeros or negative values.
     """
-    check_in_simplex_sample_space(df)
+    check_compositional_data(df)
 
     if not (subcomposition_1 and subcomposition_2):
         raise InvalidParameterValueException("A subcomposition should contain at least one column.")

@@ -7,7 +7,7 @@ from beartype.typing import Optional, Sequence
 
 from eis_toolkit.exceptions import InvalidColumnException, NumericValueSignException
 from eis_toolkit.utilities.aitchison_geometry import _closure
-from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
+from eis_toolkit.utilities.checks.compositional import check_compositional_data
 from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
 
 
@@ -39,7 +39,7 @@ def alr_transform(
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
-    check_in_simplex_sample_space(df)
+    check_compositional_data(df)
 
     if column is not None and column not in df.columns:
         raise InvalidColumnException(f"The column {column} was not found in the dataframe.")
