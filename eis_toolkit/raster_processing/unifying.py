@@ -70,8 +70,7 @@ def _unify_raster_grids(
     base_raster: rasterio.io.DatasetReader,
     rasters_to_unify: Sequence[rasterio.io.DatasetReader],
     resampling_method: Resampling,
-    unify_extens: bool,
-    mask_nodata: bool,
+    masking: Optional[Literal["extents", "extents_and_nodata"]],
 ) -> List[Tuple[np.ndarray, Profile]]:
 
     dst_crs = base_raster.crs
@@ -89,7 +88,7 @@ def _unify_raster_grids(
 
         # If we unify without clipping, things are more complicated and we need to
         # calculate corner coordinates, width and height, and snap the grid to nearest corner
-        if not unify_extens:
+        if not masking:
             dst_transform, dst_width, dst_height = _calculate_snapped_grid(raster, dst_crs, dst_resolution)
 
         dst_array = np.empty((base_raster.count, dst_height, dst_width))
@@ -115,7 +114,7 @@ def _unify_raster_grids(
             resampling=resampling_method,
         )[0]
 
-        if mask_nodata:
+        if masking == "full":
             _mask_nodata(out_image, nodata, base_raster_arr, base_raster_profile)
 
         out_profile.update({"transform": dst_transform, "width": dst_width, "height": dst_height, "crs": dst_crs})
@@ -130,8 +129,7 @@ def unify_raster_grids(
     base_raster: rasterio.io.DatasetReader,
     rasters_to_unify: Sequence[rasterio.io.DatasetReader],
     resampling_method: Literal["nearest", "bilinear", "cubic", "average", "gauss", "max", "min"] = "nearest",
-    unify_extents: bool = True,
-    mask_nodata: bool = False,
+    masking: Optional[Literal["extents", "full"]] = "extents",
 ) -> List[Tuple[np.ndarray, Profile]]:
     """Unifies given rasters with the base raster.
 
@@ -147,11 +145,10 @@ def unify_raster_grids(
         rasters_to_unify: Rasters to be unified with the base raster.
         resampling_method: Resampling method. Most suitable method depends on the dataset and context.
             `nearest`, `bilinear` and `cubic` are some common choices. This parameter defaults to `nearest`.
-        unify_extents: Controls if the bounds of rasters to-be-unified should be modified. If True, will clip
-            larger rasters and expand smaller rasters (with nodata) to match extents of the base raster.
-            Defaults to True.
-        mask_nodata: Whether nodata cells should be copied from the baster raster. If True, copies nodata pixels
-            to all bands of all rasters to-be-unified. Defaults to False.
+        masking: Controls if and how masking should be handled. If `extents`, the bounds of rasters to-be-unified
+            are matched with the base raster. Larger rasters are clipped and smaller rasters expanded (with nodata).
+            If `full`, copies nodata pixel locations from the base raster additionally. If None,
+            extents are not matched and nodata not copied. Defaults to `extents`.
 
     Returns:
         List of unified rasters' data and profiles. First element is the base raster.
@@ -163,5 +160,5 @@ def unify_raster_grids(
         raise InvalidParameterValueException("Rasters to unify is empty.")
 
     method = RESAMPLE_METHOD_MAP[resampling_method]
-    out_rasters = _unify_raster_grids(base_raster, rasters_to_unify, method, unify_extents, mask_nodata)
+    out_rasters = _unify_raster_grids(base_raster, rasters_to_unify, method, masking)
     return out_rasters

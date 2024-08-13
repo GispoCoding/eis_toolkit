@@ -38,11 +38,7 @@ def mask_raster(
         raster_arr = raster.read()
     else:
         out_rasters = unify_raster_grids(
-            base_raster=base_raster,
-            rasters_to_unify=[raster],
-            resampling_method="nearest",
-            unify_extents=True,
-            mask_nodata=False,
+            base_raster=base_raster, rasters_to_unify=[raster], resampling_method="nearest", masking="extents"
         )
         raster_arr = out_rasters[1][0]
 

@@ -32,9 +32,7 @@ def test_unify_raster_grids():
 
     with rasterio.open(raster_to_unify_path_1) as raster_to_unify:
         with rasterio.open(base_raster_path_1) as base_raster:
-            out_rasters = unify_raster_grids(
-                base_raster, [raster_to_unify], "nearest", unify_extents=False, mask_nodata=False
-            )
+            out_rasters = unify_raster_grids(base_raster, [raster_to_unify], "nearest", masking=None)
             out_image, out_meta = out_rasters[1]
 
             assert len(out_rasters) == 2
@@ -62,9 +60,7 @@ def test_unify_raster_grids_extent():
 
     with rasterio.open(raster_to_unify_path_2) as raster_to_unify:
         with rasterio.open(base_raster_path_2) as base_raster:
-            out_rasters = unify_raster_grids(
-                base_raster, [raster_to_unify], "bilinear", unify_extents=True, mask_nodata=False
-            )
+            out_rasters = unify_raster_grids(base_raster, [raster_to_unify], "bilinear", masking="extents")
             out_image, out_meta = out_rasters[1]
 
             assert len(out_rasters) == 2
@@ -94,9 +90,7 @@ def test_unify_raster_grids_full_masking():
 
     with rasterio.open(raster_to_unify_path_1) as raster_to_unify:
         with rasterio.open(base_raster_path_3) as base_raster:
-            out_rasters = unify_raster_grids(
-                base_raster, [raster_to_unify], "bilinear", unify_extents=True, mask_nodata=True
-            )
+            out_rasters = unify_raster_grids(base_raster, [raster_to_unify], "bilinear", masking="full")
             out_image, out_profile = out_rasters[1]
 
             assert len(out_rasters) == 2

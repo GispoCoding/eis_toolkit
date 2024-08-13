@@ -261,6 +261,14 @@ class ThresholdCriteria(str, Enum):
     outside = "outside"
 
 
+class MaskingMode(str, Enum):
+    """Masking modes for raster unification."""
+
+    extents = "extents"
+    full = "full"
+    none = "none"
+
+
 INPUT_FILE_OPTION = Annotated[
     Path,
     typer.Option(
@@ -1342,8 +1350,7 @@ def unify_rasters_cli(
     base_raster: INPUT_FILE_OPTION,
     output_directory: OUTPUT_DIR_OPTION,
     resampling_method: Annotated[ResamplingMethods, typer.Option(case_sensitive=False)] = ResamplingMethods.nearest,
-    unify_extents: bool = True,
-    mask_nodata: bool = False,
+    masking: Annotated[MaskingMode, typer.Option(case_sensitive=False)] = MaskingMode.extents,
 ):
     """Unify rasters to match the base raster."""
     from eis_toolkit.raster_processing.unifying import unify_raster_grids
@@ -1354,12 +1361,12 @@ def unify_rasters_cli(
         to_unify = [rasterio.open(rstr) for rstr in rasters_to_unify]  # Open all rasters to be unified
         typer.echo("Progress: 25%")
 
+        masking_param = get_enum_values(masking)
         unified = unify_raster_grids(
             base_raster=raster,
             rasters_to_unify=to_unify,
             resampling_method=get_enum_values(resampling_method),
-            unify_extents=unify_extents,
-            mask_nodata=mask_nodata,
+            masking=None if masking_param == "none" else masking_param,
         )
         [rstr.close() for rstr in to_unify]  # Close all rasters
     typer.echo("Progress: 75%")
