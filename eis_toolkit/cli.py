@@ -1342,7 +1342,8 @@ def unify_rasters_cli(
     base_raster: INPUT_FILE_OPTION,
     output_directory: OUTPUT_DIR_OPTION,
     resampling_method: Annotated[ResamplingMethods, typer.Option(case_sensitive=False)] = ResamplingMethods.nearest,
-    same_extent: bool = False,
+    unify_extents: bool = True,
+    mask_nodata: bool = False,
 ):
     """Unify rasters to match the base raster."""
     from eis_toolkit.raster_processing.unifying import unify_raster_grids
@@ -1357,7 +1358,8 @@ def unify_rasters_cli(
             base_raster=raster,
             rasters_to_unify=to_unify,
             resampling_method=get_enum_values(resampling_method),
-            same_extent=same_extent,
+            unify_extents=unify_extents,
+            mask_nodata=mask_nodata,
         )
         [rstr.close() for rstr in to_unify]  # Close all rasters
     typer.echo("Progress: 75%")
