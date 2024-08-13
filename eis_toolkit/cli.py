@@ -1517,6 +1517,30 @@ def surface_derivatives_cli(
 
 
 @app.command()
+def mask_raster_cli(
+    input_raster: INPUT_FILE_OPTION,
+    base_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+):
+    """Mask input raster using the nodata locations from base raster."""
+    from eis_toolkit.raster_processing.masking import mask_raster
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        with rasterio.open(base_raster) as base_rstr:
+            typer.echo("Progress: 25%")
+            out_image, out_meta = mask_raster(raster=raster, base_raster=base_rstr)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Raster masking completed, writing raster to {output_raster}")
+
+
+@app.command()
 def reclassify_with_manual_breaks_cli(
     input_raster: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
