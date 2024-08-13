@@ -215,10 +215,10 @@ class MLPClassifierLastActivations(str, Enum):
     softmax = "softmax"
 
 
-class MLPRegressorLastActivations(str, Enum):
-    """MLP regressor last activation functions."""
+# class MLPRegressorLastActivations(str, Enum):
+#     """MLP regressor last activation functions."""
 
-    linear = "linear"
+#     linear = "linear"
 
 
 class MLPOptimizers(str, Enum):
@@ -306,47 +306,6 @@ class ThresholdCriteria(str, Enum):
     higher = "higher"
     in_between = "in_between"
     outside = "outside"
-
-
-class MLPActivation(str, Enum):
-    """Activation function for MLP model."""
-
-    relu = "relu"
-    linear = "linear"
-    sigmoid = "sigmoid"
-    tanh = "tanh"
-
-
-class MLPLastActivation(str, Enum):
-    """Last activation function for MLP model."""
-
-    sigmoid = "sigmoid"
-    softmax = "softmax"
-
-
-class MLPOptimizer(str, Enum):
-    """Optimizer for MLP model."""
-
-    adam = "adam"
-    adangrad = "adangrad"
-    rmsprop = "rmsprop"
-    sdg = "sdg"
-
-
-class MLPClassifierLossFunction(str, Enum):
-    """Loss function for MLP classifier model."""
-
-    binary_crossentropy = ("binary_crossentropy",)
-    categorical_crossentropy = "categorical_crossentropy"
-
-
-class MLPRegressorLossFunction(str, Enum):
-    """Loss function for MLP regressor model."""
-
-    mse = ("mse",)
-    mae = "mae"
-    hinge = "hinge"
-    huber = "huber"
 
 
 class KerasClassifierMetrics(str, Enum):
@@ -2458,16 +2417,18 @@ def mlp_classifier_train_cli(
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
     neurons: Annotated[List[int], typer.Option()],
-    activation: Annotated[MLPActivation, typer.Option(case_sensitive=False)] = MLPActivation.relu,
+    activation: Annotated[MLPActivationFunctions, typer.Option(case_sensitive=False)] = MLPActivationFunctions.relu,
     output_neurons: int = 1,
-    last_activation: Annotated[MLPLastActivation, typer.Option(case_sensitive=False)] = MLPLastActivation.sigmoid,
+    last_activation: Annotated[
+        MLPClassifierLastActivations, typer.Option(case_sensitive=False)
+    ] = MLPClassifierLastActivations.sigmoid,
     epochs: int = 50,
     batch_size: int = 32,
-    optimizer: Annotated[MLPOptimizer, typer.Option(case_sensitive=False)] = MLPOptimizer.adam,
+    optimizer: Annotated[MLPOptimizers, typer.Option(case_sensitive=False)] = MLPOptimizers.adam,
     learning_rate: float = 0.001,
     loss_function: Annotated[
-        MLPClassifierLossFunction, typer.Option(case_sensitive=False)
-    ] = MLPClassifierLossFunction.binary_crossentropy,
+        MLPClassifierLossFunctions, typer.Option(case_sensitive=False)
+    ] = MLPClassifierLossFunctions.binary_crossentropy,
     dropout_rate: Optional[float] = None,
     early_stopping: bool = True,
     es_patience: int = 5,
@@ -2526,15 +2487,15 @@ def mlp_regressor_train_cli(
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
     neurons: Annotated[List[int], typer.Option()],
-    activation: Annotated[MLPActivation, typer.Option(case_sensitive=False)] = MLPActivation.relu,
+    activation: Annotated[MLPActivationFunctions, typer.Option(case_sensitive=False)] = MLPActivationFunctions.relu,
     output_neurons: int = 1,
     epochs: int = 50,
     batch_size: int = 32,
-    optimizer: Annotated[MLPOptimizer, typer.Option(case_sensitive=False)] = MLPOptimizer.adam,
+    optimizer: Annotated[MLPOptimizers, typer.Option(case_sensitive=False)] = MLPOptimizers.adam,
     learning_rate: float = 0.001,
     loss_function: Annotated[
-        MLPRegressorLossFunction, typer.Option(case_sensitive=False)
-    ] = MLPRegressorLossFunction.mse,
+        MLPRegressorLossFunctions, typer.Option(case_sensitive=False)
+    ] = MLPRegressorLossFunctions.mse,
     dropout_rate: Optional[float] = None,
     early_stopping: bool = True,
     es_patience: int = 5,
