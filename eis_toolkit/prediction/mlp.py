@@ -4,6 +4,7 @@ import numpy as np
 from beartype import beartype
 from beartype.typing import Literal, Optional, Sequence, Tuple
 from tensorflow import keras
+from tensorflow.keras.metrics import CategoricalCrossentropy, MeanAbsoluteError, MeanSquaredError, Precision, Recall
 from tensorflow.keras.optimizers.legacy import SGD, Adagrad, Adam, RMSprop
 
 from eis_toolkit.exceptions import InvalidDataShapeException, InvalidParameterValueException
@@ -21,6 +22,23 @@ def _keras_optimizer(optimizer: str, **kwargs):
         return SGD(**kwargs)
     else:
         raise InvalidParameterValueException(f"Unidentified optimizer: {optimizer}")
+
+
+def _keras_metric(metric_name: str):
+    if metric_name.lower() == "accuracy":
+        return "accuracy"
+    elif metric_name.lower() == "precision":
+        return Precision(name="precision")
+    elif metric_name.lower() == "recall":
+        return Recall(name="recall")
+    elif metric_name.lower() == "categorical_crossentropy":
+        return CategoricalCrossentropy(name="categorical_crossentropy")
+    elif metric_name.lower() == "mse":
+        return MeanSquaredError(name="mse")
+    elif metric_name.lower() == "mae":
+        return MeanAbsoluteError(name="mae")
+    else:
+        raise InvalidParameterValueException(f"Unsupported metric for Keras model: {metric_name}")
 
 
 def _check_MLP_inputs(
@@ -105,11 +123,11 @@ def train_MLP_classifier(
     dropout_rate: Optional[Number] = None,
     early_stopping: bool = True,
     es_patience: int = 5,
-    metrics: Optional[Sequence[Literal["accuracy", "precision", "recall", "f1_score"]]] = ["accuracy"],
+    metrics: Optional[Sequence[Literal["accuracy", "precision", "recall"]]] = ["accuracy"],
     random_state: Optional[int] = None,
 ) -> Tuple[keras.Model, dict]:
     """
-    Train MLP (Multilayer Perceptron) using Keras.
+    Train MLP (Multilayer Perceptron) classifier using Keras.
 
     Creates a Sequential model with Dense NN layers. For each element in `neurons`, Dense layer with corresponding
     dimensionality/neurons is created with the specified activation function (`activation`). If `dropout_rate` is
@@ -184,7 +202,9 @@ def train_MLP_classifier(
     model.add(keras.layers.Dense(units=output_neurons, activation=last_activation))
 
     model.compile(
-        optimizer=_keras_optimizer(optimizer, learning_rate=learning_rate), loss=loss_function, metrics=metrics
+        optimizer=_keras_optimizer(optimizer, learning_rate=learning_rate),
+        loss=loss_function,
+        metrics=[_keras_metric(metric) for metric in metrics],
     )
 
     # 3. Train the model
@@ -222,11 +242,11 @@ def train_MLP_regressor(
     dropout_rate: Optional[Number] = None,
     early_stopping: bool = True,
     es_patience: int = 5,
-    metrics: Optional[Sequence[Literal["mse", "rmse", "mae"]]] = ["mse"],
+    metrics: Optional[Sequence[Literal["mse", "rmse", "mae", "r2"]]] = ["mse"],
     random_state: Optional[int] = None,
 ) -> Tuple[keras.Model, dict]:
     """
-    Train MLP (Multilayer Perceptron) using Keras.
+    Train MLP (Multilayer Perceptron) regressor using Keras.
 
     Creates a Sequential model with Dense NN layers. For each element in `neurons`, Dense layer with corresponding
     dimensionality/neurons is created with the specified activation function (`activation`). If `dropout_rate` is
@@ -297,7 +317,9 @@ def train_MLP_regressor(
     model.add(keras.layers.Dense(units=output_neurons, activation=last_activation))
 
     model.compile(
-        optimizer=_keras_optimizer(optimizer, learning_rate=learning_rate), loss=loss_function, metrics=metrics
+        optimizer=_keras_optimizer(optimizer, learning_rate=learning_rate),
+        loss=loss_function,
+        metrics=[_keras_metric(metric) for metric in metrics],
     )
 
     # 3. Train the model

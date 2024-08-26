@@ -4,7 +4,7 @@ from beartype import beartype
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
-from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
+from eis_toolkit.utilities.checks.compositional import check_compositional_data
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
 from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
 
@@ -79,7 +79,7 @@ def single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
-    check_in_simplex_sample_space(df)
+    check_compositional_data(df)
 
     if column not in df.columns:
         raise InvalidColumnException(f"The column {column} was not found in the dataframe.")
@@ -121,6 +121,6 @@ def plr_transform(df: pd.DataFrame) -> pd.DataFrame:
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
-    check_in_simplex_sample_space(df)
+    check_compositional_data(df)
 
     return rename_columns_by_pattern(_plr_transform(df))
