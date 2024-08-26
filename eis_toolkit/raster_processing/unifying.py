@@ -51,7 +51,7 @@ def _mask_nodata(
     base_raster_profile: rasterio.profiles.Profile,
 ):
     # Take only first band as nodata mask from base raster
-    if base_raster_array.ndim == 3:
+    if base_raster_array.ndim != 1:
         base_raster_array = base_raster_array[0]
 
     # Create the mask
@@ -59,7 +59,7 @@ def _mask_nodata(
     mask = (base_raster_array == base_nodata_value) | np.isnan(base_raster_array)
 
     # Apply to each band
-    if raster_array.ndim == 3:
+    if raster_array.ndim != 1:
         for array in raster_array:
             array[mask] = nodata_value
     else:
