@@ -70,7 +70,7 @@ def _unify_raster_grids(
     base_raster: rasterio.io.DatasetReader,
     rasters_to_unify: Sequence[rasterio.io.DatasetReader],
     resampling_method: Resampling,
-    masking: Optional[Literal["extents", "extents_and_nodata"]],
+    masking: Optional[Literal["extents", "full"]],
 ) -> List[Tuple[np.ndarray, Profile]]:
 
     dst_crs = base_raster.crs
