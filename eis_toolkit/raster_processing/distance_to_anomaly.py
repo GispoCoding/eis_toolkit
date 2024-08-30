@@ -2,6 +2,7 @@ from itertools import chain
 from numbers import Number
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from osgeo import gdal
 
 import geopandas as gpd
 import numpy as np
@@ -239,3 +240,110 @@ def _distance_to_anomaly(
     )
 
     return distance_array
+
+def _distance_to_anomaly_gdal_ComputeProximity(
+    anomaly_raster_profile: Union[profiles.Profile, dict],
+    anomaly_raster_data: np.ndarray,
+    threshold_criteria_value: Union[Tuple[Number, Number], Number],
+    threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
+) -> Tuple[np.ndarray, profiles.Profile]:
+    data_fits_criteria = _fits_criteria(
+        threshold_criteria=threshold_criteria,
+        threshold_criteria_value=threshold_criteria_value,
+        anomaly_raster_data=anomaly_raster_data,
+        nodata_value=anomaly_raster_profile.get("nodata"),
+    )
+    if np.sum(data_fits_criteria) == 0:
+        raise EmptyDataException(
+            " ".join(
+                [
+                    "Expected the passed threshold criteria to match at least some data.",
+                    f"Check that the values of threshold_criteria ({threshold_criteria})",
+                    f"and threshold_criteria_value {threshold_criteria_value}",
+                    "match at least part of the data.",
+                ]
+            )
+        )
+    #converting True False values to binary formant.
+    converted_values = np.where(data_fits_criteria,1,0)
+    driver = gdal.GetDriverByName("MEM")
+
+    width = anomaly_raster_profile["width"]
+    height = anomaly_raster_profile["height"]
+    temp_raster = driver.Create("", width, height, 1, gdal.GDT_Float32)
+    transformation = anomaly_raster_profile["transform"]
+    x_geo = (transformation.c, transformation.a, transformation.b)
+    y_geo = (transformation.f, transformation.d, transformation.e)
+    temp_raster.SetGeoTransform(x_geo + y_geo)
+    crs = anomaly_raster_profile["crs"].to_wkt()
+    band = temp_raster.GetRasterBand(1)
+    band.WriteArray(converted_values)
+    nodatavalue=anomaly_raster_profile["nodata"]
+    band.SetNoDataValue(nodatavalue)
+    
+    # Create empty proximity raster
+    out_raster = driver.Create("",  width, height, 1, gdal.GDT_Float32)
+    out_raster.SetGeoTransform(x_geo + y_geo)   
+    out_raster.SetProjection(crs)
+    out_band = out_raster.GetRasterBand(1)
+    out_band.SetNoDataValue(nodatavalue)
+    options = ['values=1','distunits=GEO']
+    
+    # Compute proximity
+    gdal.ComputeProximity(band, out_band, options)
+
+    # Create outputs
+    out_array = out_band.ReadAsArray()
+    out_meta = anomaly_raster_profile.copy()
+
+    # Update metadata
+    out_meta["dtype"] = out_array.dtype.name
+    out_meta["count"] = 1
+
+    return out_array, out_meta
+
+
+@beartype
+def distance_to_anomaly_gdal_ComputeProximity(
+    anomaly_raster_profile: Union[profiles.Profile, dict],
+    anomaly_raster_data: np.ndarray,
+    threshold_criteria_value: Union[Tuple[Number, Number], Number],
+    threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
+) -> Tuple[np.ndarray, profiles.Profile]:
+    """Calculate distance from raster cell to nearest anomaly.
+
+    The criteria for what is anomalous can be defined as a single number and
+    criteria text of "higher" or "lower". Alternatively, the definition can be
+    a range where values inside (criteria text of "within") or outside are
+    marked as anomalous (criteria text of "outside"). If anomaly_raster_profile does
+    contain "nodata" key, np.nan is assumed to correspond to nodata values.
+
+    Args:
+        anomaly_raster_profile: The raster profile in which the distances
+            to the nearest anomalous value are determined.
+        anomaly_raster_data: The raster data in which the distances
+            to the nearest anomalous value are determined.
+        threshold_criteria_value: Value(s) used to define anomalous.
+            If the threshold criteria requires a tuple of values,
+            the first value should be the minimum and the second
+            the maximum value.
+        threshold_criteria: Method to define anomalous.
+
+    Returns:
+        A 2D numpy array with the distances to anomalies computed
+        and the original anomaly raster profile.
+
+    """
+    check_raster_profile(raster_profile=anomaly_raster_profile)
+    _check_threshold_criteria_and_value(
+        threshold_criteria=threshold_criteria, threshold_criteria_value=threshold_criteria_value
+    )
+
+    out_array, out_meta = _distance_to_anomaly_gdal_ComputeProximity(
+        anomaly_raster_profile=anomaly_raster_profile,
+        anomaly_raster_data=anomaly_raster_data,
+        threshold_criteria=threshold_criteria,
+        threshold_criteria_value=threshold_criteria_value,
+    )
+
+    return out_array, out_meta
