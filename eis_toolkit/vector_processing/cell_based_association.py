@@ -1,7 +1,6 @@
 import os
 import warnings
 from numbers import Number
-from os import PathLike
 
 import geopandas as gpd
 import numpy as np
@@ -9,8 +8,10 @@ import pandas as pd
 import rasterio
 from beartype import beartype
 from beartype.typing import List, Optional, Tuple, Union
+from rasterio import features
+from rasterio.transform import Affine
 from shapely import wkt
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Polygon
 
 from eis_toolkit.exceptions import EmptyDataFrameException, InvalidColumnException, InvalidParameterValueException
 
@@ -23,7 +24,7 @@ os.environ["USE_PYGEOS"] = "0"
 def cell_based_association(
     cell_size: int,
     geodata: List[gpd.GeoDataFrame],
-    output_path: Union[str, PathLike],
+    output_path: str,
     column: Optional[List[str]] = None,
     subset_target_attribute_values: Optional[List[Union[None, list, str]]] = None,
     add_name: Optional[List[Union[str, None]]] = None,
@@ -40,8 +41,7 @@ def cell_based_association(
         cell_size: Size of the cells.
         geodata: GeoDataFrame to create the CBA matrix. Additional
             GeoDataFrame(s) can be imputed to add to the CBA matrix.
-        output_path: Name of the saved .tif file. Include file extension (.tif)
-            in the path.
+        output_path: Name of the saved .tif file.
         column: Name of the column of interest. If no attribute is specified,
             then an artificial attribute is created representing the presence
             or absence of the geometries of this file for each cell of the CBA
@@ -90,8 +90,10 @@ def cell_based_association(
             raise InvalidColumnException("Targeted column not found in the GeoDataFrame.")
 
     for i, subset in enumerate(subset_target_attribute_values):
-        if subset is not None and not all(value in geodata[i][column[i]].tolist() for value in subset):
-            raise InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
+        if subset is not None:
+            for value in subset:
+                if value not in geodata[i][column[i]].unique():
+                    raise InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
 
     # Computation
     for i, data in enumerate(geodata):
@@ -528,14 +530,14 @@ def _to_csv(cba: gpd.GeoDataFrame, output_path: str) -> None:
 
 
 @beartype
-def _to_raster(cba: gpd.GeoDataFrame, output_path: Union[str, PathLike], nan_val: int = -9999) -> None:
+def _to_raster(cba: gpd.GeoDataFrame, output_path: str, nan_val: int = -9999) -> None:
     """Intermediate utility.
 
     Saves the object as a raster TIFF file.
 
     Args:
         cba: CBA matrix to save.
-        output_path: Name of the saved file, include file extension (.tif).
+        output_path: Name of the saved file.
         nan_val: values taken by cells with no values in them (outside the study
         area).
 
@@ -545,54 +547,51 @@ def _to_raster(cba: gpd.GeoDataFrame, output_path: Union[str, PathLike], nan_val
 
     cba = cba.copy(deep=True)
 
-    crs_txt = f"EPSG:{cba.crs.to_epsg()}"
-    count = len(cba.columns.drop("geometry"))
+    if output_path.endswith(".tif"):
+        pass
+    else:
+        output_path = output_path + ".tif"
 
-    geometries = cba["geometry"].values
-    x = np.unique(geometries.centroid.x)
-    y = np.unique(geometries.centroid.y)
-    y = np.flip(y)
-    x_resolution = x[1] - x[0]
-    y_resolution = y[0] - y[1]
-    min_x, min_y, max_x, max_y = cba.total_bounds
-    width = round((max_x - min_x) / x_resolution)
-    height = round((max_y - min_y) / y_resolution)
+    minx = cba.bounds.minx.min()
+    miny = cba.bounds.miny.min()
+    maxx = cba.bounds.maxx.max()
+    maxy = cba.bounds.maxy.max()
 
-    x_values = [x[0]]
-    for i in range(0, (width - 1), 1):
-        new_val = x_values[i] + x_resolution
-        x_values = np.append(x_values, new_val)
-    y_values = [y[0]]
-    for i in range(0, (height - 1), 1):
-        new_val = y_values[i] - y_resolution
-        y_values = np.append(y_values, new_val)
-    X, Y = np.meshgrid(x_values, y_values)
+    xres = cba.bounds.maxx.iloc[0] - cba.bounds.minx.iloc[0]
+    yres = cba.bounds.maxy.iloc[0] - cba.bounds.miny.iloc[0]
 
-    points = pd.DataFrame({"X": np.ravel(X), "Y": np.ravel(Y)})
-    points["coords"] = list(zip(points["X"], points["Y"]))
-    points["coords"] = points["coords"].apply(Point)
-    points_grid = gpd.GeoDataFrame(points, geometry="coords", crs=cba.crs)
-    points_grid = points_grid.sjoin(cba, how="left")
-    points_grid = points_grid.fillna(nan_val)
-    col_name = list(points_grid.drop(["X", "Y", "coords", "index_right"], axis=1).columns)
+    n_x = int((maxx - minx) / xres)
+    n_y = int((maxy - miny) / yres)
 
-    transform = rasterio.transform.from_bounds(min_x, min_y, max_x, max_y, width=width, height=height)
+    x = np.linspace(0, 0, n_x)
+    y = np.linspace(0, 0, n_y)
+    X, Y = np.meshgrid(x, y)
 
+    transform = Affine.translation(minx, miny) * Affine.scale(xres, yres)
+
+    band_numbers = len(cba.columns.drop("geometry"))
     with rasterio.open(
         output_path,
         mode="w",
         driver="GTiff",
-        height=height,
-        width=width,
-        count=count,
-        dtype="int32",
-        crs=crs_txt,
+        height=X.shape[0],
+        width=X.shape[1],
+        count=band_numbers,
+        dtype=X.dtype,
+        crs=cba.crs,
         transform=transform,
         nodata=nan_val,
     ) as new_dataset:
-        z = 1
-        for i in col_name:
-            new_dataset.write(points_grid.pivot(index="Y", columns="X", values=i).sort_index(ascending=False).values, z)
-            new_dataset.set_band_description(z, i)
-            z = z + 1
-    new_dataset.close()
+        rasterized = []
+        for i, col in enumerate(cba.columns.drop("geometry")):
+            geom_value = ((geom, value) for geom, value in zip(cba.geometry, cba[col]))
+            rasterized = features.rasterize(
+                geom_value,
+                out_shape=new_dataset.shape,
+                transform=new_dataset.transform,
+                all_touched=False,
+                fill=nan_val,
+                dtype=None,
+            )
+            new_dataset.write(np.array(rasterized), indexes=(i + 1))
+            new_dataset.set_band_description((i + 1), col)
