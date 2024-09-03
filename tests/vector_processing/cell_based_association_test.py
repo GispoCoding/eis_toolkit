@@ -121,7 +121,7 @@ def test_cba():
         add_buffer=[False, 5000, 5000, False, 5000],
     )
     with rasterio.open(raster_path, "r") as one:
-        with rasterio.open(output_file, "r") as two:
+        with rasterio.open(str(output_file) + ".tif", "r") as two:
             one_array = one.read()
             two_array = two.read()
     numpy.testing.assert_equal(one_array, two_array)
