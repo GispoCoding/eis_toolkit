@@ -1,0 +1,86 @@
+<PAMDataset>
+  <PAMRasterBand band="1">
+    <Description>A</Description>
+    <Histograms>
+      <HistItem>
+        <HistMin>-0.25</HistMin>
+        <HistMax>1.25</HistMax>
+        <BucketCount>2</BucketCount>
+        <IncludeOutOfRange>0</IncludeOutOfRange>
+        <Approximate>0</Approximate>
+        <HistCounts>200|25</HistCounts>
+      </HistItem>
+    </Histograms>
+    <Metadata>
+      <MDI key="STATISTICS_MINIMUM">0</MDI>
+      <MDI key="STATISTICS_MAXIMUM">1</MDI>
+      <MDI key="STATISTICS_MEAN">0.11111111111111</MDI>
+      <MDI key="STATISTICS_STDDEV">0.31426968052735</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">100</MDI>
+    </Metadata>
+  </PAMRasterBand>
+  <PAMRasterBand band="2">
+    <Description>B</Description>
+    <Histograms>
+      <HistItem>
+        <HistMin>-0.25</HistMin>
+        <HistMax>1.25</HistMax>
+        <BucketCount>2</BucketCount>
+        <IncludeOutOfRange>0</IncludeOutOfRange>
+        <Approximate>0</Approximate>
+        <HistCounts>153|72</HistCounts>
+      </HistItem>
+    </Histograms>
+    <Metadata>
+      <MDI key="STATISTICS_MINIMUM">0</MDI>
+      <MDI key="STATISTICS_MAXIMUM">1</MDI>
+      <MDI key="STATISTICS_MEAN">0.32</MDI>
+      <MDI key="STATISTICS_STDDEV">0.46647615158762</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">100</MDI>
+    </Metadata>
+  </PAMRasterBand>
+  <PAMRasterBand band="3">
+    <Description>C</Description>
+    <Histograms>
+      <HistItem>
+        <HistMin>-0.25</HistMin>
+        <HistMax>1.25</HistMax>
+        <BucketCount>2</BucketCount>
+        <IncludeOutOfRange>0</IncludeOutOfRange>
+        <Approximate>0</Approximate>
+        <HistCounts>66|159</HistCounts>
+      </HistItem>
+    </Histograms>
+    <Metadata>
+      <MDI key="STATISTICS_MINIMUM">0</MDI>
+      <MDI key="STATISTICS_MAXIMUM">1</MDI>
+      <MDI key="STATISTICS_MEAN">0.70666666666667</MDI>
+      <MDI key="STATISTICS_STDDEV">0.45528989543904</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">100</MDI>
+    </Metadata>
+  </PAMRasterBand>
+  <PAMRasterBand band="4">
+    <Description>D</Description>
+  </PAMRasterBand>
+  <PAMRasterBand band="5">
+    <Description>E</Description>
+  </PAMRasterBand>
+  <PAMRasterBand band="6">
+    <Description>F</Description>
+  </PAMRasterBand>
+  <PAMRasterBand band="7">
+    <Description>dyke</Description>
+  </PAMRasterBand>
+  <PAMRasterBand band="8">
+    <Description>Occ</Description>
+  </PAMRasterBand>
+  <PAMRasterBand band="9">
+    <Description>Occ_B</Description>
+  </PAMRasterBand>
+  <PAMRasterBand band="10">
+    <Description>Normal</Description>
+  </PAMRasterBand>
+  <PAMRasterBand band="11">
+    <Description>Thrust</Description>
+  </PAMRasterBand>
+</PAMDataset>
