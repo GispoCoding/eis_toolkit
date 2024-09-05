@@ -312,6 +312,12 @@ def distance_to_anomaly_gdal_ComputeProximity(
 ) -> Tuple[np.ndarray, profiles.Profile]:
     """Calculate distance from raster cell to nearest anomaly.
 
+    This function demonstrates superior performance compared to the distance_to_anomaly 
+    and distance_to_anomaly_gdal functions, as it uses a low-level, C++-based API 
+    within the GDAL library. By directly computing the proximity map from the 
+    source dataset, it benefits from the core-level optimizations inherent to GDAL, 
+    ensuring enhanced efficiency and speed.
+
     The criteria for what is anomalous can be defined as a single number and
     criteria text of "higher" or "lower". Alternatively, the definition can be
     a range where values inside (criteria text of "within") or outside are
