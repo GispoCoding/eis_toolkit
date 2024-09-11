@@ -247,6 +247,7 @@ def _distance_to_anomaly_gdal_ComputeProximity(
     threshold_criteria_value: Union[Tuple[Number, Number], Number],
     threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
 ) -> Tuple[np.ndarray, profiles.Profile]:
+    
     data_fits_criteria = _fits_criteria(
         threshold_criteria=threshold_criteria,
         threshold_criteria_value=threshold_criteria_value,
@@ -255,14 +256,10 @@ def _distance_to_anomaly_gdal_ComputeProximity(
     )
     if np.sum(data_fits_criteria) == 0:
         raise EmptyDataException(
-            " ".join(
-                [
                     "Expected the passed threshold criteria to match at least some data.",
                     f"Check that the values of threshold_criteria ({threshold_criteria})",
                     f"and threshold_criteria_value {threshold_criteria_value}",
                     "match at least part of the data.",
-                ]
-            )
         )
     #converting True False values to binary formant.
     converted_values = np.where(data_fits_criteria,1,0)
