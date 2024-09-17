@@ -39,3 +39,4 @@ jobs:
           python -c 'import eis_toolkit'
           # Run unittests with pytest
           pytest -v
+ 
