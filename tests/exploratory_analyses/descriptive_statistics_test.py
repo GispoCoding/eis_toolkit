@@ -61,7 +61,7 @@ def test_descriptive_statistics_geodataframe():
 
 def test_descriptive_statistics_raster():
     """Checks that returned statistics are correct when using numpy.ndarray."""
-    test = descriptive_statistics_raster(src_raster)
+    test = descriptive_statistics_raster(src_raster, 1)
     np.testing.assert_almost_equal(test["min"], 2.503)
     np.testing.assert_almost_equal(test["max"], 9.67)
     np.testing.assert_almost_equal(test["mean"], 5.1865644)

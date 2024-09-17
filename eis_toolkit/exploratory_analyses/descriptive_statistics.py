@@ -3,14 +3,14 @@ import numpy as np
 import pandas as pd
 import rasterio
 from beartype import beartype
-from beartype.typing import Union
+from beartype.typing import Dict, Union
 from statsmodels.stats import stattools
 from statsmodels.stats.weightstats import DescrStatsW
 
-from eis_toolkit.exceptions import InvalidColumnException
+from eis_toolkit.exceptions import InvalidColumnException, InvalidRasterBandException
 
 
-def _descriptive_statistics(data: Union[rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame]) -> dict:
+def _descriptive_statistics(data: Union[rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame]) -> Dict[str, float]:
     statistics = DescrStatsW(data)
     min = np.min(data)
     max = np.max(data)
@@ -38,14 +38,25 @@ def _descriptive_statistics(data: Union[rasterio.io.DatasetReader, pd.DataFrame,
 
 
 @beartype
-def descriptive_statistics_dataframe(input_data: Union[pd.DataFrame, gpd.GeoDataFrame], column: str) -> dict:
-    """Generate descriptive statistics from vector data.
+def descriptive_statistics_dataframe(
+    input_data: Union[pd.DataFrame, gpd.GeoDataFrame], column: str
+) -> Dict[str, float]:
+    """Compute descriptive statistics from vector data.
 
-    Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.
+    Computes the following statistics:
+    - min
+    - max
+    - mean
+    - quantiles 25%
+    - quantile 50% (median)
+    - quantile 75%
+    - standard deviation
+    - relative standard deviation
+    - skewness
 
     Args:
-        input_data: Data to generate descriptive statistics from.
-        column: Specify the column to generate descriptive statistics from.
+        input_data: Input vector data.
+        column: Column in vector data to compute descriptive statistics from.
 
     Returns:
         The descriptive statistics in previously described order.
@@ -58,19 +69,33 @@ def descriptive_statistics_dataframe(input_data: Union[pd.DataFrame, gpd.GeoData
 
 
 @beartype
-def descriptive_statistics_raster(input_data: rasterio.io.DatasetReader) -> dict:
-    """Generate descriptive statistics from raster data.
+def descriptive_statistics_raster(input_data: rasterio.io.DatasetReader, band: int = 1) -> Dict[str, float]:
+    """Compute descriptive statistics from raster data.
 
-    Generates min, max, mean, quantiles(25%, 50% and 75%), standard deviation, relative standard deviation and skewness.
+    Computes the following statistics:
+    - min
+    - max
+    - mean
+    - quantiles 25%
+    - quantile 50% (median)
+    - quantile 75%
+    - standard deviation
+    - relative standard deviation
+    - skewness
+
     Nodata values are removed from the data before the statistics are computed.
 
     Args:
-        input_data: Data to generate descriptive statistics from.
+        input_data: Input raster data.
+        band: Raster band to compute descriptive statistics from.
 
     Returns:
         The descriptive statistics in previously described order.
     """
-    data = input_data.read().flatten()
+    if band not in range(1, input_data.count + 1):
+        raise InvalidRasterBandException(f"Input raster does not contain the selected band: {band}.")
+
+    data = input_data.read(band)
     nodata_value = input_data.nodata
     data = data[data != nodata_value]
     statistics = _descriptive_statistics(data)
