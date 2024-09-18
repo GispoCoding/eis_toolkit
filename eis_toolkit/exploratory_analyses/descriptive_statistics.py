@@ -1,3 +1,5 @@
+from numbers import Number
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -10,7 +12,9 @@ from statsmodels.stats.weightstats import DescrStatsW
 from eis_toolkit.exceptions import InvalidColumnException, InvalidRasterBandException
 
 
-def _descriptive_statistics(data: Union[rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame]) -> Dict[str, float]:
+def _descriptive_statistics(
+    data: Union[rasterio.io.DatasetReader, pd.DataFrame, gpd.GeoDataFrame]
+) -> Dict[str, Number]:
     statistics = DescrStatsW(data)
     min = np.min(data)
     max = np.max(data)
@@ -69,7 +73,7 @@ def descriptive_statistics_dataframe(
 
 
 @beartype
-def descriptive_statistics_raster(input_data: rasterio.io.DatasetReader, band: int = 1) -> Dict[str, float]:
+def descriptive_statistics_raster(input_data: rasterio.io.DatasetReader, band: int = 1) -> Dict[str, Number]:
     """Compute descriptive statistics from raster data.
 
     Computes the following statistics:
