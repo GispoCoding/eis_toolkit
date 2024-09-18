@@ -44,7 +44,7 @@ def _descriptive_statistics(
 @beartype
 def descriptive_statistics_dataframe(
     input_data: Union[pd.DataFrame, gpd.GeoDataFrame], column: str
-) -> Dict[str, float]:
+) -> Dict[str, Number]:
     """Compute descriptive statistics from vector data.
 
     Computes the following statistics:
