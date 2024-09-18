@@ -786,15 +786,15 @@ def compute_pca_vector_cli(
 
 # DESCRIPTIVE STATISTICS (RASTER)
 @app.command()
-def descriptive_statistics_raster_cli(input_file: INPUT_FILE_OPTION):
+def descriptive_statistics_raster_cli(input_raster: INPUT_FILE_OPTION, band: int = 1):
     """Generate descriptive statistics from raster data."""
     from eis_toolkit.exploratory_analyses.descriptive_statistics import descriptive_statistics_raster
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_file) as raster:
+    with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        results_dict = descriptive_statistics_raster(raster)
+        results_dict = descriptive_statistics_raster(raster, band)
     typer.echo("Progress: 75%")
 
     typer.echo("Progress: 100% \n")
