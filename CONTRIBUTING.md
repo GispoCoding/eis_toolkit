@@ -43,18 +43,17 @@ Note that the subpackages can split up into more subpackages if needed.
 
 Module names come from the names of the .py files containing function
 declarations. You will need to create a new python file for each functionality.
-The name of the file containing the function declaration(s) for providing the
-functionality will be essentially the same as the function’s name but instead
-of the basic form use –ing form if it makes sense.
+Name the modules in a brief, descriptive manner.
 
--   Try to create modules in a way that each module contains only one
+-   For common cases, try to create modules in a way that each module contains only one
     functionality. Split this functionality into two function
     declarations: one for external use and one (the core functionality)
     for internal use. See e.g. implementation of [clipping
     functionality](./eis_toolkit/raster_processing/clipping.py) for
-    reference.
+    reference. In some cases it can make sense to include multiple tools in one module,
+    so the one/two functions per module is not absolute.
 
-1. Functions
+3. Functions
 
 Name each function according to what it is supposed to do. Try to
 express the purpose as simplistic as possible. In principle, each
@@ -92,9 +91,8 @@ maintainability and to avoid bugs.
 
 For creating docstrings, we rely on google convention (see section 3.8
 in [link](https://google.github.io/styleguide/pyguide.html) for more
-detailed instructions). Let's try to minimize the amount of code
-comments. Well defined docstrings should do most of the job with clear
-code structure.
+detailed instructions). Well defined docstrings should do most of the job with clear
+code structure, but code comments can be used (sparingly) too.
 
 ## Naming policy
 
@@ -232,9 +230,7 @@ including the same package, which was added to `pyproject.toml`, in
 `environment.yaml`. Please note that this file is only used for GitHub
 workflows, otherwise we utilize poetry for dependency handling.
 
-## Recent changes
-
-Some changes have been made to the style guide:
+## Additional style instructions
 
 -   Use `numbers.Number` as the type when both floats and integers are
     accepted by functions:
@@ -289,7 +285,8 @@ def my_function(parameter_1: float, parameter_2: bool, parameter_seq: Sequence):
 Here are some things to remember while implementing a new tool:
 
 -   Create an issue **before or when you start** developing a
-    functionality
+    functionality. Otherwise other people might have no idea you are
+    developing a feature.
 -   Adhere to the style guide
     -   Look at existing implementations and copy the form
     -   Enable pre-commit and fix style/other issues according to the
@@ -297,6 +294,9 @@ Here are some things to remember while implementing a new tool:
 -   Remember to use typing hints
 -   Write tests for your functions
 -   Add a .md file for you functionality
+-   Either implment a command-line interface function in `cli.py` in
+    approriate section of the file or raise an issue about the need to
+    implement a CLI function for your tool
 -   If you think the tool you are developing could use a separate
     general utility function, make an issue about this need before
     starting to develop it on your own. Also check if a utility function

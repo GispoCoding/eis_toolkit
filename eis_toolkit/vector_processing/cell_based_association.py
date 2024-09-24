@@ -1,6 +1,7 @@
 import os
 import warnings
 from numbers import Number
+from os import PathLike
 
 import geopandas as gpd
 import numpy as np
@@ -22,7 +23,7 @@ os.environ["USE_PYGEOS"] = "0"
 def cell_based_association(
     cell_size: int,
     geodata: List[gpd.GeoDataFrame],
-    output_path: str,
+    output_path: Union[str, PathLike],
     column: Optional[List[str]] = None,
     subset_target_attribute_values: Optional[List[Union[None, list, str]]] = None,
     add_name: Optional[List[Union[str, None]]] = None,
@@ -39,7 +40,8 @@ def cell_based_association(
         cell_size: Size of the cells.
         geodata: GeoDataFrame to create the CBA matrix. Additional
             GeoDataFrame(s) can be imputed to add to the CBA matrix.
-        output_path: Name of the saved .tif file.
+        output_path: Name of the saved .tif file. Include file extension (.tif)
+            in the path.
         column: Name of the column of interest. If no attribute is specified,
             then an artificial attribute is created representing the presence
             or absence of the geometries of this file for each cell of the CBA
@@ -88,10 +90,8 @@ def cell_based_association(
             raise InvalidColumnException("Targeted column not found in the GeoDataFrame.")
 
     for i, subset in enumerate(subset_target_attribute_values):
-        if subset is not None:
-            for value in subset:
-                if value not in geodata[i][column[i]].unique():
-                    raise InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
+        if subset is not None and not all(value in geodata[i][column[i]].tolist() for value in subset):
+            raise InvalidParameterValueException("Subset of value(s) not found in the targeted column.")
 
     # Computation
     for i, data in enumerate(geodata):
@@ -528,14 +528,14 @@ def _to_csv(cba: gpd.GeoDataFrame, output_path: str) -> None:
 
 
 @beartype
-def _to_raster(cba: gpd.GeoDataFrame, output_path: str, nan_val: int = -9999) -> None:
+def _to_raster(cba: gpd.GeoDataFrame, output_path: Union[str, PathLike], nan_val: int = -9999) -> None:
     """Intermediate utility.
 
     Saves the object as a raster TIFF file.
 
     Args:
         cba: CBA matrix to save.
-        output_path: Name of the saved file.
+        output_path: Name of the saved file, include file extension (.tif).
         nan_val: values taken by cells with no values in them (outside the study
         area).
 
@@ -579,7 +579,7 @@ def _to_raster(cba: gpd.GeoDataFrame, output_path: str, nan_val: int = -9999) ->
     transform = rasterio.transform.from_bounds(min_x, min_y, max_x, max_y, width=width, height=height)
 
     with rasterio.open(
-        output_path + ".tif",
+        output_path,
         mode="w",
         driver="GTiff",
         height=height,

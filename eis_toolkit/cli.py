@@ -199,6 +199,53 @@ class NodataHandling(str, Enum):
     remove = "remove"
 
 
+class MLPActivationFunctions(str, Enum):
+    """MLP activation functions."""
+
+    relu = "relu"
+    linear = "linear"
+    sigmoid = "sigmoid"
+    tanh = "tanh"
+
+
+class MLPClassifierLastActivations(str, Enum):
+    """MLP classifier last activation functions."""
+
+    sigmoid = "sigmoid"
+    softmax = "softmax"
+
+
+# class MLPRegressorLastActivations(str, Enum):
+#     """MLP regressor last activation functions."""
+
+#     linear = "linear"
+
+
+class MLPOptimizers(str, Enum):
+    """MLP optimizers."""
+
+    adam = "adam"
+    adagrad = "adagrad"
+    rmsprop = "rmsprop"
+    sdg = "sdg"
+
+
+class MLPClassifierLossFunctions(str, Enum):
+    """MLP classifier loss functions."""
+
+    binary_crossentropy = "binary_crossentropy"
+    categorical_crossentropy = "categorical_crossentropy"
+
+
+class MLPRegressorLossFunctions(str, Enum):
+    """MLP regressor loss functions."""
+
+    mse = "mse"
+    mae = "mae"
+    hinge = "hinge"
+    huber = "huber"
+
+
 class FocalFilterMethod(str, Enum):
     """Focal filter methods."""
 
@@ -259,6 +306,30 @@ class ThresholdCriteria(str, Enum):
     higher = "higher"
     in_between = "in_between"
     outside = "outside"
+
+
+class MaskingMode(str, Enum):
+    """Masking modes for raster unification."""
+
+    extents = "extents"
+    full = "full"
+    none = "none"
+
+
+class KerasClassifierMetrics(str, Enum):
+    """Metrics available for Keras classifier models."""
+
+    accuracy = "accuracy"
+    precision = "precision"
+    recall = "recall"
+    categorical_crossentropy = "categorical_crossentropy"
+
+
+class KerasRegressorMetrics(str, Enum):
+    """Metrics available for Keras regressor models."""
+
+    mse = "mse"
+    mae = "mae"
 
 
 INPUT_FILE_OPTION = Annotated[
@@ -331,7 +402,6 @@ def normality_test_raster_cli(input_raster: INPUT_FILE_OPTION, bands: Optional[L
     with rasterio.open(input_raster) as raster:
         data = raster.read()
         typer.echo("Progress: 25%")
-        print(bands)
         if len(bands) == 0:
             bands = None
         results_dict = normality_test_array(data=data, bands=bands, nodata_value=raster.nodata)
@@ -340,6 +410,7 @@ def normality_test_raster_cli(input_raster: INPUT_FILE_OPTION, bands: Optional[L
 
     json_str = json.dumps(results_dict)
     typer.echo("Progress: 100%")
+
     typer.echo(f"Results: {json_str}")
     typer.echo("Normality test (raster) completed")
 
@@ -361,6 +432,7 @@ def normality_test_vector_cli(input_vector: INPUT_FILE_OPTION, columns: Optional
 
     json_str = json.dumps(results_dict)
     typer.echo("Progress: 100%")
+
     typer.echo(f"Results: {json_str}")
     typer.echo("Normality test (vector) completed")
 
@@ -386,6 +458,7 @@ def chi_square_test_cli(
 
     json_str = json.dumps(results_dict)
     typer.echo("Progress: 100%")
+
     typer.echo(f"Results: {json_str}")
     typer.echo("Chi-square test completed")
 
@@ -665,6 +738,7 @@ def compute_pca_raster_cli(
         dst.write(pca_array)
 
     typer.echo("Progress: 100%")
+
     typer.echo(f"Results: {json_str}")
     typer.echo(f"PCA computation (raster) completed, output raster saved to {output_raster}.")
 
@@ -705,27 +779,28 @@ def compute_pca_vector_cli(
 
     pca_gdf.to_file(output_vector)
     typer.echo("Progress: 100%")
+
     typer.echo(f"Results: {json_str}")
     typer.echo(f"PCA computation (vector) completed, output vector saved to {output_vector}.")
 
 
 # DESCRIPTIVE STATISTICS (RASTER)
 @app.command()
-def descriptive_statistics_raster_cli(input_file: INPUT_FILE_OPTION):
+def descriptive_statistics_raster_cli(input_raster: INPUT_FILE_OPTION, band: int = 1):
     """Generate descriptive statistics from raster data."""
     from eis_toolkit.exploratory_analyses.descriptive_statistics import descriptive_statistics_raster
 
     typer.echo("Progress: 10%")
 
-    with rasterio.open(input_file) as raster:
+    with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        results_dict = descriptive_statistics_raster(raster)
+        results_dict = descriptive_statistics_raster(raster, band)
     typer.echo("Progress: 75%")
 
-    json_str = json.dumps(results_dict)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
-    typer.echo("Descriptive statistics (raster) completed")
+    typer.echo("Progress: 100% \n")
+
+    typer.echo(f"Results: {str(results_dict)}")
+    typer.echo("\nDescriptive statistics (raster) completed")
 
 
 # DESCRIPTIVE STATISTICS (VECTOR)
@@ -750,11 +825,10 @@ def descriptive_statistics_vector_cli(input_file: INPUT_FILE_OPTION, column: str
             raise Exception("Could not read input file as raster or dataframe")
     typer.echo("Progress: 75%")
 
-    json_str = json.dumps(results_dict)
     typer.echo("Progress: 100%")
 
-    typer.echo(f"Results: {json_str}")
-    typer.echo("Descriptive statistics (vector) completed")
+    typer.echo(f"Results: {str(results_dict)}")
+    typer.echo("\nDescriptive statistics (vector) completed")
 
 
 # LOCAL MORAN'S I
@@ -1339,7 +1413,7 @@ def unify_rasters_cli(
     base_raster: INPUT_FILE_OPTION,
     output_directory: OUTPUT_DIR_OPTION,
     resampling_method: Annotated[ResamplingMethods, typer.Option(case_sensitive=False)] = ResamplingMethods.nearest,
-    same_extent: bool = False,
+    masking: Annotated[MaskingMode, typer.Option(case_sensitive=False)] = MaskingMode.extents,
 ):
     """Unify rasters to match the base raster."""
     from eis_toolkit.raster_processing.unifying import unify_raster_grids
@@ -1350,18 +1424,19 @@ def unify_rasters_cli(
         to_unify = [rasterio.open(rstr) for rstr in rasters_to_unify]  # Open all rasters to be unified
         typer.echo("Progress: 25%")
 
+        masking_param = get_enum_values(masking)
         unified = unify_raster_grids(
             base_raster=raster,
             rasters_to_unify=to_unify,
             resampling_method=get_enum_values(resampling_method),
-            same_extent=same_extent,
+            masking=None if masking_param == "none" else masking_param,
         )
         [rstr.close() for rstr in to_unify]  # Close all rasters
     typer.echo("Progress: 75%")
 
     out_rasters_dict = {}
     for i, (out_image, out_meta) in enumerate(unified[1:]):  # Skip writing base raster
-        in_raster_name = os.path.splitext(os.path.split(rasters_to_unify[i - 1])[1])[0]
+        in_raster_name = os.path.splitext(os.path.split(rasters_to_unify[i])[1])[0]
         output_raster_name = f"{in_raster_name}_unified"
         output_raster_path = output_directory.joinpath(output_raster_name + ".tif")
         with rasterio.open(output_raster_path, "w", **out_meta) as dst:
@@ -1511,6 +1586,30 @@ def surface_derivatives_cli(
     typer.echo("Progress: 100%")
 
     typer.echo(f"Calculating first and/or second order surface attributes completed, writing raster to {output_raster}")
+
+
+@app.command()
+def mask_raster_cli(
+    input_raster: INPUT_FILE_OPTION,
+    base_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+):
+    """Mask input raster using the nodata locations from base raster."""
+    from eis_toolkit.raster_processing.masking import mask_raster
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        with rasterio.open(base_raster) as base_rstr:
+            typer.echo("Progress: 25%")
+            out_image, out_meta = mask_raster(raster=raster, base_raster=base_rstr)
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dest:
+        dest.write(out_image)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Raster masking completed, writing raster to {output_raster}")
 
 
 @app.command()
@@ -2019,7 +2118,42 @@ def distance_computation_cli(
 
 
 # CBA
-# TODO
+@app.command()
+def cell_based_association_cli(
+    input_vector: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    cell_size: int = typer.Option(),
+    column: Optional[str] = None,
+    subset_target_attribute_values: Optional[List[str]] = None,
+    add_name: Optional[str] = None,
+    add_buffer: Optional[float] = None,
+):
+    """Create a CBA matrix."""
+    from eis_toolkit.vector_processing.cell_based_association import cell_based_association
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    if subset_target_attribute_values is not None:
+        subset_target_attribute_values = [value.strip() for value in subset_target_attribute_values]
+
+    cell_based_association(
+        cell_size=cell_size,
+        geodata=[geodataframe],
+        output_path=output_raster,
+        column=column if column is None else [column],
+        subset_target_attribute_values=subset_target_attribute_values
+        if subset_target_attribute_values is None
+        else [subset_target_attribute_values],
+        add_name=add_name if add_name is None else [add_name],
+        add_buffer=add_buffer if add_buffer is None else [add_buffer],
+    )
+
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Cell based association completed, writing raster to {output_raster}.")
 
 
 # --- PREDICTION ---
@@ -2309,70 +2443,294 @@ def gradient_boosting_regressor_train_cli(
     typer.echo("Gradient boosting regressor training completed")
 
 
-# EVALUATE ML MODEL
+# MLP CLASSIFIER
 @app.command()
-def evaluate_trained_model_cli(
+def mlp_classifier_train_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
-    model_file: INPUT_FILE_OPTION,
-    output_raster: OUTPUT_FILE_OPTION,
-    validation_metrics: Annotated[List[str], typer.Option()],
+    output_file: OUTPUT_FILE_OPTION,
+    neurons: Annotated[List[int], typer.Option()],
+    activation: Annotated[MLPActivationFunctions, typer.Option(case_sensitive=False)] = MLPActivationFunctions.relu,
+    output_neurons: int = 1,
+    last_activation: Annotated[
+        MLPClassifierLastActivations, typer.Option(case_sensitive=False)
+    ] = MLPClassifierLastActivations.sigmoid,
+    epochs: int = 50,
+    batch_size: int = 32,
+    optimizer: Annotated[MLPOptimizers, typer.Option(case_sensitive=False)] = MLPOptimizers.adam,
+    learning_rate: float = 0.001,
+    loss_function: Annotated[
+        MLPClassifierLossFunctions, typer.Option(case_sensitive=False)
+    ] = MLPClassifierLossFunctions.binary_crossentropy,
+    dropout_rate: Optional[float] = None,
+    early_stopping: bool = True,
+    es_patience: int = 5,
+    validation_metrics: Annotated[List[KerasClassifierMetrics], typer.Option(case_sensitive=False)] = [
+        KerasClassifierMetrics.accuracy
+    ],
+    validation_split: float = 0.2,
+    random_state: Optional[int] = None,
 ):
-    """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
-    from eis_toolkit.prediction.machine_learning_general import (
-        evaluate_model,
-        load_model,
-        prepare_data_for_ml,
-        reshape_predictions,
-    )
+    """Train and validate an MLP classifier model using Keras."""
+    from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
+    from eis_toolkit.prediction.mlp import train_MLP_classifier
 
-    X, y, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters, target_labels)
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
 
     typer.echo("Progress: 30%")
 
-    model = load_model(model_file)
-    predictions, metrics_dict = evaluate_model(X, y, model, validation_metrics)
-    predictions_reshaped = reshape_predictions(
-        predictions, reference_profile["height"], reference_profile["width"], nodata_mask
+    # Train (and score) the model
+    model, metrics_dict = train_MLP_classifier(
+        X=X,
+        y=y,
+        neurons=neurons,
+        activation=get_enum_values(activation),
+        output_neurons=output_neurons,
+        last_activation=get_enum_values(last_activation),
+        epochs=epochs,
+        batch_size=batch_size,
+        optimizer=get_enum_values(optimizer),
+        learning_rate=learning_rate,
+        loss_function=get_enum_values(loss_function),
+        dropout_rate=dropout_rate,
+        early_stopping=early_stopping,
+        es_patience=es_patience,
+        metrics=get_enum_values(validation_metrics),
+        validation_split=validation_split,
+        random_state=random_state,
     )
 
     typer.echo("Progress: 80%")
 
+    save_model(model, output_file)
+
+    typer.echo("Progress: 90%")
+
     json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("MLP classifier training completed.")
+
+
+# MLP REGRESSOR
+@app.command()
+def mlp_regressor_train_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    neurons: Annotated[List[int], typer.Option()],
+    activation: Annotated[MLPActivationFunctions, typer.Option(case_sensitive=False)] = MLPActivationFunctions.relu,
+    output_neurons: int = 1,
+    epochs: int = 50,
+    batch_size: int = 32,
+    optimizer: Annotated[MLPOptimizers, typer.Option(case_sensitive=False)] = MLPOptimizers.adam,
+    learning_rate: float = 0.001,
+    loss_function: Annotated[
+        MLPRegressorLossFunctions, typer.Option(case_sensitive=False)
+    ] = MLPRegressorLossFunctions.mse,
+    dropout_rate: Optional[float] = None,
+    early_stopping: bool = True,
+    es_patience: int = 5,
+    validation_metrics: Annotated[List[KerasRegressorMetrics], typer.Option(case_sensitive=False)] = [
+        KerasRegressorMetrics.mse
+    ],
+    validation_split: float = 0.2,
+    random_state: Optional[int] = None,
+):
+    """Train and validate an MLP regressor model using Keras."""
+    from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
+    from eis_toolkit.prediction.mlp import train_MLP_regressor
+
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+
+    typer.echo("Progress: 30%")
+
+    # Train (and score) the model
+    model, metrics_dict = train_MLP_regressor(
+        X=X,
+        y=y,
+        neurons=neurons,
+        activation=get_enum_values(activation),
+        output_neurons=output_neurons,
+        last_activation="linear",
+        epochs=epochs,
+        batch_size=batch_size,
+        optimizer=get_enum_values(optimizer),
+        learning_rate=learning_rate,
+        loss_function=get_enum_values(loss_function),
+        dropout_rate=dropout_rate,
+        early_stopping=early_stopping,
+        es_patience=es_patience,
+        metrics=get_enum_values(validation_metrics),
+        validation_split=validation_split,
+        random_state=random_state,
+    )
+
+    typer.echo("Progress: 80%")
+
+    save_model(model, output_file)
+
+    typer.echo("Progress: 90%")
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100%")
+    typer.echo(f"Results: {json_str}")
+
+    typer.echo("MLP regressor training completed.")
+
+
+# TEST CLASSIFIER ML MODEL
+@app.command()
+def classifier_test_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: INPUT_FILE_OPTION,
+    model_file: INPUT_FILE_OPTION,
+    output_raster_probability: OUTPUT_FILE_OPTION,
+    output_raster_classified: OUTPUT_FILE_OPTION,
+    classification_threshold: float = 0.5,
+    test_metrics: Annotated[List[ClassifierMetrics], typer.Option(case_sensitive=False)] = [ClassifierMetrics.accuracy],
+):
+    """Test trained machine learning classifier model by predicting and scoring."""
+    from eis_toolkit.evaluation.scoring import score_predictions
+    from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml, reshape_predictions
+    from eis_toolkit.prediction.machine_learning_predict import predict_classifier
+
+    X, y, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters, target_labels)
+    typer.echo("Progress: 30%")
+
+    model = load_model(model_file)
+    predictions, probabilities = predict_classifier(X, model, classification_threshold, True)
+    probabilities_reshaped = reshape_predictions(
+        probabilities, reference_profile["height"], reference_profile["width"], nodata_mask
+    )
+    predictions_reshaped = reshape_predictions(
+        predictions, reference_profile["height"], reference_profile["width"], nodata_mask
+    )
+
+    metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics), decimals=3)
+    typer.echo("Progress: 80%")
 
     out_profile = reference_profile.copy()
-    out_profile.update({"count": 1, "dtype": predictions_reshaped.dtype})
+    out_profile.update({"count": 1, "dtype": np.float32})
+
+    with rasterio.open(output_raster_probability, "w", **out_profile) as dst:
+        dst.write(probabilities_reshaped, 1)
+    with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
+        dst.write(predictions_reshaped, 1)
+
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100% \n")
+
+    typer.echo(f"Results: {json_str}")
+    typer.echo(
+        (
+            "Testing classifier model completed, writing rasters to "
+            f"{output_raster_probability} and {output_raster_classified}."
+        )
+    )
+
+
+# TEST REGRESSOR ML MODEL
+@app.command()
+def regressor_test_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: INPUT_FILE_OPTION,
+    model_file: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    test_metrics: Annotated[List[RegressorMetrics], typer.Option(case_sensitive=False)] = [RegressorMetrics.mse],
+):
+    """Test trained machine learning regressor model by predicting and scoring."""
+    from eis_toolkit.evaluation.scoring import score_predictions
+    from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml, reshape_predictions
+    from eis_toolkit.prediction.machine_learning_predict import predict_regressor
+
+    X, y, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters, target_labels)
+    typer.echo("Progress: 30%")
+
+    model = load_model(model_file)
+    predictions = predict_regressor(X, model)
+    predictions_reshaped = reshape_predictions(
+        predictions, reference_profile["height"], reference_profile["width"], nodata_mask
+    )
+
+    metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics), decimals=3)
+    typer.echo("Progress: 80%")
+
+    out_profile = reference_profile.copy()
+    out_profile.update({"count": 1, "dtype": np.float32})
 
     with rasterio.open(output_raster, "w", **out_profile) as dst:
         dst.write(predictions_reshaped, 1)
 
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
+    json_str = json.dumps(metrics_dict)
+    typer.echo("Progress: 100% \n")
 
-    typer.echo("Evaluating trained model completed")
+    typer.echo(f"Results: {json_str}")
+    typer.echo(f"Testing regressor model completed, writing raster to {output_raster}.")
 
 
 # PREDICT WITH TRAINED ML MODEL
 @app.command()
-def predict_with_trained_model_cli(
+def classifier_predict_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     model_file: INPUT_FILE_OPTION,
-    output_raster: OUTPUT_FILE_OPTION,
+    output_raster_probability: OUTPUT_FILE_OPTION,
+    output_raster_classified: OUTPUT_FILE_OPTION,
+    classification_threshold: float = 0.5,
 ):
-    """Train and optionally validate a Gradient boosting regressor model using Sklearn."""
-    from eis_toolkit.prediction.machine_learning_general import (
-        load_model,
-        predict,
-        prepare_data_for_ml,
-        reshape_predictions,
-    )
+    """Predict with a trained machine learning classifier model."""
+    from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml, reshape_predictions
+    from eis_toolkit.prediction.machine_learning_predict import predict_classifier
 
     X, _, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters)
 
     typer.echo("Progress: 30%")
 
     model = load_model(model_file)
-    predictions = predict(X, model)
+    predictions, probabilities = predict_classifier(X, model, classification_threshold, True)
+    probabilities_reshaped = reshape_predictions(
+        probabilities, reference_profile["height"], reference_profile["width"], nodata_mask
+    )
+    predictions_reshaped = reshape_predictions(
+        predictions, reference_profile["height"], reference_profile["width"], nodata_mask
+    )
+    typer.echo("Progress: 80%")
+
+    out_profile = reference_profile.copy()
+    out_profile.update({"count": 1, "dtype": np.float32})
+
+    with rasterio.open(output_raster_probability, "w", **out_profile) as dst:
+        dst.write(probabilities_reshaped, 1)
+    with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
+        dst.write(predictions_reshaped, 1)
+
+    typer.echo("Progress: 100%")
+    typer.echo(
+        (
+            "Predicting with classifier model completed, writing rasters to "
+            f"{output_raster_probability} and {output_raster_classified}."
+        )
+    )
+
+
+# PREDICT WITH TRAINED ML MODEL
+@app.command()
+def regressor_predict_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    model_file: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+):
+    """Predict with a trained machine learning regressor model."""
+    from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml, reshape_predictions
+    from eis_toolkit.prediction.machine_learning_predict import predict_regressor
+
+    X, _, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters)
+
+    typer.echo("Progress: 30%")
+
+    model = load_model(model_file)
+    predictions = predict_regressor(X, model)
     predictions_reshaped = reshape_predictions(
         predictions, reference_profile["height"], reference_profile["width"], nodata_mask
     )
@@ -2380,13 +2738,13 @@ def predict_with_trained_model_cli(
     typer.echo("Progress: 80%")
 
     out_profile = reference_profile.copy()
-    out_profile.update({"count": 1, "dtype": predictions_reshaped.dtype})
+    out_profile.update({"count": 1, "dtype": np.float32})
 
     with rasterio.open(output_raster, "w", **out_profile) as dst:
         dst.write(predictions_reshaped, 1)
 
     typer.echo("Progress: 100%")
-    typer.echo("Predicting completed")
+    typer.echo(f"Predicting with regressor model completed, writing raster to {output_raster}.")
 
 
 # FUZZY OVERLAYS
@@ -2967,7 +3325,270 @@ def winsorize_transform_cli(
 
 
 # ---EVALUATION ---
-# TODO
+
+
+@app.command()
+def summarize_probability_metrics_cli(true_labels: INPUT_FILE_OPTION, probabilities: INPUT_FILE_OPTION):
+    """
+    Generate a comprehensive report of various evaluation metrics for classification probabilities.
+
+    The output includes ROC AUC, log loss, average precision and Brier score loss.
+    """
+    from eis_toolkit.evaluation.classification_probability_evaluation import summarize_probability_metrics
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
+    typer.echo("Progress: 25%")
+
+    results_dict = summarize_probability_metrics(y_true=y_true, y_prob=y_prob, decimals=3)
+
+    typer.echo("Progress: 75%")
+
+    typer.echo("Progress: 100% \n")
+
+    typer.echo(f"Results: {str(results_dict)}")
+    typer.echo("\nGenerating probability metrics summary completed.")
+
+
+@app.command()
+def summarize_label_metrics_binary_cli(true_labels: INPUT_FILE_OPTION, predictions: INPUT_FILE_OPTION):
+    """
+    Generate a comprehensive report of various evaluation metrics for binary classification results.
+
+    The output includes accuracy, precision, recall, F1 scores and confusion matrix elements
+    (true negatives, false positives, false negatives, true positives).
+    """
+    from eis_toolkit.evaluation.classification_label_evaluation import summarize_label_metrics_binary
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
+    typer.echo("Progress: 25%")
+
+    results_dict = summarize_label_metrics_binary(y_true=y_true, y_pred=y_pred, decimals=3)
+    typer.echo("Progress: 75%")
+
+    typer.echo("Progress: 100% \n")
+
+    typer.echo(f"Results: {str(results_dict)}")
+    typer.echo("\nGenerating prediction label metrics summary completed.")
+
+
+@app.command()
+def plot_roc_curve_cli(
+    true_labels: INPUT_FILE_OPTION,
+    probabilities: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    show_plot: bool = False,
+    save_dpi: Optional[int] = None,
+):
+    """
+    Plot ROC (receiver operating characteristic) curve.
+
+    ROC curve is a binary classification multi-threshold metric. The ideal performance corner of the plot
+    is top-left. AUC of the ROC curve summarizes model performance across different classification thresholds.
+    """
+    import matplotlib.pyplot as plt
+
+    from eis_toolkit.evaluation.classification_probability_evaluation import plot_roc_curve
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
+    typer.echo("Progress: 25%")
+
+    _ = plot_roc_curve(y_true=y_true, y_prob=y_prob)
+    typer.echo("Progress: 75%")
+    if show_plot:
+        plt.show()
+
+    if output_file is not None:
+        dpi = "figure" if save_dpi is None else save_dpi
+        plt.savefig(output_file, dpi=dpi)
+        echo_str_end = f", output figure saved to {output_file}."
+    typer.echo("Progress: 100% \n")
+
+    typer.echo("ROC curve plot completed" + echo_str_end)
+
+
+@app.command()
+def plot_det_curve_cli(
+    true_labels: INPUT_FILE_OPTION,
+    probabilities: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    show_plot: bool = False,
+    save_dpi: Optional[int] = None,
+):
+    """
+    Plot DET (detection error tradeoff) curve.
+
+    DET curve is a binary classification multi-threshold metric. DET curves are a variation of ROC curves where
+    False Negative Rate is plotted on the y-axis instead of True Positive Rate. The ideal performance corner of
+    the plot is bottom-left. When comparing the performance of different models, DET curves can be
+    slightly easier to assess visually than ROC curves.
+    """
+    import matplotlib.pyplot as plt
+
+    from eis_toolkit.evaluation.classification_probability_evaluation import plot_det_curve
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
+    typer.echo("Progress: 25%")
+
+    _ = plot_det_curve(y_true=y_true, y_prob=y_prob)
+    typer.echo("Progress: 75%")
+    if show_plot:
+        plt.show()
+
+    if output_file is not None:
+        dpi = "figure" if save_dpi is None else save_dpi
+        plt.savefig(output_file, dpi=dpi)
+        echo_str_end = f", output figure saved to {output_file}."
+    typer.echo("Progress: 100% \n")
+
+    typer.echo("DET curve plot completed" + echo_str_end)
+
+
+@app.command()
+def plot_precision_recall_curve_cli(
+    true_labels: INPUT_FILE_OPTION,
+    probabilities: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    show_plot: bool = False,
+    save_dpi: Optional[int] = None,
+):
+    """
+    Plot precision-recall curve.
+
+    Precision-recall curve is a binary classification multi-threshold metric. Precision-recall curve shows
+    the tradeoff between precision and recall for different classification thresholds.
+    It can be a useful measure of success when classes are imbalanced.
+    """
+    import matplotlib.pyplot as plt
+
+    from eis_toolkit.evaluation.classification_probability_evaluation import plot_precision_recall_curve
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
+    typer.echo("Progress: 25%")
+
+    _ = plot_precision_recall_curve(y_true=y_true, y_prob=y_prob)
+    typer.echo("Progress: 75%")
+    if show_plot:
+        plt.show()
+
+    if output_file is not None:
+        dpi = "figure" if save_dpi is None else save_dpi
+        plt.savefig(output_file, dpi=dpi)
+        echo_str_end = f", output figure saved to {output_file}."
+    typer.echo("Progress: 100% \n")
+
+    typer.echo("Precision-Recall curve plot completed" + echo_str_end)
+
+
+@app.command()
+def plot_calibration_curve_cli(
+    true_labels: INPUT_FILE_OPTION,
+    probabilities: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    n_bins: int = 5,
+    show_plot: bool = False,
+    save_dpi: Optional[int] = None,
+):
+    """
+    Plot calibration curve (aka realibity diagram).
+
+    Calibration curve has the frequency of the positive labels on the y-axis and the predicted probability on
+    the x-axis. Generally, the close the calibration curve is to line x=y, the better the model is calibrated.
+    """
+    import matplotlib.pyplot as plt
+
+    from eis_toolkit.evaluation.classification_probability_evaluation import plot_calibration_curve
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
+    typer.echo("Progress: 25%")
+
+    _ = plot_calibration_curve(y_true=y_true, y_prob=y_prob, n_bins=n_bins)
+    typer.echo("Progress: 75%")
+    if show_plot:
+        plt.show()
+
+    if output_file is not None:
+        dpi = "figure" if save_dpi is None else save_dpi
+        plt.savefig(output_file, dpi=dpi)
+        echo_str_end = f", output figure saved to {output_file}."
+    typer.echo("Progress: 100% \n")
+
+    typer.echo("Calibration curve plot completed" + echo_str_end)
+
+
+@app.command()
+def plot_confusion_matrix_cli(
+    true_labels: INPUT_FILE_OPTION,
+    predictions: INPUT_FILE_OPTION,
+    output_file: OUTPUT_FILE_OPTION,
+    show_plot: bool = False,
+    save_dpi: Optional[int] = None,
+):
+    """Plot confusion matrix to visualize classification results."""
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import confusion_matrix
+
+    from eis_toolkit.evaluation.plot_confusion_matrix import plot_confusion_matrix
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
+    typer.echo("Progress: 25%")
+
+    matrix = confusion_matrix(y_true, y_pred)
+    _ = plot_confusion_matrix(confusion_matrix=matrix)
+    typer.echo("Progress: 75%")
+    if show_plot:
+        plt.show()
+
+    if output_file is not None:
+        dpi = "figure" if save_dpi is None else save_dpi
+        plt.savefig(output_file, dpi=dpi)
+        echo_str_end = f", output figure saved to {output_file}."
+    typer.echo("Progress: 100% \n")
+
+    typer.echo("Confusion matrix plot completed" + echo_str_end)
+
+
+@app.command()
+def score_predictions_cli(
+    true_labels: INPUT_FILE_OPTION,
+    predictions: INPUT_FILE_OPTION,
+    metrics: Annotated[List[str], typer.Option()],
+    decimals: Optional[int] = None,
+):
+    """Score predictions."""
+    from eis_toolkit.evaluation.scoring import score_predictions
+    from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
+
+    typer.echo("Progress: 10%")
+
+    (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
+    typer.echo("Progress: 25%")
+
+    outputs = score_predictions(y_true, y_pred, metrics, decimals)
+    typer.echo("Progress: 100% \n")
+
+    typer.echo(f"Results: {str(outputs)}")
+    typer.echo("\nScoring predictions completed.")
 
 
 # --- UTILITIES ---

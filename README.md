@@ -48,16 +48,16 @@ pip install eis_toolkit
 
 ```console
 conda install -c conda-forge eis_toolkit
+# On Windows, tensorflow must be installed from the anaconda channel
+# Consequently, channel priority must be flexible, which can be explicitly
+# done using --no-channel-priority
+conda install -c conda-forge eis_toolkit --no-channel-priority
 ```
 
-You can find the latest release of EIS Toolkit also in the [releases page](https://github.com/GispoCoding/eis_toolkit/releases) of this GitHub repository as a Python wheel. Just download the wheel and install with pip
-
-```console
-pip install eis_toolkit-0.4.0-py3-none-any.whl
-```
+A Python wheel can be downloaded also from the [releases page](https://github.com/GispoCoding/eis_toolkit/releases) of this GitHub repository.
 
 > [!TIP]
-> GDAL installation can cause issues on various platforms, especially on Windows. If you have trouble installing EIS Toolkit in a venv due to GDAL, download a compatible GDAL wheel (for example from [this repository](https://github.com/cgohlke/geospatial-wheels/releases)), install it first, and then attempt to install EIS Toolkit again.
+> GDAL needs to be installed separately on Windows when using pip / PyPI. If you have trouble installing EIS Toolkit due to GDAL, you can download a compatible GDAL wheel (for example from [this repository](https://github.com/cgohlke/geospatial-wheels/releases)), install it first, and then attempt to install EIS Toolkit again.
 
 
 ## Usage
@@ -71,7 +71,7 @@ from eis_toolkit.raster_processing.reprojecting import reproject_raster
 from eis_toolkit.exploratory_analyses.pca import compute_pca
 ```
 
-You can find several Jupyter notebooks in this repostiory that demonstrate how tools of EIS Toolkit can be used. The documentation of EIS Toolkit can be read [here](https://gispocoding.github.io/eis_toolkit/).
+The documentation of EIS Toolkit can be read [here](https://gispocoding.github.io/eis_toolkit/). You can find several Jupyter notebooks in this repostiory that demonstrate how tools of EIS Toolkit can be used. 
 
 
 ### EIS QGIS Plugin
@@ -80,23 +80,31 @@ For those that prefer using tools of EIS Toolkit via a graphical user interface,
 The plugin is developed by the same core team that develops EIS Toolkit.
 
 ### CLI
-EIS Toolkit includes a [Typer](https://typer.tiangolo.com/) command-line interface that serves as a common interface for integrating the toolkit with external applications, such as QGIS. However, it can be used directly too. To use the CLI, simply use the command
+EIS Toolkit includes a [Typer](https://typer.tiangolo.com/) command-line interface that serves as a common interface for integrating the toolkit with external applications, such as QGIS. The CLI can be used directly too, for example
+
 ```console
-eis
+eis resample-raster-cli --input-raster path/to/raster.tif --output-raster path/to/output.tif --resolution 50 --resampling-method bilinear
 ```
 
-or
+For general help, use
 
 ```console
 eis --help
 ```
 
-to get started. However, please note that the CLI has been primarily designed to communicate with external programs and may feel clunky in direct use.
+or help for a tool
+
+```console
+eis <tool-name> --help
+```
+
+> [!NOTE] 
+> Please note that the CLI has been primarily designed to communicate with external programs and may be clunky in direct use.
 
 ## Roadmap
 
 - Milestone 1: **Beta release 0.1** (November 2023). The toolkit should have the basic funtionalities required for a full MPM workflow. Official testing phase begins. The plugin will be still under active development.
-- Milestone 2: **Release 1.0** (April 2024). All features should be incorporated at this time and the toolkit useful for actual MPM work. Testing will continue, potential bugs will be fixed and the user experience refined.
+- Milestone 2: **Release 1.0** (May 2024). Most features should be incorporated at this time and the toolkit useful for actual MPM work. Testing will continue, more advanced methods added and the user experience refined.
 
 ## Contributing
 
