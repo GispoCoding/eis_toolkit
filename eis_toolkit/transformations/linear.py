@@ -5,12 +5,8 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Optional, Sequence, Tuple
 
-from eis_toolkit.exceptions import (
-    InvalidParameterValueException,
-    InvalidRasterBandException,
-    NonMatchingParameterLengthsException,
-)
-from eis_toolkit.utilities.checks.parameter import check_minmax_position, check_parameter_length
+from eis_toolkit.exceptions import InvalidRasterBandException, NonMatchingParameterLengthsException
+from eis_toolkit.utilities.checks.parameter import check_parameter_length
 from eis_toolkit.utilities.checks.raster import check_raster_bands
 from eis_toolkit.utilities.miscellaneous import (
     cast_array_to_float,
@@ -165,10 +161,6 @@ def min_max_scaling(  # type: ignore[no-any-unimported]
 
     if check_parameter_length(bands, new_range) is False:
         raise NonMatchingParameterLengthsException("Invalid new_range length")
-
-    for item in new_range:
-        if not check_minmax_position(item):
-            raise InvalidParameterValueException(f"Invalid min-max values provided: {item}")
 
     expanded_args = expand_and_zip(bands, new_range)
     new_range = [element[1] for element in expanded_args]
