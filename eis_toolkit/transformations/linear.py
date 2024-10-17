@@ -90,12 +90,14 @@ def z_score_normalization(  # type: ignore[no-any-unimported]
     for i in range(0, len(bands)):
         band_array = raster.read(bands[i])
         band_array = cast_array_to_float(band_array, cast_int=True)
-        band_array = replace_values(band_array, values_to_replace=[nodata, np.inf], replace_value=np.nan)
+        if nodata:
+            band_array = replace_values(band_array, values_to_replace=[nodata, np.inf], replace_value=np.nan)
 
         band_array, mean_array, sd_array = _z_score_normalization(band_array.astype(np.float64))
 
         band_array = truncate_decimal_places(band_array, decimal_places=out_decimals)
-        band_array = nan_to_nodata(band_array, nodata_value=nodata)
+        if nodata:
+            band_array = nan_to_nodata(band_array, nodata_value=nodata)
         band_array = cast_array_to_float(band_array, scalar=nodata, cast_float=True)
 
         band_array = np.expand_dims(band_array, axis=0)
@@ -177,12 +179,14 @@ def min_max_scaling(  # type: ignore[no-any-unimported]
     for i in range(0, len(bands)):
         band_array = raster.read(bands[i])
         band_array = cast_array_to_float(band_array, cast_int=True)
-        band_array = replace_values(band_array, values_to_replace=[nodata, np.inf], replace_value=np.nan)
+        if nodata:
+            band_array = replace_values(band_array, values_to_replace=[nodata, np.inf], replace_value=np.nan)
 
         band_array = _min_max_scaling(band_array.astype(np.float64), new_range=new_range[i])
 
         band_array = truncate_decimal_places(band_array, decimal_places=out_decimals)
-        band_array = nan_to_nodata(band_array, nodata_value=nodata)
+        if nodata:
+            band_array = nan_to_nodata(band_array, nodata_value=nodata)
         band_array = cast_array_to_float(band_array, scalar=nodata, cast_float=True)
 
         band_array = np.expand_dims(band_array, axis=0)
