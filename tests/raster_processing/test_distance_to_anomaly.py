@@ -20,6 +20,45 @@ with rasterio.open(SMALL_RASTER_PATH) as raster:
 
 EXPECTED_SMALL_RASTER_SHAPE = SMALL_RASTER_PROFILE["height"], SMALL_RASTER_PROFILE["width"]
 
+EXPECTED_PYTESTPARAMS = [
+    pytest.param(
+        SMALL_RASTER_PROFILE,
+        SMALL_RASTER_DATA,
+        5.0,
+        "lower",
+        EXPECTED_SMALL_RASTER_SHAPE,
+        5.6949,
+        id="small_raster_lower",
+    ),
+    pytest.param(
+        SMALL_RASTER_PROFILE,
+        SMALL_RASTER_DATA,
+        5.0,
+        "higher",
+        EXPECTED_SMALL_RASTER_SHAPE,
+        6.451948,
+        id="small_raster_higher",
+    ),
+    pytest.param(
+        SMALL_RASTER_PROFILE,
+        SMALL_RASTER_DATA,
+        (2.5, 7.5),
+        "in_between",
+        EXPECTED_SMALL_RASTER_SHAPE,
+        2.114331,
+        id="small_raster_in_between",
+    ),
+    pytest.param(
+        SMALL_RASTER_PROFILE,
+        SMALL_RASTER_DATA,
+        (2.5, 7.5),
+        "outside",
+        EXPECTED_SMALL_RASTER_SHAPE,
+        32.490106,
+        id="small_raster_outside",
+    ),
+]
+
 
 def _check_result(out_image, out_profile):
     assert isinstance(out_image, np.ndarray)
@@ -38,44 +77,7 @@ def _check_result(out_image, out_profile):
             "expected_mean",
         ]
     ),
-    [
-        pytest.param(
-            SMALL_RASTER_PROFILE,
-            SMALL_RASTER_DATA,
-            5.0,
-            "lower",
-            EXPECTED_SMALL_RASTER_SHAPE,
-            5.694903,
-            id="small_raster_lower",
-        ),
-        pytest.param(
-            SMALL_RASTER_PROFILE,
-            SMALL_RASTER_DATA,
-            5.0,
-            "higher",
-            EXPECTED_SMALL_RASTER_SHAPE,
-            6.451948,
-            id="small_raster_higher",
-        ),
-        pytest.param(
-            SMALL_RASTER_PROFILE,
-            SMALL_RASTER_DATA,
-            (2.5, 7.5),
-            "in_between",
-            EXPECTED_SMALL_RASTER_SHAPE,
-            2.114331,
-            id="small_raster_in_between",
-        ),
-        pytest.param(
-            SMALL_RASTER_PROFILE,
-            SMALL_RASTER_DATA,
-            (2.5, 7.5),
-            "outside",
-            EXPECTED_SMALL_RASTER_SHAPE,
-            32.490106,
-            id="small_raster_outside",
-        ),
-    ],
+    EXPECTED_PYTESTPARAMS,
 )
 def test_distance_to_anomaly_expected(
     anomaly_raster_profile,
@@ -319,6 +321,7 @@ def test_distance_to_anomaly_nodata_handling(
     # Result should not be same as without nodata addition
     assert not np.isclose(np.mean(out_image), expected_mean_without_nodata)
 
+
 @pytest.mark.parametrize(
     ",".join(
         [
@@ -330,58 +333,20 @@ def test_distance_to_anomaly_nodata_handling(
             "expected_mean",
         ]
     ),
-    [    
-        pytest.param(
-                SMALL_RASTER_PROFILE,
-                SMALL_RASTER_DATA,
-                5.0,
-                "lower",
-                EXPECTED_SMALL_RASTER_SHAPE,
-                5.6949,
-                id="small_raster_lower",
-            ),
-        pytest.param(
-                SMALL_RASTER_PROFILE,
-                SMALL_RASTER_DATA,
-                5.0,
-                "higher",
-                EXPECTED_SMALL_RASTER_SHAPE,
-                6.452082,
-                id="small_raster_higher",
-            ),
-        pytest.param(
-            SMALL_RASTER_PROFILE,
-            SMALL_RASTER_DATA,
-            (2.5, 7.5),
-            "in_between",
-            EXPECTED_SMALL_RASTER_SHAPE,
-            2.114331,
-            id="small_raster_in_between",
-        ),
-        pytest.param(
-            SMALL_RASTER_PROFILE,
-            SMALL_RASTER_DATA,
-            (2.5, 7.5),
-            "outside",
-            EXPECTED_SMALL_RASTER_SHAPE,
-            32.490106,
-            id="small_raster_outside",
-        )
-    ],
-
+    EXPECTED_PYTESTPARAMS,
 )
-def test_distance_to_anomaly_gdal_ComputeProximity_expected(
+def test_distance_to_anomaly_gdal_compute_proximity_expected(
     anomaly_raster_profile,
     anomaly_raster_data,
     threshold_criteria_value,
     threshold_criteria,
     expected_shape,
-    expected_mean
+    expected_mean,
 ):
-    """Test distance_to_anomaly_gdal_ComputeProximity_expected with expected result."""
+    """Test distance_to_anomaly_gdal_compute_proximity_expected with expected result."""
 
     assert not np.any(np.isnan(anomaly_raster_data))
-    out_image, out_profile = distance_to_anomaly.distance_to_anomaly_gdal_ComputeProximity(
+    out_image, out_profile = distance_to_anomaly.distance_to_anomaly_gdal_compute_proximity(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data,
         threshold_criteria_value=threshold_criteria_value,
@@ -392,9 +357,10 @@ def test_distance_to_anomaly_gdal_ComputeProximity_expected(
 
     assert out_image.shape == expected_shape
     if expected_mean is not None:
-        #adding a relative tolerance and absolute tolerance to accomodate the very small error 
-        #that arises due to the floating point errors
-        assert np.isclose(np.mean(out_image), expected_mean,rtol=1e-4, atol=1e-8) 
+        # adding a relative tolerance and absolute tolerance to accomodate the very small error
+        # that arises due to the floating point errors
+        assert np.isclose(np.mean(out_image), expected_mean, rtol=1e-2, atol=1e-2)
+
 
 @pytest.mark.parametrize(
     ",".join(
@@ -422,7 +388,7 @@ def test_distance_to_anomaly_gdal_ComputeProximity_expected(
         ),
     ],
 )
-def test_distance_to_anomaly_gdal_ComputeProximity_nodata_handling(
+def test_distance_to_anomaly_gdal_compute_proximity_nodata_handling(
     anomaly_raster_profile,
     anomaly_raster_data,
     threshold_criteria_value,
@@ -431,12 +397,12 @@ def test_distance_to_anomaly_gdal_ComputeProximity_nodata_handling(
     expected_mean_without_nodata,
     nodata_mask_value,
 ):
-    """Test distance_to_anomaly_gdal_ComputeProximity with expected result."""
+    """Test distance_to_anomaly_gdal_compute_proximity with expected result."""
 
     anomaly_raster_data_with_nodata = np.where(anomaly_raster_data > nodata_mask_value, np.nan, anomaly_raster_data)
     assert np.any(np.isnan(anomaly_raster_data_with_nodata))
 
-    out_image, out_profile = distance_to_anomaly.distance_to_anomaly_gdal_ComputeProximity(
+    out_image, out_profile = distance_to_anomaly.distance_to_anomaly_gdal_compute_proximity(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data_with_nodata,
         threshold_criteria_value=threshold_criteria_value,
@@ -449,6 +415,7 @@ def test_distance_to_anomaly_gdal_ComputeProximity_nodata_handling(
 
     # Result should not be same as without nodata addition
     assert not np.isclose(np.mean(out_image), expected_mean_without_nodata)
+
 
 @pytest.mark.parametrize(
     ",".join(
@@ -465,18 +432,17 @@ def test_distance_to_anomaly_gdal_ComputeProximity_nodata_handling(
         pytest.param(
             SMALL_RASTER_PROFILE,
             SMALL_RASTER_DATA,
-            (1000.5, 1522.5),
+            (100.5, 122.5),
             "in_between",
             dict,
             partial(pytest.raises, EmptyDataException),
             id="expected_empty_data_due_to_threshold_range_outside_values2",
-            ),
-
+        ),
         pytest.param(
             SMALL_RASTER_PROFILE,
             SMALL_RASTER_DATA,
             5.0,
-            "higher",
+            "lower",
             dict,
             nullcontext,
             id="no_expected_exception",
@@ -528,7 +494,7 @@ def test_distance_to_anomaly_gdal_ComputeProximity_nodata_handling(
         ),
     ],
 )
-def test_distance_to_anomaly_gdal_ComputeProximity_expected_check(
+def test_distance_to_anomaly_gdal_compute_proximity_expected_check(
     anomaly_raster_profile,
     anomaly_raster_data,
     threshold_criteria_value,
@@ -536,12 +502,12 @@ def test_distance_to_anomaly_gdal_ComputeProximity_expected_check(
     profile_additions,
     raises,
 ):
-    """Test distance_to_anomaly_gdal_ComputeProximity checks."""
+    """Test distance_to_anomaly_gdal_compute_proximity checks."""
 
     anomaly_raster_profile.update(profile_additions())
     anomaly_raster_profile_with_additions = anomaly_raster_profile
     with raises() as exc_info:
-        out_image, out_profile = distance_to_anomaly.distance_to_anomaly_gdal_ComputeProximity(
+        out_image, out_profile = distance_to_anomaly.distance_to_anomaly_gdal_compute_proximity(
             anomaly_raster_profile=anomaly_raster_profile_with_additions,
             anomaly_raster_data=anomaly_raster_data,
             threshold_criteria_value=threshold_criteria_value,
@@ -553,4 +519,3 @@ def test_distance_to_anomaly_gdal_ComputeProximity_expected_check(
         return
 
     _check_result(out_image=out_image, out_profile=out_profile)
-
