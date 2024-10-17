@@ -129,13 +129,15 @@ def winsorize(  # type: ignore[no-any-unimported]
         inital_dtype = band_array.dtype
 
         band_array = cast_array_to_float(band_array, cast_int=True)
-        band_array = nodata_to_nan(band_array, nodata_value=nodata)
+        if nodata:
+            band_array = nodata_to_nan(band_array, nodata_value=nodata)
 
         band_array, calculated_lower, calculated_upper = _winsorize(
             band_array, percentiles=percentiles[i], inside=inside
         )
 
-        band_array = nan_to_nodata(band_array, nodata_value=nodata)
+        if nodata:
+            band_array = nan_to_nodata(band_array, nodata_value=nodata)
         band_array = cast_array_to_int(band_array, scalar=nodata, initial_dtype=inital_dtype)
 
         band_array = np.expand_dims(band_array, axis=0)

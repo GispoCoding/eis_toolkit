@@ -56,7 +56,8 @@ def binarize(  # type: ignore[no-any-unimported]
         NonMatchingParameterLengthsException: The input does not match the number of selected bands.
     """
     bands = list(range(1, raster.count + 1)) if bands is None else bands
-    nodata = cast_scalar_to_int(raster.nodata if nodata is None else nodata)
+    if nodata:
+        nodata = cast_scalar_to_int(raster.nodata if nodata is None else nodata)
 
     if check_raster_bands(raster, bands) is False:
         raise InvalidRasterBandException("Invalid band selection.")
@@ -73,11 +74,13 @@ def binarize(  # type: ignore[no-any-unimported]
         band_array = raster.read(bands[i])
         inital_dtype = band_array.dtype
 
-        band_mask = np.isin(band_array, nodata)
+        if nodata:
+            band_mask = np.isin(band_array, nodata)
         band_array = _binarize(band_array, threshold=thresholds[i])
-        band_array = np.where(band_mask, nodata, band_array)
+        if nodata:
+            band_array = np.where(band_mask, nodata, band_array)
 
-        if not check_dtype_for_int(nodata):
+        if not nodata or not check_dtype_for_int(nodata):
             band_array = band_array.astype(inital_dtype)
         else:
             band_array = band_array.astype(np.min_scalar_type(nodata))
