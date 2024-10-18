@@ -20,14 +20,13 @@ EXPECTED_SMALL_RASTER_SHAPE = raster_profile["height"], raster_profile["width"]
 
 
 @pytest.mark.parametrize(
-    "geodataframe,raster_profile,expected_shape,maximum_distance,scale,scaling_range",
+    "geodataframe,raster_profile,expected_shape,maximum_distance,scaling_range",
     [
         pytest.param(
             gdf,
             raster_profile,
             EXPECTED_SMALL_RASTER_SHAPE,
             25,
-            "linear",
             (1, 0),
             id="Inversion_and_scaling_between_1_and_0",
         ),
@@ -36,18 +35,17 @@ EXPECTED_SMALL_RASTER_SHAPE = raster_profile["height"], raster_profile["width"]
             raster_profile,
             EXPECTED_SMALL_RASTER_SHAPE,
             25,
-            "linear",
             (2, 1),
             id="Inversion_and_scaling_between_2_and_1",
         ),
     ],
 )
 def test_proximity_computation_inversion_with_expected_result(
-    geodataframe, raster_profile, expected_shape, maximum_distance, scale, scaling_range
+    geodataframe, raster_profile, expected_shape, maximum_distance, scaling_range
 ):
     """Tests if the enteries in the output matrix are between the minimum and maximum value."""
 
-    result = proximity_computation(geodataframe, raster_profile, maximum_distance, scale, scaling_range)
+    result = proximity_computation(geodataframe, raster_profile, maximum_distance, scaling_range)
 
     assert result.shape == expected_shape
     # Assert that all values in result within scaling_range
@@ -55,14 +53,13 @@ def test_proximity_computation_inversion_with_expected_result(
 
 
 @pytest.mark.parametrize(
-    "geodataframe,raster_profile,expected_shape,maximum_distance,scale,scaling_range",
+    "geodataframe,raster_profile,expected_shape,maximum_distance,scaling_range",
     [
         pytest.param(
             gdf,
             raster_profile,
             EXPECTED_SMALL_RASTER_SHAPE,
             25,
-            "linear",
             (0, 1),
             id="Scaling_between_0_and_1",
         ),
@@ -71,18 +68,17 @@ def test_proximity_computation_inversion_with_expected_result(
             raster_profile,
             EXPECTED_SMALL_RASTER_SHAPE,
             25,
-            "linear",
             (1, 2),
             id="Scaling_between_1_and_2",
         ),
     ],
 )
 def test_proximity_computation_with_expected_result(
-    geodataframe, raster_profile, expected_shape, maximum_distance, scale, scaling_range
+    geodataframe, raster_profile, expected_shape, maximum_distance, scaling_range
 ):
     """Tests if the enteries in the output matrix are between the minimum and maximum value."""
 
-    result = proximity_computation(geodataframe, raster_profile, maximum_distance, scale, scaling_range)
+    result = proximity_computation(geodataframe, raster_profile, maximum_distance, scaling_range)
 
     assert result.shape == expected_shape
     # Assert that all values in result within scaling_range
@@ -93,5 +89,5 @@ def test_proximity_computation_with_expected_error():
     """Tests if an exception is raised for a negative maximum distance."""
 
     with pytest.raises(NumericValueSignException, match="Expected max distance to be a positive number."):
-        result = proximity_computation(gdf, raster_profile, -25, "linear", (1, 0))
+        result = proximity_computation(gdf, raster_profile, -25, (1, 0))
         assert np.all((result >= 0) & (result <= 1)), "Scaling out of scaling_range"
