@@ -3,7 +3,7 @@ from numbers import Number
 import geopandas as gpd
 import numpy as np
 from beartype import beartype
-from beartype.typing import Literal, Optional, Tuple, Union
+from beartype.typing import Literal, Tuple, Union
 from rasterio import profiles
 
 from eis_toolkit.transformations.linear import _min_max_scaling
@@ -15,19 +15,18 @@ def proximity_computation(
     geodataframe: gpd.GeoDataFrame,
     raster_profile: Union[profiles.Profile, dict],
     maximum_distance: Number,
-    scaling_method: Literal["linear"],
-    scale_range: Optional[Tuple[Number, Number]] = None,
+    scaling_method: Literal["linear"] = "linear",
+    scale_range: Tuple[Number, Number] = (1, 0),
 ) -> np.ndarray:
-    """Compute proximity to the specified polygons based on the chosen scaling method.
+    """Compute proximity to the nearest geometries.
 
     Args:
-         geodataframe: The GeoDataFrame with geometries to determine distance to.
+         geodataframe: The GeoDataFrame with geometries to determine proximity to.
          raster_profile: The raster profile of the raster in which the distances
                          to the nearest geometry are determined.
-         max_distance: The maximum distance in the output array.
-         scaling_method: method of scaling
-                         linear: linear,
-         scaling_range: a tuple of maximum value and minimum value to scale the distances.
+         max_distance: The maximum distance in the output array beyond which proximity is considered 0.
+         scaling_method: Scaling method used to produce the proximity values. Defaults to 'linear'
+         scaling_range: Min and max values used for scaling the proximity values. Defaults to (1,0).
 
     Returns:
          A 2D numpy array with the scaled values.
@@ -37,8 +36,7 @@ def proximity_computation(
          EmptyDataFrameException: The input geodataframe is empty.
 
     """
-    if scaling_method == "linear":
-        out_matrix = _linear_proximity_computation(geodataframe, raster_profile, maximum_distance, scale_range)
+    out_matrix = _linear_proximity_computation(geodataframe, raster_profile, maximum_distance, scale_range)
 
     return out_matrix
 
@@ -50,12 +48,10 @@ def _linear_proximity_computation(
     maximum_distance: Number,
     scaling_range: Tuple[Number, Number],
 ) -> np.ndarray:
-    """Scales the distance values calculated by the distance_computation function between maximum and minimum.
-
-    Uses linear interpolation to calculate the distance from the polygon.
+    """Compute proximity to the nearest geometries.
 
     Args:
-         geodataframe: The GeoDataFrame with geometries to determine distance to.
+         geodataframe: The GeoDataFrame with geometries to determine proximity to.
          raster_profile: The raster profile of the raster in which the distances
                          to the nearest geometry are determined.
          max_distance: The maximum distance in the output array.
