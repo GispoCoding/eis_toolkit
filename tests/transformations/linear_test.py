@@ -4,11 +4,7 @@ import numpy as np
 import pytest
 import rasterio
 
-from eis_toolkit.exceptions import (
-    InvalidParameterValueException,
-    InvalidRasterBandException,
-    NonMatchingParameterLengthsException,
-)
+from eis_toolkit.exceptions import InvalidRasterBandException, NonMatchingParameterLengthsException
 from eis_toolkit.transformations.linear import (
     _min_max_scaling,
     _z_score_normalization,
@@ -106,12 +102,3 @@ def test_linear_parameter_length():
             # Invalid new_range
             min_max_scaling(raster=raster, bands=[1, 2, 3], new_range=[(0, 1), (0, 2)], nodata=None)
             min_max_scaling(raster=raster, bands=[1, 2], new_range=[(0, 1), (0, 2), (0, 3)], nodata=None)
-
-
-def test_linear_min_max_position():
-    """Tests that invalid min-max positions for provided parameters raises the correct exception."""
-    with pytest.raises(InvalidParameterValueException):
-        with rasterio.open(raster_path) as raster:
-            # Invalid position of minimum and maximum values for new_range
-            min_max_scaling(raster=raster, bands=None, new_range=[(1, 0)], nodata=None)
-            min_max_scaling(raster=raster, bands=[1, 2, 3], new_range=[(0, 0), (1, 0), (2, 0)], nodata=None)

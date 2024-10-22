@@ -1,7 +1,6 @@
 name: eis_toolkit
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python >=3.9.15,<3.11
   - rasterio >=1.2.10,<2.0.0

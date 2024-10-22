@@ -48,10 +48,6 @@ pip install eis_toolkit
 
 ```console
 conda install -c conda-forge eis_toolkit
-# On Windows, tensorflow must be installed from the anaconda channel
-# Consequently, channel priority must be flexible, which can be explicitly
-# done using --no-channel-priority
-conda install -c conda-forge eis_toolkit --no-channel-priority
 ```
 
 A Python wheel can be downloaded also from the [releases page](https://github.com/GispoCoding/eis_toolkit/releases) of this GitHub repository.
