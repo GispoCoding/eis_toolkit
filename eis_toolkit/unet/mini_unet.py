@@ -15,20 +15,19 @@ from eis_toolkit.exceptions import InvalidNumberOfConv2DLayer, NumericValueSignE
 @beartype
 def img_loader(image_dir: str) -> (np.ndarray, list, np.ndarray):
     """
+    Fetches all the tiffs in the given directory and creates a numpy ndarray of the common shape.
 
-     Do the Fetches all the tiffs in the given directory and creates a numpy ndarray of shape.
-
-     Shape type (image_count, bands, width, height) from them. Returns the array, tiff metadata as list and associated
-     nodatamasks in shape (image_count, width, height) Tiffs are assumed to be same size and named {number}.tif
+    Calculates shape (image_count, bands, width, height) from them. Returns the array, tiff metadata as a list and associated
+    nodatamasks in shape (image_count, width, height). Tiffs are assumed to be same size and are named as {number}.tif
     starting from 0
 
     Parameter:
         image_dir: the directory containing the images
 
     Returns:
-        the numpy ndarray of the tiffs
-        the list containing the meta
-        no data mask
+        numpy ndarray of the tiffs
+        list containing the metadata
+        nodata mask
     """
     # fetching the filepaths
     paths = []
@@ -92,9 +91,9 @@ def img_loader(image_dir: str) -> (np.ndarray, list, np.ndarray):
 @beartype
 def label_loader(label_dir: str) -> (np.ndarray, int):
     """
-    Do the Fetches all tiffs in the given directory and return a numpy ndarray of shape (image_count, width, height).
+    Fetches all the tiffs in the given directory and creates a numpy ndarray of the shape (image_count, bands, width, height).
 
-    The images are assumed to be same size and contain the labels with numbers showing classes.
+    The images are assumed to be the same size and contain the labels with numbers showing classes.
     The tiffs should have only one band.
 
     Parameters:
@@ -102,8 +101,7 @@ def label_loader(label_dir: str) -> (np.ndarray, int):
 
     Return:
         a numpy ndarray containing labels
-        no data value
-
+        nodata value
     """
     # fetching the filepaths
     paths = []
@@ -112,7 +110,7 @@ def label_loader(label_dir: str) -> (np.ndarray, int):
 
     img_count = len(paths)
 
-    # Getting the size of the images
+    # Getting the size of the rasters
     with rasterio.open(paths[0]) as src:
         meta = src.meta.copy()
     nodata_value = meta["nodata"]
@@ -149,23 +147,23 @@ def build_autoencoder_multichannel_with_skip_connection(
 ) -> tf.keras.Model:
     """
 
-    Do build the Unet.
+    Build the Unet.
 
     Parameters:
-        input_shape The shap of the input used by the Unet:
+        input_shape The shape of the input used by the Unet:
         kernel_shape The shape of the convolution kernel:
         list_of_convolutional_layers The list of convolutional layers of the Unet. This list will be reversed
            for the decoder.
-        dropout: This is the dropout rate assigned.
+        dropout: The dropout rate assigned.
         pool_size: The size of the max pooling layer.
-        up_sampling_factor: the decoder need up sampling factor to enlarge the features layer by layer.
-        output_filters: the number of filters of the output.
-        output_kernel: the dimension of the output.
-        last_activation: last activation sigmoid by default.
-        data_augmentation: if you want to include data augmentation right before the input layer.
-        data_augmentation_params_crop: if data augmentation is true fill this value.
-        data_augmentation_params_rotation: if data augmentation is true fill this value.
-        regularization: type of regularization for each layer.
+        up_sampling_factor: The decoder need up sampling factor to enlarge the features layer by layer.
+        output_filters: The number of filters of the output.
+        output_kernel: The dimension of the output.
+        last_activation: Last activation sigmoid by default.
+        data_augmentation: If you want to include data augmentation right before the input layer.
+        data_augmentation_params_crop: If data augmentation is True fill this value.
+        data_augmentation_params_rotation: if data augmentation is True fill this value.
+        regularization: Type of regularization for each layer.
 
     Return:
         the built Unet.
@@ -263,7 +261,7 @@ def dice_coeff_uncertain(
         smooth: the smooth factor.
 
     Return:
-        the dice loss value and the mask.
+        The dice loss value and the mask.
     """
 
     y_true = tf.cast(y_true, dtype=tf.float32)
@@ -287,14 +285,14 @@ def dice_coeff_uncertain(
 def regularization_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> float:
     """
 
-    Do compute the dice loss.
+    Computes the dice loss.
 
     Parameters:
         y_true: the true labels of the dataset.
         y_pred: the predicted labels from the model.
 
     Return:
-        a floating poit representing the loss.
+        a floating point representing the loss.
     """
 
     y_pred_uncertain = y_pred[:, :, :, 1]
@@ -305,14 +303,14 @@ def regularization_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> float:
 def dice_coefficient(prediction: tf.Tensor, true_label: tf.Tensor) -> tf.Tensor:
     """
 
-    Do calculate the dice loss coefficient.
+    Calculate the dice loss coefficient.
 
     Parameters:
         true_label: the true labels of the dataset.
         prediction: the predicted labels from the model.
 
     Return:
-        a floating poit representing the loss.
+        a floating point representing the loss.
     """
     prediction = tf.cast(prediction, tf.float32)
     true_label = tf.cast(true_label, tf.float32)
@@ -324,14 +322,14 @@ def dice_coefficient(prediction: tf.Tensor, true_label: tf.Tensor) -> tf.Tensor:
 def dice_loss(prediction: tf.Tensor, true_label: tf.Tensor) -> tf.Tensor:
     """
 
-    Do calculate the dice loss.
+    Calculate the dice loss.
 
     Parameters:
         true_label: the true labels of the dataset.
         prediction: the predicted labels from the model.
 
     Return:
-        a floating poit representing the loss.
+        a floating point representing the loss.
 
     """
 
@@ -404,28 +402,29 @@ def train_and_predict_the_model(
     Train and predict the Unet.
 
         Parameters:
-            x_train: a numpy array with the training sample inside
-            y_train: labels of the training dataset,
-            x_test: a numpy array with the testing sample inside,
-            y_test: labels of the testing dataset,
-            batch_size: how many sample per epochs should be used for fitting the model,
+            x_train: a numpy array with the training samplse
+            y_train: labels of the training dataset
+            x_test: a numpy array with the testing samples
+            y_test: labels of the testing dataset
+            batch_size: how many sample per epochs should be used for fitting the model
             epochs: how many epochs used for the training phase.
             is_uncertainty: bool = True, if you want to add uncertainty estimation to your Mini-Unet.
             list_of_convolutional_layers: how many convolutional layer suggestion -> [32, 64, 128, 256],
             dropout: This is the dropout rate assigned. It is used to randomly remove some predictions.
             pool_size: The size of the max pooling layer.
-            up_sampling_factor: the decoder need up sampling factor to enlarge the features layer by layer.
-            output_filters: the number of output nodes.
-            output_kernel: the dimension of the output, it should be the same of the input.
-            last_activation: last activation sigmoid by default.
+            up_sampling_factor: the decoder upsampling factor to enlarge the features layer by layer.
+            output_filters: the number of filters of the output.
+            output_kernel: the dimension of the output.
+            last_activation: last activation, sigmoid by default.
             data_augmentation: if you want to include data augmentation right before the input layer.
-            data_augmentation_params_crop: if data augmentation is true fill this value (crop range).
-            data_augmentation_params_rotation: if data augmentation is true fill this value (rotation range).
-            regularization: type of regularization for each layer. (L1, L2, L1L2, or None).
+            data_augmentation_params_crop: if data augmentation is True fill this value (crop range).
+            data_augmentation_params_rotation: if data augmentation is True fill this value (rotation range).
+            regularization: type of regularization for each layer.
+
         Raise:
-            InvalidInputException: when one input is null.
+            InvalidInputException: when an input is null.
         Return:
-            the predicted numpy array
+            The predicted numpy array
     """
 
     if x_train.shape[0] == 0 or x_train is None:
