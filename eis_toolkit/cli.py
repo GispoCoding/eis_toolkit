@@ -2156,6 +2156,58 @@ def cell_based_association_cli(
     typer.echo(f"Cell based association completed, writing raster to {output_raster}.")
 
 
+# DISTANCE COMPUTATION
+@app.command()
+def proximity_computation_cli(
+    input_vector: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    max_distance: float = typer.Option(),
+    max_distance_value: float = 0.0,
+    anomaly_value: float = 1.0,
+    base_raster: INPUT_FILE_OPTION = None,
+    pixel_size: float = None,
+    extent: Tuple[float, float, float, float] = (None, None, None, None),
+):
+    """Calculate distance from raster cell to nearest geometry."""
+    from eis_toolkit.exceptions import InvalidParameterValueException
+    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.vector_processing.proximity_computation import proximity_computation
+
+    typer.echo("Progress: 10%")
+
+    geodataframe = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    if base_raster is None or base_raster == "":
+        if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
+            raise InvalidParameterValueException(
+                "Expected positive pixel size and defined extent in absence of base raster. "
+                + f"Pixel size: {pixel_size}, extent: {extent}."
+            )
+        profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
+        profile["crs"] = geodataframe.crs
+        profile["driver"] = "GTiff"
+        profile["dtype"] = "float32"
+    else:
+        with rasterio.open(base_raster) as raster:
+            profile = raster.profile.copy()
+
+    out_image = proximity_computation(
+        geodataframe=geodataframe,
+        raster_profile=profile,
+        maximum_distance=max_distance,
+        scale_range=(anomaly_value, max_distance_value),
+    )
+    profile["count"] = 1
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_raster, "w", **profile) as dst:
+        dst.write(out_image, 1)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Proximity computation completed, writing raster to {output_raster}.")
+
+
 # --- PREDICTION ---
 
 
