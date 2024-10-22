@@ -408,18 +408,19 @@ def train_and_predict_the_model(
             y_test: labels of the testing dataset
             batch_size: how many sample per epochs should be used for fitting the model
             epochs: how many epochs used for the training phase.
-            is_uncertainty: bool = True,
+            is_uncertainty: bool = True, if you want to add uncertainty estimation to your Mini-Unet.
             list_of_convolutional_layers: how many convolutional layer suggestion -> [32, 64, 128, 256],
-            dropout: This is the dropout rate assigned.
+            dropout: This is the dropout rate assigned. It is used to randomly remove some predictions.
             pool_size: The size of the max pooling layer.
             up_sampling_factor: the decoder upsampling factor to enlarge the features layer by layer.
             output_filters: the number of filters of the output.
             output_kernel: the dimension of the output.
-            last_activation: last activation sigmoid by default.
+            last_activation: last activation, sigmoid by default.
             data_augmentation: if you want to include data augmentation right before the input layer.
-            data_augmentation_params_crop: if data augmentation is True fill this value.
-            data_augmentation_params_rotation: if data augmentation is True fill this value.
+            data_augmentation_params_crop: if data augmentation is True fill this value (crop range).
+            data_augmentation_params_rotation: if data augmentation is True fill this value (rotation range).
             regularization: type of regularization for each layer.
+
         Raise:
             InvalidInputException: when an input is null.
         Return:
