@@ -1,7 +1,6 @@
 from itertools import chain
 from numbers import Number
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 import geopandas as gpd
 import numpy as np
@@ -86,7 +85,7 @@ def distance_to_anomaly(
     return out_image, anomaly_raster_profile
 
 
-@beartype
+'''@beartype
 def distance_to_anomaly_gdal(
     anomaly_raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_data: np.ndarray,
@@ -133,7 +132,7 @@ def distance_to_anomaly_gdal(
         threshold_criteria=threshold_criteria,
         threshold_criteria_value=threshold_criteria_value,
         verbose=verbose,
-    )
+    )'''
 
 
 def _fits_criteria(
@@ -196,7 +195,7 @@ def _write_binary_anomaly_raster(tmp_dir: Path, anomaly_raster_profile, data_fit
     return anomaly_raster_binary_path
 
 
-def _distance_to_anomaly_gdal(
+"""def _distance_to_anomaly_gdal(
     anomaly_raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_data: np.ndarray,
     threshold_criteria_value: Union[Tuple[Number, Number], Number],
@@ -226,7 +225,7 @@ def _distance_to_anomaly_gdal(
                 quiet=not verbose,
             )
 
-    return output_path
+    return output_path"""
 
 
 def _distance_to_anomaly(

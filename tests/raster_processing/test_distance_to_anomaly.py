@@ -1,7 +1,6 @@
 import sys
 from contextlib import nullcontext
 from functools import partial
-from pathlib import Path
 
 import numpy as np
 import pytest
@@ -103,65 +102,6 @@ def test_distance_to_anomaly_expected(
     assert out_image.shape == expected_shape
     if expected_mean is not None:
         assert np.isclose(np.mean(out_image), expected_mean)
-
-
-@pytest.mark.parametrize(
-    ",".join(
-        [
-            "anomaly_raster_profile",
-            "anomaly_raster_data",
-            "threshold_criteria_value",
-            "threshold_criteria",
-            "expected_shape",
-            "expected_mean",
-        ]
-    ),
-    [
-        pytest.param(
-            SMALL_RASTER_PROFILE,
-            SMALL_RASTER_DATA,
-            5.0,
-            "higher",
-            EXPECTED_SMALL_RASTER_SHAPE,
-            6.452082,
-            id="small_raster_higher",
-        ),
-    ],
-)
-@pytest.mark.xfail(
-    sys.platform == "win32", reason="GDAL utilities are not available on Windows.", raises=ModuleNotFoundError
-)
-def test_distance_to_anomaly_gdal(
-    anomaly_raster_profile,
-    anomaly_raster_data,
-    threshold_criteria_value,
-    threshold_criteria,
-    expected_shape,
-    expected_mean,
-    tmp_path,
-):
-    """Test distance_to_anomaly_gdal."""
-
-    output_path = tmp_path / "output.tif"
-    result = distance_to_anomaly.distance_to_anomaly_gdal(
-        anomaly_raster_profile=anomaly_raster_profile,
-        anomaly_raster_data=anomaly_raster_data,
-        threshold_criteria_value=threshold_criteria_value,
-        threshold_criteria=threshold_criteria,
-        output_path=output_path,
-    )
-
-    assert isinstance(result, Path)
-    assert result.is_file()
-
-    with rasterio.open(result) as result_raster:
-
-        assert result_raster.meta["dtype"] in {"float32", "float64"}
-        result_raster_data = result_raster.read(1)
-
-    assert result_raster_data.shape == expected_shape
-    if expected_mean is not None:
-        assert np.isclose(np.mean(result_raster_data), expected_mean)
 
 
 @pytest.mark.parametrize(
@@ -335,6 +275,7 @@ def test_distance_to_anomaly_nodata_handling(
     ),
     EXPECTED_PYTESTPARAMS,
 )
+@pytest.mark.xfail(sys.platform != "win32", reason="gdal_array available only on Windows.", raises=ModuleNotFoundError)
 def test_distance_to_anomaly_gdal_compute_proximity_expected(
     anomaly_raster_profile,
     anomaly_raster_data,
@@ -388,6 +329,7 @@ def test_distance_to_anomaly_gdal_compute_proximity_expected(
         ),
     ],
 )
+@pytest.mark.xfail(sys.platform != "win32", reason="gdal_array available only on Windows.", raises=ModuleNotFoundError)
 def test_distance_to_anomaly_gdal_compute_proximity_nodata_handling(
     anomaly_raster_profile,
     anomaly_raster_data,
@@ -494,6 +436,7 @@ def test_distance_to_anomaly_gdal_compute_proximity_nodata_handling(
         ),
     ],
 )
+@pytest.mark.xfail(sys.platform != "win32", reason="gdal_array available only on Windows.", raises=ModuleNotFoundError)
 def test_distance_to_anomaly_gdal_compute_proximity_expected_check(
     anomaly_raster_profile,
     anomaly_raster_data,
