@@ -7,13 +7,13 @@ assignees: ''
 
 ---
 
-**What does the tool do?**
+**Tool description**
 Please describe what the tool does. Ex. "This tool calculates distances to known deposits"
 
-**Why is the tool needed?**
+**Justification and importance**
 Please give reasoning why the tool is needed. Is the tool essential or a nice-to-have? 
 
-**Which category do you think the tool belongs to?** 
+**Tool category and type** 
 The current categories are the directories under `eis_toolkit` package in this repository. You may also suggest a new category if a suitable one doesn't exist.
 
 **Implementation details**
