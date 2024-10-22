@@ -11,7 +11,7 @@ import rasterio.profiles
 from beartype.roar import BeartypeCallHintParamViolation
 
 from eis_toolkit.exceptions import EmptyDataException, InvalidParameterValueException
-from eis_toolkit.raster_processing import distance_to_anomaly
+from eis_toolkit.raster_processing import distance_to_anomaly, distance_to_anomaly_gdal
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
 with rasterio.open(SMALL_RASTER_PATH) as raster:
@@ -89,7 +89,7 @@ def test_distance_to_anomaly_expected(
 
     # No np.nan expected in input here
     assert not np.any(np.isnan(anomaly_raster_data))
-    out_image, out_profile = distance_to_anomaly.distance_to_anomaly(
+    out_image, out_profile = distance_to_anomaly(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data,
         threshold_criteria_value=threshold_criteria_value,
@@ -141,7 +141,7 @@ def test_distance_to_anomaly_gdal(
     """Test distance_to_anomaly_gdal."""
 
     output_path = tmp_path / "output.tif"
-    result = distance_to_anomaly.distance_to_anomaly_gdal(
+    result = distance_to_anomaly_gdal(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data,
         threshold_criteria_value=threshold_criteria_value,
@@ -251,7 +251,7 @@ def test_distance_to_anomaly_check(
 
     anomaly_raster_profile_with_additions = {**anomaly_raster_profile, **profile_additions()}
     with raises() as exc_info:
-        out_image, out_profile = distance_to_anomaly.distance_to_anomaly(
+        out_image, out_profile = distance_to_anomaly(
             anomaly_raster_profile=anomaly_raster_profile_with_additions,
             anomaly_raster_data=anomaly_raster_data,
             threshold_criteria_value=threshold_criteria_value,
@@ -305,7 +305,7 @@ def test_distance_to_anomaly_nodata_handling(
     anomaly_raster_data_with_nodata = np.where(anomaly_raster_data > nodata_mask_value, np.nan, anomaly_raster_data)
     assert np.any(np.isnan(anomaly_raster_data_with_nodata))
 
-    out_image, out_profile = distance_to_anomaly.distance_to_anomaly(
+    out_image, out_profile = distance_to_anomaly(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data_with_nodata,
         threshold_criteria_value=threshold_criteria_value,
