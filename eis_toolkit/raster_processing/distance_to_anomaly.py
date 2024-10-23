@@ -8,7 +8,7 @@ from beartype.typing import Literal, Optional, Tuple, Union
 from osgeo import gdal
 from rasterio import profiles
 
-from eis_toolkit.exceptions import EmptyDataException, InvalidParameterValueException
+from eis_toolkit.exceptions import EmptyDataException, InvalidParameterValueException, NumericValueSignException
 from eis_toolkit.utilities.checks.raster import check_raster_profile
 from eis_toolkit.utilities.miscellaneous import row_points, toggle_gdal_exceptions
 from eis_toolkit.vector_processing.distance_computation import distance_computation
@@ -89,6 +89,7 @@ def distance_to_anomaly_gdal(
     anomaly_raster_data: np.ndarray,
     threshold_criteria_value: Union[Tuple[Number, Number], Number],
     threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
+    max_distance: Optional[Number] = None,
 ) -> Tuple[np.ndarray, profiles.Profile]:
     """Calculate distance from raster cell to nearest anomaly.
 
@@ -111,6 +112,7 @@ def distance_to_anomaly_gdal(
             the first value should be the minimum and the second
             the maximum value.
         threshold_criteria: Method to define anomalous.
+        max_distance: The maximum distance in the output array.
 
     Returns:
         A 2D numpy array with the distances to anomalies computed
@@ -121,12 +123,15 @@ def distance_to_anomaly_gdal(
     _check_threshold_criteria_and_value(
         threshold_criteria=threshold_criteria, threshold_criteria_value=threshold_criteria_value
     )
+    if max_distance is not None and max_distance <= 0:
+        raise NumericValueSignException("Expected max distance to be a positive number.")
 
     out_array, out_meta = _distance_to_anomaly_gdal(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data,
         threshold_criteria=threshold_criteria,
         threshold_criteria_value=threshold_criteria_value,
+        max_distance=max_distance,
     )
 
     return out_array, out_meta
@@ -218,6 +223,7 @@ def _distance_to_anomaly_gdal(
     anomaly_raster_data: np.ndarray,
     threshold_criteria_value: Union[Tuple[Number, Number], Number],
     threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
+    max_distance: Optional[Number],
 ) -> Tuple[np.ndarray, profiles.Profile]:
 
     data_fits_criteria = _validate_threshold_criteria(
@@ -256,6 +262,8 @@ def _distance_to_anomaly_gdal(
 
     # Create outputs
     out_array = out_band.ReadAsArray()
+    if max_distance is not None:
+        out_array[out_array > max_distance] = max_distance
     out_meta = anomaly_raster_profile.copy()
 
     # Update metadata
