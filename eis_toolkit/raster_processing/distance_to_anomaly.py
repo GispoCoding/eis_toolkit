@@ -84,7 +84,7 @@ def distance_to_anomaly(
 
 
 @beartype
-def distance_to_anomaly_gdal_compute_proximity(
+def distance_to_anomaly_gdal(
     anomaly_raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_data: np.ndarray,
     threshold_criteria_value: Union[Tuple[Number, Number], Number],
@@ -92,17 +92,14 @@ def distance_to_anomaly_gdal_compute_proximity(
 ) -> Tuple[np.ndarray, profiles.Profile]:
     """Calculate distance from raster cell to nearest anomaly.
 
+    This tool is much faster than `distance_to_anomaly` but only available on
+    Windows.
+
     The criteria for what is anomalous can be defined as a single number and
     criteria text of "higher" or "lower". Alternatively, the definition can be
     a range where values inside (criteria text of "within") or outside are
     marked as anomalous (criteria text of "outside"). If anomaly_raster_profile does
     contain "nodata" key, np.nan is assumed to correspond to nodata values.
-
-    This function demonstrates superior performance compared to the distance_to_anomaly
-    and distance_to_anomaly_gdal functions, as it uses a low-level, C++-based API
-    within the GDAL library. By directly computing the proximity map from the
-    source dataset, it benefits from the core-level optimizations inherent to GDAL,
-    ensuring enhanced efficiency and speed.
 
     Args:
         anomaly_raster_profile: The raster profile in which the distances
@@ -125,7 +122,7 @@ def distance_to_anomaly_gdal_compute_proximity(
         threshold_criteria=threshold_criteria, threshold_criteria_value=threshold_criteria_value
     )
 
-    out_array, out_meta = _distance_to_anomaly_gdal_compute_proximity(
+    out_array, out_meta = _distance_to_anomaly_gdal(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data,
         threshold_criteria=threshold_criteria,
@@ -216,7 +213,7 @@ def _distance_to_anomaly(
     return distance_array
 
 
-def _distance_to_anomaly_gdal_compute_proximity(
+def _distance_to_anomaly_gdal(
     anomaly_raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_data: np.ndarray,
     threshold_criteria_value: Union[Tuple[Number, Number], Number],

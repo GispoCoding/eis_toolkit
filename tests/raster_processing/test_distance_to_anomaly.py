@@ -276,7 +276,7 @@ def test_distance_to_anomaly_nodata_handling(
     EXPECTED_PYTESTPARAMS,
 )
 @pytest.mark.xfail(sys.platform != "win32", reason="gdal_array available only on Windows.", raises=ModuleNotFoundError)
-def test_distance_to_anomaly_gdal_compute_proximity_expected(
+def test_distance_to_anomaly_gdal_expected(
     anomaly_raster_profile,
     anomaly_raster_data,
     threshold_criteria_value,
@@ -284,10 +284,10 @@ def test_distance_to_anomaly_gdal_compute_proximity_expected(
     expected_shape,
     expected_mean,
 ):
-    """Test distance_to_anomaly_gdal_compute_proximity_expected with expected result."""
+    """Test distance_to_anomaly_gdal with expected result."""
 
     assert not np.any(np.isnan(anomaly_raster_data))
-    out_image, out_profile = distance_to_anomaly.distance_to_anomaly_gdal_compute_proximity(
+    out_image, out_profile = distance_to_anomaly.distance_to_anomaly_gdal(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data,
         threshold_criteria_value=threshold_criteria_value,
@@ -330,7 +330,7 @@ def test_distance_to_anomaly_gdal_compute_proximity_expected(
     ],
 )
 @pytest.mark.xfail(sys.platform != "win32", reason="gdal_array available only on Windows.", raises=ModuleNotFoundError)
-def test_distance_to_anomaly_gdal_compute_proximity_nodata_handling(
+def test_distance_to_anomaly_gdal_nodata_handling(
     anomaly_raster_profile,
     anomaly_raster_data,
     threshold_criteria_value,
@@ -339,12 +339,12 @@ def test_distance_to_anomaly_gdal_compute_proximity_nodata_handling(
     expected_mean_without_nodata,
     nodata_mask_value,
 ):
-    """Test distance_to_anomaly_gdal_compute_proximity with expected result."""
+    """Test distance_to_anomaly_gdal with expected result."""
 
     anomaly_raster_data_with_nodata = np.where(anomaly_raster_data > nodata_mask_value, np.nan, anomaly_raster_data)
     assert np.any(np.isnan(anomaly_raster_data_with_nodata))
 
-    out_image, out_profile = distance_to_anomaly.distance_to_anomaly_gdal_compute_proximity(
+    out_image, out_profile = distance_to_anomaly.distance_to_anomaly_gdal(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data_with_nodata,
         threshold_criteria_value=threshold_criteria_value,
@@ -437,7 +437,7 @@ def test_distance_to_anomaly_gdal_compute_proximity_nodata_handling(
     ],
 )
 @pytest.mark.xfail(sys.platform != "win32", reason="gdal_array available only on Windows.", raises=ModuleNotFoundError)
-def test_distance_to_anomaly_gdal_compute_proximity_expected_check(
+def test_distance_to_anomaly_gdal_expected_check(
     anomaly_raster_profile,
     anomaly_raster_data,
     threshold_criteria_value,
@@ -445,12 +445,12 @@ def test_distance_to_anomaly_gdal_compute_proximity_expected_check(
     profile_additions,
     raises,
 ):
-    """Test distance_to_anomaly_gdal_compute_proximity checks."""
+    """Test distance_to_anomaly_gdal checks."""
 
     anomaly_raster_profile.update(profile_additions())
     anomaly_raster_profile_with_additions = anomaly_raster_profile
     with raises() as exc_info:
-        out_image, out_profile = distance_to_anomaly.distance_to_anomaly_gdal_compute_proximity(
+        out_image, out_profile = distance_to_anomaly.distance_to_anomaly_gdal(
             anomaly_raster_profile=anomaly_raster_profile_with_additions,
             anomaly_raster_data=anomaly_raster_data,
             threshold_criteria_value=threshold_criteria_value,
