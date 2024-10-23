@@ -1,10 +1,8 @@
 from itertools import chain
 from numbers import Number
-from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
-import rasterio
 from beartype import beartype
 from beartype.typing import Literal, Optional, Tuple, Union
 from osgeo import gdal
@@ -85,26 +83,26 @@ def distance_to_anomaly(
     return out_image, anomaly_raster_profile
 
 
-'''@beartype
-def distance_to_anomaly_gdal(
+@beartype
+def distance_to_anomaly_gdal_compute_proximity(
     anomaly_raster_profile: Union[profiles.Profile, dict],
     anomaly_raster_data: np.ndarray,
     threshold_criteria_value: Union[Tuple[Number, Number], Number],
     threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
-    output_path: Path,
-    verbose: bool = False,
-) -> Path:
+) -> Tuple[np.ndarray, profiles.Profile]:
     """Calculate distance from raster cell to nearest anomaly.
 
-    Distance is calculated for each cell in the anomaly raster and saved to a
-    new raster at output_path. The criteria for what is anomalous can be
-    defined as a single number and criteria text of "higher" or "lower".
-    Alternatively, the definition can be a range where values inside
-    (criteria text of "within") or outside are marked as anomalous
-    (criteria text of "outside"). If anomaly_raster_profile does
+    The criteria for what is anomalous can be defined as a single number and
+    criteria text of "higher" or "lower". Alternatively, the definition can be
+    a range where values inside (criteria text of "within") or outside are
+    marked as anomalous (criteria text of "outside"). If anomaly_raster_profile does
     contain "nodata" key, np.nan is assumed to correspond to nodata values.
 
-    Does not work on Windows.
+    This function demonstrates superior performance compared to the distance_to_anomaly
+    and distance_to_anomaly_gdal functions, as it uses a low-level, C++-based API
+    within the GDAL library. By directly computing the proximity map from the
+    source dataset, it benefits from the core-level optimizations inherent to GDAL,
+    ensuring enhanced efficiency and speed.
 
     Args:
         anomaly_raster_profile: The raster profile in which the distances
@@ -112,27 +110,29 @@ def distance_to_anomaly_gdal(
         anomaly_raster_data: The raster data in which the distances
             to the nearest anomalous value are determined.
         threshold_criteria_value: Value(s) used to define anomalous.
+            If the threshold criteria requires a tuple of values,
+            the first value should be the minimum and the second
+            the maximum value.
         threshold_criteria: Method to define anomalous.
-        output_path: The path to the raster with the distances to anomalies
-            calculated.
-        verbose: Whether to print gdal_proximity output.
 
     Returns:
-        The path to the raster with the distances to anomalies calculated.
+        A 2D numpy array with the distances to anomalies computed
+        and the original anomaly raster profile.
+
     """
     check_raster_profile(raster_profile=anomaly_raster_profile)
     _check_threshold_criteria_and_value(
         threshold_criteria=threshold_criteria, threshold_criteria_value=threshold_criteria_value
     )
 
-    return _distance_to_anomaly_gdal(
-        output_path=output_path,
+    out_array, out_meta = _distance_to_anomaly_gdal_compute_proximity(
         anomaly_raster_profile=anomaly_raster_profile,
         anomaly_raster_data=anomaly_raster_data,
         threshold_criteria=threshold_criteria,
         threshold_criteria_value=threshold_criteria_value,
-        verbose=verbose,
-    )'''
+    )
+
+    return out_array, out_meta
 
 
 def _fits_criteria(
@@ -183,49 +183,6 @@ def _validate_threshold_criteria(
             )
         )
     return data_fits_criteria
-
-
-def _write_binary_anomaly_raster(tmp_dir: Path, anomaly_raster_profile, data_fits_criteria: np.ndarray):
-    anomaly_raster_binary_path = tmp_dir / "anomaly_raster_binary.tif"
-
-    anomaly_raster_binary_profile = {**anomaly_raster_profile, **dict(dtype=rasterio.uint8, count=1, nodata=None)}
-    with rasterio.open(anomaly_raster_binary_path, mode="w", **anomaly_raster_binary_profile) as anomaly_raster_binary:
-        anomaly_raster_binary.write(data_fits_criteria.astype(rasterio.uint8), 1)
-
-    return anomaly_raster_binary_path
-
-
-"""def _distance_to_anomaly_gdal(
-    anomaly_raster_profile: Union[profiles.Profile, dict],
-    anomaly_raster_data: np.ndarray,
-    threshold_criteria_value: Union[Tuple[Number, Number], Number],
-    threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
-    output_path: Path,
-    verbose: bool,
-):
-    from osgeo_utils import gdal_proximity
-
-    data_fits_criteria = _fits_criteria(
-        threshold_criteria=threshold_criteria,
-        threshold_criteria_value=threshold_criteria_value,
-        anomaly_raster_data=anomaly_raster_data,
-        nodata_value=anomaly_raster_profile.get("nodata"),
-    )
-
-    with TemporaryDirectory() as tmp_dir_str:
-        tmp_dir = Path(tmp_dir_str)
-        anomaly_raster_binary_path = _write_binary_anomaly_raster(
-            tmp_dir=tmp_dir, anomaly_raster_profile=anomaly_raster_profile, data_fits_criteria=data_fits_criteria
-        )
-        with toggle_gdal_exceptions():
-            gdal_proximity.gdal_proximity(
-                src_filename=str(anomaly_raster_binary_path),
-                dst_filename=str(output_path),
-                alg_options=("VALUES=1", "DISTUNITS=GEO"),
-                quiet=not verbose,
-            )
-
-    return output_path"""
 
 
 def _distance_to_anomaly(
@@ -311,53 +268,96 @@ def _distance_to_anomaly_gdal_compute_proximity(
     return out_array, out_meta
 
 
-@beartype
-def distance_to_anomaly_gdal_compute_proximity(
-    anomaly_raster_profile: Union[profiles.Profile, dict],
-    anomaly_raster_data: np.ndarray,
-    threshold_criteria_value: Union[Tuple[Number, Number], Number],
-    threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
-) -> Tuple[np.ndarray, profiles.Profile]:
-    """Calculate distance from raster cell to nearest anomaly.
+# @beartype
+# def distance_to_anomaly_gdal(
+#     anomaly_raster_profile: Union[profiles.Profile, dict],
+#     anomaly_raster_data: np.ndarray,
+#     threshold_criteria_value: Union[Tuple[Number, Number], Number],
+#     threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
+#     output_path: Path,
+#     verbose: bool = False,
+# ) -> Path:
+#     """Calculate distance from raster cell to nearest anomaly.
 
-    The criteria for what is anomalous can be defined as a single number and
-    criteria text of "higher" or "lower". Alternatively, the definition can be
-    a range where values inside (criteria text of "within") or outside are
-    marked as anomalous (criteria text of "outside"). If anomaly_raster_profile does
-    contain "nodata" key, np.nan is assumed to correspond to nodata values.
+#     Distance is calculated for each cell in the anomaly raster and saved to a
+#     new raster at output_path. The criteria for what is anomalous can be
+#     defined as a single number and criteria text of "higher" or "lower".
+#     Alternatively, the definition can be a range where values inside
+#     (criteria text of "within") or outside are marked as anomalous
+#     (criteria text of "outside"). If anomaly_raster_profile does
+#     contain "nodata" key, np.nan is assumed to correspond to nodata values.
 
-    This function demonstrates superior performance compared to the distance_to_anomaly
-    and distance_to_anomaly_gdal functions, as it uses a low-level, C++-based API
-    within the GDAL library. By directly computing the proximity map from the
-    source dataset, it benefits from the core-level optimizations inherent to GDAL,
-    ensuring enhanced efficiency and speed.
+#     Does not work on Windows.
 
-    Args:
-        anomaly_raster_profile: The raster profile in which the distances
-            to the nearest anomalous value are determined.
-        anomaly_raster_data: The raster data in which the distances
-            to the nearest anomalous value are determined.
-        threshold_criteria_value: Value(s) used to define anomalous.
-            If the threshold criteria requires a tuple of values,
-            the first value should be the minimum and the second
-            the maximum value.
-        threshold_criteria: Method to define anomalous.
+#     Args:
+#         anomaly_raster_profile: The raster profile in which the distances
+#             to the nearest anomalous value are determined.
+#         anomaly_raster_data: The raster data in which the distances
+#             to the nearest anomalous value are determined.
+#         threshold_criteria_value: Value(s) used to define anomalous.
+#         threshold_criteria: Method to define anomalous.
+#         output_path: The path to the raster with the distances to anomalies
+#             calculated.
+#         verbose: Whether to print gdal_proximity output.
 
-    Returns:
-        A 2D numpy array with the distances to anomalies computed
-        and the original anomaly raster profile.
+#     Returns:
+#         The path to the raster with the distances to anomalies calculated.
+#     """
+#     check_raster_profile(raster_profile=anomaly_raster_profile)
+#     _check_threshold_criteria_and_value(
+#         threshold_criteria=threshold_criteria, threshold_criteria_value=threshold_criteria_value
+#     )
 
-    """
-    check_raster_profile(raster_profile=anomaly_raster_profile)
-    _check_threshold_criteria_and_value(
-        threshold_criteria=threshold_criteria, threshold_criteria_value=threshold_criteria_value
-    )
+#     return _distance_to_anomaly_gdal(
+#         output_path=output_path,
+#         anomaly_raster_profile=anomaly_raster_profile,
+#         anomaly_raster_data=anomaly_raster_data,
+#         threshold_criteria=threshold_criteria,
+#         threshold_criteria_value=threshold_criteria_value,
+#         verbose=verbose,
+#     )
 
-    out_array, out_meta = _distance_to_anomaly_gdal_compute_proximity(
-        anomaly_raster_profile=anomaly_raster_profile,
-        anomaly_raster_data=anomaly_raster_data,
-        threshold_criteria=threshold_criteria,
-        threshold_criteria_value=threshold_criteria_value,
-    )
 
-    return out_array, out_meta
+# def _write_binary_anomaly_raster(tmp_dir: Path, anomaly_raster_profile, data_fits_criteria: np.ndarray):
+#     anomaly_raster_binary_path = tmp_dir / "anomaly_raster_binary.tif"
+
+#     anomaly_raster_binary_profile = {**anomaly_raster_profile, **dict(dtype=rasterio.uint8, count=1, nodata=None)}
+#     with rasterio.open(
+#         anomaly_raster_binary_path, mode="w", **anomaly_raster_binary_profile
+#     ) as anomaly_raster_binary:
+#         anomaly_raster_binary.write(data_fits_criteria.astype(rasterio.uint8), 1)
+
+#     return anomaly_raster_binary_path
+
+
+# def _distance_to_anomaly_gdal(
+#     anomaly_raster_profile: Union[profiles.Profile, dict],
+#     anomaly_raster_data: np.ndarray,
+#     threshold_criteria_value: Union[Tuple[Number, Number], Number],
+#     threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
+#     output_path: Path,
+#     verbose: bool,
+# ):
+#     from osgeo_utils import gdal_proximity
+
+#     data_fits_criteria = _fits_criteria(
+#         threshold_criteria=threshold_criteria,
+#         threshold_criteria_value=threshold_criteria_value,
+#         anomaly_raster_data=anomaly_raster_data,
+#         nodata_value=anomaly_raster_profile.get("nodata"),
+#     )
+
+#     with TemporaryDirectory() as tmp_dir_str:
+#         tmp_dir = Path(tmp_dir_str)
+#         anomaly_raster_binary_path = _write_binary_anomaly_raster(
+#             tmp_dir=tmp_dir, anomaly_raster_profile=anomaly_raster_profile, data_fits_criteria=data_fits_criteria
+#         )
+#         with toggle_gdal_exceptions():
+#             gdal_proximity.gdal_proximity(
+#                 src_filename=str(anomaly_raster_binary_path),
+#                 dst_filename=str(output_path),
+#                 alg_options=("VALUES=1", "DISTUNITS=GEO"),
+#                 quiet=not verbose,
+#             )
+
+#     return output_path
