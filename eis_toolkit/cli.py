@@ -1275,9 +1275,9 @@ def distance_to_anomaly_cli(
 
     Uses only the first band of the raster.
     """
-    # from sys import platform
+    from sys import platform
 
-    from eis_toolkit.raster_processing.distance_to_anomaly import distance_to_anomaly
+    from eis_toolkit.raster_processing.distance_to_anomaly import distance_to_anomaly, distance_to_anomaly_gdal
 
     typer.echo("Progress: 10%")
 
@@ -1288,23 +1288,23 @@ def distance_to_anomaly_cli(
 
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
-        # # Use optimized version if Windows
-        # if platform == "win32":
-        #     out_image, out_meta = distance_to_anomaly_gdal(
-        #         anomaly_raster_profile=raster.profile,
-        #         anomaly_raster_data=raster.read(1),
-        #         threshold_criteria_value=threshold_criteria_value,
-        #         threshold_criteria=get_enum_values(threshold_criteria),
-        #         max_distance=max_distance,
-        #     )
-        # else:
-        out_image, out_meta = distance_to_anomaly(
-            anomaly_raster_profile=raster.profile,
-            anomaly_raster_data=raster.read(1),
-            threshold_criteria_value=threshold_criteria_value,
-            threshold_criteria=get_enum_values(threshold_criteria),
-            max_distance=max_distance,
-        )
+        # Use optimized version if Windows
+        if platform == "win32":
+            out_image, out_meta = distance_to_anomaly_gdal(
+                anomaly_raster_profile=raster.profile,
+                anomaly_raster_data=raster.read(1),
+                threshold_criteria_value=threshold_criteria_value,
+                threshold_criteria=get_enum_values(threshold_criteria),
+                max_distance=max_distance,
+            )
+        else:
+            out_image, out_meta = distance_to_anomaly(
+                anomaly_raster_profile=raster.profile,
+                anomaly_raster_data=raster.read(1),
+                threshold_criteria_value=threshold_criteria_value,
+                threshold_criteria=get_enum_values(threshold_criteria),
+                max_distance=max_distance,
+            )
 
     typer.echo("Progress: 75%")
 
