@@ -1332,9 +1332,9 @@ def proximity_to_anomaly_cli(
 
     Uses only the first band of the raster.
     """
-    from sys import platform
+    # from sys import platform
 
-    from eis_toolkit.raster_processing.proximity_to_anomaly import proximity_to_anomaly, proximity_to_anomaly_gdal
+    from eis_toolkit.raster_processing.proximity_to_anomaly import proximity_to_anomaly
 
     typer.echo("Progress: 10%")
 
@@ -1346,24 +1346,24 @@ def proximity_to_anomaly_cli(
     with rasterio.open(input_raster) as raster:
         typer.echo("Progress: 25%")
         # Use optimized version if Windows
-        if platform == "win32":
-            out_image, out_meta = proximity_to_anomaly_gdal(
-                anomaly_raster_profile=raster.profile,
-                anomaly_raster_data=raster.read(1),
-                threshold_criteria_value=threshold_criteria_value,
-                threshold_criteria=get_enum_values(threshold_criteria),
-                max_distance=max_distance,
-                scaling_range=(anomaly_value, max_distance_value),
-            )
-        else:
-            out_image, out_meta = proximity_to_anomaly(
-                anomaly_raster_profile=raster.profile,
-                anomaly_raster_data=raster.read(1),
-                threshold_criteria_value=threshold_criteria_value,
-                threshold_criteria=get_enum_values(threshold_criteria),
-                max_distance=max_distance,
-                scaling_range=(anomaly_value, max_distance_value),
-            )
+        # if platform == "win32":
+        #     out_image, out_meta = proximity_to_anomaly_gdal(
+        #         anomaly_raster_profile=raster.profile,
+        #         anomaly_raster_data=raster.read(1),
+        #         threshold_criteria_value=threshold_criteria_value,
+        #         threshold_criteria=get_enum_values(threshold_criteria),
+        #         max_distance=max_distance,
+        #         scaling_range=(anomaly_value, max_distance_value),
+        #     )
+        # else:
+        out_image, out_meta = proximity_to_anomaly(
+            anomaly_raster_profile=raster.profile,
+            anomaly_raster_data=raster.read(1),
+            threshold_criteria_value=threshold_criteria_value,
+            threshold_criteria=get_enum_values(threshold_criteria),
+            max_distance=max_distance,
+            scaling_range=(anomaly_value, max_distance_value),
+        )
 
     typer.echo("Progress: 75%")
 
