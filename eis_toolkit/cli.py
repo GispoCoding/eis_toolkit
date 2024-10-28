@@ -701,7 +701,7 @@ def parallel_coordinates_cli(
 def compute_pca_raster_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     output_raster: OUTPUT_FILE_OPTION,
-    number_of_components: int = typer.Option(),
+    number_of_components: Optional[int] = None,
     # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
     nodata_handling: Annotated[NodataHandling, typer.Option(case_sensitive=False)] = NodataHandling.remove,
     # NOTE: Omitted nodata parameter. Should use raster nodata.
@@ -715,27 +715,34 @@ def compute_pca_raster_cli(
     stacked_array, profiles = read_and_stack_rasters(input_rasters, nodata_handling="convert_to_nan")
     typer.echo("Progress: 25%")
 
-    pca_array, variance_ratios = compute_pca(
+    transformed_data, principal_components, variances, variance_ratios = compute_pca(
         data=stacked_array, number_of_components=number_of_components, nodata_handling=get_enum_values(nodata_handling)
     )
 
     # Fill np.nan with nodata before writing data to raster
-    pca_array[pca_array == np.nan] = -9999
+    transformed_data[transformed_data == np.nan] = -9999
     out_profile = profiles[0]
     out_profile["nodata"] = -9999
 
     # Update nr of bands
-    out_profile["count"] = number_of_components
+    out_profile["count"] = len(variances)
 
     # Create dictionary from the variance ratios array
-    variances_ratios_dict = {}
-    for i, variance_ratio in enumerate(variance_ratios):
-        name = "PC " + str(i) + " explained variance"
-        variances_ratios_dict[name] = variance_ratio
-    json_str = json.dumps(variances_ratios_dict)
+    # variances_ratios_dict = {}
+    # for i, variance_ratio in enumerate(variance_ratios):
+    #     name = "PC " + str(i) + " explained variance"
+    #     variances_ratios_dict[name] = variance_ratio
+    # json_str = json.dumps(variances_ratios_dict)
+
+    out_dict = {
+        "principal_components": np.round(principal_components, 4).tolist(),
+        "explained_variances": np.round(variances, 4).tolist(),
+        "explained_variance_ratios": np.round(variance_ratios, 4).tolist(),
+    }
+    json_str = json.dumps(out_dict)
 
     with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(pca_array)
+        dst.write(transformed_data)
 
     typer.echo("Progress: 100%")
 
@@ -748,7 +755,7 @@ def compute_pca_raster_cli(
 def compute_pca_vector_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
-    number_of_components: int = typer.Option(),
+    number_of_components: Optional[int] = None,
     columns: Annotated[List[str], typer.Option()] = None,
     # NOTE: Omitted scaler type selection here since the parameter might be deleted from PCA func
     nodata_handling: Annotated[NodataHandling, typer.Option(case_sensitive=False)] = NodataHandling.remove,
@@ -762,7 +769,7 @@ def compute_pca_vector_cli(
     gdf = gpd.read_file(input_vector)
     typer.echo("Progress: 25%")
 
-    pca_gdf, variance_ratios = compute_pca(
+    transformed_data, principal_components, variances, variance_ratios = compute_pca(
         data=gdf,
         number_of_components=number_of_components,
         columns=columns,
@@ -771,13 +778,20 @@ def compute_pca_vector_cli(
     )
 
     # Create dictionary from the variance ratios array
-    variances_ratios_dict = {}
-    for i, variance_ratio in enumerate(variance_ratios):
-        name = "PC " + str(i) + " explained variance"
-        variances_ratios_dict[name] = variance_ratio
-    json_str = json.dumps(variances_ratios_dict)
+    # variances_ratios_dict = {}
+    # for i, variance_ratio in enumerate(variance_ratios):
+    #     name = "PC " + str(i) + " explained variance"
+    #     variances_ratios_dict[name] = variance_ratio
+    # json_str = json.dumps(variances_ratios_dict)
 
-    pca_gdf.to_file(output_vector)
+    out_dict = {
+        "principal_components": np.round(principal_components, 4).tolist(),
+        "explained_variances": np.round(variances, 4).tolist(),
+        "explained_variance_ratios": np.round(variance_ratios, 4).tolist(),
+    }
+    json_str = json.dumps(out_dict)
+
+    transformed_data.to_file(output_vector)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Results: {json_str}")

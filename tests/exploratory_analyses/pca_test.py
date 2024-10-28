@@ -19,16 +19,22 @@ DATA = np.array([[1, 1], [2, 2], [3, 3]])
 @pytest.mark.xfail(sys.platform == "win32", reason="Results deviate on Windows.", raises=AssertionError)
 def test_pca_numpy_array():
     """Test that PCA function gives correct output for Numpy array input."""
-    pca_array, explained_variances = compute_pca(DATA, 2)
+    pca_array, principal_components, explained_variances, explained_variance_ratios = compute_pca(DATA, 2)
 
-    expected_pca_values = np.array([[-1.73205081, 1.11022302e-16], [0.0, 0.0], [1.73205081, 1.11022302e-16]])
-    expected_explained_variances_values = [1.0, 4.10865055e-33]
+    expected_pca_array_values = np.array([[-1.73205081, 1.11022302e-16], [0.0, 0.0], [1.73205081, 1.11022302e-16]])
+    expected_component_values = np.array([[0.70711, 0.70711], [0.70711, -0.70711]])
+    expected_explained_variance_ratios_values = [1.0, 4.10865055e-33]
 
+    np.testing.assert_equal(principal_components.size, 4)
     np.testing.assert_equal(explained_variances.size, 2)
+    np.testing.assert_equal(explained_variance_ratios.size, 2)
     np.testing.assert_equal(pca_array.shape, DATA.shape)
 
-    np.testing.assert_array_almost_equal(pca_array, expected_pca_values, decimal=5)
-    np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=5)
+    np.testing.assert_array_almost_equal(pca_array, expected_pca_array_values, decimal=5)
+    np.testing.assert_array_almost_equal(principal_components, expected_component_values, decimal=5)
+    np.testing.assert_array_almost_equal(
+        explained_variance_ratios, expected_explained_variance_ratios_values, decimal=5
+    )
 
 
 @pytest.mark.xfail(sys.platform == "win32", reason="Results deviate on Windows.", raises=AssertionError)
@@ -36,18 +42,24 @@ def test_pca_df():
     """Test that PCA function gives correct output for DF input."""
     data_df = pd.DataFrame(data=DATA, columns=["A", "B"])
 
-    pca_df, explained_variances = compute_pca(data_df, 2)
+    pca_df, principal_components, explained_variances, explained_variance_ratios = compute_pca(data_df, 2)
 
     expected_columns = ["principal_component_1", "principal_component_2"]
     expected_pca_values = np.array([[-1.73205081, 1.11022302e-16], [0.0, 0.0], [1.73205081, 1.11022302e-16]])
-    expected_explained_variances_values = [1.0, 4.10865055e-33]
+    expected_component_values = np.array([[0.70711, 0.70711], [0.70711, -0.70711]])
+    expected_explained_variance_ratios_values = [1.0, 4.10865055e-33]
 
+    np.testing.assert_equal(principal_components.size, 4)
     np.testing.assert_equal(explained_variances.size, 2)
+    np.testing.assert_equal(explained_variance_ratios.size, 2)
     np.testing.assert_equal(list(pca_df.columns), expected_columns)
     np.testing.assert_equal(pca_df.shape, data_df.shape)
 
     np.testing.assert_array_almost_equal(pca_df.values, expected_pca_values, decimal=5)
-    np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=5)
+    np.testing.assert_array_almost_equal(principal_components, expected_component_values, decimal=5)
+    np.testing.assert_array_almost_equal(
+        explained_variance_ratios, expected_explained_variance_ratios_values, decimal=5
+    )
 
 
 @pytest.mark.xfail(sys.platform == "win32", reason="Results deviate on Windows.", raises=AssertionError)
@@ -57,66 +69,96 @@ def test_pca_gdf():
         data=DATA, columns=["A", "B"], geometry=[Point(1, 2), Point(2, 1), Point(3, 3)], crs="EPSG:4326"
     )
 
-    pca_gdf, explained_variances = compute_pca(data_gdf, 2)
+    pca_gdf, principal_components, explained_variances, explained_variance_ratios = compute_pca(data_gdf, 2)
 
     expected_columns = ["principal_component_1", "principal_component_2", "geometry"]
     expected_pca_values = np.array([[-1.73205081, 1.11022302e-16], [0.0, 0.0], [1.73205081, 1.11022302e-16]])
-    expected_explained_variances_values = [1.0, 4.10865055e-33]
+    expected_component_values = np.array([[0.70711, 0.70711], [0.70711, -0.70711]])
+    expected_explained_variance_ratios_values = [1.0, 4.10865055e-33]
 
+    np.testing.assert_equal(principal_components.size, 4)
     np.testing.assert_equal(explained_variances.size, 2)
+    np.testing.assert_equal(explained_variance_ratios.size, 2)
     np.testing.assert_equal(list(pca_gdf.columns), expected_columns)
     np.testing.assert_equal(pca_gdf.shape, data_gdf.shape)
 
     np.testing.assert_array_almost_equal(pca_gdf.drop(columns=["geometry"]).values, expected_pca_values, decimal=5)
-    np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=5)
+    np.testing.assert_array_almost_equal(principal_components, expected_component_values, decimal=5)
+    np.testing.assert_array_almost_equal(
+        explained_variance_ratios, expected_explained_variance_ratios_values, decimal=5
+    )
 
 
 @pytest.mark.xfail(sys.platform == "win32", reason="Results deviate on Windows.", raises=AssertionError)
 def test_pca_with_nan_removal():
     """Test that PCA function gives correct output for Numpy array input that has NaN values and remove strategy."""
     data = np.array([[1, 1], [2, np.nan], [3, 3]])
-    pca_array, explained_variances = compute_pca(data, 2, nodata_handling="remove")
+    pca_array, principal_components, explained_variances, explained_variance_ratios = compute_pca(
+        data, 2, nodata_handling="remove"
+    )
 
     expected_pca_values = np.array([[-1.414, 0.0], [np.nan, np.nan], [1.414, 0.0]])
-    expected_explained_variances_values = [1.0, 0.0]
+    expected_component_values = np.array([[0.70711, 0.70711], [-0.70711, 0.70711]])
+    expected_explained_variance_ratios_values = [1.0, 0.0]
 
+    np.testing.assert_equal(principal_components.size, 4)
     np.testing.assert_equal(explained_variances.size, 2)
+    np.testing.assert_equal(explained_variance_ratios.size, 2)
     np.testing.assert_equal(pca_array.shape, DATA.shape)
 
     np.testing.assert_array_almost_equal(pca_array, expected_pca_values, decimal=3)
-    np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=3)
+    np.testing.assert_array_almost_equal(principal_components, expected_component_values, decimal=3)
+    np.testing.assert_array_almost_equal(
+        explained_variance_ratios, expected_explained_variance_ratios_values, decimal=3
+    )
 
 
 @pytest.mark.xfail(sys.platform == "win32", reason="Results deviate on Windows.", raises=AssertionError)
 def test_pca_with_nan_replace():
     """Test that PCA function gives correct output for Numpy array input that has NaN values and replace strategy."""
     data = np.array([[1, 1], [2, np.nan], [3, 3]])
-    pca_array, explained_variances = compute_pca(data, 2, nodata_handling="replace")
+    pca_array, principal_components, explained_variances, explained_variance_ratios = compute_pca(
+        data, 2, nodata_handling="replace"
+    )
 
     expected_pca_values = np.array([[-1.73205, 1.11022e-16], [0, 0], [1.73205, 1.11022e-16]])
-    expected_explained_variances_values = [1.0, 4.10865e-33]
+    expected_component_values = np.array([[0.707, 0.707], [0.707, -0.707]])
+    expected_explained_variance_ratios_values = [1.0, 4.10865e-33]
 
+    np.testing.assert_equal(principal_components.size, 4)
     np.testing.assert_equal(explained_variances.size, 2)
+    np.testing.assert_equal(explained_variance_ratios.size, 2)
     np.testing.assert_equal(pca_array.shape, DATA.shape)
 
     np.testing.assert_array_almost_equal(pca_array, expected_pca_values, decimal=3)
-    np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=3)
+    np.testing.assert_array_almost_equal(principal_components, expected_component_values, decimal=3)
+    np.testing.assert_array_almost_equal(
+        explained_variance_ratios, expected_explained_variance_ratios_values, decimal=3
+    )
 
 
 @pytest.mark.xfail(sys.platform == "win32", reason="Results deviate on Windows.", raises=AssertionError)
 def test_pca_with_nodata_removal():
     """Test that PCA function gives correct output for input that has specified nodata values and removal strategy."""
     data = np.array([[1, 1], [2, -9999], [3, 3]])
-    pca_array, explained_variances = compute_pca(data, 2, nodata_handling="remove", nodata=-9999)
+    pca_array, principal_components, explained_variances, explained_variance_ratios = compute_pca(
+        data, 2, nodata_handling="remove", nodata=-9999
+    )
 
     expected_pca_values = np.array([[-1.414, 0.0], [np.nan, np.nan], [1.414, 0.0]])
-    expected_explained_variances_values = [1.0, 0.0]
+    expected_component_values = np.array([[0.707, 0.707], [-0.707, 0.707]])
+    expected_explained_variance_ratios_values = [1.0, 0.0]
 
+    np.testing.assert_equal(principal_components.size, 4)
     np.testing.assert_equal(explained_variances.size, 2)
+    np.testing.assert_equal(explained_variance_ratios.size, 2)
     np.testing.assert_equal(pca_array.shape, DATA.shape)
 
     np.testing.assert_array_almost_equal(pca_array, expected_pca_values, decimal=3)
-    np.testing.assert_array_almost_equal(explained_variances, expected_explained_variances_values, decimal=3)
+    np.testing.assert_array_almost_equal(principal_components, expected_component_values, decimal=3)
+    np.testing.assert_array_almost_equal(
+        explained_variance_ratios, expected_explained_variance_ratios_values, decimal=3
+    )
 
 
 def test_pca_empty_data():
