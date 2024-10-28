@@ -2234,12 +2234,12 @@ def proximity_computation_cli(
     output_raster: OUTPUT_FILE_OPTION,
     max_distance: float = typer.Option(),
     max_distance_value: float = 0.0,
-    anomaly_value: float = 1.0,
+    geometries_value: float = 1.0,
     base_raster: INPUT_FILE_OPTION = None,
     pixel_size: float = None,
     extent: Tuple[float, float, float, float] = (None, None, None, None),
 ):
-    """Calculate distance from raster cell to nearest geometry."""
+    """Calculate proximity from raster cell to nearest geometry."""
     from eis_toolkit.exceptions import InvalidParameterValueException
     from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
     from eis_toolkit.vector_processing.proximity_computation import proximity_computation
@@ -2267,7 +2267,7 @@ def proximity_computation_cli(
         geodataframe=geodataframe,
         raster_profile=profile,
         maximum_distance=max_distance,
-        scale_range=(anomaly_value, max_distance_value),
+        scale_range=(geometries_value, max_distance_value),
     )
     profile["count"] = 1
     typer.echo("Progress: 75%")
