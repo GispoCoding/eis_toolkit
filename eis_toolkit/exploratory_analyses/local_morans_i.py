@@ -6,7 +6,6 @@ from beartype.typing import Literal
 from esda.moran import Moran_Local
 
 from eis_toolkit import exceptions
-from eis_toolkit.exceptions import InvalidParameterValueException
 
 
 @beartype
@@ -19,12 +18,12 @@ def _local_morans_i(
     elif weight_type == "knn":
         w = libpysal.weights.KNN.from_dataframe(gdf, k=k)
     else:
-        raise InvalidParameterValueException("Invalid weight_type. Use 'queen' or 'knn'.")
+        raise exceptions.InvalidParameterValueException("Invalid weight_type. Use 'queen' or 'knn'.")
 
     w.transform = "R"
 
     if len(gdf[column]) != len(w.weights):
-        raise InvalidParameterValueException("Dimension mismatch between data and weights matrix.")
+        raise exceptions.InvalidParameterValueException("Dimension mismatch between data and weights matrix.")
 
     moran_loc = Moran_Local(gdf[column], w, permutations=permutations)
 
@@ -59,12 +58,18 @@ def local_morans_i(
 
     Raises:
         EmptyDataFrameException: The input geodataframe is empty.
+        InvalidColumnException: The input column is not found in the input geodataframe.
+        InvalidParameterValueException: Input parameter values for `k` or `permutations` are invalid.
+        NonNumericDataException: The input column contains non-numeric data.
     """
     if gdf.shape[0] == 0:
         raise exceptions.EmptyDataFrameException("Geodataframe is empty.")
 
     if column not in gdf.columns:
-        raise exceptions.InvalidParameterValueException(f"Column '{column}' not found in the GeoDataFrame.")
+        raise exceptions.InvalidColumnException(f"Column '{column}' not found in the GeoDataFrame.")
+
+    if not np.issubdtype(gdf[column].dtype, np.number):
+        raise exceptions.NonNumericDataException(f"Column '{column}' must contain numeric data.")
 
     if k < 1:
         raise exceptions.InvalidParameterValueException("k must be > 0.")
