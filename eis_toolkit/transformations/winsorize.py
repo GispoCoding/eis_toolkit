@@ -150,12 +150,14 @@ def winsorize(  # type: ignore[no-any-unimported]
         current_transform = f"transformation {i + 1}"
         current_settings = {
             "band_origin": bands[i],
-            "percentile_lower": cast_scalar_to_int(percentiles[i][0]),
-            "percentile_upper": cast_scalar_to_int(percentiles[i][1]),
-            "calculated_lower": cast_scalar_to_int(calculated_lower),
-            "calculated_upper": cast_scalar_to_int(calculated_upper),
             "nodata": cast_scalar_to_int(nodata),
         }
+        if calculated_lower:
+            current_settings["percentile_lower"] = cast_scalar_to_int(percentiles[i][0])
+            current_settings["calculated_lower"] = cast_scalar_to_int(calculated_lower)
+        if calculated_upper:
+            current_settings["percentile_upper"] = cast_scalar_to_int(percentiles[i][1])
+            current_settings["calculated_upper"] = cast_scalar_to_int(calculated_upper)
 
         out_settings[current_transform] = current_settings
 
