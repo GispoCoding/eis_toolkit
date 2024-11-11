@@ -8,7 +8,7 @@ from scipy.stats import gmean
 
 from eis_toolkit.exceptions import NumericValueSignException
 from eis_toolkit.utilities.aitchison_geometry import _closure
-from eis_toolkit.utilities.checks.compositional import check_compositional_data
+from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
 from eis_toolkit.utilities.miscellaneous import rename_columns, rename_columns_by_pattern
 
 
@@ -42,7 +42,7 @@ def clr_transform(df: pd.DataFrame) -> pd.DataFrame:
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
-    check_compositional_data(df)
+    check_in_simplex_sample_space(df)
     return rename_columns_by_pattern(_clr_transform(df))
 
 
