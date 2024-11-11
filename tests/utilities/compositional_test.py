@@ -58,6 +58,22 @@ def test_compositional_data_has_nans():
         single_plr_transform(df, "b")
 
 
+def test_compositional_data_invalid():
+    """Test that input data that does not belong to a simplex sample space raises the correct exception."""
+    arr = np.array([[1, 1, 1], [2, 2, 2]])
+    df = pd.DataFrame(arr, columns=["a", "b", "c"])
+    with pytest.raises(InvalidCompositionException):
+        alr_transform(df)
+    with pytest.raises(InvalidCompositionException):
+        clr_transform(df)
+    with pytest.raises(InvalidCompositionException):
+        single_ilr_transform(df, ["a"], ["b"])
+    with pytest.raises(InvalidCompositionException):
+        plr_transform(df)
+    with pytest.raises(InvalidCompositionException):
+        single_plr_transform(df, "b")
+
+
 def test_check_for_simplex_sample_space():
     """Test whether or not a dataframe belongs to a simplex sample space is correctly identified."""
     unit_simplex_df = pd.DataFrame([[0.1, 0.2, 0.3, 0.4], [0.2, 0.3, 0.2, 0.3]])
