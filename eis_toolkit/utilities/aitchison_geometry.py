@@ -28,15 +28,13 @@ def _closure(df: pd.DataFrame, scale: Optional[Number] = None) -> pd.DataFrame:
     """
     Perform the closure operation on the dataframe.
 
-    If a scale value representing the constant sum is not provided, assumes the standard simplex,
-    in which the sum of th components of each composition vector is 1.
+    Assumes the standard simplex, in which the sum of the components of each composition vector is 1.
 
     Args:
         df: A dataframe of shape (N, D) compositional data.
-        scale: The sum to which each data row should result to. Default is 1.
 
     Returns:
-        A new dataframe of shape (N, D) where each row has been normalized to the given scale value.
+        A new dataframe of shape (N, D) where each row has been normalized to 1.
     """
 
     dfc = df.copy()
