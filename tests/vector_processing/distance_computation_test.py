@@ -8,7 +8,7 @@ import rasterio
 from shapely.geometry import LineString, Point, box
 
 from eis_toolkit.exceptions import InvalidParameterValueException
-from eis_toolkit.vector_processing.distance_computation import distance_computation
+from eis_toolkit.vector_processing.distance_computation import distance_computation_optimized
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
 with rasterio.open(SMALL_RASTER_PATH) as raster:
@@ -55,15 +55,15 @@ POLYGON_GEOMETRIES_WITHIN_SMALL_RASTER = geodataframe_with_raster_crs(
             LINE_GEOMETRIES_WITHIN_SMALL_RASTER,
             EXPECTED_SMALL_RASTER_SHAPE,
             0.0,
-            107.83784122468327,
+            119.62545715691121,
             id="line_geometries_within_small_raster",
         ),
         pytest.param(
             SMALL_RASTER_PROFILE,
             POLYGON_GEOMETRIES_WITHIN_SMALL_RASTER,
             EXPECTED_SMALL_RASTER_SHAPE,
-            0.0,
-            91.0,
+            1.4142135623730951,
+            102.45974819410792,
             id="polygon_geometries_within_small_raster",
         ),
     ],
@@ -73,7 +73,7 @@ def test_distance_computation_with_expected_results(
 ):
     """Test distance_computation."""
 
-    result = distance_computation(raster_profile=raster_profile, geodataframe=geodataframe)
+    result = distance_computation_optimized(raster_profile=raster_profile, geodataframe=geodataframe)
 
     assert isinstance(result, np.ndarray)
     assert result.shape == expected_shape
@@ -115,6 +115,6 @@ def test_distance_computation(raster_profile, geodataframe, expected_error):
     """Test distance_computation."""
 
     with expected_error:
-        result = distance_computation(raster_profile=raster_profile, geodataframe=geodataframe)
+        result = distance_computation_optimized(raster_profile=raster_profile, geodataframe=geodataframe)
         assert isinstance(result, np.ndarray)
         assert len(result.shape) == 2
