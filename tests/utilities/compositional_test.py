@@ -77,7 +77,6 @@ def test_compositional_data_invalid():
 def test_check_for_simplex_sample_space():
     """Test whether or not a dataframe belongs to a simplex sample space is correctly identified."""
     unit_simplex_df = pd.DataFrame([[0.1, 0.2, 0.3, 0.4], [0.2, 0.3, 0.2, 0.3]])
-    simplex_df = pd.DataFrame([[1, 2, 3, 4], [2, 3, 2, 3]], columns=["a", "b", "c", "d"])
     non_simplex_positive_df = pd.DataFrame([1, 2, 3, 4], [5, 6, 7, 8])
     non_positive_df = pd.DataFrame([-1, 2, 3, 4], [1, 2, 3, 4])
 
@@ -87,13 +86,8 @@ def test_check_for_simplex_sample_space():
     with pytest.raises(NumericValueSignException):
         check_in_simplex_sample_space(non_positive_df)
 
-    with pytest.raises(InvalidCompositionException):
-        check_in_simplex_sample_space(simplex_df, np.float64(100))
-
     # Valid cases - assert no exception is raised
     try:
-        check_in_simplex_sample_space(simplex_df)
-        check_in_simplex_sample_space(simplex_df, np.float64(10))
-        check_in_simplex_sample_space(unit_simplex_df, np.float64(1.0))
+        check_in_simplex_sample_space(unit_simplex_df)
     except Exception as ex:
         assert False, f"{type(ex)}: {ex}"

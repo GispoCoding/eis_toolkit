@@ -1,29 +1,30 @@
-import numpy as np
+from numbers import Number
+
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Optional
 
 from eis_toolkit.exceptions import InvalidCompositionException, NumericValueSignException
 from eis_toolkit.utilities.checks.dataframe import check_dataframe_contains_only_positive_numbers
 
 
 @beartype
-def check_in_simplex_sample_space(df: pd.DataFrame, expected_sum: Optional[np.float64] = None) -> None:
+def check_in_simplex_sample_space(df: pd.DataFrame, tolerance: Number = 0.0001) -> None:
     """
     Check that the compositions represented by the data rows belong to a simplex sample space.
 
+    Checks that data has not NaN values.
     Checks that each compositional data point belongs to the set of positive real numbers.
-    Checks that each composition is normalized to the same value.
+    Checks that input dataframe is closed to either 1 or 100.
 
     Args:
         df: The dataframe to check.
-        expected_sum: The expected sum of each row. If None, simply checks that the sum of each row is equal.
+        tolerance: Small tolerance value to allow floating-point imprecision.
 
     Returns:
-        True if values are valid and the sum of each row is the expected_sum.
+        None.
 
     Raises:
-        InvalidCompositionException: Data is not normalized to the expected value.
+        InvalidCompositionException: Data is not within the expected simplex sample space.
         NumericValueSignException: Data contains zeros or negative values.
     """
     if df.isnull().values.any():
@@ -32,9 +33,11 @@ def check_in_simplex_sample_space(df: pd.DataFrame, expected_sum: Optional[np.fl
     if not check_dataframe_contains_only_positive_numbers(df):
         raise NumericValueSignException("Data contains zeros or negative values.")
 
-    df_sum = np.sum(df, axis=1)
-    expected_sum = expected_sum if expected_sum is not None else df_sum.iloc[0]
-    if len(df_sum[df_sum.iloc[:] != expected_sum]) != 0:
-        raise InvalidCompositionException("Not each composition is normalized to the same value.")
+    row_sums = df.sum(axis=1)
+    closed_to_one = (row_sums - 1).abs() < tolerance
+    closed_to_hundred = (row_sums - 100).abs() < tolerance
+
+    if not closed_to_one.all() and not closed_to_hundred.all():
+        raise InvalidCompositionException(f"Input data is not closed to 1 or 100 within tolerance of {tolerance}.")
 
     return None
