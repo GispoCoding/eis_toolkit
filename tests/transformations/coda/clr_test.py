@@ -26,19 +26,34 @@ def test_clr_transform():
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
 
 
+def test_clr_transform_with_columns():
+    """Test CLR transform with columns."""
+    result = clr_transform(SAMPLE_DATAFRAME, columns=["a", "b", "d"])
+    expected = pd.DataFrame({"V1": [1.42, 1.24], "V2": [-0.27, -0.13], "V3": [-1.15, -1.11]}, dtype=np.float64)
+    pd.testing.assert_frame_equal(result, expected, atol=1e-2)
+
+
 def test_inverse_clr_simple():
     """Test CLR inverse core functionality."""
     zeros_df_4x4 = pd.DataFrame(np.zeros((4, 4)), columns=["V1", "V2", "V3", "V4"])
     ones_df_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["a", "b", "c", "d"])
-    result = inverse_clr(zeros_df_4x4, ["a", "b", "c", "d"], 4)
+    result = inverse_clr(zeros_df_4x4, colnames=["a", "b", "c", "d"], scale=4)
     pd.testing.assert_frame_equal(result, ones_df_4x4)
 
 
 def test_inverse_clr():
     """Test CLR inverse core functionality."""
     clr = clr_transform(SAMPLE_DATAFRAME)
-    result = inverse_clr(clr, ["a", "b", "c", "d"], 100)
+    result = inverse_clr(clr, colnames=["a", "b", "c", "d"], scale=100)
     pd.testing.assert_frame_equal(result, SAMPLE_DATAFRAME)
+
+
+def test_inverse_clr_with_columns():
+    """Test CLR inverse with columns."""
+    clr = clr_transform(SAMPLE_DATAFRAME)
+    result = inverse_clr(clr, columns=["V1", "V2"], colnames=["a", "b"], scale=100)
+    expected = pd.DataFrame({"a": [84.42, 79.75], "b": [15.58, 20.25]})
+    pd.testing.assert_frame_equal(result, expected, atol=1e-2)
 
 
 def test_inverse_clr_with_invalid_scale_value():

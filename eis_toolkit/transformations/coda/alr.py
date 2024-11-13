@@ -44,14 +44,14 @@ def alr_transform(
     if column is not None and column not in df.columns:
         raise InvalidColumnException(f"The column {column} was not found in the dataframe.")
 
-    column = column if column is not None else df.columns[-1]
+    denominator_column = column if column is not None else df.columns[-1]
 
-    columns = [col for col in df.columns]
+    columns_to_transform = [col for col in df.columns]
 
-    if not keep_denominator_column and column in columns:
-        columns.remove(column)
+    if not keep_denominator_column and denominator_column in columns_to_transform:
+        columns_to_transform.remove(denominator_column)
 
-    return rename_columns_by_pattern(_alr_transform(df, columns, column))
+    return rename_columns_by_pattern(_alr_transform(df, columns_to_transform, denominator_column))
 
 
 @beartype

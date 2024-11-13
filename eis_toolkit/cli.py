@@ -3086,7 +3086,11 @@ def inverse_alr_transform_cli(
 
 # CODA - CLR TRANSFORM
 @app.command()
-def clr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FILE_OPTION):
+def clr_transform_cli(
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
+    columns: Annotated[List[str], typer.Option()] = None,
+):
     """Perform a centered logratio transformation on the data."""
     from eis_toolkit.transformations.coda.clr import clr_transform
 
@@ -3097,7 +3101,7 @@ def clr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FIL
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_df = clr_transform(df=df)
+    out_df = clr_transform(df=df, columns=columns)
     typer.echo("Progess 75%")
 
     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
@@ -3111,6 +3115,7 @@ def clr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FIL
 def inverse_clr_transform_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
+    columns: Annotated[List[str], typer.Option()] = None,
     colnames: Annotated[List[str], typer.Option()] = None,
     scale: float = 1.0,
 ):
@@ -3124,7 +3129,7 @@ def inverse_clr_transform_cli(
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_df = inverse_clr(df=df, colnames=colnames, scale=scale)
+    out_df = inverse_clr(df=df, columns=columns, colnames=colnames, scale=scale)
     typer.echo("Progess 75%")
 
     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
