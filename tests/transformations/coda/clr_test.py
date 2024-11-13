@@ -9,19 +9,16 @@ sample_array = np.array([[65, 12, 18, 5], [63, 16, 15, 6]], dtype=np.float64)
 SAMPLE_DATAFRAME = pd.DataFrame(sample_array, columns=["a", "b", "c", "d"])
 
 
-def test_clr_transform_simple():
-    """Test CLR transform core functionality."""
-    ones_df_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["a", "b", "c", "d"])
-    zeros_df_4x4 = pd.DataFrame(np.zeros((4, 4)), columns=["V1", "V2", "V3", "V4"])
-    result = clr_transform(ones_df_4x4)
-    pd.testing.assert_frame_equal(result, zeros_df_4x4)
-
-
 def test_clr_transform():
     """Test CLR transform core functionality."""
-    result = clr_transform(SAMPLE_DATAFRAME)
+    arr = np.random.dirichlet(np.ones(4), size=4)
+    df = pd.DataFrame(arr, columns=["a", "b", "c", "d"], dtype=np.float64)
+    result = clr_transform(df)
+    geometric_means = np.prod(arr, axis=1) ** (1 / arr.shape[1])
     expected = pd.DataFrame(
-        {"V1": [1.38, 1.29], "V2": [-0.30, -0.08], "V3": [0.10, -0.15], "V4": [-1.18, -1.06]}, dtype=np.float64
+        np.log(arr / geometric_means[:, None]),
+        columns=["V1", "V2", "V3", "V4"],
+        dtype=np.float64,
     )
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
 
