@@ -13,7 +13,7 @@ from eis_toolkit.utilities.checks.raster import check_raster_profile
 
 @beartype
 def distance_computation(
-    geodataframe: gpd.GeoDataFrame, raster_profile: Union[profiles.Profile, dict], max_distance: Optional[float] = None
+    geodataframe: gpd.GeoDataFrame, raster_profile: Union[profiles.Profile, dict], max_distance: Optional[Number] = None
 ) -> np.ndarray:
     """
     Calculate distance from each raster cell (centre) to the nearest input geometry.
