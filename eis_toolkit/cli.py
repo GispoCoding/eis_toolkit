@@ -3206,7 +3206,7 @@ def single_plr_transform_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
     numerator: str = typer.Option(),
-    denominators: Annotated[List[str], typer.Option()] = None
+    denominators: Annotated[List[str], typer.Option()] = None,
 ):
     """Perform a pivot logratio transformation on the selected column."""
     from eis_toolkit.transformations.coda.plr import single_plr_transform
