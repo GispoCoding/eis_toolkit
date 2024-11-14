@@ -27,7 +27,7 @@ def test_clr_transform():
 
 
 def test_clr_transform_with_columns():
-    """Test CLR transform with columns."""
+    """Test CLR transform with column selection."""
     result = clr_transform(SAMPLE_DATAFRAME, columns=["a", "b", "d"])
     expected = pd.DataFrame({"V1": [1.42, 1.24], "V2": [-0.27, -0.13], "V3": [-1.15, -1.11]}, dtype=np.float64)
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
@@ -49,7 +49,7 @@ def test_inverse_clr():
 
 
 def test_inverse_clr_with_columns():
-    """Test CLR inverse with columns."""
+    """Test CLR inverse with column selection."""
     clr = clr_transform(SAMPLE_DATAFRAME)
     result = inverse_clr(clr, columns=["V1", "V2"], colnames=["a", "b"], scale=100)
     expected = pd.DataFrame({"a": [84.42, 79.75], "b": [15.58, 20.25]})
