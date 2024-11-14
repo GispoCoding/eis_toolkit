@@ -3035,7 +3035,8 @@ def gamma_overlay_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT
 def alr_transform_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
-    column: str = None,
+    columns: Annotated[List[str], typer.Option()] = None,
+    denominator_column: str = None,
     keep_denominator_column: bool = False,
 ):
     """Perform an additive logratio transformation on the data."""
@@ -3048,7 +3049,9 @@ def alr_transform_cli(
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_df = alr_transform(df=df, column=column, keep_denominator_column=keep_denominator_column)
+    out_df = alr_transform(
+        df=df, columns=columns, denominator_column=denominator_column, keep_denominator_column=keep_denominator_column
+    )
     typer.echo("Progess 75%")
 
     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
@@ -3063,6 +3066,7 @@ def inverse_alr_transform_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
     denominator_column: str = typer.Option(),
+    columns: Annotated[List[str], typer.Option()] = None,
     scale: float = 1.0,
 ):
     """Perform the inverse transformation for a set of ALR transformed data."""
@@ -3075,7 +3079,7 @@ def inverse_alr_transform_cli(
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_df = inverse_alr(df=df, denominator_column=denominator_column, scale=scale)
+    out_df = inverse_alr(df=df, denominator_column=denominator_column, columns=columns, scale=scale)
     typer.echo("Progess 75%")
 
     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
@@ -3089,7 +3093,7 @@ def inverse_alr_transform_cli(
 def clr_transform_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
-    columns: Annotated[List[str], typer.Option()] = None,
+    columns: Annotated[List[str], typer.Option()],
 ):
     """Perform a centered logratio transformation on the data."""
     from eis_toolkit.transformations.coda.clr import clr_transform
