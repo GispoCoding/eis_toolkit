@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from beartype import beartype
+from beartype.typing import Optional, Sequence
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
@@ -37,6 +38,9 @@ def _single_plr_transform_by_index(df: pd.DataFrame, column_ind: int) -> pd.Seri
     columns = [col for col in df.columns]
     subcomposition = [columns[i] for i in range(len(columns)) if i > column_ind]
     c = len(subcomposition)
+
+    if c == 0:
+        raise InvalidColumnException("No columns found to the right of the numerator.")
     scaling_factor = _calculate_plr_scaling_factor(c)
 
     # A series to hold the transformed rows
@@ -57,7 +61,7 @@ def _single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
 
 
 @beartype
-def single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
+def single_plr_transform(df: pd.DataFrame, numerator: str, denominators: Optional[Sequence[str]] = None) -> pd.Series:
     """
     Perform a pivot logratio transformation on the selected column.
 
@@ -68,28 +72,46 @@ def single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
 
     Args:
         df: A dataframe of shape [N, D] of compositional data.
-        column: The name of the numerator column to use for the transformation.
+        numerator: The name of the numerator column to use for the transformation.
+        denoinators: The names of the denominator columns to use for the transformation.
 
     Returns:
         A series of length N containing the transforms.
 
     Raises:
         InvalidColumnException: The input column isn't found in the dataframe, or there are no columns
-            to the right of the given column.
+            to the right of the given column, or last column selected as numerator, or selected numerator
+            is in denominators.
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
     check_compositional_data(df)
 
-    if column not in df.columns:
-        raise InvalidColumnException(f"The column {column} was not found in the dataframe.")
+    if numerator not in df.columns:
+        raise InvalidColumnException(f"The column {numerator} was not found in the dataframe.")
 
-    idx = df.columns.get_loc(column)
-
+    idx = df.columns.get_loc(numerator)
     if idx == len(df.columns) - 1:
-        raise InvalidColumnException()
+        raise InvalidColumnException("Can't select last column as numerator.")
 
-    return _single_plr_transform(df, column)
+    if denominators:
+        if numerator in denominators:
+            raise InvalidColumnException("Numerator can't be one of denominators.")
+
+        invalid_columns = [col for col in denominators if col not in df.columns]
+        if invalid_columns:
+            raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
+
+        # Place numerator to the left of the denominators
+        denominators.insert(0, numerator)
+        df = df[denominators]
+
+    else:
+        # Select only columns starting from the numerator
+        indices = df.columns[idx:].to_list()
+        df = df[indices]
+
+    return _single_plr_transform(df, numerator)
 
 
 @beartype
@@ -106,12 +128,13 @@ def _plr_transform(df: pd.DataFrame) -> pd.DataFrame:
 
 
 @beartype
-def plr_transform(df: pd.DataFrame) -> pd.DataFrame:
+def plr_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> pd.DataFrame:
     """
     Perform a pivot logratio transformation on the dataframe, returning the full set of transforms.
 
     Args:
         df: A dataframe of shape [N, D] of compositional data.
+        columns: The names of the columns to use for the transformation.
 
     Returns:
         A dataframe of shape [N, D-1] containing the set of PLR transformed data.
@@ -122,5 +145,8 @@ def plr_transform(df: pd.DataFrame) -> pd.DataFrame:
         NumericValueSignException: Data contains zeros or negative values.
     """
     check_compositional_data(df)
+
+    if columns:
+        df = df[columns]
 
     return rename_columns_by_pattern(_plr_transform(df))

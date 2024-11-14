@@ -3205,7 +3205,8 @@ def pairwise_logratio_cli(
 def single_plr_transform_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
-    column: str = typer.Option(),
+    numerator: str = typer.Option(),
+    denominators: Annotated[List[str], typer.Option()] = None
 ):
     """Perform a pivot logratio transformation on the selected column."""
     from eis_toolkit.transformations.coda.plr import single_plr_transform
@@ -3217,7 +3218,7 @@ def single_plr_transform_cli(
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_series = single_plr_transform(df=df, column=column)
+    out_series = single_plr_transform(df=df, numerator=numerator, denominators=denominators)
     typer.echo("Progess 75%")
 
     # NOTE: Output of single_plr_transform might be changed to DF in the future, to automatically do the following
