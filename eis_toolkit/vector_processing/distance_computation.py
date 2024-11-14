@@ -104,7 +104,7 @@ def distance_computation_optimized(
 
     Uses Numba-optimized calculations.
 
-        Args:
+    Args:
         geodataframe: The GeoDataFrame with geometries to determine distance to.
         raster_profile: The raster profile of the raster in which the distances
             to the nearest geometry are determined.
@@ -150,14 +150,41 @@ def distance_computation_optimized(
                 (coords[i][0], coords[i][1], coords[i + 1][0], coords[i + 1][1]) for i in range(len(coords) - 1)
             ]
 
+        elif geometry.geom_type == "MultiPolygon":
+            # For MultiPolygon, iterate over each polygon
+            segments = []
+            for poly in geometry.geoms:
+                coords = list(poly.exterior.coords)
+                for x, y in coords:
+                    polygon_coords.extend([x, y])
+                polygon_indices.append(len(polygon_coords) // 2)
+
+                # Add polygon boundary as segments for distance calculations
+                segments.extend(
+                    [(coords[i][0], coords[i][1], coords[i + 1][0], coords[i + 1][1]) for i in range(len(coords) - 1)]
+                )
+
         elif geometry.geom_type == "LineString":
             coords = list(geometry.coords)
             segments = [
                 (coords[i][0], coords[i][1], coords[i + 1][0], coords[i + 1][1]) for i in range(len(coords) - 1)
             ]
 
+        elif geometry.geom_type == "MultiLineString":
+            # For MultiLineString, iterate through each line string component
+            segments = []
+            for line in geometry.geoms:
+                coords = list(line.coords)
+                segments.extend(
+                    [(coords[i][0], coords[i][1], coords[i + 1][0], coords[i + 1][1]) for i in range(len(coords) - 1)]
+                )
+
         elif geometry.geom_type == "Point":
             segments = [(geometry.x, geometry.y)]
+
+        elif geometry.geom_type == "MultiPoint":
+            # For MultiPoint, iterate over each point and add as individual (x, y) tuples
+            segments = [(point.x, point.y) for point in geometry.geoms]
 
         else:
             raise exceptions.GeometryTypeException(f"Encountered unsupported geometry type: {geometry.geom_type}.")
