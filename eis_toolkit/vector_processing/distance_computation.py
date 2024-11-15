@@ -181,9 +181,10 @@ def _compute_distances_core(
 def _generate_raster_points(width: int, height: int, affine_transform: transform.Affine) -> np.ndarray:
     """Generate a full grid of points from the raster dimensions and affine transform."""
     cols, rows = np.meshgrid(np.arange(width), np.arange(height))
-    xs, ys = transform.xy(affine_transform, rows, cols)
-    points = np.column_stack([np.array(xs).ravel(), np.array(ys).ravel()])
-    return points
+    cols = cols.ravel()
+    rows = rows.ravel()
+    xs, ys = transform.xy(affine_transform, rows, cols, offset="center")
+    return np.column_stack([xs, ys])
 
 
 @njit
