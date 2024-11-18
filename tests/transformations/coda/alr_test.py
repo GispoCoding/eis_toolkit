@@ -33,17 +33,18 @@ def test_alr_transform():
 
 def test_alr_transform_with_columns():
     """Test ALR transform with column selection."""
-    alr = alr_transform(SAMPLE_DATAFRAME, columns=["a", "c", "d"], denominator_column="c", keep_denominator_column=True)
+    arr = np.random.dirichlet(np.ones(4), size=4)
+    df = pd.DataFrame(arr, columns=["a", "b", "c", "d"], dtype=np.float64)
+    df["e"] = ["value1", "value2", "value3", "value4"]
+
+    result = alr_transform(df, columns=["a", "b", "c", "d"], denominator_column="b", keep_denominator_column=True)
 
     expected = pd.DataFrame(
-        {
-            "V1": [np.log(65 / 18), np.log(63 / 15)],
-            "V2": [np.log(18 / 18), np.log(15 / 15)],
-            "V3": [np.log(5 / 18), np.log(6 / 15)],
-        },
+        np.log(arr / arr[:, 1, None]),
+        columns=["V1", "V2", "V3", "V4"],
         dtype=np.float64,
     )
-    pd.testing.assert_frame_equal(alr, expected)
+    pd.testing.assert_frame_equal(result, expected)
 
 
 def test_alr_transform_with_invalid_denominator_column():

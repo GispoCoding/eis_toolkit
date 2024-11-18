@@ -3,7 +3,7 @@ from numbers import Number
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import List, Optional, Sequence
+from beartype.typing import Optional, Sequence
 
 from eis_toolkit.exceptions import InvalidColumnException, NumericValueSignException
 from eis_toolkit.utilities.aitchison_geometry import _closure
@@ -43,7 +43,6 @@ def alr_transform(
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
-    check_in_simplex_sample_space(df)
 
     if denominator_column is not None and denominator_column not in df.columns:
         raise InvalidColumnException(f"The column {denominator_column} was not found in the dataframe.")
@@ -60,8 +59,11 @@ def alr_transform(
         if invalid_columns:
             raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
         columns_to_transform = columns
+        df = df[columns_to_transform]
     else:
         columns_to_transform = df.columns.to_list()
+
+    check_in_simplex_sample_space(df)
 
     if not keep_denominator_column and denominator_column in columns_to_transform:
         columns_to_transform.remove(denominator_column)
@@ -70,10 +72,8 @@ def alr_transform(
 
 
 @beartype
-def _inverse_alr(df: pd.DataFrame, columns: List[str], denominator_column: str, scale: Number = 1.0) -> pd.DataFrame:
+def _inverse_alr(df: pd.DataFrame, denominator_column: str, scale: Number = 1.0) -> pd.DataFrame:
     dfc = df.copy()
-    dfc = dfc[columns]
-
     if denominator_column not in dfc.columns.values:
         # Add the denominator column
         dfc[denominator_column] = 0.0
@@ -113,4 +113,6 @@ def inverse_alr(
     else:
         columns_to_transform = df.columns.to_list()
 
-    return _inverse_alr(df, columns_to_transform, denominator_column, scale)
+    df = df[columns_to_transform]
+
+    return _inverse_alr(df, denominator_column, scale)
