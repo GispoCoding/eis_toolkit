@@ -3093,7 +3093,7 @@ def inverse_alr_transform_cli(
 def clr_transform_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
-    columns: Annotated[List[str], typer.Option()],
+    columns: Annotated[List[str], typer.Option()] = None,
 ):
     """Perform a centered logratio transformation on the data."""
     from eis_toolkit.transformations.coda.clr import clr_transform
