@@ -3206,7 +3206,7 @@ def single_plr_transform_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
     numerator: str = typer.Option(),
-    denominators: Annotated[List[str], typer.Option()] = None,
+    denominator: Annotated[List[str], typer.Option()] = None,
 ):
     """Perform a pivot logratio transformation on the selected column."""
     from eis_toolkit.transformations.coda.plr import single_plr_transform
@@ -3218,7 +3218,7 @@ def single_plr_transform_cli(
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_series = single_plr_transform(df=df, numerator=numerator, denominators=denominators)
+    out_series = single_plr_transform(df=df, numerator=numerator, denominators=denominator)
     typer.echo("Progess 75%")
 
     # NOTE: Output of single_plr_transform might be changed to DF in the future, to automatically do the following
@@ -3231,8 +3231,12 @@ def single_plr_transform_cli(
 
 # CODA - PLR TRANSFORM
 @app.command()
-def plr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FILE_OPTION):
-    """Perform a pivot logratio transformation on the dataframe, returning the full set of transforms."""
+def plr_transform_cli(
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
+    columns: Annotated[List[str], typer.Option()] = None,
+):
+    """Perform a pivot logratio transformation on the selected columns."""
     from eis_toolkit.transformations.coda.plr import plr_transform
 
     typer.echo("Progress: 10%")
@@ -3242,7 +3246,7 @@ def plr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FIL
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_df = plr_transform(df=df)
+    out_df = plr_transform(df=df, columns=columns)
     typer.echo("Progess 75%")
 
     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
