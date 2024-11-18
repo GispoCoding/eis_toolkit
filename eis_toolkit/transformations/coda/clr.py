@@ -18,8 +18,8 @@ def _centered_ratio(row: pd.Series) -> pd.Series:
 
 
 @beartype
-def _clr_transform(df: pd.DataFrame, columns: Sequence[str]) -> pd.DataFrame:
-    dfc = df[columns].copy()
+def _clr_transform(df: pd.DataFrame) -> pd.DataFrame:
+    dfc = df.copy()
     dfc = dfc.apply(_centered_ratio, axis=1)
 
     return np.log(dfc)
@@ -42,24 +42,23 @@ def clr_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> 
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
-    check_in_simplex_sample_space(df)
 
     if columns:
         invalid_columns = [col for col in columns if col not in df.columns]
         if invalid_columns:
             raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
         columns_to_transform = columns
+        df = df[columns_to_transform]
     else:
         columns_to_transform = df.columns.to_list()
 
-    return rename_columns_by_pattern(_clr_transform(df, columns_to_transform))
+    check_in_simplex_sample_space(df)
+
+    return rename_columns_by_pattern(_clr_transform(df))
 
 
 @beartype
-def _inverse_clr(df: pd.DataFrame, columns: Optional[Sequence[str]] = None, scale: Number = 1.0) -> pd.DataFrame:
-    if columns:
-        df = df[columns]
-
+def _inverse_clr(df: pd.DataFrame, scale: Number = 1.0) -> pd.DataFrame:
     return _closure(np.exp(df), scale)
 
 
@@ -98,7 +97,10 @@ def inverse_clr(
     else:
         columns_to_transform = df.columns.to_list()
 
-    inverse_data = _inverse_clr(df, columns_to_transform, scale)
+    dfc = df.copy()
+    dfc = dfc[columns_to_transform]
+
+    inverse_data = _inverse_clr(dfc, scale)
 
     if colnames:
         return rename_columns(inverse_data, colnames)

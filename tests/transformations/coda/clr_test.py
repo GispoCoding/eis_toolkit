@@ -25,8 +25,16 @@ def test_clr_transform():
 
 def test_clr_transform_with_columns():
     """Test CLR transform with column selection."""
-    result = clr_transform(SAMPLE_DATAFRAME, columns=["a", "b", "d"])
-    expected = pd.DataFrame({"V1": [1.42, 1.24], "V2": [-0.27, -0.13], "V3": [-1.15, -1.11]}, dtype=np.float64)
+    arr = np.random.dirichlet(np.ones(4), size=4)
+    df = pd.DataFrame(arr, columns=["a", "b", "c", "d"], dtype=np.float64)
+    df["e"] = ["value1", "value2", "value3", "value4"]
+    result = clr_transform(df, columns=["a", "b", "c", "d"])
+    geometric_means = np.prod(arr, axis=1) ** (1 / arr.shape[1])
+    expected = pd.DataFrame(
+        np.log(arr / geometric_means[:, None]),
+        columns=["V1", "V2", "V3", "V4"],
+        dtype=np.float64,
+    )
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
 
 
