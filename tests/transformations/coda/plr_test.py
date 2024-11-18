@@ -11,7 +11,7 @@ def test_single_plr_transform_with_single_composition():
     arr = np.array([80, 15, 5])
     df = pd.DataFrame(arr[None], columns=["a", "b", "c"])
 
-    result = single_plr_transform(df, numerator="a", denominators=["b", "c"])
+    result = single_plr_transform(df, numerator="a", denominator=["b", "c"])
     assert result[0] == pytest.approx(1.82, abs=1e-2)
 
     result = _single_plr_transform_by_index(df, 0)

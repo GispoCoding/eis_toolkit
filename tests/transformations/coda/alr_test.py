@@ -9,34 +9,23 @@ sample_array = np.array([[65, 12, 18, 5], [63, 16, 15, 6]])
 SAMPLE_DATAFRAME = pd.DataFrame(sample_array, columns=["a", "b", "c", "d"])
 
 
-def test_alr_transform_simple():
-    """Test ALR transformation core functionality."""
-    ones_df_4x4 = pd.DataFrame(np.ones((4, 4)), columns=["a", "b", "c", "d"])
-    zeros_df_4x4 = pd.DataFrame(np.zeros((4, 3)), columns=["V1", "V2", "V3"])
-    result = alr_transform(ones_df_4x4)
-    pd.testing.assert_frame_equal(result, zeros_df_4x4)
-
-
 def test_alr_transform():
     """Test ALR transformation core functionality."""
-    arr = np.array([[1, 4, 1, 1], [2, 1, 2, 2]])
+    arr = np.random.dirichlet(np.ones(4), size=4)
     df = pd.DataFrame(arr, columns=["a", "b", "c", "d"], dtype=np.float64)
 
     result = alr_transform(df, denominator_column="b", keep_denominator_column=True)
     expected = pd.DataFrame(
-        {
-            "V1": [np.log(0.25), np.log(2)],
-            "V2": [0, 0],
-            "V3": [np.log(0.25), np.log(2)],
-            "V4": [np.log(0.25), np.log(2)],
-        },
+        np.log(arr / arr[:, 1, None]),
+        columns=["V1", "V2", "V3", "V4"],
         dtype=np.float64,
     )
     pd.testing.assert_frame_equal(result, expected)
 
     result = alr_transform(df, denominator_column="b")
     expected = pd.DataFrame(
-        {"V1": [np.log(0.25), np.log(2)], "V2": [np.log(0.25), np.log(2)], "V3": [np.log(0.25), np.log(2)]},
+        np.log(np.delete(arr, 1, axis=1) / arr[:, 1, None]),
+        columns=["V1", "V2", "V3"],
         dtype=np.float64,
     )
     pd.testing.assert_frame_equal(result, expected)

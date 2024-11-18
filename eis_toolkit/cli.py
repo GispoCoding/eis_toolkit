@@ -683,17 +683,17 @@ def parallel_coordinates_cli(
         curved_lines=curved_lines,
     )
     typer.echo("Progress: 75%")
-    if show_plot:
-        plt.show()
 
-    echo_str_end = "."
     if output_file is not None:
         dpi = "figure" if save_dpi is None else save_dpi
         plt.savefig(output_file, dpi=dpi)
-        echo_str_end = f", output figure saved to {output_file}."
-    typer.echo("Progress: 100%")
+        typer.echo(f"Output figure saved to {output_file}.")
 
-    typer.echo("Parallel coordinates plot completed" + echo_str_end)
+    if show_plot:
+        plt.show()
+
+    typer.echo("Progress: 100%")
+    typer.echo("Parallel coordinates plot completed")
 
 
 # PCA FOR RASTER DATA
@@ -3550,16 +3550,17 @@ def plot_roc_curve_cli(
 
     _ = plot_roc_curve(y_true=y_true, y_prob=y_prob)
     typer.echo("Progress: 75%")
-    if show_plot:
-        plt.show()
 
     if output_file is not None:
         dpi = "figure" if save_dpi is None else save_dpi
         plt.savefig(output_file, dpi=dpi)
-        echo_str_end = f", output figure saved to {output_file}."
-    typer.echo("Progress: 100% \n")
+        typer.echo(f"Output figure saved to {output_file}.")
 
-    typer.echo("ROC curve plot completed" + echo_str_end)
+    if show_plot:
+        plt.show()
+
+    typer.echo("Progress: 100%")
+    typer.echo("ROC curve plot completed")
 
 
 @app.command()
@@ -3590,16 +3591,17 @@ def plot_det_curve_cli(
 
     _ = plot_det_curve(y_true=y_true, y_prob=y_prob)
     typer.echo("Progress: 75%")
-    if show_plot:
-        plt.show()
 
     if output_file is not None:
         dpi = "figure" if save_dpi is None else save_dpi
         plt.savefig(output_file, dpi=dpi)
-        echo_str_end = f", output figure saved to {output_file}."
-    typer.echo("Progress: 100% \n")
+        typer.echo(f"Output figure saved to {output_file}.")
 
-    typer.echo("DET curve plot completed" + echo_str_end)
+    if show_plot:
+        plt.show()
+
+    typer.echo("Progress: 100%")
+    typer.echo("DET curve plot completed")
 
 
 @app.command()
@@ -3629,16 +3631,17 @@ def plot_precision_recall_curve_cli(
 
     _ = plot_precision_recall_curve(y_true=y_true, y_prob=y_prob)
     typer.echo("Progress: 75%")
-    if show_plot:
-        plt.show()
 
     if output_file is not None:
         dpi = "figure" if save_dpi is None else save_dpi
         plt.savefig(output_file, dpi=dpi)
-        echo_str_end = f", output figure saved to {output_file}."
-    typer.echo("Progress: 100% \n")
+        typer.echo(f"Output figure saved to {output_file}.")
 
-    typer.echo("Precision-Recall curve plot completed" + echo_str_end)
+    if show_plot:
+        plt.show()
+
+    typer.echo("Progress: 100%")
+    typer.echo("Precision-Recall curve plot completed")
 
 
 @app.command()
@@ -3668,16 +3671,17 @@ def plot_calibration_curve_cli(
 
     _ = plot_calibration_curve(y_true=y_true, y_prob=y_prob, n_bins=n_bins)
     typer.echo("Progress: 75%")
-    if show_plot:
-        plt.show()
 
     if output_file is not None:
         dpi = "figure" if save_dpi is None else save_dpi
         plt.savefig(output_file, dpi=dpi)
-        echo_str_end = f", output figure saved to {output_file}."
-    typer.echo("Progress: 100% \n")
+        typer.echo(f"Output figure saved to {output_file}.")
 
-    typer.echo("Calibration curve plot completed" + echo_str_end)
+    if show_plot:
+        plt.show()
+
+    typer.echo("Progress: 100%")
+    typer.echo("Calibration curve plot completed")
 
 
 @app.command()
@@ -3703,16 +3707,17 @@ def plot_confusion_matrix_cli(
     matrix = confusion_matrix(y_true, y_pred)
     _ = plot_confusion_matrix(confusion_matrix=matrix)
     typer.echo("Progress: 75%")
-    if show_plot:
-        plt.show()
 
     if output_file is not None:
         dpi = "figure" if save_dpi is None else save_dpi
         plt.savefig(output_file, dpi=dpi)
-        echo_str_end = f", output figure saved to {output_file}."
-    typer.echo("Progress: 100% \n")
+        typer.echo(f"Output figure saved to {output_file}.")
 
-    typer.echo("Confusion matrix plot completed" + echo_str_end)
+    if show_plot:
+        plt.show()
+
+    typer.echo("Progress: 100%")
+    typer.echo("Confusion matrix plot completed.")
 
 
 @app.command()

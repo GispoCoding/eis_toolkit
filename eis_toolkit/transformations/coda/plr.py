@@ -5,7 +5,7 @@ from beartype.typing import Optional, Sequence
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
-from eis_toolkit.utilities.checks.compositional import check_compositional_data
+from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
 from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
 
@@ -61,7 +61,7 @@ def _single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
 
 
 @beartype
-def single_plr_transform(df: pd.DataFrame, numerator: str, denominators: Optional[Sequence[str]] = None) -> pd.Series:
+def single_plr_transform(df: pd.DataFrame, numerator: str, denominator: Optional[Sequence[str]] = None) -> pd.Series:
     """
     Perform a pivot logratio transformation on the selected column.
 
@@ -73,7 +73,7 @@ def single_plr_transform(df: pd.DataFrame, numerator: str, denominators: Optiona
     Args:
         df: A dataframe of shape [N, D] of compositional data.
         numerator: The name of the numerator column to use for the transformation.
-        denoinators: The names of the denominator columns to use for the transformation.
+        denoinator: The names of the denominator columns to use for the transformation.
 
     Returns:
         A series of length N containing the transforms.
@@ -85,7 +85,7 @@ def single_plr_transform(df: pd.DataFrame, numerator: str, denominators: Optiona
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
-    check_compositional_data(df)
+    check_in_simplex_sample_space(df)
 
     if numerator not in df.columns:
         raise InvalidColumnException(f"The column {numerator} was not found in the dataframe.")
@@ -94,17 +94,17 @@ def single_plr_transform(df: pd.DataFrame, numerator: str, denominators: Optiona
     if idx == len(df.columns) - 1:
         raise InvalidColumnException("Can't select last column as numerator.")
 
-    if denominators:
-        if numerator in denominators:
+    if denominator:
+        if numerator in denominator:
             raise InvalidColumnException("Numerator can't be one of denominators.")
 
-        invalid_columns = [col for col in denominators if col not in df.columns]
+        invalid_columns = [col for col in denominator if col not in df.columns]
         if invalid_columns:
             raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
 
         # Place numerator to the left of the denominators
-        denominators.insert(0, numerator)
-        df = df[denominators]
+        denominator.insert(0, numerator)
+        df = df[denominator]
 
     else:
         # Select only columns starting from the numerator
@@ -144,7 +144,7 @@ def plr_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> 
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
-    check_compositional_data(df)
+    check_in_simplex_sample_space(df)
 
     if columns:
         df = df[columns]
