@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import rasterio
 from rasterio import profiles
@@ -8,8 +10,10 @@ from eis_toolkit.utilities.raster import (
     split_raster_bands,
     stack_raster_arrays,
 )
-from tests.exploratory_analyses.pca_test import MULTIBAND_RASTER_PATH
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
+
+TESTS_DIR = Path(__file__).parent.parent
+MULTIBAND_RASTER_PATH = TESTS_DIR.joinpath("data/remote/small_raster_multiband.tif")
 
 
 def test_split_raster_bands():
