@@ -85,7 +85,6 @@ def single_plr_transform(df: pd.DataFrame, numerator: str, denominator: Optional
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
-    check_in_simplex_sample_space(df)
 
     if numerator not in df.columns:
         raise InvalidColumnException(f"The column {numerator} was not found in the dataframe.")
@@ -110,6 +109,8 @@ def single_plr_transform(df: pd.DataFrame, numerator: str, denominator: Optional
         # Select only columns starting from the numerator
         indices = df.columns[idx:].to_list()
         df = df[indices]
+
+    check_in_simplex_sample_space(df)
 
     return _single_plr_transform(df, numerator)
 
@@ -140,13 +141,17 @@ def plr_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> 
         A dataframe of shape [N, D-1] containing the set of PLR transformed data.
 
     Raises:
-        InvalidColumnException: The data contains one or more zeros.
+        InvalidColumnException: The data contains one or more zeros, or input column(s) not found in the dataframe.
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
-    check_in_simplex_sample_space(df)
 
     if columns:
+        invalid_columns = [col for col in columns if col not in df.columns]
+        if invalid_columns:
+            raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
         df = df[columns]
+
+    check_in_simplex_sample_space(df)
 
     return rename_columns_by_pattern(_plr_transform(df))
