@@ -2,7 +2,6 @@ from itertools import chain
 from numbers import Number
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from osgeo import gdal
 
 import geopandas as gpd
 import numpy as np
@@ -13,7 +12,7 @@ from rasterio import profiles
 
 from eis_toolkit.exceptions import EmptyDataException, InvalidParameterValueException
 from eis_toolkit.utilities.checks.raster import check_raster_profile
-from eis_toolkit.utilities.miscellaneous import row_points, toggle_gdal_exceptions
+from eis_toolkit.utilities.miscellaneous import row_points
 from eis_toolkit.vector_processing.distance_computation import distance_computation
 
 
@@ -175,7 +174,11 @@ def _distance_to_anomaly_gdal(
     output_path: Path,
     verbose: bool,
 ):
-    from osgeo_utils import gdal_proximity
+    try:
+        from eis_toolkit.utilities.miscellaneous import toggle_gdal_exceptions
+        from osgeo_utils import gdal_proximity
+    except ImportError:
+        raise RuntimeError("Gdal library is not available on virtual environment venv.")
 
     data_fits_criteria = _fits_criteria(
         threshold_criteria=threshold_criteria,
@@ -247,6 +250,11 @@ def _distance_to_anomaly_gdal_ComputeProximity(
     threshold_criteria_value: Union[Tuple[Number, Number], Number],
     threshold_criteria: Literal["lower", "higher", "in_between", "outside"],
 ) -> Tuple[np.ndarray, profiles.Profile]:
+    try:
+        from osgeo import gdal
+    except ImportError:
+        raise RuntimeError("Gdal library is not available on virtual environment venv.")
+
     data_fits_criteria = _fits_criteria(
         threshold_criteria=threshold_criteria,
         threshold_criteria_value=threshold_criteria_value,

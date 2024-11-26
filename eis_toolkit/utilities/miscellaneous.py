@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from beartype import beartype
 from beartype.typing import Any, List, Optional, Sequence, Tuple, Union
-from osgeo import gdal
 from rasterio import transform
 from shapely.geometry import Point
 
@@ -366,6 +365,10 @@ def toggle_gdal_exceptions():
 
     If the exceptions are already enabled, this function will do nothing.
     """
+    try:
+        from osgeo import gdal
+    except ImportError:
+        raise RuntimeError("Gdal library is not available on virtual environment venv.")
     already_has_exceptions_enabled = False
     try:
         if gdal.GetUseExceptions() != 0:
