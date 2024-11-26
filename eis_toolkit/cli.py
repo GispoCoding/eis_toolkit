@@ -3026,6 +3026,40 @@ def gamma_overlay_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT
 # WOFE
 # TODO
 
+# --- TRAINING DATA TOOLS ---
+
+
+# BALANCE SMOTETOMEK
+@app.command()
+def balance_data_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    input_labels: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    output_labels: OUTPUT_FILE_OPTION,
+    sampling_strategy: str = "auto",
+    random_state: Optional[int] = None,
+):
+    """Resample feature data using SMOTETomek."""
+    from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml
+    from eis_toolkit.training_data_tools.class_balancing import balance_SMOTETomek
+
+    X, y, profile, _ = prepare_data_for_ml(input_rasters, input_labels)
+    typer.echo("Progress: 30%")
+
+    X_res, y_res = balance_SMOTETomek(X, y, sampling_strategy, random_state)
+    typer.echo("Progress 80%")
+
+    with rasterio.open(output_raster, "w", **profile) as dst:
+        dst.write(X_res, 1)
+
+    with rasterio.open(output_labels, "w", **profile) as dst:
+        dst.write(y_res, 1)
+    typer.echo("Progress: 100%")
+    typer.echo(
+        f"Balancing data completed, writing resampled feature data to {output_raster} \
+        and corresponding labels to {output_labels}."
+    )
+
 
 # --- TRANSFORMATIONS ---
 
