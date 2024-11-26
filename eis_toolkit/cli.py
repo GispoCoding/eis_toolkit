@@ -332,6 +332,16 @@ class KerasRegressorMetrics(str, Enum):
     mae = "mae"
 
 
+class SMOTETomekSamplingStrategy(str, Enum):
+    """Sampling strategies available for SMOTETomek."""
+
+    minority = "minority"
+    not_minority = "not minority"
+    not_majority = "not majority"
+    all = "all"
+    auto = "auto"
+
+
 INPUT_FILE_OPTION = Annotated[
     Path,
     typer.Option(
@@ -3036,7 +3046,7 @@ def balance_data_cli(
     input_labels: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
     output_labels: OUTPUT_FILE_OPTION,
-    sampling_strategy: str = "auto",
+    sampling_strategy: Annotated[SMOTETomekSamplingStrategy, typer.Option()] = SMOTETomekSamplingStrategy.auto,
     random_state: Optional[int] = None,
 ):
     """Resample feature data using SMOTETomek."""
