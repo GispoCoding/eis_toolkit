@@ -875,37 +875,37 @@ def local_morans_i_cli(
 @app.command()
 def feature_importance_cli(
     model_file: INPUT_FILE_OPTION,
-    x_input: INPUT_FILE_OPTION,
-    y_input: INPUT_FILE_OPTION,
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    feature_names: List[str],
+    feature_names: Optional[List[str]] = None,
     n_repeats: int = 50,
     random_state: Optional[int] = None,
 ):
     """Evaluate the feature importance of a sklearn classifier or regressor."""
     from eis_toolkit.exploratory_analyses.feature_importance import evaluate_feature_importance
-    from eis_toolkit.prediction.machine_learning_general import load_model
+    from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml
 
     typer.echo("Progress: 10%")
 
     model = load_model(model_file)
     typer.echo("Progress: 20%")
 
-    with rasterio.open(x_input) as src:
-        x_test = src.read(1)
-    with rasterio.open(y_input) as src:
-        y_test = src.read(1)
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
     typer.echo("Progress: 30%")
 
-    feature_importance, result = evaluate_feature_importance(
-        model, x_test, y_test, feature_names, n_repeats, random_state
-    )
+    feature_importance, result = evaluate_feature_importance(model, X, y, feature_names, n_repeats, random_state)
+    typer.echo("Progress: 80%")
+
+    # np.ndarrays are not JSON serializable -> convert to lists
+    result = {key: value.tolist() for key, value in result.items()}
+
     feature_importance.to_csv(output_file)
     json_str = json.dumps(result)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Feature importances saved to {output_file}.")
-    typer.echo(f"Metrics: {json_str}")
+    typer.echo(f"Results: {json_str}")
 
 
 # --- RASTER PROCESSING ---
