@@ -3046,15 +3046,24 @@ def balance_data_cli(
     input_labels: INPUT_FILE_OPTION,
     output_raster: OUTPUT_FILE_OPTION,
     output_labels: OUTPUT_FILE_OPTION,
-    sampling_strategy: Annotated[SMOTETomekSamplingStrategy, typer.Option()] = SMOTETomekSamplingStrategy.auto,
+    sampling_strategy_literal: Annotated[SMOTETomekSamplingStrategy, typer.Option()] = SMOTETomekSamplingStrategy.auto,
+    sampling_strategy_float: Optional[float] = None,
     random_state: Optional[int] = None,
 ):
-    """Resample feature data using SMOTETomek."""
+    """Resample feature data using SMOTETomek.
+
+    Parameter sampling_strategy_float will override sampling_strategy_literal if given.
+    """
     from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml
     from eis_toolkit.training_data_tools.class_balancing import balance_SMOTETomek
 
     X, y, profile, _ = prepare_data_for_ml(input_rasters, input_labels)
     typer.echo("Progress: 30%")
+
+    if sampling_strategy_float is not None:
+        sampling_strategy = sampling_strategy_float
+    else:
+        sampling_strategy = sampling_strategy_literal
 
     X_res, y_res = balance_SMOTETomek(X, y, sampling_strategy, random_state)
     typer.echo("Progress 80%")
