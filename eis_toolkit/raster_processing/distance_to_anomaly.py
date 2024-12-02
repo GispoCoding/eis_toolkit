@@ -10,11 +10,8 @@ from rasterio import profiles
 
 from eis_toolkit.exceptions import EmptyDataException, InvalidParameterValueException, NumericValueSignException
 from eis_toolkit.utilities.checks.raster import check_raster_profile
-from eis_toolkit.utilities.miscellaneous import row_points, toggle_gdal_exceptions
+from eis_toolkit.utilities.miscellaneous import row_points
 from eis_toolkit.vector_processing.distance_computation import distance_computation
-
-# Enabling gdal exceptions globally
-toggle_gdal_exceptions()
 
 
 def _check_threshold_criteria_and_value(threshold_criteria, threshold_criteria_value):
@@ -119,6 +116,15 @@ def distance_to_anomaly_gdal(
         and the original anomaly raster profile.
 
     """
+    try:
+        from eis_toolkit.utilities.miscellaneous import toggle_gdal_exceptions
+
+        # Enabling gdal exceptions globally
+        toggle_gdal_exceptions()
+    except ImportError:
+        print("Gdal not installed on the current environment")
+        raise ImportError
+
     check_raster_profile(raster_profile=anomaly_raster_profile)
     _check_threshold_criteria_and_value(
         threshold_criteria=threshold_criteria, threshold_criteria_value=threshold_criteria_value
