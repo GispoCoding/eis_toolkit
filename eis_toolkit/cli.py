@@ -1960,6 +1960,7 @@ def idw_interpolation_cli(
     pixel_size: float = None,
     extent: Tuple[float, float, float, float] = (None, None, None, None),
     power: float = 2.0,
+    search_radius: Optional[float] = None,
 ):
     """Apply inverse distance weighting (IDW) interpolation to input vector file."""
     from eis_toolkit.exceptions import InvalidParameterValueException
@@ -1985,7 +1986,13 @@ def idw_interpolation_cli(
         with rasterio.open(base_raster) as raster:
             profile = raster.profile.copy()
 
-    out_image = idw(geodataframe=geodataframe, target_column=target_column, raster_profile=profile, power=power)
+    out_image = idw(
+        geodataframe=geodataframe,
+        target_column=target_column,
+        raster_profile=profile,
+        power=power,
+        search_radius=search_radius,
+    )
     typer.echo("Progress: 75%")
 
     profile["count"] = 1
