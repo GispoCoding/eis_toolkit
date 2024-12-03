@@ -896,14 +896,12 @@ def feature_importance_cli(
     feature_names = [raster.name for raster in input_rasters]
     typer.echo("Progress: 40%")
 
-    feature_importance, result = evaluate_feature_importance(model, X, y, feature_names, n_repeats, random_state)
+    feature_importance, _ = evaluate_feature_importance(model, X, y, feature_names, n_repeats, random_state)
     typer.echo("Progress: 80%")
 
-    # np.ndarrays are not JSON serializable -> convert to lists
-    result = {key: value.tolist() for key, value in result.items()}
-
     feature_importance.to_csv(output_file)
-    json_str = json.dumps(result)
+    results = dict(zip(feature_importance["Feature"], feature_importance["Importance"]))
+    json_str = json.dumps(results)
     typer.echo("Progress: 100%")
 
     typer.echo(f"Feature importances saved to {output_file}.")
