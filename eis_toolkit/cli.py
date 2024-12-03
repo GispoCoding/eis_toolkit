@@ -878,7 +878,7 @@ def feature_importance_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    n_repeats: int = 50,
+    n_repeats: int = 10,
     random_state: Optional[int] = None,
 ):
     """Evaluate the feature importance of a sklearn classifier or regressor."""
