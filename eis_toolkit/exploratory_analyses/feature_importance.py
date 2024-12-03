@@ -22,15 +22,15 @@ def evaluate_feature_importance(
     random_state: Optional[int] = None,
 ) -> tuple[pd.DataFrame, dict]:
     """
-    Evaluate the feature importance of a sklearn classifier or regressor.
+    Evaluate the feature importance of a Sklearn classifier or regressor.
 
     Args:
         model: A trained and fitted Sklearn model.
-        X: Feature data (X data need to be normalized / standardized).
+        X: Feature data.
         y: Target labels.
-        feature_names: Names of the feature columns.
-        n_repeats: Number of iteration used when calculate feature importance. Defaults to 10.
-        random_state: random state for repeatability of results. Optional parameter.
+        feature_names: Names of features in X.
+        n_repeats: Number of iteration used when calculating feature importance. Defaults to 10.
+        random_state:  Seed for random number generation. Defaults to None.
 
     Returns:
         A dataframe containing features and their importance.
@@ -42,10 +42,10 @@ def evaluate_feature_importance(
     """
 
     if X.size == 0:
-        raise InvalidDatasetException("Array 'x_test' is empty.")
+        raise InvalidDatasetException("Feature matrix X is empty.")
 
     if y.size == 0:
-        raise InvalidDatasetException("Array 'y_test' is empty.")
+        raise InvalidDatasetException("Target labels y is empty.")
 
     if n_repeats < 1:
         raise InvalidParameterValueException("Value for 'n_repeats' is less than one.")
