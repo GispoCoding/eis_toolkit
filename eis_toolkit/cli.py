@@ -878,7 +878,6 @@ def feature_importance_cli(
     input_rasters: INPUT_FILES_ARGUMENT,
     target_labels: INPUT_FILE_OPTION,
     output_file: OUTPUT_FILE_OPTION,
-    feature_names: Optional[List[str]] = None,
     n_repeats: int = 50,
     random_state: Optional[int] = None,
 ):
@@ -893,6 +892,9 @@ def feature_importance_cli(
 
     X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
     typer.echo("Progress: 30%")
+
+    feature_names = [raster.name for raster in input_rasters]
+    typer.echo("Progress: 40%")
 
     feature_importance, result = evaluate_feature_importance(model, X, y, feature_names, n_repeats, random_state)
     typer.echo("Progress: 80%")
