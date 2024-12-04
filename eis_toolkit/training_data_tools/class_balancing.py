@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Optional, Union
+from beartype.typing import Literal, Optional, Union
 from imblearn.combine import SMOTETomek
 
 from eis_toolkit.exceptions import NonMatchingParameterLengthsException
@@ -11,24 +11,27 @@ from eis_toolkit.exceptions import NonMatchingParameterLengthsException
 def balance_SMOTETomek(
     X: Union[pd.DataFrame, np.ndarray],
     y: Union[pd.Series, np.ndarray],
-    sampling_strategy: Union[float, str, dict] = "auto",
+    sampling_strategy: Union[float, Literal["minority", "not minority", "not majority", "all", "auto"], dict] = "auto",
     random_state: Optional[int] = None,
 ) -> tuple[Union[pd.DataFrame, np.ndarray], Union[pd.Series, np.ndarray]]:
-    """Balances the classes of input dataset using SMOTETomek resampling method.
+    """
+    Balances the classes of input dataset using SMOTETomek resampling method.
+
+    For more information about Imblearn SMOTETomek read the documentation here:
+    https://imbalanced-learn.org/stable/references/generated/imblearn.combine.SMOTETomek.html.
 
     Args:
-        X: The feature matrix (input data as a DataFrame).
-        y: The target labels corresponding to the feature matrix.
+        X: Input feature data to be sampled.
+        y: Target labels corresponding to the input features.
         sampling_strategy: Parameter controlling how to perform the resampling.
             If float, specifies the ratio of samples in minority class to samples of majority class,
             if str, specifies classes to be resampled ("minority", "not minority", "not majority", "all", "auto"),
             if dict, the keys should be targeted classes and values the desired number of samples for the class.
             Defaults to "auto", which will resample all classes except the majority class.
-        random_state: Parameter controlling randomization of the algorithm. Can be given a seed (number).
-            Defaults to None, which randomizes the seed.
+        random_state: Seed for random number generation. Defaults to None.
 
     Returns:
-        Resampled feature matrix and target labels.
+        Resampled feature data and target labels.
 
     Raises:
         NonMatchingParameterLengthsException: If X and y have different length.
