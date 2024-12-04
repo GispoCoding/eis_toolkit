@@ -3076,7 +3076,8 @@ def gamma_overlay_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT
 def alr_transform_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
-    column: str = None,
+    columns: Annotated[List[str], typer.Option()] = None,
+    denominator_column: str = None,
     keep_denominator_column: bool = False,
 ):
     """Perform an additive logratio transformation on the data."""
@@ -3089,7 +3090,9 @@ def alr_transform_cli(
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_df = alr_transform(df=df, column=column, keep_denominator_column=keep_denominator_column)
+    out_df = alr_transform(
+        df=df, columns=columns, denominator_column=denominator_column, keep_denominator_column=keep_denominator_column
+    )
     typer.echo("Progess 75%")
 
     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
@@ -3104,6 +3107,7 @@ def inverse_alr_transform_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
     denominator_column: str = typer.Option(),
+    columns: Annotated[List[str], typer.Option()] = None,
     scale: float = 1.0,
 ):
     """Perform the inverse transformation for a set of ALR transformed data."""
@@ -3116,7 +3120,7 @@ def inverse_alr_transform_cli(
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_df = inverse_alr(df=df, denominator_column=denominator_column, scale=scale)
+    out_df = inverse_alr(df=df, denominator_column=denominator_column, columns=columns, scale=scale)
     typer.echo("Progess 75%")
 
     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
@@ -3127,7 +3131,11 @@ def inverse_alr_transform_cli(
 
 # CODA - CLR TRANSFORM
 @app.command()
-def clr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FILE_OPTION):
+def clr_transform_cli(
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
+    columns: Annotated[List[str], typer.Option()] = None,
+):
     """Perform a centered logratio transformation on the data."""
     from eis_toolkit.transformations.coda.clr import clr_transform
 
@@ -3138,7 +3146,7 @@ def clr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FIL
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_df = clr_transform(df=df)
+    out_df = clr_transform(df=df, columns=columns)
     typer.echo("Progess 75%")
 
     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
@@ -3152,6 +3160,7 @@ def clr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FIL
 def inverse_clr_transform_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
+    columns: Annotated[List[str], typer.Option()] = None,
     colnames: Annotated[List[str], typer.Option()] = None,
     scale: float = 1.0,
 ):
@@ -3165,7 +3174,7 @@ def inverse_clr_transform_cli(
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_df = inverse_clr(df=df, colnames=colnames, scale=scale)
+    out_df = inverse_clr(df=df, columns=columns, colnames=colnames, scale=scale)
     typer.echo("Progess 75%")
 
     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
@@ -3237,7 +3246,8 @@ def pairwise_logratio_cli(
 def single_plr_transform_cli(
     input_vector: INPUT_FILE_OPTION,
     output_vector: OUTPUT_FILE_OPTION,
-    column: str = typer.Option(),
+    numerator: str = typer.Option(),
+    denominator: Annotated[List[str], typer.Option()] = None,
 ):
     """Perform a pivot logratio transformation on the selected column."""
     from eis_toolkit.transformations.coda.plr import single_plr_transform
@@ -3249,7 +3259,7 @@ def single_plr_transform_cli(
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_series = single_plr_transform(df=df, column=column)
+    out_series = single_plr_transform(df=df, numerator=numerator, denominators=denominator)
     typer.echo("Progess 75%")
 
     # NOTE: Output of single_plr_transform might be changed to DF in the future, to automatically do the following
@@ -3262,8 +3272,12 @@ def single_plr_transform_cli(
 
 # CODA - PLR TRANSFORM
 @app.command()
-def plr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FILE_OPTION):
-    """Perform a pivot logratio transformation on the dataframe, returning the full set of transforms."""
+def plr_transform_cli(
+    input_vector: INPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
+    columns: Annotated[List[str], typer.Option()] = None,
+):
+    """Perform a pivot logratio transformation on the selected columns."""
     from eis_toolkit.transformations.coda.plr import plr_transform
 
     typer.echo("Progress: 10%")
@@ -3273,7 +3287,7 @@ def plr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FIL
     df = pd.DataFrame(gdf.drop(columns="geometry"))
     typer.echo("Progress: 25%")
 
-    out_df = plr_transform(df=df)
+    out_df = plr_transform(df=df, columns=columns)
     typer.echo("Progess 75%")
 
     out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
