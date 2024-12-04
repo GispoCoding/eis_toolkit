@@ -4,7 +4,11 @@ import pytest
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 
-from eis_toolkit.exceptions import InvalidDatasetException, InvalidParameterValueException
+from eis_toolkit.exceptions import (
+    InvalidDatasetException,
+    InvalidParameterValueException,
+    NonMatchingParameterLengthsException,
+)
 from eis_toolkit.exploratory_analyses.feature_importance import evaluate_feature_importance
 
 feature_names = [
@@ -42,39 +46,33 @@ def test_empty_data():
     empty_data = np.array([])
     empty_labels = np.array([])
     with pytest.raises(InvalidDatasetException):
-        _, _ = evaluate_feature_importance(
-            model=classifier, x_test=empty_data, y_test=labels, feature_names=feature_names
-        )
+        _, _ = evaluate_feature_importance(model=classifier, X=empty_data, y=labels, feature_names=feature_names)
 
     with pytest.raises(InvalidDatasetException):
-        _, _ = evaluate_feature_importance(
-            model=classifier, x_test=data, y_test=empty_labels, feature_names=feature_names
-        )
+        _, _ = evaluate_feature_importance(model=classifier, X=data, y=empty_labels, feature_names=feature_names)
 
 
 def test_invalid_n_repeats():
     """Test that invalid value for 'n_repeats' raises exception."""
     with pytest.raises(InvalidParameterValueException):
-        _, _ = evaluate_feature_importance(
-            model=classifier, x_test=data, y_test=labels, feature_names=feature_names, n_repeats=0
-        )
+        _, _ = evaluate_feature_importance(model=classifier, X=data, y=labels, feature_names=feature_names, n_repeats=0)
 
 
 def test_model_output():
     """Test that function output is as expected."""
     classifier.fit(data, labels.ravel())
     feature_importance, importance_results = evaluate_feature_importance(
-        model=classifier, x_test=data, y_test=labels, feature_names=feature_names, random_state=0
+        model=classifier, X=data, y=labels, feature_names=feature_names, n_repeats=50, random_state=0
     )
 
     np.testing.assert_almost_equal(
         feature_importance.loc[feature_importance["Feature"] == "EM_ratio", "Importance"].values[0],
-        desired=12.923077,
+        desired=0.129231,
         decimal=6,
     )
     np.testing.assert_almost_equal(
         feature_importance.loc[feature_importance["Feature"] == "EM_Qd", "Importance"].values[0],
-        desired=4.461538,
+        desired=0.044615,
         decimal=6,
     )
     np.testing.assert_equal(len(feature_importance), desired=len(feature_names))
@@ -82,3 +80,21 @@ def test_model_output():
         tuple(importance_results.keys()),
         desired=("importances_mean", "importances_std", "importances"),
     )
+
+
+def test_invalid_input_lengths():
+    """Test that non matcing X and y lengths raises an exception."""
+    labels = np.random.randint(2, size=12)
+    with pytest.raises(NonMatchingParameterLengthsException):
+        _, _ = evaluate_feature_importance(model=classifier, X=data, y=labels, feature_names=feature_names)
+
+
+def test_invalid_number_of_feature_names():
+    """Test that invalid number of feature names raises an exception."""
+    with pytest.raises(InvalidParameterValueException):
+        _, _ = evaluate_feature_importance(
+            model=classifier,
+            X=data,
+            y=labels,
+            feature_names=["a", "b", "c"],
+        )
