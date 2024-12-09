@@ -20,14 +20,18 @@ def _alr_transform(df: pd.DataFrame, columns: Sequence[str], denominator_column:
 
 @beartype
 def alr_transform(
-    df: pd.DataFrame, column: Optional[str] = None, keep_denominator_column: bool = False
+    df: pd.DataFrame,
+    columns: Optional[Sequence[str]] = None,
+    denominator_column: Optional[str] = None,
+    keep_denominator_column: bool = False,
 ) -> pd.DataFrame:
     """
     Perform an additive logratio transformation on the data.
 
     Args:
         df: A dataframe of compositional data.
-        column: The name of the column to be used as the denominator column.
+        columns: The names of the columns to be transformed.
+        denominator_column: The name of the column to be used as the denominator column.
         keep_denominator_column: Whether to include the denominator column in the result. If True, the returned
             dataframe retains its original shape.
 
@@ -39,25 +43,37 @@ def alr_transform(
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
+
+    if denominator_column is not None and denominator_column not in df.columns:
+        raise InvalidColumnException(f"The column {denominator_column} was not found in the dataframe.")
+
+    if denominator_column is not None and keep_denominator_column and columns and denominator_column not in columns:
+        raise InvalidColumnException(
+            f"Denominator column '{denominator_column}' must be in selected columns if keep_denominator_column is True."
+        )
+
+    denominator_column = denominator_column if denominator_column is not None else df.columns[-1]
+
+    if columns:
+        invalid_columns = [col for col in columns if col not in df.columns]
+        if invalid_columns:
+            raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
+        columns_to_transform = columns
+        df = df[columns_to_transform]
+    else:
+        columns_to_transform = df.columns.to_list()
+
     check_in_simplex_sample_space(df)
 
-    if column is not None and column not in df.columns:
-        raise InvalidColumnException(f"The column {column} was not found in the dataframe.")
+    if not keep_denominator_column and denominator_column in columns_to_transform:
+        columns_to_transform.remove(denominator_column)
 
-    column = column if column is not None else df.columns[-1]
-
-    columns = [col for col in df.columns]
-
-    if not keep_denominator_column and column in columns:
-        columns.remove(column)
-
-    return rename_columns_by_pattern(_alr_transform(df, columns, column))
+    return rename_columns_by_pattern(_alr_transform(df, columns_to_transform, denominator_column))
 
 
 @beartype
 def _inverse_alr(df: pd.DataFrame, denominator_column: str, scale: Number = 1.0) -> pd.DataFrame:
     dfc = df.copy()
-
     if denominator_column not in dfc.columns.values:
         # Add the denominator column
         dfc[denominator_column] = 0.0
@@ -66,13 +82,16 @@ def _inverse_alr(df: pd.DataFrame, denominator_column: str, scale: Number = 1.0)
 
 
 @beartype
-def inverse_alr(df: pd.DataFrame, denominator_column: str, scale: Number = 1.0) -> pd.DataFrame:
+def inverse_alr(
+    df: pd.DataFrame, denominator_column: str, columns: Optional[Sequence[str]] = None, scale: Number = 1.0
+) -> pd.DataFrame:
     """
     Perform the inverse transformation for a set of ALR transformed data.
 
     Args:
         df: A dataframe of ALR transformed compositional data.
         denominator_column: The name of the denominator column.
+        columns: The names of the columns to be transformed.
         scale: The value to which each composition should be normalized. Eg., if the composition is expressed
             as percentages, scale=100.
 
@@ -80,9 +99,20 @@ def inverse_alr(df: pd.DataFrame, denominator_column: str, scale: Number = 1.0) 
         A dataframe containing the inverse transformed data.
 
     Raises:
+        InvalidColumnException: The input column(s) not found in the dataframe.
         NumericValueSignException: The input scale value is zero or less.
     """
     if scale <= 0:
         raise NumericValueSignException("The scale value should be positive.")
+
+    if columns:
+        invalid_columns = [col for col in columns if col not in df.columns]
+        if invalid_columns:
+            raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
+        columns_to_transform = columns
+    else:
+        columns_to_transform = df.columns.to_list()
+
+    df = df[columns_to_transform]
 
     return _inverse_alr(df, denominator_column, scale)
