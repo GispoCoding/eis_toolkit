@@ -332,6 +332,15 @@ class KerasRegressorMetrics(str, Enum):
     mae = "mae"
 
 
+class WeightsType(str, Enum):
+    """Weights type for WofE."""
+
+    unique = "unique"
+    categorical = "categorical"
+    ascending = "ascending"
+    descending = "descending"
+
+
 INPUT_FILE_OPTION = Annotated[
     Path,
     typer.Option(
@@ -3065,7 +3074,149 @@ def gamma_overlay_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT
 
 
 # WOFE
-# TODO
+@app.command()
+def weights_of_evidence_calculate_weights_cli(
+    input_raster: INPUT_FILE_OPTION,
+    input_vector: INPUT_FILE_OPTION,
+    output_dir: OUTPUT_DIR_OPTION,
+    raster_nodata: Optional[float] = None,
+    weights_type: Annotated[WeightsType, typer.Option(case_sensitive=False)] = WeightsType.unique,
+    studentized_contrast_threshold: float = 1,
+    arrays_to_generate: Annotated[Optional[List[str]], typer.Option()] = None,
+):
+    """
+    Calculate weights of spatial associations.
+
+    Parameter --studentized-contrast-threshold is used with 'categorical', 'ascending' and 'descending' weight types.
+
+    Parameter --arrays-to-generate controls which columns in the weights dataframe are returned as arrays. All column
+    names in the produced weights_df are valid choices. Defaults to ["Class", "W+", "S_W+] for "unique" weights_type
+    and ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"] for the cumulative weight types.
+    """
+    from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_weights
+
+    typer.echo("Progress: 10%")
+
+    evidential_raster = rasterio.open(input_raster)
+    deposits = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    if arrays_to_generate == []:
+        arrays_to_generate = None
+
+    df, arrays, raster_meta, nr_of_deposits, nr_of_pixels = weights_of_evidence_calculate_weights(
+        evidential_raster=evidential_raster,
+        deposits=deposits,
+        raster_nodata=raster_nodata,
+        weights_type=weights_type,
+        studentized_contrast_threshold=studentized_contrast_threshold,
+        arrays_to_generate=arrays_to_generate,
+    )
+    typer.echo("Progress: 75%")
+
+    df.to_csv(output_dir.joinpath("wofe_results.csv"))
+    for key, array in arrays.items():
+        output_raster_path = output_dir.joinpath(key + ".tif")
+        with rasterio.open(output_raster_path, "w", **raster_meta) as dst:
+            dst.write(array, 1)
+
+    typer.echo("Progress 100%")
+
+    typer.echo(f"Number of deposit pixels: {nr_of_deposits}")
+    typer.echo(f"Number of all evidence pixels: {nr_of_pixels}")
+    typer.echo(f"Results saved in {output_dir}.")
+
+
+@app.command()
+def weights_of_evidence_calculate_responses_cli(
+    input_rasters: INPUT_FILES_ARGUMENT,
+    output_dir: OUTPUT_DIR_OPTION,
+    nr_of_deposits: Annotated[int, typer.Option()],
+    nr_of_pixels: Annotated[int, typer.Option()],
+):
+    """
+    Calculate the posterior probabilities for the given generalized weight arrays.
+
+    Parameter --input-rasters are the output arrays (rasters) of weights-of-evidence-calculate-weights-cli.
+    For each set of rasters, generalized weight and generalized standard deviation arrays are used and summed
+    together pixel-wise to calculate the posterior probabilities. If generalized arrays are not found,
+    the W+ and S_W+ arrays are used (so if outputs from unique weight calculations are used for this function).
+    """
+    from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_responses
+
+    typer.echo("Progress: 10%")
+
+    # Each set of rasters contains either W+ and S_W+ or their generalized counterparts
+    n_raster_sets = int(len(input_rasters) / 2)
+    dict_array = [{} for _ in range(n_raster_sets)]
+
+    raster_profile = None
+
+    for raster_file in input_rasters:
+        file_name = os.path.splitext(os.path.basename(raster_file))[0]
+
+        with rasterio.open(raster_file) as raster:
+            if raster_profile is None:
+                raster_profile = raster.profile
+
+            array = raster.read(1)
+
+            # Assign array to the first dictionary that lacks its key
+            for dictionary in dict_array:
+                if file_name not in dictionary:
+                    dictionary[file_name] = array
+                    break
+
+    # Retain only the common keys
+    common_keys = set.intersection(*map(set, dict_array))
+    dict_array = [{key: dictionary[key] for key in common_keys} for dictionary in dict_array]
+    typer.echo(dict_array)
+
+    ######################################################################################################
+    # Another way would be to rely on raster file paths but I'm not sure if it would work with the plugin.
+    ######################################################################################################
+    # raster_dict = {}
+    # for raster_file in input_rasters:
+    #     folder = os.path.dirname(raster_file).split("/")[-1]
+    #     file = os.path.basename(raster_file)
+    #     file_name = os.path.splitext(file)[0]
+
+    #     with rasterio.open(raster_file) as raster:
+    #         if raster_profile is None:
+    #             raster_profile = raster.profile
+
+    #         array = raster.read(1)
+
+    #         if folder not in raster_dict:
+    #             raster_dict[folder] = {}
+
+    #         raster_dict[folder][file_name] = array
+
+    # dict_array = [raster_dict[folder] for folder in raster_dict]
+
+    typer.echo("Progress: 25%")
+
+    posterior_probabilities, posterior_probabilies_std, confidence_array = weights_of_evidence_calculate_responses(
+        output_arrays=dict_array, nr_of_deposits=nr_of_deposits, nr_of_pixels=nr_of_pixels
+    )
+    typer.echo("Progress: 75%")
+
+    output_probabilities_path = output_dir.joinpath("posterior_probabilities.tif")
+    output_probabilities_std_path = output_dir.joinpath("posterior_probabilities_std.tif")
+    output_confidence_array_path = output_dir.joinpath("confidence_array.tif")
+
+    with rasterio.open(output_probabilities_path, "w", **raster_profile) as dst:
+        dst.write(posterior_probabilities, 1)
+
+    with rasterio.open(output_probabilities_std_path, "w", **raster_profile) as dst:
+        dst.write(posterior_probabilies_std, 1)
+
+    with rasterio.open(output_confidence_array_path, "w", **raster_profile) as dst:
+        dst.write(confidence_array, 1)
+
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Results saved in {output_dir}.")
 
 
 # --- TRANSFORMATIONS ---
