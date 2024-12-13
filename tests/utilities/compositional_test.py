@@ -77,6 +77,9 @@ def test_compositional_data_invalid():
 def test_check_for_simplex_sample_space():
     """Test whether or not a dataframe belongs to a simplex sample space is correctly identified."""
     unit_simplex_df = pd.DataFrame([[0.1, 0.2, 0.3, 0.4], [0.2, 0.3, 0.2, 0.3]])
+    closed_to_hundred_df = unit_simplex_df * 100
+    closed_to_million_df = unit_simplex_df * 1e6
+    closed_to_billion_df = unit_simplex_df * 1e9
     non_simplex_positive_df = pd.DataFrame([1, 2, 3, 4], [5, 6, 7, 8])
     non_positive_df = pd.DataFrame([-1, 2, 3, 4], [1, 2, 3, 4])
 
@@ -89,5 +92,20 @@ def test_check_for_simplex_sample_space():
     # Valid cases - assert no exception is raised
     try:
         check_in_simplex_sample_space(unit_simplex_df)
+    except Exception as ex:
+        assert False, f"{type(ex)}: {ex}"
+
+    try:
+        check_in_simplex_sample_space(closed_to_hundred_df)
+    except Exception as ex:
+        assert False, f"{type(ex)}: {ex}"
+
+    try:
+        check_in_simplex_sample_space(closed_to_million_df)
+    except Exception as ex:
+        assert False, f"{type(ex)}: {ex}"
+
+    try:
+        check_in_simplex_sample_space(closed_to_billion_df)
     except Exception as ex:
         assert False, f"{type(ex)}: {ex}"

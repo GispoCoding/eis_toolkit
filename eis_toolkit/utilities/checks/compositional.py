@@ -36,8 +36,14 @@ def check_in_simplex_sample_space(df: pd.DataFrame, tolerance: Number = 0.0001) 
     row_sums = df.sum(axis=1)
     closed_to_one = (row_sums - 1).abs() < tolerance
     closed_to_hundred = (row_sums - 100).abs() < tolerance
+    closed_to_million = (row_sums - 1e6).abs() < tolerance
+    closed_to_billion = (row_sums - 1e9).abs() < tolerance
 
-    if not closed_to_one.all() and not closed_to_hundred.all():
-        raise InvalidCompositionException(f"Input data is not closed to 1 or 100 within tolerance of {tolerance}.")
+    is_valid = closed_to_one.all() or closed_to_hundred.all() or closed_to_million.all() or closed_to_billion.all()
+
+    if not is_valid:
+        raise InvalidCompositionException(
+            f"Input data is not closed to 1, 100 (%), 10^6 (ppm) or 10^9 (ppb) within tolerance of {tolerance}."
+        )
 
     return None
