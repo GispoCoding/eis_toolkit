@@ -1,13 +1,14 @@
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Sequence
+from beartype.typing import Optional, Sequence
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidCompositionException, InvalidParameterValueException
 from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid
 from eis_toolkit.utilities.checks.parameter import check_lists_overlap, check_numeric_value_sign
+from eis_toolkit.utilities.miscellaneous import perform_closure
 
 
 @beartype
@@ -64,7 +65,10 @@ def _single_ilr_transform(
 
 @beartype
 def single_ilr_transform(
-    df: pd.DataFrame, subcomposition_1: Sequence[str], subcomposition_2: Sequence[str]
+    df: pd.DataFrame,
+    subcomposition_1: Sequence[str],
+    subcomposition_2: Sequence[str],
+    closure_target: Optional[int] = None,
 ) -> pd.Series:
     """
     Perform a single isometric logratio transformation on the provided subcompositions.
@@ -75,6 +79,7 @@ def single_ilr_transform(
         df: A dataframe of shape [N, D] of compositional data.
         subcomposition_1: Names of the columns in the numerator part of the ratio.
         subcomposition_2: Names of the columns in the denominator part of the ratio.
+        closure_target: Target row sum for closure. If None, no closure is performed.
 
     Returns:
         A series of length N containing the transforms.
@@ -86,6 +91,11 @@ def single_ilr_transform(
         InvalidParameterValueException: At least one subcomposition provided was empty.
         NumericValueSignException: Data contains zeros or negative values.
     """
+
+    if closure_target is not None:
+        columns = subcomposition_1 + subcomposition_2
+        df = perform_closure(df, columns, closure_target)
+
     check_in_simplex_sample_space(df)
 
     if not (subcomposition_1 and subcomposition_2):
