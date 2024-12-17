@@ -8,29 +8,27 @@ from eis_toolkit.transformations.coda.plr import _single_plr_transform_by_index,
 
 def test_single_plr_transform_with_single_composition():
     """Test a single PLR transform operation with a single composition."""
-    arr1 = np.array([80, 15, 5])
-    df1 = pd.DataFrame(arr1[None], columns=["a", "b", "c"])
-    arr2 = [0, 80, 15, 5]
-    df2 = pd.DataFrame([arr2], columns=["a", "b", "c", "d"])
+    arr = np.array([80, 15, 5])
+    df = pd.DataFrame(arr[None], columns=["a", "b", "c"])
 
-    result = single_plr_transform(df1, numerator="a", denominator=["b", "c"])
+    result = single_plr_transform(df, "a")
     assert result[0] == pytest.approx(1.82, abs=1e-2)
 
-    result = _single_plr_transform_by_index(df1, 0)
+    result = _single_plr_transform_by_index(df, 0)
     assert result[0] == pytest.approx(1.82, abs=1e-2)
 
-    result = single_plr_transform(df2, numerator="b")
-    assert result[0] == pytest.approx(1.82, abs=1e-2)
+    result = single_plr_transform(df, "b", closure_target=100)
+    assert result[0] == pytest.approx(0.78, abs=1e-2)
 
-    result = _single_plr_transform_by_index(df2, 1)
-    assert result[0] == pytest.approx(1.82, abs=1e-2)
+    result = _single_plr_transform_by_index(df, 1)
+    assert result[0] == pytest.approx(0.78, abs=1e-2)
 
 
 def test_single_plr_transform_with_simple_data():
     """Test the core functionality of a single PLR transform."""
     arr = np.array([[80, 15, 5], [75, 20, 5]])
     df = pd.DataFrame(arr, columns=["a", "b", "c"])
-    result = single_plr_transform(df, "a", ["b", "c"])
+    result = single_plr_transform(df, "a")
     assert result[1] == pytest.approx(1.65, abs=1e-2)
 
 
@@ -39,25 +37,17 @@ def test_single_plr_transform_with_last_column():
     with pytest.raises(InvalidColumnException):
         arr = np.array([[80, 15, 5], [75, 18, 7]])
         df = pd.DataFrame(arr, columns=["a", "b", "c"])
-        single_plr_transform(df, "c", ["b", "c"])
+        single_plr_transform(df, "c")
 
 
-def test_single_plr_invalid_inputs():
-    """Test that invalid inputs raises exceptions."""
+def test_single_plr_invalid_column():
+    """Test that invalid column name raises exceptions."""
     arr = np.array([[80, 15, 5], [75, 18, 7]])
     df = pd.DataFrame(arr, columns=["a", "b", "c"])
 
     # Numerator not in df
     with pytest.raises(InvalidColumnException):
-        single_plr_transform(df, "x", ["b", "c"])
-
-    # Numerator in denominators
-    with pytest.raises(InvalidColumnException):
-        single_plr_transform(df, "a", ["a", "b"])
-
-    # Denominators not in df
-    with pytest.raises(InvalidColumnException):
-        single_plr_transform(df, "a", ["x", "y"])
+        single_plr_transform(df, "x")
 
 
 def test_plr_transform():

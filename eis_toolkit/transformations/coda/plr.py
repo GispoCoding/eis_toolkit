@@ -7,7 +7,7 @@ from scipy.stats import gmean
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
 from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
-from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
+from eis_toolkit.utilities.miscellaneous import perform_closure, rename_columns_by_pattern
 
 
 @beartype
@@ -39,8 +39,6 @@ def _single_plr_transform_by_index(df: pd.DataFrame, column_ind: int) -> pd.Seri
     subcomposition = [columns[i] for i in range(len(columns)) if i > column_ind]
     c = len(subcomposition)
 
-    if c == 0:
-        raise InvalidColumnException("No columns found to the right of the numerator.")
     scaling_factor = _calculate_plr_scaling_factor(c)
 
     # A series to hold the transformed rows
@@ -53,15 +51,7 @@ def _single_plr_transform_by_index(df: pd.DataFrame, column_ind: int) -> pd.Seri
 
 
 @beartype
-def _single_plr_transform(df: pd.DataFrame, column: str) -> pd.Series:
-
-    idx = df.columns.get_loc(column)
-
-    return _single_plr_transform_by_index(df, idx)
-
-
-@beartype
-def single_plr_transform(df: pd.DataFrame, numerator: str, denominator: Optional[Sequence[str]] = None) -> pd.Series:
+def single_plr_transform(df: pd.DataFrame, column: str, closure_target: Optional[int] = None) -> pd.Series:
     """
     Perform a pivot logratio transformation on the selected column.
 
@@ -72,9 +62,8 @@ def single_plr_transform(df: pd.DataFrame, numerator: str, denominator: Optional
 
     Args:
         df: A dataframe of shape [N, D] of compositional data.
-        numerator: The name of the numerator column to use for the transformation.
-        denoinator: The names of the denominator columns to use for the transformation.
-
+        column: The name of the numerator column to use for the transformation.
+        closure_target: Target row sum for closure. If None, no closure is performed.
     Returns:
         A series of length N containing the transforms.
 
@@ -86,33 +75,24 @@ def single_plr_transform(df: pd.DataFrame, numerator: str, denominator: Optional
         NumericValueSignException: Data contains zeros or negative values.
     """
 
-    if numerator not in df.columns:
-        raise InvalidColumnException(f"The column {numerator} was not found in the dataframe.")
+    if column not in df.columns:
+        raise InvalidColumnException(f"The column {column} was not found in the dataframe.")
 
-    idx = df.columns.get_loc(numerator)
+    idx = df.columns.get_loc(column)
     if idx == len(df.columns) - 1:
         raise InvalidColumnException("Can't select last column as numerator.")
 
-    if denominator:
-        if numerator in denominator:
-            raise InvalidColumnException("Numerator can't be one of denominators.")
+    if closure_target is not None:
+        # Perform closure on columns starting from numerator "to the right"
+        columns = df.columns[idx:].to_list()
+        df = perform_closure(df, columns, closure_target)
 
-        invalid_columns = [col for col in denominator if col not in df.columns]
-        if invalid_columns:
-            raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
-
-        # Place numerator to the left of the denominators
-        denominator.insert(0, numerator)
-        df = df[denominator]
+        check_in_simplex_sample_space(df[columns])
 
     else:
-        # Select only columns starting from the numerator
-        indices = df.columns[idx:].to_list()
-        df = df[indices]
+        check_in_simplex_sample_space(df)
 
-    check_in_simplex_sample_space(df)
-
-    return _single_plr_transform(df, numerator)
+    return _single_plr_transform_by_index(df, idx)
 
 
 @beartype
@@ -129,13 +109,16 @@ def _plr_transform(df: pd.DataFrame) -> pd.DataFrame:
 
 
 @beartype
-def plr_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> pd.DataFrame:
+def plr_transform(
+    df: pd.DataFrame, columns: Optional[Sequence[str]] = None, closure_target: Optional[int] = None
+) -> pd.DataFrame:
     """
     Perform a pivot logratio transformation on the dataframe, returning the full set of transforms.
 
     Args:
         df: A dataframe of shape [N, D] of compositional data.
         columns: The names of the columns to use for the transformation.
+        closure_target: Target row sum for closure. If None, no closure is performed.
 
     Returns:
         A dataframe of shape [N, D-1] containing the set of PLR transformed data.
@@ -151,6 +134,9 @@ def plr_transform(df: pd.DataFrame, columns: Optional[Sequence[str]] = None) -> 
         if invalid_columns:
             raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
         df = df[columns]
+
+    if closure_target is not None:
+        df = perform_closure(df, closure_target=1)
 
     check_in_simplex_sample_space(df)
 
