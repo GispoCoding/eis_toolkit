@@ -390,7 +390,7 @@ def perform_closure(df: pd.DataFrame, columns: Optional[Sequence[str]] = None, c
         closure_target: Row sum of the selected columns after performing closure. Defaults to 1.
 
     Returns:
-        A DataFrame with each row sum to the closure target.
+        A DataFrame where on each row the values in the selected columns sum to the closure target.
     """
     if columns is None:
         columns = df.columns
