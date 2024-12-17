@@ -4,6 +4,7 @@ import pytest
 
 from eis_toolkit.exceptions import InvalidColumnIndexException
 from eis_toolkit.utilities.miscellaneous import (
+    perform_closure,
     rename_columns,
     rename_columns_by_pattern,
     replace_values,
@@ -71,3 +72,11 @@ def test_rename_columns_with_too_few_columns():
     target_df = pd.DataFrame({"a": [1, 2], "b": [3, 4], "col3": [5, 6]})
     renamed_df = rename_columns(df, colnames=colnames)
     pd.testing.assert_frame_equal(renamed_df, target_df)
+
+
+def test_perform_closure():
+    """Test that performing closure on a DataFrame works as expected."""
+    df = pd.DataFrame({"col1": [1, 2, 1], "col2": [4, 8, 1], "col3": [3, 1, 6]})
+    closured_df = perform_closure(df, columns=["col1", "col2"], closure_target=100)
+    expected_df = pd.DataFrame({"col1": [20.0, 20.0, 50.0], "col2": [80.0, 80.0, 50.0], "col3": [3, 1, 6]})
+    pd.testing.assert_frame_equal(closured_df, expected_df)
