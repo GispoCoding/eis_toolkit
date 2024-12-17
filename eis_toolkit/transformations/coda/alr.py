@@ -8,7 +8,7 @@ from beartype.typing import Optional, Sequence
 from eis_toolkit.exceptions import InvalidColumnException, NumericValueSignException
 from eis_toolkit.utilities.aitchison_geometry import _closure
 from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
-from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
+from eis_toolkit.utilities.miscellaneous import perform_closure, rename_columns_by_pattern
 
 
 @beartype
@@ -24,6 +24,7 @@ def alr_transform(
     columns: Optional[Sequence[str]] = None,
     denominator_column: Optional[str] = None,
     keep_denominator_column: bool = False,
+    closure_target: Optional[int] = None,
 ) -> pd.DataFrame:
     """
     Perform an additive logratio transformation on the data.
@@ -34,6 +35,7 @@ def alr_transform(
         denominator_column: The name of the column to be used as the denominator column.
         keep_denominator_column: Whether to include the denominator column in the result. If True, the returned
             dataframe retains its original shape.
+        closure_target: Target row sum for closure. If None, no closure is performed.
 
     Returns:
         A new dataframe containing the ALR transformed data.
@@ -62,6 +64,9 @@ def alr_transform(
         df = df[columns_to_transform]
     else:
         columns_to_transform = df.columns.to_list()
+
+    if closure_target is not None:
+        df = perform_closure(df, columns_to_transform, closure_target)
 
     check_in_simplex_sample_space(df)
 
