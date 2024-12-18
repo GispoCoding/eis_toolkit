@@ -7,6 +7,7 @@
 import json
 import os
 from enum import Enum
+from itertools import zip_longest
 from pathlib import Path
 
 import geopandas as gpd
@@ -343,6 +344,18 @@ class WeightsType(str, Enum):
 
 INPUT_FILE_OPTION = Annotated[
     Path,
+    typer.Option(
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        writable=False,
+        readable=True,
+        resolve_path=True,
+    ),
+]
+
+INPUT_FILES_OPTION = Annotated[
+    List[Path],
     typer.Option(
         exists=True,
         file_okay=True,
@@ -3132,8 +3145,8 @@ def weights_of_evidence_calculate_weights_cli(
 
 @app.command()
 def weights_of_evidence_calculate_responses_cli(
-    input_rasters_weights: INPUT_FILES_ARGUMENT,
-    input_rasters_standard_deviations: INPUT_FILES_ARGUMENT,
+    input_rasters_weights: INPUT_FILES_OPTION,
+    input_rasters_standard_deviations: INPUT_FILES_OPTION,
     output_probabilities: OUTPUT_FILE_OPTION,
     output_probabilities_std: OUTPUT_FILE_OPTION,
     output_confidence_array: OUTPUT_FILE_OPTION,
@@ -3151,16 +3164,25 @@ def weights_of_evidence_calculate_responses_cli(
     from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_responses
 
     typer.echo("Progress: 10%")
+    typer.echo(input_rasters_weights)
 
     dict_array = []
     raster_profile = None
-    for raster_W, raster_S_W in zip(input_rasters_weights, input_rasters_standard_deviations):
 
-        with rasterio.open(raster_W) as src1, rasterio.open(raster_S_W) as src2:
-            array_W = src1.read(1)
-            if raster_profile is None:
-                raster_profile = src1.profile
-            array_S_W = src2.read(1)
+    for raster_weights, raster_std in zip_longest(
+        input_rasters_weights, input_rasters_standard_deviations, fillvalue=None
+    ):
+
+        if raster_weights is not None:
+            with rasterio.open(raster_weights) as src:
+                array_W = src.read(1)
+
+                if raster_profile is None:
+                    raster_profile = src.profile
+
+        if raster_std is not None:
+            with rasterio.open(raster_std) as src:
+                array_S_W = src.read(1)
 
         dict_array.append({"W+": array_W, "S_W+": array_S_W})
 
