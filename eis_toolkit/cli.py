@@ -3090,8 +3090,11 @@ def weights_of_evidence_calculate_weights_cli(
     Parameter --studentized-contrast-threshold is used with 'categorical', 'ascending' and 'descending' weight types.
 
     Parameter --arrays-to-generate controls which columns in the weights dataframe are returned as arrays. All column
-    names in the produced weights_df are valid choices. Defaults to ["Class", "W+", "S_W+] for "unique" weights_type
-    and ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"] for the cumulative weight types.
+    names in the produced weights_df are valid choices. The available columns for "unique" weights_type are "Class",
+    "Pixel count", "Deposit count", "W+", "S_W+", "W-", "S_W-", "Contrast", "S_Contrast", and "Studentized contrast".
+    For other weights types, additional available column names are "Generalized class", "Generalized W+", and
+    "Generalized S_W+". Defaults to ["Class", "W+", "S_W+] for "unique" weights_type and ["Class", "W+", "S_W+",
+    "Generalized W+", "Generalized S_W+"] for the cumulative weight types.
     """
     from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_weights
 
