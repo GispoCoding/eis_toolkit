@@ -3210,6 +3210,36 @@ def weights_of_evidence_calculate_responses_cli(
     )
 
 
+@app.command()
+def agterberg_cheng_CI_test_cli(
+    input_posterior_probabilities: INPUT_FILE_OPTION,
+    input_posterior_probabilities_std: INPUT_FILE_OPTION,
+    nr_of_deposits: Annotated[int, typer.Option()],
+):
+    """Perform the conditional independence test presented by Agterberg-Cheng (2002)."""
+    from eis_toolkit.prediction.weights_of_evidence import agterberg_cheng_CI_test
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_posterior_probabilities) as src:
+        posterior_probabilities = src.read(1)
+
+    with rasterio.open(input_posterior_probabilities_std) as src:
+        posterior_probabilities_std = src.read(1)
+
+    typer.echo("Progress: 25%")
+
+    _, _, _, _, summary = agterberg_cheng_CI_test(
+        posterior_probabilities=posterior_probabilities,
+        posterior_probabilities_std=posterior_probabilities_std,
+        nr_of_deposits=nr_of_deposits,
+    )
+
+    typer.echo("Progress: 100%")
+    typer.echo("Conditional independence test completed.")
+    typer.echo(summary)
+
+
 # --- TRANSFORMATIONS ---
 
 
