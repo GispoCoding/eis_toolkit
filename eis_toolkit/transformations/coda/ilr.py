@@ -106,6 +106,7 @@ def single_ilr_transform(
     if closure_target is not None:
         columns = subcomposition_1 + subcomposition_2
         df = perform_closure(df, columns, closure_target)
+        df = df[columns]
 
     check_in_simplex_sample_space(df)
 
