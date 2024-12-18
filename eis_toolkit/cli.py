@@ -3129,8 +3129,11 @@ def weights_of_evidence_calculate_weights_cli(
 
 @app.command()
 def weights_of_evidence_calculate_responses_cli(
-    input_rasters: INPUT_FILES_ARGUMENT,
-    output_dir: OUTPUT_DIR_OPTION,
+    input_rasters_weights: INPUT_FILES_ARGUMENT,
+    input_rasters_standard_deviations: INPUT_FILES_ARGUMENT,
+    output_probabilities: OUTPUT_FILE_OPTION,
+    output_probabilities_std: OUTPUT_FILE_OPTION,
+    output_confidence_array: OUTPUT_FILE_OPTION,
     nr_of_deposits: Annotated[int, typer.Option()],
     nr_of_pixels: Annotated[int, typer.Option()],
 ):
@@ -3146,53 +3149,17 @@ def weights_of_evidence_calculate_responses_cli(
 
     typer.echo("Progress: 10%")
 
-    # Each set of rasters contains either W+ and S_W+ or their generalized counterparts
-    n_raster_sets = int(len(input_rasters) / 2)
-    dict_array = [{} for _ in range(n_raster_sets)]
-
+    dict_array = []
     raster_profile = None
+    for raster_W, raster_S_W in zip(input_rasters_weights, input_rasters_standard_deviations):
 
-    for raster_file in input_rasters:
-        file_name = os.path.splitext(os.path.basename(raster_file))[0]
-
-        with rasterio.open(raster_file) as raster:
+        with rasterio.open(raster_W) as src1, rasterio.open(raster_S_W) as src2:
+            array_W = src1.read(1)
             if raster_profile is None:
-                raster_profile = raster.profile
+                raster_profile = src1.profile
+            array_S_W = src2.read(1)
 
-            array = raster.read(1)
-
-            # Assign array to the first dictionary that lacks its key
-            for dictionary in dict_array:
-                if file_name not in dictionary:
-                    dictionary[file_name] = array
-                    break
-
-    # Retain only the common keys
-    common_keys = set.intersection(*map(set, dict_array))
-    dict_array = [{key: dictionary[key] for key in common_keys} for dictionary in dict_array]
-    typer.echo(dict_array)
-
-    ######################################################################################################
-    # Another way would be to rely on raster file paths but I'm not sure if it would work with the plugin.
-    ######################################################################################################
-    # raster_dict = {}
-    # for raster_file in input_rasters:
-    #     folder = os.path.dirname(raster_file).split("/")[-1]
-    #     file = os.path.basename(raster_file)
-    #     file_name = os.path.splitext(file)[0]
-
-    #     with rasterio.open(raster_file) as raster:
-    #         if raster_profile is None:
-    #             raster_profile = raster.profile
-
-    #         array = raster.read(1)
-
-    #         if folder not in raster_dict:
-    #             raster_dict[folder] = {}
-
-    #         raster_dict[folder][file_name] = array
-
-    # dict_array = [raster_dict[folder] for folder in raster_dict]
+        dict_array.append({"W+": array_W, "S_W+": array_S_W})
 
     typer.echo("Progress: 25%")
 
@@ -3201,22 +3168,18 @@ def weights_of_evidence_calculate_responses_cli(
     )
     typer.echo("Progress: 75%")
 
-    output_probabilities_path = output_dir.joinpath("posterior_probabilities.tif")
-    output_probabilities_std_path = output_dir.joinpath("posterior_probabilities_std.tif")
-    output_confidence_array_path = output_dir.joinpath("confidence_array.tif")
-
-    with rasterio.open(output_probabilities_path, "w", **raster_profile) as dst:
+    with rasterio.open(output_probabilities, "w", **raster_profile) as dst:
         dst.write(posterior_probabilities, 1)
 
-    with rasterio.open(output_probabilities_std_path, "w", **raster_profile) as dst:
+    with rasterio.open(output_probabilities_std, "w", **raster_profile) as dst:
         dst.write(posterior_probabilies_std, 1)
 
-    with rasterio.open(output_confidence_array_path, "w", **raster_profile) as dst:
+    with rasterio.open(output_confidence_array, "w", **raster_profile) as dst:
         dst.write(confidence_array, 1)
 
     typer.echo("Progress: 100%")
 
-    typer.echo(f"Results saved in {output_dir}.")
+    # typer.echo(f"Results saved in {output_dir}.")
 
 
 # --- TRANSFORMATIONS ---
