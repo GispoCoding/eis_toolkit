@@ -3124,7 +3124,7 @@ def weights_of_evidence_calculate_weights_cli(
 
     typer.echo(f"Number of deposit pixels: {nr_of_deposits}")
     typer.echo(f"Number of all evidence pixels: {nr_of_pixels}")
-    typer.echo(f"Results saved in {output_dir}.")
+    typer.echo(f"Weight calculations completed, rasters and CSV saved to {output_dir}.")
 
 
 @app.command()
@@ -3178,8 +3178,6 @@ def weights_of_evidence_calculate_responses_cli(
         dst.write(confidence_array, 1)
 
     typer.echo("Progress: 100%")
-
-    # typer.echo(f"Results saved in {output_dir}.")
 
 
 # --- TRANSFORMATIONS ---
