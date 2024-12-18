@@ -1,3 +1,5 @@
+from numbers import Number
+
 import numpy as np
 import pandas as pd
 from beartype import beartype
@@ -51,7 +53,7 @@ def _single_plr_transform_by_index(df: pd.DataFrame, column_ind: int) -> pd.Seri
 
 
 @beartype
-def single_plr_transform(df: pd.DataFrame, column: str, closure_target: Optional[int] = None) -> pd.Series:
+def single_plr_transform(df: pd.DataFrame, column: str, closure_target: Optional[Number] = None) -> pd.Series:
     """
     Perform a pivot logratio transformation on the selected column.
 
@@ -110,7 +112,7 @@ def _plr_transform(df: pd.DataFrame) -> pd.DataFrame:
 
 @beartype
 def plr_transform(
-    df: pd.DataFrame, columns: Optional[Sequence[str]] = None, closure_target: Optional[int] = None
+    df: pd.DataFrame, columns: Optional[Sequence[str]] = None, closure_target: Optional[Number] = None
 ) -> pd.DataFrame:
     """
     Perform a pivot logratio transformation on the dataframe, returning the full set of transforms.

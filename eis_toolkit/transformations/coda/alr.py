@@ -24,7 +24,7 @@ def alr_transform(
     columns: Optional[Sequence[str]] = None,
     denominator_column: Optional[str] = None,
     keep_denominator_column: bool = False,
-    closure_target: Optional[int] = None,
+    closure_target: Optional[Number] = None,
 ) -> pd.DataFrame:
     """
     Perform an additive logratio transformation on the data.

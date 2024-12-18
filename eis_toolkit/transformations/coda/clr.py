@@ -29,7 +29,7 @@ def _clr_transform(df: pd.DataFrame) -> pd.DataFrame:
 def clr_transform(
     df: pd.DataFrame,
     columns: Optional[Sequence[str]] = None,
-    closure_target: Optional[int] = None,
+    closure_target: Optional[Number] = None,
 ) -> pd.DataFrame:
     """
     Perform a centered logratio transformation on the data.

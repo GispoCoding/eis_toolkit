@@ -1,3 +1,5 @@
+from numbers import Number
+
 import numpy as np
 import pandas as pd
 from beartype import beartype
@@ -68,7 +70,7 @@ def single_ilr_transform(
     df: pd.DataFrame,
     subcomposition_1: Sequence[str],
     subcomposition_2: Sequence[str],
-    closure_target: Optional[int] = None,
+    closure_target: Optional[Number] = None,
 ) -> pd.Series:
     """
     Perform a single isometric logratio transformation on the provided subcompositions.
@@ -92,12 +94,6 @@ def single_ilr_transform(
         NumericValueSignException: Data contains zeros or negative values.
     """
 
-    if closure_target is not None:
-        columns = subcomposition_1 + subcomposition_2
-        df = perform_closure(df, columns, closure_target)
-
-    check_in_simplex_sample_space(df)
-
     if not (subcomposition_1 and subcomposition_2):
         raise InvalidParameterValueException("A subcomposition should contain at least one column.")
 
@@ -106,5 +102,11 @@ def single_ilr_transform(
 
     if check_lists_overlap(subcomposition_1, subcomposition_2):
         raise InvalidCompositionException("The subcompositions overlap.")
+
+    if closure_target is not None:
+        columns = subcomposition_1 + subcomposition_2
+        df = perform_closure(df, columns, closure_target)
+
+    check_in_simplex_sample_space(df)
 
     return _single_ilr_transform(df, subcomposition_1, subcomposition_2)

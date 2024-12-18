@@ -378,7 +378,9 @@ def toggle_gdal_exceptions():
 
 
 @beartype
-def perform_closure(df: pd.DataFrame, columns: Optional[Sequence[str]] = None, closure_target: int = 1) -> pd.DataFrame:
+def perform_closure(
+    df: pd.DataFrame, columns: Optional[Sequence[str]] = None, closure_target: Number = 1
+) -> pd.DataFrame:
     """
     Peform closure on selected columns of a DataFrame.
 
