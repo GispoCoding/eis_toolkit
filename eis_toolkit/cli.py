@@ -3179,6 +3179,11 @@ def weights_of_evidence_calculate_responses_cli(
 
     typer.echo("Progress: 100%")
 
+    typer.echo(
+        f"Responses calculations finished, writing output rasters to {output_probabilities}, \
+            {output_probabilities_std} and {output_confidence_array}"
+    )
+
 
 # --- TRANSFORMATIONS ---
 
