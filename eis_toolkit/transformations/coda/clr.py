@@ -55,8 +55,6 @@ def clr_transform(
             raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
         columns_to_transform = columns
         df = df[columns_to_transform]
-    else:
-        columns_to_transform = df.columns.to_list()
 
     if scale is not None:
         df = _closure(df, scale)
@@ -102,14 +100,9 @@ def inverse_clr(
         invalid_columns = [col for col in columns if col not in df.columns]
         if invalid_columns:
             raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
-        columns_to_transform = columns
-    else:
-        columns_to_transform = df.columns.to_list()
+        df = df[columns]
 
-    dfc = df.copy()
-    dfc = dfc[columns_to_transform]
-
-    inverse_data = _inverse_clr(dfc, scale)
+    inverse_data = _inverse_clr(df, scale)
 
     if colnames:
         return rename_columns(inverse_data, colnames)
