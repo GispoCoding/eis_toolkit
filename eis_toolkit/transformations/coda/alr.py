@@ -115,10 +115,6 @@ def inverse_alr(
         invalid_columns = [col for col in columns if col not in df.columns]
         if invalid_columns:
             raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
-        columns_to_transform = columns
-    else:
-        columns_to_transform = df.columns.to_list()
-
-    df = df[columns_to_transform]
+        df = df[columns]
 
     return _inverse_alr(df, denominator_column, scale)
