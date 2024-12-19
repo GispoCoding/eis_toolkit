@@ -104,6 +104,9 @@ def single_ilr_transform(
     if check_lists_overlap(subcomposition_1, subcomposition_2):
         raise InvalidCompositionException("The subcompositions overlap.")
 
+    columns = subcomposition_1 + subcomposition_2
+    df = df[columns]
+
     if scale is not None:
         df = _closure(df, scale)
 
