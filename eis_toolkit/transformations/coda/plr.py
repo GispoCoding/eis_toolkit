@@ -54,7 +54,12 @@ def _single_plr_transform_by_index(df: pd.DataFrame, column_ind: int) -> pd.Seri
 
 
 @beartype
-def single_plr_transform(df: pd.DataFrame, column: str, scale: Optional[Number] = None) -> pd.Series:
+def single_plr_transform(
+    df: pd.DataFrame,
+    numerator: str,
+    denominator_columns: Optional[Sequence[str]] = None,
+    scale: Optional[Number] = None,
+) -> pd.Series:
     """
     Perform a pivot logratio transformation on the selected column.
 
@@ -65,7 +70,9 @@ def single_plr_transform(df: pd.DataFrame, column: str, scale: Optional[Number] 
 
     Args:
         df: A dataframe of shape [N, D] of compositional data.
-        column: The name of the numerator column to use for the transformation.
+        numerator: The name of the numerator column to use for the transformation.
+        denominator_columns: The names of the columns to use for the transformation. Must be "to the right" of
+            the numerator column.
         scale: The value to which each composition should be normalized. Eg., if the composition is expressed
             as percentages, scale=100. Closure is not performed by default.
     Returns:
@@ -74,20 +81,36 @@ def single_plr_transform(df: pd.DataFrame, column: str, scale: Optional[Number] 
     Raises:
         InvalidColumnException: The input column isn't found in the dataframe, or there are no columns
             to the right of the given column, or last column selected as numerator, or selected numerator
-            is in denominators.
+            is in denominator columns, or one or more denominator columns is left of numerator column.
         InvalidCompositionException: Data is not normalized to the expected value.
         NumericValueSignException: Data contains zeros or negative values.
     """
+    if numerator not in df.columns:
+        raise InvalidColumnException(f"The numerator column {numerator} was not found in the dataframe.")
 
-    if column not in df.columns:
-        raise InvalidColumnException(f"The column {column} was not found in the dataframe.")
-
-    idx = df.columns.get_loc(column)
-    if idx == len(df.columns) - 1:
+    numerator_idx = df.columns.get_loc(numerator)
+    if numerator_idx == len(df.columns) - 1:
         raise InvalidColumnException("Can't select last column as numerator.")
 
-    # Keep columns from idx to the right
-    df = df.iloc[:, idx:]
+    if denominator_columns is not None:
+        for column in denominator_columns:
+            if column not in df.columns:
+                raise InvalidColumnException(f"The column {column} was not found in the dataframe.")
+
+        if numerator in denominator_columns:
+            raise InvalidColumnException(f"The column {numerator} is in the denominator columns.")
+
+        for column in denominator_columns:
+            column_idx = df.columns.get_loc(column)
+            if column_idx < numerator_idx:
+                raise InvalidColumnException(f"The column {column} is to the left of the numerator column {numerator}.")
+    else:
+        # Select all columns to the right of the numerator
+        denominator_columns = df.columns[numerator_idx + 1 :].to_list()
+
+    # Keep columns from numerator_idx to the right
+    columns = [numerator] + denominator_columns
+    df = df.loc[:, columns]
 
     if scale is not None:
         df = _closure(df, scale)

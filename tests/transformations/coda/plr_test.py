@@ -40,14 +40,26 @@ def test_single_plr_transform_with_last_column():
         single_plr_transform(df, "c")
 
 
-def test_single_plr_invalid_column():
-    """Test that invalid column name raises exceptions."""
+def test_single_plr_invalid_columns():
+    """Test that invalid column names raise exceptions."""
     arr = np.array([[80, 15, 5], [75, 18, 7]])
     df = pd.DataFrame(arr, columns=["a", "b", "c"])
 
     # Numerator not in df
     with pytest.raises(InvalidColumnException):
         single_plr_transform(df, "x")
+
+    # A denominator columnnot in df
+    with pytest.raises(InvalidColumnException):
+        single_plr_transform(df, "a", "x")
+
+    # Numerator in denominator columns
+    with pytest.raises(InvalidColumnException):
+        single_plr_transform(df, "a", ["a", "b"])
+
+    # A denominator column is to the left of numerator column
+    with pytest.raises(InvalidColumnException):
+        single_plr_transform(df, "b", ["a", "c"])
 
 
 def test_plr_transform():
