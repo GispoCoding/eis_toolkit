@@ -17,7 +17,7 @@ def test_single_plr_transform_with_single_composition():
     result = _single_plr_transform_by_index(df, 0)
     assert result[0] == pytest.approx(1.82, abs=1e-2)
 
-    result = single_plr_transform(df, "b", closure_target=100)
+    result = single_plr_transform(df, "b", scale=100)
     assert result[0] == pytest.approx(0.78, abs=1e-2)
 
     result = _single_plr_transform_by_index(df, 1)

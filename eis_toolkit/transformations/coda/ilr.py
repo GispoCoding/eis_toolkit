@@ -7,10 +7,10 @@ from beartype.typing import Optional, Sequence
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidCompositionException, InvalidParameterValueException
+from eis_toolkit.utilities.aitchison_geometry import _closure
 from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid
 from eis_toolkit.utilities.checks.parameter import check_lists_overlap, check_numeric_value_sign
-from eis_toolkit.utilities.miscellaneous import perform_closure
 
 
 @beartype
@@ -70,7 +70,7 @@ def single_ilr_transform(
     df: pd.DataFrame,
     subcomposition_1: Sequence[str],
     subcomposition_2: Sequence[str],
-    closure_target: Optional[Number] = None,
+    scale: Optional[Number] = None,
 ) -> pd.Series:
     """
     Perform a single isometric logratio transformation on the provided subcompositions.
@@ -81,7 +81,8 @@ def single_ilr_transform(
         df: A dataframe of shape [N, D] of compositional data.
         subcomposition_1: Names of the columns in the numerator part of the ratio.
         subcomposition_2: Names of the columns in the denominator part of the ratio.
-        closure_target: Target row sum for closure. If None, no closure is performed.
+        scale: The value to which each composition should be normalized. Eg., if the composition is expressed
+            as percentages, scale=100.
 
     Returns:
         A series of length N containing the transforms.
@@ -103,10 +104,8 @@ def single_ilr_transform(
     if check_lists_overlap(subcomposition_1, subcomposition_2):
         raise InvalidCompositionException("The subcompositions overlap.")
 
-    if closure_target is not None:
-        columns = subcomposition_1 + subcomposition_2
-        df = perform_closure(df, columns, closure_target)
-        df = df[columns]
+    if scale is not None:
+        df = _closure(df, scale)
 
     check_in_simplex_sample_space(df)
 

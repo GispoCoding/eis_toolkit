@@ -9,7 +9,7 @@ from scipy.stats import gmean
 from eis_toolkit.exceptions import InvalidColumnException, NumericValueSignException
 from eis_toolkit.utilities.aitchison_geometry import _closure
 from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
-from eis_toolkit.utilities.miscellaneous import perform_closure, rename_columns, rename_columns_by_pattern
+from eis_toolkit.utilities.miscellaneous import rename_columns, rename_columns_by_pattern
 
 
 @beartype
@@ -29,7 +29,7 @@ def _clr_transform(df: pd.DataFrame) -> pd.DataFrame:
 def clr_transform(
     df: pd.DataFrame,
     columns: Optional[Sequence[str]] = None,
-    closure_target: Optional[Number] = None,
+    scale: Optional[Number] = None,
 ) -> pd.DataFrame:
     """
     Perform a centered logratio transformation on the data.
@@ -37,7 +37,8 @@ def clr_transform(
     Args:
         df: A dataframe of compositional data.
         columns: The names of the columns to be transformed.
-        closure_target: Target row sum for closure. If None, no closure is performed.
+        scale: The value to which each composition should be normalized. Eg., if the composition is expressed
+            as percentages, scale=100.
 
     Returns:
         A new dataframe containing the CLR transformed data.
@@ -57,8 +58,8 @@ def clr_transform(
     else:
         columns_to_transform = df.columns.to_list()
 
-    if closure_target is not None:
-        df = perform_closure(df, columns_to_transform, closure_target)
+    if scale is not None:
+        df = _closure(df, scale)
 
     check_in_simplex_sample_space(df)
 

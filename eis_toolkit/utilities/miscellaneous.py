@@ -375,29 +375,3 @@ def toggle_gdal_exceptions():
     finally:
         if not already_has_exceptions_enabled:
             gdal.DontUseExceptions()
-
-
-@beartype
-def perform_closure(
-    df: pd.DataFrame, columns: Optional[Sequence[str]] = None, closure_target: Number = 1
-) -> pd.DataFrame:
-    """
-    Peform closure on selected columns of a DataFrame.
-
-    Values in the specified columns of each row are scaled so that they sum to 'closure_target'.
-
-    Args:
-        df: Input DataFrame.
-        columns: Names of the columns on which to perform closure. If not provided, all columns are used.
-        closure_target: Row sum of the selected columns after performing closure. Defaults to 1.
-
-    Returns:
-        A DataFrame where on each row the values in the selected columns sum to the closure target.
-    """
-    if columns is None:
-        columns = df.columns
-
-    row_sums = df[columns].sum(axis=1)
-    df[columns] = df[columns].div(row_sums, axis=0).mul(closure_target)
-
-    return df

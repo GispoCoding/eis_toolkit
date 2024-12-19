@@ -7,9 +7,10 @@ from beartype.typing import Optional, Sequence
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
+from eis_toolkit.utilities.aitchison_geometry import _closure
 from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
 from eis_toolkit.utilities.checks.parameter import check_numeric_value_sign
-from eis_toolkit.utilities.miscellaneous import perform_closure, rename_columns_by_pattern
+from eis_toolkit.utilities.miscellaneous import rename_columns_by_pattern
 
 
 @beartype
@@ -53,7 +54,7 @@ def _single_plr_transform_by_index(df: pd.DataFrame, column_ind: int) -> pd.Seri
 
 
 @beartype
-def single_plr_transform(df: pd.DataFrame, column: str, closure_target: Optional[Number] = None) -> pd.Series:
+def single_plr_transform(df: pd.DataFrame, column: str, scale: Optional[Number] = None) -> pd.Series:
     """
     Perform a pivot logratio transformation on the selected column.
 
@@ -65,7 +66,8 @@ def single_plr_transform(df: pd.DataFrame, column: str, closure_target: Optional
     Args:
         df: A dataframe of shape [N, D] of compositional data.
         column: The name of the numerator column to use for the transformation.
-        closure_target: Target row sum for closure. If None, no closure is performed.
+        scale: The value to which each composition should be normalized. Eg., if the composition is expressed
+            as percentages, scale=100.
     Returns:
         A series of length N containing the transforms.
 
@@ -84,17 +86,15 @@ def single_plr_transform(df: pd.DataFrame, column: str, closure_target: Optional
     if idx == len(df.columns) - 1:
         raise InvalidColumnException("Can't select last column as numerator.")
 
-    if closure_target is not None:
-        # Perform closure on columns starting from numerator "to the right"
-        columns = df.columns[idx:].to_list()
-        df = perform_closure(df, columns, closure_target)
+    # Keep columns from idx to the right
+    df = df.iloc[:, idx:]
 
-        check_in_simplex_sample_space(df[columns])
+    if scale is not None:
+        df = _closure(df, scale)
 
-    else:
-        check_in_simplex_sample_space(df)
+    check_in_simplex_sample_space(df)
 
-    return _single_plr_transform_by_index(df, idx)
+    return _single_plr_transform_by_index(df, 0)
 
 
 @beartype
@@ -112,7 +112,7 @@ def _plr_transform(df: pd.DataFrame) -> pd.DataFrame:
 
 @beartype
 def plr_transform(
-    df: pd.DataFrame, columns: Optional[Sequence[str]] = None, closure_target: Optional[Number] = None
+    df: pd.DataFrame, columns: Optional[Sequence[str]] = None, scale: Optional[Number] = None
 ) -> pd.DataFrame:
     """
     Perform a pivot logratio transformation on the dataframe, returning the full set of transforms.
@@ -120,7 +120,8 @@ def plr_transform(
     Args:
         df: A dataframe of shape [N, D] of compositional data.
         columns: The names of the columns to use for the transformation.
-        closure_target: Target row sum for closure. If None, no closure is performed.
+        scale: The value to which each composition should be normalized. Eg., if the composition is expressed
+            as percentages, scale=100.
 
     Returns:
         A dataframe of shape [N, D-1] containing the set of PLR transformed data.
@@ -137,8 +138,8 @@ def plr_transform(
             raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
         df = df[columns]
 
-    if closure_target is not None:
-        df = perform_closure(df, closure_target=1)
+    if scale is not None:
+        df = _closure(df, scale)
 
     check_in_simplex_sample_space(df)
 
