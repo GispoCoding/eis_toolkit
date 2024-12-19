@@ -871,6 +871,40 @@ def local_morans_i_cli(
     typer.echo(f"Local Moran's I completed, output vector saved to {output_vector}.")
 
 
+# FEATURE IMPORTANCE
+@app.command()
+def feature_importance_cli(
+    model_file: INPUT_FILE_OPTION,
+    input_rasters: INPUT_FILES_ARGUMENT,
+    target_labels: INPUT_FILE_OPTION,
+    n_repeats: int = 10,
+    random_state: Optional[int] = None,
+):
+    """Evaluate the feature importance of a sklearn classifier or regressor."""
+    from eis_toolkit.exploratory_analyses.feature_importance import evaluate_feature_importance
+    from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml
+
+    typer.echo("Progress: 10%")
+
+    model = load_model(model_file)
+    typer.echo("Progress: 20%")
+
+    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+    typer.echo("Progress: 30%")
+
+    feature_names = [raster.name for raster in input_rasters]
+    typer.echo("Progress: 40%")
+
+    feature_importance, _ = evaluate_feature_importance(model, X, y, feature_names, n_repeats, random_state)
+    typer.echo("Progress: 80%")
+
+    results = dict(zip(feature_importance["Feature"], feature_importance["Importance"]))
+    json_str = json.dumps(results)
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Results: {json_str}")
+
+
 # --- RASTER PROCESSING ---
 
 
@@ -1926,6 +1960,7 @@ def idw_interpolation_cli(
     pixel_size: float = None,
     extent: Tuple[float, float, float, float] = (None, None, None, None),
     power: float = 2.0,
+    search_radius: Optional[float] = None,
 ):
     """Apply inverse distance weighting (IDW) interpolation to input vector file."""
     from eis_toolkit.exceptions import InvalidParameterValueException
@@ -1951,7 +1986,13 @@ def idw_interpolation_cli(
         with rasterio.open(base_raster) as raster:
             profile = raster.profile.copy()
 
-    out_image = idw(geodataframe=geodataframe, target_column=target_column, raster_profile=profile, power=power)
+    out_image = idw(
+        geodataframe=geodataframe,
+        target_column=target_column,
+        raster_profile=profile,
+        power=power,
+        search_radius=search_radius,
+    )
     typer.echo("Progress: 75%")
 
     profile["count"] = 1
