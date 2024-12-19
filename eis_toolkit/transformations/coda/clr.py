@@ -38,7 +38,7 @@ def clr_transform(
         df: A dataframe of compositional data.
         columns: The names of the columns to be transformed.
         scale: The value to which each composition should be normalized. Eg., if the composition is expressed
-            as percentages, scale=100.
+            as percentages, scale=100. Closure is not performed by default.
 
     Returns:
         A new dataframe containing the CLR transformed data.

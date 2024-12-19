@@ -82,7 +82,7 @@ def single_ilr_transform(
         subcomposition_1: Names of the columns in the numerator part of the ratio.
         subcomposition_2: Names of the columns in the denominator part of the ratio.
         scale: The value to which each composition should be normalized. Eg., if the composition is expressed
-            as percentages, scale=100.
+            as percentages, scale=100. Closure is not performed by default.
 
     Returns:
         A series of length N containing the transforms.

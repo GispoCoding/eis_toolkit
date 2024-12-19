@@ -36,7 +36,7 @@ def alr_transform(
         keep_denominator_column: Whether to include the denominator column in the result. If True, the returned
             dataframe retains its original shape.
         scale: The value to which each composition should be normalized. Eg., if the composition is expressed
-            as percentages, scale=100.
+            as percentages, scale=100. Closure is not performed by default.
 
     Returns:
         A new dataframe containing the ALR transformed data.
