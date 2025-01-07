@@ -62,7 +62,12 @@ def alr_transform(
         if invalid_columns:
             raise InvalidColumnException(f"The following columns were not found in the dataframe: {invalid_columns}.")
         columns_to_transform = columns
-        df = df[columns_to_transform]
+
+        if denominator_column not in columns_to_transform:
+            df = df[columns_to_transform + [denominator_column]]
+        else:
+            df = df[columns_to_transform]
+
     else:
         columns_to_transform = df.columns.to_list()
 
