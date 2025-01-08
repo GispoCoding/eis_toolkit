@@ -18,6 +18,8 @@ import typer
 from beartype.typing import List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
+from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
+
 app = typer.Typer()
 
 
@@ -3135,6 +3137,7 @@ def weights_of_evidence_calculate_weights_cli(
     out_rasters_dict = {}
     file_name = input_raster.name.split(".")[0]
     for key, array in arrays.items():
+        array = nan_to_nodata(array, raster_meta["nodata"])
         output_raster_name = file_name + "_weights_" + weights_type + "_" + key
         output_raster_path = output_dir.joinpath(output_raster_name + ".tif")
         with rasterio.open(output_raster_path, "w", **raster_meta) as dst:
@@ -3183,6 +3186,7 @@ def weights_of_evidence_calculate_responses_cli(
         if raster_weights is not None:
             with rasterio.open(raster_weights) as src:
                 array_W = src.read(1)
+                array_W = nodata_to_nan(array_W, src.nodata)
 
                 if raster_profile is None:
                     raster_profile = src.profile
@@ -3190,6 +3194,7 @@ def weights_of_evidence_calculate_responses_cli(
         if raster_std is not None:
             with rasterio.open(raster_std) as src:
                 array_S_W = src.read(1)
+                array_S_W = nodata_to_nan(array_S_W, src.nodata)
 
         dict_array.append({"W+": array_W, "S_W+": array_S_W})
 
@@ -3200,12 +3205,15 @@ def weights_of_evidence_calculate_responses_cli(
     )
     typer.echo("Progress: 75%")
 
+    posterior_probabilities = nan_to_nodata(posterior_probabilities, raster_profile["nodata"])
     with rasterio.open(output_probabilities, "w", **raster_profile) as dst:
         dst.write(posterior_probabilities, 1)
 
+    posterior_probabilies_std = nan_to_nodata(posterior_probabilies_std, raster_profile["nodata"])
     with rasterio.open(output_probabilities_std, "w", **raster_profile) as dst:
         dst.write(posterior_probabilies_std, 1)
 
+    confidence_array = nan_to_nodata(confidence_array, raster_profile["nodata"])
     with rasterio.open(output_confidence_array, "w", **raster_profile) as dst:
         dst.write(confidence_array, 1)
 
@@ -3230,9 +3238,11 @@ def agterberg_cheng_CI_test_cli(
 
     with rasterio.open(input_posterior_probabilities) as src:
         posterior_probabilities = src.read(1)
+        posterior_probabilities = nodata_to_nan(posterior_probabilities, src.nodata)
 
     with rasterio.open(input_posterior_probabilities_std) as src:
         posterior_probabilities_std = src.read(1)
+        posterior_probabilities_std = nodata_to_nan(posterior_probabilities_std, src.nodata)
 
     typer.echo("Progress: 25%")
 
