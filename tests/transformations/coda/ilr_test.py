@@ -15,10 +15,10 @@ def test_calculate_scaling_factor():
 
 def test_single_ilr_transform_with_single_composition():
     """Test the core functionality of a single ILR transform with a single row of data."""
-    arr = np.array([80, 15, 5])
+    arr = np.array([80, 15, 5]).astype(np.float64)
     df = pd.DataFrame(arr[None], columns=["a", "b", "c"])
 
-    result = single_ilr_transform(df, ["a"], ["b"])
+    result = single_ilr_transform(df, ["a"], ["b"], scale=100)
     assert result[0] == pytest.approx(1.18, abs=1e-2)
 
     result = single_ilr_transform(df, ["a", "b"], ["c"])
@@ -27,10 +27,10 @@ def test_single_ilr_transform_with_single_composition():
 
 def test_single_ilr_transform():
     """Test the core functionality of a single ILR transform."""
-    arr = np.array([[80, 15, 5], [75, 18, 7]])
+    arr = np.array([[80, 15, 5], [75, 18, 7]]).astype(dtype=np.float64)
     df = pd.DataFrame(arr, columns=["a", "b", "c"])
 
-    result = single_ilr_transform(df, ["a"], ["b"])
+    result = single_ilr_transform(df, ["a"], ["b"], scale=100)
     assert result[1] == pytest.approx(1.01, abs=1e-2)
 
     result = single_ilr_transform(df, ["a", "b"], ["c"])

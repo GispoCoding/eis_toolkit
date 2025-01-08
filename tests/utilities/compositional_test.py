@@ -35,7 +35,7 @@ def test_compositional_data_has_negatives():
     with pytest.raises(NumericValueSignException):
         clr_transform(df)
     with pytest.raises(NumericValueSignException):
-        single_ilr_transform(df, ["a"], ["b"])
+        single_ilr_transform(df, ["a"], ["b", "c"], scale=100)
     with pytest.raises(NumericValueSignException):
         plr_transform(df)
     with pytest.raises(NumericValueSignException):

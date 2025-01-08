@@ -14,7 +14,7 @@ def test_alr_transform():
     arr = np.random.dirichlet(np.ones(4), size=4)
     df = pd.DataFrame(arr, columns=["a", "b", "c", "d"], dtype=np.float64)
 
-    result = alr_transform(df, column="b", keep_denominator_column=True)
+    result = alr_transform(df, denominator_column="b", keep_denominator_column=True)
     expected = pd.DataFrame(
         np.log(arr / arr[:, 1, None]),
         columns=["V1", "V2", "V3", "V4"],
@@ -22,7 +22,7 @@ def test_alr_transform():
     )
     pd.testing.assert_frame_equal(result, expected)
 
-    result = alr_transform(df, column="b")
+    result = alr_transform(df, denominator_column="b")
     expected = pd.DataFrame(
         np.log(np.delete(arr, 1, axis=1) / arr[:, 1, None]),
         columns=["V1", "V2", "V3"],
@@ -31,10 +31,32 @@ def test_alr_transform():
     pd.testing.assert_frame_equal(result, expected)
 
 
-def test_alr_transform_with_invalid_column():
-    """Test that providing a column doesn't exist raises the correct exception."""
+def test_alr_transform_with_columns():
+    """Test ALR transform with column selection."""
+    arr = np.random.dirichlet(np.ones(4), size=4)
+    df = pd.DataFrame(arr, columns=["a", "b", "c", "d"], dtype=np.float64)
+    df["e"] = ["value1", "value2", "value3", "value4"]
+
+    result = alr_transform(df, columns=["a", "b", "c", "d"], denominator_column="b", keep_denominator_column=True)
+
+    expected = pd.DataFrame(
+        np.log(arr / arr[:, 1, None]),
+        columns=["V1", "V2", "V3", "V4"],
+        dtype=np.float64,
+    )
+    pd.testing.assert_frame_equal(result, expected)
+
+
+def test_alr_transform_with_invalid_denominator_column():
+    """Test that providing a denominator column doesn't exist raises the correct exception."""
     with pytest.raises(InvalidColumnException):
         alr_transform(SAMPLE_DATAFRAME, "e")
+
+
+def test_alr_transform_with_invalid_columns():
+    """Test that providing invalid columns raises the correct exception."""
+    with pytest.raises(InvalidColumnException):
+        alr_transform(SAMPLE_DATAFRAME, columns=["x", "y", "z"])
 
 
 def test_alr_transform_denominator_column():
@@ -55,7 +77,7 @@ def test_inverse_alr():
     arr = np.array([[np.log(0.25), np.log(0.25), np.log(0.25)], [np.log(2), np.log(2), np.log(2)]])
     df = pd.DataFrame(arr, columns=["V1", "V2", "V3"], dtype=np.float64)
     column_name = "d"
-    result = inverse_alr(df, column_name, 7)
+    result = inverse_alr(df, denominator_column=column_name, scale=7)
     expected_arr = np.array([[1, 1, 1, 4], [2, 2, 2, 1]])
     expected = pd.DataFrame(expected_arr, columns=["V1", "V2", "V3", "d"], dtype=np.float64)
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
@@ -69,7 +91,7 @@ def test_inverse_alr_with_existing_denominator_column():
     expected_arr = np.array([[1, 1, 4, 1], [2, 2, 1, 2]])
     expected = pd.DataFrame(expected_arr, columns=["V1", "V2", "d", "V3"], dtype=np.float64)
 
-    result = inverse_alr(df, column_name, 7)
+    result = inverse_alr(df, denominator_column=column_name, scale=7)
     pd.testing.assert_frame_equal(result, expected, atol=1e-2)
 
 
@@ -78,6 +100,16 @@ def test_inverse_alr_with_invalid_scale_value():
     arr = np.array([[np.log(0.25), np.log(0.25), np.log(0.25)], [np.log(2), np.log(2), np.log(2)]])
     df = pd.DataFrame(arr, columns=["V1", "V2", "V3"], dtype=np.float64)
     with pytest.raises(NumericValueSignException):
-        inverse_alr(df, "d", 0)
+        inverse_alr(df, denominator_column="d", scale=0)
     with pytest.raises(NumericValueSignException):
-        inverse_alr(df, "d", -7)
+        inverse_alr(df, denominator_column="d", scale=-7)
+
+
+def test_inverse_alr_with_invalid_columns():
+    """Test that providing invalid columns raises the correct exception."""
+    arr = np.array([[np.log(0.25), np.log(0.25), np.log(0.25)], [np.log(2), np.log(2), np.log(2)]])
+    df = pd.DataFrame(arr, columns=["V1", "V2", "V3"], dtype=np.float64)
+    with pytest.raises(InvalidColumnException):
+        inverse_alr(df, columns=["a"], denominator_column="V1")
+    with pytest.raises(InvalidColumnException):
+        inverse_alr(df, columns=["a", "b", "c"], denominator_column="V1")
