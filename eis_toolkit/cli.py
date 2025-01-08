@@ -7,6 +7,7 @@
 import json
 import os
 from enum import Enum
+from itertools import zip_longest
 from pathlib import Path
 
 import geopandas as gpd
@@ -332,8 +333,29 @@ class KerasRegressorMetrics(str, Enum):
     mae = "mae"
 
 
+class WeightsType(str, Enum):
+    """Weights type for WofE."""
+
+    unique = "unique"
+    categorical = "categorical"
+    ascending = "ascending"
+    descending = "descending"
+
+
 INPUT_FILE_OPTION = Annotated[
     Path,
+    typer.Option(
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        writable=False,
+        readable=True,
+        resolve_path=True,
+    ),
+]
+
+INPUT_FILES_OPTION = Annotated[
+    List[Path],
     typer.Option(
         exists=True,
         file_okay=True,
@@ -3065,7 +3087,159 @@ def gamma_overlay_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT
 
 
 # WOFE
-# TODO
+@app.command()
+def weights_of_evidence_calculate_weights_cli(
+    input_raster: INPUT_FILE_OPTION,
+    input_vector: INPUT_FILE_OPTION,
+    output_dir: OUTPUT_DIR_OPTION,
+    raster_nodata: Optional[float] = None,
+    weights_type: Annotated[WeightsType, typer.Option(case_sensitive=False)] = WeightsType.unique,
+    studentized_contrast_threshold: float = 1,
+    arrays_to_generate: Annotated[Optional[List[str]], typer.Option()] = None,
+):
+    """
+    Calculate weights of spatial associations.
+
+    Parameter --studentized-contrast-threshold is used with 'categorical', 'ascending' and 'descending' weight types.
+
+    Parameter --arrays-to-generate controls which columns in the weights dataframe are returned as arrays. All column
+    names in the produced weights_df are valid choices. The available columns for "unique" weights_type are "Class",
+    "Pixel count", "Deposit count", "W+", "S_W+", "W-", "S_W-", "Contrast", "S_Contrast", and "Studentized contrast".
+    For other weights types, additional available column names are "Generalized class", "Generalized W+", and
+    "Generalized S_W+". Defaults to ["Class", "W+", "S_W+] for "unique" weights_type and ["Class", "W+", "S_W+",
+    "Generalized W+", "Generalized S_W+"] for the cumulative weight types.
+    """
+    from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_weights
+
+    typer.echo("Progress: 10%")
+
+    evidential_raster = rasterio.open(input_raster)
+    deposits = gpd.read_file(input_vector)
+    typer.echo("Progress: 25%")
+
+    if arrays_to_generate == []:
+        arrays_to_generate = None
+
+    df, arrays, raster_meta, nr_of_deposits, nr_of_pixels = weights_of_evidence_calculate_weights(
+        evidential_raster=evidential_raster,
+        deposits=deposits,
+        raster_nodata=raster_nodata,
+        weights_type=weights_type,
+        studentized_contrast_threshold=studentized_contrast_threshold,
+        arrays_to_generate=arrays_to_generate,
+    )
+    typer.echo("Progress: 75%")
+
+    df.to_csv(output_dir.joinpath("wofe_results.csv"))
+
+    file_name = input_raster.name.split(".")[0]
+    for key, array in arrays.items():
+        output_raster_path = output_dir.joinpath(file_name + "_weights_" + weights_type + "_" + key + ".tif")
+        with rasterio.open(output_raster_path, "w", **raster_meta) as dst:
+            dst.write(array, 1)
+
+    typer.echo("Progress 100%")
+
+    typer.echo(f"Number of deposit pixels: {nr_of_deposits}")
+    typer.echo(f"Number of all evidence pixels: {nr_of_pixels}")
+    typer.echo(f"Weight calculations completed, rasters and CSV saved to {output_dir}.")
+
+
+@app.command()
+def weights_of_evidence_calculate_responses_cli(
+    input_rasters_weights: INPUT_FILES_OPTION,
+    input_rasters_standard_deviations: INPUT_FILES_OPTION,
+    output_probabilities: OUTPUT_FILE_OPTION,
+    output_probabilities_std: OUTPUT_FILE_OPTION,
+    output_confidence_array: OUTPUT_FILE_OPTION,
+    nr_of_deposits: Annotated[int, typer.Option()],
+    nr_of_pixels: Annotated[int, typer.Option()],
+):
+    """
+    Calculate the posterior probabilities for the given generalized weight arrays.
+
+    Parameter --input-rasters are the output arrays (rasters) of weights-of-evidence-calculate-weights-cli.
+    For each set of rasters, generalized weight and generalized standard deviation arrays are used and summed
+    together pixel-wise to calculate the posterior probabilities. If generalized arrays are not found,
+    the W+ and S_W+ arrays are used (so if outputs from unique weight calculations are used for this function).
+    """
+    from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_responses
+
+    typer.echo("Progress: 10%")
+    typer.echo(input_rasters_weights)
+
+    dict_array = []
+    raster_profile = None
+
+    for raster_weights, raster_std in zip_longest(
+        input_rasters_weights, input_rasters_standard_deviations, fillvalue=None
+    ):
+
+        if raster_weights is not None:
+            with rasterio.open(raster_weights) as src:
+                array_W = src.read(1)
+
+                if raster_profile is None:
+                    raster_profile = src.profile
+
+        if raster_std is not None:
+            with rasterio.open(raster_std) as src:
+                array_S_W = src.read(1)
+
+        dict_array.append({"W+": array_W, "S_W+": array_S_W})
+
+    typer.echo("Progress: 25%")
+
+    posterior_probabilities, posterior_probabilies_std, confidence_array = weights_of_evidence_calculate_responses(
+        output_arrays=dict_array, nr_of_deposits=nr_of_deposits, nr_of_pixels=nr_of_pixels
+    )
+    typer.echo("Progress: 75%")
+
+    with rasterio.open(output_probabilities, "w", **raster_profile) as dst:
+        dst.write(posterior_probabilities, 1)
+
+    with rasterio.open(output_probabilities_std, "w", **raster_profile) as dst:
+        dst.write(posterior_probabilies_std, 1)
+
+    with rasterio.open(output_confidence_array, "w", **raster_profile) as dst:
+        dst.write(confidence_array, 1)
+
+    typer.echo("Progress: 100%")
+
+    typer.echo(
+        f"Responses calculations finished, writing output rasters to {output_probabilities}, \
+            {output_probabilities_std} and {output_confidence_array}"
+    )
+
+
+@app.command()
+def agterberg_cheng_CI_test_cli(
+    input_posterior_probabilities: INPUT_FILE_OPTION,
+    input_posterior_probabilities_std: INPUT_FILE_OPTION,
+    nr_of_deposits: Annotated[int, typer.Option()],
+):
+    """Perform the conditional independence test presented by Agterberg-Cheng (2002)."""
+    from eis_toolkit.prediction.weights_of_evidence import agterberg_cheng_CI_test
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_posterior_probabilities) as src:
+        posterior_probabilities = src.read(1)
+
+    with rasterio.open(input_posterior_probabilities_std) as src:
+        posterior_probabilities_std = src.read(1)
+
+    typer.echo("Progress: 25%")
+
+    _, _, _, _, summary = agterberg_cheng_CI_test(
+        posterior_probabilities=posterior_probabilities,
+        posterior_probabilities_std=posterior_probabilities_std,
+        nr_of_deposits=nr_of_deposits,
+    )
+
+    typer.echo("Progress: 100%")
+    typer.echo("Conditional independence test completed.")
+    typer.echo(summary)
 
 
 # --- TRANSFORMATIONS ---

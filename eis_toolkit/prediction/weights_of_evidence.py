@@ -374,9 +374,11 @@ def weights_of_evidence_calculate_weights(
             that class with max contrast has studentized contrast value at least the defined value (cumulative).
             Defaults to 1.
         arrays_to_generate: Arrays to generate from the computed weight metrics. All column names
-            in the produced weights_df are valid choices. Defaults to ["Class", "W+", "S_W+]
-            for "unique" weights_type and ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"]
-            for the cumulative weight types.
+            in the produced weights_df are valid choices. Available column names for "unique" weights type are "Class",
+            "Pixel count", "Deposit count", "W+", "S_W+", "W-", "S_W-", "Contrast", "S_Contrast", and
+            "Studentized contrast". For other weights types, additional available column names are "Generalized class",
+            "Generalzed W+", and "Generalized S_W+". Defaults to ["Class", "W+", "S_W+] for "unique" weights_type and
+            ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"] for the cumulative weight types.
 
     Returns:
         Dataframe with weights of spatial association between the input data.
