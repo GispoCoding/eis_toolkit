@@ -3132,16 +3132,21 @@ def weights_of_evidence_calculate_weights_cli(
 
     df.to_csv(output_dir.joinpath("wofe_results.csv"))
 
+    out_rasters_dict = {}
     file_name = input_raster.name.split(".")[0]
     for key, array in arrays.items():
-        output_raster_path = output_dir.joinpath(file_name + "_weights_" + weights_type + "_" + key + ".tif")
+        output_raster_name = file_name + "_weights_" + weights_type + "_" + key
+        output_raster_path = output_dir.joinpath(output_raster_name + ".tif")
         with rasterio.open(output_raster_path, "w", **raster_meta) as dst:
             dst.write(array, 1)
+        out_rasters_dict[output_raster_name] = str(output_raster_path)
 
+    json_str = json.dumps(out_rasters_dict)
     typer.echo("Progress 100%")
 
     typer.echo(f"Number of deposit pixels: {nr_of_deposits}")
     typer.echo(f"Number of all evidence pixels: {nr_of_pixels}")
+    typer.echo(f"Output rasters: {json_str}")
     typer.echo(f"Weight calculations completed, rasters and CSV saved to {output_dir}.")
 
 
