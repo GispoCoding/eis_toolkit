@@ -3131,8 +3131,11 @@ def weights_of_evidence_calculate_weights_cli(
     typer.echo("Progress: 75%")
 
     df.to_csv(output_dir.joinpath("wofe_results.csv"))
+
+    file_name = input_raster.name.split(".")[0]
     for key, array in arrays.items():
-        output_raster_path = output_dir.joinpath(key + ".tif")
+        output_raster_path = output_dir.joinpath(file_name + "_weights_" + weights_type + "_" + key + ".tif")
+        typer.echo(output_raster_path)
         with rasterio.open(output_raster_path, "w", **raster_meta) as dst:
             dst.write(array, 1)
 
