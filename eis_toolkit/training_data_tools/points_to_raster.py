@@ -8,7 +8,7 @@ from beartype import beartype
 from beartype.typing import Optional, Tuple
 from rasterio.io import MemoryFile
 
-from eis_toolkit.exceptions import NonMatchingCrsException
+from eis_toolkit.exceptions import NonMatchingCrsException,EmptyDataFrameException
 from eis_toolkit.raster_processing.create_constant_raster import create_constant_raster
 from eis_toolkit.utilities.checks.raster import check_matching_crs
 
@@ -36,7 +36,7 @@ def save_raster(path: str, array: np.ndarray, meta: dict = None, overwrite: bool
         dst.close()
 
 
-def _point_to_raster(raster_array, raster_meta, positives):
+def _point_to_raster(raster_array, raster_meta, positives, attribute):
     with MemoryFile() as memfile:
         raster_meta["driver"] = "GTiff"
         with memfile.open(**raster_meta) as datawriter:
@@ -48,7 +48,7 @@ def _point_to_raster(raster_array, raster_meta, positives):
             ):
                 raise NonMatchingCrsException(
                     "The raster and geodataframe are not in the same CRS."
-                )  # save raster data.
+                )
 
             # Select only positives that are within raster bounds
             positives = positives.cx[
@@ -56,10 +56,12 @@ def _point_to_raster(raster_array, raster_meta, positives):
                 memraster.bounds.bottom : memraster.bounds.top,  # noqa: E203
             ]
 
+            values = positives[attribute]
+
             positives_rows, positives_cols = rasterio.transform.rowcol(
                 memraster.transform, positives.geometry.x, positives.geometry.y
             )
-            raster_array[positives_rows, positives_cols] = 1
+            raster_array[positives_rows, positives_cols] = values
 
     return raster_array, raster_meta
 
@@ -67,6 +69,7 @@ def _point_to_raster(raster_array, raster_meta, positives):
 @beartype
 def points_to_raster(
     positives: geopandas.GeoDataFrame,
+    attribute: str,
     template_raster: Optional[rasterio.io.DatasetReader] = None,
     coord_west: Optional[Number] = None,
     coord_north: Optional[Number] = None,
@@ -106,10 +109,14 @@ def points_to_raster(
         A tuple containing the output raster as a NumPy array and updated metadata.
 
     Raises:
+        EmptyDataFrameException:  The input GeoDataFrame is empty.
         InvalidParameterValueException: Provide invalid input parameter.
         NonMatchingCrsException: The raster and geodataframe are not in the same CRS.
     """
 
+    if positives.empty:
+        raise EmptyDataFrameException("Expected geodataframe to contain geometries.")
+    
     base_value = 0
     raster_array, raster_meta = create_constant_raster(
         base_value,
@@ -125,6 +132,6 @@ def points_to_raster(
         nodata_value,
     )
 
-    raster_array, raster_meta = _point_to_raster(raster_array, raster_meta, positives)
+    raster_array, raster_meta = _point_to_raster(raster_array, raster_meta, positives, attribute)
 
     return raster_array, raster_meta
