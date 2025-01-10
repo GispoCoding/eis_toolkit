@@ -8,7 +8,7 @@ from beartype import beartype
 from beartype.typing import Optional, Tuple
 from rasterio.io import MemoryFile
 
-from eis_toolkit.exceptions import NonMatchingCrsException,EmptyDataFrameException
+from eis_toolkit.exceptions import EmptyDataFrameException, NonMatchingCrsException
 from eis_toolkit.raster_processing.create_constant_raster import create_constant_raster
 from eis_toolkit.utilities.checks.raster import check_matching_crs
 
@@ -46,9 +46,7 @@ def _point_to_raster(raster_array, raster_meta, positives, attribute):
             if not check_matching_crs(
                 objects=[memraster, positives],
             ):
-                raise NonMatchingCrsException(
-                    "The raster and geodataframe are not in the same CRS."
-                )
+                raise NonMatchingCrsException("The raster and geodataframe are not in the same CRS.")
 
             # Select only positives that are within raster bounds
             positives = positives.cx[
@@ -116,7 +114,7 @@ def points_to_raster(
 
     if positives.empty:
         raise EmptyDataFrameException("Expected geodataframe to contain geometries.")
-    
+
     base_value = 0
     raster_array, raster_meta = create_constant_raster(
         base_value,

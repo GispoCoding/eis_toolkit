@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import geopandas as gpd
 import pytest
 import rasterio
@@ -12,12 +13,15 @@ PATH_LABELS_GPKG = test_dir.joinpath("data/remote/interpolating/interpolation_te
 
 positives = gpd.read_file(PATH_LABELS_GPKG)
 
+
 @pytest.mark.parametrize("positives", [positives])  # Case where CRS matches
 def test_points_to_raster(positives):
     """Test that points_to_raster function works as expected."""
     with rasterio.open(SMALL_RASTER_PATH) as temp_raster:
 
-        outarray, outmeta = points_to_raster(positives=positives, attribute='value', template_raster=temp_raster, nodata_value=-999)
+        outarray, outmeta = points_to_raster(
+            positives=positives, attribute="value", template_raster=temp_raster, nodata_value=-999
+        )
 
         assert outarray.shape == (
             temp_raster.height,
@@ -31,4 +35,6 @@ def test_non_matching_crs_error(positives):
 
     with pytest.raises(NonMatchingCrsException):
         with rasterio.open(SMALL_RASTER_PATH) as temp_raster:
-            outarray, outmeta = points_to_raster(positives=positives, attribute='value', template_raster=temp_raster, nodata_value=-999)
+            outarray, outmeta = points_to_raster(
+                positives=positives, attribute="value", template_raster=temp_raster, nodata_value=-999
+            )
