@@ -7,10 +7,77 @@ import rasterio
 from beartype import beartype
 from beartype.typing import Optional, Tuple
 from rasterio.io import MemoryFile
+from scipy.ndimage import binary_dilation
 
 from eis_toolkit.exceptions import EmptyDataFrameException, NonMatchingCrsException
 from eis_toolkit.raster_processing.create_constant_raster import create_constant_raster
 from eis_toolkit.utilities.checks.raster import check_matching_crs
+
+
+def _get_kernel_size(radius: int) -> tuple[int, int]:
+    size = 1 + (radius * 2)
+    return size, radius
+
+
+def _create_grid(size: int, radius) -> tuple[np.ndarray, np.ndarray]:
+    y = np.arange(-radius, size - radius)
+    x = np.arange(-radius, size - radius)
+    y, x = np.meshgrid(y, x)
+    return x, y
+
+
+def _basic_kernel(radius: int, value: Number) -> np.ndarray:
+    size, _ = _get_kernel_size(radius)
+
+    x, y = _create_grid(size, radius)
+    mask = x**2 + y**2 <= radius**2
+    kernel = np.zeros((size, size))
+    kernel[mask] = value
+
+    return kernel
+
+
+def _create_local_buffer(
+    array: np.ndarray,
+    radius: int,
+    target_value: Number,
+) -> np.ndarray:
+    kernel = _basic_kernel(radius, target_value)
+    array = np.squeeze(array) if array.ndim >= 3 else array
+
+    return binary_dilation(array == target_value, structure=kernel)
+
+
+def _create_buffer_around_labels(
+    array: np.ndarray,
+    radius: int = 1,
+    target_value: int = 1,
+    buffer_value: Optional[str] = None,
+    overwrite_nodata: bool = False,
+) -> np.ndarray:
+    out_array = np.copy(array)
+    out_array = _create_local_buffer(
+        array=out_array,
+        radius=radius,
+        target_value=target_value,
+    )
+
+    if buffer_value == "avg":
+        out_array = np.where(out_array, target_value, 0)
+        out_array = np.where((array != 0) & (out_array != 0), (array + out_array) * 0.5, (array + out_array))
+    elif buffer_value == "max":
+        out_array = np.where(out_array, target_value, 0)
+        out_array = np.where(array != 0, np.maximum(array, out_array), out_array)
+    elif buffer_value == "min":
+        out_array = np.where(out_array, target_value, 0)
+        out_array = np.where((array != 0) & (out_array != 0), np.minimum(array, out_array), (array + out_array))
+    else:
+        out_array = np.where(out_array, target_value, array)
+
+    if overwrite_nodata is False:
+        out_array = np.where(np.isnan(array), np.nan, out_array)
+
+    return out_array
 
 
 @beartype
@@ -36,7 +103,7 @@ def save_raster(path: str, array: np.ndarray, meta: dict = None, overwrite: bool
         dst.close()
 
 
-def _point_to_raster(raster_array, raster_meta, positives, attribute):
+def _point_to_raster(raster_array, raster_meta, positives, attribute, radius, buffer_value):
     with MemoryFile() as memfile:
         raster_meta["driver"] = "GTiff"
         with memfile.open(**raster_meta) as datawriter:
@@ -54,12 +121,21 @@ def _point_to_raster(raster_array, raster_meta, positives, attribute):
                 memraster.bounds.bottom : memraster.bounds.top,  # noqa: E203
             ]
 
-            values = positives[attribute]
+            if attribute is not None:
+                values = positives[attribute]
+            else:
+                values = [1]
 
             positives_rows, positives_cols = rasterio.transform.rowcol(
                 memraster.transform, positives.geometry.x, positives.geometry.y
             )
             raster_array[positives_rows, positives_cols] = values
+
+            unique_values = list(set(values))
+
+            if radius is not None:
+                for target_value in unique_values:
+                    raster_array = _create_buffer_around_labels(raster_array, radius, target_value, buffer_value)
 
     return raster_array, raster_meta
 
@@ -67,7 +143,8 @@ def _point_to_raster(raster_array, raster_meta, positives, attribute):
 @beartype
 def points_to_raster(
     positives: geopandas.GeoDataFrame,
-    attribute: str,
+    attribute: Optional[str] = None,
+    radius: Optional[int] = None,
     template_raster: Optional[rasterio.io.DatasetReader] = None,
     coord_west: Optional[Number] = None,
     coord_north: Optional[Number] = None,
@@ -78,6 +155,7 @@ def points_to_raster(
     raster_width: Optional[int] = None,
     raster_height: Optional[int] = None,
     nodata_value: Optional[Number] = None,
+    buffer_value: Optional[str] = None,
 ) -> Tuple[np.ndarray, dict]:
     """Convert a point data set into a binary raster.
 
@@ -108,7 +186,6 @@ def points_to_raster(
 
     Raises:
         EmptyDataFrameException:  The input GeoDataFrame is empty.
-        InvalidParameterValueException: Provide invalid input parameter.
         NonMatchingCrsException: The raster and geodataframe are not in the same CRS.
     """
 
@@ -130,6 +207,6 @@ def points_to_raster(
         nodata_value,
     )
 
-    raster_array, raster_meta = _point_to_raster(raster_array, raster_meta, positives, attribute)
+    raster_array, raster_meta = _point_to_raster(raster_array, raster_meta, positives, attribute, radius, buffer_value)
 
     return raster_array, raster_meta
