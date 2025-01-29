@@ -5,6 +5,8 @@ import numpy as np
 from beartype import beartype
 from beartype.typing import Optional, Union
 from numba import njit, prange
+from osgeo import gdal
+from osgeo.gdal import ComputeProximity
 from rasterio import profiles, transform
 
 from eis_toolkit import exceptions
@@ -220,6 +222,51 @@ def _point_in_polygon(px: Number, py: Number, polygon_coords: np.ndarray, polygo
         if inside:
             return True
     return False
+
+
+@beartype
+def distance_computation_gdal(
+    input_path: str,
+    output_path: str,
+    max_distance: Optional[Number] = None,
+    nodata: Number = 0.0,
+):
+    """
+    Produce a raster proximity map using GDAL's ComputeProximity function.
+
+    The map indicates the distance from the center of each pixel to the center of the nearest
+        pixel identified as a target pixel.
+
+    Args:
+        input_path: Path to input raster.
+        output_path: Path to output raster.
+        max_distance: The maximum distance in the output raster.
+        nodata: Specify a nodata value to use for the destination proximity raster. Defaults to 0.0.
+
+    Raises:
+        NumericValueSignException: Max distance is defined and is not a positive number.
+    """
+
+    if max_distance is not None and max_distance <= 0:
+        raise exceptions.NumericValueSignException("Expected max distance to be a positive number.")
+
+    driver = gdal.GetDriverByName("GTiff")
+    src = gdal.Open(input_path)
+    src_band = src.GetRasterBand(1)
+    geo_transform = src.GetGeoTransform()
+    projection = src.GetProjection()
+    columns = src.RasterXSize
+    rows = src.RasterYSize
+
+    dst = driver.Create(output_path, columns, rows, 1, gdal.GDT_Float32)
+    dst.SetGeoTransform(geo_transform)
+    dst.SetProjection(projection)
+    dst_band = dst.GetRasterBand(1)
+
+    alg_options = [f"MAXDIST:{max_distance}"] if max_distance else []
+    alg_options.append(f"NODATA:{nodata}")
+
+    ComputeProximity(src_band, dst_band, alg_options)
 
 
 # @beartype

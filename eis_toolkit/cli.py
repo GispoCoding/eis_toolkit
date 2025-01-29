@@ -2267,6 +2267,27 @@ def distance_computation_cli(
     typer.echo(f"Distance computation completed, writing raster to {output_raster}.")
 
 
+@app.command()
+def distance_computation_gdal_cli(
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    max_distance: float = None,
+):
+    """Calculate distance from raster cell to nearest geometry."""
+    from eis_toolkit.vector_processing.distance_computation import distance_computation_gdal
+
+    typer.echo("Progress: 10%")
+
+    typer.echo("Progress: 25%")
+
+    distance_computation_gdal(str(input_raster), str(output_raster), max_distance)
+    typer.echo("Progress: 75%")
+
+    typer.echo("Progress: 100%")
+
+    typer.echo(f"Distance computation completed, writing raster to {output_raster}")
+
+
 # CBA
 @app.command()
 def cell_based_association_cli(
