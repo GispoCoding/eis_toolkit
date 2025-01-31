@@ -14,7 +14,7 @@ PATH_LABELS_GPKG = test_dir.joinpath("data/remote/interpolating/interpolation_te
 positives = gpd.read_file(PATH_LABELS_GPKG)
 
 
-@pytest.mark.parametrize("positives", [(positives)]) 
+@pytest.mark.parametrize("positives", [(positives)])
 def test_points_to_raster(positives):
     """Test that generate_negatives function works as expected."""
     with rasterio.open(SMALL_RASTER_PATH) as temp_raster:
@@ -28,8 +28,8 @@ def test_points_to_raster(positives):
         )
 
         row, col = rasterio.transform.rowcol(
-                outmeta2['transform'], sampled_negatives.geometry.x, sampled_negatives.geometry.y
-            )
+            outmeta2["transform"], sampled_negatives.geometry.x, sampled_negatives.geometry.y
+        )
 
         assert outarray2.shape == (
             temp_raster.height,

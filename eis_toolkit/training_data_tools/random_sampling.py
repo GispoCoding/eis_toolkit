@@ -1,37 +1,41 @@
+from numbers import Number
+
+import geopandas as gpd
 import numpy as np
 import rasterio
-from numbers import Number
-from beartype import beartype
-from beartype.typing import Union, Tuple
-from rasterio import profiles
 import rasterio.transform
-import geopandas as gpd
+from beartype import beartype
+from beartype.typing import Tuple, Union
+from rasterio import profiles
 from shapely.geometry import Point
+
 from eis_toolkit.exceptions import EmptyDataException
 
+
 def _random_sampling(
-        indices: np.ndarray, 
-        values: np.ndarray,
-        sample_number:Number,
-        random_seed: int,
-        ) -> np.ndarray:
-    
+    indices: np.ndarray,
+    values: np.ndarray,
+    sample_number: Number,
+    random_seed: int,
+) -> np.ndarray:
+
     indices_negatives = indices[values == 0]
-     
-    total_negatives=min(indices_negatives.size,sample_number)
+
+    total_negatives = min(indices_negatives.size, sample_number)
 
     np.random.seed(random_seed)
-    negative_indices = np.random.choice(indices_negatives.shape[0],total_negatives,replace=False)
+    negative_indices = np.random.choice(indices_negatives.shape[0], total_negatives, replace=False)
     Negative_sample = indices_negatives[negative_indices]
 
     return Negative_sample
 
+
 @beartype
 def generate_negatives(
-        raster_array: np.ndarray,
-        raster_meta: Union[profiles.Profile, dict],
-        sample_number:Number,
-        random_seed: int = 48,
+    raster_array: np.ndarray,
+    raster_meta: Union[profiles.Profile, dict],
+    sample_number: Number,
+    random_seed: int = 48,
 ) -> Tuple[gpd.GeoDataFrame, np.ndarray, dict]:
     """Generate probable negatives from raster array with marked positives.
 
@@ -47,41 +51,40 @@ def generate_negatives(
     Raises:
         EmptyDataException:  The raster array is empty.
     """
-    
-    if raster_array.size==0:
+
+    if raster_array.size == 0:
         raise EmptyDataException
 
-    out_array=np.copy(raster_array)
+    out_array = np.copy(raster_array)
 
     total_rows = out_array.shape[0]
     total_cols = out_array.shape[1]
 
-    indices = np.arange(total_rows*total_cols)
+    indices = np.arange(total_rows * total_cols)
 
-    indices = indices.reshape(-1,1)
+    indices = indices.reshape(-1, 1)
 
-    values = out_array.reshape(-1,1)
-    
-    sampled_negatives = _random_sampling(indices=indices,
-                                         values=values,
-                                         sample_number=sample_number,
-                                         random_seed=random_seed)
+    values = out_array.reshape(-1, 1)
 
-    sampled_negatives = sampled_negatives.reshape(1,-1)
-    
-    row = sampled_negatives//total_cols 
+    sampled_negatives = _random_sampling(
+        indices=indices, values=values, sample_number=sample_number, random_seed=random_seed
+    )
+
+    sampled_negatives = sampled_negatives.reshape(1, -1)
+
+    row = sampled_negatives // total_cols
     row = row[0]
-    
+
     col = np.mod(sampled_negatives, total_cols)
     col = col[0]
 
-    out_array[row,col] = -1
+    out_array[row, col] = -1
 
-    x,y = rasterio.transform.xy(raster_meta['transform'], row, col)
-    
-    points = [Point(x[i],y[i]) for i in range(len(x))]
+    x, y = rasterio.transform.xy(raster_meta["transform"], row, col)
+
+    points = [Point(x[i], y[i]) for i in range(len(x))]
 
     sample_negative = gpd.GeoDataFrame(geometry=points)
-    sample_negative.set_crs(raster_meta['crs'], allow_override=True, inplace=True)
+    sample_negative.set_crs(raster_meta["crs"], allow_override=True, inplace=True)
 
     return sample_negative, out_array, raster_meta
