@@ -4,8 +4,8 @@ import geopandas as gpd
 import pytest
 import rasterio
 
-from eis_toolkit.training_data_tools.random_sampling import generate_negatives
 from eis_toolkit.training_data_tools.points_to_raster import points_to_raster
+from eis_toolkit.training_data_tools.random_sampling import generate_negatives
 from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 
 test_dir = Path(__file__).parent.parent
