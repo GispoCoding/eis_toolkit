@@ -52,7 +52,7 @@ def _create_buffer_around_labels(
     array: np.ndarray,
     radius: int = 1,
     target_value: int = 1,
-    buffer_value: Optional[str] = None,
+    buffer: Optional[str] = None,
     overwrite_nodata: bool = False,
 ) -> np.ndarray:
     out_array = np.copy(array)
@@ -62,13 +62,13 @@ def _create_buffer_around_labels(
         target_value=target_value,
     )
 
-    if buffer_value == "avg":
+    if buffer == "avg":
         out_array = np.where(out_array, target_value, 0)
         out_array = np.where((array != 0) & (out_array != 0), (array + out_array) * 0.5, (array + out_array))
-    elif buffer_value == "max":
+    elif buffer == "max":
         out_array = np.where(out_array, target_value, 0)
         out_array = np.where(array != 0, np.maximum(array, out_array), out_array)
-    elif buffer_value == "min":
+    elif buffer == "min":
         out_array = np.where(out_array, target_value, 0)
         out_array = np.where((array != 0) & (out_array != 0), np.minimum(array, out_array), (array + out_array))
     else:
@@ -103,7 +103,7 @@ def save_raster(path: str, array: np.ndarray, meta: dict = None, overwrite: bool
         dst.close()
 
 
-def _point_to_raster(raster_array, raster_meta, positives, attribute, radius, buffer_value):
+def _point_to_raster(raster_array, raster_meta, positives, attribute, radius, buffer):
     with MemoryFile() as memfile:
         raster_meta["driver"] = "GTiff"
         with memfile.open(**raster_meta) as datawriter:
@@ -135,7 +135,7 @@ def _point_to_raster(raster_array, raster_meta, positives, attribute, radius, bu
 
             if radius is not None:
                 for target_value in unique_values:
-                    raster_array = _create_buffer_around_labels(raster_array, radius, target_value, buffer_value)
+                    raster_array = _create_buffer_around_labels(raster_array, radius, target_value, buffer)
 
     return raster_array, raster_meta
 
@@ -145,6 +145,7 @@ def points_to_raster(
     positives: geopandas.GeoDataFrame,
     attribute: Optional[str] = None,
     radius: Optional[int] = None,
+    buffer: Optional[str] = None,
     template_raster: Optional[rasterio.io.DatasetReader] = None,
     coord_west: Optional[Number] = None,
     coord_north: Optional[Number] = None,
@@ -155,11 +156,10 @@ def points_to_raster(
     raster_width: Optional[int] = None,
     raster_height: Optional[int] = None,
     nodata_value: Optional[Number] = None,
-    buffer_value: Optional[str] = None,
 ) -> Tuple[np.ndarray, dict]:
     """Convert a point data set into a binary raster.
 
-    Assigning a value of 1 to pixels corresponding to the points and 0 elsewhere.
+    Assigs attribute values if provided else 1 to pixels corresponding to the points and 0 elsewhere.
     Provide 3 methods for raster creation:
     1. Set extent and coordinate system based on a template raster.
     2. Set extent from origin, based on the western and northern coordinates and the pixel size.
@@ -170,6 +170,12 @@ def points_to_raster(
 
     Args:
         positives: The geodataframe points set to be converted into raster.
+        attribute: Values to be be assigned to the positives.
+        radius: Radius to be applied around the positives in [m].
+        buffer: Buffers the matrix value when two or more radii with different attribute value overlap.
+                'avg': performs averaging of the two attribute value
+                'min': minimum of the two attribute values
+                'max': maximum of the two attribute values
         template_raster: An optional raster to use as a template for the output.
         coord_west: The western coordinate of the output raster in [m].
         coord_east: The eastern coordinate of the output raster in [m].
@@ -207,6 +213,6 @@ def points_to_raster(
         nodata_value,
     )
 
-    raster_array, raster_meta = _point_to_raster(raster_array, raster_meta, positives, attribute, radius, buffer_value)
+    raster_array, raster_meta = _point_to_raster(raster_array, raster_meta, positives, attribute, radius, buffer)
 
     return raster_array, raster_meta
