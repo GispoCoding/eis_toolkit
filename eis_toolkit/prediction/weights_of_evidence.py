@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 from beartype import beartype
-from beartype.typing import Dict, List, Literal, Optional, Sequence, Tuple
+from beartype.typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
 
 from eis_toolkit.exceptions import ClassificationFailedException, InvalidColumnException, InvalidParameterValueException
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
@@ -68,7 +68,7 @@ REQUIRED_FOR_GENERALIZATION = {
 }
 
 
-def _read_and_preprocess_evidence(
+def _read_and_preprocess_raster_data(
     raster: rasterio.io.DatasetReader, nodata: Optional[Number] = None, band: int = 1
 ) -> np.ndarray:
     """Read raster data and handle NoData values."""
@@ -349,7 +349,7 @@ def generalize_weights_cumulative(
 @beartype
 def weights_of_evidence_calculate_weights(
     evidential_raster: rasterio.io.DatasetReader,
-    deposits: gpd.GeoDataFrame,
+    deposits: Union[gpd.GeoDataFrame, rasterio.io.DatasetReader],
     raster_nodata: Optional[Number] = None,
     weights_type: Literal["unique", "categorical", "ascending", "descending"] = "unique",
     studentized_contrast_threshold: Number = 1,
@@ -360,7 +360,7 @@ def weights_of_evidence_calculate_weights(
 
     Args:
         evidential_raster: The evidential raster.
-        deposits: Vector data representing the mineral deposits or occurences point data.
+        deposits: Vector or raster data representing the mineral deposits or occurences point data.
         raster_nodata: If nodata value of raster is wanted to specify manually. Optional parameter, defaults to None
             (nodata from raster metadata is used).
         weights_type: Accepted values are 'unique', 'categorical', 'ascending' and 'descending'.
@@ -409,13 +409,16 @@ def weights_of_evidence_calculate_weights(
         metrics_to_arrays = arrays_to_generate.copy()
 
     # 1. Preprocess data
-    evidence_array = _read_and_preprocess_evidence(evidential_raster, raster_nodata)
+    evidence_array = _read_and_preprocess_raster_data(evidential_raster, raster_nodata)
     raster_meta = evidential_raster.meta
 
-    # Rasterize deposits
-    deposit_array = rasterize_vector(
-        geodataframe=deposits, raster_profile=raster_meta, default_value=1.0, fill_value=0.0
-    )
+    # Rasterize deposits if vector data
+    if isinstance(deposits, gpd.GeoDataFrame):
+        deposit_array = rasterize_vector(
+            geodataframe=deposits, raster_profile=raster_meta, default_value=1.0, fill_value=0.0
+        )
+    else:
+        deposit_array = _read_and_preprocess_raster_data(deposits, raster_nodata)
 
     # Mask NaN out of the array
     nodata_mask = np.isnan(evidence_array)
