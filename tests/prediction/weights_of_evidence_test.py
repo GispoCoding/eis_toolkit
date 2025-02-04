@@ -169,7 +169,7 @@ def test_cumulative_reclassification_max_studentized_contrast():
 
 
 def test_calculate_responses_invalid_nr_of_deposits():
-    """Tests that an exception is raises if nr_of_deposits is larger than nr_of_pixels."""
+    """Tests that an exception is raised if nr_of_deposits > nr_of_pixels or either value is not positive."""
     df = weights_table.copy()
     output_arrays = [
         {WEIGHT_PLUS_COLUMN: df[WEIGHT_PLUS_COLUMN].to_numpy()},
@@ -177,3 +177,9 @@ def test_calculate_responses_invalid_nr_of_deposits():
     ]
     with pytest.raises(InvalidParameterValueException):
         weights_of_evidence_calculate_responses(output_arrays, nr_of_deposits=2, nr_of_pixels=1)
+
+    with pytest.raises(InvalidParameterValueException):
+        weights_of_evidence_calculate_responses(output_arrays, nr_of_deposits=1, nr_of_pixels=0)
+
+    with pytest.raises(InvalidParameterValueException):
+        weights_of_evidence_calculate_responses(output_arrays, nr_of_deposits=-1, nr_of_pixels=1)

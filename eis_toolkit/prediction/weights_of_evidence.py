@@ -503,11 +503,16 @@ def weights_of_evidence_calculate_responses(
         Array of confidence of the prospectivity values obtained in the posterior probability array.
 
     Raises:
-        InvalidParameterValueException: nr_of_deposits is not smaller than nr_of_pixels.
+        InvalidParameterValueException: nr_of_deposits is not smaller than nr_of_pixel,
+            or at least one of nr_of_deposits and nr_of_pixels is not a positive number.
     """
+
+    if nr_of_deposits <= 0 or nr_of_pixels <= 0:
+        raise InvalidParameterValueException("nr_of_deposits and nr_of_pixels must be positive.")
 
     if nr_of_deposits > nr_of_pixels:
         raise InvalidParameterValueException(f"nr_of_deposits > nr_of_pixels: {nr_of_deposits} > {nr_of_pixels}")
+
     gen_weights_sum = sum(
         [
             item[GENERALIZED_WEIGHT_PLUS_COLUMN]
