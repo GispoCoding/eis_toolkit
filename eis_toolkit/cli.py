@@ -3136,11 +3136,19 @@ def weights_of_evidence_calculate_weights_cli(
 
     out_rasters_dict = {}
     file_name = input_raster.name.split(".")[0]
+    raster_meta.pop("dtype")  # Remove dtype from metadata to set it individually
+
     for key, array in arrays.items():
+        # Set correct dtype for the array
+        if key in ["Class", "Pixel count", "Deposit count"]:
+            dtype = np.uint8
+        else:
+            dtype = np.float32
+
         array = nan_to_nodata(array, raster_meta["nodata"])
         output_raster_name = file_name + "_weights_" + weights_type + "_" + key
         output_raster_path = output_dir.joinpath(output_raster_name + ".tif")
-        with rasterio.open(output_raster_path, "w", **raster_meta) as dst:
+        with rasterio.open(output_raster_path, "w", dtype=dtype, **raster_meta) as dst:
             dst.write(array, 1)
         out_rasters_dict[output_raster_name] = str(output_raster_path)
 
