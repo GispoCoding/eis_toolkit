@@ -498,7 +498,13 @@ def weights_of_evidence_calculate_responses(
         Array of posterior probabilites.
         Array of standard deviations in the posterior probability calculations.
         Array of confidence of the prospectivity values obtained in the posterior probability array.
+
+    Raises:
+        InvalidParameterValueException: nr_of_deposits is not smaller than nr_of_pixels.
     """
+
+    if nr_of_deposits > nr_of_pixels:
+        raise InvalidParameterValueException(f"nr_of_deposits > nr_of_pixels: {nr_of_deposits} > {nr_of_pixels}")
     gen_weights_sum = sum(
         [
             item[GENERALIZED_WEIGHT_PLUS_COLUMN]
