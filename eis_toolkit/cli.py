@@ -3091,8 +3091,8 @@ def gamma_overlay_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT
 # WOFE
 @app.command()
 def weights_of_evidence_calculate_weights_cli(
-    input_raster: INPUT_FILE_OPTION,
-    input_vector: INPUT_FILE_OPTION,
+    evidential_raster: INPUT_FILE_OPTION,
+    deposits: INPUT_FILE_OPTION,
     output_dir: OUTPUT_DIR_OPTION,
     raster_nodata: Optional[float] = None,
     weights_type: Annotated[WeightsType, typer.Option(case_sensitive=False)] = WeightsType.unique,
@@ -3115,8 +3115,13 @@ def weights_of_evidence_calculate_weights_cli(
 
     typer.echo("Progress: 10%")
 
-    evidential_raster = rasterio.open(input_raster)
-    deposits = gpd.read_file(input_vector)
+    evidential_raster = rasterio.open(evidential_raster)
+
+    if deposits.suffix in (".tif", ".tiff"):
+        deposits = rasterio.open(deposits)
+    else:
+        deposits = gpd.read_file(deposits)
+
     typer.echo("Progress: 25%")
 
     if arrays_to_generate == []:
@@ -3135,7 +3140,7 @@ def weights_of_evidence_calculate_weights_cli(
     df.to_csv(output_dir.joinpath("wofe_results.csv"))
 
     out_rasters_dict = {}
-    file_name = input_raster.name.split(".")[0]
+    file_name = evidential_raster.name.split(".")[0]
     raster_meta.pop("dtype")  # Remove dtype from metadata to set it individually
 
     for key, array in arrays.items():
