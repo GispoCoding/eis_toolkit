@@ -3093,7 +3093,8 @@ def gamma_overlay_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT
 def weights_of_evidence_calculate_weights_cli(
     evidential_raster: INPUT_FILE_OPTION,
     deposits: INPUT_FILE_OPTION,
-    output_dir: OUTPUT_DIR_OPTION,
+    output_results_table: OUTPUT_FILE_OPTION,
+    output_raster_dir: OUTPUT_DIR_OPTION,
     raster_nodata: Optional[float] = None,
     weights_type: Annotated[WeightsType, typer.Option(case_sensitive=False)] = WeightsType.unique,
     studentized_contrast_threshold: float = 1,
@@ -3101,6 +3102,9 @@ def weights_of_evidence_calculate_weights_cli(
 ):
     """
     Calculate weights of spatial associations.
+
+    Save path for resulting CSV is set using --output-results-table parameter. Output rasters are saved to directory
+    set with --output-raster-dir parameter.
 
     Parameter --studentized-contrast-threshold is used with 'categorical', 'ascending' and 'descending' weight types.
 
@@ -3137,10 +3141,10 @@ def weights_of_evidence_calculate_weights_cli(
     )
     typer.echo("Progress: 75%")
 
-    df.to_csv(output_dir.joinpath("wofe_results.csv"))
+    df.to_csv(output_results_table)
 
     out_rasters_dict = {}
-    file_name = evidential_raster.name.split(".")[0]
+    file_name = evidential_raster.name.split("/")[-1].split(".")[0]
     raster_meta.pop("dtype")  # Remove dtype from metadata to set it individually
 
     for key, array in arrays.items():
@@ -3152,7 +3156,7 @@ def weights_of_evidence_calculate_weights_cli(
 
         array = nan_to_nodata(array, raster_meta["nodata"])
         output_raster_name = file_name + "_weights_" + weights_type + "_" + key
-        output_raster_path = output_dir.joinpath(output_raster_name + ".tif")
+        output_raster_path = output_raster_dir.joinpath(output_raster_name + ".tif")
         with rasterio.open(output_raster_path, "w", dtype=dtype, **raster_meta) as dst:
             dst.write(array, 1)
         out_rasters_dict[output_raster_name] = str(output_raster_path)
@@ -3163,7 +3167,8 @@ def weights_of_evidence_calculate_weights_cli(
     typer.echo(f"Number of deposit pixels: {nr_of_deposits}")
     typer.echo(f"Number of all evidence pixels: {nr_of_pixels}")
     typer.echo(f"Output rasters: {json_str}")
-    typer.echo(f"Weight calculations completed, rasters and CSV saved to {output_dir}.")
+    typer.echo(f"Weight calculations completed, rasters saved to {output_raster_dir}.")
+    typer.echo(f"CSV containing results saved to {output_results_table}.")
 
 
 @app.command()
