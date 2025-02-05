@@ -428,7 +428,7 @@ def weights_of_evidence_calculate_weights(
                 base_raster=evidential_raster,
                 rasters_to_unify=[deposits],
                 resampling_method="nearest",
-                masking="extent",
+                masking="extents",
             )
             deposit_array = out_rasters[1][0]
         else:
