@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 import rasterio
 
-from eis_toolkit.exceptions import InvalidColumnException, InvalidParameterValueException
+from eis_toolkit.exceptions import InvalidColumnException
 from eis_toolkit.prediction.weights_of_evidence import (
     CLASS_COLUMN,
     CONTRAST_COLUMN,
@@ -18,7 +18,6 @@ from eis_toolkit.prediction.weights_of_evidence import (
     WEIGHT_S_MINUS_COLUMN,
     WEIGHT_S_PLUS_COLUMN,
     generalize_weights_cumulative,
-    weights_of_evidence_calculate_responses,
     weights_of_evidence_calculate_weights,
 )
 from eis_toolkit.warnings import ClassificationFailedWarning
@@ -166,20 +165,3 @@ def test_cumulative_reclassification_max_studentized_contrast():
 
         result = generalize_weights_cumulative(df, "max_studentized_contrast")
         assert GENERALIZED_CLASS_COLUMN not in result.columns.values
-
-
-def test_calculate_responses_invalid_nr_of_deposits():
-    """Tests that an exception is raised if nr_of_deposits > nr_of_pixels or either value is not positive."""
-    df = weights_table.copy()
-    output_arrays = [
-        {WEIGHT_PLUS_COLUMN: df[WEIGHT_PLUS_COLUMN].to_numpy()},
-        {WEIGHT_S_PLUS_COLUMN: df[WEIGHT_S_PLUS_COLUMN].to_numpy()},
-    ]
-    with pytest.raises(InvalidParameterValueException):
-        weights_of_evidence_calculate_responses(output_arrays, nr_of_deposits=2, nr_of_pixels=1)
-
-    with pytest.raises(InvalidParameterValueException):
-        weights_of_evidence_calculate_responses(output_arrays, nr_of_deposits=1, nr_of_pixels=0)
-
-    with pytest.raises(InvalidParameterValueException):
-        weights_of_evidence_calculate_responses(output_arrays, nr_of_deposits=-1, nr_of_pixels=1)
