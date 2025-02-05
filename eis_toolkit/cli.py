@@ -3121,7 +3121,7 @@ def weights_of_evidence_calculate_weights_cli(
 
     evidential_raster = rasterio.open(evidential_raster)
 
-    if deposits.suffix in (".tif", ".tiff"):
+    if deposits.suffix in (".tif", ".tiff", ".asc", ".img", ".vrt", ".grd"):
         deposits = rasterio.open(deposits)
     else:
         deposits = gpd.read_file(deposits)
