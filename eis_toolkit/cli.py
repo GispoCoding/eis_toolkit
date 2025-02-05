@@ -3175,11 +3175,10 @@ def weights_of_evidence_calculate_weights_cli(
 def weights_of_evidence_calculate_responses_cli(
     input_rasters_weights: INPUT_FILES_OPTION,
     input_rasters_standard_deviations: INPUT_FILES_OPTION,
+    input_weights_table: INPUT_FILE_OPTION,
     output_probabilities: OUTPUT_FILE_OPTION,
     output_probabilities_std: OUTPUT_FILE_OPTION,
     output_confidence_array: OUTPUT_FILE_OPTION,
-    nr_of_deposits: Annotated[int, typer.Option()],
-    nr_of_pixels: Annotated[int, typer.Option()],
 ):
     """
     Calculate the posterior probabilities for the given generalized weight arrays.
@@ -3216,10 +3215,12 @@ def weights_of_evidence_calculate_responses_cli(
 
         dict_array.append({"W+": array_W, "S_W+": array_S_W})
 
+    weights_df = pd.read_csv(input_weights_table)
+
     typer.echo("Progress: 25%")
 
     posterior_probabilities, posterior_probabilies_std, confidence_array = weights_of_evidence_calculate_responses(
-        output_arrays=dict_array, nr_of_deposits=nr_of_deposits, nr_of_pixels=nr_of_pixels
+        output_arrays=dict_array, weights_df=weights_df
     )
     typer.echo("Progress: 75%")
 

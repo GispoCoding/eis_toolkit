@@ -499,7 +499,7 @@ def weights_of_evidence_calculate_weights(
 
 @beartype
 def weights_of_evidence_calculate_responses(
-    output_arrays: Sequence[Dict[str, np.ndarray]], nr_of_deposits: int, nr_of_pixels: int
+    output_arrays: Sequence[Dict[str, np.ndarray]], weights_df: pd.DataFrame
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate the posterior probabilities for the given generalized weight arrays.
 
@@ -508,8 +508,8 @@ def weights_of_evidence_calculate_responses(
             For each dictionary, generalized weight and generalized standard deviation arrays are used and summed
             together pixel-wise to calculate the posterior probabilities. If generalized arrays are not found,
             the W+ and S_W+ arrays are used (so if outputs from unique weight calculations are used for this function).
-        nr_of_deposits: Number of deposit pixels in the input data for weights of evidence calculations.
-        nr_of_pixels: Number of evidence pixels in the input data for weights of evidence calculations.
+        weights_df: Output dataframe of WofE calculate weights algorithm. Used for determining number of deposits and
+            number of pixels.
 
     Returns:
         Array of posterior probabilites.
@@ -521,11 +521,8 @@ def weights_of_evidence_calculate_responses(
             or at least one of nr_of_deposits and nr_of_pixels is not a positive number.
     """
 
-    if nr_of_deposits <= 0 or nr_of_pixels <= 0:
-        raise InvalidParameterValueException("nr_of_deposits and nr_of_pixels must be positive.")
-
-    if nr_of_deposits > nr_of_pixels:
-        raise InvalidParameterValueException(f"nr_of_deposits > nr_of_pixels: {nr_of_deposits} > {nr_of_pixels}")
+    nr_of_deposits = weights_df["Deposit count"].sum()
+    nr_of_pixels = weights_df["Pixel count"].sum()
 
     gen_weights_sum = sum(
         [
