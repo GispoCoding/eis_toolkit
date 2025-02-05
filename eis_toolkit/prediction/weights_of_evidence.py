@@ -9,6 +9,8 @@ from beartype import beartype
 from beartype.typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
 
 from eis_toolkit.exceptions import ClassificationFailedException, InvalidColumnException, InvalidParameterValueException
+from eis_toolkit.raster_processing.unifying import unify_raster_grids
+from eis_toolkit.utilities.checks.raster import check_raster_grids
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 from eis_toolkit.warnings import ClassificationFailedWarning, InvalidColumnWarning
 
@@ -411,6 +413,7 @@ def weights_of_evidence_calculate_weights(
     # 1. Preprocess data
     evidence_array = _read_and_preprocess_raster_data(evidential_raster, raster_nodata)
     raster_meta = evidential_raster.meta
+    raster_profile = evidential_raster.profile
 
     # Rasterize deposits if vector data
     if isinstance(deposits, gpd.GeoDataFrame):
@@ -418,7 +421,18 @@ def weights_of_evidence_calculate_weights(
             geodataframe=deposits, raster_profile=raster_meta, default_value=1.0, fill_value=0.0
         )
     else:
-        deposit_array = _read_and_preprocess_raster_data(deposits, raster_nodata)
+        deposit_profile = deposits.profile
+
+        if not check_raster_grids([raster_profile, deposit_profile], same_extent=True):
+            out_rasters = unify_raster_grids(
+                base_raster=evidential_raster,
+                rasters_to_unify=[deposits],
+                resampling_method="nearest",
+                masking="extent",
+            )
+            deposit_array = out_rasters[1][0]
+        else:
+            deposit_array = _read_and_preprocess_raster_data(deposits, raster_nodata)
 
     # Mask NaN out of the array
     nodata_mask = np.isnan(evidence_array)
