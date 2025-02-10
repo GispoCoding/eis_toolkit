@@ -124,16 +124,12 @@ def check_raster_grids(
     Returns:
         True if gridding and optionally bounds matches, False if not.
     """
-    import typer
 
     if not check_matching_crs(raster_profiles):
-        typer.echo("Non matching CRS")
         return False
     if not check_matching_pixel_alignment(raster_profiles):
-        typer.echo("Non matching pixel alignment")
         return False
     if same_extent and not check_matching_bounds(raster_profiles):
-        typer.echo("Non matching extent")
         return False
     return True
 
