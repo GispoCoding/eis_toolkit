@@ -554,7 +554,7 @@ def weights_of_evidence_calculate_responses(
 
 @beartype
 def agterberg_cheng_CI_test(
-    posterior_probabilities: np.ndarray, posterior_probabilities_std: np.ndarray, nr_of_deposits: int
+    posterior_probabilities: np.ndarray, posterior_probabilities_std: np.ndarray, weights_df: pd.DataFrame
 ) -> Tuple[bool, bool, bool, float, str]:
     """Perform the conditional independence test presented by Agterberg-Cheng (2002).
 
@@ -564,7 +564,8 @@ def agterberg_cheng_CI_test(
     Args:
         posterior_probabilities: Array of posterior probabilites.
         posterior_probabilities_std: Array of standard deviations in the posterior probability calculations.
-        nr_of_deposits: Number of deposit pixels in the input data for weights of evidence calculations.
+        weights_df: Output dataframe of WofE calculate weights algorithm. Used for determining number of deposits.
+
     Returns:
         Whether the conditional hypothesis can be accepted for the evidence layers that the input
             posterior probabilities and standard deviations of posterior probabilities are calculated from.
@@ -573,12 +574,9 @@ def agterberg_cheng_CI_test(
         Ratio T/n. Results > 1, may be because of lack of conditional independence of layers.
             T should not exceed n by more than 15% (Bonham-Carter 1994, p. 316).
         A summary of the the conditional independence calculations.
-
-    Raises:
-        InvalidParameterValueException: Value of nr_of_deposits is not at least 1.
     """
-    if nr_of_deposits < 1:
-        raise InvalidParameterValueException("Expected input deposits count to be at least 1.")
+
+    nr_of_deposits = weights_df["Deposit count"].max()
 
     # One-tailed significance test according to Agterberg-Cheng (2002):
     # Conditional independence must satisfy:
