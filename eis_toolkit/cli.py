@@ -3248,7 +3248,7 @@ def weights_of_evidence_calculate_responses_cli(
 def agterberg_cheng_CI_test_cli(
     input_posterior_probabilities: INPUT_FILE_OPTION,
     input_posterior_probabilities_std: INPUT_FILE_OPTION,
-    nr_of_deposits: Annotated[int, typer.Option()],
+    input_weights_table: INPUT_FILE_OPTION,
     save_summary: Optional[OUTPUT_FILE_OPTION] = None,
 ):
     """Perform the conditional independence test presented by Agterberg-Cheng (2002)."""
@@ -3264,12 +3264,14 @@ def agterberg_cheng_CI_test_cli(
         posterior_probabilities_std = src.read(1)
         posterior_probabilities_std = nodata_to_nan(posterior_probabilities_std, src.nodata)
 
+    weights_df = pd.read_csv(input_weights_table)
+
     typer.echo("Progress: 25%")
 
     _, _, _, _, summary = agterberg_cheng_CI_test(
         posterior_probabilities=posterior_probabilities,
         posterior_probabilities_std=posterior_probabilities_std,
-        nr_of_deposits=nr_of_deposits,
+        weights_df=weights_df,
     )
 
     if save_summary is not None:

@@ -250,6 +250,22 @@ def _generate_arrays_from_metrics(
     return array_dict
 
 
+def _calculate_nr_of_deposit_pixels(array: np.ndarray, df: pd.DataFrame) -> Tuple[int, int]:
+    masked_array = array[~np.isnan(array)]
+    nr_of_pixels = int(np.size(masked_array))
+
+    pixels_column = df["Pixel count"]
+
+    match = pixels_column == nr_of_pixels
+    if match.any():
+        nr_of_deposits = df.loc[match, "Deposit count"].iloc[0]
+    else:
+        nr_of_pixels = df["Pixel count"].sum()
+        nr_of_deposits = df["Deposit count"].sum()
+
+    return nr_of_deposits, nr_of_pixels
+
+
 @beartype
 def generalize_weights_cumulative(
     df: pd.DataFrame,
@@ -518,9 +534,8 @@ def weights_of_evidence_calculate_responses(
         InvalidParameterValueException: nr_of_deposits is not smaller than nr_of_pixel,
             or at least one of nr_of_deposits and nr_of_pixels is not a positive number.
     """
-
-    nr_of_deposits = weights_df["Deposit count"].max()
-    nr_of_pixels = weights_df["Pixel count"].max()
+    array = list(output_arrays[0].values())[0]
+    nr_of_deposits, nr_of_pixels = _calculate_nr_of_deposit_pixels(array, weights_df)
 
     gen_weights_sum = sum(
         [
@@ -575,8 +590,7 @@ def agterberg_cheng_CI_test(
             T should not exceed n by more than 15% (Bonham-Carter 1994, p. 316).
         A summary of the the conditional independence calculations.
     """
-
-    nr_of_deposits = weights_df["Deposit count"].max()
+    nr_of_deposits, _ = _calculate_nr_of_deposit_pixels(posterior_probabilities, weights_df)
 
     # One-tailed significance test according to Agterberg-Cheng (2002):
     # Conditional independence must satisfy:
