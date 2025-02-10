@@ -519,8 +519,8 @@ def weights_of_evidence_calculate_responses(
             or at least one of nr_of_deposits and nr_of_pixels is not a positive number.
     """
 
-    nr_of_deposits = weights_df["Deposit count"].sum()
-    nr_of_pixels = weights_df["Pixel count"].sum()
+    nr_of_deposits = weights_df["Deposit count"].max()
+    nr_of_pixels = weights_df["Pixel count"].max()
 
     gen_weights_sum = sum(
         [
