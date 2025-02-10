@@ -529,10 +529,6 @@ def weights_of_evidence_calculate_responses(
         Array of posterior probabilites.
         Array of standard deviations in the posterior probability calculations.
         Array of confidence of the prospectivity values obtained in the posterior probability array.
-
-    Raises:
-        InvalidParameterValueException: nr_of_deposits is not smaller than nr_of_pixel,
-            or at least one of nr_of_deposits and nr_of_pixels is not a positive number.
     """
     array = list(output_arrays[0].values())[0]
     nr_of_deposits, nr_of_pixels = _calculate_nr_of_deposit_pixels(array, weights_df)
