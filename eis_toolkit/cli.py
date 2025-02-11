@@ -3247,7 +3247,6 @@ def agterberg_cheng_CI_test_cli(
     input_posterior_probabilities: INPUT_FILE_OPTION,
     input_posterior_probabilities_std: INPUT_FILE_OPTION,
     input_weights_table: INPUT_FILE_OPTION,
-    save_summary: Optional[OUTPUT_FILE_OPTION] = None,
 ):
     """Perform the conditional independence test presented by Agterberg-Cheng (2002)."""
     from eis_toolkit.prediction.weights_of_evidence import agterberg_cheng_CI_test
@@ -3271,10 +3270,6 @@ def agterberg_cheng_CI_test_cli(
         posterior_probabilities_std=posterior_probabilities_std,
         weights_df=weights_df,
     )
-
-    if save_summary is not None:
-        with open(save_summary, "w") as file:
-            file.write(summary)
 
     typer.echo("Progress: 100%")
     typer.echo("Conditional independence test completed.")
