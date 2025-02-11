@@ -3164,11 +3164,9 @@ def weights_of_evidence_calculate_weights_cli(
     json_str = json.dumps(out_rasters_dict)
     typer.echo("Progress 100%")
 
-    typer.echo(f"Number of deposit pixels: {nr_of_deposits}")
-    typer.echo(f"Number of all evidence pixels: {nr_of_pixels}")
     typer.echo(f"Output rasters: {json_str}")
     typer.echo(f"Weight calculations completed, rasters saved to {output_raster_dir}.")
-    typer.echo(f"CSV containing results saved to {output_results_table}.")
+    typer.echo(f"Weights table saved to {output_results_table}.")
 
 
 @app.command()
@@ -3239,7 +3237,7 @@ def weights_of_evidence_calculate_responses_cli(
     typer.echo("Progress: 100%")
 
     typer.echo(
-        f"Responses calculations finished, writing output rasters to {output_probabilities}, \
+        f"Posterior probability calculations finished, output rasters saved to {output_probabilities}, \
             {output_probabilities_std} and {output_confidence_array}"
     )
 
