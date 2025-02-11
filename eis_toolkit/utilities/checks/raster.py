@@ -3,6 +3,7 @@ import rasterio.profiles
 import rasterio.transform
 from beartype import beartype
 from beartype.typing import Iterable, Sequence, Union
+from rasterio.crs import CRS
 
 from eis_toolkit.exceptions import InvalidParameterValueException
 
@@ -37,21 +38,25 @@ def check_matching_crs(objects: Iterable) -> bool:
     Returns:
         True if everything matches, False if not.
     """
-    epsg_list = []
+    crs_list = []
 
     for object in objects:
         if not isinstance(object, (rasterio.profiles.Profile, dict)):
             if not object.crs:
                 return False
             epsg = object.crs.to_epsg()
-            epsg_list.append(epsg)
+            crs_list.append(epsg)
         else:
             if "crs" in object:
-                epsg_list.append(object["crs"])
+                crs_object = object["crs"]
+                if type(crs_object) == CRS:
+                    crs_list.append(crs_object.to_epsg())
+                else:
+                    crs_list.append(crs_object)
             else:
                 return False
 
-    if len(set(epsg_list)) != 1:
+    if len(set(crs_list)) != 1:
         return False
 
     return True
@@ -119,6 +124,7 @@ def check_raster_grids(
     Returns:
         True if gridding and optionally bounds matches, False if not.
     """
+
     if not check_matching_crs(raster_profiles):
         return False
     if not check_matching_pixel_alignment(raster_profiles):
