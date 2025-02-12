@@ -4,7 +4,7 @@ from numbers import Number
 import numpy as np
 import rasterio
 from beartype import beartype
-from beartype.typing import Any, Callable, Dict, Optional, Sequence, Tuple, Union
+from beartype.typing import Any, Callable, Dict, Literal, Optional, Sequence, Tuple, Union
 from rasterio import profiles
 
 from eis_toolkit.exceptions import InvalidParameterValueException
@@ -97,6 +97,60 @@ def convert_raster_nodata(
     out_image = replace_values(raster_arr, old_nodata, new_nodata)
     out_meta = input_raster.meta.copy()
     out_meta["nodata"] = new_nodata
+
+    return out_image, out_meta
+
+
+@beartype
+def replace_with_nodata(
+    input_raster: rasterio.io.DatasetReader,
+    target_value: Number,
+    nodata_value: Optional[Number] = None,
+    replace_condition: Literal[
+        "equal", "less_than", "greater_than", "less_than_or_equal", "greater_than_or_equal"
+    ] = "equal",
+) -> Tuple[np.ndarray, dict]:
+    """
+    Replace pixels values with nodata for a raster.
+
+    Can be used either for replacing all pixels with certain value with nodata, or for replacing all pixels with
+    values less than, greater than, less than or equal to, or greater than or equal to the target value with nodata.
+
+    Args:
+        input_raster: Input raster dataset.
+        target_value: Value to be replaced with nodata.
+        nodata_value: Value that will be used as nodata. If not provided, nodata is determined from input raster.
+        replace_condition: Whether to replace pixels with certain value or values less than, greater than, less than or
+            equal, or greater than or equal to target_value with nodata.
+
+    Returns:
+        The input raster data with specified pixels replaced with nodata, and updated metadata.
+
+    Raises:
+        InvalidParameterValueException: Nodata is provided and not found in the input raster.
+    """
+
+    if nodata_value is None:
+        nodata_value = input_raster.nodata
+        if nodata_value is None:
+            raise InvalidParameterValueException("Nodata not provided and not found in the input raster.")
+
+    raster_arr = input_raster.read()
+
+    if replace_condition == "equal":
+        values_to_replace = target_value
+    elif replace_condition == "less_than":
+        values_to_replace = raster_arr[raster_arr < target_value].tolist()
+    elif replace_condition == "greater_than":
+        values_to_replace = raster_arr[raster_arr > target_value].tolist()
+    elif replace_condition == "less_than_or_equal":
+        values_to_replace = raster_arr[raster_arr <= target_value].tolist()
+    elif replace_condition == "greater_than_or_equal":
+        values_to_replace = raster_arr[raster_arr >= target_value].tolist()
+
+    out_image = replace_values(raster_arr, values_to_replace, nodata_value)
+    out_meta = input_raster.meta.copy()
+    out_meta["nodata"] = nodata_value
 
     return out_image, out_meta
 
