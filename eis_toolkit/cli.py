@@ -344,6 +344,16 @@ class WeightsType(str, Enum):
     descending = "descending"
 
 
+class ReplaceCondition(str, Enum):
+    """Replace conditions for replace with nodata."""
+
+    equal = "equal"
+    less_than = "less_than"
+    greater_than = "greater_than"
+    less_than_or_equal = "less_than_or_equal"
+    greater_than_or_equal = "greater_than_or_equal"
+
+
 INPUT_FILE_OPTION = Annotated[
     Path,
     typer.Option(
@@ -4075,6 +4085,31 @@ def convert_raster_nodata_cli(
     typer.echo("Progress: 100%")
 
     typer.echo(f"Converting nodata completed, writing raster to {output_raster}.")
+
+
+@app.command()
+def replace_with_nodata_cli(
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    target_value: Annotated[float, typer.Option()],
+    nodata_value: float = None,
+    replace_condition: Annotated[ReplaceCondition, typer.Option(case_sensitive=False)] = ReplaceCondition.equal,
+):
+    """Replace raster pixel values with nodata."""
+    from eis_toolkit.utilities.nodata import replace_with_nodata
+
+    typer.echo("Progress: 10%")
+
+    with rasterio.open(input_raster) as raster:
+        typer.echo("Progress: 25%")
+        out_image, out_meta = replace_with_nodata(raster, target_value, nodata_value, replace_condition)
+    typer.echo("Progress: 70%")
+
+    with rasterio.open(output_raster, "w", **out_meta) as dst:
+        dst.write(out_image)
+    typer.echo("Progres: 100%")
+
+    typer.echo(f"Raster pixel values replaced with nodata, writing raster to {output_raster}.")
 
 
 @app.command()
