@@ -1,12 +1,12 @@
-import os
 from numbers import Number
 
 import geopandas
 import numpy as np
 import rasterio
+from pyproj import CRS
+import rasterio.transform
 from beartype import beartype
 from beartype.typing import Optional, Tuple
-from rasterio.io import MemoryFile
 from scipy.ndimage import binary_dilation
 
 from eis_toolkit.exceptions import EmptyDataFrameException, NonMatchingCrsException
@@ -80,69 +80,46 @@ def _create_buffer_around_labels(
     return out_array
 
 
-@beartype
-def save_raster(path: str, array: np.ndarray, meta: dict = None, overwrite: bool = False):
-    """Save the given raster NumPy array and metadata in a raster format at the provided path.
+def _point_to_raster(raster_array, raster_meta, geodataframe, attribute, radius, buffer):
+    
+    geodataframe_crs = geodataframe.crs
+    raster_crs = raster_meta["crs"].to_epsg()
 
-    Args:
-        path: Path to store the raster.
-        array: Raster NumPy array.
-        meta: Raster metadata.
-        overwrite: overwrites the existing raster file if present, default false.
-    """
+    if(geodataframe_crs != raster_crs):
+        raise NonMatchingCrsException("The input GeoDataFrame and raster are not in the same CRS.")
+    
+    width = raster_meta["width"]
+    height = raster_meta["height"]
 
-    if os.path.exists(path) and overwrite is False:
-        print(f"File already exists: {os.path.basename(path)}.")
-        return
+    left = raster_meta["transform"][2]
+    top = raster_meta["transform"][5]
+    right = left + width * raster_meta["transform"][0]
+    bottom = top + height * raster_meta["transform"][4]
+
+    geodataframe = geodataframe.cx[left:right, bottom:top]
+
+    if attribute is not None:
+        values = geodataframe[attribute]
     else:
-        if array.ndim == 2:
-            array = np.expand_dims(array, axis=0)
+        values = [1]
 
-    with rasterio.open(path, "w", compress="lzw", **meta) as dst:
-        dst.write(array)
-        dst.close()
+    positives_rows, positives_cols = rasterio.transform.rowcol(
+        raster_meta["transform"], geodataframe.geometry.x, geodataframe.geometry.y
+    )
+    raster_array[positives_rows, positives_cols] = values
 
+    unique_values = list(set(values))
 
-def _point_to_raster(raster_array, raster_meta, positives, attribute, radius, buffer):
-    with MemoryFile() as memfile:
-        raster_meta["driver"] = "GTiff"
-        with memfile.open(**raster_meta) as datawriter:
-            datawriter.write(raster_array, 1)
-
-        with memfile.open() as memraster:
-            if not check_matching_crs(
-                objects=[memraster, positives],
-            ):
-                raise NonMatchingCrsException("The raster and geodataframe are not in the same CRS.")
-
-            # Select only positives that are within raster bounds
-            positives = positives.cx[
-                memraster.bounds.left : memraster.bounds.right,  # noqa: E203
-                memraster.bounds.bottom : memraster.bounds.top,  # noqa: E203
-            ]
-
-            if attribute is not None:
-                values = positives[attribute]
-            else:
-                values = [1]
-
-            positives_rows, positives_cols = rasterio.transform.rowcol(
-                memraster.transform, positives.geometry.x, positives.geometry.y
-            )
-            raster_array[positives_rows, positives_cols] = values
-
-            unique_values = list(set(values))
-
-            if radius is not None:
-                for target_value in unique_values:
-                    raster_array = _create_buffer_around_labels(raster_array, radius, target_value, buffer)
+    if radius is not None:
+        for target_value in unique_values:
+            raster_array = _create_buffer_around_labels(raster_array, radius, target_value, buffer)
 
     return raster_array, raster_meta
 
 
 @beartype
 def points_to_raster(
-    positives: geopandas.GeoDataFrame,
+    geodataframe: geopandas.GeoDataFrame,
     attribute: Optional[str] = None,
     radius: Optional[int] = None,
     buffer: Optional[str] = None,
@@ -169,9 +146,9 @@ def points_to_raster(
     the desired number of pixels for rows and columns.
 
     Args:
-        positives: The geodataframe points set to be converted into raster.
-        attribute: Values to be be assigned to the positives.
-        radius: Radius to be applied around the positives in [m].
+        geodataframe: The geodataframe points set to be converted into raster.
+        attribute: Values to be be assigned to the geodataframe.
+        radius: Radius to be applied around the geodataframe in [m].
         buffer: Buffers the matrix value when two or more radii with different attribute value overlap.
                 'avg': performs averaging of the two attribute value
                 'min': minimum of the two attribute values
@@ -195,7 +172,7 @@ def points_to_raster(
         NonMatchingCrsException: The raster and geodataframe are not in the same CRS.
     """
 
-    if positives.empty:
+    if geodataframe.empty:
         raise EmptyDataFrameException("Expected geodataframe to contain geometries.")
 
     base_value = 0
@@ -213,6 +190,6 @@ def points_to_raster(
         nodata_value,
     )
 
-    raster_array, raster_meta = _point_to_raster(raster_array, raster_meta, positives, attribute, radius, buffer)
+    raster_array, raster_meta = _point_to_raster(raster_array, raster_meta, geodataframe, attribute, radius, buffer)
 
     return raster_array, raster_meta
