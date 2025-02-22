@@ -1,10 +1,13 @@
+from numbers import Number
+
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Sequence
+from beartype.typing import Optional, Sequence
 from scipy.stats import gmean
 
 from eis_toolkit.exceptions import InvalidColumnException, InvalidCompositionException, InvalidParameterValueException
+from eis_toolkit.utilities.aitchison_geometry import _closure
 from eis_toolkit.utilities.checks.compositional import check_in_simplex_sample_space
 from eis_toolkit.utilities.checks.dataframe import check_columns_valid
 from eis_toolkit.utilities.checks.parameter import check_lists_overlap, check_numeric_value_sign
@@ -64,7 +67,10 @@ def _single_ilr_transform(
 
 @beartype
 def single_ilr_transform(
-    df: pd.DataFrame, subcomposition_1: Sequence[str], subcomposition_2: Sequence[str]
+    df: pd.DataFrame,
+    subcomposition_1: Sequence[str],
+    subcomposition_2: Sequence[str],
+    scale: Optional[Number] = None,
 ) -> pd.Series:
     """
     Perform a single isometric logratio transformation on the provided subcompositions.
@@ -75,6 +81,8 @@ def single_ilr_transform(
         df: A dataframe of shape [N, D] of compositional data.
         subcomposition_1: Names of the columns in the numerator part of the ratio.
         subcomposition_2: Names of the columns in the denominator part of the ratio.
+        scale: The value to which each composition should be normalized. Eg., if the composition is expressed
+            as percentages, scale=100. Closure is not performed by default.
 
     Returns:
         A series of length N containing the transforms.
@@ -86,7 +94,6 @@ def single_ilr_transform(
         InvalidParameterValueException: At least one subcomposition provided was empty.
         NumericValueSignException: Data contains zeros or negative values.
     """
-    check_in_simplex_sample_space(df)
 
     if not (subcomposition_1 and subcomposition_2):
         raise InvalidParameterValueException("A subcomposition should contain at least one column.")
@@ -96,5 +103,13 @@ def single_ilr_transform(
 
     if check_lists_overlap(subcomposition_1, subcomposition_2):
         raise InvalidCompositionException("The subcompositions overlap.")
+
+    columns = subcomposition_1 + subcomposition_2
+    df = df[columns]
+
+    if scale is not None:
+        df = _closure(df, scale)
+
+    check_in_simplex_sample_space(df)
 
     return _single_ilr_transform(df, subcomposition_1, subcomposition_2)
