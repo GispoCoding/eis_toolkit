@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from beartype import beartype
 from beartype.typing import Any, List, Optional, Sequence, Tuple, Union
-#from osgeo import gdal
+from osgeo import gdal
 from rasterio import transform
 from shapely.geometry import Point
 

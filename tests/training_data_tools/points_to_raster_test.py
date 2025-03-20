@@ -22,7 +22,8 @@ def test_points_to_raster(geodataframe):
         raster_profile = temp_raster.profile
 
         outarray, outmeta = points_to_raster(
-            geodataframe=geodataframe, attribute="value", raster_profile=raster_profile)
+            geodataframe=geodataframe, attribute="value", raster_profile=raster_profile
+        )
 
         assert outarray.shape == (
             temp_raster.height,
@@ -38,4 +39,5 @@ def test_non_matching_crs_error(geodataframe):
         with rasterio.open(SMALL_RASTER_PATH) as temp_raster:
             raster_profile = temp_raster.profile
             outarray, outmeta = points_to_raster(
-                geodataframe=geodataframe, attribute="value", raster_profile=raster_profile)
+                geodataframe=geodataframe, attribute="value", raster_profile=raster_profile
+            )
