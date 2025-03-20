@@ -2,13 +2,13 @@ from numbers import Number
 
 import geopandas
 import numpy as np
-from rasterio import profiles, transform
 from beartype import beartype
-from beartype.typing import Optional, Tuple, Union
+from beartype.typing import Literal, Optional, Tuple, Union
+from rasterio import profiles, transform
 from scipy.ndimage import binary_dilation
 
-from eis_toolkit.utilities.checks.raster import check_raster_profile
 from eis_toolkit.exceptions import EmptyDataFrameException, NonMatchingCrsException
+from eis_toolkit.utilities.checks.raster import check_raster_profile
 
 
 def _get_kernel_size(radius: int) -> tuple[int, int]:
@@ -78,7 +78,7 @@ def _create_buffer_around_labels(
 
 
 def _point_to_raster(raster_array, raster_meta, geodataframe, attribute, radius, buffer):
-        
+
     width = raster_meta.get("width")
     height = raster_meta.get("height")
 
@@ -116,7 +116,7 @@ def points_to_raster(
     raster_profile: Union[profiles.Profile, dict],
     attribute: Optional[str] = None,
     radius: Optional[int] = None,
-    buffer: Optional[str] = None,
+    buffer: Optional[Literal["min", "avg", "max"]] = None,
 ) -> Tuple[np.ndarray, Union[profiles.Profile, dict]]:
     """Convert a point data set into a binary raster.
 
@@ -141,19 +141,16 @@ def points_to_raster(
 
     if geodataframe.empty:
         raise EmptyDataFrameException("Expected geodataframe to contain geometries.")
-    
+
     if raster_profile.get("crs") != geodataframe.crs:
-        raise NonMatchingCrsException(
-            "Expected coordinate systems to match between raster and GeoDataFrame."
-        )
-    
+        raise NonMatchingCrsException("Expected coordinate systems to match between raster and GeoDataFrame.")
+
     check_raster_profile(raster_profile=raster_profile)
 
     raster_width = raster_profile.get("width")
     raster_height = raster_profile.get("height")
 
     raster_array = np.zeros((raster_height, raster_width))
-    
 
     out_array = _point_to_raster(raster_array, raster_profile, geodataframe, attribute, radius, buffer)
 
