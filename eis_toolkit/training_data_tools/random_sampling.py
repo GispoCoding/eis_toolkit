@@ -36,7 +36,7 @@ def generate_negatives(
     raster_meta: Union[profiles.Profile, dict],
     sample_number: Number,
     random_seed: int = 48,
-) -> Tuple[gpd.GeoDataFrame, np.ndarray, dict]:
+) -> Tuple[gpd.GeoDataFrame, np.ndarray, Union[profiles.Profile, dict]]:
     """Generate probable negatives from raster array with marked positives.
 
     Args:

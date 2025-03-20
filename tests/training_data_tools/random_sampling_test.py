@@ -11,17 +11,16 @@ from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 test_dir = Path(__file__).parent.parent
 PATH_LABELS_GPKG = test_dir.joinpath("data/remote/interpolating/interpolation_test_data_small.gpkg")
 
-positives = gpd.read_file(PATH_LABELS_GPKG)
+gdf = gpd.read_file(PATH_LABELS_GPKG)
 
 
-@pytest.mark.parametrize("positives", [(positives)])
-def test_points_to_raster(positives):
+@pytest.mark.parametrize("geodataframe", [gdf])
+def test_points_to_raster(geodataframe):
     """Test that generate_negatives function works as expected."""
     with rasterio.open(SMALL_RASTER_PATH) as temp_raster:
+        raster_profile = temp_raster.profile
 
-        outarray, outmeta = points_to_raster(
-            positives=positives, attribute="value", template_raster=temp_raster, nodata_value=-999
-        )
+        outarray, outmeta = points_to_raster(geodataframe=gdf, attribute="value", raster_profile=raster_profile)
 
         sampled_negatives, outarray2, outmeta2 = generate_negatives(
             raster_array=outarray, raster_meta=outmeta, sample_number=10, random_seed=30
