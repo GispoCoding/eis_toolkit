@@ -1340,8 +1340,6 @@ def distance_to_anomaly_cli(
 
     Uses only the first band of the raster.
     """
-    # from sys import platform
-
     from eis_toolkit.raster_processing.distance_to_anomaly import distance_to_anomaly
 
     if second_threshold_criteria_value is not None:
@@ -1350,29 +1348,27 @@ def distance_to_anomaly_cli(
         threshold_criteria_value = first_threshold_criteria_value
 
     with ProgressLog.reading_input_files():
-        raster = rasterio.open(input_raster)
-        # # Use optimized version if Windows
-        # if platform == "win32":
-        #     out_image, out_meta = distance_to_anomaly_gdal(
-        #         anomaly_raster_profile=raster.profile,
-        #         anomaly_raster_data=raster.read(1),
-        #         threshold_criteria_value=threshold_criteria_value,
-        #         threshold_criteria=get_enum_values(threshold_criteria),
-        #         max_distance=max_distance,
-        #     )
-        # else:
+        with rasterio.open(input_raster) as raster:
+            raster_array = raster.read(1)
+            profile = raster.profile.copy()
+
+    # Create nodata mask
+    mask = (raster_array == profile["nodata"]) | np.isnan(raster_array)
+
     with ProgressLog.running_algorithm():
-        out_image, out_meta = distance_to_anomaly(
-            anomaly_raster_profile=raster.profile,
-            anomaly_raster_data=raster.read(1),
+        out_image, out_profile = distance_to_anomaly(
+            anomaly_raster_profile=profile,
+            anomaly_raster_data=raster_array,
             threshold_criteria_value=threshold_criteria_value,
             threshold_criteria=get_enum_values(threshold_criteria),
             max_distance=max_distance,
         )
-        raster.close()
+
+    # Apply nodata mask after processing
+    out_image[mask] = out_profile["nodata"]
 
     with ProgressLog.saving_output_files(output_raster):
-        with rasterio.open(output_raster, "w", **out_meta) as dest:
+        with rasterio.open(output_raster, "w", **out_profile) as dest:
             dest.write(out_image, 1)
 
     ProgressLog.finish()
@@ -1395,8 +1391,6 @@ def proximity_to_anomaly_cli(
 
     Uses only the first band of the raster.
     """
-    # from sys import platform
-
     from eis_toolkit.raster_processing.proximity_to_anomaly import proximity_to_anomaly
 
     if second_threshold_criteria_value is not None:
@@ -1405,31 +1399,28 @@ def proximity_to_anomaly_cli(
         threshold_criteria_value = first_threshold_criteria_value
 
     with ProgressLog.reading_input_files():
-        raster = rasterio.open(input_raster)
-        # Use optimized version if Windows
-        # if platform == "win32":
-        #     out_image, out_meta = proximity_to_anomaly_gdal(
-        #         anomaly_raster_profile=raster.profile,
-        #         anomaly_raster_data=raster.read(1),
-        #         threshold_criteria_value=threshold_criteria_value,
-        #         threshold_criteria=get_enum_values(threshold_criteria),
-        #         max_distance=max_distance,
-        #         scaling_range=(anomaly_value, max_distance_value),
-        #     )
-        # else:
+        with rasterio.open(input_raster) as raster:
+            raster_array = raster.read(1)
+            profile = raster.profile.copy()
+
+    # Create nodata mask
+    mask = (raster_array == profile["nodata"]) | np.isnan(raster_array)
+
     with ProgressLog.running_algorithm():
-        out_image, out_meta = proximity_to_anomaly(
-            anomaly_raster_profile=raster.profile,
-            anomaly_raster_data=raster.read(1),
+        out_image, out_profile = proximity_to_anomaly(
+            anomaly_raster_profile=profile,
+            anomaly_raster_data=raster_array,
             threshold_criteria_value=threshold_criteria_value,
             threshold_criteria=get_enum_values(threshold_criteria),
             max_distance=max_distance,
             scaling_range=(anomaly_value, max_distance_value),
         )
-        raster.close()
+
+    # Apply nodata mask
+    out_image[mask] = out_profile["nodata"]
 
     with ProgressLog.saving_output_files(output_raster):
-        with rasterio.open(output_raster, "w", **out_meta) as dest:
+        with rasterio.open(output_raster, "w", **out_profile) as dest:
             dest.write(out_image, 1)
 
     ProgressLog.finish()
@@ -2225,16 +2216,24 @@ def distance_computation_cli(
             profile["crs"] = geodataframe.crs
             profile["driver"] = "GTiff"
             profile["dtype"] = "float32"
+            mask = None
         else:
             with rasterio.open(base_raster) as raster:
                 profile = raster.profile.copy()
+                raster_array = raster.read(1)
+                mask = (raster_array == profile["nodata"]) | np.isnan(raster_array)
 
     with ProgressLog.running_algorithm():
-        out_image = distance_computation(geodataframe=geodataframe, raster_profile=profile, max_distance=max_distance)
-    profile["count"] = 1
+        out_image, out_profile = distance_computation(
+            geodataframe=geodataframe, raster_profile=profile, max_distance=max_distance
+        )
+
+    # Apply nodata mask
+    if mask is not None:
+        out_image[mask] = out_profile["nodata"]
 
     with ProgressLog.saving_output_files(output_raster):
-        with rasterio.open(output_raster, "w", **profile) as dst:
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
 
     ProgressLog.finish()
@@ -2307,21 +2306,27 @@ def proximity_computation_cli(
             profile["crs"] = geodataframe.crs
             profile["driver"] = "GTiff"
             profile["dtype"] = "float32"
+            mask = None
         else:
             with rasterio.open(base_raster) as raster:
                 profile = raster.profile.copy()
+                raster_array = raster.read(1)
+                mask = (raster_array == profile["nodata"]) | np.isnan(raster_array)
 
     with ProgressLog.running_algorithm():
-        out_image = proximity_computation(
+        out_image, out_profile = proximity_computation(
             geodataframe=geodataframe,
             raster_profile=profile,
             maximum_distance=max_distance,
             scale_range=(geometries_value, max_distance_value),
         )
-    profile["count"] = 1
+
+    # Apply nodata mask
+    if mask is not None:
+        out_image[mask] = out_profile["nodata"]
 
     with ProgressLog.saving_output_files(output_raster):
-        with rasterio.open(output_raster, "w", **profile) as dst:
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
 
     ProgressLog.finish()
