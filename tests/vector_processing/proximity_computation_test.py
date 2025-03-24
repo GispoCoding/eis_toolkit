@@ -45,11 +45,11 @@ def test_proximity_computation_inversion_with_expected_result(
 ):
     """Tests if the enteries in the output matrix are between the minimum and maximum value."""
 
-    result = proximity_computation(geodataframe, raster_profile, maximum_distance, scaling_range)
+    out_image, _ = proximity_computation(geodataframe, raster_profile, maximum_distance, scaling_range)
 
-    assert result.shape == expected_shape
+    assert out_image.shape == expected_shape
     # Assert that all values in result within scaling_range
-    assert np.all((result >= scaling_range[1]) & (result <= scaling_range[0])), "Scaling out of scaling_range"
+    assert np.all((out_image >= scaling_range[1]) & (out_image <= scaling_range[0])), "Scaling out of scaling_range"
 
 
 @pytest.mark.parametrize(
@@ -78,16 +78,16 @@ def test_proximity_computation_with_expected_result(
 ):
     """Tests if the enteries in the output matrix are between the minimum and maximum value."""
 
-    result = proximity_computation(geodataframe, raster_profile, maximum_distance, scaling_range)
+    out_image, _ = proximity_computation(geodataframe, raster_profile, maximum_distance, scaling_range)
 
-    assert result.shape == expected_shape
+    assert out_image.shape == expected_shape
     # Assert that all values in result within scaling_range
-    assert np.all((result <= scaling_range[1]) & (result >= scaling_range[0])), "Scaling out of scaling_range"
+    assert np.all((out_image <= scaling_range[1]) & (out_image >= scaling_range[0])), "Scaling out of scaling_range"
 
 
 def test_proximity_computation_with_expected_error():
     """Tests if an exception is raised for a negative maximum distance."""
 
     with pytest.raises(NumericValueSignException, match="Expected max distance to be a positive number."):
-        result = proximity_computation(gdf, raster_profile, -25, (1, 0))
-        assert np.all((result >= 0) & (result <= 1)), "Scaling out of scaling_range"
+        out_image, _ = proximity_computation(gdf, raster_profile, -25, (1, 0))
+        assert np.all((out_image >= 0) & (out_image <= 1)), "Scaling out of scaling_range"

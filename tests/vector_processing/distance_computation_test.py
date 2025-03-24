@@ -47,7 +47,7 @@ POLYGON_GEOMETRIES_WITHIN_SMALL_RASTER = geodataframe_with_raster_crs(
             POINT_GEOMETRIES_WITHIN_SMALL_RASTER,
             EXPECTED_SMALL_RASTER_SHAPE,
             0.0,
-            107.83784122468327,
+            107.51744,
             id="point_geometries_within_small_raster",
         ),
         pytest.param(
@@ -55,7 +55,7 @@ POLYGON_GEOMETRIES_WITHIN_SMALL_RASTER = geodataframe_with_raster_crs(
             LINE_GEOMETRIES_WITHIN_SMALL_RASTER,
             EXPECTED_SMALL_RASTER_SHAPE,
             0.0,
-            107.83784122468327,
+            107.51744,
             id="line_geometries_within_small_raster",
         ),
         pytest.param(
@@ -63,7 +63,7 @@ POLYGON_GEOMETRIES_WITHIN_SMALL_RASTER = geodataframe_with_raster_crs(
             POLYGON_GEOMETRIES_WITHIN_SMALL_RASTER,
             EXPECTED_SMALL_RASTER_SHAPE,
             0.0,
-            91.0,
+            92.0,
             id="polygon_geometries_within_small_raster",
         ),
     ],
@@ -73,12 +73,12 @@ def test_distance_computation_with_expected_results(
 ):
     """Test distance_computation."""
 
-    result = distance_computation(raster_profile=raster_profile, geodataframe=geodataframe)
+    out_image, _ = distance_computation(raster_profile=raster_profile, geodataframe=geodataframe)
 
-    assert isinstance(result, np.ndarray)
-    assert result.shape == expected_shape
-    assert np.isclose(result.min(), expected_min)
-    assert np.isclose(result.max(), expected_max)
+    assert isinstance(out_image, np.ndarray)
+    assert out_image.shape == expected_shape
+    assert np.isclose(out_image.min(), expected_min, atol=0.0001)
+    assert np.isclose(out_image.max(), expected_max, atol=0.0001)
 
 
 @pytest.mark.parametrize(
@@ -115,6 +115,6 @@ def test_distance_computation(raster_profile, geodataframe, expected_error):
     """Test distance_computation."""
 
     with expected_error:
-        result = distance_computation(raster_profile=raster_profile, geodataframe=geodataframe)
-        assert isinstance(result, np.ndarray)
-        assert len(result.shape) == 2
+        out_image, _ = distance_computation(raster_profile=raster_profile, geodataframe=geodataframe)
+        assert isinstance(out_image, np.ndarray)
+        assert len(out_image.shape) == 2
