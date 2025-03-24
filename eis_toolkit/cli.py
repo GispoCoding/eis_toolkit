@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 import typer
-from beartype.typing import List, Optional, Tuple, Union
+from beartype.typing import List, Optional, Sequence, Tuple, Union
 from typing_extensions import Annotated
 
 from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
@@ -433,14 +433,14 @@ class ProgressLog:  # noqa: D101
 
     @contextmanager
     @staticmethod
-    def saving_output_files():  # noqa: D102
+    def saving_output_files(savepath: Union[str, Sequence[str]]):  # noqa: D102
         typer.echo("Saving output files...")
         yield
-        typer.echo("✅ Output files saved\n")
-
-    @staticmethod
-    def save_path(path: str):  # noqa: D102
-        typer.echo(f"✅ Output file(s) saved to {path}\n")
+        if isinstance(savepath, Sequence):
+            for file in savepath:
+                typer.echo(f"✅ Output file(s) saved to {file}\n")
+        else:
+            typer.echo(f"✅ Output file(s) saved to {savepath}\n")
 
     @staticmethod
     def finish():  # noqa: D102
@@ -542,10 +542,9 @@ def correlation_matrix_cli(
             min_periods=min_periods,
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_file):
         output_df.to_csv(output_file)
 
-    ProgressLog.save_path(output_file)
     ProgressLog.finish()
 
 
@@ -570,10 +569,9 @@ def covariance_matrix_cli(
             data=dataframe, columns=columns, min_periods=min_periods, delta_degrees_of_freedom=delta_degrees_of_freedom
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_file):
         output_df.to_csv(output_file)
 
-    ProgressLog.save_path(output_file)
     ProgressLog.finish()
 
 
@@ -602,10 +600,9 @@ def dbscan_vector_cli(
             min_samples=min_samples,
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         output_geodataframe.to_file(output_vector, driver="GPKG")
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -631,11 +628,10 @@ def dbscan_raster_cli(
     out_profile["nodata"] = -9999
     out_profile["count"] = 1
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(output_array, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -664,10 +660,9 @@ def k_means_clustering_vector_cli(
             random_state=random_state,
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         output_geodataframe.to_file(output_vector, driver="GPKG")
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -695,11 +690,10 @@ def k_means_clustering_raster_cli(
     out_profile["nodata"] = -9999
     out_profile["count"] = 1
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(output_array, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -734,10 +728,9 @@ def parallel_coordinates_cli(
         )
 
     if output_file is not None:
-        with ProgressLog.saving_output_files():
+        with ProgressLog.saving_output_files(output_file):
             dpi = "figure" if save_dpi is None else save_dpi
             plt.savefig(output_file, dpi=dpi)
-            ProgressLog.save_path(output_file)
 
     if show_plot:
         plt.show()
@@ -790,11 +783,10 @@ def compute_pca_raster_cli(
         "explained_variance_ratios": np.round(variance_ratios, 4).tolist(),
     }
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(transformed_data)
 
-    ProgressLog.save_path(output_raster)
     ResultSender.send_dict_as_json(out_dict)
     ProgressLog.finish()
 
@@ -838,10 +830,9 @@ def compute_pca_vector_cli(
         "explained_variance_ratios": np.round(variance_ratios, 4).tolist(),
     }
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         transformed_data.to_file(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ResultSender.send_dict_as_json(out_dict)
     ProgressLog.finish()
 
@@ -882,7 +873,7 @@ def descriptive_statistics_vector_cli(input_file: INPUT_FILE_OPTION, column: str
             with ProgressLog.running_algorithm():
                 results_dict = descriptive_statistics_dataframe(df, column)
         except:  # noqa: E722
-            raise Exception("Could not read input file as raster or dataframe")
+            raise Exception("Could not read input file as geodataframe")
 
     ResultSender.send_dict_as_json(results_dict)
     ProgressLog.finish()
@@ -907,10 +898,9 @@ def local_morans_i_cli(
     with ProgressLog.running_algorithm():
         out_gdf = local_morans_i(gdf, column, get_enum_values(weight_type), k, permutations)
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         out_gdf.to_file(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -963,11 +953,10 @@ def focal_filter_cli(
         out_image, out_meta = focal_filter(raster=raster, method=method, size=size, shape=get_enum_values(shape))
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -990,11 +979,10 @@ def gaussian_filter_cli(
         out_image, out_meta = gaussian_filter(raster=raster, sigma=sigma, truncate=truncate, size=size)
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1022,11 +1010,10 @@ def mexican_hat_filter_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1048,11 +1035,10 @@ def lee_additive_noise_filter_cli(
         out_image, out_meta = lee_additive_noise_filter(raster=raster, size=size, add_noise_var=add_noise_var)
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1077,11 +1063,10 @@ def lee_multiplicative_noise_filter_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1111,11 +1096,10 @@ def lee_additive_multiplicative_noise_filter_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1140,11 +1124,10 @@ def lee_enhanced_filter_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1166,11 +1149,10 @@ def gamma_filter_cli(
         out_image, out_meta = gamma_filter(raster=raster, size=size, n_looks=n_looks)
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1192,11 +1174,10 @@ def frost_filter_cli(
         out_image, out_meta = frost_filter(raster=raster, size=size, damping_factor=damping_factor)
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1218,11 +1199,10 @@ def kuan_filter_cli(
         out_image, out_meta = kuan_filter(raster=raster, size=size, n_looks=n_looks)
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1268,11 +1248,10 @@ def clip_raster_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1310,11 +1289,10 @@ def create_constant_raster_manually_cli(
             nodata_value=nodata_value,
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1340,11 +1318,10 @@ def create_constant_raster_from_template_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1394,11 +1371,10 @@ def distance_to_anomaly_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1452,11 +1428,10 @@ def proximity_to_anomaly_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1478,10 +1453,9 @@ def extract_values_from_raster_cli(
         df = extract_values_from_raster(raster_list=[raster], geodataframe=geodataframe)
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         df.to_csv(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -1505,11 +1479,10 @@ def reproject_raster_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1533,11 +1506,10 @@ def resample_raster_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1560,11 +1532,10 @@ def snap_raster_cli(
         src.close()
         snap_raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1596,7 +1567,7 @@ def unify_rasters_cli(
         raster.close()
         [rstr.close() for rstr in to_unify]
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_directory):
         out_rasters_dict = {}
         for i, (out_image, out_meta) in enumerate(unified[1:]):  # Skip writing base raster
             in_raster_name = os.path.splitext(os.path.split(rasters_to_unify[i])[1])[0]
@@ -1606,7 +1577,6 @@ def unify_rasters_cli(
                 dst.write(out_image)
             out_rasters_dict[output_raster_name] = str(output_raster_path)
 
-    ProgressLog.save_path(output_directory)
     ResultSender.send_dict_as_json(out_rasters_dict)
     ProgressLog.finish()
 
@@ -1627,11 +1597,10 @@ def unique_combinations_cli(
         out_image, out_meta = unique_combinations(rasters)
         [rstr.close() for rstr in rasters]
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1654,11 +1623,10 @@ def extract_window_cli(
         out_image, out_meta = extract_window(raster, center_coords, height, width)
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1682,11 +1650,10 @@ def classify_aspect_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ResultSender.send_dict_as_json(class_mapping)
     ProgressLog.finish()
 
@@ -1734,7 +1701,7 @@ def surface_derivatives_cli(
             )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         if first_order_parameters:
             for parameter, (out_image, out_meta) in first_order_results.items():
                 out_raster_name = str(output_raster)[:-4] + "_" + parameter + str(output_raster)[-4:]
@@ -1747,7 +1714,6 @@ def surface_derivatives_cli(
                 with rasterio.open(out_raster_name, "w", **out_meta) as dest:
                     dest.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1769,11 +1735,10 @@ def mask_raster_cli(
         raster.close()
         base_rstr.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1794,11 +1759,10 @@ def reclassify_with_manual_breaks_cli(
         out_image, out_meta = reclassify_with_manual_breaks(raster=raster, breaks=breaks, bands=bands)
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1819,11 +1783,10 @@ def reclassify_with_defined_intervals_cli(
         out_image, out_meta = reclassify_with_defined_intervals(raster=raster, interval_size=interval_size, bands=bands)
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1846,11 +1809,10 @@ def reclassify_with_equal_intervals_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1873,11 +1835,10 @@ def reclassify_with_quantiles_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1900,11 +1861,10 @@ def reclassify_with_natural_breaks_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1927,11 +1887,10 @@ def reclassify_with_geometrical_intervals_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1954,11 +1913,10 @@ def reclassify_with_standard_deviation_cli(
         )
         raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -1977,10 +1935,9 @@ def calculate_geometry_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPU
     with ProgressLog.running_algorithm():
         out_vector = calculate_geometry(geodataframe=geodataframe)
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         out_vector.to_file(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -1996,10 +1953,9 @@ def extract_shared_lines_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUT
     with ProgressLog.running_algorithm():
         out_vector = extract_shared_lines(polygons=polygons)
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         out_vector.to_file(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -2047,11 +2003,10 @@ def idw_interpolation_cli(
         )
 
     profile["count"] = 1
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -2101,11 +2056,10 @@ def kriging_interpolation_cli(
         )
 
     profile["count"] = 1
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -2161,11 +2115,10 @@ def rasterize_cli(
         )
 
     profile["count"] = 1
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -2185,10 +2138,9 @@ def reproject_vector_cli(
     with ProgressLog.running_algorithm():
         reprojected_geodataframe = reproject_vector(geodataframe=geodataframe, target_crs=target_crs)
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         reprojected_geodataframe.to_file(output_vector, driver="GeoJSON")
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -2238,11 +2190,10 @@ def vector_density_cli(
         )
 
     profile["count"] = 1
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -2282,11 +2233,10 @@ def distance_computation_cli(
         out_image = distance_computation(geodataframe=geodataframe, raster_profile=profile, max_distance=max_distance)
     profile["count"] = 1
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -2323,7 +2273,7 @@ def cell_based_association_cli(
             add_buffer=add_buffer if add_buffer is None else [add_buffer],
         )
 
-    ProgressLog.save_path(output_raster)
+    ProgressLog.saving_output_files(output_raster)
     ProgressLog.finish()
 
 
@@ -2370,11 +2320,10 @@ def proximity_computation_cli(
         )
     profile["count"] = 1
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -2424,7 +2373,7 @@ def logistic_regression_train_cli(
             random_state=random_state,
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_file):
         save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
 
     ResultSender.send_dict_as_json(metrics_dict)
@@ -2474,7 +2423,7 @@ def random_forest_classifier_train_cli(
             random_state=random_state,
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_file):
         save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
 
     ResultSender.send_dict_as_json(metrics_dict)
@@ -2522,7 +2471,7 @@ def random_forest_regressor_train_cli(
             random_state=random_state,
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_file):
         save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
 
     ResultSender.send_dict_as_json(metrics_dict)
@@ -2576,7 +2525,7 @@ def gradient_boosting_classifier_train_cli(
             random_state=random_state,
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_file):
         save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
 
     ResultSender.send_dict_as_json(metrics_dict)
@@ -2628,7 +2577,7 @@ def gradient_boosting_regressor_train_cli(
             random_state=random_state,
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_file):
         save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
 
     ResultSender.send_dict_as_json(metrics_dict)
@@ -2692,7 +2641,7 @@ def mlp_classifier_train_cli(
             random_state=random_state,
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_file):
         save_model(model, output_file)
 
     ResultSender.send_dict_as_json(metrics_dict)
@@ -2753,7 +2702,7 @@ def mlp_regressor_train_cli(
             random_state=random_state,
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_file):
         save_model(model, output_file)
 
     ResultSender.send_dict_as_json(metrics_dict)
@@ -2794,14 +2743,12 @@ def classifier_test_cli(
     out_profile = reference_profile.copy()
     out_profile.update({"count": 1, "dtype": np.float32})
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files([output_raster_probability, output_raster_classified]):
         with rasterio.open(output_raster_probability, "w", **out_profile) as dst:
             dst.write(probabilities_reshaped, 1)
         with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
             dst.write(predictions_reshaped, 1)
 
-    ProgressLog.save_path(output_raster_probability)
-    ProgressLog.save_path(output_raster_classified)
     ResultSender.send_dict_as_json(metrics_dict)
     ProgressLog.finish()
 
@@ -2835,11 +2782,10 @@ def regressor_test_cli(
     out_profile = reference_profile.copy()
     out_profile.update({"count": 1, "dtype": np.float32})
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(predictions_reshaped, 1)
 
-    ProgressLog.save_path(output_raster)
     ResultSender.send_dict_as_json(metrics_dict)
     ProgressLog.finish()
 
@@ -2873,14 +2819,12 @@ def classifier_predict_cli(
     out_profile = reference_profile.copy()
     out_profile.update({"count": 1, "dtype": np.float32})
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files([output_raster_probability, output_raster_classified]):
         with rasterio.open(output_raster_probability, "w", **out_profile) as dst:
             dst.write(probabilities_reshaped, 1)
         with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
             dst.write(predictions_reshaped, 1)
 
-    ProgressLog.save_path(output_raster_probability)
-    ProgressLog.save_path(output_raster_classified)
     ProgressLog.finish()
 
 
@@ -2908,11 +2852,10 @@ def regressor_predict_cli(
     out_profile = reference_profile.copy()
     out_profile.update({"count": 1, "dtype": np.float32})
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(predictions_reshaped, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -2938,11 +2881,10 @@ def and_overlay_cli(
     out_profile["count"] = 1
     out_profile["nodata"] = -9999
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -2966,11 +2908,10 @@ def or_overlay_cli(
     out_profile["count"] = 1
     out_profile["nodata"] = -9999
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -2994,11 +2935,10 @@ def product_overlay_cli(
     out_profile["count"] = 1
     out_profile["nodata"] = -9999
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -3022,11 +2962,10 @@ def sum_overlay_cli(
     out_profile["count"] = 1
     out_profile["nodata"] = -9999
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -3047,11 +2986,10 @@ def gamma_overlay_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT
     out_profile["count"] = 1
     out_profile["nodata"] = -9999
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -3105,7 +3043,7 @@ def weights_of_evidence_calculate_weights_cli(
             arrays_to_generate=arrays_to_generate,
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files([output_raster_dir, output_results_table]):
         df.to_csv(output_results_table)
 
         out_rasters_dict = {}
@@ -3126,8 +3064,6 @@ def weights_of_evidence_calculate_weights_cli(
                 dst.write(array, 1)
             out_rasters_dict[output_raster_name] = str(output_raster_path)
 
-    ProgressLog.save_path(output_raster_dir)
-    ProgressLog.save_path(output_results_table)
     ResultSender.send_dict_as_json(out_rasters_dict)
     ProgressLog.finish()
 
@@ -3183,7 +3119,7 @@ def weights_of_evidence_calculate_responses_cli(
             output_arrays=dict_array, weights_df=weights_df
         )
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files([output_probabilities, output_probabilities_std, output_confidence_array]):
         posterior_probabilities = nan_to_nodata(posterior_probabilities, raster_profile["nodata"])
         with rasterio.open(output_probabilities, "w", **raster_profile) as dst:
             dst.write(posterior_probabilities, 1)
@@ -3196,9 +3132,6 @@ def weights_of_evidence_calculate_responses_cli(
         with rasterio.open(output_confidence_array, "w", **raster_profile) as dst:
             dst.write(confidence_array, 1)
 
-    ProgressLog.save_path(output_probabilities)
-    ProgressLog.save_path(output_probabilities_std)
-    ProgressLog.save_path(output_confidence_array)
     ProgressLog.finish()
 
 
@@ -3255,11 +3188,10 @@ def alr_transform_cli(
     with ProgressLog.running_algorithm():
         out_df = alr_transform(df=df, column=column, keep_denominator_column=keep_denominator_column)
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
         out_gdf.to_file(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -3282,11 +3214,10 @@ def inverse_alr_transform_cli(
     with ProgressLog.running_algorithm():
         out_df = inverse_alr(df=df, denominator_column=denominator_column, scale=scale)
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
         out_gdf.to_file(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -3304,11 +3235,10 @@ def clr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FIL
     with ProgressLog.running_algorithm():
         out_df = clr_transform(df=df)
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
         out_gdf.to_file(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -3331,11 +3261,10 @@ def inverse_clr_transform_cli(
     with ProgressLog.running_algorithm():
         out_df = inverse_clr(df=df, colnames=colnames, scale=scale)
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
         out_gdf.to_file(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -3358,13 +3287,12 @@ def single_ilr_transform_cli(
     with ProgressLog.running_algorithm():
         out_series = single_ilr_transform(df=df, subcomposition_1=subcomposition_1, subcomposition_2=subcomposition_2)
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         # NOTE: Output of pairwise_logratio might be changed to DF in the future, to automatically do the following
         df["single_ilr"] = out_series
         out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
         out_gdf.to_file(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -3387,13 +3315,12 @@ def pairwise_logratio_cli(
     with ProgressLog.running_algorithm():
         out_series = pairwise_logratio(df=df, numerator_column=numerator_column, denominator_column=denominator_column)
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         # NOTE: Output of pairwise_logratio might be changed to DF in the future, to automatically do the following
         df["pairwise_logratio"] = out_series
         out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
         out_gdf.to_file(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -3415,13 +3342,12 @@ def single_plr_transform_cli(
     with ProgressLog.running_algorithm():
         out_series = single_plr_transform(df=df, column=column)
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         # NOTE: Output of single_plr_transform might be changed to DF in the future, to automatically do the following
         df["single_plr"] = out_series
         out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
         out_gdf.to_file(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -3439,11 +3365,10 @@ def plr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FIL
     with ProgressLog.running_algorithm():
         out_df = plr_transform(df=df)
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_vector):
         out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
         out_gdf.to_file(output_vector)
 
-    ProgressLog.save_path(output_vector)
     ProgressLog.finish()
 
 
@@ -3469,11 +3394,10 @@ def binarize_cli(
         out_image, out_meta, _ = binarize(raster=raster, thresholds=[threshold])
     raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -3500,11 +3424,10 @@ def clip_transform_cli(
         out_image, out_meta, _ = clip_transform(raster=raster, limits=[(limit_lower, limit_higher)])
     raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -3528,11 +3451,10 @@ def z_score_normalization_cli(
         out_image, out_meta, _ = z_score_normalization(raster=raster)
     raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -3558,11 +3480,10 @@ def min_max_scaling_cli(
         out_image, out_meta, _ = min_max_scaling(raster=raster, new_range=[(min, max)])
     raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -3588,11 +3509,10 @@ def log_transform_cli(
         out_image, out_meta, _ = log_transform(raster=raster, log_transform=[get_enum_values(log_type)])
     raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -3622,11 +3542,10 @@ def sigmoid_transform_cli(
         )
     raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -3666,11 +3585,10 @@ def winsorize_transform_cli(
         )
     raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -3744,10 +3662,9 @@ def plot_roc_curve_cli(
         _ = plot_roc_curve(y_true=y_true, y_prob=y_prob)
 
     if output_file is not None:
-        with ProgressLog.saving_output_files():
+        with ProgressLog.saving_output_files(output_file):
             dpi = "figure" if save_dpi is None else save_dpi
             plt.savefig(output_file, dpi=dpi)
-        ProgressLog.save_path(output_file)
 
     if show_plot:
         plt.show()
@@ -3783,10 +3700,9 @@ def plot_det_curve_cli(
         _ = plot_det_curve(y_true=y_true, y_prob=y_prob)
 
     if output_file is not None:
-        with ProgressLog.saving_output_files():
+        with ProgressLog.saving_output_files(output_file):
             dpi = "figure" if save_dpi is None else save_dpi
             plt.savefig(output_file, dpi=dpi)
-        ProgressLog.save_path(output_file)
 
     if show_plot:
         plt.show()
@@ -3821,10 +3737,9 @@ def plot_precision_recall_curve_cli(
         _ = plot_precision_recall_curve(y_true=y_true, y_prob=y_prob)
 
     if output_file is not None:
-        with ProgressLog.saving_output_files():
+        with ProgressLog.saving_output_files(output_file):
             dpi = "figure" if save_dpi is None else save_dpi
             plt.savefig(output_file, dpi=dpi)
-        ProgressLog.save_path(output_file)
 
     if show_plot:
         plt.show()
@@ -3859,10 +3774,9 @@ def plot_calibration_curve_cli(
         _ = plot_calibration_curve(y_true=y_true, y_prob=y_prob, n_bins=n_bins)
 
     if output_file is not None:
-        with ProgressLog.saving_output_files():
+        with ProgressLog.saving_output_files(output_file):
             dpi = "figure" if save_dpi is None else save_dpi
             plt.savefig(output_file, dpi=dpi)
-        ProgressLog.save_path(output_file)
 
     if show_plot:
         plt.show()
@@ -3893,10 +3807,9 @@ def plot_confusion_matrix_cli(
         _ = plot_confusion_matrix(confusion_matrix=matrix)
 
     if output_file is not None:
-        with ProgressLog.saving_output_files():
+        with ProgressLog.saving_output_files(output_file):
             dpi = "figure" if save_dpi is None else save_dpi
             plt.savefig(output_file, dpi=dpi)
-        ProgressLog.save_path(output_file)
 
     if show_plot:
         plt.show()
@@ -3939,14 +3852,13 @@ def split_raster_bands_cli(input_raster: INPUT_FILE_OPTION, output_dir: OUTPUT_D
         output_singleband_rasters = split_raster_bands(raster)
     raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_dir):
         name = os.path.splitext(os.path.basename(input_raster))[0]
         output_paths = get_output_paths_from_common_name(output_singleband_rasters, output_dir, f"{name}_split", ".tif")
         for output_path, (out_image, out_profile) in zip(output_paths, output_singleband_rasters):
             with rasterio.open(output_path, "w", **out_profile) as dst:
                 dst.write(out_image, 1)
 
-    ProgressLog.save_path(output_dir)
     ProgressLog.finish()
 
 
@@ -3962,11 +3874,10 @@ def combine_raster_bands_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster:
         out_image, out_meta = combine_raster_bands(rasters)
     [raster.close() for raster in rasters]
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -3985,13 +3896,12 @@ def unify_raster_nodata_cli(
         unified = unify_raster_nodata(rasters, new_nodata)
     [raster.close() for raster in rasters]
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_dir):
         output_paths = get_output_paths_from_inputs(input_rasters, output_dir, "nodata_unified", ".tif")
         for output_path, (out_image, out_profile) in zip(output_paths, unified):
             with rasterio.open(output_path, "w", **out_profile) as dst:
                 dst.write(out_image)
 
-    ProgressLog.save_path(output_dir)
     ProgressLog.finish()
 
 
@@ -4012,11 +3922,10 @@ def convert_raster_nodata_cli(
         out_image, out_meta = convert_raster_nodata(raster, old_nodata, new_nodata)
     raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -4038,11 +3947,10 @@ def replace_with_nodata_cli(
         out_image, out_meta = replace_with_nodata(raster, target_value, nodata_value, replace_condition)
     raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
@@ -4061,11 +3969,10 @@ def set_raster_nodata_cli(
         out_meta = set_raster_nodata(raster.meta, new_nodata)
     raster.close()
 
-    with ProgressLog.saving_output_files():
+    with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
 
-    ProgressLog.save_path(output_raster)
     ProgressLog.finish()
 
 
