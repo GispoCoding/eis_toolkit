@@ -33,7 +33,7 @@ def _random_sampling(
 @beartype
 def generate_negatives(
     raster_array: np.ndarray,
-    raster_meta: Union[profiles.Profile, dict],
+    raster_profile: Union[profiles.Profile, dict],
     sample_number: Number,
     random_seed: int = 48,
 ) -> Tuple[gpd.GeoDataFrame, np.ndarray, Union[profiles.Profile, dict]]:
@@ -41,15 +41,15 @@ def generate_negatives(
 
     Args:
         raster_array: Raster array with marked positives.
-        raster_meta: Raster metadata.
-        sample_number: maximum number of negatives to be generated.
+        raster_profile: The raster profile determining the output raster grid properties.
+        sample_number: Maximum number of negatives to be generated.
         random_seed: Seed for generating random negatives.
 
     Returns:
         A tuple containing the shapely points, output raster as a NumPy array and updated metadata.
 
     Raises:
-        EmptyDataException:  The raster array is empty.
+        EmptyDataException: The raster array is empty.
     """
 
     if raster_array.size == 0:
@@ -80,11 +80,11 @@ def generate_negatives(
 
     out_array[row, col] = -1
 
-    x, y = rasterio.transform.xy(raster_meta["transform"], row, col)
+    x, y = rasterio.transform.xy(raster_profile["transform"], row, col)
 
     points = [Point(x[i], y[i]) for i in range(len(x))]
 
     sample_negative = gpd.GeoDataFrame(geometry=points)
-    sample_negative.set_crs(raster_meta["crs"], allow_override=True, inplace=True)
+    sample_negative.set_crs(raster_profile["crs"], allow_override=True, inplace=True)
 
-    return sample_negative, out_array, raster_meta
+    return sample_negative, out_array, raster_profile

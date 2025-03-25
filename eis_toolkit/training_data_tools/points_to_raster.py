@@ -124,6 +124,7 @@ def points_to_raster(
 
     Args:
         geodataframe: The geodataframe points set to be converted into raster.
+        raster_profile: The raster profile determining the output raster grid properties.
         attribute: Values to be be assigned to the geodataframe.
         radius: Radius to be applied around the geodataframe in [m].
         buffer: Buffers the matrix value when two or more radii with different attribute value overlap.
