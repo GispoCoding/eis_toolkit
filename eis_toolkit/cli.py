@@ -356,6 +356,14 @@ class ReplaceCondition(str, Enum):
     greater_than_or_equal = "greater_than_or_equal"
 
 
+class BufferOption(str, Enum):
+    """Buffer options."""
+
+    avg = "avg"
+    min = "min"
+    max = "max"
+
+
 INPUT_FILE_OPTION = Annotated[
     Path,
     typer.Option(
@@ -2262,6 +2270,52 @@ def proximity_computation_cli(
             raster_profile=profile,
             maximum_distance=max_distance,
             scale_range=(geometries_value, max_distance_value),
+        )
+
+    # Apply nodata mask
+    if mask is not None:
+        out_image[mask] = out_profile["nodata"]
+
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(out_image, 1)
+
+    ProgressLog.finish()
+
+
+# --- TRAINING DATA TOOLS ---
+
+
+@app.command()
+def points_to_raster_cli(
+    input_vector: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    base_raster: INPUT_FILE_OPTION = None,
+    pixel_size: float = None,
+    extent: Tuple[float, float, float, float] = (None, None, None, None),
+    attribute: Optional[str] = None,
+    radius: Optional[int] = None,
+    buffer: Annotated[BufferOption, typer.Option(case_sensitive=False)] = None,
+):
+    """Convert a point data set into a binary raster."""
+    from eis_toolkit.training_data_tools.points_to_raster import points_to_raster
+    from eis_toolkit.utilities.raster import base_profile
+
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
+
+        if base_raster is None or base_raster == "":
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
+            mask = None
+        else:
+            with rasterio.open(base_raster) as raster:
+                profile = raster.profile.copy()
+                raster_array = raster.read(1)
+                mask = (raster_array == profile["nodata"]) | np.isnan(raster_array)
+
+    with ProgressLog.running_algorithm():
+        out_image, out_profile = points_to_raster(
+            geodataframe=geodataframe, raster_profile=profile, attribute=attribute, radius=radius, buffer=buffer
         )
 
     # Apply nodata mask
