@@ -5,6 +5,7 @@ import numpy as np
 import rasterio
 from beartype import beartype
 from beartype.typing import Literal, Sequence, Tuple, Union
+from pyproj import CRS
 from rasterio import profiles, transform
 
 from eis_toolkit.exceptions import (
@@ -170,3 +171,53 @@ def profile_from_extent_and_pixel_size(
     }
     raster_profile = profiles.Profile(raster_meta)
     return raster_profile
+
+
+@beartype
+def base_profile(
+    extent: Tuple[Number, Number, Number, Number],
+    pixel_size: Number,
+    crs: CRS,
+    dtype=np.float32,
+    count: int = 1,
+    nodata: float = -9999.0,
+    driver: str = "GTiff",
+    compress: str = "lzw",
+    round_strategy: Literal["nearest", "up", "down"] = "up",
+) -> profiles.Profile:
+    """
+    Create a raster profile from given extent, pixel size, CRS and other optional parameters.
+
+    If extent and pixel size do not match exactly, i.e. raster width and height
+    calcalated from bounds and pixel size are not integers, rounding for the width and
+    height is performed.
+
+    Args:
+        extent: Raster extent in the form (coord_west, coord_east, coord_south, coord_north).
+        pixel_size: Desired pixel size. If two values are provided, first is used for x and second for y.
+            If one value is provided, the value is used for both directions.
+        crs: Coordinate reference system.
+        dtype: Data type.
+        count: Number of raster bands.
+        nodata: Nodata value.
+        driver: Driver, defaults to GeoTIFF file format.
+        compress: Compression mode.
+        round_strategy: The rounding strategy if extent and pixel size do not match exactly.
+            Defaults to "up".
+
+    Returns:
+        Rasterio profile.
+    """
+    if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
+        raise InvalidParameterValueException(
+            "Expected positive pixel size and defined extent in absence of base raster. "
+            + f"Pixel size: {pixel_size}, extent: {extent}."
+        )
+    profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size), round_strategy)
+    profile["crs"] = crs
+    profile["dtype"] = dtype
+    profile["count"] = count
+    profile["nodata"] = nodata
+    profile["driver"] = driver
+    profile["compress"] = compress
+    return profile

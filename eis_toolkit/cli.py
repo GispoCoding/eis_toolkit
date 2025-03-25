@@ -15,6 +15,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio
+import rasterio.profiles
 import typer
 from beartype.typing import List, Optional, Sequence, Tuple, Union
 from typing_extensions import Annotated
@@ -1963,23 +1964,14 @@ def idw_interpolation_cli(
     search_radius: Optional[float] = None,
 ):
     """Apply inverse distance weighting (IDW) interpolation to input vector file."""
-    from eis_toolkit.exceptions import InvalidParameterValueException
-    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.utilities.raster import base_profile
     from eis_toolkit.vector_processing.idw_interpolation import idw
 
     with ProgressLog.reading_input_files():
         geodataframe = gpd.read_file(input_vector)
 
         if base_raster is None or base_raster == "":
-            if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
-                raise InvalidParameterValueException(
-                    "Expected positive pixel size and defined extent in absence of base raster. "
-                    + f"Pixel size: {pixel_size}, extent: {extent}."
-                )
-            profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
-            profile["crs"] = geodataframe.crs
-            profile["driver"] = "GTiff"
-            profile["dtype"] = "float32"
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
         else:
             with rasterio.open(base_raster) as raster:
                 profile = raster.profile.copy()
@@ -1993,7 +1985,6 @@ def idw_interpolation_cli(
             search_radius=search_radius,
         )
 
-    profile["count"] = 1
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
@@ -2015,23 +2006,14 @@ def kriging_interpolation_cli(
     method: Annotated[KrigingMethod, typer.Option(case_sensitive=False)] = KrigingMethod.ordinary,
 ):
     """Apply kriging interpolation to input vector file."""
-    from eis_toolkit.exceptions import InvalidParameterValueException
-    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.utilities.raster import base_profile
     from eis_toolkit.vector_processing.kriging_interpolation import kriging
 
     with ProgressLog.reading_input_files():
         geodataframe = gpd.read_file(input_vector)
 
         if base_raster is None or base_raster == "":
-            if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
-                raise InvalidParameterValueException(
-                    "Expected positive pixel size and defined extent in absence of base raster. "
-                    + f"Pixel size: {pixel_size}, extent: {extent}."
-                )
-            profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
-            profile["crs"] = geodataframe.crs
-            profile["driver"] = "GTiff"
-            profile["dtype"] = "float32"
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
         else:
             with rasterio.open(base_raster) as raster:
                 profile = raster.profile.copy()
@@ -2046,7 +2028,6 @@ def kriging_interpolation_cli(
             method=get_enum_values(method),
         )
 
-    profile["count"] = 1
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
@@ -2073,23 +2054,14 @@ def rasterize_cli(
 
     Either base raster or pixel size + extent must be provided.
     """
-    from eis_toolkit.exceptions import InvalidParameterValueException
-    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.utilities.raster import base_profile
     from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
     with ProgressLog.reading_input_files():
         geodataframe = gpd.read_file(input_vector)
 
         if base_raster is None or base_raster == "":
-            if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
-                raise InvalidParameterValueException(
-                    "Expected positive pixel size and defined extent in absence of base raster. "
-                    + f"Pixel size: {pixel_size}, extent: {extent}."
-                )
-            profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
-            profile["crs"] = geodataframe.crs
-            profile["driver"] = "GTiff"
-            profile["dtype"] = "float32"
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
         else:
             with rasterio.open(base_raster) as raster:
                 profile = raster.profile.copy()
@@ -2105,7 +2077,6 @@ def rasterize_cli(
             get_enum_values(merge_strategy),
         )
 
-    profile["count"] = 1
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
@@ -2151,23 +2122,14 @@ def vector_density_cli(
 
     Either base raster or pixel size + extent must be provided.
     """
-    from eis_toolkit.exceptions import InvalidParameterValueException
-    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.utilities.raster import base_profile
     from eis_toolkit.vector_processing.vector_density import vector_density
 
     with ProgressLog.reading_input_files():
         geodataframe = gpd.read_file(input_vector)
 
         if base_raster is None or base_raster == "":
-            if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
-                raise InvalidParameterValueException(
-                    "Expected positive pixel size and defined extent in absence of base raster. "
-                    + f"Pixel size: {pixel_size}, extent: {extent}."
-                )
-            profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
-            profile["crs"] = geodataframe.crs
-            profile["driver"] = "GTiff"
-            profile["dtype"] = "float32"
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
         else:
             with rasterio.open(base_raster) as raster:
                 profile = raster.profile.copy()
@@ -2180,7 +2142,6 @@ def vector_density_cli(
             statistic=get_enum_values(statistic),
         )
 
-    profile["count"] = 1
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
@@ -2199,23 +2160,14 @@ def distance_computation_cli(
     max_distance: float = None,
 ):
     """Calculate distance from raster cell to nearest geometry."""
-    from eis_toolkit.exceptions import InvalidParameterValueException
-    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.utilities.raster import base_profile
     from eis_toolkit.vector_processing.distance_computation import distance_computation
 
     with ProgressLog.reading_input_files():
         geodataframe = gpd.read_file(input_vector)
 
         if base_raster is None or base_raster == "":
-            if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
-                raise InvalidParameterValueException(
-                    "Expected positive pixel size and defined extent in absence of base raster. "
-                    + f"Pixel size: {pixel_size}, extent: {extent}."
-                )
-            profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
-            profile["crs"] = geodataframe.crs
-            profile["driver"] = "GTiff"
-            profile["dtype"] = "float32"
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
             mask = None
         else:
             with rasterio.open(base_raster) as raster:
@@ -2289,23 +2241,14 @@ def proximity_computation_cli(
     extent: Tuple[float, float, float, float] = (None, None, None, None),
 ):
     """Calculate proximity from raster cell to nearest geometry."""
-    from eis_toolkit.exceptions import InvalidParameterValueException
-    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.utilities.raster import base_profile
     from eis_toolkit.vector_processing.proximity_computation import proximity_computation
 
     with ProgressLog.reading_input_files():
         geodataframe = gpd.read_file(input_vector)
 
         if base_raster is None or base_raster == "":
-            if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
-                raise InvalidParameterValueException(
-                    "Expected positive pixel size and defined extent in absence of base raster. "
-                    + f"Pixel size: {pixel_size}, extent: {extent}."
-                )
-            profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
-            profile["crs"] = geodataframe.crs
-            profile["driver"] = "GTiff"
-            profile["dtype"] = "float32"
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
             mask = None
         else:
             with rasterio.open(base_raster) as raster:
