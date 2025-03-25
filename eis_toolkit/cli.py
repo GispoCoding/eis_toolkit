@@ -447,7 +447,8 @@ class ProgressLog:  # noqa: D101
         yield
         if isinstance(savepath, Sequence):
             for file in savepath:
-                typer.echo(f"✅ Output file(s) saved to {file}\n")
+                typer.echo(f"✅ Output file(s) saved to {file}")
+            typer.echo(" ")
         else:
             typer.echo(f"✅ Output file(s) saved to {savepath}\n")
 
@@ -2285,7 +2286,7 @@ def proximity_computation_cli(
 
 # --- TRAINING DATA TOOLS ---
 
-
+# POINTS TO RASTER
 @app.command()
 def points_to_raster_cli(
     input_vector: INPUT_FILE_OPTION,
@@ -2325,6 +2326,38 @@ def points_to_raster_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
+
+    ProgressLog.finish()
+
+
+# GENERATE NEGATIVES
+@app.command()
+def generate_negatives_cli(
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
+    sample_number: Annotated[int, typer.Option()],
+    random_seed: int = 48,
+):
+    """Generate probable negatives from raster array with marked positives."""
+    from eis_toolkit.training_data_tools.random_sampling import generate_negatives
+
+    with ProgressLog.reading_input_files():
+        with rasterio.open(input_raster) as raster:
+            raster_array = raster.read(1)
+            profile = raster.profile.copy()
+            mask = (raster_array == profile["nodata"]) | np.isnan(raster_array)
+
+    with ProgressLog.running_algorithm():
+        out_points, out_image, out_profile = generate_negatives(
+            raster_array=raster_array, raster_profile=profile, sample_number=sample_number, random_seed=random_seed
+        )
+    out_image[mask] = out_profile["nodata"]
+
+    with ProgressLog.saving_output_files([output_raster, output_vector]):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(out_image, 1)
+        out_points.to_file(output_vector)
 
     ProgressLog.finish()
 
