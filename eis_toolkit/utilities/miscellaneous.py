@@ -1,11 +1,9 @@
-from contextlib import contextmanager
 from numbers import Number
 
 import numpy as np
 import pandas as pd
 from beartype import beartype
 from beartype.typing import Any, List, Optional, Sequence, Tuple, Union
-from osgeo import gdal
 from rasterio import transform
 from shapely.geometry import Point
 
@@ -358,20 +356,3 @@ def row_points(
     point_xs, point_ys = zip(*[raster_transform * (col + 0.5, row + 0.5) for col in cols])
     # point_xs, point_ys = transform.xy(transform=raster_transform, cols=cols, rows=row)
     return [Point(x, y) for x, y in zip(point_xs, point_ys)]
-
-
-@contextmanager
-def toggle_gdal_exceptions():
-    """Toggle GDAL exceptions using a context manager.
-
-    If the exceptions are already enabled, this function will do nothing.
-    """
-    already_has_exceptions_enabled = False
-    try:
-        if gdal.GetUseExceptions() != 0:
-            already_has_exceptions_enabled = True
-        gdal.UseExceptions()
-        yield
-    finally:
-        if not already_has_exceptions_enabled:
-            gdal.DontUseExceptions()

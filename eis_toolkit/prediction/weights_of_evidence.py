@@ -6,9 +6,15 @@ import numpy as np
 import pandas as pd
 import rasterio
 from beartype import beartype
-from beartype.typing import Dict, List, Literal, Optional, Sequence, Tuple
+from beartype.typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
 
-from eis_toolkit.exceptions import ClassificationFailedException, InvalidColumnException, InvalidParameterValueException
+from eis_toolkit.exceptions import (
+    ClassificationFailedException,
+    InvalidColumnException,
+    InvalidParameterValueException,
+    NonMatchingRasterMetadataException,
+)
+from eis_toolkit.utilities.checks.raster import check_raster_grids
 from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 from eis_toolkit.warnings import ClassificationFailedWarning, InvalidColumnWarning
 
@@ -68,7 +74,7 @@ REQUIRED_FOR_GENERALIZATION = {
 }
 
 
-def _read_and_preprocess_evidence(
+def _read_and_preprocess_raster_data(
     raster: rasterio.io.DatasetReader, nodata: Optional[Number] = None, band: int = 1
 ) -> np.ndarray:
     """Read raster data and handle NoData values."""
@@ -244,6 +250,22 @@ def _generate_arrays_from_metrics(
     return array_dict
 
 
+def _calculate_nr_of_deposit_pixels(array: np.ndarray, df: pd.DataFrame) -> Tuple[int, int]:
+    masked_array = array[~np.isnan(array)]
+    nr_of_pixels = int(np.size(masked_array))
+
+    pixels_column = df["Pixel count"]
+
+    match = pixels_column == nr_of_pixels
+    if match.any():
+        nr_of_deposits = df.loc[match, "Deposit count"].iloc[0]
+    else:
+        nr_of_pixels = df["Pixel count"].sum()
+        nr_of_deposits = df["Deposit count"].sum()
+
+    return nr_of_deposits, nr_of_pixels
+
+
 @beartype
 def generalize_weights_cumulative(
     df: pd.DataFrame,
@@ -349,7 +371,7 @@ def generalize_weights_cumulative(
 @beartype
 def weights_of_evidence_calculate_weights(
     evidential_raster: rasterio.io.DatasetReader,
-    deposits: gpd.GeoDataFrame,
+    deposits: Union[gpd.GeoDataFrame, rasterio.io.DatasetReader],
     raster_nodata: Optional[Number] = None,
     weights_type: Literal["unique", "categorical", "ascending", "descending"] = "unique",
     studentized_contrast_threshold: Number = 1,
@@ -360,7 +382,7 @@ def weights_of_evidence_calculate_weights(
 
     Args:
         evidential_raster: The evidential raster.
-        deposits: Vector data representing the mineral deposits or occurences point data.
+        deposits: Vector or raster data representing the mineral deposits or occurences point data.
         raster_nodata: If nodata value of raster is wanted to specify manually. Optional parameter, defaults to None
             (nodata from raster metadata is used).
         weights_type: Accepted values are 'unique', 'categorical', 'ascending' and 'descending'.
@@ -374,9 +396,11 @@ def weights_of_evidence_calculate_weights(
             that class with max contrast has studentized contrast value at least the defined value (cumulative).
             Defaults to 1.
         arrays_to_generate: Arrays to generate from the computed weight metrics. All column names
-            in the produced weights_df are valid choices. Defaults to ["Class", "W+", "S_W+]
-            for "unique" weights_type and ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"]
-            for the cumulative weight types.
+            in the produced weights_df are valid choices. Available column names for "unique" weights type are "Class",
+            "Pixel count", "Deposit count", "W+", "S_W+", "W-", "S_W-", "Contrast", "S_Contrast", and
+            "Studentized contrast". For other weights types, additional available column names are "Generalized class",
+            "Generalzed W+", and "Generalized S_W+". Defaults to ["Class", "W+", "S_W+] for "unique" weights_type and
+            ["Class", "W+", "S_W+", "Generalized W+", "Generalized S_W+"] for the cumulative weight types.
 
     Returns:
         Dataframe with weights of spatial association between the input data.
@@ -407,13 +431,22 @@ def weights_of_evidence_calculate_weights(
         metrics_to_arrays = arrays_to_generate.copy()
 
     # 1. Preprocess data
-    evidence_array = _read_and_preprocess_evidence(evidential_raster, raster_nodata)
+    evidence_array = _read_and_preprocess_raster_data(evidential_raster, raster_nodata)
     raster_meta = evidential_raster.meta
+    raster_profile = evidential_raster.profile
 
-    # Rasterize deposits
-    deposit_array = rasterize_vector(
-        geodataframe=deposits, raster_profile=raster_meta, default_value=1.0, fill_value=0.0
-    )
+    # Rasterize deposits if vector data
+    if isinstance(deposits, gpd.GeoDataFrame):
+        deposit_array = rasterize_vector(
+            geodataframe=deposits, raster_profile=raster_meta, default_value=1.0, fill_value=0.0
+        )
+    else:
+        deposit_profile = deposits.profile
+
+        if check_raster_grids([raster_profile, deposit_profile], same_extent=True):
+            deposit_array = _read_and_preprocess_raster_data(deposits, raster_nodata)
+        else:
+            raise NonMatchingRasterMetadataException("Input rasters should have the same grid properties.")
 
     # Mask NaN out of the array
     nodata_mask = np.isnan(evidence_array)
@@ -480,7 +513,7 @@ def weights_of_evidence_calculate_weights(
 
 @beartype
 def weights_of_evidence_calculate_responses(
-    output_arrays: Sequence[Dict[str, np.ndarray]], nr_of_deposits: int, nr_of_pixels: int
+    output_arrays: Sequence[Dict[str, np.ndarray]], weights_df: pd.DataFrame
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate the posterior probabilities for the given generalized weight arrays.
 
@@ -489,14 +522,17 @@ def weights_of_evidence_calculate_responses(
             For each dictionary, generalized weight and generalized standard deviation arrays are used and summed
             together pixel-wise to calculate the posterior probabilities. If generalized arrays are not found,
             the W+ and S_W+ arrays are used (so if outputs from unique weight calculations are used for this function).
-        nr_of_deposits: Number of deposit pixels in the input data for weights of evidence calculations.
-        nr_of_pixels: Number of evidence pixels in the input data for weights of evidence calculations.
+        weights_df: Output dataframe of WofE calculate weights algorithm. Used for determining number of deposits and
+            number of pixels.
 
     Returns:
         Array of posterior probabilites.
         Array of standard deviations in the posterior probability calculations.
         Array of confidence of the prospectivity values obtained in the posterior probability array.
     """
+    array = list(output_arrays[0].values())[0]
+    nr_of_deposits, nr_of_pixels = _calculate_nr_of_deposit_pixels(array, weights_df)
+
     gen_weights_sum = sum(
         [
             item[GENERALIZED_WEIGHT_PLUS_COLUMN]
@@ -529,7 +565,7 @@ def weights_of_evidence_calculate_responses(
 
 @beartype
 def agterberg_cheng_CI_test(
-    posterior_probabilities: np.ndarray, posterior_probabilities_std: np.ndarray, nr_of_deposits: int
+    posterior_probabilities: np.ndarray, posterior_probabilities_std: np.ndarray, weights_df: pd.DataFrame
 ) -> Tuple[bool, bool, bool, float, str]:
     """Perform the conditional independence test presented by Agterberg-Cheng (2002).
 
@@ -539,7 +575,8 @@ def agterberg_cheng_CI_test(
     Args:
         posterior_probabilities: Array of posterior probabilites.
         posterior_probabilities_std: Array of standard deviations in the posterior probability calculations.
-        nr_of_deposits: Number of deposit pixels in the input data for weights of evidence calculations.
+        weights_df: Output dataframe of WofE calculate weights algorithm. Used for determining number of deposits.
+
     Returns:
         Whether the conditional hypothesis can be accepted for the evidence layers that the input
             posterior probabilities and standard deviations of posterior probabilities are calculated from.
@@ -548,12 +585,8 @@ def agterberg_cheng_CI_test(
         Ratio T/n. Results > 1, may be because of lack of conditional independence of layers.
             T should not exceed n by more than 15% (Bonham-Carter 1994, p. 316).
         A summary of the the conditional independence calculations.
-
-    Raises:
-        InvalidParameterValueException: Value of nr_of_deposits is not at least 1.
     """
-    if nr_of_deposits < 1:
-        raise InvalidParameterValueException("Expected input deposits count to be at least 1.")
+    nr_of_deposits, _ = _calculate_nr_of_deposit_pixels(posterior_probabilities, weights_df)
 
     # One-tailed significance test according to Agterberg-Cheng (2002):
     # Conditional independence must satisfy:

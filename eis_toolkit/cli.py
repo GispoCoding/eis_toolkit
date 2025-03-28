@@ -6,16 +6,21 @@
 
 import json
 import os
+from contextlib import contextmanager
 from enum import Enum
+from itertools import zip_longest
 from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio
+import rasterio.profiles
 import typer
-from beartype.typing import List, Optional, Tuple, Union
+from beartype.typing import List, Optional, Sequence, Tuple, Union
 from typing_extensions import Annotated
+
+from eis_toolkit.utilities.nodata import nan_to_nodata, nodata_to_nan
 
 app = typer.Typer()
 
@@ -332,8 +337,47 @@ class KerasRegressorMetrics(str, Enum):
     mae = "mae"
 
 
+class WeightsType(str, Enum):
+    """Weights type for WofE."""
+
+    unique = "unique"
+    categorical = "categorical"
+    ascending = "ascending"
+    descending = "descending"
+
+
+class ReplaceCondition(str, Enum):
+    """Replace conditions for replace with nodata."""
+
+    equal = "equal"
+    less_than = "less_than"
+    greater_than = "greater_than"
+    less_than_or_equal = "less_than_or_equal"
+    greater_than_or_equal = "greater_than_or_equal"
+
+
+class BufferOption(str, Enum):
+    """Buffer options."""
+
+    avg = "avg"
+    min = "min"
+    max = "max"
+
+
 INPUT_FILE_OPTION = Annotated[
     Path,
+    typer.Option(
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        writable=False,
+        readable=True,
+        resolve_path=True,
+    ),
+]
+
+INPUT_FILES_OPTION = Annotated[
+    List[Path],
     typer.Option(
         exists=True,
         file_okay=True,
@@ -381,6 +425,44 @@ OUTPUT_DIR_OPTION = Annotated[
 ]
 
 
+class ProgressLog:  # noqa: D101
+    @contextmanager
+    @staticmethod
+    def reading_input_files():  # noqa: D102
+        typer.echo("Opening input files....")
+        yield
+        typer.echo("✅ Input files read\n")
+
+    @contextmanager
+    @staticmethod
+    def running_algorithm():  # noqa: D102
+        typer.echo("Running algorithm...")
+        yield
+        typer.echo("✅ Algorithm run succesfully\n")
+
+    @contextmanager
+    @staticmethod
+    def saving_output_files(savepath: Union[str, Sequence[str]]):  # noqa: D102
+        typer.echo("Saving output files...")
+        yield
+        if isinstance(savepath, Sequence):
+            for file in savepath:
+                typer.echo(f"✅ Output file(s) saved to {file}")
+            typer.echo(" ")
+        else:
+            typer.echo(f"✅ Output file(s) saved to {savepath}\n")
+
+    @staticmethod
+    def finish():  # noqa: D102
+        typer.echo("✅ Algorithm execution finished succesfully\n")
+
+
+class ResultSender:  # noqa: D101
+    @staticmethod
+    def send_dict_as_json(dictionary: dict):  # noqa: D102
+        typer.echo(f"Results: {json.dumps(dictionary)}")
+
+
 def get_enum_values(parameter: Union[Enum, List[Enum]]) -> Union[str, List[str]]:
     """Get values behind enum parameter definition (required for list enums)."""
     if isinstance(parameter, List):
@@ -397,22 +479,17 @@ def normality_test_raster_cli(input_raster: INPUT_FILE_OPTION, bands: Optional[L
     """Compute Shapiro-Wilk test for normality on the input raster data."""
     from eis_toolkit.exploratory_analyses.normality_test import normality_test_array
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        with rasterio.open(input_raster) as raster:
+            data = raster.read()
+            if len(bands) == 0:
+                bands = None
 
-    with rasterio.open(input_raster) as raster:
-        data = raster.read()
-        typer.echo("Progress: 25%")
-        if len(bands) == 0:
-            bands = None
+    with ProgressLog.running_algorithm():
         results_dict = normality_test_array(data=data, bands=bands, nodata_value=raster.nodata)
 
-    typer.echo("Progress: 75%")
-
-    json_str = json.dumps(results_dict)
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Results: {json_str}")
-    typer.echo("Normality test (raster) completed")
+    ResultSender.send_dict_as_json(results_dict)
+    ProgressLog.finish()
 
 
 # NORMALITY TEST VECTOR
@@ -421,20 +498,14 @@ def normality_test_vector_cli(input_vector: INPUT_FILE_OPTION, columns: Optional
     """Compute Shapiro-Wilk test for normality on the input vector data."""
     from eis_toolkit.exploratory_analyses.normality_test import normality_test_dataframe
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        results_dict = normality_test_dataframe(data=geodataframe, columns=columns)
 
-    results_dict = normality_test_dataframe(data=geodataframe, columns=columns)
-
-    typer.echo("Progress: 75%")
-
-    json_str = json.dumps(results_dict)
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Results: {json_str}")
-    typer.echo("Normality test (vector) completed")
+    ResultSender.send_dict_as_json(results_dict)
+    ProgressLog.finish()
 
 
 # CHI-SQUARE_TEST
@@ -447,20 +518,14 @@ def chi_square_test_cli(
     """Perform a Chi-square test of independence between a target variable and one or more other variables."""
     from eis_toolkit.exploratory_analyses.chi_square_test import chi_square_test
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)  # Should we drop geometry columns?
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        results_dict = chi_square_test(data=geodataframe, target_column=target_column, columns=columns)
 
-    results_dict = chi_square_test(data=geodataframe, target_column=target_column, columns=columns)
-
-    typer.echo("Progress: 75%")
-
-    json_str = json.dumps(results_dict)
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Results: {json_str}")
-    typer.echo("Chi-square test completed")
+    ResultSender.send_dict_as_json(results_dict)
+    ProgressLog.finish()
 
 
 # CORRELATION MATRIX
@@ -475,22 +540,22 @@ def correlation_matrix_cli(
     """Compute correlation matrix on the input data."""
     from eis_toolkit.exploratory_analyses.correlation_matrix import correlation_matrix
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
+        dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
 
-    geodataframe = gpd.read_file(input_vector)
-    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        output_df = correlation_matrix(
+            data=dataframe,
+            columns=columns,
+            correlation_method=get_enum_values(correlation_method),
+            min_periods=min_periods,
+        )
 
-    output_df = correlation_matrix(
-        data=dataframe, columns=columns, correlation_method=get_enum_values(correlation_method), min_periods=min_periods
-    )
+    with ProgressLog.saving_output_files(output_file):
+        output_df.to_csv(output_file)
 
-    typer.echo("Progress: 75%")
-
-    output_df.to_csv(output_file)
-    typer.echo("Progress: 100%")
-
-    typer.echo("Correlation matrix completed")
+    ProgressLog.finish()
 
 
 # COVARIANCE MATRIX
@@ -505,22 +570,19 @@ def covariance_matrix_cli(
     """Compute covariance matrix on the input data."""
     from eis_toolkit.exploratory_analyses.covariance_matrix import covariance_matrix
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
+        dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
 
-    geodataframe = gpd.read_file(input_vector)
-    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        output_df = covariance_matrix(
+            data=dataframe, columns=columns, min_periods=min_periods, delta_degrees_of_freedom=delta_degrees_of_freedom
+        )
 
-    output_df = covariance_matrix(
-        data=dataframe, columns=columns, min_periods=min_periods, delta_degrees_of_freedom=delta_degrees_of_freedom
-    )
+    with ProgressLog.saving_output_files(output_file):
+        output_df.to_csv(output_file)
 
-    typer.echo("Progress: 75%")
-
-    output_df.to_csv(output_file)
-    typer.echo("Progress: 100%")
-
-    typer.echo("Covariance matrix completed")
+    ProgressLog.finish()
 
 
 # DBSCAN VECTOR
@@ -536,24 +598,22 @@ def dbscan_vector_cli(
     """Perform DBSCAN clustering on the input vector data."""
     from eis_toolkit.exploratory_analyses.dbscan import dbscan_vector
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        output_geodataframe = dbscan_vector(
+            data=geodataframe,
+            include_coordinates=include_coordinates,
+            columns=columns,
+            max_distance=max_distance,
+            min_samples=min_samples,
+        )
 
-    output_geodataframe = dbscan_vector(
-        data=geodataframe,
-        include_coordinates=include_coordinates,
-        columns=columns,
-        max_distance=max_distance,
-        min_samples=min_samples,
-    )
-    typer.echo("Progress: 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        output_geodataframe.to_file(output_vector, driver="GPKG")
 
-    output_geodataframe.to_file(output_vector, driver="GPKG")
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"DBSCAN completed, output vector written to {output_vector}.")
+    ProgressLog.finish()
 
 
 # DBSCAN RASTER
@@ -568,23 +628,21 @@ def dbscan_raster_cli(
     from eis_toolkit.exploratory_analyses.dbscan import dbscan_array
     from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        stacked_array, profiles = read_and_stack_rasters(input_rasters, nodata_handling="convert_to_nan")
 
-    stacked_array, profiles = read_and_stack_rasters(input_rasters, nodata_handling="convert_to_nan")
-    typer.echo("Progress: 25%")
-
-    output_array = dbscan_array(data=stacked_array, max_distance=max_distance, min_samples=min_samples)
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        output_array = dbscan_array(data=stacked_array, max_distance=max_distance, min_samples=min_samples)
 
     out_profile = profiles[0]
     out_profile["nodata"] = -9999
     out_profile["count"] = 1
 
-    with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(output_array, 1)
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(output_array, 1)
 
-    typer.echo("Progress: 100%")
-    typer.echo(f"DBSCAN clustering completed, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # K-MEANS CLUSTERING VECTOR
@@ -600,24 +658,22 @@ def k_means_clustering_vector_cli(
     """Perform k-means clustering on the input vector data."""
     from eis_toolkit.exploratory_analyses.k_means_cluster import k_means_clustering_vector
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        output_geodataframe = k_means_clustering_vector(
+            data=geodataframe,
+            include_coordinates=include_coordinates,
+            columns=columns,
+            number_of_clusters=number_of_clusters,
+            random_state=random_state,
+        )
 
-    output_geodataframe = k_means_clustering_vector(
-        data=geodataframe,
-        include_coordinates=include_coordinates,
-        columns=columns,
-        number_of_clusters=number_of_clusters,
-        random_state=random_state,
-    )
-    typer.echo("Progress: 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        output_geodataframe.to_file(output_vector, driver="GPKG")
 
-    output_geodataframe.to_file(output_vector, driver="GPKG")
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"K-means clustering completed, output vector written to {output_vector}.")
+    ProgressLog.finish()
 
 
 # K-MEANS CLUSTERING RASTER
@@ -632,25 +688,23 @@ def k_means_clustering_raster_cli(
     from eis_toolkit.exploratory_analyses.k_means_cluster import k_means_clustering_array
     from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        stacked_array, profiles = read_and_stack_rasters(input_rasters, nodata_handling="convert_to_nan")
 
-    stacked_array, profiles = read_and_stack_rasters(input_rasters, nodata_handling="convert_to_nan")
-    typer.echo("Progress: 25%")
-
-    output_array = k_means_clustering_array(
-        data=stacked_array, number_of_clusters=number_of_clusters, random_state=random_state
-    )
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        output_array = k_means_clustering_array(
+            data=stacked_array, number_of_clusters=number_of_clusters, random_state=random_state
+        )
 
     out_profile = profiles[0]
     out_profile["nodata"] = -9999
     out_profile["count"] = 1
 
-    with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(output_array, 1)
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(output_array, 1)
 
-    typer.echo("Progress: 100%")
-    typer.echo(f"K-means clustering completed, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # PARALLEL COORDINATES
@@ -670,30 +724,28 @@ def parallel_coordinates_cli(
 
     from eis_toolkit.exploratory_analyses.parallel_coordinates import plot_parallel_coordinates
 
-    typer.echo("Progress: 10%")
-    geodataframe = gpd.read_file(input_vector)
-    dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
-    typer.echo("Progress: 25%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
+        dataframe = pd.DataFrame(geodataframe.drop(columns="geometry"))
 
-    _ = plot_parallel_coordinates(
-        dataframe,
-        color_column_name=color_column_name,
-        plot_title=plot_title,
-        palette_name=palette_name,
-        curved_lines=curved_lines,
-    )
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        _ = plot_parallel_coordinates(
+            dataframe,
+            color_column_name=color_column_name,
+            plot_title=plot_title,
+            palette_name=palette_name,
+            curved_lines=curved_lines,
+        )
 
     if output_file is not None:
-        dpi = "figure" if save_dpi is None else save_dpi
-        plt.savefig(output_file, dpi=dpi)
-        typer.echo(f"Output figure saved to {output_file}.")
+        with ProgressLog.saving_output_files(output_file):
+            dpi = "figure" if save_dpi is None else save_dpi
+            plt.savefig(output_file, dpi=dpi)
 
     if show_plot:
         plt.show()
 
-    typer.echo("Progress: 100%")
-    typer.echo("Parallel coordinates plot completed")
+    ProgressLog.finish()
 
 
 # PCA FOR RASTER DATA
@@ -710,14 +762,15 @@ def compute_pca_raster_cli(
     from eis_toolkit.exploratory_analyses.pca import compute_pca
     from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        stacked_array, profiles = read_and_stack_rasters(input_rasters, nodata_handling="convert_to_nan")
 
-    stacked_array, profiles = read_and_stack_rasters(input_rasters, nodata_handling="convert_to_nan")
-    typer.echo("Progress: 25%")
-
-    transformed_data, principal_components, variances, variance_ratios = compute_pca(
-        data=stacked_array, number_of_components=number_of_components, nodata_handling=get_enum_values(nodata_handling)
-    )
+    with ProgressLog.running_algorithm():
+        transformed_data, principal_components, variances, variance_ratios = compute_pca(
+            data=stacked_array,
+            number_of_components=number_of_components,
+            nodata_handling=get_enum_values(nodata_handling),
+        )
 
     # Fill np.nan with nodata before writing data to raster
     transformed_data[transformed_data == np.nan] = -9999
@@ -739,15 +792,13 @@ def compute_pca_raster_cli(
         "explained_variances": np.round(variances, 4).tolist(),
         "explained_variance_ratios": np.round(variance_ratios, 4).tolist(),
     }
-    json_str = json.dumps(out_dict)
 
-    with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(transformed_data)
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(transformed_data)
 
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Results: {json_str}")
-    typer.echo(f"PCA computation (raster) completed, output raster saved to {output_raster}.")
+    ResultSender.send_dict_as_json(out_dict)
+    ProgressLog.finish()
 
 
 # PCA FOR VECTOR DATA
@@ -764,18 +815,17 @@ def compute_pca_vector_cli(
     """Compute defined number of principal components for vector data."""
     from eis_toolkit.exploratory_analyses.pca import compute_pca
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        gdf = gpd.read_file(input_vector)
 
-    gdf = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
-
-    transformed_data, principal_components, variances, variance_ratios = compute_pca(
-        data=gdf,
-        number_of_components=number_of_components,
-        columns=columns,
-        nodata_handling=get_enum_values(nodata_handling),
-        nodata=nodata,
-    )
+    with ProgressLog.running_algorithm():
+        transformed_data, principal_components, variances, variance_ratios = compute_pca(
+            data=gdf,
+            number_of_components=number_of_components,
+            columns=columns,
+            nodata_handling=get_enum_values(nodata_handling),
+            nodata=nodata,
+        )
 
     # Create dictionary from the variance ratios array
     # variances_ratios_dict = {}
@@ -789,13 +839,12 @@ def compute_pca_vector_cli(
         "explained_variances": np.round(variances, 4).tolist(),
         "explained_variance_ratios": np.round(variance_ratios, 4).tolist(),
     }
-    json_str = json.dumps(out_dict)
 
-    transformed_data.to_file(output_vector)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_vector):
+        transformed_data.to_file(output_vector)
 
-    typer.echo(f"Results: {json_str}")
-    typer.echo(f"PCA computation (vector) completed, output vector saved to {output_vector}.")
+    ResultSender.send_dict_as_json(out_dict)
+    ProgressLog.finish()
 
 
 # DESCRIPTIVE STATISTICS (RASTER)
@@ -804,17 +853,15 @@ def descriptive_statistics_raster_cli(input_raster: INPUT_FILE_OPTION, band: int
     """Generate descriptive statistics from raster data."""
     from eis_toolkit.exploratory_analyses.descriptive_statistics import descriptive_statistics_raster
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         results_dict = descriptive_statistics_raster(raster, band)
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    typer.echo("Progress: 100% \n")
-
-    typer.echo(f"Results: {str(results_dict)}")
-    typer.echo("\nDescriptive statistics (raster) completed")
+    ResultSender.send_dict_as_json(results_dict)
+    ProgressLog.finish()
 
 
 # DESCRIPTIVE STATISTICS (VECTOR)
@@ -823,26 +870,23 @@ def descriptive_statistics_vector_cli(input_file: INPUT_FILE_OPTION, column: str
     """Generate descriptive statistics from vector or tabular data."""
     from eis_toolkit.exploratory_analyses.descriptive_statistics import descriptive_statistics_dataframe
 
-    typer.echo("Progress: 10%")
-
     # TODO modify input file detection
     try:
-        gdf = gpd.read_file(input_file)
-        typer.echo("Progress: 25%")
-        results_dict = descriptive_statistics_dataframe(gdf, column)
+        with ProgressLog.reading_input_files():
+            gdf = gpd.read_file(input_file)
+        with ProgressLog.running_algorithm():
+            results_dict = descriptive_statistics_dataframe(gdf, column)
     except:  # noqa: E722
         try:
-            df = pd.read_csv(input_file)
-            typer.echo("Progress: 25%")
-            results_dict = descriptive_statistics_dataframe(df, column)
+            with ProgressLog.reading_input_files():
+                df = pd.read_csv(input_file)
+            with ProgressLog.running_algorithm():
+                results_dict = descriptive_statistics_dataframe(df, column)
         except:  # noqa: E722
-            raise Exception("Could not read input file as raster or dataframe")
-    typer.echo("Progress: 75%")
+            raise Exception("Could not read input file as geodataframe")
 
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Results: {str(results_dict)}")
-    typer.echo("\nDescriptive statistics (vector) completed")
+    ResultSender.send_dict_as_json(results_dict)
+    ProgressLog.finish()
 
 
 # LOCAL MORAN'S I
@@ -858,17 +902,16 @@ def local_morans_i_cli(
     """Execute Local Moran's I calculation for the data."""
     from eis_toolkit.exploratory_analyses.local_morans_i import local_morans_i
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        gdf = gpd.read_file(input_vector)
 
-    gdf = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        out_gdf = local_morans_i(gdf, column, get_enum_values(weight_type), k, permutations)
 
-    out_gdf = local_morans_i(gdf, column, get_enum_values(weight_type), k, permutations)
-    typer.echo("Progress: 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        out_gdf.to_file(output_vector)
 
-    out_gdf.to_file(output_vector)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Local Moran's I completed, output vector saved to {output_vector}.")
+    ProgressLog.finish()
 
 
 # FEATURE IMPORTANCE
@@ -884,25 +927,18 @@ def feature_importance_cli(
     from eis_toolkit.exploratory_analyses.feature_importance import evaluate_feature_importance
     from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        model = load_model(model_file)
+        X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+        feature_names = [raster.name for raster in input_rasters]
 
-    model = load_model(model_file)
-    typer.echo("Progress: 20%")
-
-    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
-    typer.echo("Progress: 30%")
-
-    feature_names = [raster.name for raster in input_rasters]
-    typer.echo("Progress: 40%")
-
-    feature_importance, _ = evaluate_feature_importance(model, X, y, feature_names, n_repeats, random_state)
-    typer.echo("Progress: 80%")
+    with ProgressLog.running_algorithm():
+        feature_importance, _ = evaluate_feature_importance(model, X, y, feature_names, n_repeats, random_state)
 
     results = dict(zip(feature_importance["Feature"], feature_importance["Importance"]))
-    json_str = json.dumps(results)
-    typer.echo("Progress: 100%")
 
-    typer.echo(f"Results: {json_str}")
+    ResultSender.send_dict_as_json(results)
+    ProgressLog.finish()
 
 
 # --- RASTER PROCESSING ---
@@ -920,18 +956,18 @@ def focal_filter_cli(
     """Apply a basic focal filter to the input raster."""
     from eis_toolkit.raster_processing.filters.focal import focal_filter
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = focal_filter(raster=raster, method=method, size=size, shape=get_enum_values(shape))
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo(f"Focal filter applied, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # GAUSSIAN FILTER
@@ -946,18 +982,18 @@ def gaussian_filter_cli(
     """Apply a gaussian filter to the input raster."""
     from eis_toolkit.raster_processing.filters.focal import gaussian_filter
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = gaussian_filter(raster=raster, sigma=sigma, truncate=truncate, size=size)
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo(f"Gaussial filter applied, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # MEXICAN HAT FILTER
@@ -975,20 +1011,20 @@ def mexican_hat_filter_cli(
     """Apply a mexican hat filter to the input raster."""
     from eis_toolkit.raster_processing.filters.focal import mexican_hat_filter
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = mexican_hat_filter(
             raster=raster, sigma=sigma, truncate=truncate, size=size, direction=get_enum_values(direction)
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo(f"Mexican hat filter applied, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # LEE ADDITIVE NOISE FILTER
@@ -1002,18 +1038,18 @@ def lee_additive_noise_filter_cli(
     """Apply a Lee filter considering additive noise components in the input raster."""
     from eis_toolkit.raster_processing.filters.speckle import lee_additive_noise_filter
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = lee_additive_noise_filter(raster=raster, size=size, add_noise_var=add_noise_var)
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo(f"Additive Lee noise filter applied, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # LEE MULTIPLICATIVE NOISE FILTER
@@ -1028,20 +1064,20 @@ def lee_multiplicative_noise_filter_cli(
     """Apply a Lee filter considering multiplicative noise components in the input raster."""
     from eis_toolkit.raster_processing.filters.speckle import lee_multiplicative_noise_filter
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = lee_multiplicative_noise_filter(
             raster=raster, size=size, mult_noise_mean=multi_noise_mean, n_looks=n_looks
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo(f"Multiplicative Lee noise filter applied, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # LEE ADDITIVE MULTIPLICATIVE NOISE FILTER
@@ -1057,10 +1093,10 @@ def lee_additive_multiplicative_noise_filter_cli(
     """Apply a Lee filter considering both additive and multiplicative noise components in the input raster."""
     from eis_toolkit.raster_processing.filters.speckle import lee_additive_multiplicative_noise_filter
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = lee_additive_multiplicative_noise_filter(
             raster=raster,
             size=size,
@@ -1068,13 +1104,13 @@ def lee_additive_multiplicative_noise_filter_cli(
             add_noise_mean=add_noise_mean,
             mult_noise_mean=multi_noise_mean,
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo(f"Additive multiplicative Lee noise filter applied, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # LEE ENHANCED FILTER
@@ -1089,20 +1125,20 @@ def lee_enhanced_filter_cli(
     """Apply an enhanced Lee filter to the input raster."""
     from eis_toolkit.raster_processing.filters.speckle import lee_enhanced_filter
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = lee_enhanced_filter(
             raster=raster, size=size, n_looks=n_looks, damping_factor=damping_factor
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo(f"Enhanced Lee filter applied, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # GAMMA FILTER
@@ -1116,18 +1152,18 @@ def gamma_filter_cli(
     """Apply a Gamma filter to the input raster."""
     from eis_toolkit.raster_processing.filters.speckle import gamma_filter
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = gamma_filter(raster=raster, size=size, n_looks=n_looks)
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo(f"Gamma filter applied, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # FROST FILTER
@@ -1141,18 +1177,18 @@ def frost_filter_cli(
     """Apply a Frost filter to the input raster."""
     from eis_toolkit.raster_processing.filters.speckle import frost_filter
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = frost_filter(raster=raster, size=size, damping_factor=damping_factor)
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo(f"Frost filter applied, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # KUAN FILTER
@@ -1166,18 +1202,18 @@ def kuan_filter_cli(
     """Apply a Kuan filter to the input raster."""
     from eis_toolkit.raster_processing.filters.speckle import kuan_filter
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = kuan_filter(raster=raster, size=size, n_looks=n_looks)
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo(f"Kuan filter applied, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # CHECK RASTER GRIDS
@@ -1186,23 +1222,19 @@ def check_raster_grids_cli(input_rasters: INPUT_FILES_ARGUMENT, same_extent: boo
     """Check all input rasters for matching gridding and optionally matching bounds."""
     from eis_toolkit.utilities.checks.raster import check_raster_grids
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster_profiles = []
+        for input_raster in input_rasters:
+            with rasterio.open(input_raster) as raster:
+                raster_profiles.append(raster.profile)
 
-    raster_profiles = []
-    for input_raster in input_rasters:
-        with rasterio.open(input_raster) as raster:
-            raster_profiles.append(raster.profile)
-    typer.echo("Progress: 50%")
+    with ProgressLog.running_algorithm():
+        result = check_raster_grids(raster_profiles=raster_profiles, same_extent=same_extent)
 
-    result = check_raster_grids(raster_profiles=raster_profiles, same_extent=same_extent)
     results_dict = {"result": result}
-    typer.echo("Progress: 75%")
 
-    json_str = json.dumps(results_dict)
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Results: {json_str}")
-    typer.echo("Checking raster grids completed.")
+    ResultSender.send_dict_as_json(results_dict)
+    ProgressLog.finish()
 
 
 # CLIP RASTER
@@ -1215,23 +1247,22 @@ def clip_raster_cli(
     """Clip the input raster with geometries in a geodataframe."""
     from eis_toolkit.raster_processing.clipping import clip_raster
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(geometries)
+        raster = rasterio.open(input_raster)
 
-    geodataframe = gpd.read_file(geometries)
-
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = clip_raster(
             raster=raster,
             geodataframe=geodataframe,
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image)
 
-    typer.echo(f"Clipping completed, output raster written to {output_raster}.")
+    ProgressLog.finish()
 
 
 # CREATE CONSTANT RASTER MANUALLY
@@ -1252,30 +1283,27 @@ def create_constant_raster_manually_cli(
     """
     from eis_toolkit.raster_processing.create_constant_raster import create_constant_raster
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.running_algorithm():
+        coord_west, coord_east, coord_south, coord_north = extent
+        raster_width = round(abs(coord_east - coord_west) / target_pixel_size)
+        raster_height = round(abs(coord_north - coord_south) / target_pixel_size)
+        out_image, out_meta = create_constant_raster(
+            constant_value=constant_value,
+            coord_west=coord_west,
+            coord_north=coord_north,
+            coord_east=coord_east,
+            coord_south=coord_south,
+            target_epsg=target_epsg,
+            raster_width=raster_width,
+            raster_height=raster_height,
+            nodata_value=nodata_value,
+        )
 
-    coord_west, coord_east, coord_south, coord_north = extent
-    raster_width = round(abs(coord_east - coord_west) / target_pixel_size)
-    raster_height = round(abs(coord_north - coord_south) / target_pixel_size)
-    out_image, out_meta = create_constant_raster(
-        constant_value=constant_value,
-        coord_west=coord_west,
-        coord_north=coord_north,
-        coord_east=coord_east,
-        coord_south=coord_south,
-        target_epsg=target_epsg,
-        raster_width=raster_width,
-        raster_height=raster_height,
-        nodata_value=nodata_value,
-    )
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo("Progress: 75%")
-
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Creating constant raster completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # CREATE CONSTANT RASTER FROM TEMPLATE
@@ -1289,23 +1317,22 @@ def create_constant_raster_from_template_cli(
     """Create constant raster from a template raster."""
     from eis_toolkit.raster_processing.create_constant_raster import create_constant_raster
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(template_raster)
 
-    with rasterio.open(template_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = create_constant_raster(
             constant_value=constant_value,
             template_raster=raster,
             nodata_value=nodata_value,
         )
+        raster.close()
 
-    typer.echo("Progress: 75%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image, 1)
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Creating constant raster completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # DISTANCE TO ANOMALY
@@ -1323,44 +1350,38 @@ def distance_to_anomaly_cli(
 
     Uses only the first band of the raster.
     """
-    # from sys import platform
-
     from eis_toolkit.raster_processing.distance_to_anomaly import distance_to_anomaly
-
-    typer.echo("Progress: 10%")
 
     if second_threshold_criteria_value is not None:
         threshold_criteria_value = (first_threshold_criteria_value, second_threshold_criteria_value)
     else:
         threshold_criteria_value = first_threshold_criteria_value
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
-        # # Use optimized version if Windows
-        # if platform == "win32":
-        #     out_image, out_meta = distance_to_anomaly_gdal(
-        #         anomaly_raster_profile=raster.profile,
-        #         anomaly_raster_data=raster.read(1),
-        #         threshold_criteria_value=threshold_criteria_value,
-        #         threshold_criteria=get_enum_values(threshold_criteria),
-        #         max_distance=max_distance,
-        #     )
-        # else:
-        out_image, out_meta = distance_to_anomaly(
-            anomaly_raster_profile=raster.profile,
-            anomaly_raster_data=raster.read(1),
+    with ProgressLog.reading_input_files():
+        with rasterio.open(input_raster) as raster:
+            raster_array = raster.read(1)
+            profile = raster.profile.copy()
+
+    # Create nodata mask
+    mask = (raster_array == profile["nodata"]) | np.isnan(raster_array)
+
+    with ProgressLog.running_algorithm():
+        out_image, out_profile = distance_to_anomaly(
+            anomaly_raster_profile=profile,
+            anomaly_raster_data=raster_array,
             threshold_criteria_value=threshold_criteria_value,
             threshold_criteria=get_enum_values(threshold_criteria),
             max_distance=max_distance,
         )
 
-    typer.echo("Progress: 75%")
+    # Apply nodata mask after processing
+    out_image[mask] = out_profile["nodata"]
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo(f"Computing distance to anomaly completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # PROXIMITY TO ANOMALY
@@ -1380,46 +1401,39 @@ def proximity_to_anomaly_cli(
 
     Uses only the first band of the raster.
     """
-    # from sys import platform
-
     from eis_toolkit.raster_processing.proximity_to_anomaly import proximity_to_anomaly
-
-    typer.echo("Progress: 10%")
 
     if second_threshold_criteria_value is not None:
         threshold_criteria_value = (first_threshold_criteria_value, second_threshold_criteria_value)
     else:
         threshold_criteria_value = first_threshold_criteria_value
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
-        # Use optimized version if Windows
-        # if platform == "win32":
-        #     out_image, out_meta = proximity_to_anomaly_gdal(
-        #         anomaly_raster_profile=raster.profile,
-        #         anomaly_raster_data=raster.read(1),
-        #         threshold_criteria_value=threshold_criteria_value,
-        #         threshold_criteria=get_enum_values(threshold_criteria),
-        #         max_distance=max_distance,
-        #         scaling_range=(anomaly_value, max_distance_value),
-        #     )
-        # else:
-        out_image, out_meta = proximity_to_anomaly(
-            anomaly_raster_profile=raster.profile,
-            anomaly_raster_data=raster.read(1),
+    with ProgressLog.reading_input_files():
+        with rasterio.open(input_raster) as raster:
+            raster_array = raster.read(1)
+            profile = raster.profile.copy()
+
+    # Create nodata mask
+    mask = (raster_array == profile["nodata"]) | np.isnan(raster_array)
+
+    with ProgressLog.running_algorithm():
+        out_image, out_profile = proximity_to_anomaly(
+            anomaly_raster_profile=profile,
+            anomaly_raster_data=raster_array,
             threshold_criteria_value=threshold_criteria_value,
             threshold_criteria=get_enum_values(threshold_criteria),
             max_distance=max_distance,
             scaling_range=(anomaly_value, max_distance_value),
         )
 
-    typer.echo("Progress: 75%")
+    # Apply nodata mask
+    out_image[mask] = out_profile["nodata"]
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dest:
+            dest.write(out_image, 1)
 
-    typer.echo(f"Computing proximity to anomaly completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # EXTRACT VALUES FROM RASTER
@@ -1432,19 +1446,18 @@ def extract_values_from_raster_cli(
     """Extract raster values using point data to a DataFrame."""
     from eis_toolkit.raster_processing.extract_values_from_raster import extract_values_from_raster
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(geometries)
+        raster = rasterio.open(input_raster)
 
-    geodataframe = gpd.read_file(geometries)
-
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         df = extract_values_from_raster(raster_list=[raster], geodataframe=geodataframe)
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    df.to_csv(output_vector)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_vector):
+        df.to_csv(output_vector)
 
-    typer.echo(f"Extracting values from raster completed, writing vector to {output_vector}.")
+    ProgressLog.finish()
 
 
 # REPROJECT RASTER
@@ -1458,20 +1471,20 @@ def reproject_raster_cli(
     """Reproject the input raster to given CRS."""
     from eis_toolkit.raster_processing.reprojecting import reproject_raster
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = reproject_raster(
             raster=raster, target_crs=target_crs, resampling_method=get_enum_values(resampling_method)
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image)
 
-    typer.echo(f"Reprojecting completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # RESAMPLE RASTER
@@ -1485,20 +1498,20 @@ def resample_raster_cli(
     """Resamples raster according to given resolution."""
     from eis_toolkit.raster_processing.resampling import resample
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = resample(
             raster=raster, resolution=resolution, resampling_method=get_enum_values(resampling_method)
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Resampling completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # SNAP RASTER
@@ -1511,18 +1524,20 @@ def snap_raster_cli(
     """Snaps/aligns input raster to the given snap raster."""
     from eis_toolkit.raster_processing.snapping import snap_with_raster
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        src = rasterio.open(input_raster)
+        snap_src = rasterio.open(snap_raster)
 
-    with rasterio.open(input_raster) as src, rasterio.open(snap_raster) as snap_src:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = snap_with_raster(src, snap_src)
-    typer.echo("Progress: 75%")
+        src.close()
+        snap_raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Snapping completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # UNIFY RASTERS
@@ -1537,12 +1552,11 @@ def unify_rasters_cli(
     """Unify rasters to match the base raster."""
     from eis_toolkit.raster_processing.unifying import unify_raster_grids
 
-    typer.echo("Progress: 10%")
-
-    with rasterio.open(base_raster) as raster:
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(base_raster)
         to_unify = [rasterio.open(rstr) for rstr in rasters_to_unify]  # Open all rasters to be unified
-        typer.echo("Progress: 25%")
 
+    with ProgressLog.running_algorithm():
         masking_param = get_enum_values(masking)
         unified = unify_raster_grids(
             base_raster=raster,
@@ -1550,22 +1564,22 @@ def unify_rasters_cli(
             resampling_method=get_enum_values(resampling_method),
             masking=None if masking_param == "none" else masking_param,
         )
-        [rstr.close() for rstr in to_unify]  # Close all rasters
-    typer.echo("Progress: 75%")
+        # Close all rasters
+        raster.close()
+        [rstr.close() for rstr in to_unify]
 
-    out_rasters_dict = {}
-    for i, (out_image, out_meta) in enumerate(unified[1:]):  # Skip writing base raster
-        in_raster_name = os.path.splitext(os.path.split(rasters_to_unify[i])[1])[0]
-        output_raster_name = f"{in_raster_name}_unified"
-        output_raster_path = output_directory.joinpath(output_raster_name + ".tif")
-        with rasterio.open(output_raster_path, "w", **out_meta) as dst:
-            dst.write(out_image)
-        out_rasters_dict[output_raster_name] = str(output_raster_path)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_directory):
+        out_rasters_dict = {}
+        for i, (out_image, out_meta) in enumerate(unified[1:]):  # Skip writing base raster
+            in_raster_name = os.path.splitext(os.path.split(rasters_to_unify[i])[1])[0]
+            output_raster_name = f"{in_raster_name}_unified"
+            output_raster_path = output_directory.joinpath(output_raster_name + ".tif")
+            with rasterio.open(output_raster_path, "w", **out_meta) as dst:
+                dst.write(out_image)
+            out_rasters_dict[output_raster_name] = str(output_raster_path)
 
-    json_str = json.dumps(out_rasters_dict)
-    typer.echo(f"Output rasters: {json_str}")
-    typer.echo(f"Unifying completed, rasters saved to {output_directory}.")
+    ResultSender.send_dict_as_json(out_rasters_dict)
+    ProgressLog.finish()
 
 
 # GET UNIQUE COMBINATIONS
@@ -1577,19 +1591,18 @@ def unique_combinations_cli(
     """Get combinations of raster values between rasters."""
     from eis_toolkit.raster_processing.unique_combinations import unique_combinations
 
-    typer.echo("Progress: 10%")
-    rasters = [rasterio.open(rstr) for rstr in input_rasters]
+    with ProgressLog.reading_input_files():
+        rasters = [rasterio.open(rstr) for rstr in input_rasters]
 
-    typer.echo("Progress: 25%")
-    out_image, out_meta = unique_combinations(rasters)
-    [rstr.close() for rstr in rasters]
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        out_image, out_meta = unique_combinations(rasters)
+        [rstr.close() for rstr in rasters]
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, 1)
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image, 1)
 
-    typer.echo(f"Writing results to {output_raster}.")
-    typer.echo("Getting unique combinations completed.")
+    ProgressLog.finish()
 
 
 # EXTRACT WINDOW
@@ -1604,18 +1617,18 @@ def extract_window_cli(
     """Extract window from raster."""
     from eis_toolkit.raster_processing.windowing import extract_window
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = extract_window(raster, center_coords, height, width)
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Windowing completed, writing raster to {output_raster}")
+    ProgressLog.finish()
 
 
 # SURFACE DERIVATIVES - CLASSIFY ASPECT
@@ -1629,22 +1642,21 @@ def classify_aspect_cli(
     """Classify an aspect raster data set."""
     from eis_toolkit.raster_processing.derivatives.classification import classify_aspect
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, class_mapping, out_meta = classify_aspect(
             raster=raster, unit=get_enum_values(unit), num_classes=num_classes
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image, 1)
-    json_str = json.dumps(class_mapping)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image, 1)
 
-    typer.echo(f"Classifying aspect completed, writing raster to {output_raster}")
+    ResultSender.send_dict_as_json(class_mapping)
+    ProgressLog.finish()
 
 
 # SURFACE DERIVATIVES
@@ -1664,10 +1676,10 @@ def surface_derivatives_cli(
     """Calculate the first and/or second order surface attributes."""
     from eis_toolkit.raster_processing.derivatives.parameters import first_order, second_order_basic_set
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         if first_order_parameters:
             first_order_results = first_order(
                 raster=raster,
@@ -1688,23 +1700,22 @@ def surface_derivatives_cli(
                 slope_tolerance=slope_tolerance,
                 method=get_enum_values(second_order_method),
             )
-    typer.echo("Progres: 75%")
+        raster.close()
 
-    if first_order_parameters:
-        for parameter, (out_image, out_meta) in first_order_results.items():
-            out_raster_name = str(output_raster)[:-4] + "_" + parameter + str(output_raster)[-4:]
-            with rasterio.open(out_raster_name, "w", **out_meta) as dest:
-                dest.write(out_image, 1)
-        typer.echo("Progress: 90%")
+    with ProgressLog.saving_output_files(output_raster):
+        if first_order_parameters:
+            for parameter, (out_image, out_meta) in first_order_results.items():
+                out_raster_name = str(output_raster)[:-4] + "_" + parameter + str(output_raster)[-4:]
+                with rasterio.open(out_raster_name, "w", **out_meta) as dest:
+                    dest.write(out_image, 1)
 
-    if second_order_parameters:
-        for parameter, (out_image, out_meta) in second_order_results.items():
-            out_raster_name = str(output_raster)[:-4] + "_" + parameter + str(output_raster)[-4:]
-            with rasterio.open(out_raster_name, "w", **out_meta) as dest:
-                dest.write(out_image, 1)
-    typer.echo("Progress: 100%")
+        if second_order_parameters:
+            for parameter, (out_image, out_meta) in second_order_results.items():
+                out_raster_name = str(output_raster)[:-4] + "_" + parameter + str(output_raster)[-4:]
+                with rasterio.open(out_raster_name, "w", **out_meta) as dest:
+                    dest.write(out_image, 1)
 
-    typer.echo(f"Calculating first and/or second order surface attributes completed, writing raster to {output_raster}")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -1716,19 +1727,20 @@ def mask_raster_cli(
     """Mask input raster using the nodata locations from base raster."""
     from eis_toolkit.raster_processing.masking import mask_raster
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
+        base_rstr = rasterio.open(base_raster)
 
-    with rasterio.open(input_raster) as raster:
-        with rasterio.open(base_raster) as base_rstr:
-            typer.echo("Progress: 25%")
-            out_image, out_meta = mask_raster(raster=raster, base_raster=base_rstr)
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        out_image, out_meta = mask_raster(raster=raster, base_raster=base_rstr)
+        raster.close()
+        base_rstr.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image)
 
-    typer.echo(f"Raster masking completed, writing raster to {output_raster}")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -1741,18 +1753,18 @@ def reclassify_with_manual_breaks_cli(
     """Classify raster with manual breaks."""
     from eis_toolkit.raster_processing.reclassify import reclassify_with_manual_breaks
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = reclassify_with_manual_breaks(raster=raster, breaks=breaks, bands=bands)
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image)
 
-    typer.echo(f"Reclassification with manual breaks completed, writing raster to {output_raster}")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -1765,18 +1777,18 @@ def reclassify_with_defined_intervals_cli(
     """Classify raster with defined intervals."""
     from eis_toolkit.raster_processing.reclassify import reclassify_with_defined_intervals
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = reclassify_with_defined_intervals(raster=raster, interval_size=interval_size, bands=bands)
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image)
 
-    typer.echo(f"Reclassification with defined intervals completed, writing raster to {output_raster}")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -1789,20 +1801,20 @@ def reclassify_with_equal_intervals_cli(
     """Classify raster with equal intervals."""
     from eis_toolkit.raster_processing.reclassify import reclassify_with_equal_intervals
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = reclassify_with_equal_intervals(
             raster=raster, number_of_intervals=number_of_intervals, bands=bands
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image)
 
-    typer.echo(f"Reclassification with equal intervals completed, writing raster to {output_raster}")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -1815,20 +1827,20 @@ def reclassify_with_quantiles_cli(
     """Classify raster with quantiles."""
     from eis_toolkit.raster_processing.reclassify import reclassify_with_quantiles
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = reclassify_with_quantiles(
             raster=raster, number_of_quantiles=number_of_quantiles, bands=bands
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image)
 
-    typer.echo(f"Reclassification with quantiles completed, writing raster to {output_raster}")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -1841,20 +1853,20 @@ def reclassify_with_natural_breaks_cli(
     """Classify raster with natural breaks (Jenks Caspall)."""
     from eis_toolkit.raster_processing.reclassify import reclassify_with_natural_breaks
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = reclassify_with_natural_breaks(
             raster=raster, number_of_classes=number_of_classes, bands=bands
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image)
 
-    typer.echo(f"Reclassification with natural breaks completed, writing raster to {output_raster}")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -1867,20 +1879,20 @@ def reclassify_with_geometrical_intervals_cli(
     """Classify raster with geometrical intervals."""
     from eis_toolkit.raster_processing.reclassify import reclassify_with_geometrical_intervals
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = reclassify_with_geometrical_intervals(
             raster=raster, number_of_classes=number_of_classes, bands=bands
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image)
 
-    typer.echo(f"Reclassification with geometric intervals completed, writing raster to {output_raster}")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -1893,20 +1905,20 @@ def reclassify_with_standard_deviation_cli(
     """Classify raster with standard deviation."""
     from eis_toolkit.raster_processing.reclassify import reclassify_with_standard_deviation
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = reclassify_with_standard_deviation(
             raster=raster, number_of_intervals=number_of_intervals, bands=bands
         )
-    typer.echo("Progress: 75%")
+        raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dest:
-        dest.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dest:
+            dest.write(out_image)
 
-    typer.echo(f"Reclassification with standard deviation completed, writing raster to {output_raster}")
+    ProgressLog.finish()
 
 
 # --- VECTOR PROCESSING ---
@@ -1918,17 +1930,16 @@ def calculate_geometry_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPU
     """Calculate the length or area of the given geometries."""
     from eis_toolkit.vector_processing.calculate_geometry import calculate_geometry
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        out_vector = calculate_geometry(geodataframe=geodataframe)
 
-    out_vector = calculate_geometry(geodataframe=geodataframe)
-    typer.echo("Progress: 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        out_vector.to_file(output_vector)
 
-    out_vector.to_file(output_vector)
-    typer.echo("Progress 100%")
-    typer.echo(f"Calculate geometry completed, writing vector to {output_vector}")
+    ProgressLog.finish()
 
 
 # EXTRACT SHARED LINES
@@ -1937,17 +1948,16 @@ def extract_shared_lines_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUT
     """Extract shared lines/borders/edges between polygons."""
     from eis_toolkit.vector_processing.extract_shared_lines import extract_shared_lines
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        polygons = gpd.read_file(input_vector)
 
-    polygons = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        out_vector = extract_shared_lines(polygons=polygons)
 
-    out_vector = extract_shared_lines(polygons=polygons)
-    typer.echo("Progress: 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        out_vector.to_file(output_vector)
 
-    out_vector.to_file(output_vector)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Extracting shared lines completed, writing vector to {out_vector}")
+    ProgressLog.finish()
 
 
 # IDW INTERPOLATION
@@ -1963,44 +1973,32 @@ def idw_interpolation_cli(
     search_radius: Optional[float] = None,
 ):
     """Apply inverse distance weighting (IDW) interpolation to input vector file."""
-    from eis_toolkit.exceptions import InvalidParameterValueException
-    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.utilities.raster import base_profile
     from eis_toolkit.vector_processing.idw_interpolation import idw
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+        if base_raster is None or base_raster == "":
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
+        else:
+            with rasterio.open(base_raster) as raster:
+                profile = raster.profile.copy()
 
-    if base_raster is None or base_raster == "":
-        if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
-            raise InvalidParameterValueException(
-                "Expected positive pixel size and defined extent in absence of base raster. "
-                + f"Pixel size: {pixel_size}, extent: {extent}."
-            )
-        profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
-        profile["crs"] = geodataframe.crs
-        profile["driver"] = "GTiff"
-        profile["dtype"] = "float32"
-    else:
-        with rasterio.open(base_raster) as raster:
-            profile = raster.profile.copy()
+    with ProgressLog.running_algorithm():
+        out_image = idw(
+            geodataframe=geodataframe,
+            target_column=target_column,
+            raster_profile=profile,
+            power=power,
+            search_radius=search_radius,
+        )
 
-    out_image = idw(
-        geodataframe=geodataframe,
-        target_column=target_column,
-        raster_profile=profile,
-        power=power,
-        search_radius=search_radius,
-    )
-    typer.echo("Progress: 75%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **profile) as dst:
+            dst.write(out_image, 1)
 
-    profile["count"] = 1
-    with rasterio.open(output_raster, "w", **profile) as dst:
-        dst.write(out_image, 1)
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"IDW interpolation completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # KRIGING INTERPOLATION
@@ -2017,45 +2015,33 @@ def kriging_interpolation_cli(
     method: Annotated[KrigingMethod, typer.Option(case_sensitive=False)] = KrigingMethod.ordinary,
 ):
     """Apply kriging interpolation to input vector file."""
-    from eis_toolkit.exceptions import InvalidParameterValueException
-    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.utilities.raster import base_profile
     from eis_toolkit.vector_processing.kriging_interpolation import kriging
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+        if base_raster is None or base_raster == "":
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
+        else:
+            with rasterio.open(base_raster) as raster:
+                profile = raster.profile.copy()
 
-    if base_raster is None or base_raster == "":
-        if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
-            raise InvalidParameterValueException(
-                "Expected positive pixel size and defined extent in absence of base raster. "
-                + f"Pixel size: {pixel_size}, extent: {extent}."
-            )
-        profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
-        profile["crs"] = geodataframe.crs
-        profile["driver"] = "GTiff"
-        profile["dtype"] = "float32"
-    else:
-        with rasterio.open(base_raster) as raster:
-            profile = raster.profile.copy()
+    with ProgressLog.running_algorithm():
+        out_image = kriging(
+            geodataframe=geodataframe,
+            target_column=target_column,
+            raster_profile=profile,
+            variogram_model=get_enum_values(variogram_model),
+            coordinates_type=get_enum_values(coordinates_type),
+            method=get_enum_values(method),
+        )
 
-    out_image = kriging(
-        geodataframe=geodataframe,
-        target_column=target_column,
-        raster_profile=profile,
-        variogram_model=get_enum_values(variogram_model),
-        coordinates_type=get_enum_values(coordinates_type),
-        method=get_enum_values(method),
-    )
-    typer.echo("Progress: 75%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **profile) as dst:
+            dst.write(out_image, 1)
 
-    profile["count"] = 1
-    with rasterio.open(output_raster, "w", **profile) as dst:
-        dst.write(out_image, 1)
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Kriging interpolation completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # RASTERIZE
@@ -2077,46 +2063,34 @@ def rasterize_cli(
 
     Either base raster or pixel size + extent must be provided.
     """
-    from eis_toolkit.exceptions import InvalidParameterValueException
-    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.utilities.raster import base_profile
     from eis_toolkit.vector_processing.rasterize_vector import rasterize_vector
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+        if base_raster is None or base_raster == "":
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
+        else:
+            with rasterio.open(base_raster) as raster:
+                profile = raster.profile.copy()
 
-    if base_raster is None or base_raster == "":
-        if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
-            raise InvalidParameterValueException(
-                "Expected positive pixel size and defined extent in absence of base raster. "
-                + f"Pixel size: {pixel_size}, extent: {extent}."
-            )
-        profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
-        profile["crs"] = geodataframe.crs
-        profile["driver"] = "GTiff"
-        profile["dtype"] = "float32"
-    else:
-        with rasterio.open(base_raster) as raster:
-            profile = raster.profile.copy()
+    with ProgressLog.running_algorithm():
+        out_image = rasterize_vector(
+            geodataframe,
+            profile,
+            value_column,
+            default_value,
+            fill_value,
+            buffer_value,
+            get_enum_values(merge_strategy),
+        )
 
-    out_image = rasterize_vector(
-        geodataframe,
-        profile,
-        value_column,
-        default_value,
-        fill_value,
-        buffer_value,
-        get_enum_values(merge_strategy),
-    )
-    typer.echo("Progress: 75%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **profile) as dst:
+            dst.write(out_image, 1)
 
-    profile["count"] = 1
-    with rasterio.open(output_raster, "w", **profile) as dst:
-        dst.write(out_image, 1)
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Rasterizing completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # REPROJECT VECTOR
@@ -2129,18 +2103,16 @@ def reproject_vector_cli(
     """Reproject the input vector to given CRS."""
     from eis_toolkit.vector_processing.reproject_vector import reproject_vector
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        reprojected_geodataframe = reproject_vector(geodataframe=geodataframe, target_crs=target_crs)
 
-    reprojected_geodataframe = reproject_vector(geodataframe=geodataframe, target_crs=target_crs)
-    typer.echo("Progress: 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        reprojected_geodataframe.to_file(output_vector, driver="GeoJSON")
 
-    reprojected_geodataframe.to_file(output_vector, driver="GeoJSON")
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Reprojecting completed, writing vector to {output_vector}.")
+    ProgressLog.finish()
 
 
 # VECTOR DENSITY
@@ -2159,43 +2131,31 @@ def vector_density_cli(
 
     Either base raster or pixel size + extent must be provided.
     """
-    from eis_toolkit.exceptions import InvalidParameterValueException
-    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.utilities.raster import base_profile
     from eis_toolkit.vector_processing.vector_density import vector_density
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+        if base_raster is None or base_raster == "":
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
+        else:
+            with rasterio.open(base_raster) as raster:
+                profile = raster.profile.copy()
 
-    if base_raster is None or base_raster == "":
-        if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
-            raise InvalidParameterValueException(
-                "Expected positive pixel size and defined extent in absence of base raster. "
-                + f"Pixel size: {pixel_size}, extent: {extent}."
-            )
-        profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
-        profile["crs"] = geodataframe.crs
-        profile["driver"] = "GTiff"
-        profile["dtype"] = "float32"
-    else:
-        with rasterio.open(base_raster) as raster:
-            profile = raster.profile.copy()
+    with ProgressLog.running_algorithm():
+        out_image = vector_density(
+            geodataframe=geodataframe,
+            raster_profile=profile,
+            buffer_value=buffer_value,
+            statistic=get_enum_values(statistic),
+        )
 
-    out_image = vector_density(
-        geodataframe=geodataframe,
-        raster_profile=profile,
-        buffer_value=buffer_value,
-        statistic=get_enum_values(statistic),
-    )
-    typer.echo("Progress: 75%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **profile) as dst:
+            dst.write(out_image, 1)
 
-    profile["count"] = 1
-    with rasterio.open(output_raster, "w", **profile) as dst:
-        dst.write(out_image, 1)
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Vector density computation completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # DISTANCE COMPUTATION
@@ -2209,38 +2169,35 @@ def distance_computation_cli(
     max_distance: float = None,
 ):
     """Calculate distance from raster cell to nearest geometry."""
-    from eis_toolkit.exceptions import InvalidParameterValueException
-    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.utilities.raster import base_profile
     from eis_toolkit.vector_processing.distance_computation import distance_computation
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+        if base_raster is None or base_raster == "":
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
+            mask = None
+        else:
+            with rasterio.open(base_raster) as raster:
+                profile = raster.profile.copy()
+                raster_array = raster.read(1)
+                mask = (raster_array == profile["nodata"]) | np.isnan(raster_array)
 
-    if base_raster is None or base_raster == "":
-        if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
-            raise InvalidParameterValueException(
-                "Expected positive pixel size and defined extent in absence of base raster. "
-                + f"Pixel size: {pixel_size}, extent: {extent}."
-            )
-        profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
-        profile["crs"] = geodataframe.crs
-        profile["driver"] = "GTiff"
-        profile["dtype"] = "float32"
-    else:
-        with rasterio.open(base_raster) as raster:
-            profile = raster.profile.copy()
+    with ProgressLog.running_algorithm():
+        out_image, out_profile = distance_computation(
+            geodataframe=geodataframe, raster_profile=profile, max_distance=max_distance
+        )
 
-    out_image = distance_computation(geodataframe=geodataframe, raster_profile=profile, max_distance=max_distance)
-    profile["count"] = 1
-    typer.echo("Progress: 75%")
+    # Apply nodata mask
+    if mask is not None:
+        out_image[mask] = out_profile["nodata"]
 
-    with rasterio.open(output_raster, "w", **profile) as dst:
-        dst.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(out_image, 1)
 
-    typer.echo(f"Distance computation completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # CBA
@@ -2257,29 +2214,27 @@ def cell_based_association_cli(
     """Create a CBA matrix."""
     from eis_toolkit.vector_processing.cell_based_association import cell_based_association
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+        if subset_target_attribute_values is not None:
+            subset_target_attribute_values = [value.strip() for value in subset_target_attribute_values]
 
-    if subset_target_attribute_values is not None:
-        subset_target_attribute_values = [value.strip() for value in subset_target_attribute_values]
+    with ProgressLog.running_algorithm():
+        cell_based_association(
+            cell_size=cell_size,
+            geodata=[geodataframe],
+            output_path=output_raster,
+            column=column if column is None else [column],
+            subset_target_attribute_values=subset_target_attribute_values
+            if subset_target_attribute_values is None
+            else [subset_target_attribute_values],
+            add_name=add_name if add_name is None else [add_name],
+            add_buffer=add_buffer if add_buffer is None else [add_buffer],
+        )
 
-    cell_based_association(
-        cell_size=cell_size,
-        geodata=[geodataframe],
-        output_path=output_raster,
-        column=column if column is None else [column],
-        subset_target_attribute_values=subset_target_attribute_values
-        if subset_target_attribute_values is None
-        else [subset_target_attribute_values],
-        add_name=add_name if add_name is None else [add_name],
-        add_buffer=add_buffer if add_buffer is None else [add_buffer],
-    )
-
-    typer.echo("Progress: 100%")
-
-    typer.echo(f"Cell based association completed, writing raster to {output_raster}.")
+    ProgressLog.saving_output_files(output_raster)
+    ProgressLog.finish()
 
 
 # PROXIMITY COMPUTATION
@@ -2295,43 +2250,116 @@ def proximity_computation_cli(
     extent: Tuple[float, float, float, float] = (None, None, None, None),
 ):
     """Calculate proximity from raster cell to nearest geometry."""
-    from eis_toolkit.exceptions import InvalidParameterValueException
-    from eis_toolkit.utilities.raster import profile_from_extent_and_pixel_size
+    from eis_toolkit.utilities.raster import base_profile
     from eis_toolkit.vector_processing.proximity_computation import proximity_computation
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
 
-    geodataframe = gpd.read_file(input_vector)
-    typer.echo("Progress: 25%")
+        if base_raster is None or base_raster == "":
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
+            mask = None
+        else:
+            with rasterio.open(base_raster) as raster:
+                profile = raster.profile.copy()
+                raster_array = raster.read(1)
+                mask = (raster_array == profile["nodata"]) | np.isnan(raster_array)
 
-    if base_raster is None or base_raster == "":
-        if any(bound is None for bound in extent) or pixel_size is None or pixel_size <= 0:
-            raise InvalidParameterValueException(
-                "Expected positive pixel size and defined extent in absence of base raster. "
-                + f"Pixel size: {pixel_size}, extent: {extent}."
-            )
-        profile = profile_from_extent_and_pixel_size(extent, (pixel_size, pixel_size))
-        profile["crs"] = geodataframe.crs
-        profile["driver"] = "GTiff"
-        profile["dtype"] = "float32"
-    else:
-        with rasterio.open(base_raster) as raster:
+    with ProgressLog.running_algorithm():
+        out_image, out_profile = proximity_computation(
+            geodataframe=geodataframe,
+            raster_profile=profile,
+            maximum_distance=max_distance,
+            scale_range=(geometries_value, max_distance_value),
+        )
+
+    # Apply nodata mask
+    if mask is not None:
+        out_image[mask] = out_profile["nodata"]
+
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(out_image, 1)
+
+    ProgressLog.finish()
+
+
+# --- TRAINING DATA TOOLS ---
+
+# POINTS TO RASTER
+@app.command()
+def points_to_raster_cli(
+    input_vector: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    base_raster: INPUT_FILE_OPTION = None,
+    pixel_size: float = None,
+    extent: Tuple[float, float, float, float] = (None, None, None, None),
+    attribute: Optional[str] = None,
+    radius: Optional[int] = None,
+    buffer: Annotated[BufferOption, typer.Option(case_sensitive=False)] = None,
+):
+    """Convert a point data set into a binary raster."""
+    from eis_toolkit.training_data_tools.points_to_raster import points_to_raster
+    from eis_toolkit.utilities.raster import base_profile
+
+    with ProgressLog.reading_input_files():
+        geodataframe = gpd.read_file(input_vector)
+
+        if base_raster is None or base_raster == "":
+            profile = base_profile(extent, pixel_size, geodataframe.crs)
+            mask = None
+        else:
+            with rasterio.open(base_raster) as raster:
+                profile = raster.profile.copy()
+                raster_array = raster.read(1)
+                mask = (raster_array == profile["nodata"]) | np.isnan(raster_array)
+
+    with ProgressLog.running_algorithm():
+        out_image, out_profile = points_to_raster(
+            geodataframe=geodataframe, raster_profile=profile, attribute=attribute, radius=radius, buffer=buffer
+        )
+
+    # Apply nodata mask
+    if mask is not None:
+        out_image[mask] = out_profile["nodata"]
+
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(out_image, 1)
+
+    ProgressLog.finish()
+
+
+# GENERATE NEGATIVES
+@app.command()
+def generate_negatives_cli(
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    output_vector: OUTPUT_FILE_OPTION,
+    sample_number: Annotated[int, typer.Option()],
+    random_seed: int = 48,
+):
+    """Generate probable negatives from raster array with marked positives."""
+    from eis_toolkit.training_data_tools.random_sampling import generate_negatives
+
+    with ProgressLog.reading_input_files():
+        with rasterio.open(input_raster) as raster:
+            raster_array = raster.read(1)
             profile = raster.profile.copy()
+            mask = (raster_array == profile["nodata"]) | np.isnan(raster_array)
 
-    out_image = proximity_computation(
-        geodataframe=geodataframe,
-        raster_profile=profile,
-        maximum_distance=max_distance,
-        scale_range=(geometries_value, max_distance_value),
-    )
-    profile["count"] = 1
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        out_points, out_image, out_profile = generate_negatives(
+            raster_array=raster_array, raster_profile=profile, sample_number=sample_number, random_seed=random_seed
+        )
+    out_image[mask] = out_profile["nodata"]
 
-    with rasterio.open(output_raster, "w", **profile) as dst:
-        dst.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files([output_raster, output_vector]):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(out_image, 1)
+        out_points.to_file(output_vector)
 
-    typer.echo(f"Proximity computation completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # --- PREDICTION ---
@@ -2361,36 +2389,30 @@ def logistic_regression_train_cli(
     from eis_toolkit.prediction.logistic_regression import logistic_regression_train
     from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
 
-    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+    with ProgressLog.reading_input_files():
+        X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
 
-    typer.echo("Progress: 30%")
+    with ProgressLog.running_algorithm():
+        # Train (and score) the model
+        model, metrics_dict = logistic_regression_train(
+            X=X,
+            y=y,
+            validation_method=get_enum_values(validation_method),
+            metrics=get_enum_values(validation_metrics),
+            split_size=split_size,
+            cv_folds=cv_folds,
+            penalty=get_enum_values(penalty),
+            max_iter=max_iter,
+            solver=get_enum_values(solver),
+            verbose=verbose,
+            random_state=random_state,
+        )
 
-    # Train (and score) the model
-    model, metrics_dict = logistic_regression_train(
-        X=X,
-        y=y,
-        validation_method=get_enum_values(validation_method),
-        metrics=get_enum_values(validation_metrics),
-        split_size=split_size,
-        cv_folds=cv_folds,
-        penalty=get_enum_values(penalty),
-        max_iter=max_iter,
-        solver=get_enum_values(solver),
-        verbose=verbose,
-        random_state=random_state,
-    )
+    with ProgressLog.saving_output_files(output_file):
+        save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
 
-    typer.echo("Progress: 80%")
-
-    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
-
-    typer.echo("Progress: 90%")
-
-    json_str = json.dumps(metrics_dict)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
-
-    typer.echo("Logistic regression training completed")
+    ResultSender.send_dict_as_json(metrics_dict)
+    ProgressLog.finish()
 
 
 # RANDOM FOREST CLASSIFIER
@@ -2417,36 +2439,30 @@ def random_forest_classifier_train_cli(
     from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
     from eis_toolkit.prediction.random_forests import random_forest_classifier_train
 
-    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+    with ProgressLog.reading_input_files():
+        X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
 
-    typer.echo("Progress: 30%")
+    with ProgressLog.running_algorithm():
+        # Train (and score) the model
+        model, metrics_dict = random_forest_classifier_train(
+            X=X,
+            y=y,
+            validation_method=get_enum_values(validation_method),
+            metrics=get_enum_values(validation_metrics),
+            split_size=split_size,
+            cv_folds=cv_folds,
+            n_estimators=n_estimators,
+            criterion=criterion,
+            max_depth=max_depth,
+            verbose=verbose,
+            random_state=random_state,
+        )
 
-    # Train (and score) the model
-    model, metrics_dict = random_forest_classifier_train(
-        X=X,
-        y=y,
-        validation_method=get_enum_values(validation_method),
-        metrics=get_enum_values(validation_metrics),
-        split_size=split_size,
-        cv_folds=cv_folds,
-        n_estimators=n_estimators,
-        criterion=criterion,
-        max_depth=max_depth,
-        verbose=verbose,
-        random_state=random_state,
-    )
+    with ProgressLog.saving_output_files(output_file):
+        save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
 
-    typer.echo("Progress: 80%")
-
-    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
-
-    typer.echo("Progress: 90%")
-
-    json_str = json.dumps(metrics_dict)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
-
-    typer.echo("Random forest classifier training completed")
+    ResultSender.send_dict_as_json(metrics_dict)
+    ProgressLog.finish()
 
 
 # RANDOM FOREST REGRESSOR
@@ -2471,36 +2487,30 @@ def random_forest_regressor_train_cli(
     from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
     from eis_toolkit.prediction.random_forests import random_forest_regressor_train
 
-    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+    with ProgressLog.reading_input_files():
+        X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
 
-    typer.echo("Progress: 30%")
+    with ProgressLog.running_algorithm():
+        # Train (and score) the model
+        model, metrics_dict = random_forest_regressor_train(
+            X=X,
+            y=y,
+            validation_method=get_enum_values(validation_method),
+            metrics=get_enum_values(validation_metrics),
+            split_size=split_size,
+            cv_folds=cv_folds,
+            n_estimators=n_estimators,
+            criterion=criterion,
+            max_depth=max_depth,
+            verbose=verbose,
+            random_state=random_state,
+        )
 
-    # Train (and score) the model
-    model, metrics_dict = random_forest_regressor_train(
-        X=X,
-        y=y,
-        validation_method=get_enum_values(validation_method),
-        metrics=get_enum_values(validation_metrics),
-        split_size=split_size,
-        cv_folds=cv_folds,
-        n_estimators=n_estimators,
-        criterion=criterion,
-        max_depth=max_depth,
-        verbose=verbose,
-        random_state=random_state,
-    )
+    with ProgressLog.saving_output_files(output_file):
+        save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
 
-    typer.echo("Progress: 80%")
-
-    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
-
-    typer.echo("Progress: 90%")
-
-    json_str = json.dumps(metrics_dict)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
-
-    typer.echo("Random forest regressor training completed")
+    ResultSender.send_dict_as_json(metrics_dict)
+    ProgressLog.finish()
 
 
 # GRADIENT BOOSTING CLASSIFIER
@@ -2529,38 +2539,32 @@ def gradient_boosting_classifier_train_cli(
     from eis_toolkit.prediction.gradient_boosting import gradient_boosting_classifier_train
     from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
 
-    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+    with ProgressLog.reading_input_files():
+        X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
 
-    typer.echo("Progress: 30%")
+    with ProgressLog.running_algorithm():
+        # Train (and score) the model
+        model, metrics_dict = gradient_boosting_classifier_train(
+            X=X,
+            y=y,
+            validation_method=get_enum_values(validation_method),
+            metrics=get_enum_values(validation_metrics),
+            split_size=split_size,
+            cv_folds=cv_folds,
+            loss=get_enum_values(loss),
+            learning_rate=learning_rate,
+            n_estimators=n_estimators,
+            max_depth=max_depth,
+            subsample=subsample,
+            verbose=verbose,
+            random_state=random_state,
+        )
 
-    # Train (and score) the model
-    model, metrics_dict = gradient_boosting_classifier_train(
-        X=X,
-        y=y,
-        validation_method=get_enum_values(validation_method),
-        metrics=get_enum_values(validation_metrics),
-        split_size=split_size,
-        cv_folds=cv_folds,
-        loss=get_enum_values(loss),
-        learning_rate=learning_rate,
-        n_estimators=n_estimators,
-        max_depth=max_depth,
-        subsample=subsample,
-        verbose=verbose,
-        random_state=random_state,
-    )
+    with ProgressLog.saving_output_files(output_file):
+        save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
 
-    typer.echo("Progress: 80%")
-
-    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
-
-    typer.echo("Progress: 90%")
-
-    json_str = json.dumps(metrics_dict)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
-
-    typer.echo("Gradient boosting classifier training completed")
+    ResultSender.send_dict_as_json(metrics_dict)
+    ProgressLog.finish()
 
 
 # GRADIENT BOOSTING REGRESSOR
@@ -2587,38 +2591,32 @@ def gradient_boosting_regressor_train_cli(
     from eis_toolkit.prediction.gradient_boosting import gradient_boosting_regressor_train
     from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
 
-    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+    with ProgressLog.reading_input_files():
+        X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
 
-    typer.echo("Progress: 30%")
+    with ProgressLog.running_algorithm():
+        # Train (and score) the model
+        model, metrics_dict = gradient_boosting_regressor_train(
+            X=X,
+            y=y,
+            validation_method=get_enum_values(validation_method),
+            metrics=get_enum_values(validation_metrics),
+            split_size=split_size,
+            cv_folds=cv_folds,
+            loss=loss,
+            learning_rate=learning_rate,
+            n_estimators=n_estimators,
+            max_depth=max_depth,
+            subsample=subsample,
+            verbose=verbose,
+            random_state=random_state,
+        )
 
-    # Train (and score) the model
-    model, metrics_dict = gradient_boosting_regressor_train(
-        X=X,
-        y=y,
-        validation_method=get_enum_values(validation_method),
-        metrics=get_enum_values(validation_metrics),
-        split_size=split_size,
-        cv_folds=cv_folds,
-        loss=loss,
-        learning_rate=learning_rate,
-        n_estimators=n_estimators,
-        max_depth=max_depth,
-        subsample=subsample,
-        verbose=verbose,
-        random_state=random_state,
-    )
+    with ProgressLog.saving_output_files(output_file):
+        save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
 
-    typer.echo("Progress: 80%")
-
-    save_model(model, output_file)  # NOTE: Check if .joblib needs to be added to save path
-
-    typer.echo("Progress: 90%")
-
-    json_str = json.dumps(metrics_dict)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
-
-    typer.echo("Gradient boosting regressor training completed")
+    ResultSender.send_dict_as_json(metrics_dict)
+    ProgressLog.finish()
 
 
 # MLP CLASSIFIER
@@ -2653,42 +2651,36 @@ def mlp_classifier_train_cli(
     from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
     from eis_toolkit.prediction.mlp import train_MLP_classifier
 
-    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+    with ProgressLog.reading_input_files():
+        X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
 
-    typer.echo("Progress: 30%")
+    with ProgressLog.running_algorithm():
+        # Train (and score) the model
+        model, metrics_dict = train_MLP_classifier(
+            X=X,
+            y=y,
+            neurons=neurons,
+            activation=get_enum_values(activation),
+            output_neurons=output_neurons,
+            last_activation=get_enum_values(last_activation),
+            epochs=epochs,
+            batch_size=batch_size,
+            optimizer=get_enum_values(optimizer),
+            learning_rate=learning_rate,
+            loss_function=get_enum_values(loss_function),
+            dropout_rate=dropout_rate,
+            early_stopping=early_stopping,
+            es_patience=es_patience,
+            metrics=get_enum_values(validation_metrics),
+            validation_split=validation_split,
+            random_state=random_state,
+        )
 
-    # Train (and score) the model
-    model, metrics_dict = train_MLP_classifier(
-        X=X,
-        y=y,
-        neurons=neurons,
-        activation=get_enum_values(activation),
-        output_neurons=output_neurons,
-        last_activation=get_enum_values(last_activation),
-        epochs=epochs,
-        batch_size=batch_size,
-        optimizer=get_enum_values(optimizer),
-        learning_rate=learning_rate,
-        loss_function=get_enum_values(loss_function),
-        dropout_rate=dropout_rate,
-        early_stopping=early_stopping,
-        es_patience=es_patience,
-        metrics=get_enum_values(validation_metrics),
-        validation_split=validation_split,
-        random_state=random_state,
-    )
+    with ProgressLog.saving_output_files(output_file):
+        save_model(model, output_file)
 
-    typer.echo("Progress: 80%")
-
-    save_model(model, output_file)
-
-    typer.echo("Progress: 90%")
-
-    json_str = json.dumps(metrics_dict)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
-
-    typer.echo("MLP classifier training completed.")
+    ResultSender.send_dict_as_json(metrics_dict)
+    ProgressLog.finish()
 
 
 # MLP REGRESSOR
@@ -2720,42 +2712,36 @@ def mlp_regressor_train_cli(
     from eis_toolkit.prediction.machine_learning_general import prepare_data_for_ml, save_model
     from eis_toolkit.prediction.mlp import train_MLP_regressor
 
-    X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
+    with ProgressLog.reading_input_files():
+        X, y, _, _ = prepare_data_for_ml(input_rasters, target_labels)
 
-    typer.echo("Progress: 30%")
+    with ProgressLog.running_algorithm():
+        # Train (and score) the model
+        model, metrics_dict = train_MLP_regressor(
+            X=X,
+            y=y,
+            neurons=neurons,
+            activation=get_enum_values(activation),
+            output_neurons=output_neurons,
+            last_activation="linear",
+            epochs=epochs,
+            batch_size=batch_size,
+            optimizer=get_enum_values(optimizer),
+            learning_rate=learning_rate,
+            loss_function=get_enum_values(loss_function),
+            dropout_rate=dropout_rate,
+            early_stopping=early_stopping,
+            es_patience=es_patience,
+            metrics=get_enum_values(validation_metrics),
+            validation_split=validation_split,
+            random_state=random_state,
+        )
 
-    # Train (and score) the model
-    model, metrics_dict = train_MLP_regressor(
-        X=X,
-        y=y,
-        neurons=neurons,
-        activation=get_enum_values(activation),
-        output_neurons=output_neurons,
-        last_activation="linear",
-        epochs=epochs,
-        batch_size=batch_size,
-        optimizer=get_enum_values(optimizer),
-        learning_rate=learning_rate,
-        loss_function=get_enum_values(loss_function),
-        dropout_rate=dropout_rate,
-        early_stopping=early_stopping,
-        es_patience=es_patience,
-        metrics=get_enum_values(validation_metrics),
-        validation_split=validation_split,
-        random_state=random_state,
-    )
+    with ProgressLog.saving_output_files(output_file):
+        save_model(model, output_file)
 
-    typer.echo("Progress: 80%")
-
-    save_model(model, output_file)
-
-    typer.echo("Progress: 90%")
-
-    json_str = json.dumps(metrics_dict)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Results: {json_str}")
-
-    typer.echo("MLP regressor training completed.")
+    ResultSender.send_dict_as_json(metrics_dict)
+    ProgressLog.finish()
 
 
 # TEST CLASSIFIER ML MODEL
@@ -2774,39 +2760,32 @@ def classifier_test_cli(
     from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml, reshape_predictions
     from eis_toolkit.prediction.machine_learning_predict import predict_classifier
 
-    X, y, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters, target_labels)
-    typer.echo("Progress: 30%")
+    with ProgressLog.reading_input_files():
+        X, y, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters, target_labels)
+        model = load_model(model_file)
 
-    model = load_model(model_file)
-    predictions, probabilities = predict_classifier(X, model, classification_threshold, True)
-    probabilities_reshaped = reshape_predictions(
-        probabilities, reference_profile["height"], reference_profile["width"], nodata_mask
-    )
-    predictions_reshaped = reshape_predictions(
-        predictions, reference_profile["height"], reference_profile["width"], nodata_mask
-    )
+    with ProgressLog.running_algorithm():
+        predictions, probabilities = predict_classifier(X, model, classification_threshold, True)
+        probabilities_reshaped = reshape_predictions(
+            probabilities, reference_profile["height"], reference_profile["width"], nodata_mask
+        )
+        predictions_reshaped = reshape_predictions(
+            predictions, reference_profile["height"], reference_profile["width"], nodata_mask
+        )
 
-    metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics), decimals=3)
-    typer.echo("Progress: 80%")
+        metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics), decimals=3)
 
     out_profile = reference_profile.copy()
     out_profile.update({"count": 1, "dtype": np.float32})
 
-    with rasterio.open(output_raster_probability, "w", **out_profile) as dst:
-        dst.write(probabilities_reshaped, 1)
-    with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
-        dst.write(predictions_reshaped, 1)
+    with ProgressLog.saving_output_files([output_raster_probability, output_raster_classified]):
+        with rasterio.open(output_raster_probability, "w", **out_profile) as dst:
+            dst.write(probabilities_reshaped, 1)
+        with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
+            dst.write(predictions_reshaped, 1)
 
-    json_str = json.dumps(metrics_dict)
-    typer.echo("Progress: 100% \n")
-
-    typer.echo(f"Results: {json_str}")
-    typer.echo(
-        (
-            "Testing classifier model completed, writing rasters to "
-            f"{output_raster_probability} and {output_raster_classified}."
-        )
-    )
+    ResultSender.send_dict_as_json(metrics_dict)
+    ProgressLog.finish()
 
 
 # TEST REGRESSOR ML MODEL
@@ -2823,29 +2802,27 @@ def regressor_test_cli(
     from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml, reshape_predictions
     from eis_toolkit.prediction.machine_learning_predict import predict_regressor
 
-    X, y, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters, target_labels)
-    typer.echo("Progress: 30%")
+    with ProgressLog.reading_input_files():
+        X, y, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters, target_labels)
+        model = load_model(model_file)
 
-    model = load_model(model_file)
-    predictions = predict_regressor(X, model)
-    predictions_reshaped = reshape_predictions(
-        predictions, reference_profile["height"], reference_profile["width"], nodata_mask
-    )
+    with ProgressLog.running_algorithm():
+        predictions = predict_regressor(X, model)
+        predictions_reshaped = reshape_predictions(
+            predictions, reference_profile["height"], reference_profile["width"], nodata_mask
+        )
 
-    metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics), decimals=3)
-    typer.echo("Progress: 80%")
+        metrics_dict = score_predictions(y, predictions, get_enum_values(test_metrics), decimals=3)
 
     out_profile = reference_profile.copy()
     out_profile.update({"count": 1, "dtype": np.float32})
 
-    with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(predictions_reshaped, 1)
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(predictions_reshaped, 1)
 
-    json_str = json.dumps(metrics_dict)
-    typer.echo("Progress: 100% \n")
-
-    typer.echo(f"Results: {json_str}")
-    typer.echo(f"Testing regressor model completed, writing raster to {output_raster}.")
+    ResultSender.send_dict_as_json(metrics_dict)
+    ProgressLog.finish()
 
 
 # PREDICT WITH TRAINED ML MODEL
@@ -2861,35 +2838,29 @@ def classifier_predict_cli(
     from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml, reshape_predictions
     from eis_toolkit.prediction.machine_learning_predict import predict_classifier
 
-    X, _, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters)
+    with ProgressLog.reading_input_files():
+        X, _, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters)
+        model = load_model(model_file)
 
-    typer.echo("Progress: 30%")
-
-    model = load_model(model_file)
-    predictions, probabilities = predict_classifier(X, model, classification_threshold, True)
-    probabilities_reshaped = reshape_predictions(
-        probabilities, reference_profile["height"], reference_profile["width"], nodata_mask
-    )
-    predictions_reshaped = reshape_predictions(
-        predictions, reference_profile["height"], reference_profile["width"], nodata_mask
-    )
-    typer.echo("Progress: 80%")
+    with ProgressLog.running_algorithm():
+        predictions, probabilities = predict_classifier(X, model, classification_threshold, True)
+        probabilities_reshaped = reshape_predictions(
+            probabilities, reference_profile["height"], reference_profile["width"], nodata_mask
+        )
+        predictions_reshaped = reshape_predictions(
+            predictions, reference_profile["height"], reference_profile["width"], nodata_mask
+        )
 
     out_profile = reference_profile.copy()
     out_profile.update({"count": 1, "dtype": np.float32})
 
-    with rasterio.open(output_raster_probability, "w", **out_profile) as dst:
-        dst.write(probabilities_reshaped, 1)
-    with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
-        dst.write(predictions_reshaped, 1)
+    with ProgressLog.saving_output_files([output_raster_probability, output_raster_classified]):
+        with rasterio.open(output_raster_probability, "w", **out_profile) as dst:
+            dst.write(probabilities_reshaped, 1)
+        with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
+            dst.write(predictions_reshaped, 1)
 
-    typer.echo("Progress: 100%")
-    typer.echo(
-        (
-            "Predicting with classifier model completed, writing rasters to "
-            f"{output_raster_probability} and {output_raster_classified}."
-        )
-    )
+    ProgressLog.finish()
 
 
 # PREDICT WITH TRAINED ML MODEL
@@ -2903,26 +2874,24 @@ def regressor_predict_cli(
     from eis_toolkit.prediction.machine_learning_general import load_model, prepare_data_for_ml, reshape_predictions
     from eis_toolkit.prediction.machine_learning_predict import predict_regressor
 
-    X, _, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters)
+    with ProgressLog.reading_input_files():
+        X, _, reference_profile, nodata_mask = prepare_data_for_ml(input_rasters)
+        model = load_model(model_file)
 
-    typer.echo("Progress: 30%")
-
-    model = load_model(model_file)
-    predictions = predict_regressor(X, model)
-    predictions_reshaped = reshape_predictions(
-        predictions, reference_profile["height"], reference_profile["width"], nodata_mask
-    )
-
-    typer.echo("Progress: 80%")
+    with ProgressLog.running_algorithm():
+        predictions = predict_regressor(X, model)
+        predictions_reshaped = reshape_predictions(
+            predictions, reference_profile["height"], reference_profile["width"], nodata_mask
+        )
 
     out_profile = reference_profile.copy()
     out_profile.update({"count": 1, "dtype": np.float32})
 
-    with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(predictions_reshaped, 1)
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(predictions_reshaped, 1)
 
-    typer.echo("Progress: 100%")
-    typer.echo(f"Predicting with regressor model completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # FUZZY OVERLAYS
@@ -2937,22 +2906,21 @@ def and_overlay_cli(
     from eis_toolkit.prediction.fuzzy_overlay import and_overlay
     from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        data, profiles = read_and_stack_rasters(input_rasters)
 
-    data, profiles = read_and_stack_rasters(input_rasters)
-    typer.echo("Progress: 25%")
-
-    out_image = and_overlay(data)
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        out_image = and_overlay(data)
 
     out_profile = profiles[0]
     out_profile["count"] = 1
     out_profile["nodata"] = -9999
-    with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(out_image, 1)
-    typer.echo("Progress: 100%")
 
-    typer.echo(f"'And' overlay completed, writing raster to {output_raster}.")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(out_image, 1)
+
+    ProgressLog.finish()
 
 
 # OR OVERLAY
@@ -2965,22 +2933,21 @@ def or_overlay_cli(
     from eis_toolkit.prediction.fuzzy_overlay import or_overlay
     from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        data, profiles = read_and_stack_rasters(input_rasters)
 
-    data, profiles = read_and_stack_rasters(input_rasters)
-    typer.echo("Progress: 25%")
-
-    out_image = or_overlay(data)
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        out_image = or_overlay(data)
 
     out_profile = profiles[0]
     out_profile["count"] = 1
     out_profile["nodata"] = -9999
-    with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(out_image, 1)
-    typer.echo("Progress: 100%")
 
-    typer.echo(f"'Or' overlay completed, writing raster to {output_raster}.")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(out_image, 1)
+
+    ProgressLog.finish()
 
 
 # PRODUCT OVERLAY
@@ -2993,22 +2960,21 @@ def product_overlay_cli(
     from eis_toolkit.prediction.fuzzy_overlay import product_overlay
     from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        data, profiles = read_and_stack_rasters(input_rasters)
 
-    data, profiles = read_and_stack_rasters(input_rasters)
-    typer.echo("Progress: 25%")
-
-    out_image = product_overlay(data)
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        out_image = product_overlay(data)
 
     out_profile = profiles[0]
     out_profile["count"] = 1
     out_profile["nodata"] = -9999
-    with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(out_image, 1)
-    typer.echo("Progress: 100%")
 
-    typer.echo(f"'Product' overlay completed, writing raster to {output_raster}.")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(out_image, 1)
+
+    ProgressLog.finish()
 
 
 # SUM OVERLAY
@@ -3021,22 +2987,21 @@ def sum_overlay_cli(
     from eis_toolkit.prediction.fuzzy_overlay import sum_overlay
     from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        data, profiles = read_and_stack_rasters(input_rasters)
 
-    data, profiles = read_and_stack_rasters(input_rasters)
-    typer.echo("Progress: 25%")
-
-    out_image = sum_overlay(data)
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        out_image = sum_overlay(data)
 
     out_profile = profiles[0]
     out_profile["count"] = 1
     out_profile["nodata"] = -9999
-    with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(out_image, 1)
-    typer.echo("Progress: 100%")
 
-    typer.echo(f"'Sum' overlay completed, writing raster to {output_raster}.")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(out_image, 1)
+
+    ProgressLog.finish()
 
 
 # GAMMA OVERLAY
@@ -3046,26 +3011,194 @@ def gamma_overlay_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT
     from eis_toolkit.prediction.fuzzy_overlay import gamma_overlay
     from eis_toolkit.utilities.file_io import read_and_stack_rasters
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        data, profiles = read_and_stack_rasters(input_rasters)
 
-    data, profiles = read_and_stack_rasters(input_rasters)
-    typer.echo("Progress: 25%")
-
-    out_image = gamma_overlay(data, gamma)
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        out_image = gamma_overlay(data, gamma)
 
     out_profile = profiles[0]
     out_profile["count"] = 1
     out_profile["nodata"] = -9999
-    with rasterio.open(output_raster, "w", **out_profile) as dst:
-        dst.write(out_image, 1)
-    typer.echo("Progress: 100%")
 
-    typer.echo(f"'Gamma' overlay completed, writing raster to {output_raster}.")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_profile) as dst:
+            dst.write(out_image, 1)
+
+    ProgressLog.finish()
 
 
 # WOFE
-# TODO
+@app.command()
+def weights_of_evidence_calculate_weights_cli(
+    evidential_raster: INPUT_FILE_OPTION,
+    deposits: INPUT_FILE_OPTION,
+    output_results_table: OUTPUT_FILE_OPTION,
+    output_raster_dir: OUTPUT_DIR_OPTION,
+    raster_nodata: Optional[float] = None,
+    weights_type: Annotated[WeightsType, typer.Option(case_sensitive=False)] = WeightsType.unique,
+    studentized_contrast_threshold: float = 1,
+    arrays_to_generate: Annotated[Optional[List[str]], typer.Option()] = None,
+):
+    """
+    Calculate weights of spatial associations.
+
+    Save path for resulting CSV is set using --output-results-table parameter. Output rasters are saved to directory
+    set with --output-raster-dir parameter.
+
+    Parameter --studentized-contrast-threshold is used with 'categorical', 'ascending' and 'descending' weight types.
+
+    Parameter --arrays-to-generate controls which columns in the weights dataframe are returned as arrays. All column
+    names in the produced weights_df are valid choices. The available columns for "unique" weights_type are "Class",
+    "Pixel count", "Deposit count", "W+", "S_W+", "W-", "S_W-", "Contrast", "S_Contrast", and "Studentized contrast".
+    For other weights types, additional available column names are "Generalized class", "Generalized W+", and
+    "Generalized S_W+". Defaults to ["Class", "W+", "S_W+] for "unique" weights_type and ["Class", "W+", "S_W+",
+    "Generalized W+", "Generalized S_W+"] for the cumulative weight types.
+    """
+    from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_weights
+
+    with ProgressLog.reading_input_files():
+        evidential_raster = rasterio.open(evidential_raster)
+
+        if deposits.suffix in (".tif", ".tiff", ".asc", ".img", ".vrt", ".grd"):
+            deposits = rasterio.open(deposits)
+        else:
+            deposits = gpd.read_file(deposits)
+
+    if arrays_to_generate == []:
+        arrays_to_generate = None
+
+    with ProgressLog.running_algorithm():
+        df, arrays, raster_meta, nr_of_deposits, nr_of_pixels = weights_of_evidence_calculate_weights(
+            evidential_raster=evidential_raster,
+            deposits=deposits,
+            raster_nodata=raster_nodata,
+            weights_type=weights_type,
+            studentized_contrast_threshold=studentized_contrast_threshold,
+            arrays_to_generate=arrays_to_generate,
+        )
+
+    with ProgressLog.saving_output_files([output_raster_dir, output_results_table]):
+        df.to_csv(output_results_table)
+
+        out_rasters_dict = {}
+        file_name = evidential_raster.name.split("/")[-1].split(".")[0]
+        raster_meta.pop("dtype")  # Remove dtype from metadata to set it individually
+
+        for key, array in arrays.items():
+            # Set correct dtype for the array
+            if key in ["Class", "Pixel count", "Deposit count"]:
+                dtype = np.uint8
+            else:
+                dtype = np.float32
+
+            array = nan_to_nodata(array, raster_meta["nodata"])
+            output_raster_name = file_name + "_weights_" + weights_type + "_" + key
+            output_raster_path = output_raster_dir.joinpath(output_raster_name + ".tif")
+            with rasterio.open(output_raster_path, "w", dtype=dtype, **raster_meta) as dst:
+                dst.write(array, 1)
+            out_rasters_dict[output_raster_name] = str(output_raster_path)
+
+    ResultSender.send_dict_as_json(out_rasters_dict)
+    ProgressLog.finish()
+
+
+@app.command()
+def weights_of_evidence_calculate_responses_cli(
+    input_rasters_weights: INPUT_FILES_OPTION,
+    input_rasters_standard_deviations: INPUT_FILES_OPTION,
+    input_weights_table: INPUT_FILE_OPTION,
+    output_probabilities: OUTPUT_FILE_OPTION,
+    output_probabilities_std: OUTPUT_FILE_OPTION,
+    output_confidence_array: OUTPUT_FILE_OPTION,
+):
+    """
+    Calculate the posterior probabilities for the given generalized weight arrays.
+
+    Parameter --input-rasters are the output arrays (rasters) of weights-of-evidence-calculate-weights-cli.
+    For each set of rasters, generalized weight and generalized standard deviation arrays are used and summed
+    together pixel-wise to calculate the posterior probabilities. If generalized arrays are not found,
+    the W+ and S_W+ arrays are used (so if outputs from unique weight calculations are used for this function).
+    """
+    from eis_toolkit.prediction.weights_of_evidence import weights_of_evidence_calculate_responses
+
+    with ProgressLog.reading_input_files():
+        typer.echo(input_rasters_weights)
+
+        dict_array = []
+        raster_profile = None
+
+        for raster_weights, raster_std in zip_longest(
+            input_rasters_weights, input_rasters_standard_deviations, fillvalue=None
+        ):
+
+            if raster_weights is not None:
+                with rasterio.open(raster_weights) as src:
+                    array_W = src.read(1)
+                    array_W = nodata_to_nan(array_W, src.nodata)
+
+                    if raster_profile is None:
+                        raster_profile = src.profile
+
+            if raster_std is not None:
+                with rasterio.open(raster_std) as src:
+                    array_S_W = src.read(1)
+                    array_S_W = nodata_to_nan(array_S_W, src.nodata)
+
+            dict_array.append({"W+": array_W, "S_W+": array_S_W})
+
+        weights_df = pd.read_csv(input_weights_table)
+
+    with ProgressLog.running_algorithm():
+        posterior_probabilities, posterior_probabilies_std, confidence_array = weights_of_evidence_calculate_responses(
+            output_arrays=dict_array, weights_df=weights_df
+        )
+
+    with ProgressLog.saving_output_files([output_probabilities, output_probabilities_std, output_confidence_array]):
+        posterior_probabilities = nan_to_nodata(posterior_probabilities, raster_profile["nodata"])
+        with rasterio.open(output_probabilities, "w", **raster_profile) as dst:
+            dst.write(posterior_probabilities, 1)
+
+        posterior_probabilies_std = nan_to_nodata(posterior_probabilies_std, raster_profile["nodata"])
+        with rasterio.open(output_probabilities_std, "w", **raster_profile) as dst:
+            dst.write(posterior_probabilies_std, 1)
+
+        confidence_array = nan_to_nodata(confidence_array, raster_profile["nodata"])
+        with rasterio.open(output_confidence_array, "w", **raster_profile) as dst:
+            dst.write(confidence_array, 1)
+
+    ProgressLog.finish()
+
+
+@app.command()
+def agterberg_cheng_CI_test_cli(
+    input_posterior_probabilities: INPUT_FILE_OPTION,
+    input_posterior_probabilities_std: INPUT_FILE_OPTION,
+    input_weights_table: INPUT_FILE_OPTION,
+):
+    """Perform the conditional independence test presented by Agterberg-Cheng (2002)."""
+    from eis_toolkit.prediction.weights_of_evidence import agterberg_cheng_CI_test
+
+    with ProgressLog.reading_input_files():
+        with rasterio.open(input_posterior_probabilities) as src:
+            posterior_probabilities = src.read(1)
+            posterior_probabilities = nodata_to_nan(posterior_probabilities, src.nodata)
+
+        with rasterio.open(input_posterior_probabilities_std) as src:
+            posterior_probabilities_std = src.read(1)
+            posterior_probabilities_std = nodata_to_nan(posterior_probabilities_std, src.nodata)
+
+        weights_df = pd.read_csv(input_weights_table)
+
+    with ProgressLog.running_algorithm():
+        _, _, _, _, summary = agterberg_cheng_CI_test(
+            posterior_probabilities=posterior_probabilities,
+            posterior_probabilities_std=posterior_probabilities_std,
+            weights_df=weights_df,
+        )
+
+    typer.echo(summary)
+    ProgressLog.finish()
 
 
 # --- TRANSFORMATIONS ---
@@ -3082,20 +3215,19 @@ def alr_transform_cli(
     """Perform an additive logratio transformation on the data."""
     from eis_toolkit.transformations.coda.alr import alr_transform
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        gdf = gpd.read_file(input_vector)
+        geometries = gdf["geometry"]
+        df = pd.DataFrame(gdf.drop(columns="geometry"))
 
-    gdf = gpd.read_file(input_vector)
-    geometries = gdf["geometry"]
-    df = pd.DataFrame(gdf.drop(columns="geometry"))
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        out_df = alr_transform(df=df, column=column, keep_denominator_column=keep_denominator_column)
 
-    out_df = alr_transform(df=df, column=column, keep_denominator_column=keep_denominator_column)
-    typer.echo("Progess 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+        out_gdf.to_file(output_vector)
 
-    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
-    out_gdf.to_file(output_vector)
-    typer.echo("Progress: 100%")
-    typer.echo(f"ALR transform completed, output saved to {output_vector}")
+    ProgressLog.finish()
 
 
 # CODA - INVERSE ALR TRANSFORM
@@ -3109,20 +3241,19 @@ def inverse_alr_transform_cli(
     """Perform the inverse transformation for a set of ALR transformed data."""
     from eis_toolkit.transformations.coda.alr import inverse_alr
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        gdf = gpd.read_file(input_vector)
+        geometries = gdf["geometry"]
+        df = pd.DataFrame(gdf.drop(columns="geometry"))
 
-    gdf = gpd.read_file(input_vector)
-    geometries = gdf["geometry"]
-    df = pd.DataFrame(gdf.drop(columns="geometry"))
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        out_df = inverse_alr(df=df, denominator_column=denominator_column, scale=scale)
 
-    out_df = inverse_alr(df=df, denominator_column=denominator_column, scale=scale)
-    typer.echo("Progess 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+        out_gdf.to_file(output_vector)
 
-    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
-    out_gdf.to_file(output_vector)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Inverse ALR transform completed, output saved to {output_vector}")
+    ProgressLog.finish()
 
 
 # CODA - CLR TRANSFORM
@@ -3131,20 +3262,19 @@ def clr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FIL
     """Perform a centered logratio transformation on the data."""
     from eis_toolkit.transformations.coda.clr import clr_transform
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        gdf = gpd.read_file(input_vector)
+        geometries = gdf["geometry"]
+        df = pd.DataFrame(gdf.drop(columns="geometry"))
 
-    gdf = gpd.read_file(input_vector)
-    geometries = gdf["geometry"]
-    df = pd.DataFrame(gdf.drop(columns="geometry"))
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        out_df = clr_transform(df=df)
 
-    out_df = clr_transform(df=df)
-    typer.echo("Progess 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+        out_gdf.to_file(output_vector)
 
-    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
-    out_gdf.to_file(output_vector)
-    typer.echo("Progress: 100%")
-    typer.echo(f"CLR transform completed, output saved to {output_vector}")
+    ProgressLog.finish()
 
 
 # CODA - INVERSE CLR TRANSFORM
@@ -3158,20 +3288,19 @@ def inverse_clr_transform_cli(
     """Perform the inverse transformation for a set of CLR transformed data."""
     from eis_toolkit.transformations.coda.clr import inverse_clr
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        gdf = gpd.read_file(input_vector)
+        geometries = gdf["geometry"]
+        df = pd.DataFrame(gdf.drop(columns="geometry"))
 
-    gdf = gpd.read_file(input_vector)
-    geometries = gdf["geometry"]
-    df = pd.DataFrame(gdf.drop(columns="geometry"))
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        out_df = inverse_clr(df=df, colnames=colnames, scale=scale)
 
-    out_df = inverse_clr(df=df, colnames=colnames, scale=scale)
-    typer.echo("Progess 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+        out_gdf.to_file(output_vector)
 
-    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
-    out_gdf.to_file(output_vector)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Inverse CLR transform completed, output saved to {output_vector}")
+    ProgressLog.finish()
 
 
 # CODA - SINGLE ILR TRANSFORM
@@ -3185,22 +3314,21 @@ def single_ilr_transform_cli(
     """Perform a single isometric logratio transformation on the provided subcompositions."""
     from eis_toolkit.transformations.coda.ilr import single_ilr_transform
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        gdf = gpd.read_file(input_vector)
+        geometries = gdf["geometry"]
+        df = pd.DataFrame(gdf.drop(columns="geometry"))
 
-    gdf = gpd.read_file(input_vector)
-    geometries = gdf["geometry"]
-    df = pd.DataFrame(gdf.drop(columns="geometry"))
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        out_series = single_ilr_transform(df=df, subcomposition_1=subcomposition_1, subcomposition_2=subcomposition_2)
 
-    out_series = single_ilr_transform(df=df, subcomposition_1=subcomposition_1, subcomposition_2=subcomposition_2)
-    typer.echo("Progess 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        # NOTE: Output of pairwise_logratio might be changed to DF in the future, to automatically do the following
+        df["single_ilr"] = out_series
+        out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
+        out_gdf.to_file(output_vector)
 
-    # NOTE: Output of pairwise_logratio might be changed to DF in the future, to automatically do the following
-    df["single_ilr"] = out_series
-    out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
-    out_gdf.to_file(output_vector)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Single ILR transform completed, output saved to {output_vector}")
+    ProgressLog.finish()
 
 
 # CODA - PAIRWISE LOGRATIO TRANSFORM
@@ -3214,22 +3342,21 @@ def pairwise_logratio_cli(
     """Perform a pairwise logratio transformation on the given columns."""
     from eis_toolkit.transformations.coda.pairwise import pairwise_logratio
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        gdf = gpd.read_file(input_vector)
+        geometries = gdf["geometry"]
+        df = pd.DataFrame(gdf.drop(columns="geometry"))
 
-    gdf = gpd.read_file(input_vector)
-    geometries = gdf["geometry"]
-    df = pd.DataFrame(gdf.drop(columns="geometry"))
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        out_series = pairwise_logratio(df=df, numerator_column=numerator_column, denominator_column=denominator_column)
 
-    out_series = pairwise_logratio(df=df, numerator_column=numerator_column, denominator_column=denominator_column)
-    typer.echo("Progess 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        # NOTE: Output of pairwise_logratio might be changed to DF in the future, to automatically do the following
+        df["pairwise_logratio"] = out_series
+        out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
+        out_gdf.to_file(output_vector)
 
-    # NOTE: Output of pairwise_logratio might be changed to DF in the future, to automatically do the following
-    df["pairwise_logratio"] = out_series
-    out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
-    out_gdf.to_file(output_vector)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Pairwise logratio transform completed, output saved to {output_vector}")
+    ProgressLog.finish()
 
 
 # CODA - SINGLE PLR TRANSFORM
@@ -3242,22 +3369,21 @@ def single_plr_transform_cli(
     """Perform a pivot logratio transformation on the selected column."""
     from eis_toolkit.transformations.coda.plr import single_plr_transform
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        gdf = gpd.read_file(input_vector)
+        geometries = gdf["geometry"]
+        df = pd.DataFrame(gdf.drop(columns="geometry"))
 
-    gdf = gpd.read_file(input_vector)
-    geometries = gdf["geometry"]
-    df = pd.DataFrame(gdf.drop(columns="geometry"))
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        out_series = single_plr_transform(df=df, column=column)
 
-    out_series = single_plr_transform(df=df, column=column)
-    typer.echo("Progess 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        # NOTE: Output of single_plr_transform might be changed to DF in the future, to automatically do the following
+        df["single_plr"] = out_series
+        out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
+        out_gdf.to_file(output_vector)
 
-    # NOTE: Output of single_plr_transform might be changed to DF in the future, to automatically do the following
-    df["single_plr"] = out_series
-    out_gdf = gpd.GeoDataFrame(df, geometry=geometries)
-    out_gdf.to_file(output_vector)
-    typer.echo("Progress: 100%")
-    typer.echo(f"Single PLR transform completed, output saved to {output_vector}")
+    ProgressLog.finish()
 
 
 # CODA - PLR TRANSFORM
@@ -3266,20 +3392,19 @@ def plr_transform_cli(input_vector: INPUT_FILE_OPTION, output_vector: OUTPUT_FIL
     """Perform a pivot logratio transformation on the dataframe, returning the full set of transforms."""
     from eis_toolkit.transformations.coda.plr import plr_transform
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        gdf = gpd.read_file(input_vector)
+        geometries = gdf["geometry"]
+        df = pd.DataFrame(gdf.drop(columns="geometry"))
 
-    gdf = gpd.read_file(input_vector)
-    geometries = gdf["geometry"]
-    df = pd.DataFrame(gdf.drop(columns="geometry"))
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        out_df = plr_transform(df=df)
 
-    out_df = plr_transform(df=df)
-    typer.echo("Progess 75%")
+    with ProgressLog.saving_output_files(output_vector):
+        out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
+        out_gdf.to_file(output_vector)
 
-    out_gdf = gpd.GeoDataFrame(out_df, geometry=geometries)
-    out_gdf.to_file(output_vector)
-    typer.echo("Progress: 100%")
-    typer.echo(f"PLR transform completed, output saved to {output_vector}")
+    ProgressLog.finish()
 
 
 # BINARIZE
@@ -3297,18 +3422,18 @@ def binarize_cli(
     """
     from eis_toolkit.transformations.binarize import binarize
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta, _ = binarize(raster=raster, thresholds=[threshold])
-    typer.echo("Progress: 70%")
+    raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Binarizing completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # CLIP TRANSFORM
@@ -3327,18 +3452,18 @@ def clip_transform_cli(
     """
     from eis_toolkit.transformations.clip import clip_transform
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta, _ = clip_transform(raster=raster, limits=[(limit_lower, limit_higher)])
-    typer.echo("Progress: 70%")
+    raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Clip transform completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # Z-SCORE NORMALIZATION
@@ -3354,18 +3479,18 @@ def z_score_normalization_cli(
     """
     from eis_toolkit.transformations.linear import z_score_normalization
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta, _ = z_score_normalization(raster=raster)
-    typer.echo("Progress: 70%")
+    raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Z-score normalization completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # MIX_MAX SCALING
@@ -3383,18 +3508,18 @@ def min_max_scaling_cli(
     """
     from eis_toolkit.transformations.linear import min_max_scaling
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta, _ = min_max_scaling(raster=raster, new_range=[(min, max)])
-    typer.echo("Progress: 70%")
+    raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Min-max scaling completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # LOGARITHMIC
@@ -3412,18 +3537,18 @@ def log_transform_cli(
     """
     from eis_toolkit.transformations.logarithmic import log_transform
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta, _ = log_transform(raster=raster, log_transform=[get_enum_values(log_type)])
-    typer.echo("Progress: 70%")
+    raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Logarithm transform completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # SIGMOID
@@ -3443,20 +3568,20 @@ def sigmoid_transform_cli(
     """
     from eis_toolkit.transformations.sigmoid import sigmoid_transform
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta, _ = sigmoid_transform(
             raster=raster, bounds=[(limit_lower, limit_upper)], slope=[slope], center=center
         )
-    typer.echo("Progress: 70%")
+    raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Sigmoid transform completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # WINSORIZE
@@ -3486,20 +3611,20 @@ def winsorize_transform_cli(
     """
     from eis_toolkit.transformations.winsorize import winsorize
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta, _ = winsorize(
             raster=raster, percentiles=[(percentile_lower, percentile_higher)], inside=inside
         )
-    typer.echo("Progress: 70%")
+    raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Winsorize transform completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # ---EVALUATION ---
@@ -3515,19 +3640,14 @@ def summarize_probability_metrics_cli(true_labels: INPUT_FILE_OPTION, probabilit
     from eis_toolkit.evaluation.classification_probability_evaluation import summarize_probability_metrics
     from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
 
-    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        results_dict = summarize_probability_metrics(y_true=y_true, y_prob=y_prob, decimals=3)
 
-    results_dict = summarize_probability_metrics(y_true=y_true, y_prob=y_prob, decimals=3)
-
-    typer.echo("Progress: 75%")
-
-    typer.echo("Progress: 100% \n")
-
-    typer.echo(f"Results: {str(results_dict)}")
-    typer.echo("\nGenerating probability metrics summary completed.")
+    ResultSender.send_dict_as_json(results_dict)
+    ProgressLog.finish()
 
 
 @app.command()
@@ -3541,18 +3661,14 @@ def summarize_label_metrics_binary_cli(true_labels: INPUT_FILE_OPTION, predictio
     from eis_toolkit.evaluation.classification_label_evaluation import summarize_label_metrics_binary
     from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
 
-    (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        results_dict = summarize_label_metrics_binary(y_true=y_true, y_pred=y_pred, decimals=3)
 
-    results_dict = summarize_label_metrics_binary(y_true=y_true, y_pred=y_pred, decimals=3)
-    typer.echo("Progress: 75%")
-
-    typer.echo("Progress: 100% \n")
-
-    typer.echo(f"Results: {str(results_dict)}")
-    typer.echo("\nGenerating prediction label metrics summary completed.")
+    ResultSender.send_dict_as_json(results_dict)
+    ProgressLog.finish()
 
 
 @app.command()
@@ -3574,24 +3690,21 @@ def plot_roc_curve_cli(
     from eis_toolkit.evaluation.classification_probability_evaluation import plot_roc_curve
     from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
 
-    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
-    typer.echo("Progress: 25%")
-
-    _ = plot_roc_curve(y_true=y_true, y_prob=y_prob)
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        _ = plot_roc_curve(y_true=y_true, y_prob=y_prob)
 
     if output_file is not None:
-        dpi = "figure" if save_dpi is None else save_dpi
-        plt.savefig(output_file, dpi=dpi)
-        typer.echo(f"Output figure saved to {output_file}.")
+        with ProgressLog.saving_output_files(output_file):
+            dpi = "figure" if save_dpi is None else save_dpi
+            plt.savefig(output_file, dpi=dpi)
 
     if show_plot:
         plt.show()
 
-    typer.echo("Progress: 100%")
-    typer.echo("ROC curve plot completed")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -3615,24 +3728,21 @@ def plot_det_curve_cli(
     from eis_toolkit.evaluation.classification_probability_evaluation import plot_det_curve
     from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
 
-    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
-    typer.echo("Progress: 25%")
-
-    _ = plot_det_curve(y_true=y_true, y_prob=y_prob)
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        _ = plot_det_curve(y_true=y_true, y_prob=y_prob)
 
     if output_file is not None:
-        dpi = "figure" if save_dpi is None else save_dpi
-        plt.savefig(output_file, dpi=dpi)
-        typer.echo(f"Output figure saved to {output_file}.")
+        with ProgressLog.saving_output_files(output_file):
+            dpi = "figure" if save_dpi is None else save_dpi
+            plt.savefig(output_file, dpi=dpi)
 
     if show_plot:
         plt.show()
 
-    typer.echo("Progress: 100%")
-    typer.echo("DET curve plot completed")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -3655,24 +3765,21 @@ def plot_precision_recall_curve_cli(
     from eis_toolkit.evaluation.classification_probability_evaluation import plot_precision_recall_curve
     from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
 
-    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
-    typer.echo("Progress: 25%")
-
-    _ = plot_precision_recall_curve(y_true=y_true, y_prob=y_prob)
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        _ = plot_precision_recall_curve(y_true=y_true, y_prob=y_prob)
 
     if output_file is not None:
-        dpi = "figure" if save_dpi is None else save_dpi
-        plt.savefig(output_file, dpi=dpi)
-        typer.echo(f"Output figure saved to {output_file}.")
+        with ProgressLog.saving_output_files(output_file):
+            dpi = "figure" if save_dpi is None else save_dpi
+            plt.savefig(output_file, dpi=dpi)
 
     if show_plot:
         plt.show()
 
-    typer.echo("Progress: 100%")
-    typer.echo("Precision-Recall curve plot completed")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -3695,24 +3802,21 @@ def plot_calibration_curve_cli(
     from eis_toolkit.evaluation.classification_probability_evaluation import plot_calibration_curve
     from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
 
-    (y_prob, y_true), _, _ = read_data_for_evaluation([probabilities, true_labels])
-    typer.echo("Progress: 25%")
-
-    _ = plot_calibration_curve(y_true=y_true, y_prob=y_prob, n_bins=n_bins)
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        _ = plot_calibration_curve(y_true=y_true, y_prob=y_prob, n_bins=n_bins)
 
     if output_file is not None:
-        dpi = "figure" if save_dpi is None else save_dpi
-        plt.savefig(output_file, dpi=dpi)
-        typer.echo(f"Output figure saved to {output_file}.")
+        with ProgressLog.saving_output_files(output_file):
+            dpi = "figure" if save_dpi is None else save_dpi
+            plt.savefig(output_file, dpi=dpi)
 
     if show_plot:
         plt.show()
 
-    typer.echo("Progress: 100%")
-    typer.echo("Calibration curve plot completed")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -3730,25 +3834,22 @@ def plot_confusion_matrix_cli(
     from eis_toolkit.evaluation.plot_confusion_matrix import plot_confusion_matrix
     from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
 
-    (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
-    typer.echo("Progress: 25%")
-
-    matrix = confusion_matrix(y_true, y_pred)
-    _ = plot_confusion_matrix(confusion_matrix=matrix)
-    typer.echo("Progress: 75%")
+    with ProgressLog.running_algorithm():
+        matrix = confusion_matrix(y_true, y_pred)
+        _ = plot_confusion_matrix(confusion_matrix=matrix)
 
     if output_file is not None:
-        dpi = "figure" if save_dpi is None else save_dpi
-        plt.savefig(output_file, dpi=dpi)
-        typer.echo(f"Output figure saved to {output_file}.")
+        with ProgressLog.saving_output_files(output_file):
+            dpi = "figure" if save_dpi is None else save_dpi
+            plt.savefig(output_file, dpi=dpi)
 
     if show_plot:
         plt.show()
 
-    typer.echo("Progress: 100%")
-    typer.echo("Confusion matrix plot completed.")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -3762,16 +3863,14 @@ def score_predictions_cli(
     from eis_toolkit.evaluation.scoring import score_predictions
     from eis_toolkit.prediction.machine_learning_general import read_data_for_evaluation
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
 
-    (y_pred, y_true), _, _ = read_data_for_evaluation([predictions, true_labels])
-    typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
+        outputs = score_predictions(y_true, y_pred, metrics, decimals)
 
-    outputs = score_predictions(y_true, y_pred, metrics, decimals)
-    typer.echo("Progress: 100% \n")
-
-    typer.echo(f"Results: {str(outputs)}")
-    typer.echo("\nScoring predictions completed.")
+    ResultSender.send_dict_as_json(outputs)
+    ProgressLog.finish()
 
 
 # --- UTILITIES ---
@@ -3781,21 +3880,21 @@ def split_raster_bands_cli(input_raster: INPUT_FILE_OPTION, output_dir: OUTPUT_D
     from eis_toolkit.utilities.file_io import get_output_paths_from_common_name
     from eis_toolkit.utilities.raster import split_raster_bands
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         output_singleband_rasters = split_raster_bands(raster)
-    typer.echo("Progress: 70%")
+    raster.close()
 
-    name = os.path.splitext(os.path.basename(input_raster))[0]
-    output_paths = get_output_paths_from_common_name(output_singleband_rasters, output_dir, f"{name}_split", ".tif")
-    for output_path, (out_image, out_profile) in zip(output_paths, output_singleband_rasters):
-        with rasterio.open(output_path, "w", **out_profile) as dst:
-            dst.write(out_image, 1)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_dir):
+        name = os.path.splitext(os.path.basename(input_raster))[0]
+        output_paths = get_output_paths_from_common_name(output_singleband_rasters, output_dir, f"{name}_split", ".tif")
+        for output_path, (out_image, out_profile) in zip(output_paths, output_singleband_rasters):
+            with rasterio.open(output_path, "w", **out_profile) as dst:
+                dst.write(out_image, 1)
 
-    typer.echo(f"Splitting raster completed, writing rasters to directory {output_dir}.")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -3803,20 +3902,18 @@ def combine_raster_bands_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster:
     """Combine multiple rasters into one multiband raster."""
     from eis_toolkit.utilities.raster import combine_raster_bands
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        rasters = [rasterio.open(raster) for raster in input_rasters]  # Open all rasters to be combined
 
-    rasters = [rasterio.open(raster) for raster in input_rasters]  # Open all rasters to be combined
-    typer.echo("Progress: 25%")
-
-    out_image, out_meta = combine_raster_bands(rasters)
+    with ProgressLog.running_algorithm():
+        out_image, out_meta = combine_raster_bands(rasters)
     [raster.close() for raster in rasters]
-    typer.echo("Progress: 70%")
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Combining rasters completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -3827,22 +3924,20 @@ def unify_raster_nodata_cli(
     from eis_toolkit.utilities.file_io import get_output_paths_from_inputs
     from eis_toolkit.utilities.nodata import unify_raster_nodata
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        rasters = [rasterio.open(raster) for raster in input_rasters]  # Open all rasters to be unified
 
-    rasters = [rasterio.open(raster) for raster in input_rasters]  # Open all rasters to be unified
-    typer.echo("Progress: 25%")
-
-    unified = unify_raster_nodata(rasters, new_nodata)
+    with ProgressLog.running_algorithm():
+        unified = unify_raster_nodata(rasters, new_nodata)
     [raster.close() for raster in rasters]
-    typer.echo("Progress: 70%")
 
-    output_paths = get_output_paths_from_inputs(input_rasters, output_dir, "nodata_unified", ".tif")
-    for output_path, (out_image, out_profile) in zip(output_paths, unified):
-        with rasterio.open(output_path, "w", **out_profile) as dst:
-            dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_dir):
+        output_paths = get_output_paths_from_inputs(input_rasters, output_dir, "nodata_unified", ".tif")
+        for output_path, (out_image, out_profile) in zip(output_paths, unified):
+            with rasterio.open(output_path, "w", **out_profile) as dst:
+                dst.write(out_image)
 
-    typer.echo(f"Unifying nodata completed, writing rasters to directory {output_dir}.")
+    ProgressLog.finish()
 
 
 @app.command()
@@ -3855,18 +3950,43 @@ def convert_raster_nodata_cli(
     """Convert existing nodata values with a new nodata value for a raster."""
     from eis_toolkit.utilities.nodata import convert_raster_nodata
 
-    typer.echo("Progress: 10%")
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
 
-    with rasterio.open(input_raster) as raster:
-        typer.echo("Progress: 25%")
+    with ProgressLog.running_algorithm():
         out_image, out_meta = convert_raster_nodata(raster, old_nodata, new_nodata)
-    typer.echo("Progress: 70%")
+    raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Converting nodata completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
+
+
+@app.command()
+def replace_with_nodata_cli(
+    input_raster: INPUT_FILE_OPTION,
+    output_raster: OUTPUT_FILE_OPTION,
+    target_value: Annotated[float, typer.Option()],
+    nodata_value: float = None,
+    replace_condition: Annotated[ReplaceCondition, typer.Option(case_sensitive=False)] = ReplaceCondition.equal,
+):
+    """Replace raster pixel values with nodata."""
+    from eis_toolkit.utilities.nodata import replace_with_nodata
+
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
+
+    with ProgressLog.running_algorithm():
+        out_image, out_meta = replace_with_nodata(raster, target_value, nodata_value, replace_condition)
+    raster.close()
+
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
+
+    ProgressLog.finish()
 
 
 @app.command()
@@ -3876,19 +3996,19 @@ def set_raster_nodata_cli(
     """Set new nodata value for raster profile."""
     from eis_toolkit.utilities.nodata import set_raster_nodata
 
-    typer.echo("Progress: 10%")
-
-    with rasterio.open(input_raster) as raster:
+    with ProgressLog.reading_input_files():
+        raster = rasterio.open(input_raster)
         out_image = raster.read()
-        typer.echo("Progress: 25%")
+
+    with ProgressLog.running_algorithm():
         out_meta = set_raster_nodata(raster.meta, new_nodata)
-    typer.echo("Progress: 70%")
+    raster.close()
 
-    with rasterio.open(output_raster, "w", **out_meta) as dst:
-        dst.write(out_image)
-    typer.echo("Progress: 100%")
+    with ProgressLog.saving_output_files(output_raster):
+        with rasterio.open(output_raster, "w", **out_meta) as dst:
+            dst.write(out_image)
 
-    typer.echo(f"Setting nodata completed, writing raster to {output_raster}.")
+    ProgressLog.finish()
 
 
 # if __name__ == "__main__":

@@ -31,7 +31,7 @@ def _random_sampling(
 @beartype
 def generate_negatives(
     raster_array: np.ndarray,
-    raster_meta: Union[profiles.Profile, dict],
+    raster_profile: Union[profiles.Profile, dict],
     sample_number: int,
     random_seed: int = 48,
 ) -> Tuple[gpd.GeoDataFrame, np.ndarray, Union[profiles.Profile, dict]]:
@@ -44,7 +44,7 @@ def generate_negatives(
 
     Args:
         raster_array: Binary raster array with marked positives.
-        raster_meta: Raster metadata.
+        raster_profile: The raster profile determining the output raster grid properties.
         sample_number: maximum number of negatives to be generated.
         random_seed: Seed for generating random negatives.
 
@@ -87,11 +87,11 @@ def generate_negatives(
 
     out_array[row, col] = -1
 
-    x, y = rasterio.transform.xy(raster_meta["transform"], row, col)
+    x, y = rasterio.transform.xy(raster_profile["transform"], row, col)
 
     points = [Point(x[i], y[i]) for i in range(len(x))]
 
     sample_negative = gpd.GeoDataFrame(geometry=points)
-    sample_negative.set_crs(raster_meta["crs"], allow_override=True, inplace=True)
+    sample_negative.set_crs(raster_profile["crs"], allow_override=True, inplace=True)
 
-    return sample_negative, out_array, raster_meta
+    return sample_negative, out_array, raster_profile

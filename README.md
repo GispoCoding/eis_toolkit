@@ -38,7 +38,7 @@ EIS Toolkit is a comprehensive Python package for mineral prospectivity mapping 
 
 
 ## Installation
-We recommend installing EIS Toolkit in an empty virtual environment to ensure compatibility between package versions. 
+EIS Toolkit requires Python 3.9 or 3.10. We recommend installing EIS Toolkit in an empty virtual environment to ensure compatibility between package versions. 
 
 EIS Toolkit is available in conda-forge and PyPI and can be installed with one of the following commands.
 

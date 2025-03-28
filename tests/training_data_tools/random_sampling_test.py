@@ -13,10 +13,10 @@ from tests.raster_processing.clip_test import raster_path as SMALL_RASTER_PATH
 test_dir = Path(__file__).parent.parent
 PATH_LABELS_GPKG = test_dir.joinpath("data/remote/interpolating/interpolation_test_data_small.gpkg")
 
-geodataframe = gpd.read_file(PATH_LABELS_GPKG)
+gdf = gpd.read_file(PATH_LABELS_GPKG)
 
 
-@pytest.mark.parametrize("geodataframe, sample_number, random_seed", [(geodataframe, 10, 30)])
+@pytest.mark.parametrize("geodataframe, sample_number, random_seed", [(gdf, 10, 30)])
 def test_points_to_raster(geodataframe, sample_number, random_seed):
     """Test that generate_negatives function works as expected."""
     with rasterio.open(SMALL_RASTER_PATH) as temp_raster:
@@ -27,7 +27,7 @@ def test_points_to_raster(geodataframe, sample_number, random_seed):
         )
 
         sampled_negatives, outarray2, outmeta2 = generate_negatives(
-            raster_array=outarray, raster_meta=outmeta, sample_number=sample_number, random_seed=random_seed
+            raster_array=outarray, raster_profile=outmeta, sample_number=sample_number, random_seed=random_seed
         )
 
         row, col = rasterio.transform.rowcol(
@@ -42,7 +42,7 @@ def test_points_to_raster(geodataframe, sample_number, random_seed):
         assert (outarray2[row, col] == -1).all()
 
 
-@pytest.mark.parametrize("geodataframe, sample_number, random_seed", [(geodataframe, 10, 30)])
+@pytest.mark.parametrize("geodataframe, sample_number, random_seed", [(gdf, 10, 30)])
 def test_Empty_Data_Frame_exception(geodataframe, sample_number, random_seed):
     """Test that generate_negatives function raises EmptyDataFrameException for an empty raster array."""
     with pytest.raises(EmptyDataFrameException):
@@ -56,11 +56,11 @@ def test_Empty_Data_Frame_exception(geodataframe, sample_number, random_seed):
             outarray = np.array([])
 
             sampled_negatives, outarray2, outmeta2 = generate_negatives(
-                raster_array=outarray, raster_meta=outmeta, sample_number=sample_number, random_seed=random_seed
+                raster_array=outarray, raster_profile=outmeta, sample_number=sample_number, random_seed=random_seed
             )
 
 
-@pytest.mark.parametrize("geodataframe, sample_number, random_seed", [(geodataframe, -10, 30), (geodataframe, 0, 30)])
+@pytest.mark.parametrize("geodataframe, sample_number, random_seed", [(gdf, -10, 30), (gdf, 0, 30)])
 def test_Numeric_value_sign_exception(geodataframe, sample_number, random_seed):
     """Test that generate_negatives function raises NumericValueSignException for negative and zero sample number."""
     with pytest.raises(NumericValueSignException):
@@ -72,5 +72,5 @@ def test_Numeric_value_sign_exception(geodataframe, sample_number, random_seed):
             )
 
             sampled_negatives, outarray2, outmeta2 = generate_negatives(
-                raster_array=outarray, raster_meta=outmeta, sample_number=sample_number, random_seed=random_seed
+                raster_array=outarray, raster_profile=outmeta, sample_number=sample_number, random_seed=random_seed
             )

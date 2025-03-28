@@ -16,7 +16,7 @@ def proximity_computation(
     raster_profile: Union[profiles.Profile, dict],
     maximum_distance: Number,
     scale_range: Tuple[Number, Number] = (1, 0),
-) -> np.ndarray:
+) -> Tuple[np.ndarray, Union[profiles.Profile, dict]]:
     """Compute proximity to the nearest geometries.
 
     Scales proximity values linearly in the given range. The first number in scale_range
@@ -30,15 +30,15 @@ def proximity_computation(
         scaling_range: Min and max values used for scaling the proximity values. Defaults to (1,0).
 
     Returns:
-        A 2D numpy array with the scaled values.
+        A 2D numpy array with the linearly scaled proximity values and raster profile..
 
     Raises:
         NonMatchingCrsException: The input raster profile and geodataframe have mismatching CRS.
         EmptyDataFrameException: The input geodataframe is empty.
     """
-    out_matrix = _linear_proximity_computation(geodataframe, raster_profile, maximum_distance, scale_range)
+    out_image, out_profile = _linear_proximity_computation(geodataframe, raster_profile, maximum_distance, scale_range)
 
-    return out_matrix
+    return out_image, out_profile
 
 
 @beartype
@@ -47,25 +47,9 @@ def _linear_proximity_computation(
     raster_profile: Union[profiles.Profile, dict],
     maximum_distance: Number,
     scaling_range: Tuple[Number, Number],
-) -> np.ndarray:
-    """Compute proximity to the nearest geometries.
+) -> Tuple[np.ndarray, Union[profiles.Profile, dict]]:
+    out_image, out_profile = distance_computation(geodataframe, raster_profile, maximum_distance)
 
-    Args:
-        geodataframe: The GeoDataFrame with geometries to determine proximity to.
-        raster_profile: The raster profile of the raster in which the distances
-            to the nearest geometry are determined.
-        max_distance: The maximum distance in the output array.
-        scaling_range: a tuple of maximum value in the scaling and minimum value.
+    out_image = _min_max_scaling(out_image, scaling_range)
 
-    Returns:
-        A 2D numpy array with the linearly scaled values.
-
-    Raises:
-        NonMatchingCrsException: The input raster profile and geodataframe have mismatching CRS.
-        EmptyDataFrameException: The input geodataframe is empty.
-    """
-    out_matrix = distance_computation(geodataframe, raster_profile, maximum_distance)
-
-    out_matrix = _min_max_scaling(out_matrix, scaling_range)
-
-    return out_matrix
+    return out_image, out_profile

@@ -1,7 +1,8 @@
 on:
   pull_request:
   push:
-    branches: [master, main]
+    # branches: [master, main]
+    branches: [main]
 jobs:
   docker-test:
     name: Docker install and test
