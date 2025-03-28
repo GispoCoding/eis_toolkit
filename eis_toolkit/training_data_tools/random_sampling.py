@@ -38,9 +38,9 @@ def generate_negatives(
     """Generate probable negatives from binary raster array with marked positives.
 
     Generates a list of random negative points from a binary raster array,
-    ensuring that these negatives do not overlap with the already marked positive 
-    points. The positives can include points with or without attribute and radius, 
-    as in the points_to_raster tool. 
+    ensuring that these negatives do not overlap with the already marked positive
+    points. The positives can include points with or without attribute and radius,
+    as in the points_to_raster tool.
 
     Args:
         raster_array: Binary raster array with marked positives.
@@ -58,7 +58,7 @@ def generate_negatives(
 
     if raster_array.size == 0:
         raise EmptyDataException("Expected non empty raster array.")
-    
+
     if sample_number <= 0:
         raise NumericValueSignException("The sample number should be always be greater than zero")
 

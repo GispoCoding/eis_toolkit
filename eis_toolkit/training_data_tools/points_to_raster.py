@@ -1,20 +1,28 @@
 import math
-import numpy as np
-import geopandas
-import pandas as pd
 from numbers import Number
+
+import geopandas
+import numpy as np
+import pandas as pd
 from beartype import beartype
+from beartype.typing import Literal, Optional, Tuple, Union
 from rasterio import profiles, transform
 from scipy.ndimage import binary_dilation
-from beartype.typing import Literal, Optional, Tuple, Union
 
+from eis_toolkit.exceptions import (
+    EmptyDataFrameException,
+    InvalidColumnException,
+    NonMatchingCrsException,
+    NonNumericDataException,
+)
 from eis_toolkit.utilities.checks.raster import check_raster_profile
-from eis_toolkit.exceptions import EmptyDataFrameException, NonMatchingCrsException, InvalidColumnException, NonNumericDataException
+
 
 def _convert_radius(radius: int, x: Number, y: Number) -> int:
-    raster_radius = math.sqrt(x**2 + y**2) #RADIUS OF A SINGLE PIXEL
-    r = radius/raster_radius
+    raster_radius = math.sqrt(x**2 + y**2)  # RADIUS OF A SINGLE PIXEL
+    r = radius / raster_radius
     return math.ceil(r) if r - math.floor(r) >= 0.5 else math.floor(r)
+
 
 def _get_kernel_size(radius: int) -> tuple[int, int]:
     size = 1 + (radius * 2)
@@ -111,7 +119,7 @@ def _point_to_raster(raster_array, raster_meta, geodataframe, attribute, radius,
     if radius is not None:
         x = raster_transform[0]
         y = raster_transform[4]
-        radius = _convert_radius(radius,x,y)
+        radius = _convert_radius(radius, x, y)
         for target_value in unique_values:
             raster_array = _create_buffer_around_labels(raster_array, radius, target_value, buffer)
 
@@ -129,14 +137,14 @@ def points_to_raster(
     """Convert a GeoDataFrame of points into a binary raster using a provided base raster profile.
 
     Accepts a base raster profile and a geodataframe with points to be converted to binary raster.
-    By default, the points are assigned a value of 1, and all other areas are set to 0. If an 
-    attribute is provided, the raster will take the corresponding values from the attribute column 
+    By default, the points are assigned a value of 1, and all other areas are set to 0. If an
+    attribute is provided, the raster will take the corresponding values from the attribute column
     in the GeoDataFrame instead of 1. The base raster profile defines the template for the raster's
-    extent, resolution, and projection. Optionally, a radius can be applied around each point (with 
-    units consistent with the raster profile) to expand the point's influence within the raster. In 
-    the case of overlapping radii with different attribute values, a buffer can be used to resolve 
+    extent, resolution, and projection. Optionally, a radius can be applied around each point (with
+    units consistent with the raster profile) to expand the point's influence within the raster. In
+    the case of overlapping radii with different attribute values, a buffer can be used to resolve
     the conflict by selecting the minimum, maximum, or average value from the overlapping pixels.
-    
+
     Args:
         geodataframe: The geodataframe points set to be converted into raster.
         attribute: Values to be be assigned to the geodataframe.
@@ -161,15 +169,14 @@ def points_to_raster(
 
     if raster_profile.get("crs") != geodataframe.crs:
         raise NonMatchingCrsException("Expected coordinate systems to match between raster and GeoDataFrame.")
-    
+
     if attribute is not None:
 
         if attribute not in geodataframe.columns:
             raise InvalidColumnException(f"Attribute '{attribute}' not found in the geodataframe")
-        
-        if not pd.to_numeric(geodataframe[attribute], errors='coerce').notna().all():
-            raise NonNumericDataException(f"Values in the '{attribute}' column are non numeric type")
 
+        if not pd.to_numeric(geodataframe[attribute], errors="coerce").notna().all():
+            raise NonNumericDataException(f"Values in the '{attribute}' column are non numeric type")
 
     check_raster_profile(raster_profile=raster_profile)
 
