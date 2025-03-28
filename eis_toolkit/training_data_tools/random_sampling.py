@@ -1,5 +1,3 @@
-from numbers import Number
-
 import geopandas as gpd
 import numpy as np
 import rasterio
@@ -9,13 +7,13 @@ from beartype.typing import Tuple, Union
 from rasterio import profiles
 from shapely.geometry import Point
 
-from eis_toolkit.exceptions import EmptyDataException
+from eis_toolkit.exceptions import EmptyDataException, NumericValueSignException
 
 
 def _random_sampling(
     indices: np.ndarray,
     values: np.ndarray,
-    sample_number: Number,
+    sample_number: int,
     random_seed: int,
 ) -> np.ndarray:
 
@@ -34,13 +32,18 @@ def _random_sampling(
 def generate_negatives(
     raster_array: np.ndarray,
     raster_meta: Union[profiles.Profile, dict],
-    sample_number: Number,
+    sample_number: int,
     random_seed: int = 48,
 ) -> Tuple[gpd.GeoDataFrame, np.ndarray, Union[profiles.Profile, dict]]:
-    """Generate probable negatives from raster array with marked positives.
+    """Generate probable negatives from binary raster array with marked positives.
+
+    Generates a list of random negative points from a binary raster array,
+    ensuring that these negatives do not overlap with the already marked positive 
+    points. The positives can include points with or without attribute and radius, 
+    as in the points_to_raster tool. 
 
     Args:
-        raster_array: Raster array with marked positives.
+        raster_array: Binary raster array with marked positives.
         raster_meta: Raster metadata.
         sample_number: maximum number of negatives to be generated.
         random_seed: Seed for generating random negatives.
@@ -49,11 +52,15 @@ def generate_negatives(
         A tuple containing the shapely points, output raster as a NumPy array and updated metadata.
 
     Raises:
-        EmptyDataException:  The raster array is empty.
+        EmptyDataException: The raster array is empty.
+        NumericValueSignException: The sample number is negative or zero.
     """
 
     if raster_array.size == 0:
-        raise EmptyDataException
+        raise EmptyDataException("Expected non empty raster array.")
+    
+    if sample_number <= 0:
+        raise NumericValueSignException("The sample number should be always be greater than zero")
 
     out_array = np.copy(raster_array)
 
