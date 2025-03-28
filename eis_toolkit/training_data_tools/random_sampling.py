@@ -7,7 +7,7 @@ from beartype.typing import Tuple, Union
 from rasterio import profiles
 from shapely.geometry import Point
 
-from eis_toolkit.exceptions import EmptyDataException, NumericValueSignException
+from eis_toolkit.exceptions import EmptyDataFrameException, NumericValueSignException
 
 
 def _random_sampling(
@@ -57,7 +57,7 @@ def generate_negatives(
     """
 
     if raster_array.size == 0:
-        raise EmptyDataException("Expected non empty raster array.")
+        raise EmptyDataFrameException("Expected non empty raster array.")
 
     if sample_number <= 0:
         raise NumericValueSignException("The sample number should be always be greater than zero")
