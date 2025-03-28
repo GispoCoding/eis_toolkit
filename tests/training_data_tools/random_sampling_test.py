@@ -1,9 +1,9 @@
 from pathlib import Path
 
+import geopandas as gpd
+import numpy as np
 import pytest
 import rasterio
-import numpy as np
-import geopandas as gpd
 
 from eis_toolkit.exceptions import EmptyDataFrameException, NumericValueSignException
 from eis_toolkit.training_data_tools.points_to_raster import points_to_raster
