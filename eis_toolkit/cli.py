@@ -126,10 +126,18 @@ class ResamplingMethods(str, Enum):
     nearest = "nearest"
     bilinear = "bilinear"
     cubic = "cubic"
+    cubic_spline = "cubic_spline"
+    lanczos = "lanczos"
     average = "average"
-    gauss = "gauss"
+    mode = "mode"
+    # gauss = "gauss"
     max = "max"
     min = "min"
+    median = "median"
+    q1 = "q1"
+    q3 = "q3"
+    sum = "sum"
+    rms = "rms"
 
 
 class ValidationMethods(str, Enum):

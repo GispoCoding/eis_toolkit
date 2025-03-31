@@ -9,14 +9,22 @@ from rasterio.enums import Resampling
 
 from eis_toolkit.exceptions import NumericValueSignException
 
-RESAMPLE_METHOD_MAP = {
+RESAMPLING_METHODS = {
     "nearest": warp.Resampling.nearest,
     "bilinear": warp.Resampling.bilinear,
     "cubic": warp.Resampling.cubic,
+    "cubic_spline": warp.Resampling.cubic_spline,
+    "lanczos": warp.Resampling.lanczos,
     "average": warp.Resampling.average,
-    "gauss": warp.Resampling.gauss,
+    "mode": warp.Resampling.mode,
+    # "gauss": warp.Resampling.gauss,  # Not available for rasterio.warp apparently
     "max": warp.Resampling.max,
     "min": warp.Resampling.min,
+    "median": warp.Resampling.med,
+    "q1": warp.Resampling.q1,
+    "q3": warp.Resampling.q3,
+    "sum": warp.Resampling.sum,
+    "rms": warp.Resampling.rms,
 }
 
 
@@ -63,7 +71,22 @@ def _resample(
 def resample(
     raster: rasterio.io.DatasetReader,
     resolution: Number,
-    resampling_method: Literal["nearest", "bilinear", "cubic", "average", "gauss", "max", "min"] = "bilinear",
+    resampling_method: Literal[
+        "nearest",
+        "bilinear",
+        "cubic",
+        "cubic_spline",
+        "lanczos",
+        "average",
+        "mode",
+        "max",
+        "min",
+        "median",
+        "q1",
+        "q3",
+        "sum",
+        "rms",
+    ] = "bilinear",
 ) -> Tuple[np.ndarray, dict]:
     """Resamples raster according to given resolution.
 
@@ -84,6 +107,6 @@ def resample(
     if resolution <= 0:
         raise NumericValueSignException(f"Expected a positive value for resolution: {resolution})")
 
-    method = RESAMPLE_METHOD_MAP[resampling_method]
+    method = RESAMPLING_METHODS[resampling_method]
     out_image, out_meta = _resample(raster, resolution, method)
     return out_image, out_meta
