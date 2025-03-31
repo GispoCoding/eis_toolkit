@@ -12,13 +12,14 @@ from scipy.ndimage import binary_dilation
 from eis_toolkit.exceptions import (
     EmptyDataFrameException,
     InvalidColumnException,
+    InvalidDataShapeException,
     NonMatchingCrsException,
     NonNumericDataException,
 )
 from eis_toolkit.utilities.checks.raster import check_raster_profile
 
 
-def _convert_radius(radius: int, x: Number, y: Number) -> int:
+def _get_pixel_amount_radius(radius: int, x: Number, y: Number) -> int:
     raster_radius = math.sqrt(x**2 + y**2)  # RADIUS OF A SINGLE PIXEL
     r = radius / raster_radius
     return math.ceil(r) if r - math.floor(r) >= 0.5 else math.floor(r)
@@ -119,7 +120,7 @@ def _point_to_raster(raster_array, raster_meta, geodataframe, attribute, radius,
     if radius is not None:
         x = raster_transform[0]
         y = raster_transform[4]
-        radius = _convert_radius(radius, x, y)
+        radius = _get_pixel_amount_radius(radius, x, y)
         for target_value in unique_values:
             raster_array = _create_buffer_around_labels(raster_array, radius, target_value, buffer)
 
@@ -140,10 +141,11 @@ def points_to_raster(
     By default, the points are assigned a value of 1, and all other areas are set to 0. If an
     attribute is provided, the raster will take the corresponding values from the attribute column
     in the GeoDataFrame instead of 1. The base raster profile defines the template for the raster's
-    extent, resolution, and projection. Optionally, a radius can be applied around each point (with
-    units consistent with the raster profile) to expand the point's influence within the raster. In
-    the case of overlapping radii with different attribute values, a buffer can be used to resolve
-    the conflict by selecting the minimum, maximum, or average value from the overlapping pixels.
+    extent, resolution, and projection. Optionally when the pixel size is square, a radius can be
+    applied around each point (with units consistent with the raster profile) to expand the point's
+    influence within the raster. In the case of overlapping radii with different attribute values,
+    a buffer can be used to resolve the conflict by selecting the minimum, maximum, or average value
+    from the overlapping pixels.
 
     Args:
         geodataframe: The geodataframe points set to be converted into raster.
@@ -162,6 +164,7 @@ def points_to_raster(
         NonMatchingCrsException: The raster and geodataframe are not in the same CRS.
         InvalidColumnException: The attribute column was not found in geodataframe.
         NonNumericDataException: Some numeric parameters have invalid values.
+        InvalidDataShapeException: The pixel size is not square.
     """
 
     if geodataframe.empty:
@@ -177,6 +180,14 @@ def points_to_raster(
 
         if not pd.to_numeric(geodataframe[attribute], errors="coerce").notna().all():
             raise NonNumericDataException(f"Values in the '{attribute}' column are non numeric type")
+
+    if radius is not None:
+        transform = raster_profile.get("transform")
+        x = transform[0]
+        y = transform[4]
+
+        if x**2 != y**2:
+            raise InvalidDataShapeException("The pixel size in the raster are not square.")
 
     check_raster_profile(raster_profile=raster_profile)
 
