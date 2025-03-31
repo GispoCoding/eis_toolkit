@@ -8,7 +8,7 @@ from rasterio.enums import Resampling
 from rasterio.profiles import Profile
 
 from eis_toolkit.exceptions import InvalidParameterValueException
-from eis_toolkit.raster_processing.resampling import RESAMPLE_METHOD_MAP
+from eis_toolkit.raster_processing.resampling import RESAMPLING_METHODS
 
 
 def _calculate_snapped_grid(
@@ -128,7 +128,22 @@ def _unify_raster_grids(
 def unify_raster_grids(
     base_raster: rasterio.io.DatasetReader,
     rasters_to_unify: Sequence[rasterio.io.DatasetReader],
-    resampling_method: Literal["nearest", "bilinear", "cubic", "average", "gauss", "max", "min"] = "nearest",
+    resampling_method: Literal[
+        "nearest",
+        "bilinear",
+        "cubic",
+        "cubic_spline",
+        "lanczos",
+        "average",
+        "mode",
+        "max",
+        "min",
+        "median",
+        "q1",
+        "q3",
+        "sum",
+        "rms",
+    ] = "nearest",
     masking: Optional[Literal["extents", "full"]] = "extents",
 ) -> List[Tuple[np.ndarray, Profile]]:
     """Unifies given rasters with the base raster.
@@ -159,6 +174,6 @@ def unify_raster_grids(
     if len(rasters_to_unify) == 0:
         raise InvalidParameterValueException("Rasters to unify is empty.")
 
-    method = RESAMPLE_METHOD_MAP[resampling_method]
+    method = RESAMPLING_METHODS[resampling_method]
     out_rasters = _unify_raster_grids(base_raster, rasters_to_unify, method, masking)
     return out_rasters

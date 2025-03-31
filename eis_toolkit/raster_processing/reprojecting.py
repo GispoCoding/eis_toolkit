@@ -5,7 +5,7 @@ from beartype.typing import Literal, Tuple
 from rasterio import warp
 
 from eis_toolkit.exceptions import MatchingCrsException
-from eis_toolkit.raster_processing.resampling import RESAMPLE_METHOD_MAP
+from eis_toolkit.raster_processing.resampling import RESAMPLING_METHODS
 
 
 # Core reprojecting functionality used internally by reproject_raster and reproject_and_write_raster
@@ -77,7 +77,7 @@ def reproject_raster(
     if target_crs == int(raster.crs.to_string()[5:]):
         raise MatchingCrsException("Raster is already in the target CRS.")
 
-    method = RESAMPLE_METHOD_MAP[resampling_method]
+    method = RESAMPLING_METHODS[resampling_method]
     out_image, out_meta = _reproject_raster(raster, target_crs, method)
 
     return out_image, out_meta
