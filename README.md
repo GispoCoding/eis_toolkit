@@ -23,8 +23,6 @@
   ·
   <a href="#usage">Usage</a>
   ·
-  <a href="#roadmap">Roadmap</a>
-  ·
   <a href="#contributing">Contributing</a>
   ·
   <a href="#license">License</a>
@@ -34,7 +32,7 @@
 EIS Toolkit is a comprehensive Python package for mineral prospectivity mapping and analysis. EIS Toolkit is developed as part of [EIS Horizon EU project](https://eis-he.eu/), which aims to aid EU's efforts in the green transition by securing critical raw materials. EIS Toolkit serves both as a standalone library that brings together and implements relevant tools for mineral prospectivity mapping and as a computational backend for [EIS QGIS Plugin](https://github.com/GispoCoding/eis_qgis_plugin).
 
 > [!NOTE]  
-> This repository is still in development. Check the [wiki page of EIS Toolkit](https://github.com/GispoCoding/eis_toolkit/wiki) for list of tools and [roadmap](#roadmap) for more details about the project.
+> This repository is still in development. Check the [wiki page of EIS Toolkit](https://github.com/GispoCoding/eis_toolkit/wiki) for list of tools.
 
 
 ## Installation
@@ -96,11 +94,6 @@ eis <tool-name> --help
 
 > [!NOTE] 
 > Please note that the CLI has been primarily designed to communicate with external programs and may be clunky in direct use.
-
-## Roadmap
-
-- Milestone 1: **Beta release 0.1** (November 2023). The toolkit should have the basic funtionalities required for a full MPM workflow. Official testing phase begins. The plugin will be still under active development.
-- Milestone 2: **Release 1.0** (May 2024). Most features should be incorporated at this time and the toolkit useful for actual MPM work. Testing will continue, more advanced methods added and the user experience refined.
 
 ## Contributing
 
