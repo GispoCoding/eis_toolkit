@@ -57,7 +57,22 @@ def _reproject_raster(
 def reproject_raster(
     raster: rasterio.io.DatasetReader,
     target_crs: int,
-    resampling_method: Literal["nearest", "bilinear", "cubic", "average", "gauss", "max", "min"] = "nearest",
+    resampling_method: Literal[
+        "nearest",
+        "bilinear",
+        "cubic",
+        "cubic_spline",
+        "lanczos",
+        "average",
+        "mode",
+        "max",
+        "min",
+        "median",
+        "q1",
+        "q3",
+        "sum",
+        "rms",
+    ] = "nearest",
 ) -> Tuple[np.ndarray, dict]:
     """Reprojects raster to match given coordinate reference system (EPSG).
 
