@@ -3111,7 +3111,7 @@ def weights_of_evidence_calculate_weights_cli(
                 dst.write(array, 1)
             out_rasters_dict[output_raster_name] = str(output_raster_path)
 
-    ResultSender.send_dict_as_json(out_rasters_dict)
+    ResultSender.send_multiple_rasters_dict_as_json(out_rasters_dict)
     ProgressLog.finish()
 
 
