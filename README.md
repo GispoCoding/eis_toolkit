@@ -34,7 +34,7 @@
 EIS Toolkit is a comprehensive Python package for mineral prospectivity mapping and analysis. EIS Toolkit is developed as part of [EIS Horizon EU project](https://eis-he.eu/), which aims to aid EU's efforts in the green transition by securing critical raw materials. EIS Toolkit serves both as a standalone library that brings together and implements relevant tools for mineral prospectivity mapping and as a computational backend for [EIS QGIS Plugin](https://github.com/GispoCoding/eis_qgis_plugin).
 
 > [!NOTE]  
-> This repository is still in development. Check the [wiki page of EIS Toolkit](https://github.com/GispoCoding/eis_toolkit/wiki) for list of tools and [roadmap](#roadmap) for more details about the project.
+> This repository is still in development. Check the [wiki page of EIS Toolkit](https://github.com/GispoCoding/eis_toolkit/wiki) for list of tools.
 
 
 ## Installation
