@@ -470,6 +470,10 @@ class ResultSender:  # noqa: D101
     def send_dict_as_json(dictionary: dict):  # noqa: D102
         typer.echo(f"Results: {json.dumps(dictionary)}")
 
+    @staticmethod
+    def send_multiple_rasters_dict_as_json(rasters_dictionary: dict):  # noqa: D102
+        typer.echo(f"Output rasters: {json.dumps(rasters_dictionary)}")
+
 
 def get_enum_values(parameter: Union[Enum, List[Enum]]) -> Union[str, List[str]]:
     """Get values behind enum parameter definition (required for list enums)."""
@@ -1586,7 +1590,7 @@ def unify_rasters_cli(
                 dst.write(out_image)
             out_rasters_dict[output_raster_name] = str(output_raster_path)
 
-    ResultSender.send_dict_as_json(out_rasters_dict)
+    ResultSender.send_multiple_rasters_dict_as_json(out_rasters_dict)
     ProgressLog.finish()
 
 
