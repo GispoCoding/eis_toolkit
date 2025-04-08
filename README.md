@@ -97,11 +97,6 @@ eis <tool-name> --help
 > [!NOTE] 
 > Please note that the CLI has been primarily designed to communicate with external programs and may be clunky in direct use.
 
-## Roadmap
-
-- Milestone 1: **Beta release 0.1** (November 2023). The toolkit should have the basic funtionalities required for a full MPM workflow. Official testing phase begins. The plugin will be still under active development.
-- Milestone 2: **Release 1.0** (May 2024). Most features should be incorporated at this time and the toolkit useful for actual MPM work. Testing will continue, more advanced methods added and the user experience refined.
-
 ## Contributing
 
 We welcome contributions to EIS Toolkit in various forms:
