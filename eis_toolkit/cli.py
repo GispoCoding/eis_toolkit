@@ -653,6 +653,7 @@ def dbscan_raster_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(output_array, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -715,6 +716,7 @@ def k_means_clustering_raster_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(output_array, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -808,6 +810,7 @@ def compute_pca_raster_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(transformed_data)
+            dst.update_stats()
 
     ResultSender.send_dict_as_json(out_dict)
     ProgressLog.finish()
@@ -978,6 +981,7 @@ def focal_filter_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1004,6 +1008,7 @@ def gaussian_filter_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1035,6 +1040,7 @@ def mexican_hat_filter_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1060,6 +1066,7 @@ def lee_additive_noise_filter_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1088,6 +1095,7 @@ def lee_multiplicative_noise_filter_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1121,6 +1129,7 @@ def lee_additive_multiplicative_noise_filter_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1149,6 +1158,7 @@ def lee_enhanced_filter_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1174,6 +1184,7 @@ def gamma_filter_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1199,6 +1210,7 @@ def frost_filter_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1224,6 +1236,7 @@ def kuan_filter_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1273,6 +1286,7 @@ def clip_raster_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1314,6 +1328,7 @@ def create_constant_raster_manually_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1343,6 +1358,7 @@ def create_constant_raster_from_template_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1392,6 +1408,7 @@ def distance_to_anomaly_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1444,6 +1461,7 @@ def proximity_to_anomaly_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dest:
             dest.write(out_image, 1)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1495,6 +1513,7 @@ def reproject_raster_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1522,6 +1541,7 @@ def resample_raster_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -1548,6 +1568,7 @@ def snap_raster_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -1588,6 +1609,7 @@ def unify_rasters_cli(
             output_raster_path = output_directory.joinpath(output_raster_name + ".tif")
             with rasterio.open(output_raster_path, "w", **out_meta) as dst:
                 dst.write(out_image)
+                dst.update_stats()
             out_rasters_dict[output_raster_name] = str(output_raster_path)
 
     ResultSender.send_multiple_rasters_dict_as_json(out_rasters_dict)
@@ -1613,6 +1635,7 @@ def unique_combinations_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -1639,6 +1662,7 @@ def extract_window_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -1666,6 +1690,7 @@ def classify_aspect_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ResultSender.send_dict_as_json(class_mapping)
     ProgressLog.finish()
@@ -1751,6 +1776,7 @@ def mask_raster_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1775,6 +1801,7 @@ def reclassify_with_manual_breaks_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1799,6 +1826,7 @@ def reclassify_with_defined_intervals_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1825,6 +1853,7 @@ def reclassify_with_equal_intervals_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1851,6 +1880,7 @@ def reclassify_with_quantiles_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1877,6 +1907,7 @@ def reclassify_with_natural_breaks_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1903,6 +1934,7 @@ def reclassify_with_geometrical_intervals_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -1929,6 +1961,7 @@ def reclassify_with_standard_deviation_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dest:
             dest.write(out_image)
+            dest.update_stats()
 
     ProgressLog.finish()
 
@@ -2009,6 +2042,7 @@ def idw_interpolation_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -2052,6 +2086,7 @@ def kriging_interpolation_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -2101,6 +2136,7 @@ def rasterize_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -2166,6 +2202,7 @@ def vector_density_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -2208,6 +2245,7 @@ def distance_computation_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -2292,6 +2330,7 @@ def proximity_computation_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -2338,6 +2377,7 @@ def points_to_raster_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -2369,6 +2409,7 @@ def generate_negatives_cli(
     with ProgressLog.saving_output_files([output_raster, output_vector]):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
         out_points.to_file(output_vector)
 
     ProgressLog.finish()
@@ -2793,8 +2834,10 @@ def classifier_test_cli(
     with ProgressLog.saving_output_files([output_raster_probability, output_raster_classified]):
         with rasterio.open(output_raster_probability, "w", **out_profile) as dst:
             dst.write(probabilities_reshaped, 1)
+            dst.update_stats()
         with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
             dst.write(predictions_reshaped, 1)
+            dst.update_stats()
 
     ResultSender.send_dict_as_json(metrics_dict)
     ProgressLog.finish()
@@ -2832,6 +2875,7 @@ def regressor_test_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(predictions_reshaped, 1)
+            dst.update_stats()
 
     ResultSender.send_dict_as_json(metrics_dict)
     ProgressLog.finish()
@@ -2869,8 +2913,10 @@ def classifier_predict_cli(
     with ProgressLog.saving_output_files([output_raster_probability, output_raster_classified]):
         with rasterio.open(output_raster_probability, "w", **out_profile) as dst:
             dst.write(probabilities_reshaped, 1)
+            dst.update_stats()
         with rasterio.open(output_raster_classified, "w", **out_profile) as dst:
             dst.write(predictions_reshaped, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -2902,6 +2948,7 @@ def regressor_predict_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(predictions_reshaped, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -2931,6 +2978,7 @@ def and_overlay_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -2958,6 +3006,7 @@ def or_overlay_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -2985,6 +3034,7 @@ def product_overlay_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3012,6 +3062,7 @@ def sum_overlay_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3036,6 +3087,7 @@ def gamma_overlay_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster: OUTPUT
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_profile) as dst:
             dst.write(out_image, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3109,6 +3161,7 @@ def weights_of_evidence_calculate_weights_cli(
             output_raster_path = output_raster_dir.joinpath(output_raster_name + ".tif")
             with rasterio.open(output_raster_path, "w", dtype=dtype, **raster_meta) as dst:
                 dst.write(array, 1)
+                dst.update_stats()
             out_rasters_dict[output_raster_name] = str(output_raster_path)
 
     ResultSender.send_multiple_rasters_dict_as_json(out_rasters_dict)
@@ -3170,14 +3223,17 @@ def weights_of_evidence_calculate_responses_cli(
         posterior_probabilities = nan_to_nodata(posterior_probabilities, raster_profile["nodata"])
         with rasterio.open(output_probabilities, "w", **raster_profile) as dst:
             dst.write(posterior_probabilities, 1)
+            dst.update_stats()
 
         posterior_probabilies_std = nan_to_nodata(posterior_probabilies_std, raster_profile["nodata"])
         with rasterio.open(output_probabilities_std, "w", **raster_profile) as dst:
             dst.write(posterior_probabilies_std, 1)
+            dst.update_stats()
 
         confidence_array = nan_to_nodata(confidence_array, raster_profile["nodata"])
         with rasterio.open(output_confidence_array, "w", **raster_profile) as dst:
             dst.write(confidence_array, 1)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3444,6 +3500,7 @@ def binarize_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3474,6 +3531,7 @@ def clip_transform_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3501,6 +3559,7 @@ def z_score_normalization_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3530,6 +3589,7 @@ def min_max_scaling_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3559,6 +3619,7 @@ def log_transform_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3592,6 +3653,7 @@ def sigmoid_transform_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3635,6 +3697,7 @@ def winsorize_transform_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3905,6 +3968,7 @@ def split_raster_bands_cli(input_raster: INPUT_FILE_OPTION, output_dir: OUTPUT_D
         for output_path, (out_image, out_profile) in zip(output_paths, output_singleband_rasters):
             with rasterio.open(output_path, "w", **out_profile) as dst:
                 dst.write(out_image, 1)
+                dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3924,6 +3988,7 @@ def combine_raster_bands_cli(input_rasters: INPUT_FILES_ARGUMENT, output_raster:
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3948,6 +4013,7 @@ def unify_raster_nodata_cli(
         for output_path, (out_image, out_profile) in zip(output_paths, unified):
             with rasterio.open(output_path, "w", **out_profile) as dst:
                 dst.write(out_image)
+                dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3972,6 +4038,7 @@ def convert_raster_nodata_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -3997,6 +4064,7 @@ def replace_with_nodata_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
@@ -4019,6 +4087,7 @@ def set_raster_nodata_cli(
     with ProgressLog.saving_output_files(output_raster):
         with rasterio.open(output_raster, "w", **out_meta) as dst:
             dst.write(out_image)
+            dst.update_stats()
 
     ProgressLog.finish()
 
