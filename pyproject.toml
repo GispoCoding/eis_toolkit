@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "eis_toolkit"
-version = "1.1.4"
+version = "1.1.5"
 description = "EIS Toolkit is a comprehensive collection of tools suitable for mineral prospectivity mapping. This toolkit has been developed as part of the Exploration Information System project which has been funded by European Union."
 authors = []
 maintainers = ["Gispo Ltd. <info@gispo.fi>"]
