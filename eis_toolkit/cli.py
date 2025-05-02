@@ -15,7 +15,6 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio
-import rasterio.profiles
 import typer
 from beartype.typing import List, Optional, Sequence, Tuple, Union
 from typing_extensions import Annotated
@@ -439,14 +438,14 @@ class ProgressLog:  # noqa: D101
     def reading_input_files():  # noqa: D102
         typer.echo("Opening input files....")
         yield
-        typer.echo("✅ Input files read\n")
+        typer.echo("[OK] Input files read\n")
 
     @contextmanager
     @staticmethod
     def running_algorithm():  # noqa: D102
         typer.echo("Running algorithm...")
         yield
-        typer.echo("✅ Algorithm run succesfully\n")
+        typer.echo("[OK] Algorithm run succesfully\n")
 
     @contextmanager
     @staticmethod
@@ -455,14 +454,14 @@ class ProgressLog:  # noqa: D101
         yield
         if isinstance(savepath, Sequence):
             for file in savepath:
-                typer.echo(f"✅ Output file(s) saved to {file}")
+                typer.echo(f"[OK] Output file(s) saved to {file}")
             typer.echo(" ")
         else:
-            typer.echo(f"✅ Output file(s) saved to {savepath}\n")
+            typer.echo(f"[OK] Output file(s) saved to {savepath}\n")
 
     @staticmethod
     def finish():  # noqa: D102
-        typer.echo("✅ Algorithm execution finished succesfully\n")
+        typer.echo("[OK] Algorithm execution finished succesfully\n")
 
 
 class ResultSender:  # noqa: D101
