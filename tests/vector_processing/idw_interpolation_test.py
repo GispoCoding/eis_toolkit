@@ -13,6 +13,7 @@ from eis_toolkit.vector_processing.idw_interpolation import idw
 
 test_dir = Path(__file__).parent.parent
 idw_test_data = test_dir.joinpath("data/remote/interpolating/idw_test_data.tif")
+idw_radius_test_data = test_dir.joinpath("data/remote/interpolating/idw_radius_test_data.tif")
 
 
 @pytest.fixture
@@ -69,6 +70,24 @@ def test_validated_points_with_extent(validated_points, raster_profile):
     assert target_column in validated_points.columns
 
     with rasterio.open(idw_test_data) as src:
+        external_values = src.read(1)
+
+    np.testing.assert_almost_equal(interpolated_values, external_values, decimal=2)
+
+
+def test_validated_points_with_radius(validated_points, raster_profile):
+    """Test IDW with search radius."""
+    target_column = "random_number"
+    interpolated_values = idw(
+        geodataframe=validated_points,
+        target_column=target_column,
+        raster_profile=raster_profile,
+        power=2,
+        search_radius=0.5,
+    )
+    assert target_column in validated_points.columns
+
+    with rasterio.open(idw_radius_test_data) as src:
         external_values = src.read(1)
 
     np.testing.assert_almost_equal(interpolated_values, external_values, decimal=2)

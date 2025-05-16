@@ -146,7 +146,7 @@ def test_geodataframe_missing_column():
 
     gdf = gpd.GeoDataFrame({"test_col": [1, 2, 3]})
 
-    with pytest.raises(exceptions.InvalidParameterValueException):
+    with pytest.raises(exceptions.InvalidColumnException):
         local_morans_i(gdf, column="value", weight_type="queen", k=4, permutations=999)
 
 

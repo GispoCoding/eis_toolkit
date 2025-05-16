@@ -8,6 +8,7 @@ from eis_toolkit.utilities.nodata import (
     handle_nodata_as_nan,
     nan_to_nodata,
     nodata_to_nan,
+    replace_with_nodata,
     set_raster_nodata,
     unify_raster_nodata,
 )
@@ -35,6 +36,76 @@ def test_convert_raster_nodata():
         assert np.count_nonzero(raster_data == new_nodata) == 0
         out_image, out_meta = convert_raster_nodata(raster, old_nodata=8.8060, new_nodata=-999)
         assert np.count_nonzero(out_image == new_nodata) > 0
+        assert out_meta["nodata"] == -999
+
+
+def test_replace_with_nodata():
+    """Test that replacing raster pixel values with nodata works as expected."""
+    target_value = 2.705
+    nodata_value = -999
+
+    with rasterio.open(SMALL_RASTER_PATH) as raster:
+        raster_data = raster.read()
+        nr_of_pixels = np.count_nonzero(raster_data == target_value)
+        assert nr_of_pixels > 0
+        assert np.count_nonzero(raster_data == nodata_value) == 0
+
+        replace_condition = "equal"
+        out_image, out_meta = replace_with_nodata(raster, target_value, nodata_value, replace_condition)
+        assert np.count_nonzero(out_image == nodata_value) > 0
+        assert np.count_nonzero(out_image == target_value) == 0
+        assert out_meta["nodata"] == -999
+
+    with rasterio.open(SMALL_RASTER_PATH) as raster:
+        raster_data = raster.read()
+        # Ensure some pixels exist that are less than the target value
+        nr_of_pixels_less_than_target = np.count_nonzero(raster_data < target_value)
+        assert nr_of_pixels_less_than_target > 0
+
+        replace_condition = "less_than"
+        out_image, out_meta = replace_with_nodata(raster, target_value, nodata_value, replace_condition)
+
+        assert np.count_nonzero(out_image == nodata_value) == nr_of_pixels_less_than_target
+        assert np.count_nonzero((out_image < target_value) & (out_image != nodata_value)) == 0
+        assert out_meta["nodata"] == -999
+
+    with rasterio.open(SMALL_RASTER_PATH) as raster:
+        raster_data = raster.read()
+        # Ensure some pixels exist that are greater than the target value
+        nr_of_pixels_greater_than_target = np.count_nonzero(raster_data > target_value)
+        assert nr_of_pixels_greater_than_target > 0
+
+        replace_condition = "greater_than"
+        out_image, out_meta = replace_with_nodata(raster, target_value, nodata_value, replace_condition)
+
+        assert np.count_nonzero(out_image == nodata_value) == nr_of_pixels_greater_than_target
+        assert np.count_nonzero(out_image > target_value) == 0
+        assert out_meta["nodata"] == -999
+
+    with rasterio.open(SMALL_RASTER_PATH) as raster:
+        raster_data = raster.read()
+        # Ensure some pixels exist that are less than or equal to the target value
+        nr_of_pixels_less_than_or_equal = np.count_nonzero(raster_data <= target_value)
+        assert nr_of_pixels_less_than_or_equal > 0
+
+        replace_condition = "less_than_or_equal"
+        out_image, out_meta = replace_with_nodata(raster, target_value, nodata_value, replace_condition)
+
+        assert np.count_nonzero(out_image == nodata_value) == nr_of_pixels_less_than_or_equal
+        assert np.count_nonzero((out_image <= target_value) & (out_image != nodata_value)) == 0
+        assert out_meta["nodata"] == -999
+
+    with rasterio.open(SMALL_RASTER_PATH) as raster:
+        raster_data = raster.read()
+        # Ensure some pixels exist that are greater than or equal to the target value
+        nr_of_pixels_greater_than_or_equal = np.count_nonzero(raster_data >= target_value)
+        assert nr_of_pixels_greater_than_or_equal > 0
+
+        replace_condition = "greater_than_or_equal"
+        out_image, out_meta = replace_with_nodata(raster, target_value, nodata_value, replace_condition)
+
+        assert np.count_nonzero(out_image == nodata_value) == nr_of_pixels_greater_than_or_equal
+        assert np.count_nonzero(out_image >= target_value) == 0
         assert out_meta["nodata"] == -999
 
 

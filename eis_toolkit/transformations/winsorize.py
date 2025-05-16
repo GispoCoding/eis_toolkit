@@ -129,13 +129,15 @@ def winsorize(  # type: ignore[no-any-unimported]
         inital_dtype = band_array.dtype
 
         band_array = cast_array_to_float(band_array, cast_int=True)
-        band_array = nodata_to_nan(band_array, nodata_value=nodata)
+        if nodata:
+            band_array = nodata_to_nan(band_array, nodata_value=nodata)
 
         band_array, calculated_lower, calculated_upper = _winsorize(
             band_array, percentiles=percentiles[i], inside=inside
         )
 
-        band_array = nan_to_nodata(band_array, nodata_value=nodata)
+        if nodata:
+            band_array = nan_to_nodata(band_array, nodata_value=nodata)
         band_array = cast_array_to_int(band_array, scalar=nodata, initial_dtype=inital_dtype)
 
         band_array = np.expand_dims(band_array, axis=0)
@@ -148,12 +150,14 @@ def winsorize(  # type: ignore[no-any-unimported]
         current_transform = f"transformation {i + 1}"
         current_settings = {
             "band_origin": bands[i],
-            "percentile_lower": cast_scalar_to_int(percentiles[i][0]),
-            "percentile_upper": cast_scalar_to_int(percentiles[i][1]),
-            "calculated_lower": cast_scalar_to_int(calculated_lower),
-            "calculated_upper": cast_scalar_to_int(calculated_upper),
             "nodata": cast_scalar_to_int(nodata),
         }
+        if calculated_lower:
+            current_settings["percentile_lower"] = cast_scalar_to_int(percentiles[i][0])
+            current_settings["calculated_lower"] = cast_scalar_to_int(calculated_lower)
+        if calculated_upper:
+            current_settings["percentile_upper"] = cast_scalar_to_int(percentiles[i][1])
+            current_settings["calculated_upper"] = cast_scalar_to_int(calculated_upper)
 
         out_settings[current_transform] = current_settings
 

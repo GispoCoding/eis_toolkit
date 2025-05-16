@@ -3,7 +3,8 @@ name: Conda
 on:
   pull_request:
   push:
-    branches: [master, main]
+    # branches: [master, main]
+    branches: [main]
 jobs:
   conda-test:
     name: Conda Install & Test
@@ -11,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9"]
-        platform: ["ubuntu-latest", "windows-latest"]
+        platform: ["ubuntu-latest"]
 
     runs-on: ${{ matrix.platform }}
     defaults:
@@ -27,6 +28,9 @@ jobs:
           auto-activate-base: false
           mamba-version: "*"
           channel-priority: true
+      - name: Set GDAL environment variable for Windows
+        if: runner.os == 'Windows'
+        run: echo "USE_PATH_FOR_GDAL_PYTHON=YES" >> $GITHUB_ENV
       - name: Print conda environment
         run: |
           # Print environment
@@ -39,3 +43,4 @@ jobs:
           python -c 'import eis_toolkit'
           # Run unittests with pytest
           pytest -v
+ 

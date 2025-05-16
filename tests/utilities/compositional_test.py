@@ -58,10 +58,28 @@ def test_compositional_data_has_nans():
         single_plr_transform(df, "b")
 
 
+def test_compositional_data_invalid():
+    """Test that input data that does not belong to a simplex sample space raises the correct exception."""
+    arr = np.array([[1, 1, 1], [2, 2, 2]])
+    df = pd.DataFrame(arr, columns=["a", "b", "c"])
+    with pytest.raises(InvalidCompositionException):
+        alr_transform(df)
+    with pytest.raises(InvalidCompositionException):
+        clr_transform(df)
+    with pytest.raises(InvalidCompositionException):
+        single_ilr_transform(df, ["a"], ["b"])
+    with pytest.raises(InvalidCompositionException):
+        plr_transform(df)
+    with pytest.raises(InvalidCompositionException):
+        single_plr_transform(df, "b")
+
+
 def test_check_for_simplex_sample_space():
     """Test whether or not a dataframe belongs to a simplex sample space is correctly identified."""
     unit_simplex_df = pd.DataFrame([[0.1, 0.2, 0.3, 0.4], [0.2, 0.3, 0.2, 0.3]])
-    simplex_df = pd.DataFrame([[1, 2, 3, 4], [2, 3, 2, 3]], columns=["a", "b", "c", "d"])
+    closed_to_hundred_df = unit_simplex_df * 100
+    closed_to_million_df = unit_simplex_df * 1e6
+    closed_to_billion_df = unit_simplex_df * 1e9
     non_simplex_positive_df = pd.DataFrame([1, 2, 3, 4], [5, 6, 7, 8])
     non_positive_df = pd.DataFrame([-1, 2, 3, 4], [1, 2, 3, 4])
 
@@ -71,13 +89,23 @@ def test_check_for_simplex_sample_space():
     with pytest.raises(NumericValueSignException):
         check_in_simplex_sample_space(non_positive_df)
 
-    with pytest.raises(InvalidCompositionException):
-        check_in_simplex_sample_space(simplex_df, np.float64(100))
-
     # Valid cases - assert no exception is raised
     try:
-        check_in_simplex_sample_space(simplex_df)
-        check_in_simplex_sample_space(simplex_df, np.float64(10))
-        check_in_simplex_sample_space(unit_simplex_df, np.float64(1.0))
+        check_in_simplex_sample_space(unit_simplex_df)
+    except Exception as ex:
+        assert False, f"{type(ex)}: {ex}"
+
+    try:
+        check_in_simplex_sample_space(closed_to_hundred_df)
+    except Exception as ex:
+        assert False, f"{type(ex)}: {ex}"
+
+    try:
+        check_in_simplex_sample_space(closed_to_million_df)
+    except Exception as ex:
+        assert False, f"{type(ex)}: {ex}"
+
+    try:
+        check_in_simplex_sample_space(closed_to_billion_df)
     except Exception as ex:
         assert False, f"{type(ex)}: {ex}"
