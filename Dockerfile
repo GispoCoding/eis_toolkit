@@ -7,12 +7,15 @@ WORKDIR /eis_toolkit
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
+    git \
     libgdal-dev \
     python3-pip
 
 RUN pip install poetry pre-commit
 
-COPY poetry.lock pyproject.toml /eis_toolkit/
+COPY poetry.lock pyproject.toml ./
+COPY README.md ./
+COPY eis_toolkit ./eis_toolkit
 
 RUN poetry install
 
