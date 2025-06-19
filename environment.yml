@@ -13,7 +13,6 @@ dependencies:
   - matplotlib-base >=3.7.0
   - statsmodels >=0.13.5,<1.0.0
   - keras >=2.10.0,<3.0.0
-  - tensorflow >=2.10.0,<3.0.0
   - beartype >=0.13.1,<2.0.0
   - seaborn >=0.12.2
   - pykrige >=1.7.0
