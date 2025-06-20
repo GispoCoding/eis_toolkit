@@ -1,25 +1,30 @@
+import os
+import warnings
+from abc import ABC, abstractmethod
 from numbers import Number
 
 import numpy as np
-import os
-import tensorflow as tf
-import tensorflow_probability as tfp
-import warnings
-from abc import ABC, abstractmethod
 from beartype import beartype
 from beartype.typing import Callable, List, Optional, Tuple
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 
-from eis_toolkit.exceptions import InvalidDataShapeException, InvalidParameterValueException
+from eis_toolkit.exceptions import (
+    InsufficientClassesException,
+    InvalidDataShapeException,
+    InvalidParameterValueException,
+)
 
-tfd = tfp.distributions
-
-# Suppress TensorFlow warnings
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
+import tensorflow as tf  # noqa: E402
+import tensorflow_probability as tfp  # noqa: E402
+
+tfd = tfp.distributions
 tf.config.run_functions_eagerly(False)
+
 
 class BayesianNeuralNetworkBase(BaseEstimator, ABC):
     """Base class for Bayesian Neural Networks."""
@@ -37,7 +42,8 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         early_stopping_patience=None,
         early_stopping_monitor="auto",
         random_state=None,
-        shuffle=False,
+        shuffle=True,
+        stratified=None,
     ):
         """
         Initialize Bayesian Neural Network.
@@ -57,6 +63,13 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
             early_stopping_monitor: Metric to monitor for early stopping.
                 Must be one of: "auto", "loss", "val_loss".
             random_state: Seed for random number generation. Defaults to None.
+            shuffle: Whether to shuffle training data before each epoch. Defaults to True.
+                Should only be disabled in case of
+                - Modeling with time series data
+                - Other data that have an ordered structure and must be handled sequentially
+            stratified: Whether to use stratified shuffling when splitting into training and validation data.
+                Defaults to None (auto mode).
+                For binary classification, it will be activated if the class ratio is below 1:3
         """
         self.hidden_units = hidden_units
         self.learning_rate = learning_rate
@@ -69,6 +82,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         self.early_stopping_monitor = early_stopping_monitor
         self.random_state = random_state
         self.shuffle = shuffle
+        self.stratified = stratified
 
         # Internal attributes (set during fit)
         self.network_layers = None
@@ -97,7 +111,6 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         b_loc = tf.Variable(self._initializer((1, d_out)), name="b_loc")
         b_std = tf.Variable(self._initializer((1, d_out)) - tf.constant(6.0), name="b_std")
         return w_loc, w_std, b_loc, b_std
-
 
     @staticmethod
     def _dense_layer_forward(
@@ -154,10 +167,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         return kl_w + kl_b
 
     def _build_network(
-        self,
-        input_shape: int,
-        hidden_units: List[int],
-        output_dim: int = 1
+        self, input_shape: int, hidden_units: List[int], output_dim: int = 1
     ) -> List[Tuple[tf.Variable, tf.Variable, tf.Variable, tf.Variable]]:
         """Build network layers with given dimensions."""
         all_units = [input_shape] + hidden_units + [output_dim]
@@ -285,11 +295,26 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
 
         return None
 
+    def _check_stratified(self, y: np.ndarray) -> bool:
+        """Check if stratified sampling should be used (or not)."""
+        if self.shuffle and self.stratified is not None:
+            return self.stratified
+
+        if not isinstance(self, ClassifierMixin):
+            return False
+
+        unique, counts = np.unique(y, return_counts=True)
+        if len(unique) == 2:
+            minority_ratio = counts.min() / len(y)
+            return minority_ratio < 0.3
+
+        return False
+
     def _create_dataset(
         self,
         X: np.ndarray,
         y: np.ndarray,
-        shuffle: bool = False,
+        shuffle: bool,
     ) -> tf.data.Dataset:
         """Create a TensorFlow dataset with consistent preprocessing."""
         dataset = tf.data.Dataset.from_tensor_slices((X, y))
@@ -297,18 +322,19 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         if shuffle:
             dataset = dataset.shuffle(X.shape[0])
 
-        return (dataset
-                .batch(self.batch_size)
-                .prefetch(tf.data.AUTOTUNE)
-                .cache())
+        return dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE).cache()
 
     def _prepare_datasets(
-        self,
-        X: np.ndarray,
-        y: np.ndarray
+        self, X: np.ndarray, y: np.ndarray
     ) -> Tuple[tf.data.Dataset, Optional[tf.data.Dataset], tf.Tensor, Optional[tf.Tensor]]:
         """
         Prepare training/validation datasets from validated data.
+
+        In case of a validation split, the training dataset will be split into two parts:
+        - The split is performed using train_test_split with the specified validation_split ratio
+        - If shuffle is True for the model, data will be shuffled before each training epoch
+        - Training data: first portion [:split]
+        - Validation data: remaining portion [split:]
 
         Args:
             X: Validated training data
@@ -320,22 +346,26 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         X, y = X.astype(np.float32), y.astype(np.float32)
 
         if self.validation_split > 0:
+            use_stratified = self._check_stratified(y)
+
             X_train, X_val, y_train, y_val = train_test_split(
-                X, y,
+                X,
+                y,
                 test_size=self.validation_split,
                 random_state=self.random_state,
                 shuffle=self.shuffle,
+                stratify=y if use_stratified else None,
             )
 
-            train_dataset = self._create_dataset(X_train, y_train)
-            val_dataset = self._create_dataset(X_val, y_val)
+            train_dataset = self._create_dataset(X_train, y_train, shuffle=self.shuffle)
+            val_dataset = self._create_dataset(X_val, y_val, shuffle=False)
 
             N_train = tf.constant(X_train.shape[0], dtype=tf.float32)
             N_val = tf.constant(X_val.shape[0], dtype=tf.float32)
 
             return train_dataset, val_dataset, N_train, N_val
         else:
-            train_dataset = self._create_dataset(X, y, shuffle=True)
+            train_dataset = self._create_dataset(X, y, shuffle=self.shuffle)
             N_train = tf.constant(X.shape[0], dtype=tf.float32)
 
             return train_dataset, None, N_train, None
@@ -351,7 +381,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         pass
 
     @abstractmethod
-    def _get_output_dim(self):
+    def _get_output_dim(self, y: np.ndarray) -> int:
         """
         Get the output dimension for this model type.
 
@@ -369,7 +399,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         For regression: return as-is or apply custom transformation
 
         Args:
-            logits: Raw network outputs
+            Raw network outputs
 
         Returns:
             Transformed predictions
@@ -383,7 +413,8 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
             n_features: Number of input features from X.
 
         Returns:
-            Depth and width information for hidden layers. Defaults are 2 layers and min. 32/16 nodes.
+            Depth and width information for hidden layers.
+            Defaults are 2 layers [2*n, n] with a minimum of [32, 16].
         """
         if self.hidden_units is None:
             unit_1 = 2 * n_features
@@ -418,7 +449,10 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
             raise InvalidParameterValueException("Early stopping patience must be at least 1.")
 
         if self.hidden_units is not None:
-            if not all(isinstance(h, int) and h > 0 for h in self.hidden_units):
+            if len(self.hidden_units) == 0:
+                raise InvalidParameterValueException("Hidden units list must not be empty.")
+
+            if not all(isinstance(unit, int) and unit > 0 for unit in self.hidden_units):
                 raise InvalidParameterValueException("All hidden units must be positive integers.")
 
     def _determine_early_stopping_monitor(self) -> Optional[str]:
@@ -442,24 +476,20 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
                 return "val_loss"
             else:
                 warnings.warn(
-                    "early_stopping_monitor='val_loss' but validation_split=0."
-                    "Early stopping will be disabled.",
-                    UserWarning
+                    "early_stopping_monitor='val_loss' but validation_split=0." "Early stopping will be disabled.",
+                    UserWarning,
                 )
                 return None
 
         # Invalid monitor value
         raise InvalidParameterValueException(
-            f"Invalid early_stopping_monitor '{monitor}'. "
-            "Must be one of: 'auto', 'loss', 'val_loss'"
+            f"Invalid early_stopping_monitor '{monitor}'. " "Must be one of: 'auto', 'loss', 'val_loss'"
         )
 
     @staticmethod
     def _create_metrics(use_validation: bool) -> dict[str, tf.keras.metrics.Metric]:
         """Create the history for tracking training progress."""
-        metrics = {
-            "loss": tf.keras.metrics.Mean(name="loss")
-        }
+        metrics = {"loss": tf.keras.metrics.Mean(name="loss")}
 
         if use_validation:
             metrics["val_loss"] = tf.keras.metrics.Mean(name="val_loss")
@@ -474,8 +504,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
 
     @staticmethod
     def _update_history(
-        history: dict[str, List[float]],
-        metrics: dict[str, tf.keras.metrics.Metric]
+        history: dict[str, List[float]], metrics: dict[str, tf.keras.metrics.Metric]
     ) -> dict[str, float]:
         """Update the training history with current epoch results."""
         epoch_results = {}
@@ -488,11 +517,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         return epoch_results
 
     @beartype
-    def fit(
-        self,
-        X: np.ndarray,
-        y: np.ndarray
-    ) -> "BayesianNeuralNetworkBase":
+    def fit(self, X: np.ndarray, y: np.ndarray) -> "BayesianNeuralNetworkBase":
         """
         Train the Bayesian Neural Network.
 
@@ -513,9 +538,10 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
 
         if self.validation_split > 0.5:
             warnings.warn(
-                f"validation_split={self.validation_split} means {self.validation_split * 100}% of data is used for validation. "
+                f"validation_split={self.validation_split} means "
+                f"{self.validation_split * 100}% of data is used for validation. "
                 "This is unusual and may lead to poor training performance.",
-                UserWarning
+                UserWarning,
             )
 
         # Determine early stopping monitor
@@ -527,7 +553,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
 
         # Build network and create training components
         hidden_units = self._determine_hidden_units(self.input_shape)
-        output_dim = self._get_output_dim()
+        output_dim = self._get_output_dim(y)
         self.network_layers = self._build_network(self.input_shape, hidden_units, output_dim=output_dim)
 
         optimizer = tf.keras.optimizers.Adam(learning_rate=self.learning_rate)
@@ -627,22 +653,29 @@ class BayesianNeuralNetworkClassifier(BayesianNeuralNetworkBase, ClassifierMixin
 
     def _get_loss_function(self):
         """Get binary cross-entropy loss function."""
+
         def binary_crossentropy_loss(y_true, y_pred):
             return tf.reduce_mean(
-                tf.nn.sigmoid_cross_entropy_with_logits(
-                    labels=tf.expand_dims(y_true, axis=-1),
-                    logits=y_pred
-                )
+                tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.expand_dims(y_true, axis=-1), logits=y_pred)
             )
+
         return binary_crossentropy_loss
 
-    def _get_output_dim(self):
-        """Get output dimension for binary classification."""
-        return 1
+    def _get_output_dim(self, y: np.ndarray) -> int:
+        """Determine the output dimension for classification."""
+        self.n_classes = len(np.unique(y))
+
+        if self.n_classes < 2:
+            raise InsufficientClassesException(f"Classification requires at least 2 classes, got {self.n_classes}. ")
+
+        return 1 if self.n_classes == 2 else self.n_classes
 
     def _process_predictions(self, logits: tf.Tensor) -> tf.Tensor:
         """Transform logits to probabilities using sigmoid."""
-        return tf.nn.sigmoid(logits)
+        if self.n_classes <= 2:
+            return tf.nn.sigmoid(logits)
+        else:
+            return tf.nn.softmax(logits)
 
     @beartype
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -687,7 +720,8 @@ def bayesian_neural_network_classifier_train(
     early_stopping_patience: Optional[int] = None,
     early_stopping_monitor: str = "auto",
     random_state: Optional[int] = 42,
-    shuffle: bool = False,
+    shuffle: bool = True,
+    stratified: Optional[bool] = None,
 ) -> BayesianNeuralNetworkClassifier:
     """
     Train a Bayesian Neural Network classifier for binary classification.
@@ -706,6 +740,8 @@ def bayesian_neural_network_classifier_train(
         early_stopping_monitor: Metric to monitor for early stopping. Options: "auto", "loss", "val_loss".
             "auto" uses "val_loss" if validation_split > 0, otherwise "loss". Defaults to "auto".
         random_state: Seed for random number generation. Defaults to 42 for reproducibility.
+        shuffle: Whether to shuffle the training data before training. Defaults to True.
+        stratified: Whether to use stratified sampling for training. Defaults to None (auto mode).
 
     Returns:
         The trained BayesianNeuralNetworkClassifier.
@@ -721,7 +757,6 @@ def bayesian_neural_network_classifier_train(
         early_stopping_monitor=early_stopping_monitor,
         random_state=random_state,
         shuffle=shuffle,
+        stratified=stratified,
     )
-
-    model.fit(X, y)
-    return model
+    return model.fit(X, y)
