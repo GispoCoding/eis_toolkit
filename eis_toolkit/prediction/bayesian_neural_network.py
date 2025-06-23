@@ -274,7 +274,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
     @staticmethod
     def _validate_input_data(X: np.ndarray, y: np.ndarray) -> None:
         """
-        Validate input data shapes and convert to float32.
+        Validate input data shapes.
 
         Args:
             X: Training data
