@@ -41,6 +41,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         validation_split=0.0,
         early_stopping_patience=None,
         early_stopping_monitor="auto",
+        early_stopping_min_delta=0.0,
         random_state=None,
         shuffle=True,
         stratified=None,
@@ -62,6 +63,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
                 If None, early stopping is disabled. Defaults to None.
             early_stopping_monitor: Metric to monitor for early stopping.
                 Must be one of: "auto", "loss", "val_loss".
+            early_stopping_min_delta: Minimum change in the monitored quantity to qualify as an improvement.
             random_state: Seed for random number generation. Defaults to None.
             shuffle: Whether to shuffle training data before each epoch. Defaults to True.
                 Should only be disabled in case of
@@ -80,6 +82,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         self.validation_split = validation_split
         self.early_stopping_patience = early_stopping_patience
         self.early_stopping_monitor = early_stopping_monitor
+        self.early_stopping_min_delta = early_stopping_min_delta
         self.random_state = random_state
         self.shuffle = shuffle
         self.stratified = stratified
@@ -448,6 +451,9 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         if self.early_stopping_patience is not None and self.early_stopping_patience < 1:
             raise InvalidParameterValueException("Early stopping patience must be at least 1.")
 
+        if self.early_stopping_min_delta < 0:
+            raise InvalidParameterValueException("Early stopping min_delta must be >= 0.")
+
         if self.hidden_units is not None:
             if len(self.hidden_units) == 0:
                 raise InvalidParameterValueException("Hidden units list must not be empty.")
@@ -597,8 +603,9 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
             # Early stopping check
             if self.early_stopping_patience and monitor_metric:
                 current_monitor_value = epoch_results[monitor_metric]
+                improvement = best_monitor_value - current_monitor_value
 
-                if current_monitor_value < best_monitor_value:
+                if improvement > self.early_stopping_min_delta:
                     best_monitor_value = current_monitor_value
                     patience_counter = 0
                 else:
@@ -719,6 +726,7 @@ def bayesian_neural_network_classifier_train(
     validation_split: float = 0.0,
     early_stopping_patience: Optional[int] = None,
     early_stopping_monitor: str = "auto",
+    early_stopping_min_delta: float = 0.0,
     random_state: Optional[int] = 42,
     shuffle: bool = True,
     stratified: Optional[bool] = None,
@@ -755,6 +763,7 @@ def bayesian_neural_network_classifier_train(
         validation_split=validation_split,
         early_stopping_patience=early_stopping_patience,
         early_stopping_monitor=early_stopping_monitor,
+        early_stopping_min_delta=early_stopping_min_delta,
         random_state=random_state,
         shuffle=shuffle,
         stratified=stratified,

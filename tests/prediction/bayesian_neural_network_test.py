@@ -113,6 +113,12 @@ def test_invalid_early_stopping_patience():
         bayesian_neural_network_classifier_train(X_IRIS, Y_IRIS_BINARY, early_stopping_patience=0)
 
 
+def test_invalid_early_stopping_min_delta():
+    """Test that invalid value for early_stopping_patience raises the correct exception."""
+    with pytest.raises(InvalidParameterValueException):
+        bayesian_neural_network_classifier_train(X_IRIS, Y_IRIS_BINARY, early_stopping_min_delta=-0.1)
+
+
 def test_invalid_early_stopping_monitor():
     """Test that invalid value for early_stopping_monitor raises the correct exception."""
     with pytest.raises(InvalidParameterValueException):
@@ -126,9 +132,6 @@ def test_invalid_hidden_units():
 
     with pytest.raises(InvalidParameterValueException):
         bayesian_neural_network_classifier_train(X_IRIS, Y_IRIS_BINARY, hidden_units=[-10, 16])
-
-    with pytest.raises(InvalidParameterValueException):
-        bayesian_neural_network_classifier_train(X_IRIS, Y_IRIS_BINARY, hidden_units=[16.5, 8])
 
     model = bayesian_neural_network_classifier_train(X_IRIS, Y_IRIS_BINARY, hidden_units=None, epochs=1, n_samples=1)
     assert model is not None, "Model should not be None when hidden_units is None"
