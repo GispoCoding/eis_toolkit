@@ -38,6 +38,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         batch_size=512,
         n_samples=50,
         clip_norm=1.0,
+        init_std=3.0,
         validation_split=0.0,
         early_stopping_patience=None,
         early_stopping_monitor="auto",
@@ -57,6 +58,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
             batch_size: Batch size for training. Values must be >= 1. Defaults to 512.
             n_samples: Number of Monte Carlo samples for predictions. Values must be >= 1. Defaults to 50.
             clip_norm: Gradient clipping norm. If None, no clipping is applied. Defaults to 1.0.
+            init_std: Standard deviation of the prior distribution for the weights.
             validation_split: Fraction of training data to use for validation.
                 Values must be between 0 and 1. Defaults to 0.1.
             early_stopping_patience: Number of epochs with no improvement after which training stops.
@@ -79,6 +81,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         self.batch_size = batch_size
         self.n_samples = n_samples
         self.clip_norm = clip_norm
+        self.prior_std = init_std
         self.validation_split = validation_split
         self.early_stopping_patience = early_stopping_patience
         self.early_stopping_monitor = early_stopping_monitor
@@ -107,13 +110,19 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         """Xavier initialization for weights."""
         return tf.random.truncated_normal(shape, mean=0.0, stddev=np.sqrt(2 / sum(shape)))
 
-    def _create_layer_params(self, d_in: int, d_out: int) -> Tuple[tf.Variable, tf.Variable, tf.Variable, tf.Variable]:
+    def _create_layer_params(
+        self,
+        d_in: int,
+        d_out: int,
+    ) -> Tuple[tf.Variable, tf.Variable, tf.Variable, tf.Variable]:
         """Create variational parameters for a dense layer."""
         w_loc = tf.Variable(self._initializer((d_in, d_out)), name="w_loc")
-        w_std = tf.Variable(self._initializer((d_in, d_out)) - tf.constant(6.0), name="w_std")
         b_loc = tf.Variable(self._initializer((1, d_out)), name="b_loc")
-        b_std = tf.Variable(self._initializer((1, d_out)) - tf.constant(6.0), name="b_std")
-        return w_loc, w_std, b_loc, b_std
+
+        prior_rho = tf.math.log(tf.math.exp(self.prior_std) - 1)
+        w_rho = tf.Variable(self._initializer((d_in, d_out)) - prior_rho, name="w_rho")
+        b_rho = tf.Variable(self._initializer((1, d_out)) - prior_rho, name="b_rho")
+        return w_loc, w_rho, b_loc, b_rho
 
     @staticmethod
     def _dense_layer_forward(
@@ -123,9 +132,9 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         sampling: bool = False,
     ) -> tf.Tensor:
         """Forward pass through a Bayesian dense layer."""
-        w_loc, w_std, b_loc, b_std = params
-        w_sigma = tf.nn.softplus(w_std)
-        b_sigma = tf.nn.softplus(b_std)
+        w_loc, w_rho, b_loc, b_rho = params
+        w_sigma = tf.nn.softplus(w_rho)
+        b_sigma = tf.nn.softplus(b_rho)
 
         if training:
             # Rademacher sampling for training
@@ -155,22 +164,28 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
             # Mean prediction
             return tf.matmul(x, w_loc) + b_loc
 
-    @staticmethod
-    def _kl_divergence(params: Tuple[tf.Variable, tf.Variable, tf.Variable, tf.Variable]) -> tf.Tensor:
+    # @staticmethod
+    def _kl_divergence(
+        self,
+        params: Tuple[tf.Variable, tf.Variable, tf.Variable, tf.Variable],
+    ) -> tf.Tensor:
         """Calculate KL divergence between variational posterior and prior."""
-        w_loc, w_std, b_loc, b_std = params
+        w_loc, w_rho, b_loc, b_rho = params
 
-        weight_posterior = tfd.Normal(w_loc, tf.nn.softplus(w_std))
-        bias_posterior = tfd.Normal(b_loc, tf.nn.softplus(b_std))
-        prior = tfd.Normal(0.0, 1.0)
+        weight_posterior = tfd.Normal(w_loc, tf.nn.softplus(w_rho))
+        bias_posterior = tfd.Normal(b_loc, tf.nn.softplus(b_rho))
+        prior = tfd.Normal(0.0, self.prior_std)
 
         kl_w = tf.reduce_sum(tfd.kl_divergence(weight_posterior, prior))
         kl_b = tf.reduce_sum(tfd.kl_divergence(bias_posterior, prior))
 
         return kl_w + kl_b
 
-    def _build_network(
-        self, input_shape: int, hidden_units: List[int], output_dim: int = 1
+    def _build_network_with_prior(
+        self,
+        input_shape: int,
+        hidden_units: List[int],
+        output_dim: int = 1,
     ) -> List[Tuple[tf.Variable, tf.Variable, tf.Variable, tf.Variable]]:
         """Build network layers with given dimensions."""
         all_units = [input_shape] + hidden_units + [output_dim]
@@ -560,7 +575,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         # Build network and create training components
         hidden_units = self._determine_hidden_units(self.input_shape)
         output_dim = self._get_output_dim(y)
-        self.network_layers = self._build_network(self.input_shape, hidden_units, output_dim=output_dim)
+        self.network_layers = self._build_network_with_prior(self.input_shape, hidden_units, output_dim=output_dim)
 
         optimizer = tf.keras.optimizers.Adam(learning_rate=self.learning_rate)
         loss_function = self._get_loss_function()
@@ -747,6 +762,7 @@ def bayesian_neural_network_classifier_train(
             If None, early stopping is disabled. Defaults to None.
         early_stopping_monitor: Metric to monitor for early stopping. Options: "auto", "loss", "val_loss".
             "auto" uses "val_loss" if validation_split > 0, otherwise "loss". Defaults to "auto".
+        early_stopping_min_delta: Minimum change in the monitored quantity to qualify as an improvement.
         random_state: Seed for random number generation. Defaults to 42 for reproducibility.
         shuffle: Whether to shuffle the training data before training. Defaults to True.
         stratified: Whether to use stratified sampling for training. Defaults to None (auto mode).

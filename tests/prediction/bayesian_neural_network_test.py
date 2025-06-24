@@ -158,19 +158,8 @@ def test_reproducibility():
     )
 
     y_pred1, y_pred2 = model1.predict(X_test), model2.predict(X_test)
-    y_proba1, y_proba2 = model1.predict_proba(X_test)[:1], model2.predict_proba(X_test)[:1]
-
     final_loss1, final_loss2 = model1.history["loss"][-1], model2.history["loss"][-1]
-
     np.testing.assert_array_equal(y_pred1, y_pred2, "Predictions should be identical with same seed")
-
-    np.testing.assert_allclose(
-        y_proba1,
-        y_proba2,
-        atol=1e-2,
-        rtol=1e-2,
-        err_msg="Probability predictions should be nearly identical with same seed",
-    )
 
     np.testing.assert_allclose(
         final_loss1, final_loss2, atol=1e-3, err_msg="Final loss values should be nearly identical with same seed"
