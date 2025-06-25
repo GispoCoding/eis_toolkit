@@ -164,7 +164,6 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
             # Mean prediction
             return tf.matmul(x, w_loc) + b_loc
 
-    # @staticmethod
     def _kl_divergence(
         self,
         params: Tuple[tf.Variable, tf.Variable, tf.Variable, tf.Variable],
