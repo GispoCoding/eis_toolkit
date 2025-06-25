@@ -38,7 +38,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         batch_size=512,
         n_samples=50,
         clip_norm=1.0,
-        init_std=3.0,
+        prior_std=3.0,
         validation_split=0.0,
         early_stopping_patience=None,
         early_stopping_monitor="auto",
@@ -58,7 +58,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
             batch_size: Batch size for training. Values must be >= 1. Defaults to 512.
             n_samples: Number of Monte Carlo samples for predictions. Values must be >= 1. Defaults to 50.
             clip_norm: Gradient clipping norm. If None, no clipping is applied. Defaults to 1.0.
-            init_std: Standard deviation of the prior distribution for the weights.
+            prior_std: Standard deviation of the prior distribution for the weights.
             validation_split: Fraction of training data to use for validation.
                 Values must be between 0 and 1. Defaults to 0.1.
             early_stopping_patience: Number of epochs with no improvement after which training stops.
@@ -81,7 +81,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
         self.batch_size = batch_size
         self.n_samples = n_samples
         self.clip_norm = clip_norm
-        self.prior_std = init_std
+        self.prior_std = prior_std
         self.validation_split = validation_split
         self.early_stopping_patience = early_stopping_patience
         self.early_stopping_monitor = early_stopping_monitor
