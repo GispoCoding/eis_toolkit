@@ -96,3 +96,7 @@ class InvalidCompositionException(Exception):
 
 class SampleSizeExceededException(Exception):
     """Exception error class for when the data exceeds maximum sample size."""
+
+
+class InsufficientClassesException(Exception):
+    """Exception error class for insufficient number of classes for classification tasks."""

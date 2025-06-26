@@ -32,10 +32,11 @@ def _extract_values_from_raster(
                 else:
                     band_column_name = str(raster_column_names[i])
             else:
+                base_name = os.path.splitext(os.path.basename(raster.name))[0]
                 if raster.count > 1:
-                    band_column_name = os.path.splitext(raster.name)[0].rsplit("/", 1)[-1] + "_" + str(band_number + 1)
+                    band_column_name = f"{base_name}_{band_number + 1}"
                 else:
-                    band_column_name = os.path.splitext(raster.name)[0].rsplit("/", 1)[-1]
+                    band_column_name = base_name
             data_frame[band_column_name] = [array[band_number] for array in raster_values]
 
     return data_frame

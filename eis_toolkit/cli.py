@@ -2671,6 +2671,13 @@ def gradient_boosting_regressor_train_cli(
     ProgressLog.finish()
 
 
+# BNN CLASSIFIER
+@app.command()
+def bnn_classifier_train_cli():
+    """Train a Bayesian Neural Network classifier model."""
+    raise Exception("This function is not available yet and needs to be implemented for the CLI.")
+
+
 # MLP CLASSIFIER
 @app.command()
 def mlp_classifier_train_cli(

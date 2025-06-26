@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python >=3.9.15,<3.11
+  - numpy >=1.26.0,<2.0.0
   - rasterio >=1.2.10,<2.0.0
   - pandas >=1.5.3
   - geopandas >=0.12.2,<1.0.0
@@ -13,15 +14,17 @@ dependencies:
   - matplotlib-base >=3.7.0
   - statsmodels >=0.13.5,<1.0.0
   - keras >=2.10.0,<3.0.0
-  - tensorflow >=2.10.0,<3.0.0
   - beartype >=0.13.1,<2.0.0
   - seaborn >=0.12.2
   - pykrige >=1.7.0
-  - rtree >= 1.0.1
+  - rtree >=1.0.1
   - typer >=0.9.0
-  - imbalanced-learn >= 0.11.0
-  - mapclassify >= 2.6.1
-  - esda >= 2.5.1
-  - numba >= 0.60.0
+  - imbalanced-learn >=0.11.0
+  - mapclassify >=2.6.1
+  - esda >=2.5.1
+  - numba >=0.60.0
   # Dependencies for testing
   - pytest >=7.2.1
+  - pip:
+      - tensorflow =2.14.0
+      - tensorflow_probability =0.22.1
