@@ -3767,7 +3767,7 @@ def summarize_label_metrics_binary_cli(true_labels: INPUT_FILE_OPTION, predictio
     with ProgressLog.running_algorithm():
         results_dict = summarize_label_metrics_binary(y_true=y_true, y_pred=y_pred, decimals=3)
 
-    ResultSender.send_dict_as_json(results_dict)
+    typer.echo(f"Results: {results_dict}")
     ProgressLog.finish()
 
 
