@@ -173,7 +173,7 @@ class BayesianNeuralNetworkBase(BaseEstimator, ABC):
 
         weight_posterior = tfd.Normal(w_loc, tf.nn.softplus(w_rho))
         bias_posterior = tfd.Normal(b_loc, tf.nn.softplus(b_rho))
-        prior = tfd.Normal(0.0, self.prior_std)
+        prior = tfd.Normal(0.0, 1.0)
 
         kl_w = tf.reduce_sum(tfd.kl_divergence(weight_posterior, prior))
         kl_b = tf.reduce_sum(tfd.kl_divergence(bias_posterior, prior))
